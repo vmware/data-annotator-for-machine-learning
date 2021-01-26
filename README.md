@@ -231,7 +231,7 @@ $ python -m spacy download en_core_web_md
 
 ##### AWS Config
 ------------
-The file has a step by step config guideline: [___annotation-service/resources/AWS-config.docx___](./annotation-service/resources/AWS-config.docx)
+The file has a step by step config guideline: [___AWS-config.docx___](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-config.docx)
 
 If you don't have an AWS account at present, you need register an account [aws portal signup](https://portal.aws.amazon.com/billing/signup#/start "aws portal signup") . if you have an account login directly [aws portal login](https://console.aws.amazon.com/console/home "aws portal login") . Loop need below component as dependency.
 
