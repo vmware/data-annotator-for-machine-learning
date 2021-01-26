@@ -1,0 +1,105 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { UserAuthService } from '../../../services/user-auth.service';
+import { AvaService } from "../../../services/ava.service";
+
+
+@Component({
+  selector: 'download',
+  templateUrl: './download.component.html',
+  styleUrls: ['./download.component.scss']
+})
+
+
+export class DownloadComponent implements OnInit {
+
+  @Input() msg: any;
+
+  @Output('onCloseDownloadDialog')
+  onCloseDownloadDialogEmitter = new EventEmitter();
+
+  @Output() generateDownloadProject = new EventEmitter();
+
+
+
+  user: any;
+  loading: boolean = false;
+  errorMessage: string = '';
+  infoMessage: string = '';
+  format: string = '';
+  loadingGenerate: boolean = false;
+  loadingDownload: boolean = false;
+  onlyLabelled: boolean = true;
+
+  constructor(
+    private avaService: AvaService,
+    private userAuthService: UserAuthService
+  ) {
+    this.user = this.userAuthService.loggedUser().email;
+
+  }
+
+  ngOnInit() {
+    this.format = 'standard';
+    // setTimeout(() => {
+    //   console.log("DownloadComponent:::", this.msg)
+    // }, 500);
+  }
+
+
+
+  onCloseDownloadDialog() {
+    this.onCloseDownloadDialogEmitter.emit();
+
+  }
+
+
+  downloadProject(url) {
+    this.loading = false;
+    window.location.href = url;
+    //let backend know download
+    if (this.msg.src == 'community') {
+      this.loadingDownload = true;
+      let param = {
+        pid: this.msg.id,
+        src: 'community'
+      };
+      this.avaService.communityDownload(param).subscribe(res => {
+        this.onCloseDownloadDialogEmitter.emit('communityDownload');
+      }, (error: any) => {
+        console.log(error);
+      });
+    } else {
+      this.onCloseDownloadDialogEmitter.emit();
+
+    };
+
+
+  }
+
+  generateProject() {
+    this.loadingGenerate = true;
+    for (let i = 0; i < this.msg.datasets.length; i++) {
+      if (this.msg.datasets[i].id == this.msg.id) {
+        this.msg.datasets[i].generateInfo.status = 'generating';
+      }
+    };
+    this.avaService.generate(this.msg.id, this.format, this.msg.src, this.onlyLabelled ? 'Yes' : 'No').subscribe(res => {
+      res.Modal = 'generateDownload';
+      this.generateDownloadProject.emit(res);
+    }, (error: any) => {
+      console.log(error);
+      this.loading = false;
+    });
+  }
+
+
+  removeUnlabel(e) {
+    this.onlyLabelled = e.target.checked;
+  }
+
+}

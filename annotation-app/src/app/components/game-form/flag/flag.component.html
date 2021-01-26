@@ -1,0 +1,96 @@
+<!-- Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="modal footerLeft">
+  <div class="modal-dialog modal-xl" role="dialog" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button aria-label="Close" class="close" type="button">
+          <clr-icon aria-hidden="true" shape="close" (click)="closeFlagModal()"></clr-icon>
+        </button>
+        <h3 class="modal-title">Flag Tickets</h3>
+      </div>
+
+      <div class="modal-body">
+        <div class="clr-row">
+          <label for="projectName" class="label-tooltip clr-col-12 clr-col-md-2">Project Name:</label>
+          <div class="clr-col-12 clr-col-md-9">
+            {{msg?.projectName}}
+          </div>
+        </div>
+        <div class="clr-row" style="margin-top: 0.5rem">
+          <label for="Labels" class="label-tooltip clr-col-12 clr-col-md-2">Labels:</label>
+          <div class="clr-col-12 clr-col-md-9 labelBox">{{labels}}</div>
+        </div>
+        <div class="clr-row" style="margin-top: 0.5rem">
+          <div class="clr-col-12 clr-col-md-12">
+            <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)" *ngIf=!firstLoadTable
+              style="height: unset !important;margin-bottom: 0.5rem;">
+              <clr-dg-placeholder>There has no flag ticket!</clr-dg-placeholder>
+              <clr-dg-column class="ellipsis-datagrid" style="max-width:90px">Index</clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid" style="max-width:150px">Action
+              </clr-dg-column>
+              <clr-dg-column *ngFor="let header of previewSrsHeader" class="ellipsis-datagrid" style="max-width:650px">
+                {{header}}</clr-dg-column>
+
+              <ng-container>
+
+                <clr-dg-row *ngFor="let dataset of previewSrs; let i=index" [clrDgItem]="dataset"
+                  style="padding-bottom: 0.5rem;">
+                  <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width:90px">{{i+1}}
+                  </clr-dg-cell>
+                  <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width:150px">
+                    <!-- <clr-radio-container clrInline style="margin-top: 0rem !important;">
+                        <clr-radio-wrapper>
+                          <input type="radio" clrRadio name="{{i+1}}" required value="Standard" [checked]=flagStatus />
+                          <label>ON</label>
+                        </clr-radio-wrapper>
+                        <clr-radio-wrapper>
+                          <input type="radio" clrRadio name="{{i+1}}" required value="Top Label" />
+                          <label>OFF</label>
+                        </clr-radio-wrapper>
+                      </clr-radio-container> -->
+                    <button class="btn btn-sm" (click)="unflag(dataset)"
+                      style="margin-top: 0 !important;">unflag</button>
+                  </clr-dg-cell>
+                  <clr-dg-cell *ngFor="let content of dataset.originalData" class="previewHeight ellipsis-datagrid"
+                    style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
+                    title="{{content}}">
+                    {{content}}
+                  </clr-dg-cell>
+
+                </clr-dg-row>
+
+              </ng-container>
+
+              <clr-dg-footer>
+                <clr-dg-pagination #pagination [(clrDgPageSize)]="pageSize" [clrDgTotalItems]="totalItems"
+                  [(clrDgPage)]="page" [clrDgLastPage]="totalPages">
+                  <clr-dg-page-size [clrPageSizeOptions]="[10,20,50,100]">
+                    Tickets per page</clr-dg-page-size>
+                  {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
+                  of {{pagination.totalItems}} Tickets
+                </clr-dg-pagination>
+              </clr-dg-footer>
+            </clr-datagrid>
+          </div>
+
+        </div>
+        <div *ngIf=firstLoadTable class="flagDataLoading">
+          <span class="spinner spinner-md" style='margin-top:3rem;margin-bottom: -0.5rem;'>
+            Loading...
+          </span>
+          <span class="loadingSpan">
+            Loading Flag Tickets, Please Wait...
+          </span>
+        </div>
+
+
+
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" aria-hidden="true"></div>

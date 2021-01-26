@@ -1,0 +1,26 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.mainArea {
+  margin: 0 2rem;
+}
+
+.cellWordBreak {
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  height: 1.8rem;
+  line-height: 0.7rem;
+}
+
+// ::ng-deep .datagrid-table {
+//   width: 100%;
+// }
+
+// ::ng-deep .datagrid-table-wrapper {
+//   height: 100%;
+// }

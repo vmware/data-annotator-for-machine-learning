@@ -1,0 +1,165 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.mainArea {
+  margin: 0 2rem;
+}
+
+.actionClass {
+  padding: 0.1rem 0.2rem;
+  height: 1rem;
+  line-height: 0.9rem;
+  min-width: 1.5rem;
+}
+
+.editableCell {
+  height: 3rem;
+  max-height: 10rem;
+  width: 100%;
+  border-radius: 4px;
+  border-color: #cccccc;
+  padding: 0.25rem 0.25rem;
+  color: #575757;
+}
+
+.form-group {
+  margin: 2rem 0 !important;
+}
+
+.addCsv input[type="text"],
+.addCsv input[type="file"] {
+  width: 100% !important;
+  margin-bottom: 0px;
+}
+
+label span {
+  color: red;
+}
+
+.preview {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem;
+  margin-left: 0.5rem;
+  box-shadow: 0 0.125rem 0 0 #d7d7d7;
+}
+
+.previewTable {
+  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
+  width: 98%;
+}
+
+.fileLabel {
+  border: 1px solid #0077b8;
+  background-color: transparent;
+  cursor: pointer;
+  color: #0077b8;
+  border-radius: 0.125rem !important;
+  font-size: 0.5rem !important;
+  letter-spacing: 0.05em;
+  height: 1rem;
+  margin-top: 0.4rem;
+}
+
+.fileLabel:hover {
+  background-color: #e0f0f6;
+}
+
+.fileInput {
+  display: none;
+}
+
+.tableLoading {
+  text-align: center;
+  background-color: white;
+  border-radius: 8px;
+  min-height: 9rem;
+  text-align: center;
+}
+
+.loadingSpan {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  color: grey;
+  opacity: 0.65;
+  font-size: 0.7rem;
+}
+
+.uploadImage {
+  width: 15rem;
+  height: 15rem;
+  background-color: #fafafa;
+  border: 1px dashed #d9d9d9;
+  border-radius: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.labelUpload {
+  border: unset;
+  line-height: 0.875rem;
+  cursor: pointer;
+  z-index: 101;
+}
+
+.labelUpload:hover {
+  color: #0077b8;
+  font-weight: bold;
+}
+
+.imagePreview {
+  max-width: 14.8rem;
+  max-height: 14.8rem;
+  position: absolute;
+}
+
+.imageHoverCover {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.imageHoverCover:hover {
+  width: 100%;
+  height: 100%;
+  background-color: #e7e7e7;
+  border: 1px dashed #e7e7e7;
+  border-radius: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.labelBox {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.labelBoxShow {
+  display: flex;
+}
+
+.labelBoxHidden {
+  display: none;
+}
+
+.labelUpload span {
+  color: currentColor;
+}
