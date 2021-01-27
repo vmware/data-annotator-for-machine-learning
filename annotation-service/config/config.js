@@ -5,7 +5,7 @@
  * 
 ***/
 
-const sysEnv = process.env.SYS_ENV || "local";
+const sysEnv = process.env.SYS_ENV || "os";
 const app = require(`./app-${sysEnv}`);
 
 module.exports = app

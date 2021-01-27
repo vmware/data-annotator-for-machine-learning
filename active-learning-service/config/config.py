@@ -9,7 +9,7 @@ import logging
 log = logging.getLogger('loop_al')
 
 # import modules
-env = os.getenv('SYS_ENV', 'local')
+env = os.getenv('SYS_ENV', 'os')
 path_file = f"config.app_{env}"
 app = importlib.import_module(path_file)
 
