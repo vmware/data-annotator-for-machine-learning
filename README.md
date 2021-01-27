@@ -1,9 +1,19 @@
 <div align='center'> <h1>Data Annotator for Machine Learning</h1> </div>
 
+Data Annotator for Machine Learning is an application that helps machine learning teams facilitate the creation and management of annotations.
 
-This Data Annotator for Machine Learning is an open-source application that helps data science teams facilitate the creation and management of annotations for your machine learning project.
-
-Data Annotator for Machine Learning streamlines the entire annotation precess so you can centrally create, manage and administer annotation projects.
+Specifically, the core features are:
+- Supported annotation tasks:
+ - text classification
+ - named entity recognition
+ - tabular classification and regresion
+ - image recognition with bounding boxes and polygons
+- Active learning with uncertainly sampling to distribute unlabeled data
+- Project tracking with real time data aggregation
+- User management panel with RBAC
+- Data management
+ - export to a common ML task format in CSV
+ - data sharing through a community datasets tab
 
 ## Table of Contents
 
@@ -28,18 +38,14 @@ This is the front-end application built with Angular8.x that based on the follow
 - **NPM** 6+
 
 #### [___annotation-service___](./annotation-service)
-This is the back-end service that provides all the api for annotation-app.  It is built with Node.js and based on the following,
-- [__Node__](https://nodejs.org/en/)__ 10+
-- [__mongodb__](https://www.mongodb.com/download-center/community) 3.5
+This is the back-end service that provides all the api for annotation-app.  It is built with Node.js and and MongoDB
 
 #### [___active-learning-service___](./active-learning-service)
-This is the back-end service that provides all active learning api.  It is built with Python Django service and based on the following,
-- [__Python__](https://www.python.org/) 3.6
-- [__Django__](https://www.djangoproject.com/) 3.0.7
+This is the back-end service that provides all active learning api.  It is built with Python and Django service in addition to Modal
 
 ## Quick start
 
-Please follow the instructions to set up the three components.
+Instructions to set up the three service components:
 
 ### Installation
 
