@@ -1,7 +1,7 @@
 <div align='center'> <h1>Data Annotator for Machine Learning</h1> </div>
 
 
-This Data Annotator for Machine Learning helps data science teams facilitate the creation and management of annotations for your machine learning project.
+This Data Annotator for Machine Learning is an open-source application that helps data science teams facilitate the creation and management of annotations for your machine learning project.
 
 Data Annotator for Machine Learning streamlines the entire annotation precess so you can centrally create, manage and administer annotation projects.
 
@@ -18,23 +18,23 @@ Data Annotator for Machine Learning streamlines the entire annotation precess so
 
 ## What is included
 
-Data Annotator for Machine Learning containes 3 services. One complete annotation work requires all these 3 services running up at the same time. That means you need set up all these 3 at the first begining before you can do annotate smoothly.
+Data Annotator for Machine Learning project containes three components, and you need to set up all components before you can start to use the application.
 
 #### [___annotation-app___](./annotation-app)
-This is the front-end service with Angular8.x that based on the following,
+This is the front-end application built with Angular8.x that based on the following,
 - **Angular** 8.x
 - **AngularCLI** 8.2.13+
 - **Node** 10+
 - **NPM** 6+
 
 #### [___annotation-service___](./annotation-service)
-This is the back-end service with Node.js that based on the following,
+This is the back-end service that provides all the api for annotation-app.  It is built with Node.js and based on the following,
 - __[Node](https://nodejs.org/en/)__ 10+
 - __[mongodb](https://www.mongodb.com/download-center/community)__ 3.5
 - __[compass](https://www.mongodb.com/download-center/compass)__ [option]
 
 #### [___active-learning-service___](./active-learning-service)
-This is the back-end service with Python that based on the following,
+This is the back-end service that provides all active learning api.  It is built with Python Django service and based on the following,
 - __[Python](https://www.python.org/)__ 3.6
 
 
@@ -43,7 +43,7 @@ This is the back-end service with Python that based on the following,
 
 ## Quick start
 
-Please follow next instructions to set up all these 3 services that mentioned above.
+Please follow the instructions to set up the three components.
 
 ### Installation
 
