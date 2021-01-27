@@ -68,166 +68,54 @@ $ python -m spacy download en_core_web_md
 
 ### Configuration
 
-<div align='center'> <h4>annotation-app</h4> </div>
-
+#### annotation-app
 
 ------------
 
 
-1. 	##### What is included
-
-	Within the download and dependencies installed you'll find the following directories and files, logically grouping common assets and providing both compiled and minified variations. You'll see something like this:
-
-    ```bash
-    \annotation-app
-    │  .gitignore
-    │  angular.json  # angular config file
-    │  package.json  # dependencies
-    │  LICENSE
-    │  ...
-    ├─ node_modules  # library root
-    │   ├─...
-    └─ src
-        │  index.html  # app web page
-        │  main.ts  # bootstrapper for client app
-        │  styles.css  # global styles
-        │  tsconfig.json # typeScript configuration
-    	│  ...
-        ├─ app
-        │  │  app.component.html
-        │  │  app.component.scss
-        │  │  app.component.ts
-        │  │  app.module.ts
-        │  │  app.routing.ts
-        │  │  ...
-        │  ├─components
-        │  │  ├─...
-        │  │  └─widgets
-        │  │          ...
-        │  ├─guards
-        │  │      ...
-        │  ├─model
-        │  │      ...
-        │  ├─pipes
-        │  │      ...
-        │  ├─services
-        │  │      ava.service.ts  # APIs service
-        │  │      environments.service.ts  # read the environment variable to find the corresponding environment.ts
-        │  │      ...
-        │  └─shared
-        │     │  shared.module.ts
-        │     └─ form-validators
-        │            ...
-        ├─ assets
-        │  └─images
-        ├─ environments  # configure the different environment
-        │      environment.prod.ts # production environment
-        │      environment.ts  # dev environment
-        └─ libs
-    ```
-2.  ##### Configuring application environments
+1.  ##### Configuring annotation-app environments
 
 	
     *  To configure the annotation-app/src/environments/environment.ts
 	
-	    annotation-app/src/environments/ folder contains the base configuration file, environment.ts and environment.prod.ts. environment.ts provides a default environment here is dev development environment. You can add override defaults for additional environments, such as staging, in target-specific configuration files.
-			
-		For example,
-			
-    ```bash
-            \annotation-app
-            │ ...
-            └─ src
-                ├─ environments
-                │      environment.ts
-                │      environment.prod.ts
-                │      environment.stage.ts
-    ```
-           
-	        
-	   The base file annotation-app/src/environments/environment.ts, contains the default environment settings. 
-	   
-	   For example,
-			
-    ```javascript
-			export const environment = {
-			  production: false
-			}
-    ```
-           
-	        
-	   In order to run the annotation-app in local, you still **need to configure the environment.ts to add some important defaults there**. 
+	   annotation-app/src/environments/ folder contains the base configuration file, environment.ts and environment.prod.ts. 
+	   In order to run the annotation-app in local, you **need to configure the environment.ts to add some important defaults there**. 
 	   
 	   For example,
 			
 		
 
     ```javascript
-			export const environment = {
-			  production: false,
-			  avaService: 'http://localhost:3000', // Must. Your API host.
-			  authUrl: '', // Option. Allow to set the Vmware ESP auth api, or set empty to use the basic login provided.
-			  tokenUrl: '', // Option. Allow to set the Vmware ESP auth token api, or set empty to use the basic token provided.
-			  logoutUrl: '', // Option. Allow to set the Vmware ESP auth logout api, or set empty.
-			  CLIENT_ID: '', // Option. Allow to set the Vmware ESP CLIENT_ID, or set empty.
-			  redirectUri: '/home', // Must.
-			  feedbackUrl: '', // Option. Allow to set the Vmware ESP feedback service, or set empty.
-			  videoSrc: '', // Option. Allow to set the demo video which will show in home page, or set empty.
-			  serviceTitle: 'Data-annotation', // Must.
-			  googleTrackId: '', // Option. Allow to set google track ID or set empty.
-			  provider: 'Data-annotation', // Must.
-			  USER_KEY: 'data-annotation-user', // Must.
-			  enableSendEmail: true // Option. Allow set true/false.
-			}
-    ```
-
-	
-    *   To configure the annotation-app/src/app/services/environment.service.ts
-	
-	    If you want configure environment-specific, then the next info is very important, to find the place reading the environment variable. 
-	    Find the file src/app/services/environment.service.ts
-	    
-    ```javascript
-            import { Injectable } from "@angular/core";
-            import { Router, NavigationEnd } from "@angular/router";
-            
-            @Injectable({
-              providedIn: "root"
-            })
-            export class EnvironmentsService {
-              private configuration = "${APP_CONFIG}";
-              private env: any;
-              private nodeEnvironment: string;
-              constructor() {
-                console.log("APP_CONFIG：", this.configuration);
-              }
-            }
-    ```
-
-	
-	   First, please set you variables in different environment with the key **APP_CONFIG**. Then you can read the value here in this environment.service.ts.
-	   If you can't read the value you set, then you can try to use some system command to substitutes env variables in main.*.*js bundle.
-	   For example, if you deploy the annotation-app in Linux and you have set the **APP_CONFIG** value in it, then you can try the following:
-	    
- 
-
+		export const environment = {
 			
-    ```javascript
-    	#!/bin/sh
-    
-    	// Substitutes env variables in main.*.js bundle
-    	sed -i 's/${APP_CONFIG}/'"${APP_CONFIG}"'/' $(ls /usr/share/nginx/html/main*.js)
-    	// Starts the application
-    	nginx -g 'daemon off;'
+			// This is required
+			production: false,
+			annotationService: 'http://localhost:3000', // Must. Your API host.
+			serviceTitle: 'Data-annotation', // Must.
+			provider: 'Data-annotation', // Must.
+			USER_KEY: 'data-annotation-user', // Must.
+			redirectUri: '/home', // Must.
+			  
+			// This is optional
+			authUrl: '', // Option. Allow to set the Vmware ESP auth api, or set empty to use the basic login provided.
+			tokenUrl: '', // Option. Allow to set the Vmware ESP auth token api, or set empty to use the basic token provided.
+			logoutUrl: '', // Option. Allow to set the Vmware ESP auth logout api, or set empty.
+			CLIENT_ID: '', // Option. Allow to set the Vmware ESP CLIENT_ID, or set empty.
+			feedbackUrl: '', // Option. Allow to set the Vmware ESP feedback service, or set empty.
+			videoSrc: '', // Option. Allow to set the demo video which will show in home page, or set empty.
+			googleTrackId: '', // Option. Allow to set google track ID or set empty.
+			enableSendEmail: true // Option. Allow set true/false.
+		}
     ```
-	    
-           
-	        
-	   And you'll also notice that by default in the src/environment folder you have an environment file for development and one for production. If can't get the **APP_CONFIG** value, then the annotation-app will default believe this is the dev env, will ignore the one for production but will directly to read all the values in the one for development.
+
+	
+    *   If you want to configure environment-specific such as production, then go to annotation-app/src/app/services/environment.service.ts. Please set you variables in different environment with the key **APP_CONFIG**. Then you can read the value here in this environment.service.ts.
+
 
 <br>
 <br>
-<div align='center'> <h4>annotation-service</h4> </div>
+
+#### annotation-service
 
 ##### AWS Config
 ------------
@@ -515,7 +403,7 @@ In [annotation-service/config/constant.js](./annotation-service/config/constant.
 
 All these values can also be set in the server environment variable, ___process.env.xxx___ is the way to get the value from the enviroment. if you set the values both in the environment and config files, it will get the value from the environment first instead of the config files.
 
-<div align='center'><h4>active-learning-service</h4></div>
+#### active-learning-service
 
 ##### mongodb config
 ------------
