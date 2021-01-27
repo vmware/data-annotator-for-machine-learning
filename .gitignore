@@ -15,12 +15,12 @@ annotation-app/tsconfig.spec.json
 # annotation-service
 annotation-service/node_modules
 annotation-service/downloadProject
-# annotation-service/config/certs/
+annotation-service/config/certs/
 
 
 # active-learning-service
 active-learning-service/*__pycache__*
 active-learning-service/models
 active-learning-service/.idea
-# active-learning-service/logs
+active-learning-service/logs
 active-learning-service/venv/
