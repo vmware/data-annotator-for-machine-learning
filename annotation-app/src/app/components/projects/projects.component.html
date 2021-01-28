@@ -100,10 +100,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                 class="badge badge-1">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
             </div>
           </div>
-          <div *ngIf="dataset.annotator.length>=6&&dataset.isExtend" (click)="more(i)" class="isShowHide">show
+          <div *ngIf="dataset.annotator.length>=6&&dataset.isExtend" (click)="more(dataset.id)" class="isShowHide">show
             <clr-icon class="showIcon" shape="angle"></clr-icon>
           </div>
-          <div *ngIf="dataset.annotator.length>=6&&!dataset.isExtend" (click)="more(i)" class="isShowHide">hide
+          <div *ngIf="dataset.annotator.length>=6&&!dataset.isExtend" (click)="more(dataset.id)" class="isShowHide">hide
             <clr-icon shape="angle"></clr-icon>
           </div>
         </clr-dg-cell>
