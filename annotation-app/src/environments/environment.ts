@@ -7,9 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 // `ng build --env=prod` then `environment.prod.ts` will be used instead.
 // The list of which env maps to which file can be found in `angular-cli.json`.
 
+import { Env } from 'app/model/index';
 
-
-export const environment = {
+export const environment:Env = {
   production: false
 };
 
