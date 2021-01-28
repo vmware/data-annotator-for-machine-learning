@@ -242,8 +242,12 @@ export class ProjectsComponent implements OnInit {
 
 
 
-  more(index) {
-    this.datasets[index].isExtend = !this.datasets[index].isExtend
+  more(id) {
+    for (let i = 0; i < this.datasets.length; i++) {
+      if (this.datasets[i].id == id) {
+        this.datasets[i].isExtend = !this.datasets[i].isExtend;
+      }
+    }
   }
 
 
