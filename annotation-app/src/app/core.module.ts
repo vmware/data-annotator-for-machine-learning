@@ -18,7 +18,7 @@ export function jwtOptionsFactory(authService: UserAuthService, env: Environment
       }
     },
     whitelistedDomains: [
-      `${env.config.avaService}`.replace(/(http|https):\/\//, ''),
+      `${env.config.annotationService}`.replace(/(http|https):\/\//, ''),
       `${env.config.authUrl}`.replace(/(http|https):\/\//, '')
     ],
   };

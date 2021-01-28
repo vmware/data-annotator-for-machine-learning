@@ -49,7 +49,7 @@ export class HeaderComponent implements OnInit {
 
 
   login() {
-    if (this.env.config.authUrl && this.env.config.authUrl != '') {
+    if (this.env.config.authUrl) {
       this.userAuthService.redirectToLogin();
     } else {
       this.router.navigate(['basicLogin'])

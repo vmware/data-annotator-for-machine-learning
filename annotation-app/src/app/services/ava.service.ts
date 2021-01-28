@@ -21,7 +21,7 @@ export class AvaService {
     private http: HttpClient,
     private env: EnvironmentsService,
   ) {
-    this.baseUrl = `${this.env.config.avaService}/api/v1.0`;
+    this.baseUrl = `${this.env.config.annotationService}/api/v1.0`;
   }
 
 

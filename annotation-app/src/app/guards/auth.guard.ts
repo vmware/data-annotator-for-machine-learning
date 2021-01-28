@@ -24,7 +24,7 @@ export class AuthGuard implements CanActivate {
     if (this.userAuthService.isLoggedIn()) {
       return this.checkRole(state.url)
     } else {
-      if (this.env.config.authUrl != '') {
+      if (this.env.config.authUrl) {
         this.userAuthService.redirectToLogin();
         return false;
       } else {

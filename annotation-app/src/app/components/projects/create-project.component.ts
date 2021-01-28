@@ -358,7 +358,7 @@ export class CreateNewComponent implements OnInit {
 
   assigneeBlur(e: any) {
     let val = e.target.value;
-    if (this.env.config.authUrl != '') {
+    if (this.env.config.authUrl) {
       this.emailReg = RegExp("@vmware.com\\s*$").test(val);
     } else {
       this.emailReg = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(val);
@@ -374,7 +374,7 @@ export class CreateNewComponent implements OnInit {
   }
 
   onEnter(e) {
-    if (this.env.config.authUrl != '') {
+    if (this.env.config.authUrl) {
       this.emailReg = RegExp("@vmware.com\\s*$").test(e);
     } else {
       this.emailReg = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(e);

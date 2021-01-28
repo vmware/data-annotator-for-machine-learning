@@ -53,7 +53,7 @@ export class DatasetsSharingComponent implements OnInit {
     public env: EnvironmentsService
 
   ) {
-    this.download = `${this.env.config.avaService}/api`;
+    this.download = `${this.env.config.annotationService}/api`;
     this.user = this.userAuthService.loggedUser().email;
     this.page = 1;
     this.pageSize = 10;

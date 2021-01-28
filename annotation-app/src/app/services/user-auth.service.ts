@@ -110,16 +110,16 @@ export class UserAuthService {
 
 
   redirectToLogin() {
-    const redirectUri = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUri);
-    window.location.href = `${this.env.config.authUrl}/authorize?response_type=code&client_id=${this.env.config.CLIENT_ID}&redirect_uri=${redirectUri}&state=${this.env.config.STATE}&bypass_uri_check=true`;
+    const redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl);
+    window.location.href = `${this.env.config.authUrl}/authorize?response_type=code&client_id=${this.env.config.CLIENT_ID}&redirect_uri=${redirectUrl}&state=${this.env.config.STATE}&bypass_uri_check=true`;
   }
 
 
-  public loging(code: string, clientId: string, redirectUri: string) {
+  public loging(code: string, clientId: string, redirectUrl: string) {
     const authReqToken: AuthRequestToken = {
       grant_type: "authorization_code",
       client_id: clientId,
-      redirect_uri: redirectUri,
+      redirect_uri: redirectUrl,
       code: code,
       bypass_uri_check: true
     };
@@ -150,7 +150,7 @@ export class UserAuthService {
 
 
   public logout(): void {
-    if (this.env.config.logoutUrl != '') {
+    if (this.env.config.logoutUrl) {
       if (this.loggedUser()) {
         this.http.post(`${this.env.config.logoutUrl}`, null, {
           headers: new HttpHeaders().append('Authorization', this.loggedUser().token.access_token),
@@ -180,7 +180,7 @@ export class UserAuthService {
 
 
   private refreshToken() {
-    if (this.env.config.tokenUrl !== '') {
+    if (this.env.config.tokenUrl) {
       const authReqToken: AuthRequestToken = {
         grant_type: "refresh_token",
         refresh_token: this.loggedUser().token.refresh_token,
@@ -203,7 +203,7 @@ export class UserAuthService {
   public autoRefreshToken(): void {
     if (this.loggedUser()) {
       let expirationMilliseconds;
-      if (this.env.config.tokenUrl !== '') {
+      if (this.env.config.tokenUrl) {
         let expirationDate: Date = this.jwtHelper.getTokenExpirationDate(this.loggedUser().token.access_token);
         expirationMilliseconds = new Date(expirationDate).getTime() - new Date().getTime() - 20 * 1000;
       } else {
@@ -250,7 +250,7 @@ export class UserAuthService {
 
 
   public getBasicAuthToken() {
-    this.http.get(`${this.env.config.avaService}/api/v1.0/token`, {
+    this.http.get(`${this.env.config.annotationService}/api/v1.0/token`, {
       headers: new HttpHeaders().append('Authorization', this.loggedUser().token.access_token),
     }).subscribe(res => {
       let storedUser = JSON.parse(localStorage.getItem(this.env.config.USER_KEY));
@@ -265,12 +265,12 @@ export class UserAuthService {
 
 
   redirectToHome() {
-    const redirectUri = window.location.origin + this.location.prepareExternalUrl('/');
-    window.location.href = `${redirectUri}`;
+    const redirectUrl = window.location.origin + this.location.prepareExternalUrl('/');
+    window.location.href = `${redirectUrl}`;
   }
 
   // addRoleToUser(email, user) {
-  //   this.http.get(`${this.env.config.avaService}/api/v1.0/users/roles`, {
+  //   this.http.get(`${this.env.config.annotationService}/api/v1.0/users/roles`, {
   //     headers: new HttpHeaders().append('Authorization', this.loggedUser().token.access_token),
   //   }).subscribe(res => {
   //     let resNew = JSON.parse(JSON.stringify(res));

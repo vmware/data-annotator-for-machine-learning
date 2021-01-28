@@ -99,7 +99,7 @@ export class AdminComponent implements OnInit {
     this.pageSize = 10;
     this.pageUser = 1;
     this.pageSizeUser = 10;
-    this.download = `${this.env.config.avaService}/api`;
+    this.download = `${this.env.config.annotationService}/api`;
 
   }
 

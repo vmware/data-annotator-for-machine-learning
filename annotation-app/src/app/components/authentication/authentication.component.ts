@@ -47,8 +47,8 @@ export class AuthenticationComponent implements OnInit {
         if (state !== this.env.config.STATE) {
           return Observable.throw("Wrong state...");
         }
-        let redirectUri = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUri);
-        return this.userAuthService.loging(code, this.env.config.CLIENT_ID, redirectUri);
+        let redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl);
+        return this.userAuthService.loging(code, this.env.config.CLIENT_ID, redirectUrl);
       }))
       .subscribe(
         data => {

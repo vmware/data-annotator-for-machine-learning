@@ -134,7 +134,7 @@ export class EditProjectComponent implements OnInit {
 
 
   onInputingProjectOwner(e) {
-    if (this.env.config.authUrl != '') {
+    if (this.env.config.authUrl) {
       this.emailRegForOwner = RegExp('@vmware.com\\s*$').test(e.target.value);
     } else {
       this.emailReg = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(e.target.value);
@@ -185,7 +185,7 @@ export class EditProjectComponent implements OnInit {
 
 
   onInputingAssignee(e) {
-    if (this.env.config.authUrl != '') {
+    if (this.env.config.authUrl) {
       this.emailReg = RegExp('@vmware.com\\s*$').test(e.target.value);
     } else {
       this.emailReg = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(e.target.value);
