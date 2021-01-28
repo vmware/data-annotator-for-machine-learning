@@ -83,25 +83,20 @@ $ python -m spacy download en_core_web_md
 	 For example,	
 
     ```javascript
-		export const environment = {
-			
-			// This is required
-			production: false,
-			annotationService: 'http://localhost:3000', // Required. Your API host.
-			serviceTitle: 'Data-annotation', // Required.
-			provider: 'Data-annotation', // Required.
-			USER_KEY: 'data-annotation-user', // Required.
-			redirectUri: '/home', // Must.
-			  
-			// This is optional
-			authUrl: '', // Optional. Allow to set the Vmware ESP auth api, or set empty to use the basic login provided.
-			tokenUrl: '', // Optional. Allow to set the Vmware ESP auth token api, or set empty to use the basic token provided.
-			logoutUrl: '', // Optional. Allow to set the Vmware ESP auth logout api, or set empty.
-			CLIENT_ID: '', // Optional. Allow to set the Vmware ESP CLIENT_ID, or set empty.
-			feedbackUrl: '', // Optional. Allow to set the Vmware ESP feedback service, or set empty.
-			videoSrc: '', // Optional. Allow to set the demo video which will show in home page, or set empty.
-			googleTrackId: '', // Optional. Allow to set google track ID or set empty.
-			enableSendEmail: true // Optional. Allow set true/false.
+		export const environment: Env = {
+
+  			// This is required
+  			production: false,
+  			annotationService: 'http://localhost:3000', // Service API host.
+  			serviceTitle: 'Data-annotation', // The UI name of annotation-app.
+  			provider: 'Data-annotation', // This will be saved in user's detailed info to show where does this user come from and supported by which service.
+  			USER_KEY: 'data-annotation-user', // Once the user logged in successfully this user's detailed info will be saved in localstorage with this key name.
+  			redirectUrl: '/home', // If there has no logged user or token occured err then will redirect to home page.
+
+  			// This is optional
+  			videoSrc: null, // Allow to set the demo video which will show in home page, or set null to show nothing.
+  			googleTrackId: null, // Allow to set google track ID or set null.
+  			enableSendEmail: true //  Allow set true/false. Set true will trigger the send-email functionality after project created, assigned and generated. While set false will disable the send-email functionality.
 		}
     ```
 
