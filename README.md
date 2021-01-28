@@ -4,16 +4,16 @@ Data Annotator for Machine Learning is an application that helps machine learnin
 
 Specifically, the core features are:
 - Supported annotation tasks:
- - text classification
- - named entity recognition
- - tabular classification and regresion
- - image recognition with bounding boxes and polygons
+  - text classification
+  - named entity recognition
+  - tabular classification and regresion
+  - image recognition with bounding boxes and polygons
 - Active learning with uncertainly sampling to distribute unlabeled data
 - Project tracking with real time data aggregation
 - User management panel with RBAC
 - Data management
- - export to a common ML task format in CSV
- - data sharing through a community datasets tab
+  - export to a common ML task format in CSV
+  - data sharing through a community datasets tab
 
 ## Table of Contents
 
@@ -31,8 +31,7 @@ Specifically, the core features are:
 Data Annotator for Machine Learning project containes three components, and you need to set up all components before you can start to use the application.
 
 #### [___annotation-app___](./annotation-app)
-This is the front-end application built with Angular8.x that based on the following,
-- **Angular** 8.x
+This is the front-end application built with Angular 8.x that with
 - **AngularCLI** 8.2.13+
 - **Node** 10+
 - **NPM** 6+
@@ -88,31 +87,31 @@ $ python -m spacy download en_core_web_md
 			
 			// This is required
 			production: false,
-			annotationService: 'http://localhost:3000', // Must. Your API host.
-			serviceTitle: 'Data-annotation', // Must.
-			provider: 'Data-annotation', // Must.
-			USER_KEY: 'data-annotation-user', // Must.
+			annotationService: 'http://localhost:3000', // Required. Your API host.
+			serviceTitle: 'Data-annotation', // Required.
+			provider: 'Data-annotation', // Required.
+			USER_KEY: 'data-annotation-user', // Required.
 			redirectUri: '/home', // Must.
 			  
 			// This is optional
-			authUrl: '', // Option. Allow to set the Vmware ESP auth api, or set empty to use the basic login provided.
-			tokenUrl: '', // Option. Allow to set the Vmware ESP auth token api, or set empty to use the basic token provided.
-			logoutUrl: '', // Option. Allow to set the Vmware ESP auth logout api, or set empty.
-			CLIENT_ID: '', // Option. Allow to set the Vmware ESP CLIENT_ID, or set empty.
-			feedbackUrl: '', // Option. Allow to set the Vmware ESP feedback service, or set empty.
-			videoSrc: '', // Option. Allow to set the demo video which will show in home page, or set empty.
-			googleTrackId: '', // Option. Allow to set google track ID or set empty.
-			enableSendEmail: true // Option. Allow set true/false.
+			authUrl: '', // Optional. Allow to set the Vmware ESP auth api, or set empty to use the basic login provided.
+			tokenUrl: '', // Optional. Allow to set the Vmware ESP auth token api, or set empty to use the basic token provided.
+			logoutUrl: '', // Optional. Allow to set the Vmware ESP auth logout api, or set empty.
+			CLIENT_ID: '', // Optional. Allow to set the Vmware ESP CLIENT_ID, or set empty.
+			feedbackUrl: '', // Optional. Allow to set the Vmware ESP feedback service, or set empty.
+			videoSrc: '', // Optional. Allow to set the demo video which will show in home page, or set empty.
+			googleTrackId: '', // Optional. Allow to set google track ID or set empty.
+			enableSendEmail: true // Optional. Allow set true/false.
 		}
     ```
 
 	
-- If you want to configure environment-specific such as production, then go to annotation-app/src/app/services/environment.service.ts. Please set you variables in different environment with the key **APP_CONFIG**. Then you can read the value in this environment.service.ts.
+- If you want to configure specific environments for dev, staging, production, go to annotation-app/src/app/services/environment.service.ts to set variables in different environments with the key **APP_CONFIG**. Then you can read the value in this environment.service.ts.
 
 ------------
 #### annotation-service
 
-You need config some values in [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) file before using. some optional configs you can skip if you don't want to use.
+You need to configure values in [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) file before using. some optional configs you can skip if you don't want to use.
 
 ```javascript
 module.exports  = {
@@ -154,13 +153,13 @@ module.exports  = {
 };
 ```
 
-AS _annotation-service_ using the AWS S3 to save datasets and AWS CloudFront to access the datasets and SQS to generate large datasets. so AWS part is mandatory.
+AS _annotation-service_ uses AWS S3 to save datasets and AWS CloudFront to access the datasets and SQS to generate large datasets. Configuration of these AWS services is mandatory.
 
-If you are fresh with AWS you can reference the [AWS official guideline](https://docs.aws.amazon.com/en_us/) You also can see the step by step config guideline we write for you in resource branch [AWS-step-by-step-config-with-chart.docx](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-chart.docx) or [AWS-step-by-step-config-with-descriptions.md](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-descriptions.md)
+If you are new to AWS you can reference the [AWS official guideline](https://docs.aws.amazon.com/en_us/) You also can see the step by step config guidelines we provide in the resources branch [AWS-step-by-step-config-with-chart.docx](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-chart.docx) or [AWS-step-by-step-config-with-descriptions.md](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-descriptions.md)
 
-If you want to use send email function. we support AWS SES and your personal or special account. You must set _enableEmail_ to true. If use AWS SES you need set _useAWSSES_ to ture and provide _sender_. If use personal or special account leave _useAWSSES_ as false and provide _sender, emailPassword, emailServerHost, emailServerPort_.
+If you want to use the email function. we support AWS SES and your personal or special accounts. You must set _enableEmail_ to true. If use AWS SES you need set _useAWSSES_ to true and provide _sender_. For personal or special accounts, leave _useAWSSES_ as false and provide _sender, emailPassword, emailServerHost, emailServerPort_.
 
-You can copy app-os.js file and change the name to app-xxx.js, deploy to different environment. such as local,sandbox,uat,prod.  you can change the value at [annotation-service/config/config.js](./annotation-service/config/config.js) just need change the "os" to "xxx", but it's recommend set this value in your sever environment it's easy to build and deploy to any environment.
+You can copy app-os.js file and change the name to app-xxx.js, deploy to different environment. such as local,sandbox,uat,prod.  you can change the value at [annotation-service/config/config.js](./annotation-service/config/config.js) just need change the "os" to "xxx", but we recommend configuring this in your server environment since it's easy to build and deploy to any environment.
 
 ```javascript
 const sysEnv = process.env.SYS_ENV || "os"
@@ -170,7 +169,7 @@ All these config values can also be set in the server environment variable, _pro
 ------------
 #### active-learning-service
 
-You need config some values in [active-learning-service/config/app_os.py](./active-learning-service/config/app_os.py) file before using.
+You need to configure [active-learning-service/config/app_os.py](./active-learning-service/config/app_os.py) before using.
 ```python
 app = {
     # mongodb url and collection name
@@ -185,10 +184,10 @@ app = {
     "S3_ROLE_ARN": os.getenv("S3_ROLE_ARN", None),
 }
 ```
-It's share the same mongodb, AWS configs so you can copy the value from [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) just need to replace the None and default value.
+Use the same mongodb, AWS configs from [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) and replace the None and default value.
 
 
-you can copy app_os.py file and change the name to app_xxx.py, deploy to different environment, such as local, sandbox, uat, prod. Just need change "os" to "xxx", in [active-learning-service/config/config.py](./active-learning-service/config/config.py) file. but it's recommend to set the value SYS_ENV='xxx' in your sever environment it's easy to build and deploy to any environment.
+you can copy app_os.py file and change the name to app_xxx.py, deploy to different environment, such as local, sandbox, uat, prod. Just need change "os" to "xxx", in [active-learning-service/config/config.py](./active-learning-service/config/config.py) file. but we recommend setting the value value SYS_ENV='xxx' in your server environment since it's easy to build and deploy to any environment.
 
 ```python
 env = os.getenv('SYS_ENV', 'os')
@@ -206,7 +205,7 @@ $ npm start
 
 # go into annotation-service's directory
 $ cd annotation-service
-$ npm run statr
+$ npm run start
 
 # go into active-learning-service's directory
 $ cd active-learning-service
