@@ -20,7 +20,7 @@ annotation-service/config/certs/
 
 # active-learning-service
 active-learning-service/*__pycache__*
-active-learning-service/models
+# active-learning-service/models
 active-learning-service/.idea
 active-learning-service/logs
 active-learning-service/venv/
