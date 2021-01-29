@@ -326,7 +326,7 @@ async function skipOne(req){
     await projectDB.findUpdateProject(conditions, update);
 
     console.log(`[ SRS ] Service skipOne.getOneSrs`);
-    const request = { 'query': { 'pid': req.body.pid}, 'auth': {"email": req.auth.email} }
+    const request = { 'query': { 'pid': req.body.pid}, 'auth': {"email": req.auth.email}, headers:{authorization: req.headers.authorization} }
     return await getOneSrs(request);
 }
 
@@ -513,8 +513,8 @@ async function flagSr(req){
     console.log(`[ SRS ] Service pull the sr from queried sr list`);
     const updatePro = { $pull: {"al.queriedSr": ObjectId(req.body.tid)} };
     await mongoDb.findOneAndUpdate(ProjectModel, queryPro, updatePro);
-    
-    const request = { 'query': { 'pid': req.body.pid}, 'auth': {"email": req.auth.email} };
+
+    const request = { 'query': { 'pid': req.body.pid}, 'auth': {"email": req.auth.email}, headers:{authorization: req.headers.authorization} };
     return await getOneSrs(request);
 }
 
