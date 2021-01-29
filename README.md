@@ -38,10 +38,13 @@ This is the front-end application built with Angular 8.x that with
 
 #### [___annotation-service___](./annotation-service)
 This is the back-end service that provides all the api for annotation-app.  It is built with Node.js and and MongoDB
-
+- [__Node__](https://nodejs.org/en/) 10+
+- [__mongodb__](https://www.mongodb.com/download-center/community) 3.5+
+- [__express__](https://www.npmjs.com/package/express) 4.17.1
 #### [___active-learning-service___](./active-learning-service)
 This is the back-end service that provides all active learning api.  It is built with Python and Django service in addition to Modal
-
+- [__Python__](https://www.python.org/) 3.6+
+- [__Django__](https://www.djangoproject.com/) 3.0.7
 ## Quick start
 
 Instructions to set up the three service components:
@@ -110,28 +113,7 @@ You need to configure values in [annotation-service/config/app-os.js](./annotati
 
 ```javascript
 module.exports  = {
-  //annotation-service default port [optional config]
-  serverPort: process.env.SERVER_PORT || 3000,
-  //annotation-service url
-  WebClientUrl: process.env.WEBCLIENT_URL || 'http://localhost:4200',
-  //active-learning-service url
-  loopALApiUrl: process.env.LOOP_AL_URL || "http://localhost:8000/api",
-  //mongodb url
-  mongoDBUrl: process.env.MONGODB_URL || 'mongodb://localhost/loop',
-  //Google Analytics tracking id [optional config]
-  trackingId: process.env.TRACKING_ID || null,
-  //default admin users
-  adminDefault: ['xxx@xxx.com'],
-  
-  //send email function [optional config]
-  enableEmail: process.env.ENABLE_EMAIL || false,
-  useAWSSES: process.env.USE_AWS_SES || false,
-  sender: process.env.EMAIL_FROM || null, //"xxx@xxx.com"
-  emailPassword: process.env.EMAIL_PASSWORD || null,
-  emailServerHost: process.env.EMAIL_SERVER_HOST || null, //"smtp.xxx.com"
-  emailServerPort: process.env.EMAIL_SERVER_PORT || 465,
-
-  //AWS IAM
+  //AWS CONFIG IAM
   region: process.env.REGION || null,
   accessKeyId: process.env.ACCESSKEY_ID || null,
   secretAccessKey: process.env.SECRET_ACCESS_KEY || null,
@@ -145,6 +127,28 @@ module.exports  = {
   cloudFrontUrl: process.env.CLOUD_FRONT_URL || null, //"https://xxx.cloudfront.net"
   cloudFrontAccessKeyId: process.env.CLOUDFRONT_ACCESS_KEY_ID || null,
   cloudFrontPrivateCert: process.env.CLOUDFRONT_PRIVATE_CERT || null, //put the cert file into config/certs/ give file name to this value.
+
+  //annotation-service url
+  WebClientUrl: process.env.WEBCLIENT_URL || 'http://localhost:4200',
+  //active-learning-service url
+  loopALApiUrl: process.env.LOOP_AL_URL || "http://localhost:8000/api",
+  //mongodb url
+  mongoDBUrl: process.env.MONGODB_URL || 'mongodb://localhost/loop',
+
+  //annotation-service default port [optional config]
+  serverPort: process.env.SERVER_PORT || 3000,
+  //Google Analytics tracking id [optional config]
+  trackingId: process.env.TRACKING_ID || null,
+  //default admin users [optional config]
+  adminDefault: ['xxx@xxx.com'],
+
+  //send email function [optional config]
+  enableEmail: process.env.ENABLE_EMAIL || false,
+  useAWSSES: process.env.USE_AWS_SES || false,
+  sender: process.env.EMAIL_FROM || null, //"xxx@xxx.com"
+  emailPassword: process.env.EMAIL_PASSWORD || null,
+  emailServerHost: process.env.EMAIL_SERVER_HOST || null, //"smtp.xxx.com"
+  emailServerPort: process.env.EMAIL_SERVER_PORT || 465,
 };
 ```
 
@@ -182,7 +186,7 @@ app = {
 Use the same mongodb, AWS configs from [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) and replace the None and default value.
 
 
-you can copy app_os.py file and change the name to app_xxx.py, deploy to different environment, such as local, sandbox, uat, prod. Just need change "os" to "xxx", in [active-learning-service/config/config.py](./active-learning-service/config/config.py) file. but we recommend setting the value value SYS_ENV='xxx' in your server environment since it's easy to build and deploy to any environment.
+you can copy app_os.py file and change the name to app_xxx.py, deploy to different environment, such as local, sandbox, uat, prod. Just need change "os" to "xxx", in [active-learning-service/config/config.py](./active-learning-service/config/config.py) file. but we recommend setting the value SYS_ENV='xxx' in your server environment since it's easy to build and deploy to any environment.
 
 ```python
 env = os.getenv('SYS_ENV', 'os')
