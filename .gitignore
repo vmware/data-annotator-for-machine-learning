@@ -20,7 +20,7 @@ annotation-service/config/app-local.js
 
 
 # active-learning-service
-active-learning-service/*__pycache__*
+*__pycache__*
 active-learning-service/venv/
 active-learning-service/.idea
 active-learning-service/logs
