@@ -32,7 +32,7 @@ Data Annotator for Machine Learning project containes three components, and you 
 
 #### [___annotation-app___](./annotation-app)
 This is the front-end application built with Angular 8.x that with
-- **AngularCLI** 8.2.13+
+- **AngularCLI** 8.3.17
 - **Node** 10+
 - **NPM** 6+
 
