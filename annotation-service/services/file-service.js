@@ -11,11 +11,9 @@ const projectDB = require('../db/project-db');
 const srsDB = require('../db/srs-db');
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
-const config = require("../config/config");
-const { GENERATESTATUS, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, AWSDOMAIN, CLOUDFRONT_ACCESS_TIME } = require("../config/constant");
+const { GENERATESTATUS, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
 const fs = require('fs');
 const ObjectId = require("mongodb").ObjectID;
-const cloudFront = require('../utils/cloudFront');
 const moment = require('moment');
 const { findFrequentlyElementInObject, probabilisticInObject, findFrequentlyElementInArray } = require('../utils/common.utils');
 const csv = require('csvtojson');
@@ -26,7 +24,7 @@ const validator = require("../utils/validator");
 const imgImporter = require("../utils/imgImporter");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const mongoDb = require("../db/mongo.db");
-
+const S3Utils = require('../utils/s3');
 
 async function createProject(req) {
 
@@ -352,8 +350,7 @@ async function queryFileForDownlad(req) {
     let response = data.generateInfo;
     if (data.generateInfo.file) {//data.generateInfo alway not null
         console.error(`[ FILE ] Service found file: ${data.generateInfo.file}`);
-        const accessUrl = config.cloudFrontUrl + data.generateInfo.file.split(AWSDOMAIN)[1];
-        const signedUrl = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, data.generateInfo.file);
         response.file = Buffer.from(signedUrl).toString("base64");
     }
 
@@ -437,9 +434,8 @@ async function uploadFile(req) {
     let fileKey = `upload/${req.auth.email}/${Date.now()}_${req.file.originalname}`;
     let file = await S3.uploadObject(fileKey, req.file.buffer);
 
-    const accessUrl = config.cloudFrontUrl + file.Location.split(AWSDOMAIN)[1];
-    const signedUrl = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
-    let filestream = request.get(signedUrl)
+    const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, file.Key);
+    let filestream = request.get(signedUrl);
 
     const hasheader = req.body.hasHeader.toLowerCase();
     let headerRule = { noheader: true };
@@ -463,7 +459,7 @@ async function uploadFile(req) {
             fileSize: req.file.size,
             format: req.body.fileFormat,
             hasHeader: hasheader,
-            location: file.Location,
+            location: file.Key,
             topReview: { header: header, topRows: topRows }
         },
         auth:{email: req.auth.email}

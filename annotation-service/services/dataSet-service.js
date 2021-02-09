@@ -8,10 +8,8 @@
 
 const DataSetDB = require('../db/dataSet-db');
 const S3Utils = require('../utils/s3');
-const config = require('../config/config');
-const {DATASETTYPE, AWSDOMAIN, CLOUDFRONT_ACCESS_TIME} = require('../config/constant');
+const {DATASETTYPE, S3OPERATIONS} = require('../config/constant');
 const ObjectId = require("mongodb").ObjectID;
-const cloudFront = require('../utils/cloudFront');
 const { isASCII } = require('../utils/validator');
 const validator = require('../utils/validator');
 
@@ -59,7 +57,7 @@ async function saveDataSetInfo(req) {
             }
         });
 
-        dataSet.fileKey = req.body.location.split(`${AWSDOMAIN}/`)[1];
+        dataSet.fileKey = req.body.location;
         dataSet.hasHeader = req.body.hasHeader;
         dataSet.location = req.body.location;
         dataSet.columnInfo = req.body.columnInfo;
@@ -92,10 +90,10 @@ async function imageTopPreview(datasets, singleData) {
     for (const ds of datasets) {
         if (ds.format == DATASETTYPE.IMGAGE) {
             let preveiw = [], index = 0;
+            const S3 = await S3Utils.s3Client();
             for (const image of ds.images) { 
                 if (index>2) break;
-                const accessUrl = config.cloudFrontUrl + image.location.split(AWSDOMAIN)[1];
-                image.location = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+                image.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, image.location, S3);
                 preveiw.push(image);
                 index++;
             }
@@ -125,14 +123,13 @@ async function deleteDataSet(req) {
     return { CODE: 0000, MSG: "delete success" };
 }
 
-async function signCloudFrontUrl(req) {
+async function signS3Url(req) {
 
-    console.log(`[ DATASET ] Service signCloudFrontUrl.queryDataSetById`);
+    console.log(`[ DATASET ] Service DataSetDB.queryDataSetById`);
     const dataSet = await DataSetDB.queryDataSetById(ObjectId(req.query.dsid));
 
-    console.log(`[ DATASET ] Service signCloudFrontUrl.cloudFront.cloudfrontSignedUrl`);
-    const accessUrl = config.cloudFrontUrl + dataSet.location.split(AWSDOMAIN)[1];
-    return await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+    console.log(`[ DATASET ] Service S3Utils.signedUrlByS3`);
+    return  await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, dataSet.location);
 }
 
 
@@ -142,7 +139,7 @@ module.exports = {
     queryDataSetByUser,
     queryDataSetByDataSetName,
     deleteDataSet,
-    signCloudFrontUrl,
+    signS3Url,
     checkDatasetsName,
     imageTopPreview,
 }

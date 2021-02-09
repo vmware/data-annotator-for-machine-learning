@@ -10,13 +10,11 @@ const csv = require('csvtojson');
 const validator = require('./validator');
 let srsDB = require('../db/srs-db');
 const request = require('request');
-const config = require("../config/config");
-const { PAGINATELIMIT, AWSDOMAIN, PROJECTTYPE, CLOUDFRONT_ACCESS_TIME } = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
 const projectDB = require('../db/project-db');
-const cloudFront = require('./cloudFront');
 const emailService = require('../services/email-service');
 const fileService = require('../services/file-service');
-
+const S3Utils = require('./s3');
 
 async function importDataset(req){
   console.log('[ IMPORT-DATASET ] Utils Start Import dataset ');
@@ -47,9 +45,8 @@ async function importLabelledDataset(req, lables, selectedColumn){
       checkType:true
   };
 
-  console.log(`[ IMPORT-DATASET ] Utils access S3 file`)
-  const accessUrl = config.cloudFrontUrl + req.body.location.split(AWSDOMAIN)[1];
-  const signedUrl = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+  console.log(`[ IMPORT-DATASET ] Utils S3Utils.signedUrlByS3`)
+  const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
   
   const options = { lean: true, ordered: false }; 
   // chunking line by line to read
