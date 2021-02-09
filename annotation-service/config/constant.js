@@ -77,4 +77,9 @@ module.exports = {
         ESP: "VMware InstaML Loop",
         OSS: "Data-Annotator-For-Machine-Learning"
     },
+    FILETYPE:{
+        ZIP: "zip",
+        TGZ: "tgz",
+        GZ: "gz"
+    },
 }
