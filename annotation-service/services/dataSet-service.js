@@ -86,11 +86,12 @@ async function queryDataSetByUser(req) {
 async function imageTopPreview(datasets, singleData) {
     
     if (singleData) datasets = [datasets];
-    
+    const S3 = await S3Utils.s3Client();
+
     for (const ds of datasets) {
         if (ds.format == DATASETTYPE.IMGAGE) {
             let preveiw = [], index = 0;
-            const S3 = await S3Utils.s3Client();
+            
             for (const image of ds.images) { 
                 if (index>2) break;
                 image.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, image.location, S3);
