@@ -134,7 +134,7 @@ module.exports  = {
 };
 ```
 
-AS _annotation-service_ uses AWS S3 to save datasets and AWS CloudFront to access the datasets and SQS to generate large datasets. Configuration of these AWS services is mandatory.
+AS _annotation-service_ uses AWS S3 to save datasets and SQS to generate large datasets. Configuration of these AWS services is mandatory.
 
 If you are new to AWS you can reference the [AWS official guideline](https://docs.aws.amazon.com/en_us/) You also can see the step by step config guidelines we provide in the resources branch [AWS-step-by-step-config-with-chart.docx](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-chart.docx) or [AWS-step-by-step-config-with-descriptions.md](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-descriptions.md)
 
