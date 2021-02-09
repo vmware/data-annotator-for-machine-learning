@@ -211,7 +211,7 @@ export class UploadComponent implements OnInit {
       if (data) {
         params.hasHeader = this.uploadGroup.get('hasHeader').value;
         params.fileKey = key;
-        params.location = data.Location;
+        params.location = data.Key;
         params.topReview = { header: this.previewHeadDatas, topRows: this.previewContentDatas };
         params.columnInfo = this.columnInfo;
       } else {
@@ -237,7 +237,7 @@ export class UploadComponent implements OnInit {
           isHasHeader: key == 'image' ? null : res.hasHeader,
           fileName: res.fileName,
           fileSize: res.fileSize,
-          location: key == 'image' ? null : data.Location,
+          location: key == 'image' ? null : data.Key,
           images: key == 'image' ? res.images : null,
 
         }
@@ -424,7 +424,7 @@ export class UploadComponent implements OnInit {
                           console.log('uploadImageErr:::', err)
                         };
                         if (data) {
-                          imagesLocation.push({ fileName: e.fileName, location: data.Location, fileSize: e.fileSize })
+                          imagesLocation.push({ fileName: e.fileName, location: data.Key, fileSize: e.fileSize })
                         }
                       })
                     }));
