@@ -6,7 +6,7 @@
 ***/
 
 module.exports  = {
-
+  //-------------------- mandatory configs --------------------//
   //AWS CONFIG IAM
   region: process.env.REGION || null,
   accessKeyId: process.env.ACCESSKEY_ID || null,
@@ -17,11 +17,6 @@ module.exports  = {
   //SQS
   sqsRoleArn: process.env.SQS_ARN || null,
   sqsUrl: process.env.SQS_URL || null,
-  //CloudFront "https://xxx.cloudfront.net"
-  cloudFrontUrl: process.env.CLOUD_FRONT_URL || null,
-  cloudFrontAccessKeyId: process.env.CLOUDFRONT_ACCESS_KEY_ID || null,
-  //put the cert file into config/certs/ give file name to this value.
-  cloudFrontPrivateCert: process.env.CLOUDFRONT_PRIVATE_CERT || null,
 
   //annotation-app url
   WebClientUrl: process.env.WEBCLIENT_URL || 'http://localhost:4200',
@@ -30,12 +25,17 @@ module.exports  = {
   //mongodb url
   mongoDBUrl: process.env.MONGODB_URL || 'mongodb://localhost/loop',
 
+  
+  //-------------------- optional configs --------------------//
   //server port [optional configs]
   serverPort: process.env.SERVER_PORT || 3000,
+  
   //default admin users [optional configs]
   adminDefault: ['xxx@xxx.com'],
+  
   //Google Analytics tracking id [optional configs]
   trackingId: process.env.TRACKING_ID || null,
+  
   //email sender address [optional configs]
   enableEmail: process.env.ENABLE_EMAIL || false,
   useAWSSES: process.env.USE_AWS_SES || false,

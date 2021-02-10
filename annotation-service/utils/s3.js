@@ -49,8 +49,26 @@ async function uploadObject(Key, Body){
     return await S3.upload(uploadParams).promise();
 }
 
+async function signedUrlByS3(operation, key, S3) {
+    if(!S3){
+        S3 = await s3Client();
+    }
+    S3.signatureVersion= 'v4';
+    
+    const params = { 
+        Bucket: config.bucketName, 
+        Key: key, 
+        Expires: ACCESS_TIME_60
+    };
+
+    return await S3.getSignedUrl(operation, params);
+
+}
+
 module.exports = {
     s3Client,
     deleteAnObject,
     uploadObject,
+    signedUrlByS3,
+
 }

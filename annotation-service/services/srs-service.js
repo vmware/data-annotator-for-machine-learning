@@ -11,9 +11,7 @@ const srsDB = require('../db/srs-db');
 const projectDB = require('../db/project-db');
 const projectService = require('./project.service');
 const validator = require('../utils/validator');
-const config = require("../config/config");
-const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, AWSDOMAIN, CLOUDFRONT_ACCESS_TIME } = require("../config/constant");
-const cloudFront = require('../utils/cloudFront');
+const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
 const request = require('request');
 const csv = require('csvtojson');
 const alService = require('./activelearning.service');
@@ -23,7 +21,7 @@ const { ProjectModel, UserModel, ImgModel, SrModel } = require("../db/db-connect
 const mongoDb = require("../db/mongo.db");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const imgImporter = require("../utils/imgImporter");
-
+const S3Utils = require('../utils/s3');
 
 async function updateSrsUserInput(req) {
     
@@ -233,8 +231,7 @@ async function getOneSrs(req) {
     if (srs.length) {
         
         if (project.projectType == PROJECTTYPE.IMGAGE) {
-            const accessUrl = config.cloudFrontUrl + srs[0].originalData.location.split(AWSDOMAIN)[1];
-            srs[0].originalData.location = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+            srs[0].originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, srs[0].originalData.location);
             return srs;
         }
 
@@ -280,9 +277,9 @@ async function getALLSrs(req) {
         nextPage: data.nextPage
     };
     if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
+        const S3 = await S3Utils.s3Client();
         for (const ticket of data.docs) {
-            const accessUrl = config.cloudFrontUrl + ticket.originalData.location.split(AWSDOMAIN)[1];
-            ticket.originalData.location = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+            ticket.originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ticket.originalData.location, S3);
         }
     }
     console.log(`[ SRS ] Service getALLSrs query projects info name end: `, Date.now());
@@ -296,8 +293,7 @@ async function getSelectedSrsById(req) {
     
     let srs = await mongoDb.findById(mp.model, ObjectId(req.query.tid));
     if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
-        const accessUrl = config.cloudFrontUrl + srs.originalData.location.split(AWSDOMAIN)[1];
-        srs.originalData.location = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+        srs.originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, srs.originalData.location);
     }
     const token = req.headers.authorization.split("Bearer ")[1];
     srs = await ENRService.gainNERtokens([srs], mp.project.projectType, token);
@@ -373,9 +369,9 @@ async function appendSrsDataByCSVFile(req){
     const update = { $set: { "appendSr": APPENDSR.ADDING, updatedDate: Date.now() }};
     await projectDB.findUpdateProject( conditions, update );
 
-    console.log(`[ SRS ] Service start appen sr`);
-    const accessUrl = config.cloudFrontUrl + req.body.location.split(AWSDOMAIN)[1];
-    const signedUrl = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+    console.log(`[ SRS ] Service S3Utils.signedUrlByS3`);
+    const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
+    
     const headerRule = {
         noheader: false,
         fork: true,

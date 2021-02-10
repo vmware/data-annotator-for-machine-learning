@@ -15,9 +15,8 @@ annotation-app/tsconfig.spec.json
 # annotation-service
 annotation-service/node_modules
 annotation-service/downloadProject
-annotation-service/config/certs/
 annotation-service/config/app-local.js
-
+annotation-service/config/app-poc.js
 
 # active-learning-service
 *__pycache__*

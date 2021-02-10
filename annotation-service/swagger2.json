@@ -150,7 +150,7 @@
           {
             "name": "location",
             "in": "formData",
-            "description": "'location' means the location of the csv file in S3. (e.g. https://yours3bucket.s3.us-west 2.amazonaws.com/uploads/xxx@xxx.com/1586934928434818196_file1.csv)",
+            "description": "'location' means the location of the csv file in S3. (e.g. 'uploads/xxx@xxx.com/1586934928434818196_file1.csv')",
             "type": "string",
             "required": true
           },
@@ -785,7 +785,7 @@
                   "index",
                   "education"
                 ],
-                "location": "https://yours3bucket.s3.us-west-2.amazonaws.com/upload/xxx@xxx.com/1600159831466391633_embedding-append.csv"
+                "location": "upload/xxx@xxx.com/1600159831466391633_embedding-append.csv"
               }
             }
           }
@@ -2493,7 +2493,7 @@
         "format": "tabular",
         "hasHeader": "yes",
         "id": "5f5755349c1590edde642ff2",
-        "location": "https://yours3bucket.s3.us-west-2.amazonaws.com/upload/xxx@xxx.com/1599558963396912088_Export_embedding-append62_09022020145034.csv",
+        "location": "upload/xxx@xxx.com/1599558963396912088_Export_embedding-append62_09022020145034.csv",
         "topReview": {
           "header": [
             "index",

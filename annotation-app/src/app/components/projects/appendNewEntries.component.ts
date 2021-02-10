@@ -741,7 +741,7 @@ export class AppendNewEntriesComponent implements OnInit {
             if (data) {
                 params.hasHeader = 'yes';
                 params.fileKey = key;
-                params.location = data.Location;
+                params.location = data.Key;
                 params.topReview = { header: this.previewHeadDatas, topRows: this.previewContentDatas };
                 params.columnInfo = this.columnInfo;
                 params.format = this.projectType == 'tabular' ? 'tabular' : 'csv';
@@ -761,7 +761,7 @@ export class AppendNewEntriesComponent implements OnInit {
                 pname: this.projectName,
                 isFile: from == 'fromSingle' ? false : true,
                 selectedHeaders: this.originalHead,
-                location: this.projectType == 'image' ? null : data.Location,
+                location: this.projectType == 'image' ? null : data.Key,
                 projectType: this.projectType,
                 images: (this.projectType == 'image' && from == 'fromSingle') ? data : [],
                 selectedDataset: from == 'fromSingle' ? null : this.uploadGroup.get('datasetsName').value,
@@ -900,7 +900,7 @@ export class AppendNewEntriesComponent implements OnInit {
                                                 console.log('uploadImageErr:::', err)
                                             };
                                             if (data) {
-                                                imagesLocation.push({ fileName: e.fileName, location: data.Location, fileSize: e.fileSize })
+                                                imagesLocation.push({ fileName: e.fileName, location: data.Key, fileSize: e.fileSize })
                                             }
                                         })
                                     }));
@@ -925,7 +925,7 @@ export class AppendNewEntriesComponent implements OnInit {
             s3.upload(uploadParams, async function (err, data) {
                 if (err) { console.log("s3UploadError:::", err) };
                 if (data) {
-                    await imagesLocation.push({ fileName: entry[i].name, location: data.Location, fileSize: entry[i].size });
+                    await imagesLocation.push({ fileName: entry[i].name, location: data.Key, fileSize: entry[i].size });
                     realEntryIndex++;
                     if (realEntryIndex === entry.length) {
                         let appendParams = {

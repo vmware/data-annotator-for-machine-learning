@@ -8,14 +8,13 @@
 
 const SQS = require('../utils/sqs');
 const config = require('../config/config');
-const { GENERATESTATUS, FILESIZE, CLOUDFRONT_ACCESS_TIME } = require('../config/constant');
+const { GENERATESTATUS, FILESIZE, PROJECTTYPE, FILEFORMAT, S3OPERATIONS } = require('../config/constant');
 const FileService = require('./file-service');
 const ProjectDB = require('../db/project-db');
 const ObjectId = require("mongodb").ObjectID;
 const S3Service = require('./s3.service');
-const { PROJECTTYPE, FILEFORMAT, AWSDOMAIN } = require('../config/constant');
 const communityService = require('./community.service');
-const cloudFront = require('../utils/cloudFront');
+const S3Utils = require('../utils/s3');
 
 async function generateFile(req){
     
@@ -60,8 +59,7 @@ async function avoidRegeneration(project, req) {
     await communityService.countCommunityDownload(req);
 
     console.log(`[ SQS ] Service avoidRegeneration`);
-    const accessUrl = config.cloudFrontUrl + project.generateInfo.file.split(AWSDOMAIN)[1];
-    const location = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+    const location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, project.generateInfo.file);
     
     let resBody = project.generateInfo;
     resBody.file = Buffer.from(location).toString("base64");
@@ -96,7 +94,7 @@ async function directlyDownload(data, req){
      await FileService.deleteTempFile(file.fileName);
 
     console.log(`[ SQS ] Service directlyDownload save file position and generate status to db`);
-    await FileService.updateGenerateStatus(data.id, GENERATESTATUS.DONE, upload.Location, null, data.format, data.onlyLabelled);
+    await FileService.updateGenerateStatus(data.id, GENERATESTATUS.DONE, upload.Key, null, data.format, data.onlyLabelled);
 
     console.log(`[ SQS ] Service directlyDownload.queryFileForDownlad`);
     const request = {query: {pid: data.id}};
