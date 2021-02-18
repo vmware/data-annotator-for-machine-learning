@@ -49,7 +49,7 @@ async function superColliderQuery(req){
         user: req.auth.email,
         description: req.body.description,
         topReview: reviews,
-        location: upload.Location,
+        location: upload.Key,
         hasHeader: 'yes',
         format: 'csv',
         fileSize: fileSizeInByte,

@@ -31,7 +31,6 @@ module.exports = {
         DONE: "done"
     },
     PAGINATELIMIT: 5000,
-    CLOUDFRONT_ACCESS_TIME: 1000*60*60,
     FILESIZE: 1024*1024*5, //less than 5MB directly download
     ACCESS_TIME_60: 60*60, //in seconds
     ACCESS_TIME_30: 60*30, //in seconds
@@ -45,11 +44,11 @@ module.exports = {
     FILEFORMAT:{
         STANDARD:"standard",
         TOPLABEL:"topLabel",
-        PROBABILISTIC: "probabilistic"
+        PROBABILISTIC: "probabilistic",
     },
     LABELTYPE:{
         TEXT: "textLabel",
-        NUMERIC: "numericLabel"
+        NUMERIC: "numericLabel",
     },
     PROJECTTYPE:{
         TABULAR: "tabular",
@@ -63,19 +62,21 @@ module.exports = {
     },
     ENCODE:{
         EMBEDDINGS:"embeddings",
-        ONEHOT:"oneHot"
+        ONEHOT:"oneHot",
     },
     DATASETTYPE:{
         CSV: "csv",
         TABULAR: "tabular",
-        IMGAGE: "image"
+        IMGAGE: "image",
     },
     YES: "Yes",
     NO: "No",
-    AWSDOMAIN: ".amazonaws.com",
     TEAM:{
         ESP: "VMware InstaML Loop",
-        OSS: "Data-Annotator-For-Machine-Learning"
+        OSS: "Data-Annotator-For-Machine-Learning",
+    },
+    S3OPERATIONS:{
+        GETOBJECT: 'getObject',
     },
     FILETYPE:{
         ZIP: "zip",

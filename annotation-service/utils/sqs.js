@@ -65,7 +65,7 @@ async function consumeSQSMessage(){
             await FileService.deleteTempFile(file.fileName);
 
             console.log("[ SQS ] Utils save file position and generate status to db");    
-            await FileService.updateGenerateStatus(data.id, GENERATESTATUS.DONE, upload.Location, null, data.format, data.onlyLabelled);
+            await FileService.updateGenerateStatus(data.id, GENERATESTATUS.DONE, upload.Key, null, data.format, data.onlyLabelled);
             
             console.log("[ SQS ] Utils send generation email to owner");    
             await EmailService.sendGenerationEmailToOwner(data.user, file.fileName);
