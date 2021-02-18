@@ -11,11 +11,11 @@ const validator = require('./validator');
 const srsDB = require('../db/srs-db');
 const request = require('request');
 const config = require("../config/config");
-const { PAGINATELIMIT, PROJECTTYPE, ENCODE, AWSDOMAIN, CLOUDFRONT_ACCESS_TIME } = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, ENCODE, S3OPERATIONS } = require("../config/constant");
 const projectDB = require('../db/project-db');
-const cloudFront = require('./cloudFront');
 const emailService = require('../services/email-service');
 const axios = require("axios");
+const S3Utils = require('./s3');
 
 module.exports = {
     execute: async function (req, annotators) {
@@ -55,9 +55,8 @@ module.exports = {
             headerRule.checkType = false;
         }
         
-        console.log(`[ SRS ] Utils cloudFront.cloudfrontSignedUrl`);
-        const accessUrl = config.cloudFrontUrl + req.body.location.split(AWSDOMAIN)[1];
-        const signedUrl = await cloudFront.cloudfrontSignedUrl(accessUrl, Date.now() + CLOUDFRONT_ACCESS_TIME);
+        console.log(`[ SRS ] Utils S3Utils.signedUrlByS3`);
+        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
         
         console.log(`[ SRS ] Utils import data to db start: `, Date.now());
         // chunking line by line to read

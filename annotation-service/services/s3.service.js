@@ -61,6 +61,6 @@ async function uploadFileToS3(fileName, key) {
 module.exports = {
     prepareS3Configs,
     deleteOriginalFile,
-    uploadFileToS3
+    uploadFileToS3,
 
 }

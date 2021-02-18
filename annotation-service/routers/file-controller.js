@@ -109,7 +109,7 @@ router.delete(APIs.FILE_DATASET_DELETE, (req, res) => {
 
 router.get(APIs.FILE_SIGN_URL, (req, res) => {
     console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
-    dataSetService.signCloudFrontUrl(req).then((response) => {
+    dataSetService.signS3Url(req).then((response) => {
         console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
         res.status(200).json(response);
     }).catch(error => {

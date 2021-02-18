@@ -123,10 +123,6 @@ module.exports  = {
   //AWS SQS
   sqsRoleArn: process.env.SQS_ARN || null,
   sqsUrl: process.env.SQS_URL || null,
-  //AWS CloudFront and cloudfront cert
-  cloudFrontUrl: process.env.CLOUD_FRONT_URL || null, //"https://xxx.cloudfront.net"
-  cloudFrontAccessKeyId: process.env.CLOUDFRONT_ACCESS_KEY_ID || null,
-  cloudFrontPrivateCert: process.env.CLOUDFRONT_PRIVATE_CERT || null, //put the cert file into config/certs/ give file name to this value.
 
   //annotation-service url
   WebClientUrl: process.env.WEBCLIENT_URL || 'http://localhost:4200',
@@ -135,24 +131,10 @@ module.exports  = {
   //mongodb url
   mongoDBUrl: process.env.MONGODB_URL || 'mongodb://localhost/loop',
 
-  //annotation-service default port [optional config]
-  serverPort: process.env.SERVER_PORT || 3000,
-  //Google Analytics tracking id [optional config]
-  trackingId: process.env.TRACKING_ID || null,
-  //default admin users [optional config]
-  adminDefault: ['xxx@xxx.com'],
-
-  //send email function [optional config]
-  enableEmail: process.env.ENABLE_EMAIL || false,
-  useAWSSES: process.env.USE_AWS_SES || false,
-  sender: process.env.EMAIL_FROM || null, //"xxx@xxx.com"
-  emailPassword: process.env.EMAIL_PASSWORD || null,
-  emailServerHost: process.env.EMAIL_SERVER_HOST || null, //"smtp.xxx.com"
-  emailServerPort: process.env.EMAIL_SERVER_PORT || 465,
 };
 ```
 
-AS _annotation-service_ uses AWS S3 to save datasets and AWS CloudFront to access the datasets and SQS to generate large datasets. Configuration of these AWS services is mandatory.
+AS _annotation-service_ uses AWS S3 to save datasets and SQS to generate large datasets. Configuration of these AWS services is mandatory.
 
 If you are new to AWS you can reference the [AWS official guideline](https://docs.aws.amazon.com/en_us/) You also can see the step by step config guidelines we provide in the resources branch [AWS-step-by-step-config-with-chart.docx](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-chart.docx) or [AWS-step-by-step-config-with-descriptions.md](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-descriptions.md)
 
