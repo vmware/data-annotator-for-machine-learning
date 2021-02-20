@@ -22,6 +22,7 @@ const dataSetService = require('../services/dataSet-service');
 const S3 = require('../utils/s3');
 const validator = require("../utils/validator");
 const imgImporter = require("../utils/imgImporter");
+const logImporter = require("../utils/logImporter");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const mongoDb = require("../db/mongo.db");
 const S3Utils = require('../utils/s3');
@@ -43,6 +44,7 @@ async function createProject(req) {
     console.log(`[ FILE ] Service ticktes to db`);
     await srsImporter.execute(req, annotators);
     await imgImporter.execute(req, true, annotators);
+    await logImporter.execute(req, true, annotators);
 
     console.log(`[ FILE ] Service save project info to db`);
     return await saveProjectInfo(req, userCompleteCase, annotators);

@@ -67,10 +67,30 @@ imgSchema.index({ projectName: 1 });
 imgSchema.index({ "flag.users": 1 });
 imgSchema.plugin(mongoosePaginate);
 
-// create SR model
+// create Image model
 const ImgModel = mongoose.model("IMAGE", imgSchema);
 
+/**
+ * Create mongoose image tickets schema for all cases
+ */
+const logSchema = new mongoose.Schema({
+    projectName: { type: String },
+    userInputsLength: { type: Number },
+    userInputs: [],
+    originalData: { type: Object },
+    fileInfo:{ type: Object },
+    flag: {
+        users: [],
+        silence: { type: Boolean, default: false }
+    }
+}, { _id: true });
+logSchema.set("toJSON", { virtuals: true });
+logSchema.index({ projectName: 1 });
+logSchema.index({ "flag.users": 1 });
+logSchema.plugin(mongoosePaginate);
 
+// create Image model
+const LogModel = mongoose.model("LOG", logSchema);
 
 /**
  * Create mongoose User schema
@@ -197,6 +217,7 @@ const DataSetModel = mongoose.model("DataSet", dataSetSchema);
 module.exports = {
     SrModel,
     ImgModel,
+    LogModel,
     UserModel,
     ProjectModel,
     DataSetModel,

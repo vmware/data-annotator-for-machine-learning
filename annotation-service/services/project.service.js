@@ -252,7 +252,7 @@ async function updateProject(req) {
                     update = { $set: { "userInputs.$[elem].problemCategory.value.rectanglelabels.0" : editLb[key] } };
                     options = {arrayFilters: [ { "elem.problemCategory.value.rectanglelabels.0": key } ]};
                     await mongoDb.updateManyByConditions(mp.model, query, update, options);
-                } else{
+                } else if (projectInfo.projectType == PROJECTTYPE.TEXT || projectInfo.projectType == PROJECTTYPE.TABULAR) {
                     query = { projectName: req.body.pname,  "userInputs.problemCategory": key};
                     update = { $set: { "userInputs.$[elem].problemCategory" : editLb[key] } };
                     options = {arrayFilters: [ { "elem.problemCategory": key } ]};

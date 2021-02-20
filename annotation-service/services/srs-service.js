@@ -179,7 +179,7 @@ async function getOneSrs(req) {
     
     const mp = await getModelProject({ _id: ObjectId(req.query.pid)});
 
-    //1. find model queried sr from queriedSr
+    //1. find model queried tickets from queriedSr
     if (project.al.queriedSr.length > 0) { 
         if (limitation <= project.al.queriedSr.length) {
              let ids = project.al.queriedSr.filter((id, i) =>{
@@ -196,7 +196,7 @@ async function getOneSrs(req) {
         }
     }
     
-    //2. find sr from db 
+    //2. find tickets from db 
     conditions = {
         projectName: project.projectName, 
         userInputsLength: { $lt: project.maxAnnotation },

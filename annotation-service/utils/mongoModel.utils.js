@@ -7,7 +7,7 @@
 
 
 const { PROJECTTYPE } = require("../config/constant");
-const { ImgModel, SrModel } = require("../db/db-connect");
+const { ImgModel, SrModel, LogModel } = require("../db/db-connect");
 const validator = require("./validator");
 
 
@@ -15,7 +15,9 @@ async function getModelProject(conditions) {
   const project = await validator.checkProjectByconditions(conditions, true);
   let model = SrModel;
   if (project[0].projectType == PROJECTTYPE.IMGAGE) {
-      model = ImgModel;
+    model = ImgModel;
+  }else if (project[0].projectType == PROJECTTYPE.LOG) {
+    model = LogModel;
   }
   return {model: model, project: project[0]};
 }
