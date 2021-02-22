@@ -206,7 +206,8 @@ const dataSetSchema = new mongoose.Schema({
         fileName: { type: String },
         location: { type: String },
         fileSize: { type: Number },
-    }]
+    }],
+    totalRows: { type: Number }
 });
 dataSetSchema.set("toJSON", { virtuals: true });
 dataSetSchema.index({ dataSetName: 1 });

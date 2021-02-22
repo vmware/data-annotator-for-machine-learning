@@ -63,6 +63,11 @@ async function saveDataSetInfo(req) {
         dataSet.columnInfo = req.body.columnInfo;
         dataSet.topReview = reviews;
 
+    }else if (req.body.format == DATASETTYPE.LOG) {
+        dataSet.fileKey = req.body.fileKey;
+        dataSet.location = req.body.location;
+        dataSet.topReview = req.body.topReview;
+        dataSet.totalRows = req.body.totalRows;
     }
     
     let conditions = { dataSetName: req.body.dsname };
