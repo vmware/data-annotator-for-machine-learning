@@ -44,6 +44,7 @@ import { FeedbackService } from "./services/feedback.service";
 import { EditProjectComponent } from './components/edit-project/edit-project.component';
 import { LabelStudioService } from "./services/label-studio.service";
 import { SharedModule } from "./shared/shared.module";
+import { GetElementService } from "./services/common/dom.service";
 
 
 @NgModule({
@@ -95,7 +96,8 @@ import { SharedModule } from "./shared/shared.module";
     AuthGuard,
     FeedbackService,
     LabelStudioService,
-    Title
+    Title,
+    GetElementService
   ],
   bootstrap: [AppComponent]
 })

@@ -455,3 +455,54 @@ label .label-leftBoard {
   white-space: break-spaces;
   word-break: break-all;
 }
+
+.txtBox {
+  overflow: auto;
+  max-height: 40rem;
+  padding-bottom: 3rem;
+}
+
+.txtRow {
+  margin-top: 0.5rem !important;
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
+.selectedTxtRow {
+  background-color: #ffe184;
+  padding: 0.25em 0.4em 0.25em 0;
+  font-weight: bold;
+  color: black;
+  user-select: none;
+  line-height: 1.3rem;
+  margin-right: 0.15rem;
+  position: relative;
+}
+
+.txtEntityLabel {
+  background-color: #ffe184;
+  font-size: unset;
+  font-weight: bold;
+  height: 1.5rem;
+  outline: unset;
+  color: #0077b8;
+  padding: 0.25em 0.4em 0.25em 0.25em;
+  position: relative;
+}
+
+::ng-deep .clearTxt {
+  user-select: none;
+  transition: opacity 0.1s ease;
+  position: absolute;
+  left: -0.4rem;
+  top: -0.4rem;
+  background-color: transparent;
+  color: transparent;
+  font-weight: 900;
+  border-radius: 50%;
+  text-align: center;
+  width: 0.8em;
+  height: 0.8em;
+  line-height: 0.5em;
+  font-size: 1.5em;
+}

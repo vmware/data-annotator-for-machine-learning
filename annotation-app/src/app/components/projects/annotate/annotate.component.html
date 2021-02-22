@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <span *ngIf='silenceStatus' style="color: #2F8400;font-size: 0.5em;">Reviewed for accuracy</span>
           </h2>
           <div class="questionContainer">
-            <div *ngIf='projectType!=="ner" && projectType!=="image"'>
+            <div *ngIf='projectType!=="ner" && projectType!=="image" && projectType!=="txt"'>
               <div *ngFor="let ticket of sr.originalData;">
                 <p class="question-paragraph">
                   <span class="ticketColumn">{{ticket.key}}</span>
@@ -127,13 +127,26 @@ SPDX-License-Identifier: Apache-2.0 -->
                 (mouseup)="onMouseUp($event,ticket)" id="{{ticket.id}}"
                 class="nerSpan spanIndex{{ticket.id}}">{{ticket.text}}</span>
             </div>
+            <div *ngIf='projectType==="txt"' class="txtBox">
+              <p *ngFor="let ticket of sr.originalData;let i = index" (mousedown)="onMouseDownTxt($event,ticket,i)"
+                (mouseup)="onMouseUpTxt($event,ticket,i)" id="c-{{i}}" class="txtRow txtRow{{i}}">
+                <span style="margin-right: 1rem;color:#CCCCCC;">{{i+1}}</span>
+                <!-- <mark style="background-color: transparent;" class="box-{{i}}"> -->
+                <span class="txtRowEntity{{i}}"></span>
+                <span class="txtRowContent{{i}}">{{ticket.text}}</span>
+                <!-- </mark> -->
+
+
+              </p>
+            </div>
           </div>
           <div class="clr-row" *ngIf='projectType!=="image"'>
             <h4 style="margin-top: 2rem;margin-left: 0.5rem;">{{projectInfo?.annotationQuestion}}</h4>
           </div>
           <!-- 6 colorful labels -->
-          <div class="questionContainer"
-            *ngIf="!isShowDropDown && !isNumeric && !isMultipleLabel && projectType != 'ner' && projectType!=='image'">
+          <!-- <div class="questionContainer"
+            *ngIf="!isShowDropDown && !isNumeric && !isMultipleLabel && projectType != 'ner' && projectType!=='image'"> -->
+          <div class="questionContainer" *ngIf="!isShowDropDown  && (projectType == 'text' || projectType=='tabular')">
             <div>
               <button *ngFor="let label of categories; let i = index" class="btn labels label label{{ i }} submit"
                 style="margin: 0.3rem 0.2rem;" type="submit" (click)="onSelectingCategory(label, i)" [ngClass]="
@@ -162,9 +175,10 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <!-- dropdown labels -->
-          <div class="clr-form-group category clr-row"
+          <!-- <div class="clr-form-group category clr-row"
             *ngIf="isShowDropDown && !isNumeric && !isMultipleLabel && projectType !== 'ner' && projectType!=='image'"
-            (change)="onSelectingDropDown($event)">
+            (change)="onSelectingDropDown($event)"> -->
+          <div class="clr-form-group category clr-row" *ngIf="isShowDropDown" (change)="onSelectingDropDown($event)">
             <label for="category" class="label-tooltip">Labels: </label>
             <div class="clr-select-wrapper">
               <select formControlName="category" (click)="dropDownSubmit()">
@@ -198,8 +212,9 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <!-- multiple checkbox labels -->
-          <div class="questionContainer"
-            *ngIf="!isNumeric && isMultipleLabel && projectType != 'ner' && projectType!=='image'">
+          <!-- <div class="questionContainer"
+            *ngIf="!isNumeric && isMultipleLabel && projectType != 'ner' && projectType!=='image'"> -->
+          <div class="questionContainer" *ngIf="isMultipleLabel">
             <div class="clr-form-control" style="margin-top: 0;">
               <div class="clr-control-container" style="width: 100%;">
                 <div class="clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
@@ -212,11 +227,20 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
           </div>
+          <!-- txt log labels -->
+          <div class="questionContainer" *ngIf="projectType == 'txt'">
+            <div>
+              <button *ngFor="let label of categories; let i = index" class="btn labels label entityLabel"
+                [ngClass]="{'entitySelected': i==selectedEntityID, 'entityLabel': i!==selectedEntityID}"
+                (click)="onSelectingEntity($event,label, i)">{{ label }}</button>
+              &nbsp; &nbsp;
+            </div>
+          </div>
 
           <div class="actions">
 
-            <button *ngIf='isMultipleLabel || projectType=="ner" || projectType=="image"' class="btn btn-success submit"
-              type="submit"
+            <button *ngIf='isMultipleLabel || projectType=="ner" || projectType=="image" || projectType=="txt"'
+              class="btn btn-success submit" type="submit"
               [disabled]="multipleLabelList.length==0 && spansList.length==0 && currentBoundingData.length==0"
               title="{{ multipleLabelList.length>0 || spansList.length>0 || currentBoundingData.length>0 ? '' : 'You can only submit after annotating' }}">Submit</button>
             <button class="btn btn-outline" type="button" (click)="onSkipGame()">

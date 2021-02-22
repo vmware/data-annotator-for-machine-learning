@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 export interface SR {
-  _id: number,
+  _id?: number,
   originalData?: any,
   problemCategory?: any,
   productName?: string,

@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </label>
             <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
               <input name="localFileFile" type="file" (change)="onLocalFileChange($event)"
-                [accept]="msg.page=='datasets'?'.zip,.ZIP,.csv,.CSV':(msg.type=='image'?'.zip,.ZIP':'.csv,.CSV')">
+                [accept]="msg.page=='datasets'?'.zip,.ZIP,.csv,.CSV,.tgz,.TGZ':(msg.type=='image'?'.zip,.ZIP':'.csv,.CSV,.tgz,.TGZ')">
             </div>
             <div class="clr-col-12 clr-col-md-1">
               <clr-tooltip *ngIf="uploadGroup.get('localFile').errors && uploadGroup.get('localFile').touched">
@@ -79,16 +79,30 @@ SPDX-License-Identifier: Apache-2.0 -->
                     id="tabular" name="fileFormat" (ngModelChange)=changeFileFormat($event) />
                   <label for="tabular">&nbsp;Tabular</label>
                 </clr-radio-wrapper>
-                <clr-radio-wrapper *ngIf="(msg.type=='image'&&msg.page=='create')||(msg.page=='datasets')">
+                <clr-radio-wrapper style="margin-right: 0.5rem;"
+                  *ngIf="(msg.type=='image'&&msg.page=='create')||(msg.page=='datasets')">
                   <input type="radio" clrRadio class="clr-radio" formControlName="fileFormat" value="image" id="image"
                     name="fileFormat" (ngModelChange)=changeFileFormat($event) />
                   <label for="image">&nbsp;Images</label>
                 </clr-radio-wrapper>
+                <clr-radio-wrapper *ngIf="(msg.type=='txt'&&msg.page=='create')||(msg.page=='datasets')">
+                  <input type="radio" clrRadio class="clr-radio" formControlName="fileFormat" value="txt" id="txt"
+                    name="fileFormat" (ngModelChange)=changeFileFormat($event) />
+                  <label for="txt">&nbsp;Txt</label>
+                </clr-radio-wrapper>
+                <clr-control-helper *ngIf="uploadSet.fileFormat=='csv'">Upload a CSV with a minimum of 2 columns
+                  containing the label and the text.</clr-control-helper>
+                <clr-control-helper *ngIf="uploadSet.fileFormat=='tabular'">Upload a CSV with a minimum of 2 columns.
+                </clr-control-helper>
+                <clr-control-helper *ngIf="uploadSet.fileFormat=='image'">Upload a zip file containing your images
+                  dataset with or without subfolders.</clr-control-helper>
+                <clr-control-helper *ngIf="uploadSet.fileFormat=='txt'">Upload a zip or a tgz file containing your txt
+                  dataset with or without subfolders.</clr-control-helper>
               </label>
             </div>
           </div>
 
-          <div class="form-group clr-row" *ngIf="uploadGroup.get('fileFormat').value!='image'">
+          <div class="form-group clr-row" *ngIf="uploadSet.fileFormat=='csv' || uploadSet.fileFormat=='tabular'">
             <label for="hasHeader" class="label-tooltip clr-col-12 clr-col-md-3">Has Header<span>*</span></label>
             <div class="clr-row clr-col-12 clr-col-md-9" style="margin-top: 0.1rem;">
               <label class="md-check format clr-row">

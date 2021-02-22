@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="form-group clr-row">
               <div class="clr-col-12 clr-col-md-1"></div>
               <label for="selectedDataset"
-                class="label-tooltip clr-col-12 clr-col-md-2">{{msg.type=='image'?'Images Upload':'CSV Upload'}}
+                class="label-tooltip clr-col-12 clr-col-md-2">{{msg.type=='image'?'Images Upload':'File Upload'}}
                 <span>*</span></label>
               <div class="clr-select-wrapper clr-col-12 clr-col-md-8">
                 <select id="select-basic" class="clr-select" formControlName="selectedDataset"
@@ -81,13 +81,14 @@ SPDX-License-Identifier: Apache-2.0 -->
               <label class="label-tooltip clr-col-12 clr-col-md-2"></label>
               <div class="clr-input-wrapper clr-col-12 clr-col-md-8" style="margin-top: -0.8rem;">
                 <button class="btn btn-sm add-doc" type="button"
-                  (click)="onAddingDataset($event)">{{msg.type=='image'?'Upload Images':'Upload CSV'}}</button>
+                  (click)="onAddingDataset($event)">{{msg.type=='image'?'Upload Images':'Upload File'}}</button>
                 <!-- <button class="btn btn-sm add-doc" type="button" (click)="onQuerySQL()">From
                   Supercollider</button> -->
               </div>
             </div>
             <!-- this is the csv data preview -->
-            <div class="form-group clr-row" *ngIf="isShowSetHeader=='csv'||isShowSetHeader=='tabular'">
+            <div class="form-group clr-row"
+              *ngIf="isShowSetHeader=='csv'||isShowSetHeader=='tabular'||isShowSetHeader=='txt'">
               <div class="clr-col-12 clr-col-md-3"></div>
               <div class="preview clr-col-12 clr-col-md-8">
                 <clr-tabs>

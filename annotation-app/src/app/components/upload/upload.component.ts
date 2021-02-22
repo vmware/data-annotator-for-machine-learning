@@ -17,7 +17,8 @@ import AWS from 'aws-sdk/lib/aws';
 import { Buffer } from 'buffer';
 import * as _ from "lodash";
 import * as JSZip from 'jszip';
-
+import * as Pako from 'pako';
+import untar from "js-untar";
 
 @Component({
   selector: 'upload',
@@ -93,24 +94,26 @@ export class UploadComponent implements OnInit {
   createUploadForm(): void {
     if (!this.uploadSet) {
       this.uploadSet = DatasetUtil.uploadInit();
+
     };
-    let flag;
     if (this.msg.page == 'datasets') {
-      flag = "csv";
+      this.uploadSet.fileFormat = "csv";
     } else if ((this.msg.page == 'create')) {
       if (this.msg.type == 'tabular') {
-        flag = 'tabular';
+        this.uploadSet.fileFormat = 'tabular';
       } else if (this.msg.type == 'text' || this.msg.type == 'ner') {
-        flag = 'csv'
+        this.uploadSet.fileFormat = 'csv'
       } else if (this.msg.type == 'image') {
-        flag = 'image'
+        this.uploadSet.fileFormat = 'image'
+      } else if (this.msg.type == 'txt') {
+        this.uploadSet.fileFormat = 'txt'
       }
     }
     this.uploadGroup = this.formBuilder.group({
       datasetsName: ['', DatasetValidator.modelName()],
       localFile: [null, DatasetValidator.localFile(this.msg.type)],
       hasHeader: [this.uploadSet.hasHeader, ''],
-      fileFormat: [flag, '']
+      fileFormat: [this.uploadSet.fileFormat, '']
     });
   }
 
@@ -134,6 +137,7 @@ export class UploadComponent implements OnInit {
 
   onLocalFileChange(event) {
     if (event.target.files.length > 0) {
+      console.log(111, event)
       this.inputFile = event.target.files[0];
       this.errorMessage = '';
       this.previewHeadDatas = [];
@@ -153,6 +157,8 @@ export class UploadComponent implements OnInit {
     this.papaParse();
     this.uploadGroup.get('localFile').setValue(this.inputFile);
   }
+
+
 
   papaParse() {
     let previewData = [];
@@ -186,59 +192,69 @@ export class UploadComponent implements OnInit {
     }
   }
 
-  updateDatasets(data, key) {
 
-    let formData = new FormData();
-    let params = {
-      dsname: this.uploadGroup.get('datasetsName').value,
-      fileName: this.inputFile.name,
-      fileSize: this.inputFile.size,
-      format: this.uploadGroup.get('fileFormat').value,
-      hasHeader: null,
-      fileKey: null,
-      location: null,
-      topReview: null,
-      columnInfo: null,
-      images: null
-    }
-    if (key == 'image') {
-      formData.append("dsname", this.uploadGroup.get('datasetsName').value);
-      formData.append("fileName", this.inputFile.name);
-      formData.append("fileSize", this.inputFile.size);
-      formData.append("format", this.uploadGroup.get('fileFormat').value);
-      formData.append("images", JSON.stringify(data));
-    } else {
-      if (data) {
-        params.hasHeader = this.uploadGroup.get('hasHeader').value;
-        params.fileKey = key;
-        params.location = data.Key;
-        params.topReview = { header: this.previewHeadDatas, topRows: this.previewContentDatas };
-        params.columnInfo = this.columnInfo;
-      } else {
-        this.errorMessage = 'Upload failed, please try again later.';
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 3000);
+
+  updateDatasets(data) {
+    if (data) {
+      console.log('data:::', data)
+      let formData = new FormData();
+      let uploadFormat = this.uploadGroup.get('fileFormat').value;
+      let params = {
+        dsname: this.uploadGroup.get('datasetsName').value,
+        fileName: this.inputFile.name,
+        fileSize: this.inputFile.size,
+        format: uploadFormat,
+        fileKey: data.Key,
+        location: data.Key,
       }
-    };
+      if (uploadFormat == 'image') {
+        formData.append("dsname", this.uploadGroup.get('datasetsName').value);
+        formData.append("fileName", this.inputFile.name);
+        formData.append("fileSize", this.inputFile.size);
+        formData.append("format", this.uploadGroup.get('fileFormat').value);
+        formData.append("images", JSON.stringify(data));
+      } else if (uploadFormat == 'txt') {
+        let topReview = [];
+        this.previewContentDatas.previewExample.forEach(element => {
+          topReview.push({ fileName: element.name, fileSize: element.size, fileContent: element.content.slice(0, 501) })
+        });
+        params['topReview'] = topReview;
+        params['totalRows'] = this.previewContentDatas.exampleEntries;
+
+      } else {
+        params['hasHeader'] = this.uploadGroup.get('hasHeader').value;
+        params['topReview'] = { header: this.previewHeadDatas, topRows: this.previewContentDatas };
+      };
+      console.log(12345, params)
+      this.toPostDatasets(data, uploadFormat, formData, params)
+
+    } else {
+      this.errorMessage = 'Upload failed, please try again later.';
+      setTimeout(() => {
+        this.errorMessage = '';
+      }, 3000);
+    }
+  };
 
 
-    this.avaService.uploadDateset(key == 'image' ? formData : params).subscribe(
+
+  toPostDatasets(data, uploadFormat, formData, params) {
+    this.avaService.uploadDateset(uploadFormat == 'image' ? formData : params).subscribe(
       res => {
 
         let params = {
           dataSetName: this.uploadGroup.get('datasetsName').value,
           isShowSetHeader: res.format,
-          previewHeadDatas: key == 'image' ? ['Id', 'ImageName', 'ImageSize(KB)', 'Image'] : this.previewHeadDatas,
-          previewContentDatas: key == 'image' ? res.topReview : this.previewContentDatas,
-          chooseLabel: key == 'image' ? null : this.previewHeadDatas,
-          columnInfo: key == 'image' ? null : res.columnInfo,
+          previewHeadDatas: uploadFormat == 'image' ? ['Id', 'ImageName', 'ImageSize(KB)', 'Image'] : this.previewHeadDatas,
+          previewContentDatas: uploadFormat == 'image' ? res.topReview : this.previewContentDatas,
+          chooseLabel: uploadFormat == 'image' ? null : this.previewHeadDatas,
+          columnInfo: uploadFormat == 'image' ? null : res.columnInfo,
           dataSetId: res.id,
-          isHasHeader: key == 'image' ? null : res.hasHeader,
+          isHasHeader: uploadFormat == 'image' ? null : res.hasHeader,
           fileName: res.fileName,
           fileSize: res.fileSize,
-          location: key == 'image' ? null : data.Key,
-          images: key == 'image' ? res.images : null,
+          location: uploadFormat == 'image' ? null : data.Key,
+          images: uploadFormat == 'image' ? res.images : null,
 
         }
         this.uploadSuccessEmitter.emit(params);
@@ -271,8 +287,6 @@ export class UploadComponent implements OnInit {
         this.uploadSuccessEmitter.emit(params);
       }
     );
-
-
   }
 
 
@@ -298,7 +312,7 @@ export class UploadComponent implements OnInit {
         );
         let uploadParams = { Bucket: new Buffer(res.bucket, 'base64').toString(), Key: new Buffer(res.key, 'base64').toString() + '/' + outNo + '_' + file.name, Body: file };
         let data = await s3.upload(uploadParams).promise();
-        this.updateDatasets(data, uploadParams.Key);
+        this.updateDatasets(data);
       };
     },
       error => {
@@ -343,6 +357,13 @@ export class UploadComponent implements OnInit {
 
         } else if (this.uploadGroup.get('fileFormat').value == "image") {
           this.unzipImages();
+        } else if (this.uploadGroup.get('fileFormat').value == "txt") {
+          if (this.inputFile.name.split('.').pop().toLowerCase() == 'zip') {
+            this.unZip();
+          } else {
+            this.unTgz();
+          }
+          this.uploadToS3(this.inputFile);
         };
       }
     }
@@ -429,7 +450,7 @@ export class UploadComponent implements OnInit {
                       })
                     }));
                   };
-                  that.updateDatasets(imagesLocation, 'image')
+                  that.updateDatasets(imagesLocation)
                 }
               })
             }
@@ -468,9 +489,117 @@ export class UploadComponent implements OnInit {
 
 
   changeFileFormat(e) {
+    this.uploadSet.fileFormat = e;
     this.uploadGroup.get("localFile").setValidators(DatasetValidator.localFile(e));
     this.uploadGroup.get("localFile").updateValueAndValidity();
+  }
 
+
+  validTxtType(fileName) {
+    let name = fileName.split('/').pop();
+    if (!(name.startsWith('__MACOSX') || name.startsWith('._'))) {
+      let types = ['txt'];
+      let type = name.split('.').pop();
+      if (types.indexOf(type.toLowerCase()) > -1) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  };
+
+
+  unTgz() {
+    console.log(333, this.inputFile)
+    var that = this;
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(that.inputFile);
+    reader.onload = function (event) {
+      let result: any = (event.target as any).result;
+      console.log(444, event)
+      console.log(444.5, result)
+
+
+      const inflator = new Pako.Inflate();
+
+      inflator.push(result);
+      if (inflator.err) {
+        console.log('inflator-err:::', inflator.msg);
+      }
+
+      const output = inflator.result;
+      untar(output.buffer)
+        .then((extractedFiles) => {
+          console.log(444.7, extractedFiles)
+          let example = 0;
+          let txtList = [];
+          extractedFiles.forEach(element => {
+            if (element.type == 0 || element.type == null) {
+              if (that.validTxtType(element.name)) {
+                example++;
+                txtList.push(element);
+              }
+            }
+          });
+          let previewExample = txtList.splice(0, 3)
+          console.log(555, example, previewExample);
+          previewExample.forEach(e => {
+            that.toReadBlobToText(e.blob).then(data => {
+              e.content = data;
+            });
+          });
+          that.previewContentDatas = { previewExample: previewExample, exampleEntries: example }
+        });
+    }
+  }
+
+
+
+  toReadBlobToText(blob) {
+    return new Promise(function (resolve) {
+      var reader = new FileReader();
+      reader.readAsText(blob)
+      reader.onload = function (event) {
+        let res: any = (event.target as any).result;
+        console.log(777, res)
+        resolve(res)
+      }
+    })
+  }
+
+
+
+  unZip() {
+    let jsZip = new JSZip();
+    var that = this;
+    let example = 0;
+    let txtList = [];
+    console.log('000', that.inputFile)
+    jsZip.loadAsync(that.inputFile).then(function (entries) {
+      console.log(111, entries)
+      entries.forEach((path, file) => {
+        if (!file.dir && that.validTxtType(path)) {
+          example++;
+          txtList.push(file);
+        }
+      });
+      let previewExample = txtList.splice(0, 3)
+      console.log(555, example, previewExample);
+      previewExample.forEach(e => {
+        console.log(555.1, e._data.compressedContent.buffer);
+        console.log(555.2, e._data.compressedContent)
+        jsZip.file(e.name).async('string').then(function success(res) {
+          e.content = res;
+          e.size = e._data.uncompressedSize
+        }, function error(e) {
+          console.log('jsZip-to-string-err:::', e)
+        })
+      });
+      that.previewContentDatas = { previewExample: previewExample, exampleEntries: example }
+      console.log(555.2, that.previewContentDatas)
+    })
   }
 
 

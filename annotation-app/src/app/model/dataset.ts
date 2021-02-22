@@ -70,12 +70,6 @@ export class DatasetUtil {
       query: ''
     };
   }
-
-  // static projectInit(): ProjectData {
-  //   return {
-  //     projectType: 'ner'
-  //   }
-  // }
 }
 
 
@@ -143,7 +137,3 @@ export interface UploadData {
 }
 
 
-
-// export interface ProjectData {
-//   projectType: string;
-// }

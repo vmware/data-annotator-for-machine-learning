@@ -143,6 +143,7 @@ export class CreateNewComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(111, this.msg)
     this.loading = false;
     this.error = null;
     this.nameExist = false;
@@ -447,7 +448,7 @@ export class CreateNewComponent implements OnInit {
     this.dataSetId = e.dataSetId;
     this.fileName = e.fileName;
     this.fileSize = e.fileSize;
-    this.isShowSetHeader = e.isShowSetHeader;
+    // this.isShowSetHeader = e.isShowSetHeader;
     this.previewHeadDatas = e.previewHeadDatas;
     this.previewContentDatas = e.previewContentDatas;
     if (this.msg.type == 'image' && e.images && e.images.length > 0) {

@@ -10,10 +10,10 @@ import 'rxjs/Rx'
 import { SR, SrUserInput } from '../../../model/sr';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { UserAuthService } from '../../../services/user-auth.service';
 import * as _ from "lodash";
 import { LabelStudioService } from 'app/services/label-studio.service';
-
+import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { GetElementService } from 'app/services/common/dom.service';
 
 @Component({
   selector: 'app-annotate',
@@ -75,21 +75,19 @@ export class AnnotateComponent implements OnInit {
   historyTask: any = [];
   antTags: any;
 
+
   constructor(
     private renderer2: Renderer2,
     private router: Router,
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
     private avaService: AvaService,
-    private userAuthService: UserAuthService,
     private el: ElementRef,
-    private LabelStudioService: LabelStudioService
+    private LabelStudioService: LabelStudioService,
+    private http: HttpClient,
+    private getElementService: GetElementService
 
-
-  ) {
-
-
-  }
+  ) { }
 
 
 
@@ -113,7 +111,8 @@ export class AnnotateComponent implements OnInit {
     this.route.queryParams.subscribe(data => {
       this.selectParam = data.name;
       this.projectId = data.id;
-      this.projectType = data.projectType;
+      // this.projectType = data.projectType;
+      this.projectType = 'txt';
       this.avaService.getProjectInfo(this.projectId).subscribe(response => {
         response.taskInstructions = response.taskInstructions.replace(/(\r\n|\n|\r)/gm, "<br/>");
         this.projectInfo = response;
@@ -124,6 +123,7 @@ export class AnnotateComponent implements OnInit {
       }, error => {
         console.log(error);
       });
+
     });
 
     this.createForm();
@@ -199,6 +199,15 @@ export class AnnotateComponent implements OnInit {
             }
             this.toCallStudio(option);
           }, 0);
+        };
+        if (this.projectType == 'txt') {
+          let url = "assets/test-data.json";
+          this.http.get(url).subscribe(res => {
+            console.log(res)
+            this.sr = res;
+
+          })
+
         };
         if (this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
@@ -1163,6 +1172,64 @@ export class AnnotateComponent implements OnInit {
       }
     }
   }
+
+
+  onMouseDownTxt(e, data, row) {
+    console.log('onMouseDownTxt:::', e, data, row)
+    this.spanStart = row;
+    console.log('this.spanStart:::', this.spanStart)
+  }
+
+
+  onMouseUpTxt(e, data, row) {
+    console.log('onMouseUpTxt:::', e, data, row)
+    this.spanEnd = row;
+    console.log('label:::', this.categories, this.selectedEntityID)
+
+    if (this.spanEnd > this.spanStart) {
+      console.log('this.spanEnd:::', this.spanStart, this.spanEnd)
+
+      for (let a = this.spanStart; a < this.spanEnd + 1; a++) {
+        let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
+        let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
+        this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
+        // this.getElementService.toFindDomAddClass(pDom, 'selected');
+        this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
+        // this.getElementService.toFindDomAddClass(txtRowEntityDom, 'selected');
+        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt');
+        this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a));
+
+      }
+    } else if (this.spanEnd == this.spanStart) {
+      let pDom = this.el.nativeElement.querySelector('.txtRowContent' + this.spanEnd);
+      this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
+      // this.getElementService.toFindDomAddClass(pDom, 'selected');
+      let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
+      this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
+      // this.getElementService.toFindDomAddClass(txtRowEntityDom, 'selected');
+      this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt');
+      this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
+      this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
+      this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
+    } else {
+      for (let a = this.spanEnd; a < this.spanStart + 1; a++) {
+        let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
+        this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
+        // this.getElementService.toFindDomAddClass(pDom, 'selected');
+        let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
+        this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
+        // this.getElementService.toFindDomAddClass(txtRowEntityDom, 'selected');
+        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt');
+        this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a));
+
+      }
+    }
+  }
+
 
 
 
