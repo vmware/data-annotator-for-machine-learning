@@ -85,7 +85,6 @@ async function updateSrsUserInput(req) {
                         });
                     });
                 }
-                
             }
         });
         console.log(`[ SRS ] Service re-edit ticket=${ticket._id.toString()}`);

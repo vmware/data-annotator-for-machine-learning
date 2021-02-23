@@ -19,8 +19,8 @@ const S3Utils = require('./s3');
 
 module.exports = {
     execute: async function (req, annotators) {
-
-        if (req.body.projectType != PROJECTTYPE.TEXT || req.body.projectType != PROJECTTYPE.TABULAR || req.body.projectType != PROJECTTYPE.NER ) {
+        const projectType = req.body.projectType;
+        if (projectType != PROJECTTYPE.TEXT || projectType != PROJECTTYPE.TABULAR || projectType != PROJECTTYPE.NER ) {
             return;
         }
 
@@ -36,7 +36,7 @@ module.exports = {
             header: header,
             isHasHeader: req.body.isHasHeader,
             selectedColumn: selectedColumn,
-            projectType: req.body.projectType,
+            projectType: projectType,
             encoder: req.body.encoder
         };
         let totalCase = 0;

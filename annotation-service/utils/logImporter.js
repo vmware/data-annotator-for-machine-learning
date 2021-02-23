@@ -12,12 +12,11 @@ const emailService = require('../services/email-service');
 const mongoDb = require('../db/mongo.db');
 const validator = require("./validator");
 const S3Utils = require('./s3');
-const urllib = require('urllib');
 const compressing = require('compressing');
 const streamifier = require('streamifier');
 const readline = require('readline');
 const _ = require('lodash');
-
+const axios = require('axios');
 
 async function execute(req, sendEmail, annotators) {
       
@@ -25,7 +24,7 @@ async function execute(req, sendEmail, annotators) {
     return;
   }
   const start = Date.now();
-  console.log(`[ SRS ] Utils srsImporter.execute start: `, start);
+  console.log(`[ LOG ] Utils logImporter.execute start: `, start);
   
   const options = { lean: true, ordered: false };
   let docs = [], totalCase = 0;
@@ -41,7 +40,7 @@ async function execute(req, sendEmail, annotators) {
   console.log(`[ LOG ] Utils S3Utils.signedUrlByS3`);
   const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
 
-  urllib.request(signedUrl, { timeout: 1000 * ACCESS_TIME_60 }).then( result => {
+  axios.request(signedUrl, {responseType: "arraybuffer"}).then(result => {
     streamifier.createReadStream(result.data).pipe(uncompressStream)
     .on('entry', async (header, stream, next) => {
       stream.on('end', next);
@@ -52,12 +51,12 @@ async function execute(req, sendEmail, annotators) {
         let index = 0, textLines = {};
         const readInterface = readline.createInterface({ input: stream });
         
-        readInterface.on('line', function(line) {
+        readInterface.on('line', async (line) => {
           index += 1;
           if (line && line.trim() && validator.isASCII(line)) {
             textLines[index] = line.trim()
           }
-        }).on('close', function() {
+        }).on('close', async () => {
           if (Object.keys(textLines).length) {
             const sechema = {
               projectName: req.body.pname,
@@ -114,7 +113,7 @@ async function execute(req, sendEmail, annotators) {
     
     });
   }).catch(err => {
-    console.error("[ LOG ] [ ERROR ] Utils urllib.request error ->", err);
+    console.error("[ LOG ] [ ERROR ] Utils axios.request error ->", err);
   });
 
 }

@@ -31,7 +31,7 @@ module.exports = {
         DONE: "done"
     },
     PAGINATELIMIT: 5000,
-    PAGINATETEXTLIMIT: 20,
+    PAGINATETEXTLIMIT: 100,
     FILESIZE: 1024*1024*5, //less than 5MB directly download
     ACCESS_TIME_60: 60*60, //in seconds
     ACCESS_TIME_30: 60*30, //in seconds
