@@ -290,7 +290,7 @@ export class CreateNewComponent implements OnInit {
     formData.append("max", this.dsDialogForm.value.max);
     formData.append("labelType", this.labelType);
     formData.append("estimator", this.dsDialogForm.value.selectedClassifier);
-    formData.append("projectType", this.projectType);
+    formData.append("projectType", this.projectType == 'txt' ? this.projectType = 'log' : this.projectType);
     formData.append("encoder", this.dsDialogForm.value.selectedEncoder);
     formData.append("isMultipleLabel", (this.msg.type == 'ner' || this.msg.type == 'image') ? true : this.dsDialogForm.value.multipleLabel);
     return this.avaService.postDataset(formData);

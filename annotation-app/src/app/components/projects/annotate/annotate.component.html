@@ -234,38 +234,10 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <!-- log free-text -->
           <div class="row user-text-input">
-            <div class="col-xs-6 question-input">
-              <h4>
-                Rewrite Service Request (5 Points)
-                <clr-signpost>
-                  <clr-signpost-content clrPosition="right-bottom" *clrIfOpen>
-                    <span>Service Requests often include a lot of information. Help us identify the most important
-                      parts:</span>
-                    <ul>
-                      <li>rewrite the problem description more concisely</li>
-                      <li>remove irrelevant details, such as hostnames</li>
-                      <li>remove system output, such as logs, errors, pings</li>
-                      <li>include error messages, software versions</li>
-                    </ul>
-                    <p><strong>Example:</strong></p>
-                    <p>hi, i am setting up a new 6.5 cluster of servers. each server has 2 interfaces and i want to set
-                      up ONE standard switch with the 2 interfaces in it.</p>
-                    <p>I have several vlans and one of the vlans is an ISCSI vlan. on this vlan, i wish to do jumbo
-                      frames. is it possible to have a mix of jumbo and non jumbo vlans in the same standard vswitch?
-                    </p>
-                    <p>also</p>
-                    <p>the NICS are ISCSI nics and show up as storage adapters. i wish to use these interfaces instead
-                      of the software iscsi adapter (for performance reasons). do i need an iscsi vmkernal on the iscsi
-                      vlan if i am using the iscsi hba? do i set jumbo frame size on the storage adapter?</p>
-                    <p><strong>Rewrite:</strong></p>
-                    <p>Can I mix jumbo and non-jumbo VLANs in the same vSphere Standard Switch? How do I correctly
-                      configure my storage adapters if I'm using iSCSI NICs?</p>
-                  </clr-signpost-content>
-                </clr-signpost>
-              </h4>
-              <textarea id="rephrasedQuestion" formControlName="rephrasedQuestion" maxlength="1024"
-                placeholder="(Optional) Please provide a better version of the question above (1024 characters max)"
-                rows="8"></textarea>
+            <div class="question-input">
+              <h4>Provide Details</h4>
+              <textarea id="rephrasedQuestion" formControlName="rephrasedQuestion"
+                placeholder="(Optional) Please provide more details about the log above." rows="8"></textarea>
             </div>
           </div>
           <div class="actions">
