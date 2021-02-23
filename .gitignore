@@ -17,7 +17,6 @@ annotation-service/node_modules
 annotation-service/downloadProject
 annotation-service/config/app-local.js
 annotation-service/config/app-poc.js
-annotation-service/package-lock.json
 
 # active-learning-service
 *__pycache__*
