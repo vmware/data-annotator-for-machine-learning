@@ -219,7 +219,7 @@ export class CreateNewComponent implements OnInit {
           this.dsDialogForm.get("selectedEncoder").setValidators(DatasetValidator.required());
           this.dsDialogForm.get("selectedEncoder").updateValueAndValidity();
         };
-        if (this.msg.type === 'ner') {
+        if (this.msg.type === 'ner' || this.msg.type === 'txt') {
           this.validNer();
         };
         if (this.msg.type === 'image') {
@@ -456,6 +456,12 @@ export class CreateNewComponent implements OnInit {
         element.fileSize = (element.fileSize / 1024).toFixed(2)
       });
       this.dsDialogForm.get("totalRow").setValue(e.images.length);
+    } else if (this.msg.type == 'txt') {
+      this.previewContentDatas.forEach(element => {
+        element.fileSize = (element.fileSize / 1024).toFixed(2)
+      });
+      this.location = e.location;
+      this.dsDialogForm.get("totalRow").setValue(e.totalRows);
     } else {
       this.chooseLabel = e.chooseLabel;
       this.isHasHeader = e.isHasHeader;
@@ -537,6 +543,16 @@ export class CreateNewComponent implements OnInit {
           });
           this.previewContentDatas = choosedDataset.topReview;
           this.dsDialogForm.get("totalRow").setValue(choosedDataset.images.length);
+        } else if (choosedDataset.format == 'txt') {
+          this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
+          let a = 0;
+          choosedDataset.topReview.forEach(element => {
+            element.fileSize = (element.fileSize / 1024).toFixed(2);
+          });
+          this.previewContentDatas = choosedDataset.topReview;
+          this.dsDialogForm.get("totalRow").setValue(choosedDataset.totalRows);
+          this.location = choosedDataset.location;
+          this.loadingPreviewData = false;
         } else {
           this.previewHeadDatas = choosedDataset.topReview.header;
           this.previewContentDatas = choosedDataset.topReview.topRows;

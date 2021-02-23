@@ -87,8 +87,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
             <!-- this is the csv data preview -->
-            <div class="form-group clr-row"
-              *ngIf="isShowSetHeader=='csv'||isShowSetHeader=='tabular'||isShowSetHeader=='txt'">
+            <div class="form-group clr-row" *ngIf="isShowSetHeader=='csv'||isShowSetHeader=='tabular'">
               <div class="clr-col-12 clr-col-md-3"></div>
               <div class="preview clr-col-12 clr-col-md-8">
                 <clr-tabs>
@@ -237,6 +236,50 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
               <div class="clr-col-12 clr-col-md-1"></div>
             </div>
+            <!-- this is the txt data preview -->
+            <div class="form-group clr-row" *ngIf="isShowSetHeader=='txt'">
+              <div class="clr-col-12 clr-col-md-3"></div>
+              <div class="preview clr-col-12 clr-col-md-8">
+                <clr-tabs>
+                  <clr-tab>
+                    <button clrTabLink id="link1">
+                      Preview TXT</button>
+                    <clr-tab-content id="content1" *clrIfActive>
+
+                      <div *ngIf="loadingPreviewData" class="setData"
+                        style="display: flex; justify-content: center;align-items: center;">
+                        <span class="spinner spinner-md">
+                          Loading...
+                        </span>
+                        <span class="loadingSpan">
+                          Loading TXT Preview Data, Please Wait...
+                        </span>
+                      </div>
+                      <div class="previewTable">
+                        <table *ngIf="!loadingPreviewData" class="table"
+                          style="margin-top: 0rem !important; border-top: transparent;">
+                          <thead>
+                            <tr>
+                              <th class="left" *ngFor="let itemHeader of previewHeadDatas"
+                                style="vertical-align: baseline;border-left: 1px solid #ccc;">
+                                {{itemHeader}}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let previewCont of previewContentDatas">
+                              <td class="left">{{previewCont.fileName}}</td>
+                              <td class="left">{{previewCont.fileSize}}</td>
+                              <td class="left">{{previewCont.fileContent}}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </clr-tab-content>
+                  </clr-tab>
+                </clr-tabs>
+              </div>
+              <div class="clr-col-12 clr-col-md-1"></div>
+            </div>
             <!-- this is the zip data preview -->
             <div class="form-group clr-row" *ngIf="isShowSetHeader=='image'">
               <div class="clr-col-12 clr-col-md-3"></div>
@@ -355,7 +398,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <input #labels id="labels" maxlength="50" clrInput placeholder="Add New Label Here" name="addNewLabel"
                   class="clr-input" (keyup.enter)="onEnterLabel(labels.value)" (blur)="labelsBlur($event)"
                   (keyup)="onLabelKeydown($event)" [disabled]="categoryList.length>49" />
-                <div *ngIf="msg.type!='ner' && msg.type!='image'" class="clr-checkbox-wrapper"
+                <div *ngIf="msg.type!='ner' && msg.type!='image' && msg.type!='txt'" class="clr-checkbox-wrapper"
                   style="margin-top: 0.5rem;">
                   <input type="checkbox" id="multipleLabel" name="checkbox-basic" value="multipleLabel"
                     class="clr-checkbox" (click)="isMultiple($event)" formControlName="multipleLabel">
@@ -459,7 +502,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
 
-          <div class="form-group clr-row" *ngIf="isNumeric || isMultipleLabel || msg.type=='ner'">
+          <div class="form-group clr-row" *ngIf="isNumeric || isMultipleLabel || msg.type=='ner'|| msg.type=='txt'">
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="assignmentLogic" class="label-tooltip clr-col-12 clr-col-md-2">Case Assignment Logic </label>
             <div class="clr-row clr-col-12 clr-col-md-9" style="margin-top: 0.1rem;">

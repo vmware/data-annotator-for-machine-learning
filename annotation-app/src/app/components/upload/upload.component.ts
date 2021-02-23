@@ -245,16 +245,17 @@ export class UploadComponent implements OnInit {
         let params = {
           dataSetName: this.uploadGroup.get('datasetsName').value,
           isShowSetHeader: res.format,
-          previewHeadDatas: uploadFormat == 'image' ? ['Id', 'ImageName', 'ImageSize(KB)', 'Image'] : this.previewHeadDatas,
-          previewContentDatas: uploadFormat == 'image' ? res.topReview : this.previewContentDatas,
-          chooseLabel: uploadFormat == 'image' ? null : this.previewHeadDatas,
-          columnInfo: uploadFormat == 'image' ? null : res.columnInfo,
+          previewHeadDatas: uploadFormat == 'image' ? ['Id', 'ImageName', 'ImageSize(KB)', 'Image'] : (uploadFormat == 'txt' ? ['FileName', 'FileSize(KB)', 'FileContent'] : this.previewHeadDatas),
+          previewContentDatas: (uploadFormat == 'image' || uploadFormat == 'txt') ? res.topReview : this.previewContentDatas,
+          chooseLabel: (uploadFormat == 'image' || uploadFormat == 'txt') ? null : this.previewHeadDatas,
+          columnInfo: (uploadFormat == 'image' || uploadFormat == 'txt') ? null : res.columnInfo,
           dataSetId: res.id,
-          isHasHeader: uploadFormat == 'image' ? null : res.hasHeader,
+          isHasHeader: (uploadFormat == 'image' || uploadFormat == 'txt') ? null : res.hasHeader,
           fileName: res.fileName,
           fileSize: res.fileSize,
           location: uploadFormat == 'image' ? null : data.Key,
           images: uploadFormat == 'image' ? res.images : null,
+          totalRows: uploadFormat == 'txt' ? res.totalRows : null,
 
         }
         this.uploadSuccessEmitter.emit(params);
