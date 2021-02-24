@@ -26,5 +26,5 @@ export interface UserInput {
 export interface SrUserInput {
   pid: number,
   user?: string,
-  userInput: UserInput[],
+  userInput: any,
 }

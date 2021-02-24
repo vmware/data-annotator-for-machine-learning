@@ -464,6 +464,20 @@ label .label-leftBoard {
   white-space: nowrap;
 }
 
+.txtRow ::selection {
+  background-color: #ffe184;
+  color: currentColor;
+}
+
+.txtRow:hover {
+  cursor: pointer;
+}
+
+.rowIndex {
+  margin-right: 1rem;
+  color: #cccccc;
+}
+
 .selectedTxtRow {
   background-color: #ffe184;
   padding: 0.25em 0.4em 0.25em 0;
@@ -501,4 +515,10 @@ label .label-leftBoard {
   height: 0.8em;
   line-height: 0.5em;
   font-size: 1.5em;
+}
+
+.log-textarea {
+  width: 100%;
+  margin-top: 1rem;
+  border-color: #ccc;
 }

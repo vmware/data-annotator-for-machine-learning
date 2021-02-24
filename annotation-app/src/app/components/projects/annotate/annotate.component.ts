@@ -12,7 +12,6 @@ import { FormGroup, FormBuilder } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import * as _ from "lodash";
 import { LabelStudioService } from 'app/services/label-studio.service';
-import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { GetElementService } from 'app/services/common/dom.service';
 
 @Component({
@@ -84,7 +83,6 @@ export class AnnotateComponent implements OnInit {
     private avaService: AvaService,
     private el: ElementRef,
     private LabelStudioService: LabelStudioService,
-    private http: HttpClient,
     private getElementService: GetElementService
 
   ) { }
@@ -111,8 +109,7 @@ export class AnnotateComponent implements OnInit {
     this.route.queryParams.subscribe(data => {
       this.selectParam = data.name;
       this.projectId = data.id;
-      // this.projectType = data.projectType;
-      this.projectType = 'txt';
+      this.projectType = data.projectType;
       this.avaService.getProjectInfo(this.projectId).subscribe(response => {
         response.taskInstructions = response.taskInstructions.replace(/(\r\n|\n|\r)/gm, "<br/>");
         this.projectInfo = response;
@@ -150,7 +147,7 @@ export class AnnotateComponent implements OnInit {
     this.questionForm.addControl('questionGroup',
       this.formBuilder.group({
         category: this.sr.problemCategory,
-        rephrasedQuestion: [null],
+        freeText: [null],
         answer: [null],
         selectProject: [this.selectParam],
       })
@@ -200,14 +197,9 @@ export class AnnotateComponent implements OnInit {
             this.toCallStudio(option);
           }, 0);
         };
-        if (this.projectType == 'txt') {
-          let url = "assets/test-data.json";
-          this.http.get(url).subscribe(res => {
-            console.log(res)
-            this.sr = res;
-
-          })
-
+        if (this.projectType == 'log') {
+          this.sr = this.resetLogSrData(this.sr)
+          console.log('log-sr:::', this.sr)
         };
         if (this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
@@ -264,9 +256,9 @@ export class AnnotateComponent implements OnInit {
     this.maxAnnotationError = null;
     let category = [];
     category = this.categoryFunc()
-    let rephrasedQuestion = this.questionForm.get('questionGroup.rephrasedQuestion').value;
-    let answer = this.questionForm.get('questionGroup.answer').value;
-    this.pointsEarnedOnSubmission = this.calculatePointsEarned(category, rephrasedQuestion, answer);
+    // let freeText = this.questionForm.get('questionGroup.freeText').value;
+    // let answer = this.questionForm.get('questionGroup.answer').value;
+    // this.pointsEarnedOnSubmission = this.calculatePointsEarned(category, freeText, answer);
     let srUserInput: SrUserInput = {
       pid: this.projectId,
       userInput: [{
@@ -278,9 +270,10 @@ export class AnnotateComponent implements OnInit {
     if (this.projectType == 'image') {
       srUserInput.userInput[0].problemCategory = this.currentBoundingData;
       this.sr.images = this.currentBoundingData;
-    }
+    };
 
     this.loading = true;
+    console.log('srUserInput:::', srUserInput)
     this.avaService.putSrUserInput(srUserInput).subscribe(response => {
 
       if (response && response.MSG) {
@@ -325,7 +318,7 @@ export class AnnotateComponent implements OnInit {
           images: OldSr.images
         };
         this.annotationHistory.unshift(addSubmit);
-        // console.log("getOne.annotationHistory:::", this.annotationHistory);
+        console.log("getOne.annotationHistory:::", this.annotationHistory);
       }
       this.sr = newSr;
       this.currentBoundingData = [];
@@ -351,6 +344,9 @@ export class AnnotateComponent implements OnInit {
           }
           this.toCallStudio(option);
         }, 0);
+      };
+      if (this.projectType == 'log') {
+        this.sr = this.resetLogSrData(this.sr);
       }
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
@@ -451,7 +447,10 @@ export class AnnotateComponent implements OnInit {
           }
           this.toCallStudio(option);
         }, 0);
-      }
+      };
+      if (this.projectType == 'log') {
+        this.sr = this.resetLogSrData(this.sr);
+      };
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
       };
@@ -482,16 +481,16 @@ export class AnnotateComponent implements OnInit {
         this.numericInput.nativeElement.focus();
       }, 300);
     };
-    let rephrasedQuestion = this.questionForm.get('questionGroup.rephrasedQuestion').value;
+    let freeText = this.questionForm.get('questionGroup.freeText').value;
     let answer = this.questionForm.get('questionGroup.answer').value;
-    return !(category.length > 0 || rephrasedQuestion || answer);
+    return !(category.length > 0 || freeText || answer);
   }
 
 
-  calculatePointsEarned(category, rephrasedQuestion, answer): number {
+  calculatePointsEarned(category, freeText, answer): number {
     let questionPoints = 0;
     questionPoints = (category.length > 0) ? questionPoints + 1 : questionPoints;
-    questionPoints = (rephrasedQuestion) ? questionPoints + 5 : questionPoints;
+    questionPoints = (freeText) ? questionPoints + 5 : questionPoints;
     questionPoints = (answer) ? questionPoints + 10 : questionPoints;
     return questionPoints;
   }
@@ -557,7 +556,7 @@ export class AnnotateComponent implements OnInit {
 
     this.silenceStatus = false;
     let isCategory = this.categoryFunc();
-    let isRewtite = this.questionForm.get('questionGroup.rephrasedQuestion').value;
+    let isRewtite = this.questionForm.get('questionGroup.freeText').value;
     let isQuestion = this.questionForm.get('questionGroup.answer').value;
 
     if (isCategory.length > 0 || isRewtite || isQuestion) {
@@ -578,7 +577,7 @@ export class AnnotateComponent implements OnInit {
       this.silenceStatus = false;
       this.clrErrorTip = false;
       let isCategory = this.categoryFunc();
-      let isRewtite = this.questionForm.get('questionGroup.rephrasedQuestion').value;
+      let isRewtite = this.questionForm.get('questionGroup.freeText').value;
       let isQuestion = this.questionForm.get('questionGroup.answer').value;
       if (isCategory.length > 0 || isRewtite || isQuestion) {
         this.isSkippingGameDialog = true;
@@ -641,7 +640,10 @@ export class AnnotateComponent implements OnInit {
 
           this.toCallStudio(option);
         }, 0);
-      }
+      };
+      if (this.projectType == 'log') {
+        this.sr = this.resetLogSrData(this.sr);
+      };
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
       };
@@ -719,15 +721,15 @@ export class AnnotateComponent implements OnInit {
         category.push(this.questionForm.get('questionGroup.category').value);
       }
       return category;
-    } else if (!this.isShowDropDown && !this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' || this.isNumeric) {
+    } else if ((!this.isShowDropDown && !this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') || this.isNumeric) {
       if (this.labelChoose) {
         category.push(this.labelChoose);
       }
       return category;
-    } else if (!this.isNumeric && this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image') {
+    } else if (!this.isNumeric && this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
       category = this.multipleLabelList;
       return category;
-    } else if (this.projectType == 'ner') {
+    } else if (this.projectType == 'ner' || this.projectType == 'log') {
       category = this.spansList;
       return category;
     } else if (this.projectType == 'image') {
@@ -797,7 +799,7 @@ export class AnnotateComponent implements OnInit {
   clearUserInput() {
     this.isShowDropDown ? this.questionForm.get('questionGroup.category').reset() : this.labelChoose = null;
     this.active = -1;
-    this.questionForm.get('questionGroup.rephrasedQuestion').reset();
+    this.questionForm.get('questionGroup.freeText').reset();
     this.questionForm.get('questionGroup.answer').reset();
     this.multipleLabelList = [];
     this.spansList = [];
@@ -1070,6 +1072,20 @@ export class AnnotateComponent implements OnInit {
     }
   };
 
+  resetLogSrData(sr) {
+    if (!sr.MSG) {
+      let flag = [];
+      sr = sr[0];
+      _.forIn(sr.originalData, function (value, key) {
+        flag.push({ index: key, text: value, freeText: '' });
+      });
+      sr.originalData = flag;
+      return sr;
+    } else {
+      return sr;
+    }
+  }
+
 
   toCallStudio(option) {
     this.LabelStudioService.initLabelStudio(option)
@@ -1185,7 +1201,6 @@ export class AnnotateComponent implements OnInit {
     console.log('onMouseUpTxt:::', e, data, row)
     this.spanEnd = row;
     console.log('label:::', this.categories, this.selectedEntityID)
-
     if (this.spanEnd > this.spanStart) {
       console.log('this.spanEnd:::', this.spanStart, this.spanEnd)
 
@@ -1193,41 +1208,63 @@ export class AnnotateComponent implements OnInit {
         let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
         let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
         this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
-        // this.getElementService.toFindDomAddClass(pDom, 'selected');
+        if (_.indexOf(this.toGetLogLines(this.spansList), pDom.classList[0].split('-').pop()) < 0) {
+          this.spansList.push({ line: pDom.classList[0].split('-').pop(), label: this.categories[this.selectedEntityID], freeText: this.questionForm.get('questionGroup.freeText').value })
+        }
         this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
-        // this.getElementService.toFindDomAddClass(txtRowEntityDom, 'selected');
-        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt');
+        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList);
         this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
         this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
-        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a));
 
+        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a), this.spansList);
+        console.log('pDom.className:::', pDom.classList)
       }
     } else if (this.spanEnd == this.spanStart) {
       let pDom = this.el.nativeElement.querySelector('.txtRowContent' + this.spanEnd);
       this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
-      // this.getElementService.toFindDomAddClass(pDom, 'selected');
+      // update the this.spansList
+      if (_.indexOf(this.toGetLogLines(this.spansList), data.index) < 0) {
+        this.spansList.push({ line: data.index, label: this.categories[this.selectedEntityID], freeText: this.questionForm.get('questionGroup.freeText').value })
+      }
+
       let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
       this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
-      // this.getElementService.toFindDomAddClass(txtRowEntityDom, 'selected');
-      this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt');
+      this.spansList = this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt', this.spansList);
       this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
       this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
-      this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
+      this.spansList = this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd), this.spansList);
     } else {
       for (let a = this.spanEnd; a < this.spanStart + 1; a++) {
         let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
         this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
-        // this.getElementService.toFindDomAddClass(pDom, 'selected');
+        if (_.indexOf(this.toGetLogLines(this.spansList), pDom.classList[0].split('-').pop()) < 0) {
+          this.spansList.push({ line: pDom.classList[0].split('-').pop(), label: this.categories[this.selectedEntityID], freeText: this.questionForm.get('questionGroup.freeText').value })
+        }
         let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
         this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
-        // this.getElementService.toFindDomAddClass(txtRowEntityDom, 'selected');
-        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt');
+        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList);
         this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
         this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
-        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a), this.spansList);
 
       }
     }
+    console.log('this.spansList:::', this.spansList)
+
+  }
+
+
+  toGetLogLines(spansList) {
+    let x = [];
+    spansList.forEach((e) => {
+      x.push(e.line);
+    });
+    return x;
+  }
+
+
+  clickIndex(data, index) {
+
   }
 
 

@@ -35,7 +35,7 @@ export class GetElementService {
     }
 
 
-    toCreateClear(txtRowEntityDom, pDom, newClass, styleClass) {
+    toCreateClear(txtRowEntityDom, pDom, newClass, styleClass, spansList) {
         let dom = this.renderer.createElement('span');
         this.renderer.appendChild(dom, this.renderer.createText('×'));
         this.renderer.appendChild(txtRowEntityDom, dom);
@@ -48,7 +48,17 @@ export class GetElementService {
             this.renderer.removeClass(this.renderer.parentNode(dom), 'txtEntityLabel');
             this.renderer.setProperty(this.renderer.parentNode(dom), 'innerHTML', '');
             this.renderer.removeClass(pDom, 'selectedTxtRow');
-        })
+            // to update the spansList
+            spansList.forEach((e, i) => {
+                if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
+                    console.log('delete-entity:::', e)
+
+                    spansList.splice(i, 1)
+                }
+            });
+        });
+        return spansList;
+
 
     }
 
@@ -78,17 +88,21 @@ export class GetElementService {
     }
 
 
-    toClearSelected(txtRowEntityDom, pDom, clearDom) {
+    toClearSelected(txtRowEntityDom, pDom, clearDom, spansList) {
         this.renderer.listen(txtRowEntityDom, 'click', (e) => {
-            console.log(88888, 'ininin')
-            console.log(111, e)
+            console.log(88888, 'ininin', e)
             let classList = e.target.className.split(' ');
             if (classList.indexOf('selected') > -1 && classList.indexOf('txtEntityLabel') > -1) {
                 console.log('in-toClearSelected-e')
                 this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
                 this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
                 this.renderer.removeClass(pDom, 'selectedTxtRow');
-
+                // to update the spansList
+                spansList.forEach((e, i) => {
+                    if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
+                        spansList.splice(i, 1)
+                    }
+                });
             }
 
         });
@@ -103,9 +117,17 @@ export class GetElementService {
                 this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
                 this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
                 this.renderer.removeClass(pDom, 'selectedTxtRow');
+                // to update the spansList
+                spansList.forEach((e, i) => {
+                    if (e.line == classList[0].split('-').pop()) {
+                        console.log('delete-pdom:::', e)
+                        spansList.splice(i, 1)
+                    }
+                });
             }
 
-        })
+        });
+        return spansList;
     }
 
 

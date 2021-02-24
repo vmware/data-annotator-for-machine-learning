@@ -62,9 +62,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="clr-form-group left-project-info clr-row historyPosition"
                   (click)="historyBack(i,item.srId)">
                   <div *ngFor="let flag of item.historyDescription;" class="historyText">
-                    <div *ngIf="projectType=='ner'" title="{{flag.text}}">{{flag.text}}</div>
+                    <div *ngIf="projectType=='ner' || projectType=='log'" title="{{flag.text}}">{{flag.text}}</div>
                     <div *ngIf="projectType=='image'" title="{{flag.fileName}}">{{flag.fileName}}</div>
-                    <div *ngIf="projectType!=='ner' && projectType!=='image'" title="{{flag.key+':'+flag.value}}">
+                    <div *ngIf="projectType!=='ner' && projectType!=='image'&& projectType!=='log'"
+                      title="{{flag.key+':'+flag.value}}">
                       {{flag.key+":"+flag.value}}</div>
                   </div>
                 </div>
@@ -96,7 +97,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <span *ngIf='silenceStatus' style="color: #2F8400;font-size: 0.5em;">Reviewed for accuracy</span>
           </h2>
           <div class="questionContainer">
-            <div *ngIf='projectType!=="ner" && projectType!=="image" && projectType!=="txt"'>
+            <div *ngIf='projectType!=="ner" && projectType!=="image" && projectType!=="log"'>
               <div *ngFor="let ticket of sr.originalData;">
                 <p class="question-paragraph">
                   <span class="ticketColumn">{{ticket.key}}</span>
@@ -127,12 +128,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                 (mouseup)="onMouseUp($event,ticket)" id="{{ticket.id}}"
                 class="nerSpan spanIndex{{ticket.id}}">{{ticket.text}}</span>
             </div>
-            <div *ngIf='projectType==="txt"' class="txtBox">
+            <div *ngIf='projectType==="log"' class="txtBox">
               <p *ngFor="let ticket of sr.originalData;let i = index" (mousedown)="onMouseDownTxt($event,ticket,i)"
-                (mouseup)="onMouseUpTxt($event,ticket,i)" id="c-{{i}}" class="txtRow txtRow{{i}}">
-                <span style="margin-right: 1rem;color:#CCCCCC;">{{i+1}}</span>
+                (mouseup)="onMouseUpTxt($event,ticket,i)" id="c-{{i}}" class="txtRow txtRow{{i}}"
+                title="{{ticket.freeText}}">
+                <span class="rowIndex" (click)="clickIndex(ticket,i)">{{i+1}}</span>
                 <span class="txtRowEntity{{i}}"></span>
-                <span class="txtRowContent{{i}}">{{ticket.text}}</span>
+                <span class="logLine-{{ticket.index}} txtRowContent{{i}} ">{{ticket.text}}</span>
               </p>
             </div>
           </div>
@@ -210,7 +212,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <!-- multiple checkbox labels -->
           <!-- <div class="questionContainer"
             *ngIf="!isNumeric && isMultipleLabel && projectType != 'ner' && projectType!=='image'"> -->
-          <div class="questionContainer" *ngIf="isMultipleLabel">
+          <div class="questionContainer" *ngIf="isMultipleLabel&& projectType != 'ner' && projectType!=='image'">
             <div class="clr-form-control" style="margin-top: 0;">
               <div class="clr-control-container" style="width: 100%;">
                 <div class="clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
@@ -224,25 +226,23 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <!-- txt log labels -->
-          <div class="questionContainer" *ngIf="projectType == 'txt'">
+          <div class="questionContainer" *ngIf="projectType == 'log'">
             <div>
               <button *ngFor="let label of categories; let i = index" class="btn labels label entityLabel"
                 [ngClass]="{'entitySelected': i==selectedEntityID, 'entityLabel': i!==selectedEntityID}"
                 (click)="onSelectingEntity($event,label, i)">{{ label }}</button>
               &nbsp; &nbsp;
             </div>
-          </div>
-          <!-- log free-text -->
-          <div class="row user-text-input">
-            <div class="question-input">
-              <h4>Provide Details</h4>
-              <textarea id="rephrasedQuestion" formControlName="rephrasedQuestion"
-                placeholder="(Optional) Please provide more details about the log above." rows="8"></textarea>
+            <div class="clr-textarea-wrapper clr-col-12">
+
+              <textarea class="clr-textarea log-textarea" formControlName="freeText"
+                placeholder="( Optional ) Please provide more details about the log above." rows="5"></textarea>
             </div>
           </div>
+
           <div class="actions">
 
-            <button *ngIf='isMultipleLabel || projectType=="ner" || projectType=="image" || projectType=="txt"'
+            <button *ngIf='isMultipleLabel || projectType=="ner" || projectType=="image" || projectType=="log"'
               class="btn btn-success submit" type="submit"
               [disabled]="multipleLabelList.length==0 && spansList.length==0 && currentBoundingData.length==0"
               title="{{ multipleLabelList.length>0 || spansList.length>0 || currentBoundingData.length>0 ? '' : 'You can only submit after annotating' }}">Submit</button>
