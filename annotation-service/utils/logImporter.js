@@ -45,19 +45,24 @@ async function execute(req, sendEmail, annotators) {
     .on('entry', async (header, stream, next) => {
       stream.on('end', next);
 
+      
       // header.type is 'Directory' or 'file'
-      if (header.type === 'file' && (header.size || header.yauzl.uncompressedSize)) {
-        
+      //__MACOSX or linux back file start with ._
+      const name = header.name.split("/");
+      if (header.type === 'file' && (header.size || header.yauzl.uncompressedSize) && !name[name.length-1].startsWith("._")) {
+
         let index = 0, textLines = {};
         const readInterface = readline.createInterface({ input: stream });
         
         readInterface.on('line', async (line) => {
           index += 1;
+          
           if (line && line.trim() && validator.isASCII(line)) {
-            textLines[index] = line.trim()
+            textLines[index] = line.trim();
           }
         }).on('close', async () => {
           if (Object.keys(textLines).length) {
+
             const sechema = {
               projectName: req.body.pname,
               userInputsLength: 0,
@@ -67,6 +72,7 @@ async function execute(req, sendEmail, annotators) {
                 fileName: header.name
               }
             };
+            
             docs.push(sechema);
             totalCase += 1;
           }
