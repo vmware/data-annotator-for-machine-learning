@@ -398,7 +398,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <input #labels id="labels" maxlength="50" clrInput placeholder="Add New Label Here" name="addNewLabel"
                   class="clr-input" (keyup.enter)="onEnterLabel(labels.value)" (blur)="labelsBlur($event)"
                   (keyup)="onLabelKeydown($event)" [disabled]="categoryList.length>49" />
-                <div *ngIf="msg.type!='ner' && msg.type!='image' && msg.type!='txt'" class="clr-checkbox-wrapper"
+                <div *ngIf="msg.type!='ner' && msg.type!='image' && msg.type!='log'" class="clr-checkbox-wrapper"
                   style="margin-top: 0.5rem;">
                   <input type="checkbox" id="multipleLabel" name="checkbox-basic" value="multipleLabel"
                     class="clr-checkbox" (click)="isMultiple($event)" formControlName="multipleLabel">

@@ -212,7 +212,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           <!-- multiple checkbox labels -->
           <!-- <div class="questionContainer"
             *ngIf="!isNumeric && isMultipleLabel && projectType != 'ner' && projectType!=='image'"> -->
-          <div class="questionContainer" *ngIf="isMultipleLabel&& projectType != 'ner' && projectType!=='image'">
+          <div class="questionContainer"
+            *ngIf="isMultipleLabel&& projectType != 'ner' && projectType!=='image'&& projectType != 'log'">
             <div class="clr-form-control" style="margin-top: 0;">
               <div class="clr-control-container" style="width: 100%;">
                 <div class="clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
