@@ -70,7 +70,7 @@ async function updateSrsUserInput(req) {
         let userInputs = []
         req.body.userInput.forEach(ui => {
             if (ui.tid == ticket._id.toString()) {
-                if (pro.projectType == PROJECTTYPE.NER) {
+                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.LOG) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
@@ -105,7 +105,7 @@ async function updateSrsUserInput(req) {
         let userInputs = []
         req.body.userInput.forEach(ui => {
             if (ui.tid == id) {
-                if (pro.projectType == PROJECTTYPE.NER) {
+                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.LOG) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,

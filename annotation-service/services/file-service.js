@@ -226,7 +226,7 @@ async function prepareContents(srData, project, format) {
                     await project.categoryList.split(",").forEach((label) => {
                         if (lb.label === label) {
                             const line = lb.line;
-                            let data = { [line]: [ srs.originalData[line] ] };
+                            let data = { [line]: srs.originalData[line] };
                             if (lb.freeText) {
                                 data["freeText"] = lb.freeText;
                             }
