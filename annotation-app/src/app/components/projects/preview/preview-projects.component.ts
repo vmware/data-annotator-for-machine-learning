@@ -277,7 +277,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                         res[w].originalData = flag;
                         res[w].projectType = 'log';
                     }
-                    console.log('resetpreview:::', res)
                 } else {
                     if (flag.length > 0) {
                         let pre = [];
@@ -416,7 +415,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                     res[w].flag = res[w].flag.users
                     res[w].projectType = 'log';
                 }
-                console.log('resetpreview:::', res)
             } else {
                 if (flag.length > 0) {
                     let pre = [];

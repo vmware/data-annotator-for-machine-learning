@@ -6,8 +6,6 @@ SPDX-License-Identifier: Apache-2.0
 import { Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 
 import "rxjs/Rx";
-import { typeWithParameters } from '@angular/compiler/src/render3/util';
-import { resolveTxt } from 'dns';
 
 @Injectable()
 export class GetElementService {
@@ -35,7 +33,7 @@ export class GetElementService {
     }
 
 
-    toCreateClear(txtRowEntityDom, pDom, newClass, styleClass, spansList) {
+    toCreateClear(txtRowEntityDom, pDom, newClass, styleClass, spansList, indexDom) {
         let dom = this.renderer.createElement('span');
         this.renderer.appendChild(dom, this.renderer.createText('×'));
         this.renderer.appendChild(txtRowEntityDom, dom);
@@ -51,9 +49,10 @@ export class GetElementService {
             // to update the spansList
             spansList.forEach((e, i) => {
                 if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
-                    console.log('delete-entity:::', e)
+                    spansList.splice(i, 1);
+                    this.renderer.removeClass(indexDom, 'selectedRowIndex');
+                    this.renderer.addClass(indexDom, 'rowIndex');
 
-                    spansList.splice(i, 1)
                 }
             });
         });
@@ -88,19 +87,20 @@ export class GetElementService {
     }
 
 
-    toClearSelected(txtRowEntityDom, pDom, clearDom, spansList) {
+    toClearSelected(txtRowEntityDom, pDom, clearDom, spansList, indexDom) {
         this.renderer.listen(txtRowEntityDom, 'click', (e) => {
-            console.log(88888, 'ininin', e)
             let classList = e.target.className.split(' ');
             if (classList.indexOf('selected') > -1 && classList.indexOf('txtEntityLabel') > -1) {
-                console.log('in-toClearSelected-e')
                 this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
                 this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
                 this.renderer.removeClass(pDom, 'selectedTxtRow');
                 // to update the spansList
                 spansList.forEach((e, i) => {
                     if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
-                        spansList.splice(i, 1)
+                        spansList.splice(i, 1);
+                        this.renderer.removeClass(indexDom, 'selectedRowIndex');
+                        this.renderer.addClass(indexDom, 'rowIndex');
+
                     }
                 });
             }
@@ -109,10 +109,8 @@ export class GetElementService {
 
 
         this.renderer.listen(pDom, 'click', (e) => {
-            console.log(111, e)
             let classList = e.target.className.split(' ');
             if (classList.indexOf('selected') > -1 && classList.indexOf('selectedTxtRow') > -1) {
-                console.log('in-toClearSelected-c')
 
                 this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
                 this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
@@ -120,8 +118,10 @@ export class GetElementService {
                 // to update the spansList
                 spansList.forEach((e, i) => {
                     if (e.line == classList[0].split('-').pop()) {
-                        console.log('delete-pdom:::', e)
-                        spansList.splice(i, 1)
+                        spansList.splice(i, 1);
+                        this.renderer.removeClass(indexDom, 'selectedRowIndex');
+                        this.renderer.addClass(indexDom, 'rowIndex');
+
                     }
                 });
             }

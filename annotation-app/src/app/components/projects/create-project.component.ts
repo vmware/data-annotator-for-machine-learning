@@ -144,7 +144,6 @@ export class CreateNewComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(111, this.msg)
     this.loading = false;
     this.error = null;
     this.nameExist = false;

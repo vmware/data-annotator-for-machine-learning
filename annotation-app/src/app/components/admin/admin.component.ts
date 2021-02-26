@@ -449,6 +449,8 @@ export class AdminComponent implements OnInit {
     };
     if (projectType == 'image') {
       this.router.navigate(['appendNewEntries'], { queryParams: { id: id, name: projectName, from: 'admin', projectType: projectType } })
+    } else if (projectType == 'log') {
+
     } else {
       this.avaService.getSample(id).subscribe(res => {
         if (res.appendSr == 'adding') {

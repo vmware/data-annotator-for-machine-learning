@@ -454,7 +454,7 @@ label .label-leftBoard {
 
 .txtBox {
   overflow: auto;
-  max-height: 40rem;
+  max-height: 18rem;
   padding-bottom: 3rem;
 }
 
@@ -476,6 +476,23 @@ label .label-leftBoard {
 .rowIndex {
   margin-right: 1rem;
   color: #cccccc;
+}
+
+// .rowIndex:hover {
+//   background-color: #cccccc;
+//   border-radius: 4px;
+//   padding-right: 5px;
+//   padding-left: 5px;
+//   color: white;
+// }
+
+.selectedRowIndex {
+  margin-right: 1rem;
+  background-color: #0077b8;
+  border-radius: 4px;
+  padding-right: 5px;
+  padding-left: 5px;
+  color: white;
 }
 
 .selectedTxtRow {
@@ -519,6 +536,6 @@ label .label-leftBoard {
 
 .log-textarea {
   width: 100%;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   border-color: #ccc;
 }

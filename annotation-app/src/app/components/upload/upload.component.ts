@@ -137,7 +137,6 @@ export class UploadComponent implements OnInit {
 
   onLocalFileChange(event) {
     if (event.target.files.length > 0) {
-      console.log(111, event)
       this.inputFile = event.target.files[0];
       this.errorMessage = '';
       this.previewHeadDatas = [];
@@ -196,7 +195,6 @@ export class UploadComponent implements OnInit {
 
   updateDatasets(data) {
     if (data) {
-      console.log('data:::', data)
       let formData = new FormData();
       let uploadFormat = this.uploadGroup.get('fileFormat').value;
       let params = {
@@ -225,7 +223,6 @@ export class UploadComponent implements OnInit {
         params['hasHeader'] = this.uploadGroup.get('hasHeader').value;
         params['topReview'] = { header: this.previewHeadDatas, topRows: this.previewContentDatas };
       };
-      console.log(12345, params)
       this.toPostDatasets(data, uploadFormat, formData, params)
 
     } else {
@@ -513,27 +510,19 @@ export class UploadComponent implements OnInit {
 
 
   unTgz() {
-    console.log(333, this.inputFile)
     var that = this;
     var reader = new FileReader();
     reader.readAsArrayBuffer(that.inputFile);
     reader.onload = function (event) {
       let result: any = (event.target as any).result;
-      console.log(444, event)
-      console.log(444.5, result)
-
-
       const inflator = new Pako.Inflate();
-
       inflator.push(result);
       if (inflator.err) {
         console.log('inflator-err:::', inflator.msg);
       }
-
       const output = inflator.result;
       untar(output.buffer)
         .then((extractedFiles) => {
-          console.log(444.7, extractedFiles)
           let example = 0;
           let txtList = [];
           extractedFiles.forEach(element => {
@@ -545,7 +534,6 @@ export class UploadComponent implements OnInit {
             }
           });
           let previewExample = txtList.splice(0, 3)
-          console.log(555, example, previewExample);
           previewExample.forEach(e => {
             that.toReadBlobToText(e.blob).then(data => {
               e.content = data;
@@ -564,7 +552,6 @@ export class UploadComponent implements OnInit {
       reader.readAsText(blob)
       reader.onload = function (event) {
         let res: any = (event.target as any).result;
-        console.log(777, res)
         resolve(res)
       }
     })
@@ -577,9 +564,7 @@ export class UploadComponent implements OnInit {
     var that = this;
     let example = 0;
     let txtList = [];
-    console.log('000', that.inputFile)
     jsZip.loadAsync(that.inputFile).then(function (entries) {
-      console.log(111, entries)
       entries.forEach((path, file) => {
         if (!file.dir && that.validTxtType(path)) {
           example++;
@@ -587,19 +572,14 @@ export class UploadComponent implements OnInit {
         }
       });
       let previewExample = txtList.splice(0, 3)
-      console.log(555, example, previewExample);
       previewExample.forEach(e => {
-        console.log(555.1, e._data.compressedContent.buffer);
-        console.log(555.2, e._data.compressedContent)
         jsZip.file(e.name).async('string').then(function success(res) {
           e.content = res;
           e.size = e._data.uncompressedSize
         }, function error(e) {
-          console.log('jsZip-to-string-err:::', e)
         })
       });
       that.previewContentDatas = { previewExample: previewExample, exampleEntries: example }
-      console.log(555.2, that.previewContentDatas)
     })
   }
 
