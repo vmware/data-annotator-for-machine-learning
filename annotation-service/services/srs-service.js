@@ -634,18 +634,18 @@ async function deleteSrs(req){
 
 async function deleteLabel(req){
     const label = req.body.label;
-    let conditions = {projectName: req.body.pname}, MODEL = SrModel;
-    const projects = await validator.checkProjectByconditions(conditions, true)
+    let conditions = {projectName: req.body.pname};
 
-    let labelArray = projects[0].categoryList.split(",");
+    const mp = await getModelProject(conditions);
+
+    let labelArray = mp.project.categoryList.split(",");
     if (!labelArray.includes(label)) {
         throw {CODE: 4004, MSG: "LABEL NOT EXIST"};
     }
     
-    if (projects[0].projectType == PROJECTTYPE.NER) {
+    if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.LOG) {
         conditions["userInputs.problemCategory.label"] = label;
-    }else if (projects[0].projectType == PROJECTTYPE.IMGAGE) {
-        MODEL = ImgModel;
+    }else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
         conditions = {
             projectName: req.body.pname, 
             $or:[
@@ -658,7 +658,7 @@ async function deleteLabel(req){
         conditions["userInputs.problemCategory"] = label;
     }
     
-    const tickets = await mongoDb.findByConditions(MODEL, conditions);
+    const tickets = await mongoDb.findByConditions(mp.model, conditions);
     if (tickets[0]) {
         throw {CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED"};
     }
