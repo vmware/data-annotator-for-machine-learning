@@ -73,17 +73,13 @@ $ python -m spacy download en_core_web_md
 
 #### annotation-app
 
-------------
-
 ##### Configuring annotation-app environments
 
-- To configure the annotation-app/src/environments/environment.ts
-	
-	 annotation-app/src/environments/ folder contains the base configuration file, environment.ts and environment.prod.ts. 
-	 <br>
-	 In order to run the annotation-app **in local**, you **need to configure the environment.ts to add some important defaults there**. 
+The annotation-app/src/environments/ folder contains the base configuration file, environment.ts and environment.prod.ts. 
+<br>
+In order to run the annotation-app **in local**, you **need to configure the environment.ts to setup the required variables**. 
 	   
-	 For example,	
+For example,	
 
     ```javascript
 		export const environment: Env = {
@@ -104,12 +100,12 @@ $ python -m spacy download en_core_web_md
     ```
 
 	
-- If you want to configure specific environments for dev, staging, production, go to annotation-app/src/app/services/environment.service.ts to set variables in different environments with the key **APP_CONFIG**. Then you can read the value in this environment.service.ts.
+If you want to configure specific environments for dev, staging, production, go to annotation-app/src/app/services/environment.service.ts to set variables in different environments with the key **APP_CONFIG**. Then you can read the value in this environment.service.ts.
 
 ------------
 #### annotation-service
 
-You need to configure values in [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) file before using. some optional configs you can skip if you don't want to use.
+You need to configure the following required variables in [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) file before using. 
 
 ```javascript
 module.exports  = {
