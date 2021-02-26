@@ -95,11 +95,7 @@ async function execute(req, sendEmail, annotators) {
       }
 
       const condition = { projectName: req.body.pname };
-      const update = {
-          $set: {
-              totalCase: totalCase
-          }
-      };
+      const update = { $inc: { totalCase: totalCase } };
       console.log(`[ SRS ] Utils update totalCase:`, totalCase);
       await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
 
@@ -121,12 +117,52 @@ async function execute(req, sendEmail, annotators) {
   }).catch(err => {
     console.error("[ LOG ] [ ERROR ] Utils axios.request error ->", err);
   });
-
+  
 }
 
 
-async function quickAppendLogs(req, dsName){
+async function quickAppendLogs(req){
   
+  let totalCase = 0; docs=[];
+  
+  for (const ticket of req.body.srdata) {
+    
+    let index = 0, textLines = {};
+    for (const line of ticket.split("\n")) {
+      if (line && line.trim() && validator.isASCII(line)) {
+        textLines[++index] = line.trim();
+      }
+    }
+
+    if (Object.keys(textLines).length) {
+      const sechema = {
+        projectName: req.body.pname,
+        userInputsLength: 0,
+        originalData: textLines,
+        fileInfo:{
+          fileSize: Math.random(),
+          fileName: "QUICK_APPEND" + Math.random()
+        }
+      };  
+      docs.push(sechema);
+      totalCase += 1;
+    }
+
+  }
+
+  if(docs.length){
+
+    console.log(`[ LOG ] Utils quick append logs data to db`);
+    const options = { lean: true, ordered: false };
+    await mongoDb.insertMany(LogModel, docs, options);
+
+    const condition = { projectName: req.body.pname };
+    const update = { $inc: { totalCase: totalCase } };
+    console.log(`[ SRS ] Utils quick append update totalCase:`, totalCase);
+    await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
+  
+  }
+
 }
 
 
