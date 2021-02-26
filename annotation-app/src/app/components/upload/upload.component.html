@@ -85,7 +85,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="fileFormat" (ngModelChange)=changeFileFormat($event) />
                   <label for="image">&nbsp;Images</label>
                 </clr-radio-wrapper>
-                <clr-radio-wrapper *ngIf="(msg.type=='txt'&&msg.page=='create')||(msg.page=='datasets')">
+                <clr-radio-wrapper *ngIf="(msg.type=='log'&&msg.page=='create')||(msg.page=='datasets')">
                   <input type="radio" clrRadio class="clr-radio" formControlName="fileFormat" value="txt" id="txt"
                     name="fileFormat" (ngModelChange)=changeFileFormat($event) />
                   <label for="txt">&nbsp;Txt</label>

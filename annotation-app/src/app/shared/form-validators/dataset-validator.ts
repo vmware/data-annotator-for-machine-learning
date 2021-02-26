@@ -209,7 +209,7 @@ export class DatasetValidator {
 
   static requiredTwo(type): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      if (type == 'ner' || type == 'image' || type == 'txt') {
+      if (type == 'ner' || type == 'image' || type == 'log') {
         if (control.value.length < 1) {
           return { 'msg': { value: DatasetValidator.REQUIRED_FIELD_ENTITY } };
         };

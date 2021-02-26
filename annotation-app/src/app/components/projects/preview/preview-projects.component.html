@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="clr-row label-leftBoard">
                     <label for="assignmentLogic">Assignment Logic : </label>&nbsp;&nbsp;
                     <div
-                        *ngIf="selectedDataset?.labelType=='numericLabel' || selectedDataset?.isMultipleLabel == true || selectedDataset?.projectType=='image'">
+                        *ngIf="selectedDataset?.labelType=='numericLabel' || selectedDataset?.isMultipleLabel == true || selectedDataset?.projectType=='image' || selectedDataset?.projectType=='log'">
                         {{selectedDataset?.assignmentLogic|toUpperCase}}</div>
                     <div *ngIf="selectedDataset?.labelType!='numericLabel' && !selectedDataset?.isMultipleLabel">Active
                         learning</div>
@@ -148,11 +148,55 @@ SPDX-License-Identifier: Apache-2.0 -->
                                         <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width:90px">
                                             {{i+1}}
                                         </clr-dg-cell>
-                                        <clr-dg-cell *ngFor="let content of dataset.originalData"
+                                        <div *ngIf="!dataset.projectType||dataset.projectType!=='log'">
+                                            <clr-dg-cell *ngFor="let content of dataset.originalData"
+                                                class="previewHeight ellipsis-datagrid"
+                                                style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
+                                                title="{{content}}">
+                                                {{content}}
+                                            </clr-dg-cell>
+                                        </div>
+                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
                                             class="previewHeight ellipsis-datagrid"
                                             style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
-                                            title="{{content}}">
-                                            {{content}}
+                                            title="{{dataset.originalData.fileName}}">
+                                            {{dataset.originalData.fileName}}
+                                        </clr-dg-cell>
+                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
+                                            class="previewHeight ellipsis-datagrid"
+                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
+                                            title="{{dataset.originalData.fileSize}}">
+                                            {{dataset.originalData.fileSize}}
+                                        </clr-dg-cell>
+                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
+                                            class="previewHeight ellipsis-datagrid"
+                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px">
+                                            {{dataset.originalData.filePreview}}
+                                            <div class="signpost-triggers-wrapper">
+                                                <div class="signpost-trigger-demo">
+                                                    <div class="signpost-item">
+                                                        <div class="trigger-item">
+                                                            <clr-signpost>
+                                                                <button class="btn btn-sm btn-link btnOutline"
+                                                                    clrSignpostTrigger>
+                                                                    show details
+                                                                </button>
+                                                                <!-- <clr-icon shape="details" clrSignpostTrigger></clr-icon> -->
+                                                                <clr-signpost-content [clrPosition]="'right-bottom'"
+                                                                    *clrIfOpen>
+                                                                    <p><strong>Txt FileContent:</strong></p>
+                                                                    <p
+                                                                        *ngFor="let log of dataset.originalData.fileContent">
+                                                                        <span
+                                                                            style="margin-right: 0.5rem">{{log.index}}</span>
+                                                                        <span>{{log.text}}</span>
+                                                                    </p>
+                                                                </clr-signpost-content>
+                                                            </clr-signpost>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </clr-dg-cell>
                                         <clr-dg-cell class="ellipsis-datagrid previewHeight"
                                             style="min-width:80px;max-width:120px">
@@ -182,10 +226,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                         Annotate Time
                                                     </clr-dg-column>
                                                     <clr-dg-column class="studioCell"
-                                                        *ngIf='projectType=="image" || projectType=="ner"'>
+                                                        *ngIf='projectType=="image" || projectType=="ner"|| projectType=="log"'>
                                                         Re-Label
                                                     </clr-dg-column>
-                                                    <clr-dg-column *ngIf='projectType!="ner" && projectType!="image"'
+                                                    <clr-dg-column
+                                                        *ngIf='projectType!="ner" && projectType!="image"&& projectType!="log"'
                                                         style="min-width: 20rem">
                                                         Re-Label
                                                     </clr-dg-column>
@@ -195,26 +240,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                         <clr-dg-cell>
                                                             {{flag.timestamp | date:'yyyy-MM-dd HH:mm:ss'}}
                                                         </clr-dg-cell>
-                                                        <clr-dg-cell *ngIf='projectType!="ner" && projectType!="image"'
+                                                        <clr-dg-cell
+                                                            *ngIf='projectType!="ner" && projectType!="image"&& projectType!="log"'
                                                             style="min-width: 20rem">
                                                             {{flag.problemCategory}}
                                                         </clr-dg-cell>
                                                         <clr-dg-cell *ngIf='projectType=="ner"' class="studioCell">
-                                                            <!-- <clr-datagrid>
-                                                                <clr-dg-column
-                                                                    *ngFor="let entity of selectedCategoryList">
-                                                                    {{entity}}
-                                                                </clr-dg-column>
-                                                                <clr-dg-row
-                                                                    *ngFor="let innerCell of flag.problemCategory">
-                                                                    <clr-dg-cell
-                                                                        *ngFor="let innerCellData of innerCell">
-                                                                        <div style="word-break: break-word;"
-                                                                            *ngFor="let innerCellDataSingle of innerCellData">
-                                                                            {{'[ '+innerCellDataSingle+' ]'}}</div>
-                                                                    </clr-dg-cell>
-                                                                </clr-dg-row>
-                                                            </clr-datagrid> -->
                                                             <clr-datagrid>
                                                                 <clr-dg-column *ngFor="let title of innerTable">
                                                                     {{title}}
@@ -225,6 +256,22 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                                     <clr-dg-cell>{{innerCell.text}}</clr-dg-cell>
                                                                     <clr-dg-cell>{{innerCell.start}}</clr-dg-cell>
                                                                     <clr-dg-cell>{{innerCell.end}}</clr-dg-cell>
+                                                                </clr-dg-row>
+                                                            </clr-datagrid>
+                                                        </clr-dg-cell>
+                                                        <clr-dg-cell *ngIf='projectType=="log"' class="studioCell">
+                                                            <clr-datagrid>
+                                                                <clr-dg-column *ngFor="let title of innerTable">
+                                                                    {{title}}
+                                                                </clr-dg-column>
+                                                                <clr-dg-row
+                                                                    *ngFor="let innerCell of flag.problemCategory">
+                                                                    <clr-dg-cell>{{innerCell.line}}</clr-dg-cell>
+                                                                    <clr-dg-cell style="word-break: break-all;">
+                                                                        {{innerCell.text}}</clr-dg-cell>
+                                                                    <clr-dg-cell>{{innerCell.label}}</clr-dg-cell>
+                                                                    <clr-dg-cell style="word-break: break-all;">
+                                                                        {{innerCell.freeText}}</clr-dg-cell>
                                                                 </clr-dg-row>
                                                             </clr-datagrid>
                                                         </clr-dg-cell>
@@ -293,16 +340,60 @@ SPDX-License-Identifier: Apache-2.0 -->
 
                                 <ng-container>
                                     <clr-dg-row *ngFor="let dataset of previewFlagContent; let i=index"
-                                        [clrDgItem]="dataset">
+                                        [clrDgItem]="dataset" style="padding-bottom: 2rem;">
 
                                         <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width:90px">
                                             {{i+1}}
                                         </clr-dg-cell>
-                                        <clr-dg-cell *ngFor="let content of dataset.originalData"
+                                        <div *ngIf="!dataset.projectType||dataset.projectType!=='log'">
+                                            <clr-dg-cell *ngFor="let content of dataset.originalData"
+                                                class="previewHeight ellipsis-datagrid"
+                                                style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px;width: 200px;"
+                                                title="{{content}}">
+                                                {{content}}
+                                            </clr-dg-cell>
+                                        </div>
+                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
                                             class="previewHeight ellipsis-datagrid"
-                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px;width: 200px;"
-                                            title="{{content}}">
-                                            {{content}}
+                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
+                                            title="{{dataset.originalData.fileName}}">
+                                            {{dataset.originalData.fileName}}
+                                        </clr-dg-cell>
+                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
+                                            class="previewHeight ellipsis-datagrid"
+                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
+                                            title="{{dataset.originalData.fileSize}}">
+                                            {{dataset.originalData.fileSize}}
+                                        </clr-dg-cell>
+                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
+                                            class="previewHeight ellipsis-datagrid"
+                                            style="word-break:break-all;max-width:650px">
+                                            {{dataset.originalData.filePreview}}
+                                            <div class="signpost-triggers-wrapper">
+                                                <div class="signpost-trigger-demo">
+                                                    <div class="signpost-item">
+                                                        <div class="trigger-item">
+                                                            <clr-signpost>
+                                                                <button class="btn btn-sm btn-link btnOutline"
+                                                                    clrSignpostTrigger>
+                                                                    show details
+                                                                </button>
+                                                                <!-- <clr-icon shape="details" clrSignpostTrigger></clr-icon> -->
+                                                                <clr-signpost-content [clrPosition]="'right-bottom'"
+                                                                    *clrIfOpen>
+                                                                    <p><strong>Txt FileContent:</strong></p>
+                                                                    <p
+                                                                        *ngFor="let log of dataset.originalData.fileContent">
+                                                                        <span
+                                                                            style="margin-right: 0.5rem">{{log.index}}</span>
+                                                                        <span>{{log.text}}</span>
+                                                                    </p>
+                                                                </clr-signpost-content>
+                                                            </clr-signpost>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </clr-dg-cell>
                                         <clr-dg-cell class="ellipsis-datagrid previewHeight" style="min-width:250px">
                                             <div *ngFor="let a of dataset.flag">{{a}}</div>

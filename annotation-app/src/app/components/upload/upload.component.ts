@@ -105,7 +105,7 @@ export class UploadComponent implements OnInit {
         this.uploadSet.fileFormat = 'csv'
       } else if (this.msg.type == 'image') {
         this.uploadSet.fileFormat = 'image'
-      } else if (this.msg.type == 'txt') {
+      } else if (this.msg.type == 'log') {
         this.uploadSet.fileFormat = 'txt'
       }
     }

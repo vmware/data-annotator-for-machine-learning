@@ -130,6 +130,7 @@ export class CreateNewComponent implements OnInit {
         page: 'create'
       }
     });
+
     this.userQuestionUpdate
       .pipe(debounceTime(400), distinctUntilChanged())
       .subscribe((value) => {
@@ -219,7 +220,7 @@ export class CreateNewComponent implements OnInit {
           this.dsDialogForm.get("selectedEncoder").setValidators(DatasetValidator.required());
           this.dsDialogForm.get("selectedEncoder").updateValueAndValidity();
         };
-        if (this.msg.type === 'ner' || this.msg.type === 'txt') {
+        if (this.msg.type === 'ner' || this.msg.type === 'log') {
           this.validNer();
         };
         if (this.msg.type === 'image') {
@@ -290,9 +291,9 @@ export class CreateNewComponent implements OnInit {
     formData.append("max", this.dsDialogForm.value.max);
     formData.append("labelType", this.labelType);
     formData.append("estimator", this.dsDialogForm.value.selectedClassifier);
-    formData.append("projectType", this.projectType == 'txt' ? this.projectType = 'log' : this.projectType);
+    formData.append("projectType", this.projectType);
     formData.append("encoder", this.dsDialogForm.value.selectedEncoder);
-    formData.append("isMultipleLabel", (this.msg.type == 'ner' || this.msg.type == 'image') ? true : this.dsDialogForm.value.multipleLabel);
+    formData.append("isMultipleLabel", (this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log') ? true : this.dsDialogForm.value.multipleLabel);
     return this.avaService.postDataset(formData);
   }
 
@@ -456,7 +457,7 @@ export class CreateNewComponent implements OnInit {
         element.fileSize = (element.fileSize / 1024).toFixed(2)
       });
       this.dsDialogForm.get("totalRow").setValue(e.images.length);
-    } else if (this.msg.type == 'txt') {
+    } else if (this.msg.type == 'log') {
       this.previewContentDatas.forEach(element => {
         element.fileSize = (element.fileSize / 1024).toFixed(2)
       });
