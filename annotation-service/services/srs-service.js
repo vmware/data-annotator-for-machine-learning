@@ -22,6 +22,7 @@ const mongoDb = require("../db/mongo.db");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const imgImporter = require("../utils/imgImporter");
 const S3Utils = require('../utils/s3');
+const logImporter = require('../utils/logImporter');
 
 async function updateSrsUserInput(req) {
     
@@ -70,7 +71,7 @@ async function updateSrsUserInput(req) {
         let userInputs = []
         req.body.userInput.forEach(ui => {
             if (ui.tid == ticket._id.toString()) {
-                if (pro.projectType == PROJECTTYPE.NER) {
+                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.LOG) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
@@ -85,7 +86,6 @@ async function updateSrsUserInput(req) {
                         });
                     });
                 }
-                
             }
         });
         console.log(`[ SRS ] Service re-edit ticket=${ticket._id.toString()}`);
@@ -106,7 +106,7 @@ async function updateSrsUserInput(req) {
         let userInputs = []
         req.body.userInput.forEach(ui => {
             if (ui.tid == id) {
-                if (pro.projectType == PROJECTTYPE.NER) {
+                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.LOG) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
@@ -179,7 +179,7 @@ async function getOneSrs(req) {
     
     const mp = await getModelProject({ _id: ObjectId(req.query.pid)});
 
-    //1. find model queried sr from queriedSr
+    //1. find model queried tickets from queriedSr
     if (project.al.queriedSr.length > 0) { 
         if (limitation <= project.al.queriedSr.length) {
              let ids = project.al.queriedSr.filter((id, i) =>{
@@ -196,7 +196,7 @@ async function getOneSrs(req) {
         }
     }
     
-    //2. find sr from db 
+    //2. find tickets from db 
     conditions = {
         projectName: project.projectName, 
         userInputsLength: { $lt: project.maxAnnotation },
@@ -431,25 +431,27 @@ async function appendSrsDataByCSVFile(req){
 }
 
 async function appendSrsData(req){
-    
+    //validate user and project
     await validator.checkAnnotator(req.auth.email);
-    
     const mp = await getModelProject({projectName: req.body.pname});
+    
+    const projectType = mp.project.projectType;
+    req.body.projectType = projectType;
 
-    if (req.body.projectType == PROJECTTYPE.IMGAGE) {
+    if (projectType == PROJECTTYPE.IMGAGE) {
         
-        const pcond = {projectName: req.body.pname};
-        const pro = await validator.checkProjectByconditions(pcond, true);
         let appendNumber = 0;
         
         if (req.body.isFile) {
+            //file append
             await imgImporter.execute(req,false);
             
             const conditions = { dataSetName: req.body.selectedDataset }
             const ds = await validator.checkDataSet(conditions, true);
             appendNumber = ds[0].images.length;
         }else{
-            await imgImporter.quickAppendImages(req, pro[0].selectedDataset);
+            //quick append
+            await imgImporter.quickAppendImages(req, mp.project.selectedDataset);
             appendNumber = req.body.images.length;
         }
         
@@ -457,22 +459,36 @@ async function appendSrsData(req){
         const update = { $set: { "appendSr": APPENDSR.DONE, updatedDate: Date.now() }, $inc: { totalCase: appendNumber } };
         await mongoDb.findOneAndUpdate(ProjectModel, pcond, update);
 
-    } else {
+    } else if(projectType == PROJECTTYPE.TEXT || projectType == PROJECTTYPE.TABULAR || projectType == PROJECTTYPE.NER){
+        
         //validate pname and headers
         const originalHeaders = mp.project.selectedColumn;
+        
         if(req.body.isFile){
+            //file append
             console.log(`[ SRS ] Service appendSrsData csvFile: ${req.body.csvFile}`);
             const appendHeaders = req.body.selectedHeaders;
             await validator.checkAppendTicketsHeaders(appendHeaders, originalHeaders)
             
             await appendSrsDataByCSVFile(req);
-            console.log(`[ SRS ] Service appendSrsDataByCSVFile done`);
+            console.log(`[ SRS ] Service append tickets by CSV file done`);
         }else{
+            //quick append
             const appendHeaders = Object.keys(req.body.srdata[0]);        
             await validator.checkAppendTicketsHeaders(appendHeaders, originalHeaders)
 
             await appendSrsDataByForms(req);
-            console.log(`[ SRS ] Service appendSrsDataByForms done`);
+            console.log(`[ SRS ] Service append tickets data forms  done`);
+        }
+    }else if (projectType == PROJECTTYPE.LOG) {
+        if (req.body.isFile) {
+            //file append
+            await logImporter.execute(req, false);
+            console.log(`[ SRS ] Service append logs tickets by file done`);
+        } else {
+            //quick append
+            await logImporter.quickAppendLogs(req);
+            console.log(`[ SRS ] Service append logs tickets by forms done`);
         }
     }
     
@@ -618,18 +634,18 @@ async function deleteSrs(req){
 
 async function deleteLabel(req){
     const label = req.body.label;
-    let conditions = {projectName: req.body.pname}, MODEL = SrModel;
-    const projects = await validator.checkProjectByconditions(conditions, true)
+    let conditions = {projectName: req.body.pname};
 
-    let labelArray = projects[0].categoryList.split(",");
+    const mp = await getModelProject(conditions);
+
+    let labelArray = mp.project.categoryList.split(",");
     if (!labelArray.includes(label)) {
         throw {CODE: 4004, MSG: "LABEL NOT EXIST"};
     }
     
-    if (projects[0].projectType == PROJECTTYPE.NER) {
+    if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.LOG) {
         conditions["userInputs.problemCategory.label"] = label;
-    }else if (projects[0].projectType == PROJECTTYPE.IMGAGE) {
-        MODEL = ImgModel;
+    }else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
         conditions = {
             projectName: req.body.pname, 
             $or:[
@@ -642,7 +658,7 @@ async function deleteLabel(req){
         conditions["userInputs.problemCategory"] = label;
     }
     
-    const tickets = await mongoDb.findByConditions(MODEL, conditions);
+    const tickets = await mongoDb.findByConditions(mp.model, conditions);
     if (tickets[0]) {
         throw {CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED"};
     }

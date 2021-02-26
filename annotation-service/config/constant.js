@@ -31,6 +31,7 @@ module.exports = {
         DONE: "done"
     },
     PAGINATELIMIT: 5000,
+    PAGINATETEXTLIMIT: 100,
     FILESIZE: 1024*1024*5, //less than 5MB directly download
     ACCESS_TIME_60: 60*60, //in seconds
     ACCESS_TIME_30: 60*30, //in seconds
@@ -53,9 +54,9 @@ module.exports = {
     PROJECTTYPE:{
         TABULAR: "tabular",
         TEXT: "text",
-        REGRESSION: "regression",
         NER: "ner",
         IMGAGE: "image",
+        LOG:"log",
     },
     DOWNLOADSRC:{
         COMMUNITY: "community",
@@ -68,6 +69,7 @@ module.exports = {
         CSV: "csv",
         TABULAR: "tabular",
         IMGAGE: "image",
+        LOG: "txt",
     },
     YES: "Yes",
     NO: "No",
@@ -77,5 +79,10 @@ module.exports = {
     },
     S3OPERATIONS:{
         GETOBJECT: 'getObject',
+    },
+    FILETYPE:{
+        ZIP: "zip",
+        TGZ: "tgz",
+        GZ: "gz"
     },
 }

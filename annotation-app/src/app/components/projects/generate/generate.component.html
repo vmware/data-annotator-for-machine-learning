@@ -29,12 +29,12 @@ SPDX-License-Identifier: Apache-2.0 -->
           </clr-radio-wrapper>
           <clr-radio-wrapper style="margin-top: .5rem;">
             <input type="radio" clrRadio name="options" required value="topLabel" [(ngModel)]="format"
-              [disabled]="msg.projectType=='ner'||msg.projectType=='image'" />
+              [disabled]="msg.projectType=='ner'||msg.projectType=='image'||msg.projectType=='log'" />
             <label>Top Label</label>
           </clr-radio-wrapper>
           <clr-radio-wrapper style="margin-top: .5rem;">
             <input type="radio" clrRadio name="options" required value="probabilistic" [(ngModel)]="format"
-              [disabled]="msg.projectType=='ner'||msg.projectType=='image'" />
+              [disabled]="msg.projectType=='ner'||msg.projectType=='image'||msg.projectType=='log'" />
             <label>Probabilistic</label>
           </clr-radio-wrapper>
 

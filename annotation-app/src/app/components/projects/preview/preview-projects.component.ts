@@ -11,6 +11,7 @@ import * as _ from "lodash";
 import { ActivatedRoute } from '@angular/router';
 import { LabelStudioService } from 'app/services/label-studio.service';
 import { EnvironmentsService } from 'app/services/environments.service';
+import { debug } from 'util';
 enableProdMode();
 
 
@@ -139,7 +140,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
         this.loadingFlag = true;
         this.firstLoadTable = true;
         this.firstLoadFlag = true;
-        this.innerTable = ['Entity', 'Text', 'Start_idx', 'End_idx']
+        this.innerTable = this.projectType == 'ner' ? ['Entity', 'Text', 'Start_idx', 'End_idx'] : ['LineNumber', 'LineContent', 'Label', 'FreeText']
         this.getALLSrs();
         this.getALLFlag();
 
@@ -267,6 +268,15 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                         let flag = [res[w].id, res[w].originalData.fileName, ((res[w].originalData.fileSize) / 1024).toFixed(2)];
                         res[w].originalData = flag;
                     }
+                } else if (this.projectType == 'log') {
+                    this.previewSrsHeader = ['FileName', 'FileSize(KB)', 'FileContent'];
+                    for (let w = 0; w < res.length; w++) {
+                        this.resetLoguserInputs(res[w]);
+                        let file = this.resetLogOriginalData(res[w])
+                        let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview.slice(0, 100) + '...' };
+                        res[w].originalData = flag;
+                        res[w].projectType = 'log';
+                    }
                 } else {
                     if (flag.length > 0) {
                         let pre = [];
@@ -367,7 +377,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                 } else {
                     this.loading = false;
                 }
-                if (this.isMultipleLabel && this.projectType != 'ner') {
+                if (this.isMultipleLabel && this.projectType != 'ner' && this.projectType != 'log') {
                     this.toRenewPreviewSrs();
                 }
                 this.firstLoadTable = false;
@@ -395,6 +405,15 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                     let flag = [res[w].id, res[w].originalData.fileName, ((res[w].originalData.fileSize) / 1024).toFixed(2)];
                     res[w].originalData = flag;
                     res[w].flag = res[w].flag.users
+                }
+            } else if (this.projectType == 'log') {
+                this.previewFlagHeader = ['FileName', 'FileSize(KB)', 'FileContent'];
+                for (let w = 0; w < res.length; w++) {
+                    let file = this.resetLogOriginalData(res[w])
+                    let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview.slice(0, 100) + '...' };
+                    res[w].originalData = flag;
+                    res[w].flag = res[w].flag.users
+                    res[w].projectType = 'log';
                 }
             } else {
                 if (flag.length > 0) {
@@ -665,7 +684,40 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
     };
 
 
+    resetLogOriginalData(sr) {
+        if (!sr.MSG) {
+            let flag = [];
+            let preview = '';
+            let res;
+            _.forIn(sr.originalData, function (value, key) {
+                flag.push({ index: key, text: value });
+                preview = preview + (key + '. ' + value)
+            });
+            sr.originalData = flag;
+            res = { originalData: sr.originalData, preview: preview }
+            return res;
+        } else {
+            return sr;
+        }
+    }
 
+
+    resetLoguserInputs(sr) {
+        if (!sr.MSG) {
+            sr.userInputs.forEach(element => {
+                element.problemCategory.forEach(element1 => {
+                    for (var key in sr.originalData) {
+                        if (element1.line == key) {
+                            element1.text = sr.originalData[key];
+                            break;
+                        }
+                    }
+                });
+            });
+        } else {
+            return sr;
+        }
+    }
 
 
 

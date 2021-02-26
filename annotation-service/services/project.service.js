@@ -237,7 +237,7 @@ async function updateProject(req) {
         if (labelEdit) {
             for(const key in editLb){
                 let query,update,options;
-                if (projectInfo.projectType == PROJECTTYPE.NER) {
+                if (projectInfo.projectType == PROJECTTYPE.NER || projectInfo.projectType == PROJECTTYPE.LOG) {
                     query = { projectName: req.body.pname, "userInputs.problemCategory.label": key};
                     update = { $set: { "userInputs.0.problemCategory.$[elem].label" : editLb[key] } };
                     options = {arrayFilters: [ { "elem.label": key } ]}; 
@@ -252,7 +252,7 @@ async function updateProject(req) {
                     update = { $set: { "userInputs.$[elem].problemCategory.value.rectanglelabels.0" : editLb[key] } };
                     options = {arrayFilters: [ { "elem.problemCategory.value.rectanglelabels.0": key } ]};
                     await mongoDb.updateManyByConditions(mp.model, query, update, options);
-                } else{
+                } else if (projectInfo.projectType == PROJECTTYPE.TEXT || projectInfo.projectType == PROJECTTYPE.TABULAR) {
                     query = { projectName: req.body.pname,  "userInputs.problemCategory": key};
                     update = { $set: { "userInputs.$[elem].problemCategory" : editLb[key] } };
                     options = {arrayFilters: [ { "elem.problemCategory": key } ]};
@@ -331,7 +331,7 @@ async function projectLeaderBoard(req) {
             let lb = { 'label': label, annotated: 0 };
             srsUI.forEach(UIS => {
                 UIS.userInputs.forEach(ui => {
-                    if (proInfo.projectType == PROJECTTYPE.NER) {
+                    if (proInfo.projectType == PROJECTTYPE.NER || proInfo.projectType == PROJECTTYPE.LOG) {
                         ui.problemCategory.forEach(ann =>{
                             if (ann.label == label){
                                 lb.annotated += 1;

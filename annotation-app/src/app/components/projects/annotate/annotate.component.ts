@@ -10,10 +10,10 @@ import 'rxjs/Rx'
 import { SR, SrUserInput } from '../../../model/sr';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { UserAuthService } from '../../../services/user-auth.service';
 import * as _ from "lodash";
 import { LabelStudioService } from 'app/services/label-studio.service';
-
+import { GetElementService } from 'app/services/common/dom.service';
+import { ClassField } from '@angular/compiler';
 
 @Component({
   selector: 'app-annotate',
@@ -81,15 +81,11 @@ export class AnnotateComponent implements OnInit {
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
     private avaService: AvaService,
-    private userAuthService: UserAuthService,
     private el: ElementRef,
-    private LabelStudioService: LabelStudioService
+    private LabelStudioService: LabelStudioService,
+    private getElementService: GetElementService
 
-
-  ) {
-
-
-  }
+  ) { }
 
 
 
@@ -124,6 +120,7 @@ export class AnnotateComponent implements OnInit {
       }, error => {
         console.log(error);
       });
+
     });
 
     this.createForm();
@@ -150,7 +147,7 @@ export class AnnotateComponent implements OnInit {
     this.questionForm.addControl('questionGroup',
       this.formBuilder.group({
         category: this.sr.problemCategory,
-        rephrasedQuestion: [null],
+        freeText: [null],
         answer: [null],
         selectProject: [this.selectParam],
       })
@@ -199,6 +196,9 @@ export class AnnotateComponent implements OnInit {
             }
             this.toCallStudio(option);
           }, 0);
+        };
+        if (this.projectType == 'log') {
+          this.sr = this.resetLogSrData(this.sr)
         };
         if (this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
@@ -255,9 +255,9 @@ export class AnnotateComponent implements OnInit {
     this.maxAnnotationError = null;
     let category = [];
     category = this.categoryFunc()
-    let rephrasedQuestion = this.questionForm.get('questionGroup.rephrasedQuestion').value;
-    let answer = this.questionForm.get('questionGroup.answer').value;
-    this.pointsEarnedOnSubmission = this.calculatePointsEarned(category, rephrasedQuestion, answer);
+    // let freeText = this.questionForm.get('questionGroup.freeText').value;
+    // let answer = this.questionForm.get('questionGroup.answer').value;
+    // this.pointsEarnedOnSubmission = this.calculatePointsEarned(category, freeText, answer);
     let srUserInput: SrUserInput = {
       pid: this.projectId,
       userInput: [{
@@ -269,7 +269,7 @@ export class AnnotateComponent implements OnInit {
     if (this.projectType == 'image') {
       srUserInput.userInput[0].problemCategory = this.currentBoundingData;
       this.sr.images = this.currentBoundingData;
-    }
+    };
 
     this.loading = true;
     this.avaService.putSrUserInput(srUserInput).subscribe(response => {
@@ -342,6 +342,9 @@ export class AnnotateComponent implements OnInit {
           }
           this.toCallStudio(option);
         }, 0);
+      };
+      if (this.projectType == 'log') {
+        this.sr = this.resetLogSrData(this.sr);
       }
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
@@ -442,7 +445,10 @@ export class AnnotateComponent implements OnInit {
           }
           this.toCallStudio(option);
         }, 0);
-      }
+      };
+      if (this.projectType == 'log') {
+        this.sr = this.resetLogSrData(this.sr);
+      };
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
       };
@@ -473,16 +479,16 @@ export class AnnotateComponent implements OnInit {
         this.numericInput.nativeElement.focus();
       }, 300);
     };
-    let rephrasedQuestion = this.questionForm.get('questionGroup.rephrasedQuestion').value;
+    let freeText = this.questionForm.get('questionGroup.freeText').value;
     let answer = this.questionForm.get('questionGroup.answer').value;
-    return !(category.length > 0 || rephrasedQuestion || answer);
+    return !(category.length > 0 || freeText || answer);
   }
 
 
-  calculatePointsEarned(category, rephrasedQuestion, answer): number {
+  calculatePointsEarned(category, freeText, answer): number {
     let questionPoints = 0;
     questionPoints = (category.length > 0) ? questionPoints + 1 : questionPoints;
-    questionPoints = (rephrasedQuestion) ? questionPoints + 5 : questionPoints;
+    questionPoints = (freeText) ? questionPoints + 5 : questionPoints;
     questionPoints = (answer) ? questionPoints + 10 : questionPoints;
     return questionPoints;
   }
@@ -548,10 +554,10 @@ export class AnnotateComponent implements OnInit {
 
     this.silenceStatus = false;
     let isCategory = this.categoryFunc();
-    let isRewtite = this.questionForm.get('questionGroup.rephrasedQuestion').value;
-    let isQuestion = this.questionForm.get('questionGroup.answer').value;
+    // let isRewtite = this.questionForm.get('questionGroup.freeText').value;
+    // let isQuestion = this.questionForm.get('questionGroup.answer').value;
 
-    if (isCategory.length > 0 || isRewtite || isQuestion) {
+    if (isCategory.length > 0) {
       this.isSkippingGameDialog = true;
     } else {
       this.clearCheckbox();
@@ -569,9 +575,9 @@ export class AnnotateComponent implements OnInit {
       this.silenceStatus = false;
       this.clrErrorTip = false;
       let isCategory = this.categoryFunc();
-      let isRewtite = this.questionForm.get('questionGroup.rephrasedQuestion').value;
-      let isQuestion = this.questionForm.get('questionGroup.answer').value;
-      if (isCategory.length > 0 || isRewtite || isQuestion) {
+      // let isRewtite = this.questionForm.get('questionGroup.freeText').value;
+      // let isQuestion = this.questionForm.get('questionGroup.answer').value;
+      if (isCategory.length > 0) {
         this.isSkippingGameDialog = true;
       } else {
         let param = {
@@ -632,7 +638,10 @@ export class AnnotateComponent implements OnInit {
 
           this.toCallStudio(option);
         }, 0);
-      }
+      };
+      if (this.projectType == 'log') {
+        this.sr = this.resetLogSrData(this.sr);
+      };
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
       };
@@ -710,16 +719,23 @@ export class AnnotateComponent implements OnInit {
         category.push(this.questionForm.get('questionGroup.category').value);
       }
       return category;
-    } else if (!this.isShowDropDown && !this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' || this.isNumeric) {
+    } else if ((!this.isShowDropDown && !this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') || this.isNumeric) {
       if (this.labelChoose) {
         category.push(this.labelChoose);
       }
       return category;
-    } else if (!this.isNumeric && this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image') {
+    } else if (!this.isNumeric && this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
       category = this.multipleLabelList;
       return category;
     } else if (this.projectType == 'ner') {
       category = this.spansList;
+      return category;
+    } else if (this.projectType == 'log') {
+      let a = [];
+      this.spansList.forEach((e) => {
+        a.push({ line: e.line, label: e.label, freeText: e.freeText })
+      });
+      category = a;
       return category;
     } else if (this.projectType == 'image') {
       category = this.currentBoundingData;
@@ -756,7 +772,7 @@ export class AnnotateComponent implements OnInit {
           this.renderer2.setStyle(this.el.nativeElement.querySelector('.' + this.idName), 'background-color', '#ff9c32');
           break;
       };
-    } else if (!this.isNumeric && this.isMultipleLabel && this.projectType != 'ner' && this.projectType !== 'image') {
+    } else if (!this.isNumeric && this.isMultipleLabel && this.projectType != 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
       this.multipleLabelList = this.annotationHistory[index].category
       this.multipleLabelList.forEach(e => {
         let multiLabelClass = 'multiLabel' + this.categories.indexOf(e);;
@@ -780,6 +796,20 @@ export class AnnotateComponent implements OnInit {
 
         });
       }, 10);
+    } else if (this.projectType == 'log') {
+      setTimeout(() => {
+        this.sr.userInputs[0].problemCategory.forEach(element => {
+          for (let i = 0; i < this.sr.originalData.length; i++) {
+            if (element.line == this.sr.originalData[i].line) {
+              this.onMouseDownTxt(element, this.sr.originalData[i].index);
+              this.onMouseUpTxt(element, this.sr.originalData[i].index, 'historyBack');
+              break;
+
+            }
+          }
+        });
+      }, 10)
+
     }
     this.annotationHistory.splice(index, 1);
   }
@@ -788,7 +818,7 @@ export class AnnotateComponent implements OnInit {
   clearUserInput() {
     this.isShowDropDown ? this.questionForm.get('questionGroup.category').reset() : this.labelChoose = null;
     this.active = -1;
-    this.questionForm.get('questionGroup.rephrasedQuestion').reset();
+    this.questionForm.get('questionGroup.freeText').reset();
     this.questionForm.get('questionGroup.answer').reset();
     this.multipleLabelList = [];
     this.spansList = [];
@@ -979,7 +1009,7 @@ export class AnnotateComponent implements OnInit {
       if (responseSr) {
 
         let flag = [];
-        if (this.projectType != 'ner' && this.projectType != 'image') {
+        if (this.projectType != 'ner' && this.projectType != 'image' && this.projectType != 'log') {
           _.forIn(responseSr.originalData, function (value, key) {
             flag.push({ key: key, value: value });
             responseSr.originalData = flag;
@@ -1002,8 +1032,10 @@ export class AnnotateComponent implements OnInit {
             this.currentBoundingData = this.annotationHistory[index].images;
             this.annotationHistory.splice(index, 1);
           }, 0);
+        };
+        if (this.projectType == 'log') {
+          responseSr.originalData = this.resetLogSrData([responseSr]).originalData
         }
-
         if (responseSr.flag && responseSr.flag.silence) {
           this.silenceStatus = true;
         };
@@ -1060,6 +1092,23 @@ export class AnnotateComponent implements OnInit {
       return sr;
     }
   };
+
+  resetLogSrData(sr) {
+    if (!sr.MSG) {
+      let flag = [];
+      sr = sr[0];
+      let a = 0;
+      _.forIn(sr.originalData, function (value, key) {
+        flag.push({ index: a, line: key, text: value, freeText: '' });
+        a++
+      });
+
+      sr.originalData = flag;
+      return sr;
+    } else {
+      return sr;
+    }
+  }
 
 
   toCallStudio(option) {
@@ -1165,6 +1214,128 @@ export class AnnotateComponent implements OnInit {
   }
 
 
+  onMouseDownTxt(data, row) {
+    this.spanStart = row;
+  }
+
+
+  onMouseUpTxt(data, row, from) {
+    this.spanEnd = row;
+    if (this.spanEnd > this.spanStart) {
+
+      for (let a = this.spanStart; a < this.spanEnd + 1; a++) {
+        let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
+        let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
+        let indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
+        this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
+        if (_.indexOf(this.toGetLogLines(this.spansList), pDom.classList[0].split('-').pop()) < 0) {
+          this.spansList.push({ line: pDom.classList[0].split('-').pop(), label: this.categories[this.selectedEntityID], freeText: this.questionForm.get('questionGroup.freeText').value, index: a, selected: false })
+        }
+        this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
+        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList, indexDom);
+        this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+
+        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a), this.spansList, indexDom);
+      }
+    } else if (this.spanEnd == this.spanStart) {
+      let pDom = this.el.nativeElement.querySelector('.txtRowContent' + this.spanEnd);
+      let indexDom = this.el.nativeElement.querySelector('.logIndex' + this.spanEnd);
+      this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
+      // update the this.spansList
+      if (_.indexOf(this.toGetLogLines(this.spansList), data.line) < 0) {
+        this.spansList.push({ line: data.line, label: from == 'historyBack' ? data.label : this.categories[this.selectedEntityID], freeText: from == 'historyBack' ? data.freeText : this.questionForm.get('questionGroup.freeText').value, index: this.spanEnd, selected: false })
+      }
+
+      let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
+      this.getElementService.toFindDomAddText(txtRowEntityDom, from == 'historyBack' ? data.label : this.categories[this.selectedEntityID], 'txtEntityLabel');
+      this.spansList = this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt', this.spansList, indexDom);
+      this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
+      this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
+      this.spansList = this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd), this.spansList, indexDom);
+    } else {
+      for (let a = this.spanEnd; a < this.spanStart + 1; a++) {
+        let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
+        let indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
+        this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
+        if (_.indexOf(this.toGetLogLines(this.spansList), pDom.classList[0].split('-').pop()) < 0) {
+          this.spansList.push({ line: pDom.classList[0].split('-').pop(), label: this.categories[this.selectedEntityID], freeText: this.questionForm.get('questionGroup.freeText').value, index: a, selected: false })
+        }
+        let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
+        this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
+        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList, indexDom);
+        this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a), this.spansList, indexDom);
+
+      }
+    }
+    // console.log('this.spansList:::', this.spansList)
+
+  }
+
+
+  toGetLogLines(spansList) {
+    let x = [];
+    spansList.forEach((e) => {
+      x.push(e.line);
+    });
+    return x;
+  }
+
+
+  clickIndex(e, data, index) {
+    // to clean all the selected rowIndex first
+    if (this.spansList.length > 0) {
+      this.spansList.forEach((e) => {
+        if (e.index != data.index) {
+          if (e.selected) {
+            e.selected = false;
+            let dom = this.el.nativeElement.querySelector('.logIndex' + e.index);
+            this.renderer2.removeClass(dom, 'selectedRowIndex');
+            this.renderer2.addClass(dom, 'rowIndex');
+          }
+        }
+      })
+    }
+
+    if (e.target.nextSibling.className.indexOf('txtEntityLabel') > 0) {
+
+      // to show the original freetext enable edit
+      for (let i = 0; i < this.spansList.length; i++) {
+        if (this.spansList[i].line == data.line) {
+          this.questionForm.get('questionGroup.freeText').setValue(this.spansList[i].freeText);
+          let classList = e.target.className.split(' ')
+          if (classList.indexOf('selectedRowIndex') > -1) {
+            classList.splice(classList.indexOf('selectedRowIndex'), 1, 'rowIndex')
+            e.target.className = classList.join(' ');
+            this.spansList[i].selected = false;
+          } else {
+            classList.splice(classList.indexOf('rowIndex'), 1, 'selectedRowIndex')
+            e.target.className = classList.join(' ');
+            this.spansList[i].selected = true;
+          };
+          break;
+        }
+      }
+    } else {
+
+      this.questionForm.get('questionGroup.freeText').reset();
+
+    }
+  }
+
+
+  updateFreeText(e) {
+    if (this.spansList.length > 0) {
+      for (let i = 0; i < this.spansList.length; i++) {
+        if (this.spansList[i].selected) {
+          this.spansList[i].freeText = e;
+          break;
+        }
+      }
+    }
+  }
 
 
 }

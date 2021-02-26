@@ -11,7 +11,7 @@ const projectDB = require('../db/project-db');
 const srsDB = require('../db/srs-db');
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
-const { GENERATESTATUS, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
+const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
 const fs = require('fs');
 const ObjectId = require("mongodb").ObjectID;
 const moment = require('moment');
@@ -22,6 +22,7 @@ const dataSetService = require('../services/dataSet-service');
 const S3 = require('../utils/s3');
 const validator = require("../utils/validator");
 const imgImporter = require("../utils/imgImporter");
+const logImporter = require("../utils/logImporter");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const mongoDb = require("../db/mongo.db");
 const S3Utils = require('../utils/s3');
@@ -43,6 +44,7 @@ async function createProject(req) {
     console.log(`[ FILE ] Service ticktes to db`);
     await srsImporter.execute(req, annotators);
     await imgImporter.execute(req, true, annotators);
+    await logImporter.execute(req, true, annotators);
 
     console.log(`[ FILE ] Service save project info to db`);
     return await saveProjectInfo(req, userCompleteCase, annotators);
@@ -119,7 +121,7 @@ async function prepareHeaders(project, format) {
 
     let headerArray = [];
     //selected headers
-    if (project.projectType == PROJECTTYPE.IMGAGE) {
+    if (project.projectType == PROJECTTYPE.IMGAGE || project.projectType == PROJECTTYPE.LOG) {
         let param = { id: "fileName", title: "fileName" };
         headerArray.push(param);
     }else{
@@ -211,6 +213,32 @@ async function prepareContents(srData, project, format) {
             await project.categoryList.split(",").forEach(item => {
                 newCase[item] = newCase[item][0]? JSON.stringify(newCase[item]):[];
             });
+        }else if(project.projectType == PROJECTTYPE.LOG){
+            // init log classification fileName
+            newCase.fileName = srs.fileInfo.fileName;
+
+            await project.categoryList.split(",").forEach(item => {
+                newCase[item] = [];
+            });
+            
+            await srs.userInputs.forEach(async item => {
+                await item.problemCategory.forEach(async lb =>{
+                    await project.categoryList.split(",").forEach((label) => {
+                        if (lb.label === label) {
+                            const line = lb.line;
+                            let data = { [line]: srs.originalData[line] };
+                            if (lb.freeText) {
+                                data["freeText"] = lb.freeText;
+                            }
+                            newCase[label].push(data)
+                        }
+                    });
+                });
+            });
+            //change annotations to a string array 
+            await project.categoryList.split(",").forEach(item => {
+                newCase[item] = newCase[item][0]? JSON.stringify(newCase[item]):[];
+            });
         }else{
             // init selected data
             await project.selectedColumn.forEach(item => {
@@ -279,12 +307,12 @@ async function prepareCsv(mp, format, onlyLabelled) {
     };
     console.log(`[ FILE ] Service prepare csvWriterOptions info`, csvWriterOptions.path);
 
-    let hasData = true;
-    let options = { page: 1, limit: PAGINATELIMIT };
+
+    let options = { page: 1, limit: mp.project.projectType==PROJECTTYPE.LOG? PAGINATETEXTLIMIT : PAGINATELIMIT };
     let query = { projectName: mp.project.projectName };
     onlyLabelled == 'Yes' ? query.userInputsLength = { $gt: 0 }: query;
 
-    while (hasData) {
+    while (true) {
         
         // let result = await srsDB.paginateQuerySrsData(query, options);
         let result = await mongoDb.paginateQuery(mp.model, query, options);
@@ -298,7 +326,7 @@ async function prepareCsv(mp, format, onlyLabelled) {
             options.page = result.nextPage;
         } else {
             console.log(`[ FILE ] Service [Generate-End-] totalCase= ${result.totalDocs} lastPage= ${result.totalPages}`);
-            hasData = false;
+            break;
         }
     }
     return fileName

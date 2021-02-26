@@ -298,6 +298,7 @@ export class ProjectsComponent implements OnInit {
   }
 
   availableNewEntry(id, projectName, projectType) {
+
     for (let i = 0; i < this.datasets.length; i++) {
       if (this.datasets[i].id == id) {
         this.datasets[i].appendSr = 'adding';
@@ -306,6 +307,8 @@ export class ProjectsComponent implements OnInit {
     };
     if (projectType == 'image') {
       this.router.navigate(['appendNewEntries'], { queryParams: { id: id, name: projectName, from: 'projects', projectType: projectType } })
+    } else if (projectType == 'log') {
+
     } else {
       this.avaService.getSample(id).subscribe(res => {
         if (res.appendSr == 'adding') {
@@ -334,6 +337,8 @@ export class ProjectsComponent implements OnInit {
     };
     if (projectType == 'image') {
       this.router.navigate(['appendNewEntries'], { queryParams: { id: id, name: projectName, from: 'projects', projectType: projectType } })
+    } else if (projectType == 'log') {
+
     } else {
       this.avaService.getSample(id).subscribe(res => {
         if (res.appendSr == 'adding') {

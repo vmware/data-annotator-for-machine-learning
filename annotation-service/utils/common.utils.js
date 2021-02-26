@@ -7,7 +7,7 @@
 ***/
 
 
-const LDS = require("lodash");
+const _ = require("lodash");
 
 //Find the most frequent element in the array
 async function findFrequentlyElementInArray(arr) {
@@ -24,9 +24,9 @@ async function findFrequentlyElementInArray(arr) {
     },{})
 
     const times = Object.values(obj);    
-    const max = LDS.max(times);
+    const max = _.max(times);
 
-    if(LDS.indexOf(times, max) == LDS.lastIndexOf(times, max)){
+    if(_.indexOf(times, max) == _.lastIndexOf(times, max)){
         return maxEle;
     }
     return null;
@@ -37,19 +37,19 @@ async function findFrequentlyElementInObject(obj) {
 
     const values = Object.values(obj);
     const keys = Object.keys(obj);  
-    const maxV = LDS.max(values);
+    const maxV = _.max(values);
 
-    if (!LDS.sum(values)) {
+    if (!_.sum(values)) {
         return null;
     }
     // more than one max value take first
-    const key = keys[LDS.indexOf(values, maxV)];
+    const key = keys[_.indexOf(values, maxV)];
     return {[key]: obj[key]};
 
     //max value is only one
-    // if(LDS.indexOf(values, maxV) == LDS.lastIndexOf(values, maxV)){
+    // if(_.indexOf(values, maxV) == _.lastIndexOf(values, maxV)){
     //     let resp = {};
-    //     resp[keys[LDS.indexOf(values, maxV)]] = obj[keys[LDS.indexOf(values, maxV)]];
+    //     resp[keys[_.indexOf(values, maxV)]] = obj[keys[_.indexOf(values, maxV)]];
     //     return resp;
     // }
     
@@ -59,11 +59,11 @@ async function findFrequentlyElementInObject(obj) {
 async function probabilisticInObject(obj) {
 
     const values = Object.values(obj);
-    const total = (LDS.sum(values) == 0 ? 1 : LDS.sum(values));
+    const total = (_.sum(values) == 0 ? 1 : _.sum(values));
 
     let probabilistic = {};
     for (const [key,value] of Object.entries(obj)) {
-        probabilistic[key] = LDS.round(LDS.divide(value, total), 2);
+        probabilistic[key] = _.round(_.divide(value, total), 2);
     }
     return probabilistic;
 }

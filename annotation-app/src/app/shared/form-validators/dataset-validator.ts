@@ -209,7 +209,7 @@ export class DatasetValidator {
 
   static requiredTwo(type): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
-      if (type == 'ner' || type == 'image') {
+      if (type == 'ner' || type == 'image' || type == 'log') {
         if (control.value.length < 1) {
           return { 'msg': { value: DatasetValidator.REQUIRED_FIELD_ENTITY } };
         };
@@ -340,14 +340,23 @@ export class DatasetValidator {
           return false;
         }
       };
-      if (projectType !== 'image') {
+      if (projectType == 'csv' || projectType == 'tabular' || projectType == '') {
+
         if (ext == 'csv') {
           return true;
         } else {
           return false;
         }
       };
+      if (projectType == 'txt' || projectType == 'log') {
+        if (ext == 'zip' || ext == 'tgz') {
+          return true;
+        } else {
+          return false;
+        }
+      };
     } else {
+
       return false;
     }
   }

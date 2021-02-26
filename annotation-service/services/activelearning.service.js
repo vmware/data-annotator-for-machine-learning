@@ -11,7 +11,7 @@ const ObjectId = require("mongodb").ObjectID;
 const axios = require("axios");
 const config = require("../config/config");
 const { LABELTYPE, PROJECTTYPE } = require("../config/constant");
-const LDS = require("lodash");
+const _ = require("lodash");
 
 
 async function triggerActiveLearning(pid, _ids, user, token){
@@ -25,7 +25,7 @@ async function triggerActiveLearning(pid, _ids, user, token){
   const options = {headers: { 'Content-Type': 'application/json', Authorization: token }};
 
   // trigger active learing start to train a al model only trigger once
-  if (!project.al.trained && LDS.uniq(project.al.newLBSr).length >= project.al.trigger && !project.al.training) {
+  if (!project.al.trained && _.uniq(project.al.newLBSr).length >= project.al.trigger && !project.al.training) {
     
     console.log(`[ ACTIVE-LEARNING ] TRAIN MODEL`);
     axios.post(`${config.loopALApiUrl}/al/model/train`, {"projectName": project.projectName, user: user}, options);
@@ -37,7 +37,7 @@ async function triggerActiveLearning(pid, _ids, user, token){
   if(project.al.trained){
     
     // trigger active learning to teach al model
-    if(LDS.uniq(project.al.newLBSr).length >= project.al.frequency && !project.al.teaching) {
+    if(_.uniq(project.al.newLBSr).length >= project.al.frequency && !project.al.teaching) {
       
       console.log(`[ ACTIVE-LEARNING ] TEACH MODEL`);
       axios.post(`${config.loopALApiUrl}/al/model/teach`, {"projectName": project.projectName, user: user}, options);
