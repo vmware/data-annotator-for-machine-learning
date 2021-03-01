@@ -81,23 +81,23 @@ In order to run the annotation-app **in local**, you **need to configure the env
 	   
 For example,	
 
-    ```javascript
-		export const environment: Env = {
+```javascript
+export const environment: Env = {
 
-  			// This is required
-  			production: false,
-  			annotationService: 'http://localhost:3000', // Service API host.
-  			serviceTitle: 'Data-annotation', // The UI name of annotation-app.
-  			provider: 'Data-annotation', // This will be saved in user's detailed info to show where does this user come from and supported by which service.
-  			USER_KEY: 'data-annotation-user', // Once the user logged in successfully this user's detailed info will be saved in localstorage with this key name.
-  			redirectUrl: '/home', // If there has no logged user or token occured err then will redirect to home page.
+  // This is required
+  production: false,
+  annotationService: 'http://localhost:3000', // Service API host.
+  serviceTitle: 'Data-annotation', // The UI name of annotation-app.
+  provider: 'Data-annotation', // This will be saved in user's detailed info to show where does this user come from and supported by which service.
+  USER_KEY: 'data-annotation-user', // Once the user logged in successfully this user's detailed info will be saved in localstorage with this key name.
+  edirectUrl: '/home', // If there has no logged user or token occured err then will redirect to home page.
 
-  			// This is optional
-  			videoSrc: null, // Allow to set the demo video which will show in home page, or set null to show nothing.
-  			googleTrackId: null, // Allow to set google track ID or set null.
-  			enableSendEmail: true //  Allow set true/false. Set true will trigger the send-email functionality after project created, assigned and generated. While set false will disable the send-email functionality.
-		}
-    ```
+  // This is optional
+  videoSrc: null, // Allow to set the demo video which will show in home page, or set null to show nothing.
+  googleTrackId: null, // Allow to set google track ID or set null.
+  enableSendEmail: true //  Allow set true/false. Set true will trigger the send-email functionality after project created, assigned and generated. While set false will disable the send-email functionality.
+}
+```
 
 	
 If you want to configure specific environments for dev, staging, production, go to annotation-app/src/app/services/environment.service.ts to set variables in different environments with the key **APP_CONFIG**. Then you can read the value in this environment.service.ts.
