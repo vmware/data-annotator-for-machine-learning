@@ -307,7 +307,6 @@ export class AnnotateComponent implements OnInit {
         let OldSr = JSON.parse(JSON.stringify(this.sr));
         let addSubmit = {
           srId: OldSr._id,
-          historyDescription: (this.projectType == 'ner' || this.projectType == 'image') ? [OldSr.originalData] : OldSr.originalData,
           type: 'submit',
           category: this.categoryFunc(),
           rewrite: '',
@@ -315,6 +314,21 @@ export class AnnotateComponent implements OnInit {
           activeClass: this.active,
           images: OldSr.images
         };
+        if (this.projectType == 'ner' || this.projectType == 'image') {
+          addSubmit['historyDescription'] = [OldSr.originalData]
+        } else if (this.projectType == 'log') {
+          addSubmit.category.forEach(element => {
+            for (let i = 0; i < OldSr.originalData.length; i++) {
+              if (element.line == OldSr.originalData[i].line) {
+                element.text = OldSr.originalData[i].text;
+                break;
+              }
+            }
+          });
+          addSubmit['historyDescription'] = addSubmit.category;
+        } else {
+          addSubmit['historyDescription'] = OldSr.originalData.slice(0, 10);
+        }
         this.annotationHistory.unshift(addSubmit);
         // console.log("getOne.annotationHistory:::", this.annotationHistory);
       }
@@ -413,7 +427,7 @@ export class AnnotateComponent implements OnInit {
       let OldSr = JSON.parse(JSON.stringify(this.sr));
       let addSkip = {
         srId: OldSr._id,
-        historyDescription: (this.projectType == 'ner' || this.projectType == 'image') ? [OldSr.originalData] : OldSr.originalData,
+        historyDescription: (this.projectType == 'ner' || this.projectType == 'image') ? [OldSr.originalData] : OldSr.originalData.slice(0, 10),
         type: 'skip',
         category: [],
         rewrite: '',
@@ -798,16 +812,19 @@ export class AnnotateComponent implements OnInit {
       }, 10);
     } else if (this.projectType == 'log') {
       setTimeout(() => {
-        this.sr.userInputs[0].problemCategory.forEach(element => {
-          for (let i = 0; i < this.sr.originalData.length; i++) {
-            if (element.line == this.sr.originalData[i].line) {
-              this.onMouseDownTxt(element, this.sr.originalData[i].index);
-              this.onMouseUpTxt(element, this.sr.originalData[i].index, 'historyBack');
-              break;
+        if (this.sr.userInputs.length > 0) {
+          this.sr.userInputs[0].problemCategory.forEach(element => {
+            for (let i = 0; i < this.sr.originalData.length; i++) {
+              if (element.line == this.sr.originalData[i].line) {
+                this.onMouseDownTxt(element, this.sr.originalData[i].index);
+                this.onMouseUpTxt(element, this.sr.originalData[i].index, 'historyBack');
+                break;
 
+              }
             }
-          }
-        });
+          });
+        }
+
       }, 10)
 
     }

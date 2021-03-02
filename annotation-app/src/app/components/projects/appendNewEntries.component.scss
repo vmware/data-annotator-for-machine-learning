@@ -112,6 +112,14 @@ label span {
   z-index: 101;
 }
 
+.txtUpload {
+  padding: unset;
+  width: 140%;
+  height: 100%;
+  border-radius: 0;
+  margin-left: -0.2rem;
+}
+
 .labelUpload:hover {
   color: #0077b8;
   font-weight: bold;
