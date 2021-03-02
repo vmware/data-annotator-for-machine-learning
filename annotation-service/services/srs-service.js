@@ -497,20 +497,25 @@ async function appendSrsData(req){
 
 
 async function sampleSr(req){
-    console.log(`[ SRS ] Service sampleSr.queryProjectById`);
-    const pro = await projectDB.queryProjectById(ObjectId(req.query.pid), 'selectedColumn projectName appendSr');
+    console.log(`[ SRS ] Service sampleSr.getModelProject`);
+    const mp = await getModelProject({_id: ObjectId(req.query.pid)});
+
     console.log(`[ SRS ] Service sampleSr.aggregateSrsData`);
     const schema = [
-        { $match: { projectName: pro.projectName}}, 
+        { $match: { projectName: mp.project.projectName}}, 
         { $sample: { size: 1 }}
     ];
-    const sr = await srsDB.aggregateSrsData(schema);
+    const sr = await mongoDb.aggregateBySchema(mp.model, schema);
     //old data save all csv filed to originalData in db
     console.log(`[ SRS ] Service prepare response sample sr data`);
-    const data = { appendSr: pro.appendSr, sampleSr:{} };
-    pro.selectedColumn.forEach(header =>{
-        data.sampleSr[header] = sr[0].originalData[header]
-    });
+    const data = { appendSr: mp.project.appendSr, sampleSr:{} };
+    
+    if (mp.project.projectType == PROJECTTYPE.LOG) {
+        data.sampleSr = sr[0];
+    }else{
+        data.sampleSr = sr[0].originalData;
+    }
+    
     return data;
 }
 
