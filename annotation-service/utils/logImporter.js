@@ -6,7 +6,7 @@
 ***/
 
 
-const { PAGINATETEXTLIMIT, PROJECTTYPE, S3OPERATIONS, FILETYPE, ACCESS_TIME_60 } = require("../config/constant");
+const { PAGINATETEXTLIMIT, PROJECTTYPE, S3OPERATIONS, FILETYPE, APPENDSR } = require("../config/constant");
 const { LogModel, ProjectModel } = require("../db/db-connect");
 const emailService = require('../services/email-service');
 const mongoDb = require('../db/mongo.db');
@@ -18,7 +18,7 @@ const readline = require('readline');
 const _ = require('lodash');
 const axios = require('axios');
 
-async function execute(req, sendEmail, annotators) {
+async function execute(req, sendEmail, annotators, append) {
       
   if (req.body.projectType != PROJECTTYPE.LOG) {
     return;
@@ -97,6 +97,11 @@ async function execute(req, sendEmail, annotators) {
       const condition = { projectName: req.body.pname };
       const update = { $inc: { totalCase: totalCase } };
       console.log(`[ SRS ] Utils update totalCase:`, totalCase);
+
+      if (append) {
+        update.$set={ appendSr: APPENDSR.DONE };
+      }
+
       await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
 
       if (sendEmail) {
@@ -122,13 +127,13 @@ async function execute(req, sendEmail, annotators) {
 
 
 async function quickAppendLogs(req){
-  
+
   let totalCase = 0; docs=[];
   
-  for (const ticket of req.body.srdata) {
+  for (const file of req.files) {
     
     let index = 0, textLines = {};
-    for (const line of ticket.split("\n")) {
+    for (const line of file.buffer.toString().split("\n")) {
       if (line && line.trim() && validator.isASCII(line)) {
         textLines[++index] = line.trim();
       }
@@ -140,8 +145,8 @@ async function quickAppendLogs(req){
         userInputsLength: 0,
         originalData: textLines,
         fileInfo:{
-          fileSize: Math.random(),
-          fileName: "QUICK_APPEND" + Math.random()
+          fileSize: file.size,
+          fileName: file.originalname
         }
       };  
       docs.push(sechema);
@@ -157,7 +162,7 @@ async function quickAppendLogs(req){
     await mongoDb.insertMany(LogModel, docs, options);
 
     const condition = { projectName: req.body.pname };
-    const update = { $inc: { totalCase: totalCase } };
+    const update = { $inc: { totalCase: totalCase }, $set:{ appendSr: APPENDSR.DONE } };
     console.log(`[ SRS ] Utils quick append update totalCase:`, totalCase);
     await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
   

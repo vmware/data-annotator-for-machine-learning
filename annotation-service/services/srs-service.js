@@ -481,9 +481,10 @@ async function appendSrsData(req){
             console.log(`[ SRS ] Service append tickets data forms  done`);
         }
     }else if (projectType == PROJECTTYPE.LOG) {
+        req.body.isFile = typeof req.body.isFile === 'string'? (req.body.isFile == 'true'?true:false):req.body.isFile;
         if (req.body.isFile) {
             //file append
-            await logImporter.execute(req, false);
+            await logImporter.execute(req, false, null, true);
             console.log(`[ SRS ] Service append logs tickets by file done`);
         } else {
             //quick append

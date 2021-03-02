@@ -10,7 +10,8 @@ const express = require("express");
 const router = express.Router();
 const srsService = require("../services/srs-service");
 const APIs = require('../resources/APIs');
-
+const multer = require("multer");
+const upload = multer();
 
 /* Add SR user input */
 router.patch(APIs.SRS_UPDATE, (req, res) => {
@@ -93,7 +94,7 @@ router.post(APIs.SRS_SKIP_ONE, (req, res) => {
     });
 });
 
-router.post(APIs.SRS_APPEND, (req, res) => {
+router.post(APIs.SRS_APPEND, upload.any(), (req, res) => {
     console.log(`[ SRS ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
     srsService.appendSrsData(req).then(response =>{
         console.log(`[ SRS ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
