@@ -332,6 +332,7 @@ export class DatasetValidator {
 
   private static validateFileExt(inputFile: any, projectType): boolean {
     let ext = inputFile.name.split('.').pop().toLowerCase();
+    // console.log('validateFileExt:::', projectType, ext)
     if (projectType || projectType == '') {
       if (projectType == 'image') {
         if (ext == 'zip') {
@@ -340,7 +341,7 @@ export class DatasetValidator {
           return false;
         }
       };
-      if (projectType == 'csv' || projectType == 'tabular' || projectType == '') {
+      if (projectType == 'ner' || projectType == 'text' || projectType == 'csv' || projectType == 'tabular' || projectType == '') {
 
         if (ext == 'csv') {
           return true;

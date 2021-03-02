@@ -417,10 +417,11 @@ export class AppendNewEntriesComponent implements OnInit {
                     this.uploadGroup.get("totalRow").setValue(choosedDataset.images.length);
                 } else if (this.projectType == 'log') {
                     this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
+                    let a = [];
                     choosedDataset.topReview.forEach(element => {
-                        element.fileSize = (element.fileSize / 1024).toFixed(2);
+                        a.push({ name: element.fileName, size: (element.fileSize / 1024).toFixed(2), content: element.fileContent })
                     });
-                    this.previewContentDatas = choosedDataset.topReview;
+                    this.previewContentDatas = a;
                     this.uploadGroup.get("totalRow").setValue(choosedDataset.totalRows);
                     this.loadPreviewTable = false;
                 } else {
@@ -496,19 +497,31 @@ export class AppendNewEntriesComponent implements OnInit {
                 this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
                 let flag;
                 if (this.inputFile.name.split('.').pop().toLowerCase() == 'zip') {
-                    flag = this.UnZipService.unZip(this.inputFile);
-                } else if (this.inputFile.name.split('.').pop().toLowerCase() == 'tgz') {
-                    flag = this.UnZipService.unTgz(this.inputFile);
-                    console.log('flag:::', flag)
-                    this.previewContentDatas = flag.previewExample;
-                    this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
-                    this.loadPreviewTable = false;
-                };
-                console.log('flag:::', flag)
-                // this.previewContentDatas = flag.previewExample;
-                // this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
-                // this.loadPreviewTable = false;
+                    this.UnZipService.unZip(this.inputFile).then(e => {
+                        flag = e;
+                        this.previewContentDatas = flag.previewExample;
+                        this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
+                        this.loadPreviewTable = false;
 
+                    });
+                } else if (this.inputFile.name.split('.').pop().toLowerCase() == 'tgz') {
+                    this.UnZipService.unTgz(this.inputFile).then(e => {
+                        flag = e;
+                        this.previewContentDatas = flag.previewExample;
+                        this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
+                        this.loadPreviewTable = false;
+                        // setTimeout(() => {
+                        //     this.previewContentDatas = flag.previewExample;
+                        //     this.previewContentDatas.forEach(element => {
+                        //         topReview.push({ fileName: element.name, fileSize: element.size, fileContent: element.content })
+                        //     });
+                        //     this.previewContentDatas = topReview;
+                        //     this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
+                        //     this.loadPreviewTable = false;
+                        // }, 1000);
+
+                    });
+                };
             } else {
                 this.parseCSV();
             };
@@ -785,13 +798,21 @@ export class AppendNewEntriesComponent implements OnInit {
             formData.append("images", JSON.stringify(data));
         } else {
             if (data) {
+
                 params.hasHeader = 'yes';
                 params.fileKey = key;
                 params.location = data.Key;
                 params.topReview = { header: this.previewHeadDatas, topRows: this.previewContentDatas };
                 params.columnInfo = this.columnInfo;
-                params.format = this.projectType == 'tabular' ? 'tabular' : 'csv';
-
+                params.format = this.projectType == 'tabular' ? 'tabular' : (this.projectType == 'log' ? 'txt' : 'csv');
+                if (this.projectType == 'log') {
+                    params['totalRows'] = this.uploadGroup.get("totalRow").value;
+                    let a = [];
+                    this.previewContentDatas.forEach(element => {
+                        a.push({ fileName: element.name, fileSize: element.size, fileContent: element.content.slice(0, 501) })
+                    });
+                    params.topReview = a;
+                }
             } else {
                 this.errorMessage = 'Upload failed, please try again later.';
                 setTimeout(() => {

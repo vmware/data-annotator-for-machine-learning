@@ -295,9 +295,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                     </tbody>
                                     <tbody *ngIf="projectType=='log'">
                                         <tr *ngFor="let previewCont of previewContentDatas">
-                                            <td class="left">{{previewCont.fileName}}</td>
-                                            <td class="left">{{previewCont.fileSize}}</td>
-                                            <td class="left">{{previewCont.fileContent}}</td>
+                                            <td class="left">{{previewCont.name}}</td>
+                                            <td class="left">{{previewCont.size/1000}}</td>
+                                            <td class="left"
+                                                style="margin-bottom: 0.5rem;padding-bottom: unset; word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 20;overflow: hidden;"
+                                                title="{{previewCont.content}}">
+                                                {{previewCont.content}}</td>
                                         </tr>
                                     </tbody>
                                 </table>
