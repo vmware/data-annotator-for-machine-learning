@@ -90,7 +90,7 @@ export const environment: Env = {
   serviceTitle: 'Data-annotation', // The UI name of annotation-app.
   provider: 'Data-annotation', // This will be saved in user's detailed info to show where does this user come from and supported by which service.
   USER_KEY: 'data-annotation-user', // Once the user logged in successfully this user's detailed info will be saved in localstorage with this key name.
-  edirectUrl: '/home', // If there has no logged user or token occured err then will redirect to home page.
+  redirectUrl: '/home', // If there has no logged user or token occured err then will redirect to home page.
 
   // This is optional
   videoSrc: null, // Allow to set the demo video which will show in home page, or set null to show nothing.
