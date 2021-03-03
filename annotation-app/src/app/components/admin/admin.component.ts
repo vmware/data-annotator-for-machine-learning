@@ -450,6 +450,7 @@ export class AdminComponent implements OnInit {
     if (projectType == 'image') {
       this.router.navigate(['appendNewEntries'], { queryParams: { id: id, name: projectName, from: 'admin', projectType: projectType } })
     } else if (projectType == 'log') {
+      this.router.navigate(['appendNewEntries'], { queryParams: { id: id, name: projectName, from: 'admin', projectType: projectType } })
 
     } else {
       this.avaService.getSample(id).subscribe(res => {
@@ -484,6 +485,8 @@ export class AdminComponent implements OnInit {
       }
     }
     if (projectType == 'image') {
+      this.router.navigate(['appendNewEntries'], { queryParams: { id: id, name: projectName, from: 'admin', projectType: projectType } })
+    } else if (projectType == 'log') {
       this.router.navigate(['appendNewEntries'], { queryParams: { id: id, name: projectName, from: 'admin', projectType: projectType } })
     } else {
       this.avaService.getSample(id).subscribe(res => {

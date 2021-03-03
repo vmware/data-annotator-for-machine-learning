@@ -232,7 +232,6 @@ export class AppendNewEntriesComponent implements OnInit {
 
         } else if (this.projectType == 'log') {
             let formData = new FormData();
-            console.log('ready-to-db:::', this.newAddedData);
             this.newAddedData.forEach(element => {
                 if (element.format !== false && element.file) {
                     formData.append('file', element.file);
@@ -1065,7 +1064,6 @@ export class AppendNewEntriesComponent implements OnInit {
                 reader.onloadend = (e) => {
                     this.newAddedData[index].fileContent = reader.result
                 };
-                console.log('onTxtChange:::', this.newAddedData)
             } else {
                 this.newAddedData[index].name = '/';
                 this.newAddedData[index].size = '/';
