@@ -6,7 +6,7 @@
 ***/
 
 
-const { PAGINATETEXTLIMIT, PROJECTTYPE, S3OPERATIONS, FILETYPE, APPENDSR } = require("../config/constant");
+const { PAGINATETEXTLIMIT, PROJECTTYPE, S3OPERATIONS, FILETYPE, APPENDSR, DATASETTYPE } = require("../config/constant");
 const { LogModel, ProjectModel } = require("../db/db-connect");
 const emailService = require('../services/email-service');
 const mongoDb = require('../db/mongo.db');
@@ -47,10 +47,13 @@ async function execute(req, sendEmail, annotators, append) {
 
       
       // header.type is 'Directory' or 'file'
-      //__MACOSX or linux back file start with ._
+      // __MACOSX or linux back file start with ._
+      // only need handle txt file
       const name = header.name.split("/");
-      if (header.type === 'file' && (header.size || header.yauzl.uncompressedSize) && !name[name.length-1].startsWith("._")) {
+      const fileType = header.name.toLowerCase().split(".");
 
+      if (header.type === 'file' && (header.size || header.yauzl.uncompressedSize) && !name[name.length-1].startsWith("._") && fileType[fileType.length-1] == DATASETTYPE.LOG) {
+    
         let index = 0, textLines = {};
         const readInterface = readline.createInterface({ input: stream });
         
@@ -131,7 +134,9 @@ async function quickAppendLogs(req){
   let totalCase = 0; docs=[];
   
   for (const file of req.files) {
-    
+    const names = file.originalname.toLowerCase().split(".");
+    if (names[names.length-1] != DATASETTYPE.LOG) continue;
+
     let index = 0, textLines = {};
     for (const line of file.buffer.toString().split("\n")) {
       if (line && line.trim() && validator.isASCII(line)) {
