@@ -236,7 +236,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
 
         }, error => {
             this.loadingD3 = false;
-            console.log("projectPreview:", error)
+            console.log("projectPreviewErr:", error)
         });
 
         this.getALLSrsParam = {

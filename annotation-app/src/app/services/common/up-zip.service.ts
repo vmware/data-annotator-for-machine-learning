@@ -1,16 +1,10 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
 
 import { Component, OnInit, Input, Output, EventEmitter, Injectable } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { UserAuthService } from '../../services/user-auth.service';
-import { AvaService } from "../../services/ava.service";
-import { QueryDatasetData, DatasetUtil, UploadData } from '../../model/index';
-import { FormValidatorUtil } from '../../shared/form-validators/form-validator-util';
-import { DatasetValidator } from '../../shared/form-validators/dataset-validator';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { Papa } from 'ngx-papaparse';
-import AWS from 'aws-sdk/lib/aws';
-import { Buffer } from 'buffer';
 import * as _ from "lodash";
 import * as JSZip from 'jszip';
 import * as Pako from 'pako';

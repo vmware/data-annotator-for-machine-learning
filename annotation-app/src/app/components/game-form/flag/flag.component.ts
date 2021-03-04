@@ -4,10 +4,8 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
 import { UserAuthService } from '../../../services/user-auth.service';
 import { AvaService } from "../../../services/ava.service";
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import * as _ from "lodash";
 
 
@@ -50,6 +48,7 @@ export class FlagComponent implements OnInit {
   }
 
   ngOnInit() {
+
     this.flagStatus = true;
     this.firstLoadTable = true;
     this.page = 1;
@@ -59,7 +58,8 @@ export class FlagComponent implements OnInit {
       this.labels = this.msg.categoryList;
     } else if (this.msg.labelType && this.msg.labelType == "numericLabel") {
       this.labels = this.msg.min + "--" + this.msg.max;
-    }
+    };
+
 
   }
 
@@ -91,23 +91,37 @@ export class FlagComponent implements OnInit {
       for (let i = 0; i < response.length; i++) {
         flag.push(response[i].originalData)
       };
-      if (flag.length > 0) {
-        let pre = [];
-        _.forIn(flag[0], function (value, key) {
-          pre.push(key)
-        });
-        this.previewSrsHeader = pre;
-        for (let j = 0; j < flag.length; j++) {
-          let a = flag[j];
-          let cell = [];
-          for (let key in a) {
-            cell.push(a[key]);
-          }
-          cellContent.push(cell);
+      if (this.msg.projectType == 'log') {
+        if (flag.length > 0) {
+          this.previewSrsHeader = ['FileContent'];
+          response.forEach(element => {
+            let file = this.resetLogOriginalData(element);
+            let flag = { fileContent: file.originalData, filePreview: file.preview.slice(0, 100) + '...' };
+            element.originalData = flag;
+          });
+        }
+      } else if (this.msg.projectType == 'image') {
+        this.previewSrsHeader = ['FileSize (KB)', 'FileName'];
+      } else {
+        if (flag.length > 0) {
+          let pre = [];
+          _.forIn(flag[0], function (value, key) {
+            pre.push(key)
+          });
+          this.previewSrsHeader = pre;
+          for (let j = 0; j < flag.length; j++) {
+            let a = flag[j];
+            let cell = [];
+            for (let key in a) {
+              cell.push(a[key]);
+            }
+            cellContent.push(cell);
+          };
         };
-      };
-      for (let k = 0; k < response.length; k++) {
-        response[k].originalData = cellContent[k];
+        for (let k = 0; k < response.length; k++) {
+          response[k].originalData = cellContent[k];
+        }
+
       }
       this.previewSrs = response;
       this.loading = false;
@@ -136,6 +150,24 @@ export class FlagComponent implements OnInit {
       this.loading = false;
 
     });
+  };
+
+
+  resetLogOriginalData(sr) {
+    if (!sr.MSG) {
+      let flag = [];
+      let preview = '';
+      let res;
+      _.forIn(sr.originalData, function (value, key) {
+        flag.push({ index: key, text: value });
+        preview = preview + (key + '. ' + value)
+      });
+      sr.originalData = flag;
+      res = { originalData: sr.originalData, preview: preview }
+      return res;
+    } else {
+      return sr;
+    }
   }
 
 

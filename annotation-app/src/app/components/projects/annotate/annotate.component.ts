@@ -13,7 +13,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import * as _ from "lodash";
 import { LabelStudioService } from 'app/services/label-studio.service';
 import { GetElementService } from 'app/services/common/dom.service';
-import { ClassField } from '@angular/compiler';
 
 @Component({
   selector: 'app-annotate',
@@ -74,6 +73,39 @@ export class AnnotateComponent implements OnInit {
   projectType: string;
   historyTask: any = [];
   antTags: any;
+  logCategories: any = [];
+  colorsRainbow = [
+    "#00ffff",
+    "#ff00ff",
+    "#00ff7f",
+    "#ff6347",
+    "#9B0D54",
+    "#00bfff",
+    "#ffa500",
+    "#ff69b4",
+    "#7fffd4",
+    "#ffd700",
+    "#FBC1DA",
+    "#4D007A",
+    "#ffdab9",
+    "#adff2f",
+    "#d2b48c",
+    "#dcdcdc",
+    "#583fcf",
+    "#A32100",
+    "#0F1E82",
+    "#F89997",
+    "#003D79",
+    "#00D4B8",
+    "#6C5F59",
+    "#AADB1E",
+    "#36C9E1",
+    "#D0ACE4",
+    "#798893",
+    "#ED186F",
+    "#9DA3DB",
+    "#ffff00"
+  ];
 
   constructor(
     private renderer2: Renderer2,
@@ -184,7 +216,7 @@ export class AnnotateComponent implements OnInit {
           // console.log("fetchData.this.sr:::", this.sr);
           this.sr = this.resetImageSrData(this.sr);
           setTimeout(() => {
-            this.sortLabelForImage();
+            this.sortLabelForColor(this.categories);
             let option = {
               dom: 'label-studio',
               imageRectLabelTemplate: this.imageRectLabelTemplate,
@@ -214,19 +246,26 @@ export class AnnotateComponent implements OnInit {
         } else {
 
           this.categories = categoryResponse.lables;
+          if (this.projectType == 'log') {
+            this.sortLabelForColor(this.categories)
+          }
           this.isShowDropDown = false;
-          if (this.categories.length > 6 && this.projectType != 'ner' && this.projectType != 'image') {
+          if (this.categories.length > 6 && this.projectType != 'ner' && this.projectType != 'image' && this.projectType != 'log') {
             this.isShowDropDown = true;
           };
         }
-        // this.loading = false;
-
       }, error => {
         this.error = "All cases have been completely annotated.";
         console.log('Unable to fetch SR data from ava server: ', JSON.stringify(error, null, 2));
         this.loading = false;
       }, () => {
         this.loading = false;
+        if (this.projectType == 'log') {
+          setTimeout(() => {
+            this.el.nativeElement.querySelector('.logCategories' + this.selectedEntityID).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
+          }, 5);
+        }
+
       }
     );
   }
@@ -377,6 +416,11 @@ export class AnnotateComponent implements OnInit {
       this.showSubmitDialog();
     }, () => {
       this.loading = false;
+      if (this.projectType == 'log') {
+        setTimeout(() => {
+          this.el.nativeElement.querySelector('.logCategories' + this.selectedEntityID).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
+        }, 5);
+      }
       this.showSubmitDialog();
     });
   }
@@ -481,6 +525,11 @@ export class AnnotateComponent implements OnInit {
       this.isSkippingGameDialog = false;
     }, () => {
       this.loading = false;
+      if (this.projectType == 'log') {
+        setTimeout(() => {
+          this.el.nativeElement.querySelector('.logCategories' + this.selectedEntityID).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
+        }, 5);
+      }
       this.isSkippingGameDialog = false;
     });
   }
@@ -568,8 +617,6 @@ export class AnnotateComponent implements OnInit {
 
     this.silenceStatus = false;
     let isCategory = this.categoryFunc();
-    // let isRewtite = this.questionForm.get('questionGroup.freeText').value;
-    // let isQuestion = this.questionForm.get('questionGroup.answer').value;
 
     if (isCategory.length > 0) {
       this.isSkippingGameDialog = true;
@@ -589,8 +636,6 @@ export class AnnotateComponent implements OnInit {
       this.silenceStatus = false;
       this.clrErrorTip = false;
       let isCategory = this.categoryFunc();
-      // let isRewtite = this.questionForm.get('questionGroup.freeText').value;
-      // let isQuestion = this.questionForm.get('questionGroup.answer').value;
       if (isCategory.length > 0) {
         this.isSkippingGameDialog = true;
       } else {
@@ -660,7 +705,11 @@ export class AnnotateComponent implements OnInit {
         this.silenceStatus = true;
       };
       this.loading = false;
-
+      if (this.projectType == 'log') {
+        setTimeout(() => {
+          this.el.nativeElement.querySelector('.logCategories' + this.selectedEntityID).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
+        }, 5);
+      }
       if (this.isNumeric) {
         setTimeout(() => {
           this.numericInput.nativeElement.focus();
@@ -807,7 +856,6 @@ export class AnnotateComponent implements OnInit {
             this.onMouseDown(annotatedIDs[0], 'historyBack');
             this.onMouseUp(annotatedIDs[annotatedIDs.length - 1], 'historyBack', this.categories.indexOf(element2.label));
           });
-
         });
       }, 10);
     } else if (this.projectType == 'log') {
@@ -819,14 +867,11 @@ export class AnnotateComponent implements OnInit {
                 this.onMouseDownTxt(element, this.sr.originalData[i].index);
                 this.onMouseUpTxt(element, this.sr.originalData[i].index, 'historyBack');
                 break;
-
               }
             }
           });
         }
-
       }, 10)
-
     }
     this.annotationHistory.splice(index, 1);
   }
@@ -984,6 +1029,19 @@ export class AnnotateComponent implements OnInit {
   onSelectingEntity(e, data, index) {
     e.preventDefault();
     this.selectedEntityID = index;
+    if (this.projectType == 'log') {
+      let logLabelDoms = this.el.nativeElement.querySelectorAll('.logCategories');
+      // console.log('logLabelDoms:::', logLabelDoms);
+      logLabelDoms.forEach((element, i) => {
+        if (index == i) {
+          element.style.backgroundColor = element.style.borderColor;
+          element.style.color = 'white';
+        } else {
+          element.style.backgroundColor = "";
+          element.style.color = "black";
+        }
+      });
+    }
 
   }
 
@@ -1172,45 +1230,17 @@ export class AnnotateComponent implements OnInit {
   }
 
 
-  sortLabelForImage() {
-    let coloursRainbow = [
-      "#00ffff",
-      "#ff00ff",
-      "#00ff7f",
-      "#ff6347",
-      "#9B0D54",
-      "#00bfff",
-      "#ffa500",
-      "#ff69b4",
-      "#7fffd4",
-      "#ffd700",
-      "#FBC1DA",
-      "#4D007A",
-      "#ffdab9",
-      "#adff2f",
-      "#d2b48c",
-      "#dcdcdc",
-      "#583fcf",
-      "#A32100",
-      "#0F1E82",
-      "#F89997",
-      "#003D79",
-      "#00D4B8",
-      "#6C5F59",
-      "#AADB1E",
-      "#36C9E1",
-      "#D0ACE4",
-      "#798893",
-      "#ED186F",
-      "#9DA3DB",
-      "#ffff00"
-    ];
-    this.categories.forEach((element, index) => {
+  sortLabelForColor(categories) {
+    this.logCategories = [];
+    categories.forEach((element, index) => {
       if (index >= 30) { index = index - 30; };
-      this.imageRectLabelTemplate += `<Label value="${element}" background="${coloursRainbow[index]}" selectedColor="white"/>`
-      this.imagePolyLabelTemplate += `<Label value="${element}" background="${coloursRainbow[index]}" selectedColor="white"/>`
+      if (this.projectType == 'log') {
+        this.logCategories.push({ label: element, color: this.colorsRainbow[index] })
+      } else {
+        this.imageRectLabelTemplate += `<Label value="${element}" background="${this.colorsRainbow[index]}" selectedColor="white"/>`
+        this.imagePolyLabelTemplate += `<Label value="${element}" background="${this.colorsRainbow[index]}" selectedColor="white"/>`
+      }
     });
-
   };
 
 
@@ -1238,57 +1268,29 @@ export class AnnotateComponent implements OnInit {
 
   onMouseUpTxt(data, row, from) {
     this.spanEnd = row;
-    if (this.spanEnd > this.spanStart) {
-
-      for (let a = this.spanStart; a < this.spanEnd + 1; a++) {
-        let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
-        let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
-        let indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
-        this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
-        if (_.indexOf(this.toGetLogLines(this.spansList), pDom.classList[0].split('-').pop()) < 0) {
-          this.spansList.push({ line: pDom.classList[0].split('-').pop(), label: this.categories[this.selectedEntityID], freeText: this.questionForm.get('questionGroup.freeText').value, index: a, selected: false })
-        }
-        this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
-        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList, indexDom);
-        this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
-        this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
-
-        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a), this.spansList, indexDom);
-      }
-    } else if (this.spanEnd == this.spanStart) {
+    if (this.spanEnd == this.spanStart) {
       let pDom = this.el.nativeElement.querySelector('.txtRowContent' + this.spanEnd);
       let indexDom = this.el.nativeElement.querySelector('.logIndex' + this.spanEnd);
       this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
+      // to give label's color to text
+      pDom.style.backgroundColor = this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID];
       // update the this.spansList
       if (_.indexOf(this.toGetLogLines(this.spansList), data.line) < 0) {
         this.spansList.push({ line: data.line, label: from == 'historyBack' ? data.label : this.categories[this.selectedEntityID], freeText: from == 'historyBack' ? data.freeText : this.questionForm.get('questionGroup.freeText').value, index: this.spanEnd, selected: false })
       }
 
       let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
+      // to give label's color to entity
+      txtRowEntityDom.style.backgroundColor = this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID];
+
       this.getElementService.toFindDomAddText(txtRowEntityDom, from == 'historyBack' ? data.label : this.categories[this.selectedEntityID], 'txtEntityLabel');
-      this.spansList = this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt', this.spansList, indexDom);
+      this.spansList = this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt', this.spansList, indexDom, this.el.nativeElement.querySelector('.customBadge' + this.spanEnd));
       this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
       this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
-      this.spansList = this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd), this.spansList, indexDom);
-    } else {
-      for (let a = this.spanEnd; a < this.spanStart + 1; a++) {
-        let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
-        let indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
-        this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
-        if (_.indexOf(this.toGetLogLines(this.spansList), pDom.classList[0].split('-').pop()) < 0) {
-          this.spansList.push({ line: pDom.classList[0].split('-').pop(), label: this.categories[this.selectedEntityID], freeText: this.questionForm.get('questionGroup.freeText').value, index: a, selected: false })
-        }
-        let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
-        this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
-        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList, indexDom);
-        this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
-        this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
-        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a), this.spansList, indexDom);
-
-      }
+      this.spansList = this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd), this.spansList, indexDom, this.el.nativeElement.querySelector('.customBadge' + this.spanEnd));
     }
     // console.log('this.spansList:::', this.spansList)
-
+    this.toCheckSpanslist(this.spansList);
   }
 
 
@@ -1316,13 +1318,13 @@ export class AnnotateComponent implements OnInit {
       })
     }
 
-    if (e.target.nextSibling.className.indexOf('txtEntityLabel') > 0) {
+    if (e.target.nextSibling && e.target.nextSibling.className && e.target.nextSibling.className.indexOf('txtEntityLabel') > 0) {
 
       // to show the original freetext enable edit
       for (let i = 0; i < this.spansList.length; i++) {
         if (this.spansList[i].line == data.line) {
           this.questionForm.get('questionGroup.freeText').setValue(this.spansList[i].freeText);
-          let classList = e.target.className.split(' ')
+          let classList = e.target.className.split(' ');
           if (classList.indexOf('selectedRowIndex') > -1) {
             classList.splice(classList.indexOf('selectedRowIndex'), 1, 'rowIndex')
             e.target.className = classList.join(' ');
@@ -1332,6 +1334,7 @@ export class AnnotateComponent implements OnInit {
             e.target.className = classList.join(' ');
             this.spansList[i].selected = true;
           };
+          this.toCheckSpanslist(this.spansList)
           break;
         }
       }
@@ -1348,10 +1351,21 @@ export class AnnotateComponent implements OnInit {
       for (let i = 0; i < this.spansList.length; i++) {
         if (this.spansList[i].selected) {
           this.spansList[i].freeText = e;
+          this.toCheckSpanslist(this.spansList)
           break;
         }
       }
     }
+  }
+
+  toCheckSpanslist(list) {
+    list.forEach(element => {
+      if (element.freeText) {
+        this.el.nativeElement.querySelector('.customBadge' + element.index).style.backgroundColor = '#cccccc'
+      } else {
+        this.el.nativeElement.querySelector('.customBadge' + element.index).style.backgroundColor = ''
+      }
+    });
   }
 
 

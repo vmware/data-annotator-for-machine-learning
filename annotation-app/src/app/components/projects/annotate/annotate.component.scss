@@ -476,6 +476,7 @@ label .label-leftBoard {
 .rowIndex {
   margin-right: 1rem;
   color: #cccccc;
+  position: relative;
 }
 
 // .rowIndex:hover {
@@ -490,13 +491,13 @@ label .label-leftBoard {
   margin-right: 1rem;
   background-color: #0077b8;
   border-radius: 4px;
-  padding-right: 5px;
+  padding-right: 3px;
   padding-left: 5px;
   color: white;
 }
 
 .selectedTxtRow {
-  background-color: #ffe184;
+  // background-color: #ffe184;
   padding: 0.25em 0.4em 0.25em 0;
   font-weight: bold;
   color: black;
@@ -507,12 +508,13 @@ label .label-leftBoard {
 }
 
 .txtEntityLabel {
-  background-color: #ffe184;
+  // background-color: #ffe184;
   font-size: unset;
   font-weight: bold;
   height: 1.5rem;
   outline: unset;
-  color: #0077b8;
+  // color: #0077b8;
+  color: white;
   padding: 0.25em 0.4em 0.25em 0.25em;
   position: relative;
 }
@@ -538,4 +540,36 @@ label .label-leftBoard {
   width: 100%;
   margin-top: 0.5rem;
   border-color: #ccc;
+}
+
+.logEntityLabel {
+  font-size: unset;
+  font-weight: bold;
+  height: 1.5rem;
+  outline: unset;
+  margin: 0.3rem 0.2rem;
+  color: black;
+  border: 3px solid transparent;
+}
+
+.logEntitySelected {
+  color: white;
+  outline: unset;
+  margin: 0.3rem 0.2rem;
+  border: 3px solid transparent;
+}
+
+.customBadge {
+  // background: #cccccc;
+  color: #fff;
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  top: 0.1rem;
+  right: -0.1rem;
+}
+
+.logCategories:hover {
+  background-color: transparent !important;
 }
