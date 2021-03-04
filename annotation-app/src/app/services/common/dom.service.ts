@@ -33,7 +33,7 @@ export class GetElementService {
     }
 
 
-    toCreateClear(txtRowEntityDom, pDom, newClass, styleClass, spansList, indexDom) {
+    toCreateClear(txtRowEntityDom, pDom, newClass, styleClass, spansList, indexDom, badgeDom) {
         let dom = this.renderer.createElement('span');
         this.renderer.appendChild(dom, this.renderer.createText('×'));
         this.renderer.appendChild(txtRowEntityDom, dom);
@@ -46,6 +46,8 @@ export class GetElementService {
             this.renderer.removeClass(this.renderer.parentNode(dom), 'txtEntityLabel');
             this.renderer.setProperty(this.renderer.parentNode(dom), 'innerHTML', '');
             this.renderer.removeClass(pDom, 'selectedTxtRow');
+            pDom.style.backgroundColor = "";
+            badgeDom.style.background = "";
             // to update the spansList
             spansList.forEach((e, i) => {
                 if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
@@ -87,13 +89,18 @@ export class GetElementService {
     }
 
 
-    toClearSelected(txtRowEntityDom, pDom, clearDom, spansList, indexDom) {
+    toClearSelected(txtRowEntityDom, pDom, clearDom, spansList, indexDom, badgeDom) {
         this.renderer.listen(txtRowEntityDom, 'click', (e) => {
             let classList = e.target.className.split(' ');
             if (classList.indexOf('selected') > -1 && classList.indexOf('txtEntityLabel') > -1) {
                 this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
                 this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
                 this.renderer.removeClass(pDom, 'selectedTxtRow');
+                pDom.style.backgroundColor = "";
+                txtRowEntityDom.style.backgroundColor = "";
+                badgeDom.style.background = "";
+
+
                 // to update the spansList
                 spansList.forEach((e, i) => {
                     if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
@@ -115,6 +122,10 @@ export class GetElementService {
                 this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
                 this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
                 this.renderer.removeClass(pDom, 'selectedTxtRow');
+                pDom.style.backgroundColor = "";
+                txtRowEntityDom.style.backgroundColor = "";
+                badgeDom.style.background = "";
+
                 // to update the spansList
                 spansList.forEach((e, i) => {
                     if (e.line == classList[0].split('-').pop()) {

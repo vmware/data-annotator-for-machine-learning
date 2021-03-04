@@ -3,7 +3,7 @@ Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import { Component, OnInit, ElementRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, ElementRef, Renderer2, ɵConsole } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import 'rxjs/Rx'
 import * as _ from 'lodash';
@@ -21,8 +21,7 @@ import AWS from 'aws-sdk/lib/aws';
 import { Buffer } from 'buffer';
 import { DomSanitizer } from '@angular/platform-browser';
 import * as JSZip from 'jszip'
-
-
+import { UnZipService } from 'app/services/common/up-zip.service';
 @Component({
     selector: 'app-append',
     templateUrl: './appendNewEntries.component.html',
@@ -73,7 +72,8 @@ export class AppendNewEntriesComponent implements OnInit {
         private router: Router,
         private el: ElementRef,
         private renderer2: Renderer2,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
+        private UnZipService: UnZipService
 
     ) {
         this.user = this.userAuthService.loggedUser().email;
@@ -128,6 +128,11 @@ export class AppendNewEntriesComponent implements OnInit {
             this.newAddedData.push(flag);
             this.loading = false;
 
+        } else if (this.projectType == 'log') {
+            let flag = { name: '/', size: '/', sizeInkb: '/', format: true, file: null, fileContent: '/' };
+            this.newAddedData.push(flag);
+            this.loading = false;
+
         } else {
             this.avaService.getSample(this.projectId).subscribe(res => {
                 this.sampleData = res.sampleSr;
@@ -153,6 +158,9 @@ export class AppendNewEntriesComponent implements OnInit {
         let b = [];
         if (this.projectType == 'image') {
             this.newAddedData.push({ src: "/", name: '/', size: '/', sizeInkb: '/', format: true, file: File })
+        } else if (this.projectType == 'log') {
+            this.newAddedData.push({ name: '/', size: '/', sizeInkb: '/', format: true, file: null, fileContent: '/' })
+
         } else {
             for (let j = 0; j < this.newAddedData[0].length; j++) {
                 a = { key: this.newAddedData[0][j].key, value: '', format: true };
@@ -220,6 +228,18 @@ export class AppendNewEntriesComponent implements OnInit {
                 }
             })
 
+
+
+        } else if (this.projectType == 'log') {
+            let formData = new FormData();
+            this.newAddedData.forEach(element => {
+                if (element.format !== false && element.file) {
+                    formData.append('file', element.file);
+                }
+            });
+            formData.append('pname', this.projectName)
+            formData.append('isFile', 'false')
+            this.appendSrs(formData);
 
 
         } else {
@@ -394,6 +414,15 @@ export class AppendNewEntriesComponent implements OnInit {
                     });
                     this.previewContentDatas = choosedDataset.topReview;
                     this.uploadGroup.get("totalRow").setValue(choosedDataset.images.length);
+                } else if (this.projectType == 'log') {
+                    this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
+                    let a = [];
+                    choosedDataset.topReview.forEach(element => {
+                        a.push({ name: element.fileName, size: (element.fileSize / 1024).toFixed(2), content: element.fileContent })
+                    });
+                    this.previewContentDatas = a;
+                    this.uploadGroup.get("totalRow").setValue(choosedDataset.totalRows);
+                    this.loadPreviewTable = false;
                 } else {
                     this.previewHeadDatas = choosedDataset.topReview.header;
                     this.previewContentDatas = choosedDataset.topReview.topRows;
@@ -443,7 +472,7 @@ export class AppendNewEntriesComponent implements OnInit {
                     let objectKey = Object.keys(entries.files)
                     let cc = []
                     for (let i = 0; i < objectKey.length; i++) {
-                        if (objectKey[i].split('/')[1] != '' && that.validImageType(objectKey[i])) {
+                        if (objectKey[i].split('/')[1] != '' && that.UnZipService.validImageType(objectKey[i])) {
                             cc.push(objectKey[i])
                             if (cc.length == 3) { break }
                         }
@@ -463,6 +492,35 @@ export class AppendNewEntriesComponent implements OnInit {
                 }, (err) => {
                     console.log(err)
                 });
+            } else if (this.projectType == 'log') {
+                this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
+                let flag;
+                if (this.inputFile.name.split('.').pop().toLowerCase() == 'zip') {
+                    this.UnZipService.unZip(this.inputFile).then(e => {
+                        flag = e;
+                        this.previewContentDatas = flag.previewExample;
+                        this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
+                        this.loadPreviewTable = false;
+
+                    });
+                } else if (this.inputFile.name.split('.').pop().toLowerCase() == 'tgz') {
+                    this.UnZipService.unTgz(this.inputFile).then(e => {
+                        flag = e;
+                        this.previewContentDatas = flag.previewExample;
+                        this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
+                        this.loadPreviewTable = false;
+                        // setTimeout(() => {
+                        //     this.previewContentDatas = flag.previewExample;
+                        //     this.previewContentDatas.forEach(element => {
+                        //         topReview.push({ fileName: element.name, fileSize: element.size, fileContent: element.content })
+                        //     });
+                        //     this.previewContentDatas = topReview;
+                        //     this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
+                        //     this.loadPreviewTable = false;
+                        // }, 1000);
+
+                    });
+                };
             } else {
                 this.parseCSV();
             };
@@ -739,13 +797,21 @@ export class AppendNewEntriesComponent implements OnInit {
             formData.append("images", JSON.stringify(data));
         } else {
             if (data) {
+
                 params.hasHeader = 'yes';
                 params.fileKey = key;
                 params.location = data.Key;
                 params.topReview = { header: this.previewHeadDatas, topRows: this.previewContentDatas };
                 params.columnInfo = this.columnInfo;
-                params.format = this.projectType == 'tabular' ? 'tabular' : 'csv';
-
+                params.format = this.projectType == 'tabular' ? 'tabular' : (this.projectType == 'log' ? 'txt' : 'csv');
+                if (this.projectType == 'log') {
+                    params['totalRows'] = this.uploadGroup.get("totalRow").value;
+                    let a = [];
+                    this.previewContentDatas.forEach(element => {
+                        a.push({ fileName: element.name, fileSize: element.size, fileContent: element.content.slice(0, 501) })
+                    });
+                    params.topReview = a;
+                }
             } else {
                 this.errorMessage = 'Upload failed, please try again later.';
                 setTimeout(() => {
@@ -805,7 +871,7 @@ export class AppendNewEntriesComponent implements OnInit {
 
     onImageChange(e, index) {
         if (e && e.target.files[0]) {
-            if (this.validImageType(e.target.files[0].name)) {
+            if (this.UnZipService.validImageType(e.target.files[0].name)) {
                 let image = e.target.files[0];
                 this.newAddedData[index].name = image.name;
                 this.newAddedData[index].sizeInkb = (image.size / 1024).toFixed(2);
@@ -862,7 +928,7 @@ export class AppendNewEntriesComponent implements OnInit {
         jsZip.loadAsync(inputFile).then(function (entries) {
             let realEntryLength = 0;
             entries.forEach((path, file) => {
-                if (!file.dir && that.validImageType(path)) {
+                if (!file.dir && that.UnZipService.validImageType(path)) {
                     realEntryLength++
                 }
             });
@@ -887,7 +953,7 @@ export class AppendNewEntriesComponent implements OnInit {
                 let uploadEntries = [];
                 let that = this;
                 entry.forEach((path, file) => {
-                    if (!file.dir && that.validImageType(path)) {
+                    if (!file.dir && that.UnZipService.validImageType(path)) {
                         file.async('blob').then(async function (blob) {
                             realEntryIndex++;
                             let uploadParams = { Bucket: new Buffer(s3Config.bucket, 'base64').toString(), Key: new Buffer(s3Config.key, 'base64').toString() + '/' + outNo + '/' + path, Body: blob };
@@ -971,6 +1037,47 @@ export class AppendNewEntriesComponent implements OnInit {
     }
 
 
+    onTxtChange(e, index) {
+        if (e && e.target.files[0]) {
+            if (this.UnZipService.validTxtType(e.target.files[0].name)) {
+
+                for (let i = 0; i < this.newAddedData.length; i++) {
+                    if (this.newAddedData[i].name == e.target.files[0].name) {
+                        this.newAddedData[index].name = '/';
+                        this.newAddedData[index].size = '/';
+                        this.newAddedData[index].sizeInkb = '/'
+                        this.newAddedData[index].format = false;
+                        this.newAddedData[index].file = null;
+                        this.newAddedData[index].fileContent = '/';
+                        this.newAddedData[index].unique = true;
+                        return;
+                    }
+                }
+                let txt = e.target.files[0];
+                this.newAddedData[index].name = txt.name;
+                this.newAddedData[index].sizeInkb = (txt.size / 1024).toFixed(2);
+                this.newAddedData[index].size = txt.size;
+                this.newAddedData[index].format = true;
+                this.newAddedData[index].file = txt;
+                let reader = new FileReader();
+                reader.readAsText(txt);
+                reader.onloadend = (e) => {
+                    this.newAddedData[index].fileContent = reader.result
+                };
+            } else {
+                this.newAddedData[index].name = '/';
+                this.newAddedData[index].size = '/';
+                this.newAddedData[index].sizeInkb = '/'
+                this.newAddedData[index].format = false;
+                this.newAddedData[index].file = null;
+                this.newAddedData[index].fileContent = '/';
+
+            }
+
+        }
+    }
+
+
 
     isASCII(str) {
         // return /^[\x00-\x7F]*$/.test(str);
@@ -980,18 +1087,8 @@ export class AppendNewEntriesComponent implements OnInit {
 
 
 
-    validImageType(fileName) {
-        if (!fileName.startsWith('__MACOSX')) {
-            let types = ['png', 'jpg', 'jpeg', 'tif', 'bmp'];
-            let type = fileName.split('.').pop();
-            if (types.indexOf(type.toLowerCase()) > -1) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    };
+
+
+
 
 }

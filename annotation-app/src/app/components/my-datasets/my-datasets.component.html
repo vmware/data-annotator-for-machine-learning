@@ -107,7 +107,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 {{itemHeader}}</th>
             </tr>
           </thead>
-          <tbody *ngIf="targetFormat!=='image'">
+          <tbody *ngIf="targetFormat!=='image'&&targetFormat!=='txt'">
             <tr *ngFor="let previewCont of topRowContent">
               <td class="left" *ngFor="let item of previewCont">{{item}}</td>
             </tr>
@@ -119,6 +119,13 @@ SPDX-License-Identifier: Apache-2.0 -->
               <td class="left">{{previewCont.fileSize}}</td>
               <td class="left"><img src="{{previewCont.location}}" alt="" style="max-width: 15rem;max-height: 15rem;">
               </td>
+            </tr>
+          </tbody>
+          <tbody *ngIf="targetFormat=='txt'">
+            <tr *ngFor="let previewCont of topRowContent">
+              <td class="left">{{previewCont.fileName}}</td>
+              <td class="left">{{previewCont.fileSize}}</td>
+              <td class="left">{{previewCont.fileContent}}</td>
             </tr>
           </tbody>
         </table>

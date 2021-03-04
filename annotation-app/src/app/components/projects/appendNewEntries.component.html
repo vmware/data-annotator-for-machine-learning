@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     Publish
                 </button>
 
-                <clr-datagrid *ngIf="projectType!=='image'" [clrDgLoading]="loading">
+                <clr-datagrid *ngIf="projectType!=='image'&& projectType!=='log'" [clrDgLoading]="loading">
                     <clr-dg-column style="max-width:90px">#</clr-dg-column>
                     <clr-dg-column *ngFor="let header of sampleData">{{ header.key}}</clr-dg-column>
                     <clr-dg-column style="max-width:90px">Action</clr-dg-column>
@@ -90,16 +90,58 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <clr-dg-cell>{{content.sizeInkb}}</clr-dg-cell>
                     </clr-dg-row>
                 </clr-datagrid>
+                <clr-datagrid *ngIf="projectType=='log'" [clrDgLoading]="loading">
+                    <clr-dg-column>#</clr-dg-column>
+                    <clr-dg-column>File Name</clr-dg-column>
+                    <clr-dg-column>File Size (KB)</clr-dg-column>
+                    <clr-dg-column>File Content</clr-dg-column>
+                    <clr-dg-column>Action</clr-dg-column>
+                    <clr-dg-row *ngFor="let content of newAddedData; let a = index">
+                        <clr-dg-cell>{{ a + 1 }}</clr-dg-cell>
+                        <clr-dg-cell style="word-break: break-all">{{content.name}}</clr-dg-cell>
+                        <clr-dg-cell>{{content.sizeInkb}}</clr-dg-cell>
+                        <clr-dg-cell title="{{content.fileContent}}"
+                            style="min-width: 400px;margin-bottom: 0.5rem;padding-bottom: unset; word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 20;overflow: hidden;">
+                            {{content.fileContent}}</clr-dg-cell>
+                        <clr-dg-cell>
+                            <button type="button" class="btn btn-icon actionClass" role="tooltip" aria-haspopup="true"
+                                title="Click to Upload">
+                                <div>
+                                    <label class="label labelUpload txtUpload" for="uploadTxt{{a}}" style="top: 8rem">
+                                        <span>
+                                            <clr-icon size="16" shape="upload"
+                                                style="color: #0077b8;margin-bottom: 0.1rem;">
+                                            </clr-icon>
+                                        </span>
+                                    </label>
+                                    <input id="uploadTxt{{a}}" style="display:none" accept=".txt,.TXT" type="file"
+                                        (change)="onTxtChange($event,a)">
+                                </div>
+                            </button>
+                            <button type="button" class="btn btn-icon actionClass" role="tooltip" aria-haspopup="true"
+                                title="Delete" (click)="deleteRow($event, a)">
+                                <clr-icon aria-hidden="true" shape="trash"></clr-icon>
+                            </button>
+                            <div *ngIf='content.format==false && !content.unique' style="color: red;">Wrong
+                                Format!</div>
+                            <div *ngIf='content.format==false && content.unique' style="color: red;">Same File!
+                            </div>
+
+                        </clr-dg-cell>
+
+                    </clr-dg-row>
+                </clr-datagrid>
 
             </clr-tab-content>
         </clr-tab>
         <clr-tab>
-            <button clrTabLink>{{projectType=="image"?"Upload Zip":"Upload CSV"}}</button>
+            <button clrTabLink>{{(projectType=="image"||projectType=="log")?"Upload Zip":"Upload CSV"}}</button>
             <clr-tab-content *clrIfActive>
 
-                <h5 *ngIf="projectType!=='image'" style="margin-top: 2rem;">Original csv header with an example given
+                <h5 *ngIf="projectType!=='image'&&projectType!=='log'" style="margin-top: 2rem;">Original csv header
+                    with an example given
                 </h5>
-                <clr-datagrid *ngIf="projectType!=='image'" [clrDgLoading]="loading">
+                <clr-datagrid *ngIf="projectType!=='image'&&projectType!=='log'" [clrDgLoading]="loading">
                     <clr-dg-column *ngFor="let header of sampleData">{{ header.key}}</clr-dg-column>
                     <clr-dg-row>
                         <clr-dg-cell *ngFor="let content of sampleData">
@@ -108,13 +150,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </clr-dg-row>
 
                 </clr-datagrid>
-                <h5 *ngIf="projectType!=='image'" style="margin-top: 2rem;">Add new csv ( Make sure your new csv
+                <h5 *ngIf="projectType!=='image'&&projectType!=='log'" style="margin-top: 2rem;">Add new csv ( Make sure
+                    your new csv
                     contains the same original
                     headers as above )</h5>
                 <form class="addCsv" [formGroup]="uploadGroup" autocomplete="off">
                     <div class="form-group clr-row">
                         <label for="datasetsName" class="label-tooltip clr-col-12 clr-col-md-1">Name
-                            <!-- <span>*</span> -->
                         </label>
                         <div class="clr-input-wrapper clr-col-12 clr-col-md-5">
                             <!-- <input id="datasetsName" type="text" formControlName="datasetsName" class="clr-input"
@@ -146,7 +188,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </div>
                     <div class="form-group clr-row">
                         <label for="localFile"
-                            class="label-tooltip clr-col-12 clr-col-md-1">{{projectType=="image"?"Images":"CSV"}}
+                            class="label-tooltip clr-col-12 clr-col-md-1">{{(projectType=="image" || projectType=="log")?"ZIP":"CSV"}}
                             Upload
                             <clr-tooltip>
                                 <clr-icon clrTooltipTrigger shape="info-circle" size="18" aria-label="Uniq tooltip 5">
@@ -155,6 +197,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                                     <span style="color: currentColor">Text and tabular dataset only support CSV (UTF-8)
                                         file. Image dataset only
                                         support ZIP
+                                        file.Txt dataset only
+                                        support ZIP or TGZ
                                         file.</span>
                                 </clr-tooltip-content>
                             </clr-tooltip>
@@ -171,15 +215,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </div>
                             <br>
                             <label class="label fileLabel" for="upfiles">
-                                UPLOAD {{projectType=="image"?"IMAGES":"CSV"}}
+                                UPLOAD {{(projectType=="image" || projectType=="log")?"ZIP":"CSV"}}
                             </label>
 
                             <span>{{inputFile?.name}}</span>
-                            <input *ngIf="projectType!=='image'" id="upfiles" name="localFileFile" type="file"
+                            <!-- <input *ngIf="projectType!=='image'" id="upfiles" name="localFileFile" type="file"
                                 (change)="onLocalFileChange($event)" accept=".csv,.CSV" class="fileInput">
                             <input *ngIf="projectType=='image'" id="upfiles" name="localFileFile" type="file"
-                                (change)="onLocalFileChange($event)" accept=".zip,.ZIP" class="fileInput">
-
+                                (change)="onLocalFileChange($event)" accept=".zip,.ZIP" class="fileInput"> -->
+                            <input id="upfiles" name="localFileFile" type="file" (change)="onLocalFileChange($event)"
+                                [accept]="projectType=='image'?'.zip,.ZIP':(projectType=='log'?'.zip,.ZIP,.tgz,.TGZ':'.csv,.CSV')"
+                                class="fileInput">
 
                         </div>
 
@@ -232,7 +278,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                 {{itemHeader}}</th>
                                         </tr>
                                     </thead>
-                                    <tbody *ngIf="projectType!=='image'">
+                                    <tbody *ngIf="projectType!=='image'&&projectType!=='log'">
                                         <tr *ngFor="let previewCont of previewContentDatas">
                                             <td class="left" *ngFor="let item of previewCont">{{item}}</td>
                                         </tr>
@@ -245,6 +291,16 @@ SPDX-License-Identifier: Apache-2.0 -->
                                             <td class="left"><img [src]="previewCont.location" alt=""
                                                     style="max-width: 15rem;max-height: 15rem;">
                                             </td>
+                                        </tr>
+                                    </tbody>
+                                    <tbody *ngIf="projectType=='log'">
+                                        <tr *ngFor="let previewCont of previewContentDatas">
+                                            <td class="left">{{previewCont.name}}</td>
+                                            <td class="left">{{previewCont.size/1000}}</td>
+                                            <td class="left"
+                                                style="margin-bottom: 0.5rem;padding-bottom: unset; word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 20;overflow: hidden;"
+                                                title="{{previewCont.content}}">
+                                                {{previewCont.content}}</td>
                                         </tr>
                                     </tbody>
                                 </table>

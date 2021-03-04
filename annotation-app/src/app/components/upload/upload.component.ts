@@ -579,7 +579,7 @@ export class UploadComponent implements OnInit {
         }, function error(e) {
         })
       });
-      that.previewContentDatas = { previewExample: previewExample, exampleEntries: example }
+      that.previewContentDatas = { previewExample: previewExample, exampleEntries: example };
     })
   }
 

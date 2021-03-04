@@ -40,24 +40,53 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width:90px">{{i+1}}
                   </clr-dg-cell>
                   <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width:150px">
-                    <!-- <clr-radio-container clrInline style="margin-top: 0rem !important;">
-                        <clr-radio-wrapper>
-                          <input type="radio" clrRadio name="{{i+1}}" required value="Standard" [checked]=flagStatus />
-                          <label>ON</label>
-                        </clr-radio-wrapper>
-                        <clr-radio-wrapper>
-                          <input type="radio" clrRadio name="{{i+1}}" required value="Top Label" />
-                          <label>OFF</label>
-                        </clr-radio-wrapper>
-                      </clr-radio-container> -->
                     <button class="btn btn-sm" (click)="unflag(dataset)"
                       style="margin-top: 0 !important;">unflag</button>
                   </clr-dg-cell>
-                  <clr-dg-cell *ngFor="let content of dataset.originalData" class="previewHeight ellipsis-datagrid"
-                    style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
-                    title="{{content}}">
-                    {{content}}
-                  </clr-dg-cell>
+                  <div *ngIf="msg.projectType!='log' && msg.projectType!='image'">
+                    <clr-dg-cell *ngFor="let content of dataset.originalData" class="previewHeight ellipsis-datagrid"
+                      style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
+                      title="{{content}}">
+                      {{content}}
+                    </clr-dg-cell>
+                  </div>
+                  <div *ngIf="msg.projectType=='log'">
+                    <clr-dg-cell class="previewHeight ellipsis-datagrid"
+                      style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px">
+                      {{dataset.originalData.filePreview}}
+                      <div class="signpost-triggers-wrapper">
+                        <div class="signpost-trigger-demo">
+                          <div class="signpost-item">
+                            <div class="trigger-item">
+                              <clr-signpost>
+                                <button class="btn btn-sm btn-link btnOutline" clrSignpostTrigger>
+                                  show details
+                                </button>
+                                <clr-signpost-content [clrPosition]="'right-bottom'" *clrIfOpen>
+                                  <p><strong>Txt FileContent:</strong></p>
+                                  <p *ngFor="let log of dataset.originalData.fileContent">
+                                    <span style="margin-right: 0.5rem">{{log.index}}</span>
+                                    <span>{{log.text}}</span>
+                                  </p>
+                                </clr-signpost-content>
+                              </clr-signpost>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </clr-dg-cell>
+                  </div>
+                  <div *ngIf="msg.projectType=='image'">
+                    <clr-dg-cell class="previewHeight ellipsis-datagrid"
+                      style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px">
+                      {{dataset.originalData.fileSize/1000}}
+                    </clr-dg-cell>
+                    <clr-dg-cell class="previewHeight ellipsis-datagrid"
+                      style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px">
+                      {{dataset.originalData.fileName}}
+                    </clr-dg-cell>
+                  </div>
+
 
                 </clr-dg-row>
 

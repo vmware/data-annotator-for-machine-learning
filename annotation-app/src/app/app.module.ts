@@ -45,6 +45,7 @@ import { EditProjectComponent } from './components/edit-project/edit-project.com
 import { LabelStudioService } from "./services/label-studio.service";
 import { SharedModule } from "./shared/shared.module";
 import { GetElementService } from "./services/common/dom.service";
+import { UnZipService } from "./services/common/up-zip.service";
 
 
 @NgModule({
@@ -97,7 +98,8 @@ import { GetElementService } from "./services/common/dom.service";
     FeedbackService,
     LabelStudioService,
     Title,
-    GetElementService
+    GetElementService,
+    UnZipService
   ],
   bootstrap: [AppComponent]
 })

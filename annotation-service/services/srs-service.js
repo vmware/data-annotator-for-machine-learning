@@ -481,9 +481,10 @@ async function appendSrsData(req){
             console.log(`[ SRS ] Service append tickets data forms  done`);
         }
     }else if (projectType == PROJECTTYPE.LOG) {
+        req.body.isFile = typeof req.body.isFile === 'string'? (req.body.isFile == 'true'?true:false):req.body.isFile;
         if (req.body.isFile) {
             //file append
-            await logImporter.execute(req, false);
+            await logImporter.execute(req, false, null, true);
             console.log(`[ SRS ] Service append logs tickets by file done`);
         } else {
             //quick append
@@ -496,20 +497,25 @@ async function appendSrsData(req){
 
 
 async function sampleSr(req){
-    console.log(`[ SRS ] Service sampleSr.queryProjectById`);
-    const pro = await projectDB.queryProjectById(ObjectId(req.query.pid), 'selectedColumn projectName appendSr');
+    console.log(`[ SRS ] Service sampleSr.getModelProject`);
+    const mp = await getModelProject({_id: ObjectId(req.query.pid)});
+
     console.log(`[ SRS ] Service sampleSr.aggregateSrsData`);
     const schema = [
-        { $match: { projectName: pro.projectName}}, 
+        { $match: { projectName: mp.project.projectName}}, 
         { $sample: { size: 1 }}
     ];
-    const sr = await srsDB.aggregateSrsData(schema);
+    const sr = await mongoDb.aggregateBySchema(mp.model, schema);
     //old data save all csv filed to originalData in db
     console.log(`[ SRS ] Service prepare response sample sr data`);
-    const data = { appendSr: pro.appendSr, sampleSr:{} };
-    pro.selectedColumn.forEach(header =>{
-        data.sampleSr[header] = sr[0].originalData[header]
-    });
+    const data = { appendSr: mp.project.appendSr, sampleSr:{} };
+    
+    if (mp.project.projectType == PROJECTTYPE.LOG) {
+        data.sampleSr = sr[0];
+    }else{
+        data.sampleSr = sr[0].originalData;
+    }
+    
     return data;
 }
 

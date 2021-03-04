@@ -131,7 +131,9 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div *ngIf='projectType==="log"' class="txtBox">
               <p *ngFor="let ticket of sr.originalData;let i = index" id="c-{{i}}" class="txtRow txtRow{{i}}"
                 title="{{ticket.freeText}}">
-                <span class="logIndex{{i}} rowIndex" (click)="clickIndex($event,ticket,i)">{{i+1}}</span>
+                <span class="logIndex{{i}} rowIndex" (click)="clickIndex($event,ticket,i)">{{i+1}}
+                  <span class="customBadge customBadge{{i}}"></span>
+                </span>
                 <span class="txtRowEntity{{i}}"></span>
                 <span class="logLine-{{ticket.line}} txtRowContent{{i}} " (mousedown)="onMouseDownTxt(ticket,i)"
                   (mouseup)="onMouseUpTxt(ticket,i,'current')">{{ticket.text}}</span>
@@ -222,9 +224,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           <!-- txt log labels -->
           <div class="questionContainer" *ngIf="projectType == 'log'">
             <div>
-              <button *ngFor="let label of categories; let i = index" class="btn labels label entityLabel"
-                [ngClass]="{'entitySelected': i==selectedEntityID, 'entityLabel': i!==selectedEntityID}"
-                (click)="onSelectingEntity($event,label, i)">{{ label }}</button>
+              <button *ngFor="let item of logCategories; let i = index"
+                class="logCategories logCategories{{i}} btn labels label logEntityLabel"
+                [ngClass]="{'logEntitySelected': i==selectedEntityID, 'logEntityLabel': i!==selectedEntityID}"
+                [ngStyle]="{'border-color':item.color }"
+                (click)="onSelectingEntity($event,item.label, i)">{{ item.label }}</button>
               &nbsp; &nbsp;
             </div>
             <div class="clr-textarea-wrapper clr-col-12" style="padding-left: 0.3rem;">
