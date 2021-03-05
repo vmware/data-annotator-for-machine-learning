@@ -284,7 +284,8 @@ export class AppendNewEntriesComponent implements OnInit {
 
 
     private getMyDatasets() {
-        this.avaService.getMyDatasets().subscribe(
+        let a = (this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'ner') ? 'csv' : (this.projectType == 'image' ? 'image' : 'txt')
+        this.avaService.getMyDatasets(a).subscribe(
             (res) => {
                 if (this.projectType == 'image') {
                     let flag = [];
