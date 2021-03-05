@@ -62,7 +62,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 *clrIfOpen>
                                 <span *ngIf="ownerList.length==0">This field is required</span>
                                 <span *ngIf="inputOwnerValidation">This owner has already exist!</span>
-                                <span *ngIf="!emailRegForOwner">Wrong format! Only allow Vmware email box!</span>
+                                <span *ngIf="!emailRegForOwner && env.config.authUrl">Wrong format! Only allow Vmware
+                                    email box!</span>
+                                <span *ngIf="!emailRegForOwner && !env.config.authUrl">Wrong format!</span>
+
                             </clr-tooltip-content>
                         </clr-tooltip>
                     </div>
@@ -91,7 +94,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 *clrIfOpen>
                                 <span *ngIf="assigneeList.length==0">This field is required</span>
                                 <span *ngIf="inputAssigneeValidation">This annotator has already exist!</span>
-                                <span *ngIf="!emailReg">Wrong format! Only allow Vmware email box!</span>
+                                <span *ngIf="!emailReg && env.config.authUrl">Wrong format! Only allow Vmware email
+                                    box!</span>
+                                <span *ngIf="!emailReg && !env.config.authUrl">Wrong format!</span>
+
                             </clr-tooltip-content>
                         </clr-tooltip>
                     </div>

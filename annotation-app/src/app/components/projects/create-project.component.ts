@@ -362,7 +362,7 @@ export class CreateNewComponent implements OnInit {
     if (this.env.config.authUrl) {
       this.emailReg = RegExp("@vmware.com\\s*$").test(val);
     } else {
-      this.emailReg = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(val);
+      this.emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val);
     }
     if (this.emailReg && this.inputAssigneeValidation == false) {
       this.assigneeList.push(val);
@@ -378,7 +378,7 @@ export class CreateNewComponent implements OnInit {
     if (this.env.config.authUrl) {
       this.emailReg = RegExp("@vmware.com\\s*$").test(e);
     } else {
-      this.emailReg = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(e);
+      this.emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
     }
     if (this.emailReg && this.inputAssigneeValidation == false) {
       this.assigneeList.push(e);
