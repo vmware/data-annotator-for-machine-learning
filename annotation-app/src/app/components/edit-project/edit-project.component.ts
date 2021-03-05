@@ -137,7 +137,7 @@ export class EditProjectComponent implements OnInit {
     if (this.env.config.authUrl) {
       this.emailRegForOwner = RegExp('@vmware.com\\s*$').test(e.target.value);
     } else {
-      this.emailReg = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(e.target.value);
+      this.emailRegForOwner = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.target.value);
     };
     if (this.emailRegForOwner && this.inputOwnerValidation == false) {
       this.ownerList.push(e.target.value);
@@ -188,7 +188,7 @@ export class EditProjectComponent implements OnInit {
     if (this.env.config.authUrl) {
       this.emailReg = RegExp('@vmware.com\\s*$').test(e.target.value);
     } else {
-      this.emailReg = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(e.target.value);
+      this.emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.target.value);
     };
     if (this.emailReg && this.inputAssigneeValidation == false) {
       this.assigneeList.push(e.target.value);
