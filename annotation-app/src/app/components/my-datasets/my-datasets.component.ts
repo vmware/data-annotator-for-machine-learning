@@ -91,7 +91,7 @@ export class MyDatasetsComponent implements OnInit {
 
   private getMyDatasets(params?: any) {
     this.loading = true;
-    this.avaService.getMyDatasets().subscribe(res => {
+    this.avaService.getMyDatasets('').subscribe(res => {
       this.loading = false;
       this.datasets = res;
       this.totalItems = res.length;
