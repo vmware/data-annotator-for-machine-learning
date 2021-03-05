@@ -54,8 +54,8 @@ export class AvaService {
   }
 
 
-  public getMyDatasets(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/users/datasets`);
+  public getMyDatasets(format?: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/users/datasets?format=${format}`);
   }
 
 
