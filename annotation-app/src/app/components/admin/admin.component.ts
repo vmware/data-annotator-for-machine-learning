@@ -217,7 +217,7 @@ export class AdminComponent implements OnInit {
       let emailReg;
       if (!this.env.config.authUrl) {
         this.setUserErrMessage = '';
-        emailReg = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/.test(this.inputEmail);
+        emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.inputEmail);
         if (!emailReg) {
           this.setUserErrMessage = 'Wrong format! Only accept email address';
         }
