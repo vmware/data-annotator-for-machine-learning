@@ -33,7 +33,7 @@ async function execute(req, sendEmail, annotators, append) {
   const fileType = _.toLower(urlsplit[urlsplit.length-1]);
   if (fileType  == FILETYPE.ZIP) {
     uncompressStream = new compressing.zip.UncompressStream();
-  }else if (fileType == FILETYPE.TGZ || fileType == FILETYPE.GZ) {
+  }else if (fileType == FILETYPE.TGZ) {
     uncompressStream = new compressing.tgz.UncompressStream();
   }
 

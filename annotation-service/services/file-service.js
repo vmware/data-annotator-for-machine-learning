@@ -80,7 +80,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         assignmentLogic: req.body.assignmentLogic,
         annotator: annotators,
         dataSource: req.body.fileName,
-        selectedDataset: req.body.selectedDataset,
+        selectedDataset: [req.body.selectedDataset],
         selectedColumn: selectedColumn,
         annotationQuestion: req.body.annotationQuestion,
         shareStatus: false,
