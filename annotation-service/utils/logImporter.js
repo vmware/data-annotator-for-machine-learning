@@ -99,7 +99,7 @@ async function execute(req, sendEmail, annotators, append) {
 
       const condition = { projectName: req.body.pname };
       const update = { $inc: { totalCase: totalCase } };
-      console.log(`[ SRS ] Utils update totalCase:`, totalCase);
+      console.log(`[ LOG ] Utils update totalCase:`, totalCase);
 
       if (append) {
         update.$set={ appendSr: APPENDSR.DONE };

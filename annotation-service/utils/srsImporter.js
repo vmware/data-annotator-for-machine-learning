@@ -20,7 +20,7 @@ const S3Utils = require('./s3');
 module.exports = {
     execute: async function (req, annotators) {
         const projectType = req.body.projectType;
-        if (projectType != PROJECTTYPE.TEXT || projectType != PROJECTTYPE.TABULAR || projectType != PROJECTTYPE.NER ) {
+        if (projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER ) {
             return;
         }
 
