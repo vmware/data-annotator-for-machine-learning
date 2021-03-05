@@ -95,7 +95,7 @@ async function queryDataSetByUser(req) {
         }
     }
     const datasets = await DataSetDB.queryDataSetByConditions(condition);
-    if (format && format == DATASETTYPE.IMGAGE) {
+    if (!format || format == DATASETTYPE.IMGAGE) {
         return await imageTopPreview(datasets);
     }
     return datasets;
