@@ -83,6 +83,16 @@ async function saveDataSetInfo(req) {
 async function queryDataSetByUser(req) {
     console.log(`[ DATASET ] Service queryDataSetByUser`);
     const condition = { user: req.auth.email };
+    if (req.query.format) {
+        if (req.query.format == DATASETTYPE.CSV) {
+            condition.$or = [
+                {format: DATASETTYPE.CSV},
+                {format: DATASETTYPE.TABULAR}
+            ];
+        }else{
+            condition.format = req.query.format;
+        }
+    }
     const datasets = await DataSetDB.queryDataSetByConditions(condition);
     
     return await imageTopPreview(datasets);
