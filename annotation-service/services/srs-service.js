@@ -326,8 +326,13 @@ async function skipOne(req){
     return await getOneSrs(request);
 }
 
-async function appendSrsDataByForms(req){
+async function appendSrsDataByForms(req, originalHeaders){
+    
     console.log(`[ SRS ] Service appendSrsDataByForms start prepare data `);
+
+    const appendHeaders = Object.keys(req.body.srdata[0]);        
+    await validator.checkAppendTicketsHeaders(appendHeaders, originalHeaders)
+    
     let caseNum = 0;
     let docs = [];
     req.body.srdata.forEach(srJson =>{
@@ -361,7 +366,7 @@ async function appendSrsDataByForms(req){
 
 }
 
-async function appendSrsDataByCSVFile(req){
+async function appendSrsDataByCSVFile(req, originalHeaders){
 
     console.log(`[ SRS ] Service appendSrsDataByCSVFile update appen sr status to adding: `, Date.now());
     //update append status
@@ -379,10 +384,13 @@ async function appendSrsDataByCSVFile(req){
     };
     let caseNum = 0;
     let docs = [];
-    csv(headerRule).fromStream(request.get(signedUrl)).subscribe( oneData => {
+    csv(headerRule).fromStream(request.get(signedUrl)).subscribe( async (oneData, index) => {
+        if (index==0) {
+            await validator.checkAppendTicketsHeaders(Object.keys(oneData), originalHeaders)
+        }
         //only save selected data
         const select = {};
-        req.body.selectedHeaders.forEach( item =>{
+        originalHeaders.forEach( item =>{
             select[item] = oneData[item];
         });
         //check all selected data if is empty
@@ -421,7 +429,11 @@ async function appendSrsDataByCSVFile(req){
 
             console.log(`[ SRS ] Service appendSrsDataByCSVFile update appen sr status to done`);
             const conditions = { projectName: req.body.pname };
-            const update = { $set: { "appendSr": APPENDSR.DONE, updatedDate: Date.now() }, $inc: { "totalCase": caseNum } };
+            const update = { 
+                $set: { appendSr: APPENDSR.DONE, updatedDate: Date.now() }, 
+                $inc: { totalCase: caseNum },
+                $push: { selectedDataset: req.body.selectedDataset }
+            };
             await projectDB.findUpdateProject(conditions,update);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
         } catch (error) {
@@ -435,52 +447,45 @@ async function appendSrsData(req){
     await validator.checkAnnotator(req.auth.email);
     const mp = await getModelProject({projectName: req.body.pname});
     
+    const dataset = req.body.selectedDataset;
     const projectType = mp.project.projectType;
     req.body.projectType = projectType;
 
+    if (dataset) {
+        const conditions = { dataSetName: dataset }
+        datasets = await validator.checkDataSet(conditions, true);
+        req.body.location = datasets[0].location;
+    }
+
     if (projectType == PROJECTTYPE.IMGAGE) {
-        
-        let appendNumber = 0;
-        
+        const update = { $set: { appendSr: APPENDSR.DONE, updatedDate: Date.now() } };
         if (req.body.isFile) {
             //file append
             await imgImporter.execute(req,false);
-            
-            const conditions = { dataSetName: req.body.selectedDataset }
-            const ds = await validator.checkDataSet(conditions, true);
-            appendNumber = ds[0].images.length;
+            update.$push = { selectedDataset: dataset };
+            update.$inc = { totalCase: datasets[0].images.length };
+
         }else{
             //quick append
-            await imgImporter.quickAppendImages(req, mp.project.selectedDataset);
-            appendNumber = req.body.images.length;
+            await imgImporter.quickAppendImages(req, mp.project.selectedDataset[0]);
+            update.$inc = { totalCase: req.body.images.length };
         }
-        
-        //update total case
-        const update = { $set: { "appendSr": APPENDSR.DONE, updatedDate: Date.now() }, $inc: { totalCase: appendNumber } };
-        await mongoDb.findOneAndUpdate(ProjectModel, pcond, update);
+        await mongoDb.findOneAndUpdate(ProjectModel, {projectName: req.body.pname}, update);
 
-    } else if(projectType == PROJECTTYPE.TEXT || projectType == PROJECTTYPE.TABULAR || projectType == PROJECTTYPE.NER){
-        
+    } else if(projectType == PROJECTTYPE.TEXT || projectType == PROJECTTYPE.TABULAR || projectType == PROJECTTYPE.NER){  
         //validate pname and headers
         const originalHeaders = mp.project.selectedColumn;
-        
         if(req.body.isFile){
-            //file append
-            console.log(`[ SRS ] Service appendSrsData csvFile: ${req.body.csvFile}`);
-            const appendHeaders = req.body.selectedHeaders;
-            await validator.checkAppendTicketsHeaders(appendHeaders, originalHeaders)
-            
-            await appendSrsDataByCSVFile(req);
+            //file append            
+            await appendSrsDataByCSVFile(req, originalHeaders);
             console.log(`[ SRS ] Service append tickets by CSV file done`);
         }else{
-            //quick append
-            const appendHeaders = Object.keys(req.body.srdata[0]);        
-            await validator.checkAppendTicketsHeaders(appendHeaders, originalHeaders)
-
-            await appendSrsDataByForms(req);
+            await appendSrsDataByForms(req, originalHeaders);
             console.log(`[ SRS ] Service append tickets data forms  done`);
         }
+    
     }else if (projectType == PROJECTTYPE.LOG) {
+        //form data changed the field  type to string
         req.body.isFile = typeof req.body.isFile === 'string'? (req.body.isFile == 'true'?true:false):req.body.isFile;
         if (req.body.isFile) {
             //file append
@@ -491,6 +496,7 @@ async function appendSrsData(req){
             await logImporter.quickAppendLogs(req);
             console.log(`[ SRS ] Service append logs tickets by forms done`);
         }
+    
     }
     
 }

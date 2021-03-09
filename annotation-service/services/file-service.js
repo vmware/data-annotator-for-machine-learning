@@ -26,6 +26,7 @@ const logImporter = require("../utils/logImporter");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const mongoDb = require("../db/mongo.db");
 const S3Utils = require('../utils/s3');
+const { DataSetModel } = require("../db/db-connect");
 
 async function createProject(req) {
 
@@ -375,13 +376,22 @@ async function queryFileForDownlad(req) {
     const data = await projectDB.queryProjectById(ObjectId(req.query.pid));
     data._doc.generateInfo.labelType = data.labelType ? data.labelType : LABELTYPE.TEXT;
 
+    const S3 = await S3Utils.s3Client();
     let response = data.generateInfo;
+    originalDataSets = []
+
     if (data.generateInfo.file) {//data.generateInfo alway not null
         console.error(`[ FILE ] Service found file: ${data.generateInfo.file}`);
-        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, data.generateInfo.file);
+        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, data.generateInfo.file, S3);
         response.file = Buffer.from(signedUrl).toString("base64");
     }
-
+    for (const dataset of data.selectedDataset) {
+        const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
+        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
+        originalDataSets.push(signedUrl)
+    }
+    data._doc.generateInfo.originalDataSets = originalDataSets;
+    
     return response;
 
 }
