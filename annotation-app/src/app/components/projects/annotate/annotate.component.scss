@@ -498,7 +498,7 @@ label .label-leftBoard {
 
 .selectedTxtRow {
   // background-color: #ffe184;
-  padding: 0.25em 0.4em 0.25em 0;
+  padding: 0.25em 0.4em 0.25em 0.25em;
   font-weight: bold;
   color: black;
   user-select: none;
@@ -557,6 +557,11 @@ label .label-leftBoard {
   outline: unset;
   margin: 0.3rem 0.2rem;
   border: 3px solid transparent;
+}
+
+::ng-deep .logEntitySelected:hover {
+  color: black !important;
+  border-bottom-width: 8px;
 }
 
 .customBadge {

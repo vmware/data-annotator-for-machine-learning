@@ -14,6 +14,7 @@ import * as _ from "lodash";
 import { LabelStudioService } from 'app/services/label-studio.service';
 import { GetElementService } from 'app/services/common/dom.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ToolService } from 'app/services/common/tool.service';
 
 @Component({
   selector: 'app-annotate',
@@ -117,7 +118,8 @@ export class AnnotateComponent implements OnInit {
     private avaService: AvaService,
     private el: ElementRef,
     private LabelStudioService: LabelStudioService,
-    private getElementService: GetElementService
+    private getElementService: GetElementService,
+    private toolService: ToolService
 
   ) { }
 
@@ -165,25 +167,33 @@ export class AnnotateComponent implements OnInit {
       .subscribe(e => {
         // console.log('updateFilterText:::', e)
         let filterRowsIndex = [];
+        this.sr.originalData.forEach(element => {
+          element.filter = true;
+        });
         if (e) {
           this.sr.originalData.forEach((element, index) => {
-            if (element.text.indexOf(e) == -1) {
-              element.filter = false;
-            } else {
+            let arr = [...element.text.matchAll(RegExp(e, 'gi'))]
+            if (arr.length > 0) {
               element.filter = true;
               this.getElementService.setFilterHighLight('txtRowContent' + element.index, element.text, e);
               filterRowsIndex.push(element.index)
+            } else {
+              element.filter = false;
             }
           });
         };
-        this.spansList.forEach(data => {
-          if (!e || (filterRowsIndex.length > 0 && filterRowsIndex.indexOf(data.index) > -1)) {
-            this.onMouseDownTxt({ line: data.line, label: data.label, freeText: data.freeText }, data.index);
-            this.onMouseUpTxt({ line: data.line, label: data.label, freeText: data.freeText }, data.index, 'historyBack');
+        setTimeout(() => {
+          this.spansList.forEach(data => {
+            if (!e || (filterRowsIndex.length > 0 && filterRowsIndex.indexOf(data.index) > -1)) {
+              this.onMouseDownTxt({ line: data.line, label: data.label, freeText: data.freeText }, data.index);
+              this.onMouseUpTxt({ line: data.line, label: data.label, freeText: data.freeText }, data.index, 'historyBack');
 
-          }
-        })
+            }
+          })
+        }, 10);
+
       });
+
   };
 
 
@@ -1302,7 +1312,7 @@ export class AnnotateComponent implements OnInit {
       this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
       // to give label's color to text
       if (pDom) {
-        pDom.style.backgroundColor = this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID];
+        pDom.style.backgroundColor = this.toolService.hexToRgb(this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID]);
       }
       // update the this.spansList
       if (_.indexOf(this.toGetLogLines(this.spansList), data.line) < 0) {
@@ -1401,6 +1411,9 @@ export class AnnotateComponent implements OnInit {
       }
     });
   };
+
+
+
 
 
 
