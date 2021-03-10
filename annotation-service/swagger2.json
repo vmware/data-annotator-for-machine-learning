@@ -770,7 +770,7 @@
             "schema": {
               "example": {
                 "pname": "0915.15",
-                "csvFile": true,
+                "isFile": true,
                 "srdata": [
                   {
                     "index": 10,

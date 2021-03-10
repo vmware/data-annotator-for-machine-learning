@@ -132,7 +132,7 @@ const projectSchema = new mongoose.Schema({
     assignmentLogic: { type: String },
     annotator: { type: Array },
     dataSource: { type: String },
-    selectedDataset: { type: String },
+    selectedDataset: { type: Array },
     selectedColumn: { type: Array },
     annotationQuestion: { type: String },
     shareStatus: { type: Boolean },

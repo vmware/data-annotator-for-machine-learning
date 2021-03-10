@@ -83,6 +83,5 @@ module.exports = {
     FILETYPE:{
         ZIP: "zip",
         TGZ: "tgz",
-        GZ: "gz"
     },
 }

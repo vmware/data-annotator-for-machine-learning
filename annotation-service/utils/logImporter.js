@@ -33,7 +33,7 @@ async function execute(req, sendEmail, annotators, append) {
   const fileType = _.toLower(urlsplit[urlsplit.length-1]);
   if (fileType  == FILETYPE.ZIP) {
     uncompressStream = new compressing.zip.UncompressStream();
-  }else if (fileType == FILETYPE.TGZ || fileType == FILETYPE.GZ) {
+  }else if (fileType == FILETYPE.TGZ) {
     uncompressStream = new compressing.tgz.UncompressStream();
   }
 
@@ -98,11 +98,12 @@ async function execute(req, sendEmail, annotators, append) {
       }
 
       const condition = { projectName: req.body.pname };
-      const update = { $inc: { totalCase: totalCase } };
+      const update = { $inc: { totalCase: totalCase }, updatedDate: Date.now() };
       console.log(`[ LOG ] Utils update totalCase:`, totalCase);
 
       if (append) {
-        update.$set={ appendSr: APPENDSR.DONE };
+        update.$set = { appendSr: APPENDSR.DONE };
+        update.$push = { selectedDataset: req.body.selectedDataset };
       }
 
       await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
