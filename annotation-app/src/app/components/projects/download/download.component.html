@@ -19,6 +19,11 @@ SPDX-License-Identifier: Apache-2.0 -->
             dataset download please generate the latest dataset first.</span>
           <span *ngIf="msg?.labelType!='numericLabel'">The last generate format is <span
               style="font-weight: bold;">{{msg?.format=='topLabel'?'top label':msg?.format}}</span> .</span>
+          <span *ngIf="msg?.projectType=='log'"> <a href="javascript://"
+              (click)="downloadOriginal(msg?.originalDataSets)">
+              Click to
+              download this project's original
+              datasets.</a></span>
           <!-- <div style="margin-left: 0.1rem;" *ngIf="msg?.labelType!='numericLabel'"> -->
           <div style="margin-left: 0.1rem;">
             <clr-radio-container clrInline>

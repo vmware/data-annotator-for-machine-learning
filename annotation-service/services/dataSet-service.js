@@ -78,19 +78,23 @@ async function saveDataSetInfo(req) {
 async function queryDataSetByUser(req) {
     console.log(`[ DATASET ] Service queryDataSetByUser`);
     const condition = { user: req.auth.email };
-    if (req.query.format) {
-        if (req.query.format == DATASETTYPE.CSV) {
+    const format = req.query.format;
+    if (format) {
+        if (format == DATASETTYPE.CSV) {
             condition.$or = [
                 {format: DATASETTYPE.CSV},
                 {format: DATASETTYPE.TABULAR}
             ];
         }else{
-            condition.format = req.query.format;
+            condition.format = format;
         }
     }
     const datasets = await DataSetDB.queryDataSetByConditions(condition);
+    if (!format || format == DATASETTYPE.IMGAGE) {
+        return await imageTopPreview(datasets);
+    }
+    return datasets;
     
-    return await imageTopPreview(datasets);
 }
 
 async function imageTopPreview(datasets, singleData) {

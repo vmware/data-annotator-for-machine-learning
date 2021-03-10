@@ -24,7 +24,7 @@ export class EnvironmentsService {
     this.env = require('../../environments/environment' + this.nodeEnvironment);
     console.log("Environment:", this.nodeEnvironment);
     // Global site tag (gtag.js) - Google Analytics Start
-    if (this.configuration == 'prod' && this.env.config.googleTrackId) {
+    if (this.configuration == 'prod' && this.env.environment.googleTrackId) {
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
           gtag('config', this.env.environment.googleTrackId, { page_path: event.urlAfterRedirects });

@@ -128,16 +128,41 @@ SPDX-License-Identifier: Apache-2.0 -->
                 (mouseup)="onMouseUp($event,ticket)" id="{{ticket.id}}"
                 class="nerSpan spanIndex{{ticket.id}}">{{ticket.text}}</span>
             </div>
+            <!-- to filter the log -->
+            <div *ngIf='projectType==="log"' class="clr-control-container clr-col-8" class="filterInput">
+              <div class="clr-input-wrapper">
+                <input autocomplete="off" type="text" placeholder="Type to filter ... " class="clr-input filterText"
+                  formControlName="filterText" (ngModelChange)='this.updateFilterText.next($event)'>
+              </div>
+            </div>
             <div *ngIf='projectType==="log"' class="txtBox">
-              <p *ngFor="let ticket of sr.originalData;let i = index" id="c-{{i}}" class="txtRow txtRow{{i}}"
-                title="{{ticket.freeText}}">
-                <span class="logIndex{{i}} rowIndex" (click)="clickIndex($event,ticket,i)">{{i+1}}
-                  <span class="customBadge customBadge{{i}}"></span>
-                </span>
-                <span class="txtRowEntity{{i}}"></span>
-                <span class="logLine-{{ticket.line}} txtRowContent{{i}} " (mousedown)="onMouseDownTxt(ticket,i)"
-                  (mouseup)="onMouseUpTxt(ticket,i,'current')">{{ticket.text}}</span>
-              </p>
+              <div *ngIf="!this.questionForm.get('questionGroup.filterText').value">
+                <p *ngFor="let ticket of sr.originalData;let i = index" id="c-{{i}}" class="txtRow txtRow{{i}}"
+                  title="{{ticket.freeText}}">
+                  <span class="logIndex{{i}} rowIndex" (click)="clickIndex($event,ticket,i)">{{i+1}}
+                    <span class="customBadge customBadge{{i}}"></span>
+                  </span>
+                  <span class="txtRowEntity{{i}}"></span>
+                  <span class="logLine-{{ticket.line}} txtRowContent{{i}} " (mousedown)="onMouseDownTxt(ticket,i)"
+                    (mouseup)="onMouseUpTxt(ticket,i,'current')">{{ticket.text}}</span>
+                </p>
+              </div>
+              <div *ngIf="this.questionForm.get('questionGroup.filterText').value">
+                <div *ngFor="let ticket of sr.originalData;let i = index">
+                  <p id="c-{{ticket.index}}" class="txtRow txtRow{{ticket.index}}" title="{{ticket.freeText}}">
+                    <span *ngIf="ticket.filter" class="logIndex{{ticket.index}} rowIndex"
+                      (click)="clickIndex($event,ticket,ticket.index)">{{ticket.index+1}}
+                      <span class="customBadge customBadge{{ticket.index}}"></span>
+                    </span>
+                    <span *ngIf="ticket.filter" class="txtRowEntity{{ticket.index}}"></span>
+                    <span *ngIf="ticket.filter" class="logLine-{{ticket.line}} txtRowContent{{ticket.index}} "
+                      (mousedown)="onMouseDownTxt(ticket,ticket.index)"
+                      (mouseup)="onMouseUpTxt(ticket,ticket.index,'current')">{{ticket.text}}</span>
+                  </p>
+                </div>
+
+              </div>
+
             </div>
           </div>
           <div class="clr-row" *ngIf='projectType!=="image"'>

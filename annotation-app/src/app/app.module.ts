@@ -46,6 +46,8 @@ import { LabelStudioService } from "./services/label-studio.service";
 import { SharedModule } from "./shared/shared.module";
 import { GetElementService } from "./services/common/dom.service";
 import { UnZipService } from "./services/common/up-zip.service";
+import { DownloadService } from "./services/common/download.service";
+import { ToolService } from "./services/common/tool.service";
 
 
 @NgModule({
@@ -99,7 +101,9 @@ import { UnZipService } from "./services/common/up-zip.service";
     LabelStudioService,
     Title,
     GetElementService,
-    UnZipService
+    UnZipService,
+    DownloadService,
+    ToolService
   ],
   bootstrap: [AppComponent]
 })

@@ -498,7 +498,7 @@ label .label-leftBoard {
 
 .selectedTxtRow {
   // background-color: #ffe184;
-  padding: 0.25em 0.4em 0.25em 0;
+  padding: 0.25em 0.4em 0.25em 0.25em;
   font-weight: bold;
   color: black;
   user-select: none;
@@ -559,6 +559,11 @@ label .label-leftBoard {
   border: 3px solid transparent;
 }
 
+::ng-deep .logEntitySelected:hover {
+  color: black !important;
+  border-bottom-width: 8px;
+}
+
 .customBadge {
   // background: #cccccc;
   color: #fff;
@@ -572,4 +577,18 @@ label .label-leftBoard {
 
 .logCategories:hover {
   background-color: transparent !important;
+}
+
+.filterInput {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  margin-left: 1.5rem;
+}
+
+.filterText {
+  width: 80%;
+}
+
+::ng-deep .high-light {
+  background: yellow;
 }
