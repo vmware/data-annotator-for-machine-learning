@@ -120,7 +120,7 @@ async function execute(req, sendEmail, annotators, append) {
         await emailService.sendEmailToAnnotator(param);
       }
       
-      console.log(`[ LOG ] Utils imgImporter.execute end using ${ (Date.now()-start)/1000 } s: `); 
+      console.log(`[ LOG ] Utils logImporter.execute end using ${ (Date.now()-start)/1000 } s: `); 
     
     });
   }).catch(err => {

@@ -11,7 +11,7 @@ const projectDB = require('../db/project-db');
 const srsDB = require('../db/srs-db');
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
-const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
+const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE } = require("../config/constant");
 const fs = require('fs');
 const ObjectId = require("mongodb").ObjectID;
 const moment = require('moment');
@@ -27,6 +27,10 @@ const { getModelProject } = require("../utils/mongoModel.utils");
 const mongoDb = require("../db/mongo.db");
 const S3Utils = require('../utils/s3');
 const { DataSetModel } = require("../db/db-connect");
+const compressing = require('compressing');
+const streamifier = require('streamifier');
+const readline = require('readline');
+const { once } = require('events');
 
 async function createProject(req) {
 
@@ -464,41 +468,96 @@ async function csvContentsSrs(result) {
 
 async function uploadFile(req) {
 
-    const ds = await dataSetService.checkDatasetsName(req.body.dsname);
-    if (ds && ds.length > 0) {
-        return { CODE: 3001, MSG: "there already have the same dataSet, please change the dataSet name" };
-    }
-
-    let fileKey = `upload/${req.auth.email}/${Date.now()}_${req.file.originalname}`;
-    let file = await S3.uploadObject(fileKey, req.file.buffer);
-
-    const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, file.Key);
-    let filestream = request.get(signedUrl);
-
-    const hasheader = req.body.hasHeader.toLowerCase();
-    let headerRule = { noheader: true };
-    hasheader == 'no' ? null: headerRule.noheader=false;
+    await validator.checkDataSet({dataSetName: req.body.dsname}, false);
     
-    let header=[], topRows=[];
+    const fileSplit = req.file.originalname.toLowerCase().split(".");
+    const fileType = fileSplit[fileSplit.length-1];
+    
+    if (![FILETYPE.CSV, FILETYPE.ZIP, FILETYPE.TGZ].includes(fileType)) {
+        return {CODE: 3001, MSG: "FILE FORMAT NOT SUPPORTED"};
+    }
+    
+    const fileKey = `upload/${req.auth.email}/${Date.now()}_${req.file.originalname}`;
+    const file = await S3.uploadObject(fileKey, req.file.buffer);
+    let filestream = req.file.buffer, fileFormat = FILETYPE.CSV, totalRows = 0, topReview;
+    const hasheader = req.body.hasHeader.toLowerCase();
 
-    await csv(headerRule).fromStream(filestream).subscribe((row,i) => {
-        if (i < 5) {
-            if (i==0) header = Object.keys(row);
-            topRows.push(Object.values(row));   
-        }else{
-            filestream = null;
+    if (FILETYPE.CSV == fileType) {
+        let header = [], topRows = [];
+        let headerRule = { noheader: true };
+        hasheader == 'no' ? null: headerRule.noheader=false;
+
+        await csv(headerRule).fromString(filestream.toString()).subscribe((row,i) => {
+            if (i < 5) {
+                if (i==0) header = Object.keys(row);
+                topRows.push(Object.values(row));
+            }else{
+                filestream = null;
+            }
+        });
+        topReview = { header: header, topRows: topRows };
+    }else if ([FILETYPE.ZIP, FILETYPE.TGZ].includes(fileType)) {
+        fileFormat = DATASETTYPE.LOG, topReview = [];
+        
+        if (fileType  == FILETYPE.ZIP) {
+            uncompressStream = new compressing.zip.UncompressStream();
+        }else if (fileType == FILETYPE.TGZ) {
+            uncompressStream = new compressing.tgz.UncompressStream();
         }
-    });
+        
+        await streamifier.createReadStream(filestream).pipe(uncompressStream).on('entry', async (header, stream, next) => {
+            stream.on('end', next);
+    
+            const nameSplit = header.name.toLowerCase().split("/");
+            const name = nameSplit[nameSplit.length-1]
+            const fileSplit = header.name.toLowerCase().split(".");
+            const fileType = fileSplit[fileSplit.length-1];
+    
+            if (header.type === 'file' && (header.size || header.yauzl.uncompressedSize) && !name.startsWith("._") && fileType == DATASETTYPE.LOG) {
+                if (totalRows <= 2) {
+                    let index = 0, textLines = "";
+                    let readInterface = readline.createInterface({ input: stream });
+                    readInterface.on('line', (line) => {
+                        if (index >= 5) {
+                            readInterface.emit('close');
+                        }else{
+                            if (line && line.trim() && validator.isASCII(line)) {
+                                index ++;
+                                textLines += line.trim() + "\n";
+                            }
+                        }
+                    }).on('close', async() => {
+                        if (Object.keys(textLines).length) {
+                            topReview.push({
+                                fileSize: header.size? header.size: header.yauzl.uncompressedSize,
+                                fileName: header.name,
+                                fileContent: textLines
+                            });
+                        }
+                        readInterface.removeAllListeners();
+                    });
+                }
+                totalRows++;
+            }
+            stream.resume();
+        }).on('error',err => {
+            console.error("[ FILE ] [ ERROR ] Service swagger upload datasets error ->", err);
+            throw {CODE: 500, MSG: "SAVE DATASETS ERROR"}
+        }).on('finish', () => {
+            console.log(topReview)
+        });
+    }
     const datasetInfo = {
         body:{
             dsname: req.body.dsname,
             fileKey: fileKey,
             fileName: req.file.originalname,
             fileSize: req.file.size,
-            format: req.body.fileFormat,
+            format: fileFormat,
             hasHeader: hasheader,
             location: file.Key,
-            topReview: { header: header, topRows: topRows }
+            topReview: topReview,
+            totalRows: totalRows
         },
         auth:{email: req.auth.email}
     }

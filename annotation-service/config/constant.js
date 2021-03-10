@@ -83,5 +83,6 @@ module.exports = {
     FILETYPE:{
         ZIP: "zip",
         TGZ: "tgz",
+        CSV: "csv",
     },
 }

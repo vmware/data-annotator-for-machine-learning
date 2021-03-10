@@ -13,11 +13,6 @@ const ObjectId = require("mongodb").ObjectID;
 const { isASCII } = require('../utils/validator');
 const validator = require('../utils/validator');
 
-async function checkDatasetsName(dsname){
-    console.log(`[ DATASET ] Service checkDatasetsName dataSet name is unique`);
-    return await DataSetDB.queryDataSetByConditions({ dataSetName: dsname });
-}
-
 async function saveDataSetInfo(req) {
 
     await validator.checkDataSet({ dataSetName: req.body.dsname }, false);
@@ -156,6 +151,5 @@ module.exports = {
     queryDataSetByDataSetName,
     deleteDataSet,
     signS3Url,
-    checkDatasetsName,
     imageTopPreview,
 }

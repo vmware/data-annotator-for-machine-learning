@@ -1221,21 +1221,15 @@
           {
             "name": "hasHeader",
             "in": "formData",
-            "description": "Does the dataset csv has header or not. (e.g. yes || no)",
+            "description": "Does the dataset csv has header or not",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "fileFormat",
-            "in": "formData",
-            "description": "The format of the dataset. (e.g. csv || tabular)",
-            "required": true,
-            "type": "string"
+            "type": "string",
+            "enum":["no", "yes"]
           },
           {
             "name": "file",
             "in": "formData",
-            "description": "file to upload",
+            "description": "file to upload only support for: [.csv .zip .tgz]",
             "required": true,
             "type": "file"
           }
