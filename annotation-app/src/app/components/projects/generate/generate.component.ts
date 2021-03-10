@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { UserAuthService } from '../../../services/user-auth.service';
 import { AvaService } from "../../../services/ava.service";
+import { DownloadService } from 'app/services/common/download.service';
 
 
 @Component({
@@ -35,7 +36,9 @@ export class GenerateComponent implements OnInit {
 
   constructor(
     private avaService: AvaService,
-    private userAuthService: UserAuthService
+    private userAuthService: UserAuthService,
+    private downloadService: DownloadService
+
   ) {
     this.user = this.userAuthService.loggedUser().email;
 
@@ -45,7 +48,7 @@ export class GenerateComponent implements OnInit {
     this.format = 'standard';
     // setTimeout(() => {
     //   console.log("GenerateComponent:::", this.msg)
-    // }, 500);
+    // }, 1000);
   }
 
 
@@ -72,6 +75,12 @@ export class GenerateComponent implements OnInit {
 
   removeUnlabel(e) {
     this.onlyLabelled = e.target.checked;
+  };
+
+
+  downloadOriginal(urls) {
+    this.downloadService.downloadMultiple(urls);
+
   }
 
 }

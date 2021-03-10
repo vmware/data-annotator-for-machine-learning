@@ -363,6 +363,7 @@ export class CreateNewComponent implements OnInit {
       this.emailReg = RegExp("@vmware.com\\s*$").test(val);
     } else {
       this.emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val);
+      // this.emailReg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val)
     }
     if (this.emailReg && this.inputAssigneeValidation == false) {
       this.assigneeList.push(val);

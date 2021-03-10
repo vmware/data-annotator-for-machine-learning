@@ -573,3 +573,17 @@ label .label-leftBoard {
 .logCategories:hover {
   background-color: transparent !important;
 }
+
+.filterInput {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  margin-left: 1.5rem;
+}
+
+.filterText {
+  width: 80%;
+}
+
+::ng-deep .high-light {
+  background: yellow;
+}

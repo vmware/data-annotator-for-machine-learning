@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { UserAuthService } from '../../../services/user-auth.service';
 import { AvaService } from "../../../services/ava.service";
-
+import { DownloadService } from 'app/services/common/download.service';
 
 @Component({
   selector: 'download',
@@ -37,7 +37,8 @@ export class DownloadComponent implements OnInit {
 
   constructor(
     private avaService: AvaService,
-    private userAuthService: UserAuthService
+    private userAuthService: UserAuthService,
+    private downloadService: DownloadService
   ) {
     this.user = this.userAuthService.loggedUser().email;
 
@@ -51,10 +52,13 @@ export class DownloadComponent implements OnInit {
   }
 
 
-
   onCloseDownloadDialog() {
     this.onCloseDownloadDialogEmitter.emit();
+  };
 
+
+  downloadOriginal(urls) {
+    this.downloadService.downloadMultiple(urls);
   }
 
 
@@ -77,9 +81,8 @@ export class DownloadComponent implements OnInit {
       this.onCloseDownloadDialogEmitter.emit();
 
     };
-
-
   }
+
 
   generateProject() {
     this.loadingGenerate = true;
