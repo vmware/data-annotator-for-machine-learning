@@ -15,11 +15,17 @@ SPDX-License-Identifier: Apache-2.0 -->
           <span>This project {{msg?.projectName}} has never been generated.</span>
           <span *ngIf="msg?.projectType=='log'"> <a href="javascript://"
               (click)="downloadOriginal(msg?.originalDataSets)"> Click to download this project's original
-              datasets.</a></span>
+              datasets.</a>
+            <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-left">
+              <clr-icon shape="info-circle" class="is-solid" style="color: #0077b8;" size="20"></clr-icon>
+              <span class="tooltip-content">Will download all the related original .zip/.tgz files except for the
+                individual txt file uploaded through manually quick append way.</span>
+            </a>
+          </span>
           <clr-radio-container clrInline style="margin-left: 0.1rem;">
             <label style="font-size: 0.6rem;">Please choose a format before generate new dataset
               <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-right">
-                <clr-icon shape="info-circle" class="is-solid" style="color: #0077b8;" size="24"></clr-icon>
+                <clr-icon shape="info-circle" class="is-solid" style="color: #0077b8;" size="20"></clr-icon>
                 <span class="tooltip-content">
                   * Standard: count of each label. <br>
                   * Top: top label only. <br>
