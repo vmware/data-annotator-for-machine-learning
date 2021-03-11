@@ -23,13 +23,19 @@ SPDX-License-Identifier: Apache-2.0 -->
               (click)="downloadOriginal(msg?.originalDataSets)">
               Click to
               download this project's original
-              datasets.</a></span>
+              datasets.</a>
+            <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-right">
+              <clr-icon shape="info-circle" class="is-solid" style="color: #0077b8;" size="20"></clr-icon>
+              <span class="tooltip-content">Will download all the related original .zip/.tgz files except for the
+                individual txt file uploaded through manually quick append way.</span>
+            </a>
+          </span>
           <!-- <div style="margin-left: 0.1rem;" *ngIf="msg?.labelType!='numericLabel'"> -->
           <div style="margin-left: 0.1rem;">
             <clr-radio-container clrInline>
               <label style="font-size: 0.6rem;">Please choose a format before generate new dataset
                 <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-right">
-                  <clr-icon shape="info-circle" class="is-solid" style="color: #0077b8;" size="24"></clr-icon>
+                  <clr-icon shape="info-circle" class="is-solid" style="color: #0077b8;" size="20"></clr-icon>
                   <span class="tooltip-content">
                     * Standard: count of each label. <br>
                     * Top: top label only. <br>
