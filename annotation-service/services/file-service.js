@@ -17,7 +17,6 @@ const ObjectId = require("mongodb").ObjectID;
 const moment = require('moment');
 const { findFrequentlyElementInObject, probabilisticInObject, findFrequentlyElementInArray } = require('../utils/common.utils');
 const csv = require('csvtojson');
-const request = require('request');
 const dataSetService = require('../services/dataSet-service');
 const S3 = require('../utils/s3');
 const validator = require("../utils/validator");
@@ -30,7 +29,7 @@ const { DataSetModel } = require("../db/db-connect");
 const compressing = require('compressing');
 const streamifier = require('streamifier');
 const readline = require('readline');
-const { once } = require('events');
+
 
 async function createProject(req) {
 
@@ -389,10 +388,12 @@ async function queryFileForDownlad(req) {
         const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, data.generateInfo.file, S3);
         response.file = Buffer.from(signedUrl).toString("base64");
     }
-    for (const dataset of data.selectedDataset) {
-        const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
-        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
-        originalDataSets.push(signedUrl)
+    if (data.projectType != PROJECTTYPE.IMGAGE) {
+        for (const dataset of data.selectedDataset) {
+            const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
+            const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
+            originalDataSets.push(signedUrl)
+        }
     }
     data._doc.generateInfo.originalDataSets = originalDataSets;
     
@@ -479,13 +480,24 @@ async function uploadFile(req) {
     
     const fileKey = `upload/${req.auth.email}/${Date.now()}_${req.file.originalname}`;
     const file = await S3.uploadObject(fileKey, req.file.buffer);
-    let filestream = req.file.buffer, fileFormat = FILETYPE.CSV, totalRows = 0, topReview;
-    const hasheader = req.body.hasHeader.toLowerCase();
 
+    const datasetInfo = {
+        body:{
+            dsname: req.body.dsname,
+            fileKey: fileKey,
+            fileName: req.file.originalname,
+            fileSize: req.file.size,
+            location: file.Key
+        },
+        auth:{email: req.auth.email}
+    }
+
+    let filestream = req.file.buffer, totalRows = 0, topReview;
+    
     if (FILETYPE.CSV == fileType) {
         let header = [], topRows = [];
         let headerRule = { noheader: true };
-        hasheader == 'no' ? null: headerRule.noheader=false;
+        req.body.hasHeader == 'no' ? null: headerRule.noheader=false;
 
         await csv(headerRule).fromString(filestream.toString()).subscribe((row,i) => {
             if (i < 5) {
@@ -496,8 +508,13 @@ async function uploadFile(req) {
             }
         });
         topReview = { header: header, topRows: topRows };
+
+        datasetInfo.body.format = FILETYPE.CSV;
+        datasetInfo.body.hasHeader = req.body.hasHeader;
+        datasetInfo.body.topReview = topReview;
+
     }else if ([FILETYPE.ZIP, FILETYPE.TGZ].includes(fileType)) {
-        fileFormat = DATASETTYPE.LOG, topReview = [];
+        topReview = [];
         
         if (fileType  == FILETYPE.ZIP) {
             uncompressStream = new compressing.zip.UncompressStream();
@@ -505,7 +522,7 @@ async function uploadFile(req) {
             uncompressStream = new compressing.tgz.UncompressStream();
         }
         
-        await streamifier.createReadStream(filestream).pipe(uncompressStream).on('entry', async (header, stream, next) => {
+        streamifier.createReadStream(filestream).pipe(uncompressStream).on('entry', (header, stream, next) => {
             stream.on('end', next);
     
             const nameSplit = header.name.toLowerCase().split("/");
@@ -526,7 +543,7 @@ async function uploadFile(req) {
                                 textLines += line.trim() + "\n";
                             }
                         }
-                    }).on('close', async() => {
+                    }).on('close', () => {
                         if (Object.keys(textLines).length) {
                             topReview.push({
                                 fileSize: header.size? header.size: header.yauzl.uncompressedSize,
@@ -543,25 +560,16 @@ async function uploadFile(req) {
         }).on('error',err => {
             console.error("[ FILE ] [ ERROR ] Service swagger upload datasets error ->", err);
             throw {CODE: 500, MSG: "SAVE DATASETS ERROR"}
-        }).on('finish', () => {
-            console.log(topReview)
+        }).on('finish', async () => {
+            datasetInfo.body.format = DATASETTYPE.LOG;
+            datasetInfo.body.topReview = topReview;
+            datasetInfo.body.totalRows = totalRows;
+            
+            console.error("[ FILE ] [ FINISH ] Service swagger upload uncompressStream done ->");
+            return await dataSetService.saveDataSetInfo(datasetInfo);
         });
     }
-    const datasetInfo = {
-        body:{
-            dsname: req.body.dsname,
-            fileKey: fileKey,
-            fileName: req.file.originalname,
-            fileSize: req.file.size,
-            format: fileFormat,
-            hasHeader: hasheader,
-            location: file.Key,
-            topReview: topReview,
-            totalRows: totalRows
-        },
-        auth:{email: req.auth.email}
-    }
-    return await dataSetService.saveDataSetInfo(datasetInfo);
+
 }
 
 module.exports = {
