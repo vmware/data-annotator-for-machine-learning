@@ -179,7 +179,7 @@ async function getOneSrs(req) {
     
     const mp = await getModelProject({ _id: ObjectId(req.query.pid)});
 
-    //1. find model queried tickets from queriedSr
+    // 1. find model queried tickets from queriedSr
     if (project.al.queriedSr.length > 0) { 
         if (limitation <= project.al.queriedSr.length) {
              let ids = project.al.queriedSr.filter((id, i) =>{
@@ -196,6 +196,8 @@ async function getOneSrs(req) {
         }
     }
     
+    START = Date.now();
+    
     //2. find tickets from db 
     conditions = {
         projectName: project.projectName, 
@@ -208,26 +210,21 @@ async function getOneSrs(req) {
     });
  
     const options = { skip: usc.skip, limit: limitation };
-    
+    console.log( typeof limitation, limitation);
     if(project.assignmentLogic == 'sequential'){
         console.log(`[ SRS ] Service sequential query data skipped: `, usc.skip);
        srs = await mongoDb.findByConditions(mp.model, conditions, filterFileds, options);
     }else{
         console.log(`[ SRS ] Service random query data skipped: `, usc.skip);
         const schema = [
-            { $match: {
-                projectName: project.projectName,
-                userInputsLength: { $lt: project.maxAnnotation },
-                "userInputs.user": { $ne: req.auth.email },
-                "flag.users": { $ne: req.auth.email },
-            } },
+            { $match: conditions},
             { $project: filterFileds }, 
             { $skip: usc.skip},
-            { $sample: { size: limitation }}
+            {$limit: limitation}
         ];
         srs = await mongoDb.aggregateBySchema(mp.model, schema);
     }
-    
+    console.log(`query tickets use time in sencods: ${(Date.now()-START)/1000} (s)`);
     if (srs.length) {
         
         if (project.projectType == PROJECTTYPE.IMGAGE) {
