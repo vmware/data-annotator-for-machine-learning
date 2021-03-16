@@ -16,7 +16,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <span *ngIf="msg?.projectType=='log'"> <a href="javascript://"
               (click)="downloadOriginal(msg?.originalDataSets)"> Click to download this project's original
               datasets.</a>
-            <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-left">
+            <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-right" style="position: absolute;">
               <clr-icon shape="info-circle" class="is-solid" style="color: #0077b8;" size="20"></clr-icon>
               <span class="tooltip-content">Will download all the related original .zip/.tgz files except for the
                 individual txt file uploaded through manually quick append way.</span>

@@ -19,17 +19,20 @@ SPDX-License-Identifier: Apache-2.0 -->
             dataset download please generate the latest dataset first.</span>
           <span *ngIf="msg?.labelType!='numericLabel'">The last generate format is <span
               style="font-weight: bold;">{{msg?.format=='topLabel'?'top label':msg?.format}}</span> .</span>
+          <!-- <div> -->
           <span *ngIf="msg?.projectType=='log'"> <a href="javascript://"
               (click)="downloadOriginal(msg?.originalDataSets)">
               Click to
               download this project's original
               datasets.</a>
-            <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-right">
+            <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-right" style="position: absolute;">
               <clr-icon shape="info-circle" class="is-solid" style="color: #0077b8;" size="20"></clr-icon>
               <span class="tooltip-content">Will download all the related original .zip/.tgz files except for the
                 individual txt file uploaded through manually quick append way.</span>
             </a>
           </span>
+          <!-- </div> -->
+
           <!-- <div style="margin-left: 0.1rem;" *ngIf="msg?.labelType!='numericLabel'"> -->
           <div style="margin-left: 0.1rem;">
             <clr-radio-container clrInline>

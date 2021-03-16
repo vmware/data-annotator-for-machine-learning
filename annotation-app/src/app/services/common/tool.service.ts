@@ -21,6 +21,13 @@ export class ToolService {
         }
         c = '0x' + c.substring(1);
         return 'rgb(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(',') + ',0.4)';
+    }
+
+
+    regexExec(reg, text) {
+        let a = [...text.matchAll(RegExp(eval(reg), 'g'))];
+        return a;
+        // return eval(reg).exec(text);
 
     }
 

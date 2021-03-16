@@ -157,12 +157,11 @@ export class GetElementService {
     };
 
 
-    setFilterHighLight(className, originalText, filter) {
+    setFilterHighLight(className, originalText, filterList) {
         const matchElement = document.getElementsByClassName(className);
-        const arr = [...originalText.matchAll(RegExp(filter, 'gi'))];
         let keyWord = [];
         originalText = originalText.replace(/</gim, '&lt');
-        arr.forEach(e => {
+        filterList.forEach(e => {
             keyWord.push(e[0]);
         });
         let replaceHtml;
