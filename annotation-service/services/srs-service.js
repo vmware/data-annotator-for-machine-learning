@@ -210,7 +210,7 @@ async function getOneSrs(req) {
     });
  
     const options = { skip: usc.skip, limit: limitation };
-    console.log( typeof limitation, limitation);
+
     if(project.assignmentLogic == 'sequential'){
         console.log(`[ SRS ] Service sequential query data skipped: `, usc.skip);
        srs = await mongoDb.findByConditions(mp.model, conditions, filterFileds, options);
@@ -224,7 +224,7 @@ async function getOneSrs(req) {
         ];
         srs = await mongoDb.aggregateBySchema(mp.model, schema);
     }
-    console.log(`query tickets use time in sencods: ${(Date.now()-START)/1000} (s)`);
+    console.log(`[ SRS ] Service query tickets use time in sencods: ${(Date.now()-START)/1000} (s)`);
     if (srs.length) {
         
         if (project.projectType == PROJECTTYPE.IMGAGE) {

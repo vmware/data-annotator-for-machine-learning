@@ -1237,9 +1237,7 @@
         "responses": {
           "200": {
             "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/datasets"
-            }
+            "schema": { "example": { "CODE": 200, "MSG": "OK"} }
           },
           "401": {
             "description": "Unauthorized"

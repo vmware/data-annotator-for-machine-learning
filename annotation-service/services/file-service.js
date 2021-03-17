@@ -513,6 +513,9 @@ async function uploadFile(req) {
         datasetInfo.body.hasHeader = req.body.hasHeader;
         datasetInfo.body.topReview = topReview;
 
+        console.error("[ FILE ] [ FINISH ] Service swagger upload csv done ->");
+        await dataSetService.saveDataSetInfo(datasetInfo);
+
     }else if ([FILETYPE.ZIP, FILETYPE.TGZ].includes(fileType)) {
         topReview = [];
         
@@ -566,9 +569,10 @@ async function uploadFile(req) {
             datasetInfo.body.totalRows = totalRows;
             
             console.error("[ FILE ] [ FINISH ] Service swagger upload uncompressStream done ->");
-            return await dataSetService.saveDataSetInfo(datasetInfo);
+            await dataSetService.saveDataSetInfo(datasetInfo);
         });
     }
+    return {CODE: 200, MSG: "OK"};
 
 }
 
