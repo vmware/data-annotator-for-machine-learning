@@ -650,3 +650,57 @@ label .label-leftBoard {
   margin-left: -0.6rem;
   color: red;
 }
+
+.isDrawer {
+  width: 0px !important;
+  overflow: hidden;
+}
+// .drawer {
+//   color: #ccc;
+// }
+
+// .drawer:hover {
+//   color: #0077b8;
+//   height: 35px !important;
+//   width: 35px !important;
+// }
+
+.showTag {
+  border-radius: 30px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 4.5rem;
+  height: 1.5rem;
+  color: #ccc;
+  background: linear-gradient(to left, #dedede, transparent 70%);
+}
+
+.showTag:hover {
+  color: white;
+  background: linear-gradient(to left, #0077b8, transparent 70%);
+  .drawer {
+    height: 35px !important;
+    width: 35px !important;
+  }
+}
+
+.hideTag {
+  border-radius: 30px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 4.5rem;
+  height: 1.5rem;
+  color: #ccc;
+  background: linear-gradient(to right, #dedede, transparent 70%);
+}
+
+.hideTag:hover {
+  color: white;
+  background: linear-gradient(to right, #0077b8, transparent 70%);
+  .drawer {
+    height: 35px !important;
+    width: 35px !important;
+  }
+}

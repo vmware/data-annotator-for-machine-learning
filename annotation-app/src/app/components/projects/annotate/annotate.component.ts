@@ -77,6 +77,7 @@ export class AnnotateComponent implements OnInit {
   filterList: any = [];
   filterType: string = 'keyword';
   regexErr: boolean = false;
+  isDrawer: boolean = false;
   colorsRainbow = [
     "#00ffff",
     "#ff00ff",
@@ -278,7 +279,6 @@ export class AnnotateComponent implements OnInit {
             };
           }, 5);
         }
-
       }
     );
   }
@@ -438,11 +438,6 @@ export class AnnotateComponent implements OnInit {
       this.showSubmitDialog();
     });
   }
-
-  // clickNext() {
-  //   this.getOne();
-  //   this.maxAnnotationError = null;
-  // }
 
 
   showSubmitDialog(): void {
@@ -609,6 +604,7 @@ export class AnnotateComponent implements OnInit {
     this.idName = '';
     this.clearUserInput();
     this.filterList = [];
+    this.selectedEntityID = 0;
 
   }
 
@@ -1554,6 +1550,16 @@ export class AnnotateComponent implements OnInit {
           }
         }
       }
+    }
+  };
+
+
+
+  detailDrawer() {
+    if (this.isDrawer) {
+      this.isDrawer = false;
+    } else {
+      this.isDrawer = true;
     }
   }
 

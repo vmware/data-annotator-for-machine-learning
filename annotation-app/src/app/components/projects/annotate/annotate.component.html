@@ -4,9 +4,23 @@ SPDX-License-Identifier: Apache-2.0 -->
 <form class="clr-form" [formGroup]="questionForm" (ngSubmit)="onSubmit()" novalidate>
   <div formGroupName="questionGroup">
     <section class="clr-form-block">
+
       <div *ngIf="!loading" class="clr-row">
-        <div class="clr-col-1"></div>
-        <div class="clr-col-3 leftBoard">
+
+        <div class="clr-col-1">
+          <div style="position: absolute;bottom: 3rem;left: 0rem;">
+            <div class="showTag" *ngIf='isDrawer' (click)="detailDrawer()">
+              <clr-icon shape="angle" class="drawer" size="30" style="transform: rotate(90deg); margin-right: 0.3rem;">
+              </clr-icon>
+            </div>
+            <div class="hideTag" *ngIf='!isDrawer' (click)="detailDrawer()">
+              <clr-icon shape="angle" class="drawer" size="30" style="transform: rotate(-90deg); margin-left: 0.3rem;">
+              </clr-icon>
+
+            </div>
+          </div>
+        </div>
+        <div class=" leftBoard" [ngClass]="{ 'clr-col-3':!isDrawer, 'isDrawer':isDrawer}">
           <h2>Annotate Details</h2>
 
           <div class="clr-form-group form-group clr-row">
@@ -76,7 +90,9 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </ng-container>
         </div>
-        <div class="clr-col-7" style="margin-bottom: 10rem;">
+        <div class="centerBoard" [ngClass]="{ 'clr-col-7':!isDrawer, 'clr-col-10':isDrawer}"
+          style="margin-bottom: 10rem;">
+
           <div style="position: relative;">
             <clr-alert *ngIf="maxAnnotationError" [clrAlertType]="'info'" (clrAlertClosedChange)="maxAnnotationError=''"
               class="invalidAlert">
@@ -276,8 +292,8 @@ SPDX-License-Identifier: Apache-2.0 -->
               <button *ngFor="let item of logCategories; let i = index"
                 class="logCategories logCategories{{i}} btn labels label logEntityLabel"
                 [ngClass]="{'logEntitySelected': i==selectedEntityID, 'logEntityLabel': i!==selectedEntityID}"
-                [ngStyle]="{'border-left-color':item.color,'border-left-width':'6px','box-shadow':'1px 1px 3px 0px '+ '#9A9A9A'}"
-                (click)="onSelectingEntity($event,item.label, i)">{{ item.label }}</button>
+                [ngStyle]="{'border-left-color':item.color,'background-color':i==selectedEntityID?item.color:'','border-left-width':'6px','box-shadow':'1px 1px 3px 0px '+ '#9A9A9A'}"
+                (click)="onSelectingEntity($event,label, i)">{{ item.label }}</button>
               &nbsp; &nbsp;
             </div>
             <div class="clr-textarea-wrapper clr-col-12" style="padding-left: 0.3rem;">
