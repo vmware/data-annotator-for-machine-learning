@@ -8,11 +8,19 @@
 
 const projectDB = require('../db/project-db');
 const ObjectId = require("mongodb").ObjectID;
-const axios = require("axios");
 const config = require("../config/config");
 const { LABELTYPE, PROJECTTYPE } = require("../config/constant");
 const _ = require("lodash");
 
+const HttpsProxyAgent = require('https-proxy-agent');
+
+const axiosDefaultConfig = {
+    baseURL: config.loopALApiUrl,
+    proxy: false,
+    // httpsAgent: new HttpsProxyAgent('http://142.93.165.82:8080')
+};
+
+const axios = require ('axios').create(axiosDefaultConfig);
 
 async function triggerActiveLearning(pid, _ids, user, token){
   // pull current srid from queriedSr
@@ -28,8 +36,11 @@ async function triggerActiveLearning(pid, _ids, user, token){
   if (!project.al.trained && _.uniq(project.al.newLBSr).length >= project.al.trigger && !project.al.training) {
     
     console.log(`[ ACTIVE-LEARNING ] TRAIN MODEL`);
-    axios.post(`${config.loopALApiUrl}/al/model/train`, {"projectName": project.projectName, user: user}, options);
-    
+
+    axios.post('/al/model/train', {"projectName": project.projectName, user: user}, options).then(res =>{
+      console.log(`[ ACTIVE-LEARNING ] Active learning train model request is posted`);
+    }).catch(err =>{console.error("[ ACTIVE-LEARNING ] ERROR", err)})
+
     //set a training flag to avoid repeate send rquest
     await projectDB.findUpdateProject({_id: pid}, {$set: {"al.training": true}});
   }
@@ -40,7 +51,7 @@ async function triggerActiveLearning(pid, _ids, user, token){
     if(_.uniq(project.al.newLBSr).length >= project.al.frequency && !project.al.teaching) {
       
       console.log(`[ ACTIVE-LEARNING ] TEACH MODEL`);
-      axios.post(`${config.loopALApiUrl}/al/model/teach`, {"projectName": project.projectName, user: user}, options);
+      axios.post('/al/model/teach', {"projectName": project.projectName, user: user}, options);
       
       //set a teaching flag to avoid repeate send rquest
       await projectDB.findUpdateProject({_id: pid}, {$set: {"al.teaching": true}});
@@ -50,7 +61,7 @@ async function triggerActiveLearning(pid, _ids, user, token){
     if (project.al.queriedSr.length <= 3 && !project.al.querying) {
       
       console.log(`[ ACTIVE-LEARNING ] QUERY-INSTANCE`);
-      axios.post(`${config.loopALApiUrl}/al/model/query`, {"projectName": project.projectName, user: user}, options);
+      axios.post('/al/model/query', {"projectName": project.projectName, user: user}, options);
       
       //set a querying flag to avoid repeate send rquest
       await projectDB.findUpdateProject({_id: pid}, {$set: {"al.querying": true}});
