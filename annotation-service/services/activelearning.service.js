@@ -11,18 +11,10 @@ const ObjectId = require("mongodb").ObjectID;
 const config = require("../config/config");
 const { LABELTYPE, PROJECTTYPE } = require("../config/constant");
 const _ = require("lodash");
-
-const HttpsProxyAgent = require('https-proxy-agent');
-
-const axiosDefaultConfig = {
-    baseURL: config.loopALApiUrl,
-    proxy: false,
-    // httpsAgent: new HttpsProxyAgent('http://142.93.165.82:8080')
-};
-
-const axios = require ('axios').create(axiosDefaultConfig);
+const axios = require ('axios');
 
 async function triggerActiveLearning(pid, _ids, user, token){
+
   // pull current srid from queriedSr
   const update = {$pullAll:{ "al.queriedSr": _ids }};
   const project = await projectDB.findUpdateProject({_id: pid}, update, { new: true, multi: true });
@@ -30,19 +22,31 @@ async function triggerActiveLearning(pid, _ids, user, token){
   // regression project or acteave learning faild
   if (project.projectType == PROJECTTYPE.IMGAGE || project.labelType == LABELTYPE.NUMERIC || project.al.alFailed) return;
   
-  const options = {headers: { 'Content-Type': 'application/json', Authorization: token }};
+  // set axios default config
+  axios.defaults.baseURL = config.loopALApiUrl;
+  axios.defaults.proxy = false;
+  axios.defaults.headers.common['Authorization'] = token;
+  axios.defaults.headers.post['Content-Type'] = 'application/json';
+
+  const data = {projectName: project.projectName, user: user};
 
   // trigger active learing start to train a al model only trigger once
   if (!project.al.trained && _.uniq(project.al.newLBSr).length >= project.al.trigger && !project.al.training) {
     
-    console.log(`[ ACTIVE-LEARNING ] TRAIN MODEL`);
-
-    axios.post('/al/model/train', {"projectName": project.projectName, user: user}, options).then(res =>{
-      console.log(`[ ACTIVE-LEARNING ] Active learning train model request is posted`);
-    }).catch(err =>{console.error("[ ACTIVE-LEARNING ] ERROR", err)})
+    console.log(`[ ACTIVE-LEARNING ] TRAIN-MODEL START`);
+    const url = "/al/model/train";
 
     //set a training flag to avoid repeate send rquest
     await projectDB.findUpdateProject({_id: pid}, {$set: {"al.training": true}});
+
+    axios.post(url, data).then(res =>{
+      console.log(`[ ACTIVE-LEARNING ] [ SUCCESS ] TRAIN-MODEL`);
+    }).catch( async err =>{
+      console.error("[ ACTIVE-LEARNING ] [ ERROR ] TRAIN-MODEL:", err);
+      // support retry
+      await projectDB.findUpdateProject({_id: pid}, {$set: {"al.training": false}});
+    });
+
   }
  
   if(project.al.trained){
@@ -50,23 +54,40 @@ async function triggerActiveLearning(pid, _ids, user, token){
     // trigger active learning to teach al model
     if(_.uniq(project.al.newLBSr).length >= project.al.frequency && !project.al.teaching) {
       
-      console.log(`[ ACTIVE-LEARNING ] TEACH MODEL`);
-      axios.post('/al/model/teach', {"projectName": project.projectName, user: user}, options);
-      
+      console.log(`[ ACTIVE-LEARNING ] TEACH-MODEL`);
+      const url = "/al/model/teach";
+
       //set a teaching flag to avoid repeate send rquest
       await projectDB.findUpdateProject({_id: pid}, {$set: {"al.teaching": true}});
+      
+      axios.post(url, data).then(res =>{
+        console.log(`[ ACTIVE-LEARNING ] [ SUCCESS ] TEACH-MODEL`);
+      }).catch( async err =>{
+        console.error("[ ACTIVE-LEARNING ] [ ERROR ] TEACH-MODEL:", err);
+        // support retry
+        await projectDB.findUpdateProject({_id: pid}, {$set: {"al.teaching": false}});
+      });
+
     }
     
     // trigger active learning to query uncertain instance, set less than 3 will remove the al query gaps
     if (project.al.queriedSr.length <= 3 && !project.al.querying) {
       
       console.log(`[ ACTIVE-LEARNING ] QUERY-INSTANCE`);
-      axios.post('/al/model/query', {"projectName": project.projectName, user: user}, options);
+      const url = "/al/model/query";
       
       //set a querying flag to avoid repeate send rquest
       await projectDB.findUpdateProject({_id: pid}, {$set: {"al.querying": true}});
+
+      axios.post(url, data).then(res =>{
+        console.log(`[ ACTIVE-LEARNING ] [ SUCCESS ] QUERY-INSTANCE`);
+      }).catch( async err =>{
+        console.error("[ ACTIVE-LEARNING ] [ ERROR ] QUERY-INSTANCE:", err);
+        // support retry
+        await projectDB.findUpdateProject({_id: pid}, {$set: {"al.querying": false}});
+      });
+
     }
-  
   }
 }
 

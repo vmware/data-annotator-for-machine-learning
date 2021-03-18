@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         <div class="clr-row" style="margin-top: 0.5rem">
           <div class="clr-col-12 clr-col-md-12">
             <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)" *ngIf=!firstLoadTable
-              style="height: unset !important;margin-bottom: 0.5rem;">
+              style="height: unset !important;margin-bottom: 0.5rem;min-height: 15rem;">
               <clr-dg-placeholder>There has no flag ticket!</clr-dg-placeholder>
               <clr-dg-column class="ellipsis-datagrid" style="max-width:90px">Index</clr-dg-column>
               <clr-dg-column class="ellipsis-datagrid" style="max-width:150px">Action

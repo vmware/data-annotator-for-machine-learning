@@ -13,6 +13,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import * as _ from "lodash";
 import { LabelStudioService } from 'app/services/label-studio.service';
 import { GetElementService } from 'app/services/common/dom.service';
+import { ToolService } from 'app/services/common/tool.service';
 
 @Component({
   selector: 'app-annotate',
@@ -49,7 +50,6 @@ export class AnnotateComponent implements OnInit {
   idName: string;
   isShowDropDown: boolean;
   projectId: any;
-  projectList: any;
   silenceStatus: boolean;
   isNumeric: boolean;
   numericMessage: string;
@@ -74,6 +74,10 @@ export class AnnotateComponent implements OnInit {
   historyTask: any = [];
   antTags: any;
   logCategories: any = [];
+  filterList: any = [];
+  filterType: string = 'keyword';
+  regexErr: boolean = false;
+  isDrawer: boolean = false;
   colorsRainbow = [
     "#00ffff",
     "#ff00ff",
@@ -115,14 +119,14 @@ export class AnnotateComponent implements OnInit {
     private avaService: AvaService,
     private el: ElementRef,
     private LabelStudioService: LabelStudioService,
-    private getElementService: GetElementService
+    private getElementService: GetElementService,
+    private toolService: ToolService
 
   ) { }
 
 
 
   ngOnInit(): void {
-
     this.loading = true;
     this.error = null;
     this.maxAnnotationError = null;
@@ -152,14 +156,12 @@ export class AnnotateComponent implements OnInit {
       }, error => {
         console.log(error);
       });
-
     });
-
     this.createForm();
     this.getProjectsList();
     this.getProgress();
-  };
 
+  };
 
 
   createForm(): void {
@@ -182,6 +184,7 @@ export class AnnotateComponent implements OnInit {
         freeText: [null],
         answer: [null],
         selectProject: [this.selectParam],
+        filterText: [null],
       })
     );
   }
@@ -263,9 +266,19 @@ export class AnnotateComponent implements OnInit {
         if (this.projectType == 'log') {
           setTimeout(() => {
             this.el.nativeElement.querySelector('.logCategories' + this.selectedEntityID).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
+            // to read the filterList from localStorage
+            if (localStorage.getItem('log-filter')) {
+              let logFilter = JSON.parse(localStorage.getItem('log-filter'));
+              for (let i = 0; i < logFilter.length; i++) {
+                if (this.projectId == logFilter[i].pId) {
+                  this.filterList = logFilter[i].filter;
+                  this.toFilterLog(this.filterList);
+                  break;
+                }
+              }
+            };
           }, 5);
         }
-
       }
     );
   }
@@ -398,6 +411,7 @@ export class AnnotateComponent implements OnInit {
       };
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
+        this.toFilterLog(this.filterList);
       }
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
@@ -424,11 +438,6 @@ export class AnnotateComponent implements OnInit {
       this.showSubmitDialog();
     });
   }
-
-  // clickNext() {
-  //   this.getOne();
-  //   this.maxAnnotationError = null;
-  // }
 
 
   showSubmitDialog(): void {
@@ -506,6 +515,8 @@ export class AnnotateComponent implements OnInit {
       };
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
+        this.toFilterLog(this.filterList);
+
       };
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
@@ -559,12 +570,7 @@ export class AnnotateComponent implements OnInit {
 
   getProjectsList() {
     this.avaService.getProjectsList().subscribe(response => {
-      this.projectList = response;
-      let flag = [];
-      for (let i = 0; i < response.length; i++) {
-        flag.push(response[i].projectName)
-      }
-      this.projects = flag;
+      this.projects = response;
     }, error => {
       console.log(error)
     });
@@ -577,9 +583,10 @@ export class AnnotateComponent implements OnInit {
     this.minLabel = null;
     this.maxLabel = null;
     this.selectParam = e.target.value;
-    this.projectList.forEach(element => {
-      if (element.projectName == e.target.value) {
-        this.projectId = element.id;
+    this.toStorageFilter();
+    for (let i = 0; i < this.projects.length; i++) {
+      if (this.projects[i].projectName == e.target.value) {
+        this.projectId = this.projects[i].id;
         this.avaService.getProjectInfo(this.projectId).subscribe(response => {
           this.projectInfo = response;
           this.max = response.maxAnnotation;
@@ -590,13 +597,15 @@ export class AnnotateComponent implements OnInit {
           this.loading = false;
         });
       }
-    });
-
+    }
     this.fetchData();
     this.getProgress();
     this.annotationHistory = [];
     this.idName = '';
     this.clearUserInput();
+    this.filterList = [];
+    this.selectedEntityID = 0;
+
   }
 
 
@@ -700,6 +709,8 @@ export class AnnotateComponent implements OnInit {
       };
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
+        this.toFilterLog(this.filterList);
+
       };
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
@@ -884,6 +895,8 @@ export class AnnotateComponent implements OnInit {
     this.questionForm.get('questionGroup.answer').reset();
     this.multipleLabelList = [];
     this.spansList = [];
+    this.projectType == 'log' ? this.questionForm.get('questionGroup.filterText').reset() : null;
+    this.regexErr = false;
 
   }
 
@@ -1034,7 +1047,7 @@ export class AnnotateComponent implements OnInit {
       // console.log('logLabelDoms:::', logLabelDoms);
       logLabelDoms.forEach((element, i) => {
         if (index == i) {
-          element.style.backgroundColor = element.style.borderColor;
+          element.style.backgroundColor = element.style.borderLeftColor;
           element.style.color = 'white';
         } else {
           element.style.backgroundColor = "";
@@ -1109,7 +1122,11 @@ export class AnnotateComponent implements OnInit {
           }, 0);
         };
         if (this.projectType == 'log') {
-          responseSr.originalData = this.resetLogSrData([responseSr]).originalData
+          responseSr.originalData = this.resetLogSrData([responseSr]).originalData;
+          setTimeout(() => {
+            this.toFilterLog(this.filterList);
+          }, 10);
+
         }
         if (responseSr.flag && responseSr.flag.silence) {
           this.silenceStatus = true;
@@ -1273,7 +1290,9 @@ export class AnnotateComponent implements OnInit {
       let indexDom = this.el.nativeElement.querySelector('.logIndex' + this.spanEnd);
       this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
       // to give label's color to text
-      pDom.style.backgroundColor = this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID];
+      if (pDom) {
+        pDom.style.backgroundColor = this.toolService.hexToRgb(this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID]);
+      }
       // update the this.spansList
       if (_.indexOf(this.toGetLogLines(this.spansList), data.line) < 0) {
         this.spansList.push({ line: data.line, label: from == 'historyBack' ? data.label : this.categories[this.selectedEntityID], freeText: from == 'historyBack' ? data.freeText : this.questionForm.get('questionGroup.freeText').value, index: this.spanEnd, selected: false })
@@ -1281,8 +1300,9 @@ export class AnnotateComponent implements OnInit {
 
       let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
       // to give label's color to entity
-      txtRowEntityDom.style.backgroundColor = this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID];
-
+      if (txtRowEntityDom) {
+        txtRowEntityDom.style.backgroundColor = this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID];
+      }
       this.getElementService.toFindDomAddText(txtRowEntityDom, from == 'historyBack' ? data.label : this.categories[this.selectedEntityID], 'txtEntityLabel');
       this.spansList = this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt', this.spansList, indexDom, this.el.nativeElement.querySelector('.customBadge' + this.spanEnd));
       this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
@@ -1318,7 +1338,7 @@ export class AnnotateComponent implements OnInit {
       })
     }
 
-    if (e.target.nextSibling && e.target.nextSibling.className && e.target.nextSibling.className.indexOf('txtEntityLabel') > 0) {
+    if (e.target.nextElementSibling && e.target.nextElementSibling.className && e.target.nextElementSibling.className.indexOf('txtEntityLabel') > 0) {
 
       // to show the original freetext enable edit
       for (let i = 0; i < this.spansList.length; i++) {
@@ -1358,15 +1378,198 @@ export class AnnotateComponent implements OnInit {
     }
   }
 
+
   toCheckSpanslist(list) {
     list.forEach(element => {
-      if (element.freeText) {
-        this.el.nativeElement.querySelector('.customBadge' + element.index).style.backgroundColor = '#cccccc'
-      } else {
-        this.el.nativeElement.querySelector('.customBadge' + element.index).style.backgroundColor = ''
+      let dom = this.el.nativeElement.querySelector('.customBadge' + element.index);
+      if (dom) {
+        if (element.freeText) {
+          dom.style.backgroundColor = '#cccccc'
+        } else {
+          dom.style.backgroundColor = ''
+        }
       }
     });
+  };
+
+
+  toFilterLog(e) {
+    // console.log('updateFilterText:::', e)
+    let filterRowsIndex = [];
+    this.sr.originalData.forEach(element => {
+      element.filter = true;
+    });
+    if (e.length > 0) {
+      this.sr.originalData.forEach((element, index) => {
+        let arr = [];
+        e.forEach(filter => {
+          if (filter.filterType == 'keyword') {
+            let a = [...element.text.matchAll(RegExp(filter.filterText, 'gi'))];
+            if (a.length > 0) {
+              arr = [...arr, ...a]
+            }
+          } else {
+            let a = this.toolService.regexExec(filter.filterText, element.text);
+            if (a.length > 0) {
+              arr = [...arr, ...a]
+            };
+          };
+          if (arr.length > 0) {
+            element.filter = true;
+            this.getElementService.setFilterHighLight('txtRowContent' + element.index, element.text, arr);
+            filterRowsIndex.push(element.index)
+          } else {
+            element.filter = false;
+          }
+        });
+      });
+    };
+    setTimeout(() => {
+      if (this.spansList.length > 0) {
+        this.spansList.forEach(data => {
+          if (e.length == 0 || (filterRowsIndex.length > 0 && filterRowsIndex.indexOf(data.index) > -1)) {
+            this.onMouseDownTxt({ line: data.line, label: data.label, freeText: data.freeText }, data.index);
+            this.onMouseUpTxt({ line: data.line, label: data.label, freeText: data.freeText }, data.index, 'historyBack');
+          }
+        })
+      }
+    }, 10);
   }
+
+
+  updateFilterSelect(e) {
+    this.regexErr = false;
+    this.filterType = e.target.value;
+  };
+
+
+  updateFilterText(e) {
+    this.regexErr = false;
+  }
+
+
+  overFilter(index) {
+    this.active = index;
+  }
+
+
+  outFilter(index) {
+    this.active = null;
+  }
+
+
+  deleteFilter(index) {
+    this.filterList.splice(index, 1);
+    this.toFilterLog(this.filterList);
+
+  }
+
+
+  onEnterFilter(e) {
+    if (e) {
+      if (this.filterType == 'regex') {
+        try {
+          this.toolService.regexExec(e, 'test');
+          this.regexErr = false;
+        } catch (err) {
+          console.log("regErr:", err);
+          this.regexErr = true;
+          return;
+        };
+      } else {
+        this.regexErr = false;
+      }
+      this.filterList.push({ filterType: this.filterType, filterText: e });
+      this.questionForm.get('questionGroup.filterText').reset();
+      this.toFilterLog(this.filterList);
+
+
+    }
+  }
+
+
+  blurFilter(e) {
+    if (e.target.value) {
+      if (this.filterType == 'regex') {
+        try {
+          this.toolService.regexExec(e.target.value, 'test');
+          this.regexErr = false;
+        } catch (err) {
+          console.log("regErr:", err);
+          this.regexErr = true;
+          return;
+        };
+      } else {
+        this.regexErr = false;
+      };
+      this.filterList.push({ filterType: this.filterType, filterText: e.target.value });
+      this.questionForm.get('questionGroup.filterText').reset()
+      this.toFilterLog(this.filterList);
+    }
+  };
+
+
+  toStorageFilter() {
+    if (this.filterList.length > 0) {
+      if (localStorage.getItem('log-filter')) {
+        let logFilter = JSON.parse(localStorage.getItem('log-filter'));
+        let pIds = []
+        logFilter.forEach(element => {
+          pIds.push(element.pId)
+        });
+        if (pIds.indexOf(this.projectId) > -1) {
+          logFilter[pIds.indexOf(this.projectId)].filter = this.filterList;
+          localStorage.setItem('log-filter', JSON.stringify(logFilter));
+        } else {
+          logFilter.push({
+            pId: this.projectId,
+            filter: this.filterList
+          });
+          localStorage.setItem('log-filter', JSON.stringify(logFilter));
+        }
+      } else {
+        let obj = {
+          pId: this.projectId,
+          filter: this.filterList
+        }
+        localStorage.setItem('log-filter', JSON.stringify([obj]));
+      }
+    } else {
+      if (localStorage.getItem('log-filter')) {
+        let logFilter = JSON.parse(localStorage.getItem('log-filter'));
+        for (let i = 0; i < logFilter.length; i++) {
+          if (this.projectId == logFilter[i].pId) {
+            logFilter.splice(i, 1);
+            if (logFilter.length > 0) {
+              localStorage.setItem('log-filter', JSON.stringify(logFilter));
+              break;
+            } else {
+              localStorage.removeItem('log-filter');
+              break;
+            }
+          }
+        }
+      }
+    }
+  };
+
+
+
+  detailDrawer() {
+    if (this.isDrawer) {
+      this.isDrawer = false;
+    } else {
+      this.isDrawer = true;
+    }
+  }
+
+
+
+  ngOnDestroy() {
+    this.toStorageFilter();
+  }
+
+
 
 
 }

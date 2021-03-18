@@ -180,9 +180,22 @@ export class ProjectsComponent implements OnInit {
         this.loading = false;
       });
     } else {
-      e.src = 'projects';
-      this.msgGenerate = e;
       this.showGenerateDatasets = true;
+      e.src = 'projects';
+      if (e.projectType == 'log') {
+        this.avaService.downloadProject(e.id).subscribe(res => {
+          if (res) {
+            e.originalDataSets = res.originalDataSets;
+            this.msgGenerate = e;
+          }
+        }, (error: any) => {
+          console.log(error);
+          this.showGenerateDatasets = false;
+        });
+      } else {
+        this.msgGenerate = e;
+
+      }
     }
   };
 
@@ -203,16 +216,17 @@ export class ProjectsComponent implements OnInit {
           projectName: e.projectName,
           labelType: e.labelType,
           projectType: e.projectType,
-          src: 'projects'
-
+          src: 'projects',
+          originalDataSets: res.originalDataSets
         };
       }
     }, (error: any) => {
       console.log(error);
-      this.loading = false;
+      this.showDownloadDatasets = false;
     });
 
   }
+
 
 
 

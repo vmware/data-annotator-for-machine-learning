@@ -498,7 +498,7 @@ label .label-leftBoard {
 
 .selectedTxtRow {
   // background-color: #ffe184;
-  padding: 0.25em 0.4em 0.25em 0;
+  padding: 0.25em 0.4em 0.25em 0.25em;
   font-weight: bold;
   color: black;
   user-select: none;
@@ -548,7 +548,7 @@ label .label-leftBoard {
   height: 1.5rem;
   outline: unset;
   margin: 0.3rem 0.2rem;
-  color: black;
+  color: #000000d9;
   border: 3px solid transparent;
 }
 
@@ -557,6 +557,11 @@ label .label-leftBoard {
   outline: unset;
   margin: 0.3rem 0.2rem;
   border: 3px solid transparent;
+}
+
+::ng-deep .logEntitySelected:hover {
+  color: #000000d9 !important;
+  border-bottom-width: 5px;
 }
 
 .customBadge {
@@ -570,6 +575,132 @@ label .label-leftBoard {
   right: -0.1rem;
 }
 
+.logCategories {
+  border-radius: 0.1rem;
+}
+
 .logCategories:hover {
   background-color: transparent !important;
+  box-shadow: 2px 2px 4px 1px #9a9a9a !important;
+  // border-radius: 0.3rem;
+}
+
+.filterLog {
+  margin-bottom: 1rem;
+}
+
+.filterSelect {
+  width: 100%;
+  border: 1px solid #999;
+  border-radius: 3px;
+  color: #999;
+  padding-left: 0.3rem;
+  outline: unset;
+}
+
+.filterSelect:hover {
+  border: 1px solid #0077b8;
+  color: #0077b8;
+  background-color: rgba(0, 119, 184, 0.1);
+}
+
+.filterSelect::selection {
+  width: 100%;
+  border: 1px solid #0077b8;
+  color: #0077b8;
+}
+
+.filterInput {
+  // margin-top: 0.5rem;
+  // margin-bottom: 1rem;
+  // margin-left: 1.5rem;
+}
+
+.filterText {
+  width: 80%;
+  margin-left: -0.7rem;
+  margin-top: -0.1rem;
+}
+
+.filterBox {
+  min-height: 1rem;
+  background-color: white;
+  border-radius: 3px;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filterLabel {
+  margin-top: 0.3rem;
+  box-shadow: 1px 1px 3px 0px #9a9a9a;
+  border-color: #9a9a9a;
+  color: #9a9a9a;
+}
+
+.overLabels {
+  background-color: rgb(238, 238, 238, 0.5);
+  cursor: pointer;
+}
+
+::ng-deep .high-light {
+  background: yellow;
+}
+
+.regexErr {
+  margin-left: -0.6rem;
+  color: red;
+}
+
+.isDrawer {
+  width: 0px !important;
+  overflow: hidden;
+}
+// .drawer {
+//   color: #ccc;
+// }
+
+// .drawer:hover {
+//   color: #0077b8;
+//   height: 35px !important;
+//   width: 35px !important;
+// }
+
+.showTag {
+  border-radius: 30px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 4.5rem;
+  height: 1.5rem;
+  color: #ccc;
+  background: linear-gradient(to left, #dedede, transparent 70%);
+}
+
+.showTag:hover {
+  color: white;
+  background: linear-gradient(to left, #0077b8, transparent 70%);
+  .drawer {
+    height: 35px !important;
+    width: 35px !important;
+  }
+}
+
+.hideTag {
+  border-radius: 30px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 4.5rem;
+  height: 1.5rem;
+  color: #ccc;
+  background: linear-gradient(to right, #dedede, transparent 70%);
+}
+
+.hideTag:hover {
+  color: white;
+  background: linear-gradient(to right, #0077b8, transparent 70%);
+  .drawer {
+    height: 35px !important;
+    width: 35px !important;
+  }
 }

@@ -11,13 +11,12 @@ const projectDB = require('../db/project-db');
 const srsDB = require('../db/srs-db');
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
-const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
+const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE } = require("../config/constant");
 const fs = require('fs');
 const ObjectId = require("mongodb").ObjectID;
 const moment = require('moment');
 const { findFrequentlyElementInObject, probabilisticInObject, findFrequentlyElementInArray } = require('../utils/common.utils');
 const csv = require('csvtojson');
-const request = require('request');
 const dataSetService = require('../services/dataSet-service');
 const S3 = require('../utils/s3');
 const validator = require("../utils/validator");
@@ -26,6 +25,11 @@ const logImporter = require("../utils/logImporter");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const mongoDb = require("../db/mongo.db");
 const S3Utils = require('../utils/s3');
+const { DataSetModel } = require("../db/db-connect");
+const compressing = require('compressing');
+const streamifier = require('streamifier');
+const readline = require('readline');
+
 
 async function createProject(req) {
 
@@ -80,7 +84,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         assignmentLogic: req.body.assignmentLogic,
         annotator: annotators,
         dataSource: req.body.fileName,
-        selectedDataset: req.body.selectedDataset,
+        selectedDataset: [req.body.selectedDataset],
         selectedColumn: selectedColumn,
         annotationQuestion: req.body.annotationQuestion,
         shareStatus: false,
@@ -375,13 +379,24 @@ async function queryFileForDownlad(req) {
     const data = await projectDB.queryProjectById(ObjectId(req.query.pid));
     data._doc.generateInfo.labelType = data.labelType ? data.labelType : LABELTYPE.TEXT;
 
+    const S3 = await S3Utils.s3Client();
     let response = data.generateInfo;
+    originalDataSets = []
+
     if (data.generateInfo.file) {//data.generateInfo alway not null
         console.error(`[ FILE ] Service found file: ${data.generateInfo.file}`);
-        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, data.generateInfo.file);
+        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, data.generateInfo.file, S3);
         response.file = Buffer.from(signedUrl).toString("base64");
     }
-
+    if (data.projectType != PROJECTTYPE.IMGAGE) {
+        for (const dataset of data.selectedDataset) {
+            const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
+            const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
+            originalDataSets.push(signedUrl)
+        }
+    }
+    data._doc.generateInfo.originalDataSets = originalDataSets;
+    
     return response;
 
 }
@@ -454,45 +469,111 @@ async function csvContentsSrs(result) {
 
 async function uploadFile(req) {
 
-    const ds = await dataSetService.checkDatasetsName(req.body.dsname);
-    if (ds && ds.length > 0) {
-        return { CODE: 3001, MSG: "there already have the same dataSet, please change the dataSet name" };
-    }
-
-    let fileKey = `upload/${req.auth.email}/${Date.now()}_${req.file.originalname}`;
-    let file = await S3.uploadObject(fileKey, req.file.buffer);
-
-    const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, file.Key);
-    let filestream = request.get(signedUrl);
-
-    const hasheader = req.body.hasHeader.toLowerCase();
-    let headerRule = { noheader: true };
-    hasheader == 'no' ? null: headerRule.noheader=false;
+    await validator.checkDataSet({dataSetName: req.body.dsname}, false);
     
-    let header=[], topRows=[];
+    const fileSplit = req.file.originalname.toLowerCase().split(".");
+    const fileType = fileSplit[fileSplit.length-1];
+    
+    if (![FILETYPE.CSV, FILETYPE.ZIP, FILETYPE.TGZ].includes(fileType)) {
+        return {CODE: 3001, MSG: "FILE FORMAT NOT SUPPORTED"};
+    }
+    
+    const fileKey = `upload/${req.auth.email}/${Date.now()}_${req.file.originalname}`;
+    const file = await S3.uploadObject(fileKey, req.file.buffer);
 
-    await csv(headerRule).fromStream(filestream).subscribe((row,i) => {
-        if (i < 5) {
-            if (i==0) header = Object.keys(row);
-            topRows.push(Object.values(row));   
-        }else{
-            filestream = null;
-        }
-    });
     const datasetInfo = {
         body:{
             dsname: req.body.dsname,
             fileKey: fileKey,
             fileName: req.file.originalname,
             fileSize: req.file.size,
-            format: req.body.fileFormat,
-            hasHeader: hasheader,
-            location: file.Key,
-            topReview: { header: header, topRows: topRows }
+            location: file.Key
         },
         auth:{email: req.auth.email}
     }
-    return await dataSetService.saveDataSetInfo(datasetInfo);
+
+    let filestream = req.file.buffer, totalRows = 0, topReview;
+    
+    if (FILETYPE.CSV == fileType) {
+        let header = [], topRows = [];
+        let headerRule = { noheader: true };
+        req.body.hasHeader == 'no' ? null: headerRule.noheader=false;
+
+        await csv(headerRule).fromString(filestream.toString()).subscribe((row,i) => {
+            if (i < 5) {
+                if (i==0) header = Object.keys(row);
+                topRows.push(Object.values(row));
+            }else{
+                filestream = null;
+            }
+        });
+        topReview = { header: header, topRows: topRows };
+
+        datasetInfo.body.format = FILETYPE.CSV;
+        datasetInfo.body.hasHeader = req.body.hasHeader;
+        datasetInfo.body.topReview = topReview;
+
+        console.error("[ FILE ] [ FINISH ] Service swagger upload csv done ->");
+        await dataSetService.saveDataSetInfo(datasetInfo);
+
+    }else if ([FILETYPE.ZIP, FILETYPE.TGZ].includes(fileType)) {
+        topReview = [];
+        
+        if (fileType  == FILETYPE.ZIP) {
+            uncompressStream = new compressing.zip.UncompressStream();
+        }else if (fileType == FILETYPE.TGZ) {
+            uncompressStream = new compressing.tgz.UncompressStream();
+        }
+        
+        streamifier.createReadStream(filestream).pipe(uncompressStream).on('entry', (header, stream, next) => {
+            stream.on('end', next);
+    
+            const nameSplit = header.name.toLowerCase().split("/");
+            const name = nameSplit[nameSplit.length-1]
+            const fileSplit = header.name.toLowerCase().split(".");
+            const fileType = fileSplit[fileSplit.length-1];
+    
+            if (header.type === 'file' && (header.size || header.yauzl.uncompressedSize) && !name.startsWith("._") && fileType == DATASETTYPE.LOG) {
+                if (totalRows <= 2) {
+                    let index = 0, textLines = "";
+                    let readInterface = readline.createInterface({ input: stream });
+                    readInterface.on('line', (line) => {
+                        if (index >= 5) {
+                            readInterface.emit('close');
+                        }else{
+                            if (line && line.trim() && validator.isASCII(line)) {
+                                index ++;
+                                textLines += line.trim() + "\n";
+                            }
+                        }
+                    }).on('close', () => {
+                        if (Object.keys(textLines).length) {
+                            topReview.push({
+                                fileSize: header.size? header.size: header.yauzl.uncompressedSize,
+                                fileName: header.name,
+                                fileContent: textLines
+                            });
+                        }
+                        readInterface.removeAllListeners();
+                    });
+                }
+                totalRows++;
+            }
+            stream.resume();
+        }).on('error',err => {
+            console.error("[ FILE ] [ ERROR ] Service swagger upload datasets error ->", err);
+            throw {CODE: 500, MSG: "SAVE DATASETS ERROR"}
+        }).on('finish', async () => {
+            datasetInfo.body.format = DATASETTYPE.LOG;
+            datasetInfo.body.topReview = topReview;
+            datasetInfo.body.totalRows = totalRows;
+            
+            console.error("[ FILE ] [ FINISH ] Service swagger upload uncompressStream done ->");
+            await dataSetService.saveDataSetInfo(datasetInfo);
+        });
+    }
+    return {CODE: 200, MSG: "OK"};
+
 }
 
 module.exports = {

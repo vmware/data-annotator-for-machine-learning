@@ -711,12 +711,17 @@ export class AppendNewEntriesComponent implements OnInit {
         if (!this.uploadGroup.invalid && this.nameExist == false && this.fixHeader.length == 0) {
             this.addLoading = true;
             if (this.uploadGroup.get('localFile').value == null) {
+                // let appendParams = {
+                //     pname: this.projectName,
+                //     isFile: true,
+                //     selectedHeaders: this.originalHead,
+                //     location: this.location,
+                //     projectType: this.projectType,
+                //     selectedDataset: this.uploadGroup.get('selectedDataset').value,
+                // }
                 let appendParams = {
                     pname: this.projectName,
                     isFile: true,
-                    selectedHeaders: this.originalHead,
-                    location: this.location,
-                    projectType: this.projectType,
                     selectedDataset: this.uploadGroup.get('selectedDataset').value,
                 }
                 this.appendSrs(appendParams);
@@ -824,15 +829,27 @@ export class AppendNewEntriesComponent implements OnInit {
 
 
         this.avaService.uploadDateset(key == 'image' ? formData : params).subscribe(res => {
+            // let appendParams = {
+            //     pname: this.projectName,
+            //     isFile: from == 'fromSingle' ? false : true,
+            //     selectedHeaders: this.originalHead,
+            //     location: this.projectType == 'image' ? null : data.Key,
+            //     projectType: this.projectType,
+            //     images: (this.projectType == 'image' && from == 'fromSingle') ? data : [],
+            //     selectedDataset: from == 'fromSingle' ? null : this.uploadGroup.get('datasetsName').value,
+
+            // };
             let appendParams = {
                 pname: this.projectName,
-                isFile: from == 'fromSingle' ? false : true,
-                selectedHeaders: this.originalHead,
-                location: this.projectType == 'image' ? null : data.Key,
-                projectType: this.projectType,
-                images: (this.projectType == 'image' && from == 'fromSingle') ? data : [],
-                selectedDataset: from == 'fromSingle' ? null : this.uploadGroup.get('datasetsName').value,
-
+                isFile: true,
+                selectedDataset: this.uploadGroup.get('datasetsName').value,
+            };
+            if (from == 'fromSingle') {
+                appendParams.isFile = false;
+                appendParams.selectedDataset = null;
+            };
+            if (this.projectType == 'image' && from == 'fromSingle') {
+                appendParams['images'] = data;
             }
             this.appendSrs(appendParams);
         }, error => {

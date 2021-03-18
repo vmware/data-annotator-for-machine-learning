@@ -4,16 +4,31 @@ SPDX-License-Identifier: Apache-2.0 -->
 <form class="clr-form" [formGroup]="questionForm" (ngSubmit)="onSubmit()" novalidate>
   <div formGroupName="questionGroup">
     <section class="clr-form-block">
+
       <div *ngIf="!loading" class="clr-row">
-        <div class="clr-col-1"></div>
-        <div class="clr-col-3 leftBoard">
+
+        <div class="clr-col-1">
+          <div style="position: absolute;bottom: 3rem;left: 0rem;">
+            <div class="showTag" *ngIf='isDrawer' (click)="detailDrawer()">
+              <clr-icon shape="angle" class="drawer" size="30" style="transform: rotate(90deg); margin-right: 0.3rem;">
+              </clr-icon>
+            </div>
+            <div class="hideTag" *ngIf='!isDrawer' (click)="detailDrawer()">
+              <clr-icon shape="angle" class="drawer" size="30" style="transform: rotate(-90deg); margin-left: 0.3rem;">
+              </clr-icon>
+
+            </div>
+          </div>
+        </div>
+        <div class=" leftBoard" [ngClass]="{ 'clr-col-3':!isDrawer, 'isDrawer':isDrawer}">
           <h2>Annotate Details</h2>
 
           <div class="clr-form-group form-group clr-row">
             <label for="selectProject" class="label-leftBoard">Projects </label>&nbsp;&nbsp;
             <div class="clr-select-wrapper">
               <select (change)="onSelectingProjects($event)" formControlName="selectProject">
-                <option *ngFor="let selectProject of projects" [value]="selectProject">{{ selectProject }}</option>
+                <option *ngFor="let selectProject of projects" [value]="selectProject.projectName">
+                  {{ selectProject.projectName }}</option>
               </select>
             </div>
             <div class="line"></div>
@@ -30,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div class="clr-form-group left-project-info clr-row">
             <label for="source" class="label-leftBoard">Source: </label>&nbsp;&nbsp;
-            <div>{{projectInfo?.dataSource}}</div>
+            <div style="word-break: break-all;">{{projectInfo?.dataSource}}</div>
           </div>
           <div class="clr-form-group left-project-info ">
             <label for="source" class="label-leftBoard">Instruction : </label>&nbsp;&nbsp;
@@ -75,7 +90,9 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </ng-container>
         </div>
-        <div class="clr-col-7" style="margin-bottom: 10rem;">
+        <div class="centerBoard" [ngClass]="{ 'clr-col-7':!isDrawer, 'clr-col-10':isDrawer}"
+          style="margin-bottom: 10rem;">
+
           <div style="position: relative;">
             <clr-alert *ngIf="maxAnnotationError" [clrAlertType]="'info'" (clrAlertClosedChange)="maxAnnotationError=''"
               class="invalidAlert">
@@ -96,6 +113,37 @@ SPDX-License-Identifier: Apache-2.0 -->
             </clr-icon>
             <span *ngIf='silenceStatus' style="color: #2F8400;font-size: 0.5em;">Reviewed for accuracy</span>
           </h2>
+
+          <!-- to filter the log -->
+          <div *ngIf='projectType==="log"'>
+            <div class="clr-row filterLog">
+              <div class="clr-form-control clr-col-2" style="margin-top: 0rem;">
+                <select class="filterSelect" (change)='updateFilterSelect($event)'>
+                  <option value="keyword">Keyword</option>
+                  <option value="regex">Regex</option>
+                </select>
+              </div>
+
+              <div class="clr-control-container clr-col-8 filterInput">
+                <div class="clr-input-wrapper  ">
+                  <input #filters autocomplete="off" type="text"
+                    [placeholder]="filterType=='keyword'?'Type keyword to filter, for example, abc .':'Type custom regex rule to filter, for example, /[A-Z]/' "
+                    class="clr-input filterText" formControlName="filterText"
+                    (keyup.enter)="onEnterFilter(filters.value)" (blur)="blurFilter($event)"
+                    (ngModelChange)='updateFilterText($event)'>
+                </div>
+                <span *ngIf='regexErr' class="clr-subtext regexErr">Wrong format!</span>
+              </div>
+            </div>
+            <div *ngIf="filterList.length>0" class="filterBox">
+              <span *ngFor="let filter of filterList; let i = index" class="label filterLabel" (click)="deleteFilter(i)"
+                (mouseenter)="overFilter(i)" (mouseleave)="outFilter(i)"
+                [ngClass]="active==i ? 'overLabels':''">{{filter.filterText}}<clr-icon shape="times" *ngIf="active==i"
+                  (click)="deleteFilter(i)" style="margin-left: 0.5rem;"></clr-icon>
+              </span>
+            </div>
+
+          </div>
           <div class="questionContainer">
             <div *ngIf='projectType!=="ner" && projectType!=="image" && projectType!=="log"'>
               <div *ngFor="let ticket of sr.originalData;">
@@ -128,16 +176,33 @@ SPDX-License-Identifier: Apache-2.0 -->
                 (mouseup)="onMouseUp($event,ticket)" id="{{ticket.id}}"
                 class="nerSpan spanIndex{{ticket.id}}">{{ticket.text}}</span>
             </div>
+            <!-- here is log annotation content -->
             <div *ngIf='projectType==="log"' class="txtBox">
-              <p *ngFor="let ticket of sr.originalData;let i = index" id="c-{{i}}" class="txtRow txtRow{{i}}"
-                title="{{ticket.freeText}}">
-                <span class="logIndex{{i}} rowIndex" (click)="clickIndex($event,ticket,i)">{{i+1}}
-                  <span class="customBadge customBadge{{i}}"></span>
-                </span>
-                <span class="txtRowEntity{{i}}"></span>
-                <span class="logLine-{{ticket.line}} txtRowContent{{i}} " (mousedown)="onMouseDownTxt(ticket,i)"
-                  (mouseup)="onMouseUpTxt(ticket,i,'current')">{{ticket.text}}</span>
-              </p>
+              <div *ngIf="filterList.length<=0">
+                <p *ngFor="let ticket of sr.originalData;let i = index" id="c-{{i}}" class="txtRow txtRow{{i}}"
+                  title="{{ticket.freeText}}">
+                  <span class="logIndex{{i}} rowIndex" (click)="clickIndex($event,ticket,i)">{{i+1}}
+                    <span class="customBadge customBadge{{i}}"></span>
+                  </span>
+                  <span class="txtRowEntity{{i}}"></span>
+                  <span class="logLine-{{ticket.line}} txtRowContent{{i}} " (mousedown)="onMouseDownTxt(ticket,i)"
+                    (mouseup)="onMouseUpTxt(ticket,i,'current')">{{ticket.text}}</span>
+                </p>
+              </div>
+              <div *ngIf="filterList.length>0">
+                <div *ngFor="let ticket of sr.originalData;let i = index">
+                  <p id="c-{{ticket.index}}" class="txtRow txtRow{{ticket.index}}" title="{{ticket.freeText}}">
+                    <span *ngIf="ticket.filter" class="logIndex{{ticket.index}} rowIndex"
+                      (click)="clickIndex($event,ticket,ticket.index)">{{ticket.index+1}}
+                      <span class="customBadge customBadge{{ticket.index}}"></span>
+                    </span>
+                    <span *ngIf="ticket.filter" class="txtRowEntity{{ticket.index}}"></span>
+                    <span *ngIf="ticket.filter" class="logLine-{{ticket.line}} txtRowContent{{ticket.index}} "
+                      (mousedown)="onMouseDownTxt(ticket,ticket.index)"
+                      (mouseup)="onMouseUpTxt(ticket,ticket.index,'current')">{{ticket.text}}</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
           <div class="clr-row" *ngIf='projectType!=="image"'>
@@ -227,8 +292,8 @@ SPDX-License-Identifier: Apache-2.0 -->
               <button *ngFor="let item of logCategories; let i = index"
                 class="logCategories logCategories{{i}} btn labels label logEntityLabel"
                 [ngClass]="{'logEntitySelected': i==selectedEntityID, 'logEntityLabel': i!==selectedEntityID}"
-                [ngStyle]="{'border-color':item.color }"
-                (click)="onSelectingEntity($event,item.label, i)">{{ item.label }}</button>
+                [ngStyle]="{'border-left-color':item.color,'background-color':i==selectedEntityID?item.color:'','border-left-width':'6px','box-shadow':'1px 1px 3px 0px '+ '#9A9A9A'}"
+                (click)="onSelectingEntity($event,label, i)">{{ item.label }}</button>
               &nbsp; &nbsp;
             </div>
             <div class="clr-textarea-wrapper clr-col-12" style="padding-left: 0.3rem;">

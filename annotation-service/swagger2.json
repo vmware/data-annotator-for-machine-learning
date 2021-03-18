@@ -770,7 +770,7 @@
             "schema": {
               "example": {
                 "pname": "0915.15",
-                "csvFile": true,
+                "isFile": true,
                 "srdata": [
                   {
                     "index": 10,
@@ -1221,21 +1221,15 @@
           {
             "name": "hasHeader",
             "in": "formData",
-            "description": "Does the dataset csv has header or not. (e.g. yes || no)",
+            "description": "Does the dataset csv has header or not",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "fileFormat",
-            "in": "formData",
-            "description": "The format of the dataset. (e.g. csv || tabular)",
-            "required": true,
-            "type": "string"
+            "type": "string",
+            "enum":["no", "yes"]
           },
           {
             "name": "file",
             "in": "formData",
-            "description": "file to upload",
+            "description": "file to upload only support for: [.csv .zip .tgz]",
             "required": true,
             "type": "file"
           }
@@ -1243,9 +1237,7 @@
         "responses": {
           "200": {
             "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/datasets"
-            }
+            "schema": { "example": { "CODE": 200, "MSG": "OK"} }
           },
           "401": {
             "description": "Unauthorized"

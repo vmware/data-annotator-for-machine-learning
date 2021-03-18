@@ -343,9 +343,21 @@ export class AdminComponent implements OnInit {
         this.loading = false;
       });
     } else {
-      e.src = 'admin';
-      this.msgGenerate = e;
       this.showGenerateDatasets = true;
+      e.src = 'admin';
+      if (e.projectType == 'log') {
+        this.avaService.downloadProject(e.id).subscribe(res => {
+          if (res) {
+            e.originalDataSets = res.originalDataSets;
+            this.msgGenerate = e;
+          }
+        }, (error: any) => {
+          console.log(error);
+          this.showGenerateDatasets = false;
+        });
+      } else {
+        this.msgGenerate = e;
+      }
     }
   }
 
@@ -365,8 +377,8 @@ export class AdminComponent implements OnInit {
           projectName: e.projectName,
           labelType: e.labelType,
           projectType: e.projectType,
-          src: 'admin'
-
+          src: 'admin',
+          originalDataSets: res.originalDataSets
         };
 
       }

@@ -38,11 +38,11 @@ async function checkProjectByconditions(conditions, checkExsit){
 async function checkAppendTicketsHeaders(appendHeaders, originalHeaders){
     
     const errRes = {CODE: 4005, MSG: "ERROR INPUT TICKET'S HEADERS"};
-    if (appendHeaders.length != originalHeaders.length) {
+    if (appendHeaders.length < originalHeaders.length) {
         throw errRes;
     }
-    appendHeaders.forEach(header =>{
-        if (!originalHeaders.includes(header)) {
+    originalHeaders.forEach(header =>{
+        if (!appendHeaders.includes(header)) {
             throw errRes;
         }
     });
