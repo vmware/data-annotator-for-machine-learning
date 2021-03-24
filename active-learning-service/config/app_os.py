@@ -14,5 +14,9 @@ app = {
     "S3_BUCKET_NAME": os.getenv("S3_BUCKET_NAME", None),
     "S3_ROLE_ARN": os.getenv("S3_ROLE_ARN", None),
 
+    # optional token config
+    "TOKEN_ALGORITHM": os.getenv("TOKEN_ALGORITHM", "HS256"),
+    "TOKEN_SECRET_OR_PRIVATE_KEY": os.getenv("TOKEN_SECRET_OR_PRIVATE_KEY", "OPEN SOURCE"),
+
 
 }

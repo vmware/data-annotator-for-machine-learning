@@ -26,3 +26,4 @@ active-learning-service/.idea
 active-learning-service/logs
 active-learning-service/models
 active-learning-service/config/app_local.py
+active-learning-service/config/app_poc.py
