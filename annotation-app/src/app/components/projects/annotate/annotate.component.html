@@ -25,8 +25,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
           <div class="clr-form-group form-group clr-row">
             <label for="selectProject" class="label-leftBoard">Projects </label>&nbsp;&nbsp;
-            <div class="clr-select-wrapper">
-              <select (change)="onSelectingProjects($event)" formControlName="selectProject">
+            <div class="clr-select-wrapper" style="max-width: 70%;">
+              <select style="max-width: 95%;" (change)="onSelectingProjects($event)" formControlName="selectProject">
                 <option *ngFor="let selectProject of projects" [value]="selectProject.projectName">
                   {{ selectProject.projectName }}</option>
               </select>
@@ -37,11 +37,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           <h3>Project Info</h3>
           <div class="clr-form-group left-project-info clr-row">
             <label for="name" class="label-leftBoard">Name: </label>&nbsp;&nbsp;
-            <div>{{selectParam}}</div>
+            <div style="word-break: break-all;">{{selectParam}}</div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
             <label for="owner" class="label-leftBoard">Owner: </label>&nbsp;&nbsp;
-            <div>{{projectInfo?.creator}}</div>
+            <div style="word-break: break-all;">{{projectInfo?.creator}}</div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
             <label for="source" class="label-leftBoard">Source: </label>&nbsp;&nbsp;

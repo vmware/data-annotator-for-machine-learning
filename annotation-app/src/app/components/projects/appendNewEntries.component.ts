@@ -3,7 +3,7 @@ Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import { Component, OnInit, ElementRef, Renderer2, ɵConsole } from '@angular/core';
+import { Component, OnInit, ElementRef, Renderer2 } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import 'rxjs/Rx'
 import * as _ from 'lodash';
@@ -224,7 +224,9 @@ export class AppendNewEntriesComponent implements OnInit {
                             this.newAddedData.splice(i, 1);
                         }
                     };
-                    this.uploadToS3(null, 'single');
+                    if (this.newAddedData.length > 0) {
+                        this.uploadToS3(null, 'single');
+                    }
                 }
             })
 
@@ -239,34 +241,35 @@ export class AppendNewEntriesComponent implements OnInit {
             });
             formData.append('pname', this.projectName)
             formData.append('isFile', 'false')
-            this.appendSrs(formData);
-
-
+            if (formData.get('file')) {
+                this.appendSrs(formData);
+            }
         } else {
             let srdata = [];
             let allValue = [];
             for (let i = 0; i < this.newAddedData.length; i++) {
                 let flag = {};
+                let rowArry = [];
                 for (let j = 0; j < this.newAddedData[i].length; j++) {
                     if (this.newAddedData[i][j].format == false) {
                         return;
                     };
                     allValue.push(this.newAddedData[i][j].value);
+                    rowArry.push(this.newAddedData[i][j].value)
                     flag[this.newAddedData[i][j].key] = this.newAddedData[i][j].value;
                 }
-                srdata.push(flag);
+                if (rowArry.join('').replace(/(\r\n|\r|\n|\n\r)/g, '').replace(/\s*/g, "") !== '') {
+                    srdata.push(flag);
+                }
             }
-            for (let i = 0; i < allValue.length; i++) {
-                if (allValue[i] != '') {
-                    let params = {
-                        pname: this.projectName,
-                        isFile: false,
-                        srdata: srdata
-                    };
-                    this.appendSrs(params);
+            if (allValue.join('') !== '' && srdata.length > 0) {
+                let params = {
+                    pname: this.projectName,
+                    isFile: false,
+                    srdata: srdata
                 };
-                return;
-            }
+                this.appendSrs(params);
+            };
         }
     }
 
@@ -756,7 +759,16 @@ export class AppendNewEntriesComponent implements OnInit {
                     if (addMethod == 'zip') {
                         this.uploadImages(file, s3, res);
                     } else {
-                        this.uploadSingleImage(outNo, s3, res, this.newAddedData)
+                        let aa = [];
+                        this.newAddedData.forEach(element => {
+                            if (element.format !== false && element.src !== '/' && element.size !== '/') {
+                                aa.push(element)
+                            }
+                        });
+                        this.newAddedData = aa;
+                        if (this.newAddedData.length > 0) {
+                            this.uploadSingleImage(outNo, s3, res, this.newAddedData)
+                        }
                     }
 
                 } else {
