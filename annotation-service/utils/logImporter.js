@@ -13,10 +13,9 @@ const mongoDb = require('../db/mongo.db');
 const validator = require("./validator");
 const S3Utils = require('./s3');
 const compressing = require('compressing');
-const streamifier = require('streamifier');
 const readline = require('readline');
-const _ = require('lodash');
-const axios = require('axios');
+const request = require('request');
+const unzip = require('unzip-stream');
 
 async function execute(req, sendEmail, annotators, append) {
       
@@ -26,107 +25,115 @@ async function execute(req, sendEmail, annotators, append) {
   const start = Date.now();
   console.log(`[ LOG ] Utils logImporter.execute start: `, start);
   
-  const options = { lean: true, ordered: false };
   let docs = [], totalCase = 0;
-
+  const projectName = req.body.pname;
   const urlsplit = req.body.location.split(".");
-  const fileType = _.toLower(urlsplit[urlsplit.length-1]);
-  if (fileType  == FILETYPE.ZIP) {
-    uncompressStream = new compressing.zip.UncompressStream();
-  }else if (fileType == FILETYPE.TGZ) {
-    uncompressStream = new compressing.tgz.UncompressStream();
-  }
+  const fileType = urlsplit[urlsplit.length-1].toLowerCase();
 
   console.log(`[ LOG ] Utils S3Utils.signedUrlByS3`);
   const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
 
-  axios.request(signedUrl, {responseType: "arraybuffer"}).then(result => {
-    streamifier.createReadStream(result.data).pipe(uncompressStream)
-    .on('entry', async (header, stream, next) => {
+
+  if (fileType  == FILETYPE.ZIP) {
+    unzipstream = unzip.Parse();
+    request.get(signedUrl).pipe(unzipstream).on('entry', (entry) => {
+      
+      lineBylineToRead(entry.type, entry.size, entry.path, entry, projectName);
+      entry.autodrain();
+
+    }).on('finish', () =>{
+      setTimeout(() => {
+        finishInsertLogsData(projectName, sendEmail, req.auth.email, append, req.body.selectedDataset, annotators);
+        console.log(`[ LOG ] Utils logImporter.execute zip file end using ${ (Date.now()-start)/1000 } s: `);
+      }, 1000*5);
+    })
+  }else if (fileType == FILETYPE.TGZ) {
+    request.get(signedUrl).pipe(new compressing.tgz.UncompressStream()).on('entry', (header, stream, next) => {
       stream.on('end', next);
-
-      
-      // header.type is 'Directory' or 'file'
-      // __MACOSX or linux back file start with ._
-      // only need handle txt file
-      const name = header.name.split("/");
-      const fileType = header.name.toLowerCase().split(".");
-
-      if (header.type === 'file' && (header.size || header.yauzl.uncompressedSize) && !name[name.length-1].startsWith("._") && fileType[fileType.length-1] == DATASETTYPE.LOG) {
-    
-        let index = 0, textLines = {};
-        const readInterface = readline.createInterface({ input: stream });
-        
-        readInterface.on('line', async (line) => {
-          index += 1;
-          
-          if (line && line.trim() && validator.isASCII(line)) {
-            textLines[index] = line.trim();
-          }
-        }).on('close', async () => {
-          if (Object.keys(textLines).length) {
-
-            const sechema = {
-              projectName: req.body.pname,
-              userInputsLength: 0,
-              originalData: textLines,
-              fileInfo:{
-                fileSize: header.size? header.size: header.yauzl.uncompressedSize,
-                fileName: header.name
-              }
-            };
-            
-            docs.push(sechema);
-            totalCase += 1;
-          }
-        });
-      }
-      
-      if(docs.length && docs.length % PAGINATETEXTLIMIT == 0){ 
-        await mongoDb.insertMany(LogModel, docs, options);
-        docs = [];
-      }
-
+      lineBylineToRead(header.type, header.size, header.name, stream, projectName);
       stream.resume();
-    
-    }).on('finish', async ()=>{
-      
-      console.log(`[ LOG ] Utils save log data to db`);
-      if(docs.length){ 
-        await mongoDb.insertMany(LogModel, docs, options);
-        docs = [];
-      }
+    }).on('finish', () =>{
+      finishInsertLogsData(projectName, sendEmail, req.auth.email, append, req.body.selectedDataset, annotators);
+      console.log(`[ LOG ] Utils logImporter.execute tgz file end using ${ (Date.now()-start)/1000 } s: `);
+    })
+  }
 
-      const condition = { projectName: req.body.pname };
-      const update = { $inc: { totalCase: totalCase }, updatedDate: Date.now() };
-      console.log(`[ LOG ] Utils update totalCase:`, totalCase);
-
-      if (append) {
-        update.$set = { appendSr: APPENDSR.DONE };
-        update.$push = { selectedDataset: req.body.selectedDataset };
-      }
-
-      await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
-
-      if (sendEmail) {
-        console.log(`[ LOG ] Utils import log sendEmailToAnnotator`);
-        const param = {
-          body: {
-            annotator: annotators,
-            pname: req.body.pname
-          },
-          auth:{ email: req.auth.email }
-        }
-        await emailService.sendEmailToAnnotator(param);
-      }
-      
-      console.log(`[ LOG ] Utils logImporter.execute end using ${ (Date.now()-start)/1000 } s: `); 
-    
-    });
-  }).catch(err => {
-    console.error("[ LOG ] [ ERROR ] Utils axios.request error ->", err);
-  });
+  function lineBylineToRead(type, size, filePath, stream, projectName) {
   
+    const path1 = filePath.toLowerCase().split("/");
+    const fileName = path1[path1.length-1];
+    const path2 = filePath.toLowerCase().split(".");
+    const fileType = path2[path2.length-1];
+  
+    if (type.toLowerCase() == 'file' && size && !fileName.startsWith("._") && fileType == DATASETTYPE.LOG) {
+      
+      let index = 0, textLines = {};
+      const readInterface = readline.createInterface({ input: stream });
+      
+      readInterface.on('line', (line) => {
+        index += 1;
+        
+        if (line && line.trim() && validator.isASCII(line)) {
+          textLines[index] = line.trim();
+        }
+      }).on('close', () => {
+        if (Object.keys(textLines).length) {
+          const sechema = {
+            projectName: projectName,
+            userInputsLength: 0,
+            originalData: textLines,
+            fileInfo:{
+              fileSize: size,
+              fileName: fileName
+            }
+          };
+
+          docs.push(sechema);
+          totalCase += 1;
+        }
+      });
+    }
+  
+    if(docs.length && docs.length % PAGINATETEXTLIMIT == 0){ 
+      console.log(`[ LOG ] lineBylineToRead Utils save log data to db ${docs.length}`);
+      const options = { lean: true, ordered: false };
+      mongoDb.insertMany(LogModel, docs, options);
+      docs = [];
+    }
+  }
+
+  async function finishInsertLogsData(projectName, sendEmail, email, append, selectedDataset, annotators) {
+  
+    if(docs.length){ 
+      console.log(`[ LOG ] finishInsertLogsData Utils save log data to db ${docs.length}`);
+      const options = { lean: true, ordered: false };
+      await mongoDb.insertMany(LogModel, docs, options);
+      docs = [];
+    }
+  
+    const condition = { projectName: projectName };
+    const update = { $inc: { totalCase: totalCase }, updatedDate: Date.now() };
+    console.log(`[ LOG ] Utils update totalCase:`, totalCase);
+  
+    if (append) {
+      update.$set = { appendSr: APPENDSR.DONE };
+      update.$push = { selectedDataset: selectedDataset };
+    }
+  
+    await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
+  
+    if (sendEmail) {
+      console.log(`[ LOG ] Utils import log sendEmailToAnnotator`);
+      const param = {
+        body: {
+          annotator: annotators,
+          pname: projectName
+        },
+        auth:{ email: email }
+      }
+      await emailService.sendEmailToAnnotator(param);
+    } 
+  }
 }
 
 
@@ -158,11 +165,9 @@ async function quickAppendLogs(req){
       docs.push(sechema);
       totalCase += 1;
     }
-
   }
 
   if(docs.length){
-
     console.log(`[ LOG ] Utils quick append logs data to db`);
     const options = { lean: true, ordered: false };
     await mongoDb.insertMany(LogModel, docs, options);
@@ -171,10 +176,11 @@ async function quickAppendLogs(req){
     const update = { $inc: { totalCase: totalCase }, $set:{ appendSr: APPENDSR.DONE } };
     console.log(`[ SRS ] Utils quick append update totalCase:`, totalCase);
     await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
-  
   }
-
 }
+
+
+
 
 
 module.exports = {
