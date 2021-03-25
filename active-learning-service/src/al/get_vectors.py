@@ -9,6 +9,8 @@ from config.config import config
 import numpy as np
 import spacy
 
+from src.exceptions.base_exceptions import NetWorkException
+
 nlp = spacy.load("en_core_web_md")
 log = logging.getLogger('loop_al')
 
@@ -33,6 +35,7 @@ def esp_text_vectors(user, sr_text, token):
         return vectors
     else:
         log.error(f"Request text vector fail: {res}")
+        raise NetWorkException(res.status_code, f"Request text vector fail: {res}")
 
 
 def os_text_vectors(sr_text):
