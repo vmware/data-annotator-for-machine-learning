@@ -35,7 +35,7 @@ def verification_token(request):
 
     if request.method == "POST" and request.body:
         req = json.loads(request.body)
-        if req["user"] and req["user"] != decode["email"]:
+        if "user" in req and req["user"] != decode["email"]:
             raise AuthException(401, "invalid user or token")
 
 
