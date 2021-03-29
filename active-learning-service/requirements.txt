@@ -14,3 +14,4 @@ fastai~=1.0.61
 spacy~=2.3.2
 
 PyJWT~=2.0.1
+cryptography~=3.4.7
