@@ -18,7 +18,7 @@ def verification_token(request):
     if "ESP" in config and config["ESP"]:
         pk = obtain_public_key()
         key = bytes(pk['key'].replace("RSA ", ""), encoding="utf8")
-        algorithms = [pk['alg']]
+        algorithms = pk['alg']
     else:
         key = config["TOKEN_SECRET_OR_PRIVATE_KEY"]
         algorithms = config["TOKEN_ALGORITHM"]
@@ -29,7 +29,7 @@ def verification_token(request):
     token = request.headers["Authorization"]
 
     try:
-        decode = jwt.decode(token, key, algorithms=algorithms)
+        decode = jwt.decode(token, key, algorithms=[algorithms])
     except Exception as e:
         raise AuthException(401, f"invalid token: {e}")
 
