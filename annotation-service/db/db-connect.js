@@ -174,7 +174,8 @@ const projectSchema = new mongoose.Schema({
         objectColumn: { type: Array }
     },
     encoder: { type: String },
-    isMultipleLabel: { type: Boolean, default: false }
+    isMultipleLabel: { type: Boolean, default: false },
+    regression: {type: Boolean, default: false}
 
 }, { _id: true });
 projectSchema.index({ projectName: 1 });

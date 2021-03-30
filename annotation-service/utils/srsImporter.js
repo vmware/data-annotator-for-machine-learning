@@ -23,35 +23,29 @@ module.exports = {
         if (projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER ) {
             return;
         }
-
-        console.log(`[ SRS ] Utils srsImporter.execute start: `, Date.now());
+        const start = Date.now();
+        console.log(`[ SRS ] Utils srsImporter.execute start: `, start);
         
         let header = req.body.header;
         header = (typeof header === 'string'? JSON.parse(header):header);
         let selectedColumn = req.body.selectDescription;
         selectedColumn = (typeof selectedColumn === 'string'? JSON.parse(selectedColumn):selectedColumn);
+        let selectLabels = req.body.selectLabels;
+        selectLabels = (typeof selectLabels === 'string'? JSON.parse(selectLabels):selectLabels);
 
-        const data = {
-            projectName: req.body.pname,
-            header: header,
-            isHasHeader: req.body.isHasHeader,
-            selectedColumn: selectedColumn,
-            projectType: projectType,
-            encoder: req.body.encoder
-        };
         let totalCase = 0;
         let docs = [];
         let headerRule = {
             noheader: false,
             fork: true,
             flatKeys: true,
-            headers: data.header,
+            headers: header,
             checkType:true
         };
-        if (data.isHasHeader == 'no') {
+        if (req.body.isHasHeader == 'no') {
             headerRule.noheader = true;
         };
-        if (data.projectType == PROJECTTYPE.TEXT) {
+        if (projectType == PROJECTTYPE.TEXT) {
             headerRule.checkType = false;
         }
         
@@ -61,11 +55,20 @@ module.exports = {
         console.log(`[ SRS ] Utils import data to db start: `, Date.now());
         // chunking line by line to read
         csv(headerRule).fromStream(request.get(signedUrl)).subscribe((oneData) => {
+            saveData(oneData);
+        }, async (error) => {
+            console.log(`[ SRS ] [ERROR] Utils import data have ${error}: `, Date.now());
+        }, async () => {
+            await finishSaveData();
+        });
+        
+        // handle and save data to db
+        function saveData(oneData) {
             //only save selected data
-            const select = {};
-            data.selectedColumn.forEach( item =>{
+            let select = {};
+            for (const item of selectedColumn) {
                 select[item] = oneData[item];
-            });
+            }
             //check all selected data if is empty
             let selectedData = Object.values(select).toString().replace(new RegExp(',', 'g'),'').trim();
             if(selectedData){
@@ -78,10 +81,25 @@ module.exports = {
                 }
                 if (selectedData) {
                     let sechema = {
-                        projectName: data.projectName,
+                        projectName: req.body.pname,
                         userInputsLength: 0,
                         originalData: select
                     };
+                    //support ner regression
+                    if (req.body.regression && req.body.projectType == PROJECTTYPE.NER) {
+                        let problemCategory = [];
+                        for (const lb of selectLabels) {
+                            for (const dataLb of oneData[lb]) {
+                                problemCategory.push({
+                                    text : Object.keys(dataLb)[0],
+                                    start: Object.values(dataLb)[0][0],
+                                    end: Object.values(dataLb)[0][1],
+                                    label: lb
+                                });
+                            }
+                        }
+                        sechema.userInputs=[ { problemCategory: problemCategory } ];
+                    }
                     docs.push(sechema);
                     totalCase += 1;
                 }
@@ -92,18 +110,18 @@ module.exports = {
                 srsDB.insertManySrsData(docs, options);
                 docs = [];
             }
-
-        }, async (error) => {
-            console.log(`[ SRS ] [ERROR] Utils import data have ${error}: `, Date.now());
-        }, async () => {
+        }
+        
+        //handle data finish
+        async function finishSaveData() {
             try {
-                console.log(`[ SRS ] Utils import last sr data to db: `);
+                console.log(`[ SRS ] Utils import last sr data to db`);
                 const options = { lean: true, ordered: false }; 
                 srsDB.insertManySrsData(docs, options);
                 docs = [];
 
-                console.log(`[ SRS ] Utils import data to db end: `, Date.now());
-                const condition = { projectName: data.projectName };
+                console.log(`[ SRS ] Utils import data to db end: `);
+                const condition = { projectName: req.body.pname };
                 const update = {
                     $set: {
                         totalCase: totalCase
@@ -111,19 +129,21 @@ module.exports = {
                 };
                 console.log(`[ SRS ] Utils update totalCase:`, totalCase);
                 await projectDB.findUpdateProject(condition, update);
-                
+
+                console.log(`[ SRS ] Utils srsImporter.execute end: within:[ ${(Date.now() - start) / 1000}s ] `);
+
                 console.log(`[ SRS ] Utils sendEmailToAnnotator`);
                 const param = {
                     body: {
                         annotator: annotators,
-                        pname: data.projectName
+                        pname: req.body.pname
                     },
                     auth:{ email: req.auth.email }
                 }
                 await emailService.sendEmailToAnnotator(param);
                 
                 //trigger tabular one-hot-encoding project generate the vector model
-                if (data.encoder == ENCODE.ONEHOT) {
+                if (req.body.encoder == ENCODE.ONEHOT) {
                     console.log(`[ SRS ] Utils trigger active learning vector sr data`);
                     const opts = {
                         headers: { 'Content-Type': 'application/json', Authorization: req.headers.authorization.split("Bearer ")[1] }
@@ -131,13 +151,11 @@ module.exports = {
                     axios.post(`${config.loopALApiUrl}/al/sr/vector`, condition, opts);
                 }
                 
-                console.log(`[ SRS ] Utils srsImporter.execute end: `, Date.now());
-
             } catch (error) {
                 console.log(`[ SRS ] [ERROR] Utils importe srs done, but fail on update tatalcase or send email ${error}: `, Date.now());
             }
-            
-        });
+        }
+
 
     }
 }
