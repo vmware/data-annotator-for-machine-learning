@@ -48,6 +48,7 @@ import { GetElementService } from "./services/common/dom.service";
 import { UnZipService } from "./services/common/up-zip.service";
 import { DownloadService } from "./services/common/download.service";
 import { ToolService } from "./services/common/tool.service";
+import { SliceTextPipe } from "./pipes/sliceText.pipe";
 
 
 @NgModule({
@@ -58,6 +59,7 @@ import { ToolService } from "./services/common/tool.service";
     HeaderComponent,
     AuthenticationComponent,
     FullNamePipe,
+    SliceTextPipe,
     FooterComponent,
     ProjectsComponent,
     DropdownPage,

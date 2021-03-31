@@ -137,7 +137,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <div *ngIf="!loadingSetData" class="setData">
                         <button *ngIf="!setDataComplete" type="button" class="btn btn-primary sureSet"
                           (click)="sureSet()"
-                          [disabled]="msg.type=='ner'?(!this.dsDialogForm.get('selectedText').value):(selectDescription.length==0 ||!this.dsDialogForm.get('selectLabels').value||isSelectWrongColumn==true) "
+                          [disabled]="msg.type=='ner'?(!this.dsDialogForm.get('selectedText').value||isSelectWrongColumn==true):(selectDescription.length==0 ||!this.dsDialogForm.get('selectLabels').value||isSelectWrongColumn==true) "
                           title="{{
                             msg.type=='ner'?(!this.dsDialogForm.get('selectedText').value?'You can only create after seting the data source of Text column':''):(!this.dsDialogForm.get('selectDescription').value ||!this.dsDialogForm.get('selectLabels').value||isSelectWrongColumn==true
                           ? 'You can only create after seting the data source of Description and Labels'
@@ -190,7 +190,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </div> -->
 
                             <clr-datagrid [(clrDgSelected)]="selectDescription"
-                              (clrDgSelectedChange)="selectionChanged($event)">
+                              (clrDgSelectedChange)="selectionChanged()">
                               <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
                               <!-- <clr-dg-column class="ellipsis-datagrid" *ngIf="projectType=='tabular'">Variable Type
                               </clr-dg-column> -->
@@ -210,9 +210,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </clr-datagrid>
                           </div>
                         </div>
+                        <!-- ner project SET DATA box -->
                         <div *ngIf="msg.type=='ner'" class="clr-row" style="margin-bottom: 1rem;">
-                          <div class="clr-col-10" style="margin-top: 0.5rem;">
-                            <div class="sureSetString">Please select a single text column which you intend to present to
+                          <div class="clr-col-5" style="margin-top: 0.5rem;">
+                            <div class="sureSetString">First:Please select a single text column which you intend to
+                              present to
                               annotators
                             </div>
 
@@ -227,6 +229,24 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 </select>
                               </div>
                             </div>
+                          </div>
+                          <div class="clr-col-6" style="margin-top: 0.5rem;">
+                            <div class="sureSetString">Second: Select the columns to present the existing labels to
+                              annotators (optional)</div>
+                            <div class="clr-subtext-wrapper" *ngIf="isSelectWrongColumn">
+                              <clr-icon shape="exclamation-circle"
+                                style="margin-top: 0.2rem; margin-left: 0.2rem;color: red;"></clr-icon>
+                              <span class="clr-subtext" style="color: red;">The text column and the label column
+                                should not be the same!</span>
+                            </div>
+                            <clr-datagrid [(clrDgSelected)]="selectDescription"
+                              (clrDgSelectedChange)="selectionChanged()">
+                              <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
+                              <clr-dg-row *clrDgItems="let column of columnInfo; let i=index" [clrDgItem]="column">
+                                <clr-dg-cell class="ellipsis-datagrid labelOriginal label{{i}}"
+                                  style="color: #000; word-break: break-all;">{{column.name}}</clr-dg-cell>
+                              </clr-dg-row>
+                            </clr-datagrid>
                           </div>
                         </div>
                       </div>
@@ -390,11 +410,28 @@ SPDX-License-Identifier: Apache-2.0 -->
 
               <!-- string label -->
               <div *ngIf="!isShowNumeric">
-                <span *ngFor="let label of categoryList; let i = index" class="label" maxlength="5"
-                  (mouseenter)="overLabels(i)" (mouseleave)="outLabels(i)"
-                  [ngClass]="active==i ? 'overLabels':''">{{label}}<clr-icon shape="times" *ngIf="active==i"
-                    (click)="deleteLabel(i)"></clr-icon></span>
+                <div *ngIf="projectType==='ner'">
+                  <span *ngFor="let label of selectDescription; let i = index" class="label"
+                    style="position: relative;padding: 0 1rem 0 1rem;margin-top: 0.3rem;" maxlength="5"
+                    (mouseenter)="overLabels(i,'original')" (mouseleave)="outLabels(i,'original')"
+                    [ngClass]="activeOriginal==i ? 'overLabels':''">{{label.name}}
+                    <clr-icon shape="times" *ngIf="activeOriginal==i " style="position: absolute;right: 0.1rem;"
+                      (click)="deleteLabel(i,'original')">
+                    </clr-icon>
+                  </span>
+                  &nbsp; &nbsp;
+                </div>
+                <span *ngFor="let label of categoryList; let i = index" class="label"
+                  style="position: relative;padding: 0 1rem 0 1rem;margin-top: 0.3rem;" maxlength="5"
+                  (mouseenter)="overLabels(i,'new')" (mouseleave)="outLabels(i,'new')"
+                  [ngClass]="activeNew==i ? 'overLabels':''">{{projectType=='ner'?label.name:label}}<clr-icon
+                    shape="times" *ngIf="activeNew==i" style="position: absolute;right: 0.1rem;"
+                    (click)="deleteLabel(i,'new')">
+                  </clr-icon>
+                </span>
                 &nbsp; &nbsp;
+
+
                 <input #labels id="labels" maxlength="50" clrInput placeholder="Add New Label Here" name="addNewLabel"
                   class="clr-input" (keyup.enter)="onEnterLabel(labels.value)" (blur)="labelsBlur($event)"
                   (keyup)="onLabelKeydown($event)" [disabled]="categoryList.length>49" />

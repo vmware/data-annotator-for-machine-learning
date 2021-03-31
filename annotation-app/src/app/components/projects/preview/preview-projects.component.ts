@@ -273,7 +273,9 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                     for (let w = 0; w < res.length; w++) {
                         this.resetLoguserInputs(res[w]);
                         let file = this.resetLogOriginalData(res[w])
-                        let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview.slice(0, 100) + '...' };
+                        // let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview.slice(0, 100) + '...' };
+                        let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview };
+
                         res[w].originalData = flag;
                         res[w].projectType = 'log';
                     }
@@ -297,7 +299,13 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                         res[k].originalData = cellContent[k];
                     }
                 }
-
+                if (this.projectType == 'ner') {
+                    res.forEach(element => {
+                        if (element.userInputs.length > 0 && element.userInputs[0].problemCategory.length > 0 && element.userInputsLength == 0) {
+                            element.originalInputs = 1;
+                        }
+                    });
+                }
 
                 // to reset the problemcategory data
                 // if (this.projectType == 'ner') {

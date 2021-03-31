@@ -3,7 +3,7 @@ Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import { Component, OnInit, Input, Output, EventEmitter, Renderer2 } from "@angular/core";
+import { Component, OnInit, Input, Output, EventEmitter, Renderer2, ɵConsole } from "@angular/core";
 import { FormGroup, FormBuilder } from "@angular/forms";
 import { Observable, Subject } from "rxjs";
 import { AvaService } from "../../services/ava.service";
@@ -59,7 +59,7 @@ export class CreateNewComponent implements OnInit {
   descriptions = [];
   chooseLabel = [];
   selectDescription = [];
-  selectLabel: string;
+  // selectLabel: string;
   selectColumns = [];
   pageSize: number;
   page: number;
@@ -70,7 +70,8 @@ export class CreateNewComponent implements OnInit {
   infoMessage: string;
   inputLabelValidation: boolean;
   inputAssigneeValidation: boolean;
-  active: number;
+  activeNew: number;
+  activeOriginal: number;
   totalCase: number;
   setDataDialog: boolean;
   overPerLabelLimit: boolean;
@@ -269,15 +270,14 @@ export class CreateNewComponent implements OnInit {
   public postLocalFile(dataset: DatasetData): Observable<any> {
     let formData = new FormData();
 
-    this.dsDialogForm.get("labels").setValue(this.categoryList);
+    this.dsDialogForm.get("labels").setValue(this.projectType === "ner" ? [...this.categoryList, ...this.selectDescription] : this.categoryList);
     formData.append("pname", this.dsDialogForm.value.projectName);
     formData.append("taskInstruction", this.dsDialogForm.value.taskInstruction);
     formData.append("maxAnnotations", this.dsDialogForm.value.maxAnnotations);
-    formData.append("labels", this.dsDialogForm.value.labels);
     formData.append("assignmentLogic", this.dsDialogForm.value.assignmentLogic);
     formData.append("assignee", JSON.stringify(this.dsDialogForm.value.assignee));
     formData.append("selectDescription", this.msg.type == 'ner' ? JSON.stringify([this.dsDialogForm.value.selectedText]) : JSON.stringify(this.dsDialogForm.value.selectDescription));
-    formData.append("selectLabels", this.dsDialogForm.value.selectLabels);
+    formData.append("selectLabels", this.msg.type == 'ner' ? JSON.stringify(this.dsDialogForm.value.selectDescription) : this.dsDialogForm.value.selectLabels);
     formData.append("header", JSON.stringify(this.previewHeadDatas));
     formData.append("isHasHeader", this.isHasHeader);
     formData.append("annotationQuestion", this.dsDialogForm.value.annotationQuestion);
@@ -293,6 +293,17 @@ export class CreateNewComponent implements OnInit {
     formData.append("projectType", this.projectType);
     formData.append("encoder", this.dsDialogForm.value.selectedEncoder);
     formData.append("isMultipleLabel", (this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log') ? true : this.dsDialogForm.value.multipleLabel);
+    if (this.projectType === 'ner') {
+      formData.append("regression", this.selectDescription.length > 0 ? 'true' : 'false');
+      let aa = [];
+      this.dsDialogForm.value.labels.forEach(element => {
+        aa.push(element.name);
+      });
+      formData.append("labels", aa.join(','));
+
+    } else {
+      formData.append("labels", this.dsDialogForm.value.labels);
+    };
     return this.avaService.postDataset(formData);
   }
 
@@ -342,8 +353,13 @@ export class CreateNewComponent implements OnInit {
 
   onEnterLabel(e) {
     if (e && this.inputLabelValidation == false) {
-      this.categoryList.push(e);
-      this.dsDialogForm.get("labels").setValue(this.categoryList);
+      if (this.projectType === 'ner') {
+        this.categoryList.push({ name: e });
+        this.dsDialogForm.get("labels").setValue([...this.categoryList, ...this.selectDescription]);
+      } else {
+        this.categoryList.push(e);
+        this.dsDialogForm.get("labels").setValue(this.categoryList);
+      }
       this.labels.nativeElement.value = null;
     }
   }
@@ -351,11 +367,17 @@ export class CreateNewComponent implements OnInit {
   labelsBlur(e: any) {
     let val = e.target.value;
     if (val && this.inputLabelValidation == false) {
-      this.categoryList.push(val);
-      this.dsDialogForm.get("labels").setValue(this.categoryList);
+      if (this.projectType === 'ner') {
+        this.categoryList.push({ name: val });
+        this.dsDialogForm.get("labels").setValue([...this.categoryList, ...this.selectDescription]);
+      } else {
+        this.categoryList.push(val);
+        this.dsDialogForm.get("labels").setValue(this.categoryList);
+      }
       this.labels.nativeElement.value = null;
     }
   }
+
 
   assigneeBlur(e: any) {
     let val = e.target.value;
@@ -435,7 +457,7 @@ export class CreateNewComponent implements OnInit {
     this.isShowNumeric = false;
     this.dsDialogForm.get("selectLabels").reset();
     this.selectDescription = [];
-    this.selectLabel = "";
+    // this.selectLabel = "";
     this.setDataComplete = false;
     this.isSelectWrongColumn = false;
     this.selectColumns = [];
@@ -474,7 +496,8 @@ export class CreateNewComponent implements OnInit {
           this.columnInfo.push({
             name: this.previewHeadDatas[i],
             type: "Numeric",
-            uniqueLength: 51
+            uniqueLength: 51,
+            isOriginal: true
           });
         }
       };
@@ -506,7 +529,7 @@ export class CreateNewComponent implements OnInit {
     this.isShowNumeric = false;
     this.dsDialogForm.get("selectLabels").reset();
     this.selectDescription = [];
-    this.selectLabel = "";
+    // this.selectLabel = "";
     this.setDataComplete = false;
     this.isSelectWrongColumn = false;
     this.selectColumns = [];
@@ -566,7 +589,8 @@ export class CreateNewComponent implements OnInit {
               this.columnInfo.push({
                 name: this.previewHeadDatas[i],
                 type: "Numeric",
-                uniqueLength: 51
+                uniqueLength: 51,
+                isOriginal: true
               });
             }
           };
@@ -583,7 +607,7 @@ export class CreateNewComponent implements OnInit {
 
   onSelectingLabels(e) {
     this.changeSetData = true;
-    this.selectLabel = e.target.value;
+    // this.selectLabel = e.target.value;
     this.dsDialogForm.get("totalRow").setValue(0);
     this.dsDialogForm.get("min").setValue(null);
     this.dsDialogForm.get("max").setValue(null);
@@ -608,36 +632,37 @@ export class CreateNewComponent implements OnInit {
     } else {
       this.isShowLabelRadio = false;
     };
-    this.selectDescription.forEach(element => {
-      this.selectLabel == element.name ? (this.isSelectWrongColumn = true) : (this.isSelectWrongColumn = false);
-      // this.selectLabel.indexOf(element.name) == -1
-      //   ? (this.isSelectWrongColumn = false)
-      //   : (this.isSelectWrongColumn = true);
-    });
-    let dom = this.el.nativeElement.querySelectorAll(".labelOriginal");
-    for (let i = 0; i < dom.length; i++) {
-      dom[i].style.color = "rgb(0, 0, 0)";
-    };
-
     if (this.selectDescription.length > 0) {
-      for (let i = 0; i < this.selectDescription.length; i++) {
-        if (this.selectDescription[i].name == this.selectLabel) {
-          let index = _.indexOf(this.previewHeadDatas, this.selectLabel)
-          this.isSelectWrongColumn = true;
-          this.renderer2.setStyle(
-            this.el.nativeElement.querySelector(".label" + index),
-            "color",
-            "red"
-          );
-        }
-      }
-    };
+      this.selectDescription.forEach(element => {
+        e.target.value == element.name ? (this.isSelectWrongColumn = true) : (this.isSelectWrongColumn = false);
+      });
+    }
+    this.turnDuplicatedRed(e.target.value);
+
+    // let dom = this.el.nativeElement.querySelectorAll(".labelOriginal");
+    // for (let i = 0; i < dom.length; i++) {
+    //   dom[i].style.color = "rgb(0, 0, 0)";
+    // };
+
+    // if (this.selectDescription.length > 0) {
+    //   for (let i = 0; i < this.selectDescription.length; i++) {
+    //     if (this.selectDescription[i].name == this.selectLabel) {
+    //       let index = _.indexOf(this.previewHeadDatas, this.selectLabel)
+    //       this.isSelectWrongColumn = true;
+    //       this.renderer2.setStyle(
+    //         this.el.nativeElement.querySelector(".label" + index),
+    //         "color",
+    //         "red"
+    //       );
+    //     }
+    //   }
+    // };
   }
 
 
 
 
-  selectionChanged(e) {
+  selectionChanged() {
     this.changePreview = true;
     this.isSelectWrongColumn = false;
     this.selectColumns = [];
@@ -645,26 +670,49 @@ export class CreateNewComponent implements OnInit {
       this.selectColumns.push(e.name);
     })
     this.dsDialogForm.get("selectDescription").setValue(this.selectColumns);
+    this.turnDuplicatedRed(this.projectType == 'ner' ? this.dsDialogForm.get("selectedText").value : this.dsDialogForm.get("selectLabels").value);
+
+    if (this.projectType !== 'ner') {
+      this.dsDialogForm.get("totalRow").setValue(0);
+      this.totalCase = 0;
+      this.nonEnglish = 0;
+      this.previewTotalData = [];
+    };
+    if (this.projectType === 'ner') {
+      this.selectDescription.forEach(element => {
+        for (let i = 0; i < this.categoryList.length; i++) {
+          if (element.name == this.categoryList[i].name) {
+            this.categoryList.splice(i, 1);
+            break;
+          }
+        }
+      });
+      this.dsDialogForm.get("labels").setValue([...this.categoryList, ...this.selectDescription]);
+
+    }
+  }
+
+
+
+  turnDuplicatedRed(selectLabel) {
     let dom = this.el.nativeElement.querySelectorAll(".labelOriginal");
     for (let i = 0; i < dom.length; i++) {
       dom[i].style.color = "rgb(0, 0, 0)";
     };
-    this.selectDescription.forEach((element) => {
-      if (this.selectLabel == element.name) {
-        let index = _.indexOf(this.previewHeadDatas, this.selectLabel)
-        this.isSelectWrongColumn = true;
-        this.renderer2.setStyle(
-          this.el.nativeElement.querySelector(".label" + index),
-          "color",
-          "red"
-        );
+    if (this.selectDescription.length > 0) {
+      for (let i = 0; i < this.selectDescription.length; i++) {
+        if (this.selectDescription[i].name == selectLabel) {
+          let index = _.indexOf(this.previewHeadDatas, selectLabel)
+          this.isSelectWrongColumn = true;
+          this.renderer2.setStyle(
+            this.el.nativeElement.querySelector(".label" + index),
+            "color",
+            "red"
+          );
+          break;
+        }
       }
-
-    });
-    this.dsDialogForm.get("totalRow").setValue(0);
-    this.totalCase = 0;
-    this.nonEnglish = 0;
-    this.previewTotalData = [];
+    };
   }
 
 
@@ -677,6 +725,12 @@ export class CreateNewComponent implements OnInit {
     this.previewTotalData = [];
     this.labelType = '';
     this.dsDialogForm.get("totalRow").setValue(0);
+    if (this.selectDescription.length > 0) {
+      this.selectDescription.forEach(element => {
+        e.target.value == element.name ? (this.isSelectWrongColumn = true) : (this.isSelectWrongColumn = false);
+      });
+    }
+    this.turnDuplicatedRed(e.target.value)
   }
 
 
@@ -689,14 +743,16 @@ export class CreateNewComponent implements OnInit {
       this.totalCase = 0;
       this.previewTotalData = [];
       this.dsDialogForm.get("totalRow").setValue(0);
-      this.dsDialogForm.get("labels").setValue([]);
+      if (this.projectType !== 'ner') {
+        this.dsDialogForm.get("labels").setValue([]);
+        this.categoryList = [];
+      }
       this.dsDialogForm.get("min").setValue(null);
       this.dsDialogForm.get("max").setValue(null);
       this.dsDialogForm.get("multipleLabel").setValue(null);
       this.isMultipleLabel = null;
 
 
-      this.categoryList = [];
 
       let indexArray = [];
       if (this.msg.type == 'ner') {
@@ -819,7 +875,12 @@ export class CreateNewComponent implements OnInit {
                   this.overPerLabelLimit = true;
                 };
                 this.categoryList = flag;
-                this.dsDialogForm.get("labels").setValue(this.categoryList);
+                if (this.projectType === 'ner') {
+                  this.dsDialogForm.get("labels").setValue([...this.categoryList, ...this.selectDescription]);
+                } else {
+                  this.dsDialogForm.get("labels").setValue(this.categoryList);
+
+                }
 
               } else if (selectedLabelIndex > -1 && isNumeric == true) {
                 this.isNumeric = true;;
@@ -849,10 +910,23 @@ export class CreateNewComponent implements OnInit {
 
 
   onLabelKeydown(e) {
-    if (this.categoryList.indexOf(e.target.value) !== -1) {
-      this.inputLabelValidation = true;
+    if (this.projectType === 'ner') {
+      let aa = [];
+      let bb = this.dsDialogForm.value.labels;
+      bb.forEach(e => {
+        aa.push(e.name)
+      });
+      if (aa.indexOf(e.target.value) !== -1) {
+        this.inputLabelValidation = true;
+      } else {
+        this.inputLabelValidation = false;
+      }
     } else {
-      this.inputLabelValidation = false;
+      if (this.categoryList.indexOf(e.target.value) !== -1) {
+        this.inputLabelValidation = true;
+      } else {
+        this.inputLabelValidation = false;
+      }
     }
   }
 
@@ -864,18 +938,38 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-  overLabels(index) {
-    this.active = index;
+  overLabels(index, from) {
+    if (from === 'new') {
+      this.activeNew = index;
+    } else {
+      this.activeOriginal = index;
+    }
+
   }
 
-  outLabels(index) {
-    this.active = null;
+  outLabels(index, from) {
+    if (from === 'new') {
+      this.activeNew = null;
+    } else {
+      this.activeOriginal = null;
+    }
   }
 
-  deleteLabel(index) {
-    this.categoryList.splice(index, 1);
-    this.dsDialogForm.get("labels").setValue(this.categoryList);
+  deleteLabel(index, from) {
+    if (from === 'new') {
+      this.categoryList.splice(index, 1);
+    } else {
+      this.selectDescription.splice(index, 1);
+      let aa = [];
+      this.selectDescription.forEach(e => {
+        aa.push(e.name);
+      })
+      this.dsDialogForm.get("selectDescription").setValue(aa);
+    }
+    this.dsDialogForm.get("labels").setValue(this.projectType === "ner" ? [...this.categoryList, ...this.selectDescription] : this.categoryList);
   }
+
+
 
   checkDatasetName(e) {
     this.avaService.findDatasetName(e).subscribe((res) => {

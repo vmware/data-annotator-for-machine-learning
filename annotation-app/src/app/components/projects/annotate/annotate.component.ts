@@ -214,6 +214,7 @@ export class AnnotateComponent implements OnInit {
         };
         if (this.projectType == 'ner') {
           this.sr = this.resetNerSrData(this.sr);
+          this.toShowExistingLabel();
         };
         if (this.projectType == 'image') {
           // console.log("fetchData.this.sr:::", this.sr);
@@ -391,6 +392,7 @@ export class AnnotateComponent implements OnInit {
       };
       if (this.projectType == 'ner') {
         this.sr = this.resetNerSrData(this.sr);
+        this.toShowExistingLabel();
       };
       if (this.projectType == 'image') {
         this.sr = this.resetImageSrData(this.sr);
@@ -496,6 +498,7 @@ export class AnnotateComponent implements OnInit {
       };
       if (this.projectType == 'ner') {
         this.sr = this.resetNerSrData(this.sr);
+        this.toShowExistingLabel();
       };
       if (this.projectType == 'image') {
         this.sr = this.resetImageSrData(this.sr);
@@ -689,6 +692,7 @@ export class AnnotateComponent implements OnInit {
       };
       if (this.projectType == 'ner') {
         this.sr = this.resetNerSrData(this.sr);
+        this.toShowExistingLabel();
       };
       if (this.projectType == 'image') {
         this.sr = this.resetImageSrData(this.sr);
@@ -1020,10 +1024,8 @@ export class AnnotateComponent implements OnInit {
             this.renderer2.insertBefore(parentDom, spanDom, targetMark);
             this.el.nativeElement.querySelector('.spanIndex' + ids[i]).addEventListener('mousedown', this.onMouseDown.bind(this))
             this.el.nativeElement.querySelector('.spanIndex' + ids[i]).addEventListener('mouseup', this.onMouseUp.bind(this))
-
           };
           this.renderer2.removeChild(parentDom, targetMark);
-
           // to update the spansList
           this.spansList.forEach((e, i) => {
             if (e.ids == element.slice(2)) {
@@ -1032,9 +1034,7 @@ export class AnnotateComponent implements OnInit {
           });
         }
       })
-
     };
-
   }
 
 
@@ -1055,7 +1055,6 @@ export class AnnotateComponent implements OnInit {
         }
       });
     }
-
   }
 
 
@@ -1085,7 +1084,6 @@ export class AnnotateComponent implements OnInit {
     } else {
       return null;
     }
-
   }
 
 
@@ -1155,6 +1153,33 @@ export class AnnotateComponent implements OnInit {
 
   resetNerSrData(sr) {
     if (!sr.MSG) {
+      if (sr[0].userInputs && sr[0].userInputs.length > 0 && sr[0].userInputs[0].problemCategory.length > 0) {
+        let aa = sr[0].userInputs[0].problemCategory;
+        let bb = sr[0].originalData.tokens;
+        for (let j = 0; j < aa.length; j++) {
+          let ids = [];
+          for (let i = 0; i < bb.length; i++) {
+            if (aa[j].start == bb[i].start && ids.length == 0) {
+              ids.push(bb[i].id)
+            };
+            if (aa[j].end == bb[i].end) {
+              ids.push(bb[i].id);
+              if (ids.length == 2) {
+                if (ids[0] == ids[1]) {
+                  aa[j].ids = String(ids[0])
+                } else {
+                  let flag = [];
+                  for (let k = ids[0]; k < ids[1] + 1; k++) {
+                    flag.push(k)
+                  };
+                  aa[j].ids = flag.join('-');
+                }
+                break;
+              }
+            }
+          }
+        }
+      }
       return sr[0];
     } else {
       return sr;
@@ -1561,6 +1586,22 @@ export class AnnotateComponent implements OnInit {
     } else {
       this.isDrawer = true;
     }
+  }
+
+
+
+  toShowExistingLabel() {
+    let annotations = this.sr.userInputs;
+    let annotatedIDs = [];
+    setTimeout(() => {
+      annotations.forEach(element => {
+        element.problemCategory.forEach(element2 => {
+          annotatedIDs = element2.ids.split('-');
+          this.onMouseDown(annotatedIDs[0], 'historyBack');
+          this.onMouseUp(annotatedIDs[annotatedIDs.length - 1], 'historyBack', this.categories.indexOf(element2.label));
+        });
+      });
+    }, 10);
   }
 
 

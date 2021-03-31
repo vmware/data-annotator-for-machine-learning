@@ -160,11 +160,13 @@ export class UploadComponent implements OnInit {
 
 
   papaParse() {
+
+    let hasHeader = this.uploadGroup.get('hasHeader').value;
     let previewData = [];
     if (this.inputFile) {
       this.papa.parse(this.inputFile, {
         header: false,
-        preview: 50,
+        preview: 20,
         dynamicTyping: true,
         skipEmptyLines: true,
         error: (error) => {
@@ -174,8 +176,9 @@ export class UploadComponent implements OnInit {
           if (!(_.sortedUniq(results.data).length == 1 && _.sortedUniq(results.data)[0] == null)) {
             previewData.push(results.data)
           }
-          if (previewData.length == 6) {
-            if (this.uploadGroup.get('hasHeader').value == 'yes') {
+          if (previewData.length < 7) {
+            this.previewHeadDatas = [];
+            if (hasHeader == 'yes') {
               this.previewHeadDatas = previewData[0];
               this.previewContentDatas = previewData.slice(1, 6);
             } else {
@@ -184,11 +187,10 @@ export class UploadComponent implements OnInit {
               };
               this.previewContentDatas = previewData.slice(0, 5);
             };
-            parser.abort();
           };
         }
       });
-    }
+    };
   }
 
 

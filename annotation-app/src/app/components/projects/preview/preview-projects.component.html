@@ -129,12 +129,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <clr-tab>
                     <button clrTabLink id="link1">Annotation</button>
                     <clr-tab-content id="content1" *clrIfActive="labelType=='numericLabel'">
-                        <div style=" margin-bottom: 2rem">
+                        <div style=" margin-bottom: 2rem" class="annotationDataTable">
                             <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)"
                                 *ngIf=!firstLoadTable>
                                 <clr-dg-column class="ellipsis-datagrid" style="max-width:90px">Index</clr-dg-column>
                                 <clr-dg-column *ngFor="let header of previewSrsHeader" class="ellipsis-datagrid"
-                                    style="max-width:650px">
+                                    style="max-width:650px;">
                                     {{header}}</clr-dg-column>
                                 <clr-dg-column class="ellipsis-datagrid" style="min-width:80px;max-width:120px">
                                     Annotations No.
@@ -151,27 +151,28 @@ SPDX-License-Identifier: Apache-2.0 -->
                                         <div *ngIf="!dataset.projectType||dataset.projectType!=='log'">
                                             <clr-dg-cell *ngFor="let content of dataset.originalData"
                                                 class="previewHeight ellipsis-datagrid"
-                                                style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
+                                                style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;"
                                                 title="{{content}}">
                                                 {{content}}
                                             </clr-dg-cell>
                                         </div>
                                         <clr-dg-cell *ngIf="dataset.projectType=='log'"
                                             class="previewHeight ellipsis-datagrid"
-                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
+                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;"
                                             title="{{dataset.originalData.fileName}}">
                                             {{dataset.originalData.fileName}}
                                         </clr-dg-cell>
                                         <clr-dg-cell *ngIf="dataset.projectType=='log'"
                                             class="previewHeight ellipsis-datagrid"
-                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
+                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;"
                                             title="{{dataset.originalData.fileSize}}">
                                             {{dataset.originalData.fileSize}}
                                         </clr-dg-cell>
                                         <clr-dg-cell *ngIf="dataset.projectType=='log'"
                                             class="previewHeight ellipsis-datagrid"
-                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px">
-                                            {{dataset.originalData.filePreview}}
+                                            title="{{dataset.originalData.filePreview}}"
+                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;overflow: hidden;">
+                                            {{dataset.originalData.filePreview | SliceTextPipe}}
                                             <div class="signpost-triggers-wrapper">
                                                 <div class="signpost-trigger-demo">
                                                     <div class="signpost-item">
@@ -212,7 +213,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                             <div *ngFor="let a of dataset.userInputs">{{a.user}}</div>
                                         </clr-dg-cell>
                                         <ng-container ngProjectAs="clr-dg-row-detail"
-                                            *ngIf="dataset.userInputsLength>0">
+                                            *ngIf="dataset.userInputsLength>0 ||dataset?.originalInputs>0">
                                             <!-- <clr-dg-row-detail *clrIfExpanded style="margin-bottom: 1rem;"> -->
                                             <clr-dg-row-detail (clrIfExpanded)='true' style="margin-bottom: 1rem;">
                                                 <clr-datagrid>
@@ -227,7 +228,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                     </clr-dg-column>
                                                     <clr-dg-column class="studioCell"
                                                         *ngIf='projectType=="image" || projectType=="ner"|| projectType=="log"'>
-                                                        Re-Label
+                                                        {{dataset?.originalInputs>0?"Original-Label":" Re-Label"}}
                                                     </clr-dg-column>
                                                     <clr-dg-column
                                                         *ngIf='projectType!="ner" && projectType!="image"&& projectType!="log"'
