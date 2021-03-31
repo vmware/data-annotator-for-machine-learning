@@ -86,7 +86,7 @@ module.exports = {
                         originalData: select
                     };
                     //support ner regression
-                    if (req.body.regression && req.body.projectType == PROJECTTYPE.NER) {
+                    if ((req.body.regression == 'true' || req.body.regression == true)&& req.body.projectType == PROJECTTYPE.NER) {
                         let problemCategory = [];
                         for (const lb of selectLabels) {
                             for (const dataLb of oneData[lb]) {
