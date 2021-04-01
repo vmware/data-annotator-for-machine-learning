@@ -1591,17 +1591,20 @@ export class AnnotateComponent implements OnInit {
 
 
   toShowExistingLabel() {
-    let annotations = this.sr.userInputs;
-    let annotatedIDs = [];
-    setTimeout(() => {
-      annotations.forEach(element => {
-        element.problemCategory.forEach(element2 => {
-          annotatedIDs = element2.ids.split('-');
-          this.onMouseDown(annotatedIDs[0], 'historyBack');
-          this.onMouseUp(annotatedIDs[annotatedIDs.length - 1], 'historyBack', this.categories.indexOf(element2.label));
+    if (this.sr.userInputs) {
+      let annotations = this.sr.userInputs;
+      let annotatedIDs = [];
+      setTimeout(() => {
+        annotations.forEach(element => {
+          element.problemCategory.forEach(element2 => {
+            annotatedIDs = element2.ids.split('-');
+            this.onMouseDown(annotatedIDs[0], 'historyBack');
+            this.onMouseUp(annotatedIDs[annotatedIDs.length - 1], 'historyBack', this.categories.indexOf(element2.label));
+          });
         });
-      });
-    }, 10);
+      }, 10);
+    }
+
   }
 
 

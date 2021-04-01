@@ -152,14 +152,19 @@ export class UserAuthService {
   public logout(): void {
     if (this.env.config.logoutUrl) {
       if (this.loggedUser()) {
-        this.http.post(`${this.env.config.logoutUrl}`, null, {
-          headers: new HttpHeaders().append('Authorization', this.loggedUser().token.access_token),
-        }).pipe(
-          finalize(() => {
-            this.clearSession();
-            this.redirectToHome();
-          })
-        ).subscribe();
+        // this.http.post(`${this.env.config.logoutUrl}`, null, {
+        //   headers: new HttpHeaders().append('Authorization', this.loggedUser().token.access_token),
+        // }).pipe(
+        //   finalize(() => {
+        //     this.clearSession();
+        //     this.redirectToHome();
+        //   })
+        // ).subscribe();
+        this.clearSession();
+        let redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl);
+        window.location.href = `${this.env.config.logoutUrl}?client_id=${this.env.config.CLIENT_ID}&redirect_uri=${redirectUrl}&state=${this.env.config.STATE}`;
+        // window.location.href = `${this.env.config.logoutUrl}?client_id=${this.env.config.CLIENT_ID}&logout_uri=${window.location.origin}/home`;
+
         this.sessionLifetimeSubject.next(SessionStatus.NOT_AUTHENTICATED);
         if (this.tokenExpirationTimer) {
           clearTimeout(this.tokenExpirationTimer);
