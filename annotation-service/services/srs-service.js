@@ -123,8 +123,12 @@ async function updateSrsUserInput(req) {
                 }
             }
         });
-        
+
         let conditions = { _id: ObjectId(id) };
+        if (pro.regression && pro.projectType == PROJECTTYPE.NER) {
+            const updateSR = { $set: { userInputs: [] } };
+            await mongoDb.findOneAndUpdate(mp.model, conditions, updateSR)
+        }
         let update = { $push: { userInputs: {$each: userInputs} }, $inc: { userInputsLength: 1 } };
         const options = { new: true };
         const srsData = await mongoDb.findOneAndUpdate(mp.model, conditions, update, options);
@@ -175,6 +179,8 @@ async function getOneSrs(req) {
     
     let limitation = req.query.limit? Number.parseInt(req.query.limit): 1;
     const filterFileds = { _id:1, originalData:1, flag: 1 };
+    if (project.regression && project.projectType == PROJECTTYPE.NER) { filterFileds.userInputs = 1 };
+    
     let srs, conditions, alQueriedSr;
     
     const mp = await getModelProject({ _id: ObjectId(req.query.pid)});
