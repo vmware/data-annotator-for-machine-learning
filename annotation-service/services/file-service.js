@@ -61,7 +61,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     selectedColumn = (typeof selectedColumn === 'string'? JSON.parse(selectedColumn):selectedColumn);
     
     let labels = req.body.labels;
-    labels = (typeof labels === 'object'? labels.toString: labels);
+    labels = (typeof labels === 'object'? labels.toString(): labels);
 
     let totalCase = 0, alFailed = req.body.isMultipleLabel === 'true'? true: false;
     if (req.body.projectType == PROJECTTYPE.IMGAGE) {
@@ -102,7 +102,8 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         },
         projectType: req.body.projectType,
         encoder: req.body.encoder,
-        isMultipleLabel: req.body.isMultipleLabel === 'true'? true: false
+        isMultipleLabel: req.body.isMultipleLabel === 'true'? true: false,
+        regression: req.body.regression === 'true'? true: false
     };
     return await projectDB.saveProject(project);
 }
