@@ -1,0 +1,401 @@
+<!-- Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<form class="clr-form" [formGroup]="questionForm" (ngSubmit)="onSubmit()" novalidate>
+  <div formGroupName="questionGroup">
+    <section class="clr-form-block">
+
+      <div *ngIf="!loading" class="clr-row">
+
+        <div class="clr-col-1">
+          <div style="position: absolute;bottom: 3rem;left: 0rem;">
+            <div class="showTag" *ngIf='isDrawer' (click)="detailDrawer()">
+              <clr-icon shape="angle" class="drawer" size="30" style="transform: rotate(90deg); margin-right: 0.3rem;">
+              </clr-icon>
+            </div>
+            <div class="hideTag" *ngIf='!isDrawer' (click)="detailDrawer()">
+              <clr-icon shape="angle" class="drawer" size="30" style="transform: rotate(-90deg); margin-left: 0.3rem;">
+              </clr-icon>
+
+            </div>
+          </div>
+        </div>
+        <div class=" leftBoard" [ngClass]="{ 'clr-col-3':!isDrawer, 'isDrawer':isDrawer}">
+          <h2>Annotate Details</h2>
+
+          <div class="clr-form-group form-group clr-row">
+            <label for="selectProject" class="label-leftBoard">Projects </label>&nbsp;&nbsp;
+            <div class="clr-select-wrapper" style="max-width: 70%;">
+              <select style="max-width: 95%;" (change)="onSelectingProjects($event)" formControlName="selectProject">
+                <option *ngFor="let selectProject of projects" [value]="selectProject.projectName">
+                  {{ selectProject.projectName }}</option>
+              </select>
+            </div>
+            <div class="line"></div>
+          </div>
+
+          <h3>Project Info</h3>
+          <div class="clr-form-group left-project-info clr-row">
+            <label for="name" class="label-leftBoard">Name: </label>&nbsp;&nbsp;
+            <div style="word-break: break-all;">{{selectParam}}</div>
+          </div>
+          <div class="clr-form-group left-project-info clr-row">
+            <label for="owner" class="label-leftBoard">Owner: </label>&nbsp;&nbsp;
+            <div style="word-break: break-all;">{{projectInfo?.creator}}</div>
+          </div>
+          <div class="clr-form-group left-project-info clr-row">
+            <label for="source" class="label-leftBoard">Source: </label>&nbsp;&nbsp;
+            <div style="word-break: break-all;">{{projectInfo?.dataSource}}</div>
+          </div>
+          <div class="clr-form-group left-project-info ">
+            <label for="source" class="label-leftBoard">Instruction : </label>&nbsp;&nbsp;
+            <div class="instructionBox" [innerHTML]="projectInfo?.taskInstructions"></div>
+            <div class="line"></div>
+          </div>
+
+          <h3>Progress</h3>
+          <div class="clr-form-group left-project-info clr-row">
+            <label for="name" class="label-leftBoard">This session:</label>&nbsp;&nbsp;
+            <div>{{progressInfo?.totalCase}}</div>
+          </div>
+          <div class="clr-form-group left-project-info clr-row">
+            <label for="owner" class="label-leftBoard">Annotations: </label>&nbsp;&nbsp;
+            <div>{{progressInfo?.completeCase}}</div>
+          </div>
+          <div class="clr-form-group left-project-info clr-row ">
+            <clr-progress-bar clrValue='{{percentage}}' clrLabeled clrDisplayval='{{percentage}}%'>
+            </clr-progress-bar>
+            <div class="line"></div>
+          </div>
+
+          <h3>History</h3>
+
+          <ng-container>
+            <div class="historyBox">
+
+              <div *ngFor="let item of annotationHistory; let i = index" style="position: relative;">
+                <div class="clr-form-group left-project-info clr-row historyPosition"
+                  (click)="historyBack(i,item.srId)">
+                  <div *ngFor="let flag of item.historyDescription;" class="historyText">
+                    <div *ngIf="projectType=='ner' || projectType=='log'" title="{{flag.text}}">{{flag.text}}</div>
+                    <div *ngIf="projectType=='image'" title="{{flag.fileName}}">{{flag.fileName}}</div>
+                    <div *ngIf="projectType!=='ner' && projectType!=='image'&& projectType!=='log'"
+                      title="{{flag.key+':'+flag.value}}">
+                      {{flag.key+":"+flag.value}}</div>
+                  </div>
+                </div>
+                <clr-icon *ngIf="item.type==='submit'" class="historyIcon" shape="success-standard"></clr-icon>
+                <clr-icon *ngIf="item.type==='skip'" class="historyIcon" shape="ban"></clr-icon>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+        <div class="centerBoard" [ngClass]="{ 'clr-col-7':!isDrawer, 'clr-col-10':isDrawer}"
+          style="margin-bottom: 10rem;">
+
+          <div style="position: relative;">
+            <clr-alert *ngIf="maxAnnotationError" [clrAlertType]="'info'" (clrAlertClosedChange)="maxAnnotationError=''"
+              class="invalidAlert">
+              <div class="alert-item"><span class="alert-text">{{maxAnnotationError}}</span></div>
+            </clr-alert>
+          </div>
+
+          <h2 class="originalH2">Original Ticket&nbsp;&nbsp;&nbsp;
+            <a *ngIf='!silenceStatus' role="tooltip" aria-haspopup="true" class="tooltip tooltip-right">
+              <clr-icon size='25' class="is-solid" style="color: #e12200;cursor: pointer;" shape="flag"
+                (click)="flagTicket()">
+              </clr-icon>
+              <span class="tooltip-content" style="background-color: #eee; color: #313131;">Click to flag this
+                ticket</span>
+            </a>
+
+            <clr-icon *ngIf='silenceStatus' size='25' shape="flag" class="is-solid" style="color: #2F8400;">
+            </clr-icon>
+            <span *ngIf='silenceStatus' style="color: #2F8400;font-size: 0.5em;">Reviewed for accuracy</span>
+          </h2>
+
+          <!-- to filter the log -->
+          <div *ngIf='projectType==="log"'>
+            <div class="clr-row filterLog">
+              <div class="clr-form-control clr-col-2" style="margin-top: 0rem;">
+                <select class="filterSelect" (change)='updateFilterSelect($event)'>
+                  <option value="keyword">Keyword</option>
+                  <option value="regex">Regex</option>
+                </select>
+              </div>
+
+              <div class="clr-control-container clr-col-8 filterInput">
+                <div class="clr-input-wrapper  ">
+                  <input #filters autocomplete="off" type="text"
+                    [placeholder]="filterType=='keyword'?'Type keyword to filter, for example, abc .':'Type custom regex rule to filter, for example, /[A-Z]/' "
+                    class="clr-input filterText" formControlName="filterText"
+                    (keyup.enter)="onEnterFilter(filters.value)" (blur)="blurFilter($event)"
+                    (ngModelChange)='updateFilterText($event)'>
+                </div>
+                <span *ngIf='regexErr' class="clr-subtext regexErr">Wrong format!</span>
+              </div>
+            </div>
+            <div *ngIf="filterList.length>0" class="filterBox">
+              <span *ngFor="let filter of filterList; let i = index" class="label filterLabel" (click)="deleteFilter(i)"
+                (mouseenter)="overFilter(i)" (mouseleave)="outFilter(i)"
+                [ngClass]="active==i ? 'overLabels':''">{{filter.filterText}}<clr-icon shape="times" *ngIf="active==i"
+                  (click)="deleteFilter(i)" style="margin-left: 0.5rem;"></clr-icon>
+              </span>
+            </div>
+
+          </div>
+          <div class="questionContainer">
+            <div *ngIf='projectType!=="ner" && projectType!=="image" && projectType!=="log"'>
+              <div *ngFor="let ticket of sr.originalData;">
+                <p class="question-paragraph">
+                  <span class="ticketColumn">{{ticket.key}}</span>
+                  <span>:&nbsp;&nbsp;</span>
+                  <span>{{ticket.value}}</span></p><br>
+              </div>
+            </div>
+            <div *ngIf='projectType==="image"'>
+              <div class="panel" style="margin-bottom: 1rem;margin-top: 0.5rem;">
+                <button [ngClass]="{'rectSelected': rectSelected, 'rectUnselected': !rectSelected}"
+                  class="btn btn-outline" type="button" (click)="onRects()">
+                  <img src="../../../../assets/images/rect.svg" alt=""></button>
+                <button [ngClass]="{'rectSelected': !rectSelected, 'rectUnselected': rectSelected}" name="onPolygonBtn"
+                  class="btn btn-outline" type="button" (click)="onPolygon()"><img
+                    src="../../../../assets/images/polygon.svg" alt=""></button>
+                <button class="btn btn-outline" type="button" (click)="deletePolygon()"><img
+                    src="../../../../assets/images/trash.svg" alt="">
+                </button>
+                <button class="btn btn-outline" type="button" (click)="deleteAllPolygon()"><img
+                    src="../../../../assets/images/refresh.svg" alt=""></button>
+              </div>
+              <div id="label-studio">
+                <!-- here is LSF image annotation -->
+              </div>
+            </div>
+            <div *ngIf='projectType==="ner"' class="nerBox">
+              <span *ngFor="let ticket of sr.originalData.tokens;" (mousedown)="onMouseDown($event,ticket)"
+                (mouseup)="onMouseUp($event,ticket)" id="{{ticket.id}}"
+                class="nerSpan spanIndex{{ticket.id}}">{{ticket.text}}</span>
+            </div>
+            <!-- here is log annotation content -->
+            <div *ngIf='projectType==="log"' class="txtBox">
+              <div *ngIf="filterList.length<=0">
+                <p *ngFor="let ticket of sr.originalData;let i = index" id="c-{{i}}" class="txtRow txtRow{{i}}"
+                  title="{{ticket.freeText}}">
+                  <span class="logIndex{{i}} rowIndex" (click)="clickIndex($event,ticket,i)">{{i+1}}
+                    <span class="customBadge customBadge{{i}}"></span>
+                  </span>
+                  <span class="txtRowEntity{{i}}"></span>
+                  <span class="logLine-{{ticket.line}} txtRowContent{{i}} " (mousedown)="onMouseDownTxt(ticket,i)"
+                    (mouseup)="onMouseUpTxt(ticket,i,'current')">{{ticket.text}}</span>
+                </p>
+              </div>
+              <div *ngIf="filterList.length>0">
+                <div *ngFor="let ticket of sr.originalData;let i = index">
+                  <p id="c-{{ticket.index}}" class="txtRow txtRow{{ticket.index}}" title="{{ticket.freeText}}">
+                    <span *ngIf="ticket.filter" class="logIndex{{ticket.index}} rowIndex"
+                      (click)="clickIndex($event,ticket,ticket.index)">{{ticket.index+1}}
+                      <span class="customBadge customBadge{{ticket.index}}"></span>
+                    </span>
+                    <span *ngIf="ticket.filter" class="txtRowEntity{{ticket.index}}"></span>
+                    <span *ngIf="ticket.filter" class="logLine-{{ticket.line}} txtRowContent{{ticket.index}} "
+                      (mousedown)="onMouseDownTxt(ticket,ticket.index)"
+                      (mouseup)="onMouseUpTxt(ticket,ticket.index,'current')">{{ticket.text}}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="clr-row" *ngIf='projectType!=="image"'>
+            <h4 style="margin-top: 2rem;margin-left: 0.5rem;">{{projectInfo?.annotationQuestion}}</h4>
+          </div>
+          <!-- 6 colorful labels -->
+          <div class="questionContainer"
+            *ngIf="!isShowDropDown && !isNumeric && !isMultipleLabel  && (projectType == 'text' || projectType=='tabular')">
+            <div>
+              <button *ngFor="let label of categories; let i = index" class="btn labels label label{{ i }} submit"
+                style="margin: 0.3rem 0.2rem;" type="submit" (click)="onSelectingCategory(label, i)" [ngClass]="
+                  active == i && i == 0
+                    ? 'clickActive0'
+                    : active == i && i == 1
+                    ? 'clickActive1'
+                    : active == i && i == 2
+                    ? 'clickActive2'
+                    : active == i && i == 3
+                    ? 'clickActive3'
+                    : active == i && i == 4
+                    ? 'clickActive4'
+                    : active == i && i == 5
+                    ? 'clickActive5'
+                    : {
+                        green: i == 0,
+                        red: i == 1,
+                        yellow: i == 2,
+                        blue: i == 3,
+                        purple: i == 4,
+                        orange: i == 5
+                      }
+                ">{{ label }}</button>
+              &nbsp; &nbsp;
+            </div>
+          </div>
+          <!-- dropdown labels -->
+          <div class="clr-form-group category clr-row" *ngIf="isShowDropDown" (change)="onSelectingDropDown($event)">
+            <label for="category" class="label-tooltip">Labels: </label>
+            <div class="clr-select-wrapper">
+              <select formControlName="category" (click)="dropDownSubmit()">
+                <option *ngFor="let category of categories" [value]="category">
+                  {{ category }}</option>
+              </select>
+            </div>
+            <span class="required asteristic">*</span>
+            <span class="required">required</span>
+          </div>
+          <!-- numeric labels input -->
+          <div *ngIf="isNumeric" class=" clr-row">
+            <div class="clr-control-container clr-col-6" style="margin-top: 1rem;"
+              [ngClass]="{'clr-error': clrErrorTip}">
+              <div class="clr-input-wrapper">
+                <input #numericInput autocomplete="off" type="text" id="example" placeholder="Enter value here"
+                  class="clr-input" style="width: 90%;" (keydown.enter)="enterNumeric($event)"
+                  (keyup)="enterNumericUp($event)" [(ngModel)]="labelChoose" [ngModelOptions]="{standalone: true}">
+                <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+              </div>
+              <span class="clr-subtext">{{numericMessage}}</span>
+            </div>
+          </div>
+          <!-- ner entity label -->
+          <div class="questionContainer" *ngIf="projectType == 'ner'">
+            <div>
+              <button *ngFor="let label of categories; let i = index" class="btn labels label entityLabel"
+                [ngClass]="{'entitySelected': i==selectedEntityID, 'entityLabel': i!==selectedEntityID}"
+                (click)="onSelectingEntity($event,label, i)">{{ label }}</button>
+              &nbsp; &nbsp;
+            </div>
+          </div>
+          <!-- multiple checkbox labels -->
+          <div class="questionContainer" *ngIf="isMultipleLabel&& (projectType == 'text' || projectType=='tabular')">
+            <div class="clr-form-control" style="margin-top: 0;">
+              <div class="clr-control-container" style="width: 100%;">
+                <div class="clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
+                  *ngFor="let label of categories;let i = index">
+                  <input type="checkbox" id="{{label}}" name="checkbox" value="{{label}}" class="clr-checkbox"
+                    (click)="selectLabel($event,i)">
+                  <label for="{{label}}" class="clr-control-label">{{label}}</label>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <!-- txt log labels -->
+          <div class="questionContainer" *ngIf="projectType == 'log'">
+            <div>
+              <button *ngFor="let item of logCategories; let i = index"
+                class="logCategories logCategories{{i}} btn labels label logEntityLabel"
+                [ngClass]="{'logEntitySelected': i==selectedEntityID, 'logEntityLabel': i!==selectedEntityID}"
+                [ngStyle]="{'border-left-color':item.color,'background-color':i==selectedEntityID?item.color:'','border-left-width':'6px','box-shadow':'1px 1px 3px 0px '+ '#9A9A9A'}"
+                (click)="onSelectingEntity($event,label, i)">{{ item.label }}</button>
+              &nbsp; &nbsp;
+            </div>
+            <div class="clr-textarea-wrapper clr-col-12" style="padding-left: 0.3rem;">
+              <textarea class="clr-textarea log-textarea" formControlName="freeText"
+                placeholder="( Optional ) Please provide more details about the log above." rows="1"
+                (ngModelChange)='updateFreeText($event)'></textarea>
+            </div>
+          </div>
+
+          <div class="actions">
+
+            <button *ngIf='isMultipleLabel || projectType=="ner" || projectType=="image" || projectType=="log"'
+              class="btn btn-success submit" type="submit"
+              [disabled]="multipleLabelList.length==0 && spansList.length==0 && currentBoundingData.length==0"
+              title="{{ multipleLabelList.length>0 || spansList.length>0 || currentBoundingData.length>0 ? '' : 'You can only submit after annotating' }}">Submit</button>
+            <button class="btn btn-outline" type="button" (click)="onSkipGame()">
+              <clr-icon shape="ban"></clr-icon>
+              Skip
+            </button>
+            <button class="btn btn-outline" type="button" (click)="isBack()">
+              <clr-icon shape="undo"></clr-icon>
+              Back to Previous
+            </button>
+            <button class="btn btn-primary btn-danger" type="button" (click)="onEndGame()">
+              Exit
+            </button>
+          </div>
+        </div>
+        <div class="clr-col-1"></div>
+      </div>
+    </section>
+  </div>
+
+  <div *ngIf="loading" style="text-align: center;">
+    <div class='row'>
+      <span class="spinner" style='margin-top:5rem;margin-bottom: -1rem;'>
+        Loading...
+      </span>
+      <span class="loadingSpan">
+        Loading Project Data, Please Wait...
+      </span>
+    </div>
+
+  </div>
+</form>
+
+<clr-modal [(clrModalOpen)]="isEndingGameDialog" [clrModalClosable]="false">
+  <h3 class="modal-title">Are you sure you want to exit?</h3>
+  <div class="modal-body">
+    <p *ngIf="labelChoose!=''||questionForm.get('questionGroup.category').value">
+      You already provided a label
+    </p>
+  </div>
+  <div class="modal-footer modal-footer-annotate">
+    <button class="btn btn-outline" type="button" (click)="isEndingGameDialog = false">
+      No
+    </button>
+    <button type="button" class="btn btn-primary" [routerLink]="['/game']" routerLinkActive="active">
+      Yes
+    </button>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="isSkippingGameDialog" [clrModalClosable]="false">
+  <h3 class="modal-title">Are you sure you want skip?</h3>
+  <div class="modal-body">
+    <p *ngIf="labelChoose!=''||questionForm.get('questionGroup.category').value">
+      You already provided a label
+    </p>
+  </div>
+  <div class="modal-footer modal-footer-annotate">
+    <button class="btn btn-outline" type="button" (click)="isSkippingGameDialog = false">
+      No
+    </button>
+    <button type="button" class="btn btn-primary" (click)="skipAndFetchNewQuestion()">
+      Yes
+    </button>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="error" [clrModalClosable]="false">
+
+  <div class="modal-body">
+    <div class="alert alert-text">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+          </div>
+          <span class="alert-text" *ngIf="error"> Message: {{ error }} </span>
+          <!-- <span class="alert-text" *ngIf="maxAnnotationError"> Message: {{ maxAnnotationError }} </span> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer modal-footer-annotate">
+    <button *ngIf="error" class="btn btn-primary" type="button" (click)="error = null" [routerLink]="['/game']"
+      [queryParams]="{ hash: 'max' }" routerLinkActive="active">
+      OK
+    </button>
+    <!-- <button *ngIf="maxAnnotationError" class="btn btn-primary" type="button" (click)="clickNext()">
+      NEXT
+    </button> -->
+  </div>
+</clr-modal>

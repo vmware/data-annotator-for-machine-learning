@@ -1,0 +1,165 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.form-group {
+  margin: 30px 0 !important;
+}
+
+label span {
+  color: red;
+}
+
+.form-group .select {
+  width: 100%;
+}
+
+::ng-deep .dcr-doc-form .select2-class {
+  width: 100% !important;
+}
+
+.form-block input[type="text"],
+.form-block input[type="file"] {
+  width: 100% !important;
+  margin-bottom: 0px;
+}
+
+.maxAnnotations {
+  width: 100% !important;
+  margin-bottom: 0px;
+}
+
+.form-group .select,
+.form-group select {
+  width: 100% !important;
+}
+
+.form-group textarea {
+  width: 100% !important;
+}
+
+::ng-deep .btn.btn-sm {
+  margin-top: 7px !important;
+}
+
+::ng-deep .md-check {
+  margin-left: 10px !important;
+}
+
+.form-group label {
+  font-size: 0.54167rem;
+}
+.labelsList {
+  border: 1px solid #999;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  min-height: 5rem;
+  padding: 0.5rem;
+}
+
+::ng-deep clr-tooltip-content {
+  left: auto !important;
+  top: auto !important;
+}
+
+ul li {
+  list-style-type: none;
+}
+
+.tooltip-content {
+  color: white !important;
+}
+
+.preview {
+  // max-height: 500px;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem;
+  margin-left: 0.5rem;
+  box-shadow: 0 0.125rem 0 0 #d7d7d7;
+}
+
+.previewTable {
+  max-height: 500px;
+  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
+  margin-top: 0rem;
+}
+
+.uploadModal input[type="text"],
+.uploadModal input[type="file"] {
+  width: 100% !important;
+  margin-bottom: 0px;
+}
+
+.uploadLoading {
+  background-color: rgba(0, 119, 184, 0.2);
+  border-color: rgba(0, 119, 184, 0.2);
+}
+
+.setData {
+  max-height: 500px;
+  overflow-y: auto;
+  border-radius: 4px;
+  padding-left: 0.4rem;
+  min-height: 300px;
+}
+
+.setDataLineHeight {
+  margin: 0 0 !important;
+}
+
+.sureSet {
+  margin: 0.25rem 0.25rem;
+  margin-top: 0.7rem !important;
+}
+
+.overLabels {
+  background-color: #dddddd;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.sureSetString {
+  font-weight: 600;
+  margin-left: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.labelOriginal {
+  color: #000;
+}
+
+table thead th:first-child {
+  border-left: 1px solid transparent !important;
+}
+
+.arrowIcon {
+  transform: rotate(90deg);
+  color: #ccc;
+  margin-top: 0.4rem;
+}
+
+.numeric .clr-input {
+  border-radius: 6px 6px 0 0;
+  // border: 1px solid #999;
+  height: 2rem !important;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+  background-color: white;
+}
+
+.loadingSpan {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  color: grey;
+  opacity: 0.65;
+  font-size: 0.5rem;
+}

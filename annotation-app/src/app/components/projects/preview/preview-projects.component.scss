@@ -1,0 +1,163 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.mainArea {
+  margin: 0 2rem;
+}
+.grid-options {
+  padding-top: 20px;
+}
+
+.float-right {
+  float: right !important;
+}
+
+.prev-info {
+  margin-top: 10px;
+}
+.prev-info label {
+  display: inline-block;
+  font-weight: bold;
+}
+.prev-info span {
+  margin-left: 30px;
+}
+
+.gridHeight {
+  height: auto !important;
+}
+
+.labels {
+  max-width: 50rem;
+}
+
+.add-doc {
+  margin-right: 0rem;
+  margin-top: 1rem !important;
+}
+
+::ng-deep .createBtn .btn.btn-sm {
+  margin-top: 1rem !important;
+}
+
+::ng-deep .clr-input-wrapper {
+  max-height: initial;
+}
+
+.previewHeight {
+  height: 3.4rem !important;
+}
+
+.projectName {
+  font-weight: 400;
+  font-size: 0.583333rem;
+  letter-spacing: normal;
+  line-height: 1rem;
+  color: #575757;
+  margin-left: 1rem;
+}
+
+.cellWordBreak {
+  word-break: break-all;
+}
+
+.toShowTable {
+  margin-bottom: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  width: 25rem;
+}
+
+.toShowTable:hover {
+  color: #4682b4;
+  font-size: 18spx;
+  font-weight: 600;
+
+  clr-icon {
+    height: 18px;
+    width: 18px;
+  }
+}
+
+.d3Box {
+  margin-top: 2rem;
+}
+
+.topBoardBox {
+  height: 15rem;
+  background-color: white;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+.label-leftBoard {
+  margin-bottom: 0.45rem !important;
+  word-break: break-word !important;
+  padding-left: 5px;
+  padding-bottom: 5px;
+
+  label {
+    font-weight: 600;
+  }
+}
+
+.topBoardInfo {
+  padding-top: 0.4rem;
+  padding-left: 0.8rem;
+  padding-right: 0.7rem;
+  overflow-x: auto;
+  font-size: 12px;
+  padding-bottom: 0.5rem;
+}
+
+.loadingSpan {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  color: grey;
+  opacity: 0.65;
+  font-size: 0.7rem;
+}
+
+.annotationLoading {
+  text-align: center;
+  background-color: white;
+  border-radius: 8px;
+  min-height: 9rem;
+  text-align: center;
+}
+
+.modelChartBox {
+  border-radius: 8px;
+  background-color: white;
+  height: 20rem;
+  margin-bottom: 3rem;
+}
+
+.modelChartBar {
+  display: inline-block;
+  margin: auto;
+  width: 100%;
+  overflow: hidden;
+}
+
+.studioCell {
+  width: 35rem !important;
+}
+
+.btnOutline {
+  margin-top: 0.3rem;
+  margin-left: -0.5rem;
+  outline-color: currentColor;
+}
+
+// ::ng-deep .annotationDataTable .datagrid-table .datagrid-cell {
+//   flex: 1 1 !important;
+// }
+
+// ::ng-deep .annotationDataTable .datagrid-table .datagrid-column {
+//   flex: 1 1 !important;
+// }

@@ -1,0 +1,107 @@
+<!-- Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<form class="ds-form" [formGroup]="dsForm" (keydown.enter)="$event.preventDefault()" autocomplete="off">
+  <div class="modal">
+    <div class="modal-dialog" role="dialog" aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button aria-label="Close" class="close" type="button">
+            <clr-icon aria-hidden="true" shape="close" (click)="onCloseDialog()"></clr-icon>
+          </button>
+          <h3 class="modal-title">Query SuperCollider</h3>
+
+          <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage=''">
+            <div class="alert-item"><span class="alert-text">{{errorMessage}}</span></div>
+          </clr-alert>
+          <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage=''">
+            <div class="alert-item"><span class="alert-text">{{infoMessage}}</span></div>
+          </clr-alert>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group clr-row">
+            <label for="name" class="label-tooltip clr-col-12 clr-col-md-3">Name<span>*</span></label>
+            <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+              <!-- <input id="name" type="text" formControlName="name" class="clr-input" (blur)="inputNameBlur($event)"> -->
+              <input id="name" type="text" formControlName="name" class="clr-input"
+                (ngModelChange)="this.userQuestionUpdate.next($event)">
+            </div>
+            <div class="clr-col-12 clr-col-md-1">
+              <clr-tooltip *ngIf="dsForm.get('name').errors && dsForm.get('name').touched">
+                <clr-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red;" class="valid-tooltip">
+                </clr-icon>
+                <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                  <span>{{dsForm.get('name').errors.msg.value}}</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+              <clr-tooltip *ngIf="nameExist">
+                <clr-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red;" class="valid-tooltip">
+                </clr-icon>
+                <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                  <span>This name already exists!</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+          </div>
+          <div class="form-group clr-row">
+            <label for="description" class="label-tooltip clr-col-12 clr-col-md-3">Description
+            </label>
+            <div class="clr-textarea-wrapper clr-col-12 clr-col-md-8">
+              <textarea id="description" formControlName="description" rows="2" class="clr-textarea"
+                (keydown)="onKeydown($event)"></textarea>
+            </div>
+            <div class="clr-col-12 clr-col-md-1">
+              <clr-tooltip *ngIf="dsForm.get('description').errors && dsForm.get('description').touched">
+                <clr-icon clrTooltipTrigger shape="error-standard" class="valid-tooltip"></clr-icon>
+                <clr-tooltip-content class="error-tooltip" clrPosition="top-left" clrSize="sm" *clrIfOpen>
+                  <span>{{dsForm.get('description').errors.msg.value}}</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+          </div>
+          <div class="form-group clr-row">
+            <label for="source" class="label-tooltip clr-col-12 clr-col-md-3">Source</label>
+            <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+              <input id="source" type="text" formControlName="source" value="VAC" class="clr-input">
+            </div>
+            <div class="clr-col-12 clr-col-md-1">
+              <clr-tooltip *ngIf="dsForm.get('source').errors && dsForm.get('source').touched">
+                <clr-icon clrTooltipTrigger shape="error-standard" class="valid-tooltip"></clr-icon>
+                <clr-tooltip-content class="error-tooltip" clrPosition="top-left" clrSize="sm" *clrIfOpen>
+                  <span>{{dsForm.get('source').errors.msg.value}}</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+          </div>
+          <div class="form-group clr-row">
+            <label for="query" class="label-tooltip clr-col-12 clr-col-md-3">SQL Query to Run<span>*</span></label>
+            <div class="clr-textarea-wrapper clr-col-12 clr-col-md-8"> <textarea id="query" class="clr-textarea"
+                formControlName="query" rows="12" placeholder="{{placeholder}}" (keydown)="onKeydown($event)">
+                  </textarea></div>
+            <div class="clr-col-12 clr-col-md-1">
+              <clr-tooltip *ngIf="dsForm.get('query').errors && dsForm.get('query').touched">
+                <clr-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red;" class="valid-tooltip">
+                </clr-icon>
+                <clr-tooltip-content class="error-tooltip" clrPosition="top-right" clrSize="sm" *clrIfOpen>
+                  <span>{{dsForm.get('query').errors.msg.value}}</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" type="button" (click)="onCloseDialog()">Cancel</button>
+          <!-- <button type="submit" class="btn btn-primary" (click)="onSubmit($event)">Run</button> -->
+          <button *ngIf="!querySQL" type="button" class="btn btn-primary" (click)="onSubmit()">Run</button>
+          <button *ngIf="querySQL" type="button" class="btn querySQLLoading">
+            <clr-spinner clrSmall clrAssertive
+              style="min-height: 0.75rem;min-width: 0.75rem;height: 0.75rem;width: 0.75rem;margin-top: 0.35rem;">loading
+            </clr-spinner>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" aria-hidden="true"></div>
+</form>

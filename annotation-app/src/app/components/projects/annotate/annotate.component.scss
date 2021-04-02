@@ -1,0 +1,706 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+button.category {
+  margin-top: 20px;
+}
+
+.actions button {
+  margin-top: 2rem;
+}
+
+.actions button.submit {
+  width: 100px;
+}
+
+.user-text-input {
+  margin-top: 50px;
+}
+
+.points {
+  text-align: right;
+}
+
+.select {
+  margin-top: 20px;
+  width: 200px;
+}
+
+.user-text-input h4 {
+  margin-bottom: 10px;
+  margin-top: 0px;
+}
+
+label.label-tooltip {
+  background-color: #007cbb;
+  width: 100px !important;
+  color: white !important;
+  padding: 6px;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 400;
+  margin-right: 10px;
+  margin-left: 7px;
+}
+
+button.btn.btn-outline {
+  max-width: 600px;
+  text-transform: none;
+}
+
+.questionContainer {
+  background-color: white;
+  padding: 15px;
+}
+
+.questionContainer p {
+  margin-top: 0px;
+}
+
+.required {
+  font-size: 15px;
+}
+
+.required.asteristic {
+  color: red;
+  margin-right: 5px !important;
+  margin-left: 10px !important;
+}
+
+.question-paragraph {
+  color: black !important;
+}
+
+.category clr-signpost.signpost {
+  margin-left: -10px;
+  margin-right: 5px;
+}
+
+.category clr-signpost-content.signpost-content {
+  max-width: 600px;
+}
+
+.category clr-signpost li span {
+  font-weight: bold;
+}
+
+h4 clr-signpost-content.signpost-content {
+  font-size: 0.54167rem !important;
+  font-weight: 400 !important;
+  color: #565656 !important;
+  margin-top: 5px !important;
+}
+
+h4 clr-signpost-content.signpost-content p {
+  font-size: 0.54167rem !important;
+  font-weight: 400 !important;
+  color: #565656 !important;
+  margin-top: 5px !important;
+}
+
+::ng-deep .user-text-input .signpost-content-body {
+  max-height: 13rem;
+}
+
+.form-group {
+  margin: 15px 0;
+}
+
+.form-group label {
+  font-size: 0.54167rem;
+}
+
+label .label-leftBoard {
+  width: 100px !important;
+  color: #000 !important;
+  padding: 6px;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 400;
+  margin-right: 10px;
+  margin-left: 7px;
+}
+
+.line {
+  height: 1px;
+  border: 1px solid #e8e8e8;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+.left-project-info {
+  margin: 0;
+}
+
+.instructionBox {
+  max-height: 5rem;
+  overflow-y: auto;
+  word-break: break-all;
+}
+
+.historyIcon {
+  position: absolute;
+  right: 0.4rem;
+  top: 0.4rem;
+}
+
+.historyPosition {
+  position: relative;
+  padding-right: 2rem;
+}
+
+.historyBox {
+  max-height: 11rem;
+  overflow-y: auto;
+}
+
+.historyText {
+  overflow: hidden;
+  min-width: 0;
+  text-align: left;
+  white-space: nowrap;
+  padding-right: 1rem;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.historyPosition:hover {
+  background-color: #ececec;
+  .historyIcon {
+    color: #0077b8;
+  }
+}
+
+.labels {
+  font-size: unset;
+  font-weight: bold;
+  height: 1.5rem;
+}
+.yellow {
+  color: black;
+  cursor: pointer;
+  border: 3px solid #efd603;
+  background-color: white;
+}
+
+.red {
+  color: black;
+  cursor: pointer;
+  border: 3px solid #ff681c;
+  background-color: white;
+}
+
+.green {
+  color: black;
+  cursor: pointer;
+  border: 3px solid #60b515;
+  background-color: white;
+}
+
+.blue {
+  color: black;
+  cursor: pointer;
+  border: 3px solid #00bfa9;
+  background-color: white;
+}
+
+.purple {
+  color: black;
+  cursor: pointer;
+  border: 3px solid #6870c4;
+  background-color: white;
+}
+
+.orange {
+  color: black;
+  cursor: pointer;
+  border: 3px solid #ff9c32;
+  background-color: white;
+}
+
+.label0:hover {
+  background-color: rgba(96, 181, 21, 0.1);
+  cursor: pointer;
+}
+
+.label1:hover {
+  background-color: rgba(255, 104, 28, 0.1);
+  cursor: pointer;
+}
+
+.label2:hover {
+  background-color: rgba(239, 214, 3, 0.1);
+  cursor: pointer;
+}
+
+.label3:hover {
+  background-color: rgba(0, 191, 169, 0.1);
+  cursor: pointer;
+}
+
+.label4:hover {
+  background-color: rgba(104, 112, 196, 0.1);
+  cursor: pointer;
+}
+
+.label5:hover {
+  background-color: rgba(255, 156, 50, 0.1);
+  cursor: pointer;
+}
+
+.clickActive0 {
+  background-color: #60b515;
+  border: 3px solid #60b515;
+  color: black;
+  pointer-events: none;
+}
+
+.clickActive1 {
+  background-color: #ff681c;
+  border: 3px solid #ff681c;
+  color: black;
+  pointer-events: none;
+}
+
+.clickActive2 {
+  background-color: #efd603;
+  border: 3px solid #efd603;
+  color: black;
+  pointer-events: none;
+}
+
+.clickActive3 {
+  background-color: #00bfa9;
+  border: 3px solid #00bfa9;
+  color: black;
+  pointer-events: none;
+}
+
+.clickActive4 {
+  background-color: #6870c4;
+  border: 3px solid #6870c4;
+  color: black;
+  pointer-events: none;
+}
+
+.clickActive5 {
+  background-color: #ff9c32;
+  border: 3px solid #ff9c32;
+  color: black;
+  pointer-events: none;
+}
+
+.ticketColumn {
+  font-weight: bold;
+}
+
+::ng-deep .modal-footer-annotate .btn {
+  margin-right: 0.5rem !important;
+}
+
+.loadingSpan {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  color: grey;
+  opacity: 0.65;
+  font-size: 0.7rem;
+}
+
+::ng-deep .originalH2 .tooltip .tooltip-content.tooltip-right::before,
+.tooltip.tooltip-right > .tooltip-content::before {
+  border-top-color: #eee;
+  border-right-color: #eee;
+}
+
+::ng-deep .progress > progress {
+  width: 96%;
+}
+
+.labelCheckbox {
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-bottom: 0.3rem;
+  padding: 5px;
+}
+
+.nerBox {
+  word-break: break-all;
+}
+
+.nerSpan {
+  padding-left: 0.25rem;
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
+.nerSpan::selection {
+  background-color: #ffe184;
+}
+
+.markSelected {
+  background-color: #ffe184;
+  padding: 0.25em 0.4em 0.25em 0;
+  font-weight: bold;
+  color: black;
+  user-select: none;
+  line-height: 1.3rem;
+  margin-right: 0.15rem;
+  margin-left: 0.3rem;
+  position: relative;
+}
+
+.entity {
+  color: #0077b8;
+  font-size: 0.77em;
+  font-weight: bold;
+  margin-left: 8px;
+  text-transform: uppercase;
+  vertical-align: middle;
+  word-break: keep-all;
+  white-space: nowrap;
+  font-weight: 900;
+  font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+}
+
+.clear {
+  position: absolute;
+  margin-top: -0.1rem;
+  background-color: transparent;
+  color: transparent;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+  // line-height: 14px;
+  line-height: 11px;
+  user-select: none;
+  border-radius: 50%;
+  font-size: 1.5em;
+  transition: opacity 0.1s ease;
+}
+
+.invalidAlert {
+  position: absolute;
+  top: -0.9rem;
+  width: -webkit-fill-available;
+  width: -moz-available;
+}
+
+.entityLabel {
+  font-size: unset;
+  font-weight: bold;
+  height: 1.5rem;
+  outline: unset;
+  color: #0077b8;
+  border: 2px solid #0077b8;
+  margin: 0.3rem 0.2rem;
+}
+
+.entityLabel:active {
+  box-shadow: 0 2px 0 0 inset;
+  color: #0077b8;
+}
+
+.entityLabel:hover {
+  background-color: rgba(88, 63, 207, 0.06);
+}
+
+.entitySelected {
+  background-color: #0077b8;
+  color: white;
+  border: 2px solid #0077b8;
+  outline: unset;
+  margin: 0.3rem 0.2rem;
+}
+
+::ng-deep .ant-tag {
+  height: 1.5rem !important;
+  min-width: 3rem;
+  font-size: initial;
+  text-align: center;
+  line-height: 1.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  border-left-width: 5px !important;
+  // background-color: #fafafa !important;
+}
+
+.panel button {
+  line-height: 0.5rem;
+  min-width: unset;
+  border: unset;
+  outline: unset;
+}
+
+.rectSelected {
+  background-color: #e0f0f6;
+}
+
+.rectUnselected {
+  background-color: transparent;
+}
+
+// .tagColor {
+//   background-color: pink !important;
+// }
+
+.wordShow {
+  white-space: break-spaces;
+  word-break: break-all;
+}
+
+.txtBox {
+  overflow: auto;
+  max-height: 18rem;
+  padding-bottom: 3rem;
+}
+
+.txtRow {
+  margin-top: 0.5rem !important;
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
+.txtRow ::selection {
+  background-color: #ffe184;
+  color: currentColor;
+}
+
+.txtRow:hover {
+  cursor: pointer;
+}
+
+.rowIndex {
+  margin-right: 1rem;
+  color: #cccccc;
+  position: relative;
+}
+
+// .rowIndex:hover {
+//   background-color: #cccccc;
+//   border-radius: 4px;
+//   padding-right: 5px;
+//   padding-left: 5px;
+//   color: white;
+// }
+
+.selectedRowIndex {
+  margin-right: 1rem;
+  background-color: #0077b8;
+  border-radius: 4px;
+  padding-right: 3px;
+  padding-left: 5px;
+  color: white;
+}
+
+.selectedTxtRow {
+  // background-color: #ffe184;
+  padding: 0.25em 0.4em 0.25em 0.25em;
+  font-weight: bold;
+  color: black;
+  user-select: none;
+  line-height: 1.3rem;
+  margin-right: 0.15rem;
+  position: relative;
+}
+
+.txtEntityLabel {
+  // background-color: #ffe184;
+  font-size: unset;
+  font-weight: bold;
+  height: 1.5rem;
+  outline: unset;
+  // color: #0077b8;
+  color: white;
+  padding: 0.25em 0.4em 0.25em 0.25em;
+  position: relative;
+}
+
+::ng-deep .clearTxt {
+  user-select: none;
+  transition: opacity 0.1s ease;
+  position: absolute;
+  left: -0.4rem;
+  top: -0.4rem;
+  background-color: transparent;
+  color: transparent;
+  font-weight: 900;
+  border-radius: 50%;
+  text-align: center;
+  width: 0.8em;
+  height: 0.8em;
+  line-height: 0.5em;
+  font-size: 1.5em;
+}
+
+.log-textarea {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-color: #ccc;
+}
+
+.logEntityLabel {
+  font-size: unset;
+  font-weight: bold;
+  height: 1.5rem;
+  outline: unset;
+  margin: 0.3rem 0.2rem;
+  color: #000000d9;
+  border: 3px solid transparent;
+}
+
+.logEntitySelected {
+  color: white;
+  outline: unset;
+  margin: 0.3rem 0.2rem;
+  border: 3px solid transparent;
+}
+
+::ng-deep .logEntitySelected:hover {
+  color: #000000d9 !important;
+  border-bottom-width: 5px;
+}
+
+.customBadge {
+  // background: #cccccc;
+  color: #fff;
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  top: 0.1rem;
+  right: -0.1rem;
+}
+
+.logCategories {
+  border-radius: 0.1rem;
+}
+
+.logCategories:hover {
+  background-color: transparent !important;
+  box-shadow: 2px 2px 4px 1px #9a9a9a !important;
+  // border-radius: 0.3rem;
+}
+
+.filterLog {
+  margin-bottom: 1rem;
+}
+
+.filterSelect {
+  width: 100%;
+  border: 1px solid #999;
+  border-radius: 3px;
+  color: #999;
+  padding-left: 0.3rem;
+  outline: unset;
+}
+
+.filterSelect:hover {
+  border: 1px solid #0077b8;
+  color: #0077b8;
+  background-color: rgba(0, 119, 184, 0.1);
+}
+
+.filterSelect::selection {
+  width: 100%;
+  border: 1px solid #0077b8;
+  color: #0077b8;
+}
+
+.filterInput {
+  // margin-top: 0.5rem;
+  // margin-bottom: 1rem;
+  // margin-left: 1.5rem;
+}
+
+.filterText {
+  width: 80%;
+  margin-left: -0.7rem;
+  margin-top: -0.1rem;
+}
+
+.filterBox {
+  min-height: 1rem;
+  background-color: white;
+  border-radius: 3px;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filterLabel {
+  margin-top: 0.3rem;
+  box-shadow: 1px 1px 3px 0px #9a9a9a;
+  border-color: #9a9a9a;
+  color: #9a9a9a;
+}
+
+.overLabels {
+  background-color: rgb(238, 238, 238, 0.5);
+  cursor: pointer;
+}
+
+::ng-deep .high-light {
+  background: yellow;
+}
+
+.regexErr {
+  margin-left: -0.6rem;
+  color: red;
+}
+
+.isDrawer {
+  width: 0px !important;
+  overflow: hidden;
+}
+// .drawer {
+//   color: #ccc;
+// }
+
+// .drawer:hover {
+//   color: #0077b8;
+//   height: 35px !important;
+//   width: 35px !important;
+// }
+
+.showTag {
+  border-radius: 30px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 4.5rem;
+  height: 1.5rem;
+  color: #ccc;
+  background: linear-gradient(to left, #dedede, transparent 70%);
+}
+
+.showTag:hover {
+  color: white;
+  background: linear-gradient(to left, #0077b8, transparent 70%);
+  .drawer {
+    height: 35px !important;
+    width: 35px !important;
+  }
+}
+
+.hideTag {
+  border-radius: 30px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 4.5rem;
+  height: 1.5rem;
+  color: #ccc;
+  background: linear-gradient(to right, #dedede, transparent 70%);
+}
+
+.hideTag:hover {
+  color: white;
+  background: linear-gradient(to right, #0077b8, transparent 70%);
+  .drawer {
+    height: 35px !important;
+    width: 35px !important;
+  }
+}

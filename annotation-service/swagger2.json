@@ -1,0 +1,2786 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This API allows Loop users to upload dataset, create annotation projects, and annotate tickets etc.",
+    "version": "1.0.0",
+    "title": "Loop REST API"
+  },
+  "basePath": "/api/v1.0",
+  "tags": [
+    {
+      "name": "projects",
+      "description": "Everything about projects"
+    },
+    {
+      "name": "tickets",
+      "description": "Everything about tickets"
+    },
+    {
+      "name": "datasets",
+      "description": "Everything about datasets"
+    },
+    {
+      "name": "users",
+      "description": "Everything about users"
+    }
+  ],
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/projects": {
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "create a new project",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/x-www-form-urlencoded",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pname",
+            "in": "formData",
+            "description": "'pname' means the name of the project. (e.g. demo)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "taskInstruction",
+            "in": "formData",
+            "description": "'taskInstruction' means the task instruction of the project. Not required. (e.g. This is for demo show.)",
+            "type": "string"
+          },
+          {
+            "name": "maxAnnotations",
+            "in": "formData",
+            "description": "'maxAnnotations' means the limit of the number of annotations permitted for each individual case across all annotators. The value should be greater than 0. (e.g. 2)",
+            "required": true,
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "exclusiveMinimum": true,
+            "multipleOf": 1
+          },
+          {
+            "name": "labels",
+            "in": "formData",
+            "description": "'labels' means all the labels of the project. Conditionally required. (e.g. label1,label2,label3)",
+            "type": "string"
+          },
+          {
+            "name": "isMultipleLabel",
+            "in": "formData",
+            "description": "'isMultipleLabel' means allow multiple label selections. (e.g. true)",
+            "type": "boolean"
+          },
+          {
+            "name": "labelType",
+            "in": "formData",
+            "description": "'labelType' means the format of the project's label is text or numeric scope. (e.g. numericLabel || textLabel)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "assignmentLogic",
+            "in": "formData",
+            "description": "'assignmentLogic' means what is the sequnce of the ticket returns. Conditionally required. (e.g. sequential || random)",
+            "type": "string"
+          },
+          {
+            "name": "assignee",
+            "in": "formData",
+            "description": "'assignee' means who will be assigned the annotation task. (e.g. ['xxx@xxx.com','xxx@xxx.com'])",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "selectDescription",
+            "in": "formData",
+            "description": "'selectDescription' means the columns which had been selected as the entry's content come from. (e.g.  [\"column1\",\"column2\"])",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "header",
+            "in": "formData",
+            "description": "'header' means the header of the csv file. (e.g.  [\"column1\",\"column2\",\"column3\"])",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "isHasHeader",
+            "in": "formData",
+            "description": "'isHasHeader' means whether the csv file has a header or not. (e.g. yes || no)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "annotationQuestion",
+            "in": "formData",
+            "description": "'annotationQuestion' means what annotation question will be showed to annotators.",
+            "type": "string",
+            "default": "What label does this ticket belong to ?"
+          },
+          {
+            "name": "fileName",
+            "in": "formData",
+            "description": "'fileName' means the name of the csv. (e.g. file1.csv)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "fileSize",
+            "in": "formData",
+            "description": "'fileSize' means the size of the csv. (e.g. 900052)",
+            "type": "number",
+            "required": true,
+            "format": "int64",
+            "minimum": 1,
+            "exclusiveMinimum": true
+          },
+          {
+            "name": "location",
+            "in": "formData",
+            "description": "'location' means the location of the csv file in S3. (e.g. 'uploads/xxx@xxx.com/1586934928434818196_file1.csv')",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "selectedDataset",
+            "in": "formData",
+            "description": "'selectedDataset' means the dataset name of the csv file. (e.g. dataset1)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "min",
+            "in": "formData",
+            "description": "'min' means the minimun numeric of the numeric label. Conditionally required. (e.g. -10)",
+            "type": "number",
+            "format": "int64"
+          },
+          {
+            "name": "max",
+            "in": "formData",
+            "description": "'max' means the maximun numeric of the numeric label. Conditionally required. (e.g. 1000)",
+            "type": "number",
+            "format": "int64"
+          },
+          {
+            "name": "estimator",
+            "in": "formData",
+            "description": "'estimator' means the estimator of the active learning model. Conditionally required. (e.g. null || RFC || KNC || GBC) GBC means the GradientBoostingClassifier, KNC means the KNeighborsClassifier, RFC means the RandomForestClassifier.",
+            "type": "string"
+          },
+          {
+            "name": "projectType",
+            "in": "formData",
+            "description": "'projectType' means the type of the project. (e.g. null || text || tabular || regression || ner)",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "encoder",
+            "in": "formData",
+            "description": "'encoder' means the encoder method of the active learning model. Conditionally required (e.g. null || oneHot || embeddings).",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "get projects list",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/xml",
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "src",
+            "in": "query",
+            "description": "'projects' to get own projects. 'admin' to get all owners' projects. 'annotate' to get all own annotation task. 'community' to get all community datasets.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/projects"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "edit one project's some information",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'pname' means the name of the project. (e.g. demo). 'pid' means the id of the project. 'previousPname' means the previous name of the project. 'assignmentLogic' means what is the sequnce of the ticket returns. Conditionally required. (e.g. sequential || random). 'frequency' means the active learing frequency. (e.g. 10). Trigger means the number of labelled entries that can trigger the active learing.",
+            "required": true,
+            "schema": {
+              "example": {
+                "pid": "5f4f408a42962068ec43bb18",
+                "previousPname": "demo-1",
+                "pname": "demo-2",
+                "projectOwner": ["xxx@xxx.com","xxx@xxx.com"],
+                "assignee": ["xxx@xxx.com","xxx@xxx.com"],
+                "assignmentLogic": "sequential || random",
+                "frequency": 10,
+                "trigger": 50,
+                "min": -1,
+                "max": 10,
+                "editLabels":{
+                  "positive":"positive",
+                  "neg":"negative"
+                },
+                "addLabels":["nature"]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "delete the project",
+        "description": "Please be sure this delete is not reversible",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'pname' means that project's name.",
+            "required": true,
+            "schema": {
+              "example": {
+                "pname": "demo"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/labels":{
+      "delete": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "delete never used label",
+        "description": "Please be sure this delete is not reversible, it only allowd to delete never used label",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'pname' means that project's name. 'label' means this project never used label",
+            "required": true,
+            "schema": {
+              "example": {
+                "pname": "demo",
+                "label": "<50k"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/details": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "get one project's information by project id",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "query",
+            "description": "'pid' means the project id.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/projects"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/share": {
+      "patch": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "share one project to community",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'pid' means project's id. 'share' means to share or not, has value true and false. 'shareDescription' means the description for this share.",
+            "required": true,
+            "schema": {
+              "example": {
+                "pid": "5f46f89c3049470018639879",
+                "share": true,
+                "shareDescription": "to share for you"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/projects"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/al/accuracy": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "get one project's model accuracy",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "query",
+            "description": "'pid' means project's id.",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/modelAccuracy"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/annotations": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "get # Annotations Per Category and # Annotations Per User",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/xml",
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "query",
+            "description": "'pid' means project's id.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/annotationDetails"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/tickets/annotations": {
+      "get": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "get a single ticket or a batch of tickets sequentially or randomly",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "query",
+            "description": "'pid' means that project's id.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "'limit' means the size of the batch.",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/tickets"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/tickets": {
+      "get": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "get one project's all tickets also provide every ticket's annotation infomation",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "query",
+            "description": "'pid' means project's id.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "'page' means the page number.",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "'limit' means the # of tickets in one page.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/srs"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "annotate one or more tickets",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'pid' means project's id. 'tid' means that ticket's id. ",
+            "required": true,
+            "schema": {
+              "example": {
+                "pid": "5f4f408a42962068ec43bb18",
+                "userInput": [
+                  {
+                    "problemCategory": [
+                      "b"
+                    ],
+                    "tid": "5f4f408c42962068ec43bb1f"
+                  },
+                  {
+                    "problemCategory": [
+                      "dd"
+                    ],
+                    "tid": "5f4f408c42962068ec43bb2f"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "append a new dataset to original project",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'pname' means the project's name. 'selectedHeaders' means the project's original selectDescription column during upload a csv. 'location' is needed when adding new entries by uploading csv.  'srdata' means the new added row and every columns key's value during adding new entries by row.  'csvFile' value is boolean true means to upload csv and false means addind new entries by row. ",
+            "required": true,
+            "schema": {
+              "example": {
+                "pname": "0915.15",
+                "isFile": true,
+                "srdata": [
+                  {
+                    "index": 10,
+                    "education": "great"
+                  },
+                  {
+                    "index": 11,
+                    "education": "bad"
+                  }
+                ],
+                "selectedHeaders": [
+                  "index",
+                  "education"
+                ],
+                "location": "upload/xxx@xxx.com/1600159831466391633_embedding-append.csv"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "delete one or more tickets",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'tids' means that ticket's id. 'pname' means the project's name.",
+            "required": true,
+            "schema": {
+              "example": {
+                "pname": "0902.1",
+                "tids": [
+                  "5f4f408c42962068ec43bb20",
+                  "5f4f408c42962068ec43bb21"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/projects"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/tickets/flags": {
+      "post": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "flag one ticket",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'pid' means project's id. 'tid' means that ticket's id.",
+            "required": true,
+            "schema": {
+              "example": {
+                "pid": "5f46f89c3049470018639879",
+                "tid": "5f46f89d3049470018639a51"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/tickets"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "get all flag tickets from all annotators of one project",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pname",
+            "in": "query",
+            "description": "'pname' means project's name.",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "'page' means the pageNumber to go.",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "'limit' means the # of tickets in one page.",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/flagTickets"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/tickets/users/flags": {
+      "get": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "get one user's all flag tickets of one project",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pname",
+            "in": "query",
+            "description": "'pname' means project's name.",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "'page' means the pageNumber to go.",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "'limit' means the # of tickets in one page.",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/flagTickets"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/tickets/flags/un-flag": {
+      "post": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "unflag one ticket",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'tid' means that ticket's id.",
+            "required": true,
+            "schema": {
+              "example": {
+                "tid": "5f46f89d3049470018639a51"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/tickets/flags/silence": {
+      "post": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "silence one or more tickets",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'tid' means that ticket's id.",
+            "required": true,
+            "schema": {
+              "example": {
+                "tids": [
+                  "5f46f89d3049470018639a51"
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/tickets/examples": {
+      "get": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "get one ticket example",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/xml",
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "query",
+            "description": "pid means the ID of the project",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ticketExample"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/tickets/details": {
+      "get": {
+        "tags": [
+          "tickets"
+        ],
+        "summary": "get one ticket's information by ticket's id",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "tid",
+            "in": "query",
+            "description": "'tid' means that ticket's id.",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/tickets"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/datasets/s3/upload": {
+      "post": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "uploads a file",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "dsname",
+            "in": "formData",
+            "description": "Name of the dataset. (e.g. dataset1)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "hasHeader",
+            "in": "formData",
+            "description": "Does the dataset csv has header or not",
+            "required": true,
+            "type": "string",
+            "enum":["no", "yes"]
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "file to upload only support for: [.csv .zip .tgz]",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": { "example": { "CODE": 200, "MSG": "OK"} }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/users/datasets": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "get own datasets",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/xml",
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/datasets"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/datasets": {
+      "delete": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "delete the dataset",
+        "description": "Please be sure this delete is not reversible",
+        "operationId": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'fileKey' means that dataset's fileKey. 'dsname' means the dataset's name.",
+            "required": true,
+            "schema": {
+              "example": {
+                "fileKey": "1584957379841383411125M_763536.csv",
+                "dsname": "125MB"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "example": {
+                "CODE": 0,
+                "MSG": "delete success"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/generate": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "generate one dataset",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/xml",
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "query",
+            "description": "ID of the project",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "description": "The format of the generated file. 'standard' means count of each label. 'top' means top label only. 'probablistic' means ratio of label relative to total.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "src",
+            "in": "query",
+            "description": "where does generate or download comes from. Comes from 'projects', 'admin' or 'community'.",
+            "type": "string"
+          },
+          {
+            "name": "onlylabelled",
+            "in": "query",
+            "description": "Yes means to export only the labelled entries, No means to export all the entries.",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/ApiResponse"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/projects/download": {
+      "get": {
+        "tags": [
+          "datasets"
+        ],
+        "summary": "download one dataset",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/xml",
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "pid",
+            "in": "query",
+            "description": "ID of the project",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/generateInfo"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "get all users",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/users"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "set user a role",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'role' means that user's role. 'email' means the email address of the current user. 'uname' means that user's full name.",
+            "required": true,
+            "schema": {
+              "example": {
+                "email": "xxx@xxx.com",
+                "role": "Admin",
+                "uname": "Xxx Xxx"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/users"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "edit the user's role",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'role' means that user's role. 'user' means the email address of the current user.",
+            "required": true,
+            "schema": {
+              "example": {
+                "user": "xxx@xxx.com",
+                "role": "Annotator"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/users"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "users"
+        ],
+        "summary": "delete one user",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "'uid' means the email address of the current user.",
+            "required": true,
+            "schema": {
+              "example": {
+                "uid": "xxx@xxx.com"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ApiResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/users/roles": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "get the role of one user",
+        "description": "",
+        "operationId": "",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/users"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "description": "JWT token",
+      "name": "Authorization",
+      "in": "header"
+    },
+    "api_key": {
+      "type": "apiKey",
+      "name": "api_key",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "projects": {
+      "type": "object",
+      "example": {
+        "generateInfo": {
+          "status": "pending",
+          "format": "standard",
+          "file": "https://yours3bucket.s3.us-west-2.amazonaws.com/download/5f4f408a42962068ec43bb18/Export_embedding-append62_09022020145034.csv",
+          "updateTime": "1599029437343"
+        },
+        "al": {
+          "newLBSr": [
+            "5f46f89d3049470018639a51"
+          ],
+          "queriedSr": [
+            "5f46f89d3049470018639a51",
+            "5f46f8ae304947001863f91c",
+            "5f46f8a2304947001863b528",
+            "5f46f8a9304947001863dd74",
+            "5f46f8a9304947001863dc5d"
+          ]
+        },
+        "frequency": 10,
+        "trigger": 50,
+        "trained": true,
+        "alFailed": false,
+        "training": true,
+        "querying": false,
+        "teaching": false,
+        "accuracy": [
+          {
+            "index": 50,
+            "accuracy": 1
+          },
+          {
+            "index": 60,
+            "accuracy": 1
+          },
+          {
+            "index": 70,
+            "accuracy": 0.9285714285714286
+          }
+        ],
+        "numberColumn": [
+          "index",
+          "age",
+          "fnlwgt",
+          "education-num",
+          "capital-gain",
+          "capital-loss",
+          "hours-per-week"
+        ],
+        "objectColumn": [
+          "workclass",
+          "education",
+          "marital-status",
+          "occupation",
+          "relationship",
+          "race",
+          "sex",
+          "native-country",
+          "salary"
+        ],
+        "estimator": "RFC",
+        "vectorModel": "models/5f46f89c3049470018639879/5f46f89c3049470018639879_vaporizer_model.pkl",
+        "labelID": {
+          "good": 0,
+          "bad": 1
+        },
+        "model": "models/5f46f89c3049470018639879/5f46f89c3049470018639879_model.pkl",
+        "annotator": [
+          "xxx@xxx.com"
+        ],
+        "selectedColumn": [
+          "index",
+          "age",
+          "workclass",
+          "fnlwgt",
+          "education",
+          "education-num",
+          "marital-status",
+          "occupation",
+          "relationship",
+          "race",
+          "sex",
+          "capital-gain",
+          "capital-loss",
+          "hours-per-week",
+          "native-country",
+          "salary"
+        ],
+        "fileSize": 3971592,
+        "appendSr": "pending",
+        "id": "5f46f89c3049470018639879",
+        "creator": "xxx@xxx.com",
+        "createdDate": "1598486684466",
+        "updatedDate": "1598486992402",
+        "projectName": "0827.1",
+        "taskInstructions": "",
+        "totalCase": 32562,
+        "userCompleteCase": [
+          {
+            "completeCase": 70,
+            "skip": 0,
+            "id": "5f46f89c304947001863987a",
+            "user": "xxx@xxx.com",
+            "_id": "5f46f89c304947001863987a"
+          }
+        ],
+        "maxAnnotation": 2,
+        "categoryList": "good,bad",
+        "assignmentLogic": "sequential",
+        "dataSource": "adult-index-null.csv",
+        "annotationQuestion": "What label does this ticket belong to ?",
+        "shareStatus": false,
+        "shareDescription": "",
+        "labelType": "textLabel",
+        "min": 0,
+        "max": 0,
+        "projectType": "tabular",
+        "encoder": "embeddings"
+      },
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "ObjectId"
+        },
+        "creator": {
+          "type": "string"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "updatedDate": {
+          "type": "string"
+        },
+        "projectName": {
+          "type": "string"
+        },
+        "taskInstructions": {
+          "type": "string"
+        },
+        "totalCase": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "projectCompleteCase": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "userCompleteCase": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "user": {
+                "type": "string"
+              },
+              "completeCase": {
+                "type": "integer",
+                "default": 0,
+                "format": "int64"
+              },
+              "skip": {
+                "type": "integer",
+                "default": 0,
+                "format": "int64"
+              },
+              "id": {
+                "type": "string",
+                "format": "ObjectId"
+              },
+              "_id": {
+                "type": "string",
+                "format": "ObjectId"
+              }
+            }
+          }
+        },
+        "maxAnnotation": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "categoryList": {
+          "type": "string"
+        },
+        "assignmentLogic": {
+          "type": "string"
+        },
+        "annotator": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dataSource": {
+          "type": "string"
+        },
+        "selectedColumn": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "annotationQuestion": {
+          "type": "string"
+        },
+        "shareStatus": {
+          "type": "boolean"
+        },
+        "shareDescription": {
+          "type": "string"
+        },
+        "generateInfo": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "default": "pending",
+              "enum": [
+                "pending",
+                "done"
+              ]
+            },
+            "messageId": {
+              "type": "string"
+            },
+            "startTime": {
+              "type": "string"
+            },
+            "updateTime": {
+              "type": "string"
+            },
+            "file": {
+              "type": "string"
+            },
+            "format": {
+              "type": "string",
+              "default": "standard"
+            }
+          }
+        },
+        "fileSize": {
+          "type": "integer",
+          "default": 0,
+          "format": "int64"
+        },
+        "appendSr": {
+          "type": "string",
+          "default": "pending"
+        },
+        "labelType": {
+          "type": "string"
+        },
+        "projectType": {
+          "type": "string"
+        },
+        "min": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "max": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "downloadCount": {
+          "type": "object",
+          "properties": {
+            "community": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        },
+        "al": {
+          "type": "object",
+          "properties": {
+            "labelID": {
+              "type": "object"
+            },
+            "model": {
+              "type": "string"
+            },
+            "vectorModel": {
+              "type": "string"
+            },
+            "newLBSr": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "ObjectId"
+              }
+            },
+            "queriedSr": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "ObjectId"
+              }
+            },
+            "frequency": {
+              "type": "integer",
+              "default": 10,
+              "format": "int32"
+            },
+            "trigger": {
+              "type": "integer",
+              "default": 50,
+              "format": "int32"
+            },
+            "trained": {
+              "type": "boolean",
+              "default": false
+            },
+            "alFailed": {
+              "type": "boolean",
+              "default": false
+            },
+            "training": {
+              "type": "boolean",
+              "default": false
+            },
+            "querying": {
+              "type": "boolean",
+              "default": false
+            },
+            "teaching": {
+              "type": "boolean",
+              "default": false
+            },
+            "accuracy": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "accuracy": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            },
+            "estimator": {
+              "type": "string"
+            },
+            "numberColumn": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "objectColumn": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "encoder": {
+          "type": "object"
+        }
+      }
+    },
+    "generateInfo": {
+      "type": "object",
+      "example": {
+        "status": "pending",
+        "format": "standard",
+        "file": "https://yours3bucket.s3.us-west-2.amazonaws.com/download/5f4f408a42962068ec43bb18/Export_embedding-append62_09022020145034.csv",
+        "updateTime": "1599029437343"
+      },
+      "properties": {
+        "status": {
+          "type": "string",
+          "default": "pending",
+          "enum": [
+            "pending",
+            "done"
+          ]
+        },
+        "messageId": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "updateTime": {
+          "type": "string"
+        },
+        "file": {
+          "type": "string",
+          "description": "Here will response a download link that expires in 30 minutes encode with BASE64, please to decode it before download. "
+        },
+        "format": {
+          "type": "string",
+          "default": "standard"
+        }
+      }
+    },
+    "modelAccuracy": {
+      "type": "object",
+      "example": {
+        "status": true,
+        "accuracy": [
+          {
+            "index": 50,
+            "accuracy": 1
+          },
+          {
+            "index": 60,
+            "accuracy": 1
+          },
+          {
+            "index": 70,
+            "accuracy": 0.9285714285714286
+          }
+        ]
+      },
+      "properties": {
+        "accuracy": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "index": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "accuracy": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
+        },
+        "status": {
+          "type": "boolean"
+        }
+      }
+    },
+    "tickets": {
+      "type": "object",
+      "example": {
+        "flag": {
+          "users": [],
+          "silence": false
+        },
+        "_id": "5f46f8a9304947001863dd74",
+        "originalData": {
+          "index": 17658,
+          "age": 30,
+          "workclass": "Private",
+          "fnlwgt": 340899,
+          "education": "Prof-school",
+          "education-num": 15,
+          "marital-status": "Never-married",
+          "occupation": "Prof-specialty",
+          "relationship": "Not-in-family",
+          "race": "White",
+          "sex": "Male",
+          "capital-gain": 0,
+          "capital-loss": 1590,
+          "hours-per-week": 80,
+          "native-country": "United-States",
+          "salary": "<50k"
+        },
+        "id": "5f46f8a9304947001863dd74",
+        "projectName": "0902.1",
+        "userInputsLength": 1,
+        "__v": 0,
+        "userInputs": [
+          {
+            "_id": "5f5832859d0cd15d48408921"
+          },
+          {
+            "problemCategory": "b"
+          },
+          {
+            "user": "xxx@xxx.com"
+          },
+          {
+            "timestamp": "2020-09-09T01:40:21.814Z"
+          }
+        ]
+      },
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "ObjectId"
+        },
+        "_id": {
+          "type": "string",
+          "format": "ObjectId"
+        },
+        "flag": {
+          "type": "object",
+          "properties": {
+            "users": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "silence": {
+              "type": "boolean"
+            }
+          }
+        },
+        "originalData": {
+          "type": "object"
+        },
+        "projectName": {
+          "type": "string"
+        },
+        "userInputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "problemCategory": {
+                "type": "string"
+              },
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "user": {
+                "type": "string"
+              },
+              "_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "userInputsLength": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "__v": {
+          "type": "integer",
+          "default": 0,
+          "format": "int32"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "text_vector": {
+          "type": "string"
+        },
+        "al_test": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ticketExample": {
+      "type": "object",
+      "example": {
+        "appendSr": "done",
+        "sampleSr": {
+          "index": "40",
+          "age": "39",
+          "workclass": "Private",
+          "fnlwgt": "150125",
+          "education": "Assoc-acdm",
+          "education-num": "",
+          "marital-status": "Divorced",
+          "occupation": "",
+          "relationship": "Unmarried",
+          "race": "Black",
+          "sex": "Female",
+          "capital-gain": "0",
+          "capital-loss": "0",
+          "hours-per-week": "40",
+          "native-country": "United-States",
+          "salary": "<50k"
+        }
+      },
+      "properties": {
+        "sampleSr": {
+          "type": "object"
+        },
+        "appendSr": {
+          "type": "string"
+        }
+      }
+    },
+    "flagTickets": {
+      "type": "object",
+      "example": {
+        "docs": [
+          {
+            "_id": "5f46f8ae304947001863f91c",
+            "id": "5f46f8ae304947001863f91c",
+            "originalData": {
+              "index": 24738,
+              "age": 52,
+              "workclass": "Self-emp-inc",
+              "fnlwgt": 179951,
+              "education": "Prof-school",
+              "education-num": 15,
+              "marital-status": "Married-civ-spouse",
+              "occupation": "Exec-managerial",
+              "relationship": "Husband",
+              "race": "White",
+              "sex": "Male",
+              "capital-gain": 0,
+              "capital-loss": 0,
+              "hours-per-week": 40,
+              "native-country": "United-States",
+              "salary": "<50k"
+            },
+            "flag": {
+              "users": [
+                "xxx@xxx.com"
+              ],
+              "silence": false
+            },
+            "projectName": "0827.1",
+            "userInputs": [],
+            "userInputsLength": 0,
+            "__v": 0
+          },
+          {
+            "id": "5f46f89d3049470018639a51",
+            "_id": "5f46f89d3049470018639a51",
+            "originalData": {
+              "index": 471,
+              "age": 52,
+              "workclass": "?",
+              "fnlwgt": 115209,
+              "education": "Prof-school",
+              "education-num": 15,
+              "marital-status": "Married-spouse-absent",
+              "occupation": "",
+              "relationship": "Unmarried",
+              "race": "Asian-Pac-Islander",
+              "sex": "Female",
+              "capital-gain": 0,
+              "capital-loss": 0,
+              "hours-per-week": 40,
+              "native-country": "Vietnam",
+              "salary": "<50k"
+            },
+            "flag": {
+              "users": [
+                "xxx@xxx.com"
+              ],
+              "silence": false
+            },
+            "projectName": "0827.1",
+            "userInputs": [],
+            "userInputsLength": 0,
+            "__v": 0
+          }
+        ],
+        "totalDocs": 2,
+        "limit": 10,
+        "totalPages": 1,
+        "page": 1,
+        "pagingCounter": 1,
+        "hasPrevPage": false,
+        "hasNextPage": false,
+        "prevPage": null,
+        "nextPage": null
+      },
+      "properties": {
+        "docs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tickets"
+          }
+        },
+        "totalDocs": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "totalPages": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "pagingCounter": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "hasPrevPage": {
+          "type": "boolean"
+        },
+        "hasNextPage": {
+          "type": "boolean"
+        },
+        "prevPage": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "nextPage": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "srs": {
+      "type": "object",
+      "example": {
+        "pageInfo": {
+          "totalRowss": 61,
+          "totalPages": 7,
+          "currentPage": 2,
+          "hasPrevPage": true,
+          "hasNextPage": true,
+          "prevPage": 1,
+          "nextPage": 3
+        },
+        "data": [
+          {
+            "flag": {
+              "users": [
+                "xxx@xxx.com"
+              ],
+              "silence": false
+            },
+            "_id": "5f4f408c42962068ec43bb26",
+            "projectName": "0902.1",
+            "userInputsLength": 0,
+            "originalData": {
+              "index": "13",
+              "age": "30",
+              "workclass": "Private",
+              "fnlwgt": "151989",
+              "education": "Assoc-voc",
+              "education-num": "",
+              "marital-status": "Married-civ-spouse",
+              "occupation": "",
+              "relationship": "Wife",
+              "race": "White",
+              "sex": "Female",
+              "capital-gain": "0",
+              "capital-loss": "0",
+              "hours-per-week": "40",
+              "native-country": "United-States",
+              "salary": "<50k"
+            },
+            "userInputs": [],
+            "__v": 0,
+            "id": "5f4f408c42962068ec43bb26"
+          }
+        ]
+      },
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/tickets"
+          }
+        },
+        "pageInfo": {
+          "type": "object",
+          "properties": {
+            "currentPage": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nextPage": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "prevPage": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "totalPages": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "totalRowss": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "hasNextPage": {
+              "type": "boolean"
+            },
+            "hasPrevPage": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "datasets": {
+      "type": "object",
+      "example": {
+        "columnInfo": [
+          {
+            "_id": "5f5755349d0cd15d48408920",
+            "name": "index",
+            "type": "Numeric",
+            "uniqueLength": 63
+          }
+        ],
+        "createTime": "1599558964850",
+        "dataSetName": "0908.3",
+        "description": null,
+        "fileKey": "upload/xxx@xxx.com/1599558963396912088_Export_embedding-append62_09022020145034.csv",
+        "fileName": "Export_embedding-append62_09022020145034.csv",
+        "fileSize": 9572,
+        "format": "tabular",
+        "hasHeader": "yes",
+        "id": "5f5755349c1590edde642ff2",
+        "location": "upload/xxx@xxx.com/1599558963396912088_Export_embedding-append62_09022020145034.csv",
+        "topReview": {
+          "header": [
+            "index",
+            "age",
+            "workclass",
+            "fnlwgt",
+            "education",
+            "education-num",
+            "marital-status",
+            "occupation",
+            "relationship",
+            "race",
+            "sex",
+            "capital-gain",
+            "capital-loss",
+            "hours-per-week",
+            "native-country",
+            "salary",
+            "a",
+            "b",
+            "probabilistic"
+          ],
+          "topRows": [
+            [
+              1,
+              49,
+              "Private",
+              101320,
+              "Assoc-acdm",
+              12,
+              "Married-civ-spouse",
+              null,
+              "Wife",
+              "White",
+              "Female",
+              0,
+              1902,
+              40,
+              "United-States",
+              ">=50k",
+              1,
+              0,
+              "(1,0)"
+            ],
+            [
+              2,
+              44,
+              "Private",
+              236746,
+              "Masters",
+              14,
+              "Divorced",
+              "Exec-managerial",
+              "Not-in-family",
+              "White",
+              "Male",
+              10520,
+              0,
+              45,
+              "United-States",
+              ">=50k",
+              1,
+              0,
+              "(1,0)"
+            ]
+          ]
+        },
+        "updateTime": "1599558964850",
+        "user": "xxx@xxx.com",
+        "__v": 0,
+        "_id": "5f5755349c1590edde642ff2"
+      },
+      "properties": {
+        "_id": {
+          "type": "string",
+          "format": "ObjectId"
+        },
+        "dataSetName": {
+          "type": "string"
+        },
+        "__v": {
+          "type": "integer",
+          "default": 0,
+          "format": "int32"
+        },
+        "fileName": {
+          "type": "string"
+        },
+        "fileKey": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "topReview": {
+          "type": "object",
+          "properties": {
+            "header": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "topRows": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "hasHeader": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "format": {
+          "type": "string"
+        },
+        "fileSize": {
+          "type": "integer",
+          "default": 0,
+          "format": "int64"
+        },
+        "createTime": {
+          "type": "string"
+        },
+        "updateTime": {
+          "type": "string"
+        },
+        "columnInfo": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "format": "ObjectId"
+              },
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "uniqueLength": {
+                "type": "integer",
+                "default": 0,
+                "format": "int32"
+              }
+            }
+          }
+        }
+      }
+    },
+    "users": {
+      "type": "object",
+      "example": {
+        "createdDate": "1596606399237",
+        "email": "xxx@xxx.com",
+        "fullName": "DC Admin Test",
+        "id": "xxx@xxx.com",
+        "optOutProducts": [],
+        "points": 113,
+        "role": "Annotator",
+        "srCount": 0,
+        "srs": [],
+        "__v": 0,
+        "_id": "xxx@xxx.com"
+      },
+      "properties": {
+        "_id": {
+          "type": "string",
+          "format": "ObjectId"
+        },
+        "email": {
+          "type": "string"
+        },
+        "fullName": {
+          "type": "string"
+        },
+        "srs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "ObjectId"
+          }
+        },
+        "points": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "role": {
+          "type": "string"
+        },
+        "createdDate": {
+          "type": "string"
+        },
+        "optOutProducts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "annotationDetails": {
+      "type": "object",
+      "example": {
+        "userCase": [
+          {
+            "user": "xxx@xxx.com",
+            "fullName": "Xxx Xxx",
+            "completeCase": 129
+          }
+        ],
+        "labels": [
+          {
+            "label": ">=50k",
+            "annotated": 70
+          },
+          {
+            "label": "<50k",
+            "annotated": 59
+          }
+        ],
+        "labelledCase": 129,
+        "totalCase": 2116530,
+        "notLabeledYet": 2116401
+      },
+      "properties": {
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "annotated": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
+        },
+        "userCase": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fullName": {
+                "type": "string"
+              },
+              "user": {
+                "type": "string"
+              },
+              "completeCase": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
+        },
+        "totalCase": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "labelledCase": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "notLabeledYet": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "ApiResponse": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

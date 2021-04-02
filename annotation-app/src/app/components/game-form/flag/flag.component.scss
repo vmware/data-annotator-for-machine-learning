@@ -1,0 +1,50 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+// .modal .modal-dialog {
+//   width: inherit !important;
+// }
+// .modal .modal-dialog .modal-content {
+//   width: 800px;
+// }
+
+clr-alert {
+  margin-top: 1rem;
+}
+
+::ng-deep .btn.btn-sm {
+  margin-top: 7px !important;
+}
+
+::ng-deep .md-check {
+  margin-left: 10px !important;
+}
+
+::ng-deep .footerLeft .modal-footer {
+  display: inherit !important;
+}
+
+.flagDataLoading {
+  text-align: center;
+  background-color: white;
+  border-radius: 8px;
+  min-height: 9rem;
+  text-align: center;
+}
+
+.loadingSpan {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  color: grey;
+  opacity: 0.65;
+  font-size: 0.7rem;
+}
+
+.labelBox {
+  max-height: 4rem;
+  overflow-x: auto;
+}

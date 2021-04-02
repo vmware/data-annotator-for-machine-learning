@@ -1,0 +1,30 @@
+# annotation-app
+annotation-app/node_modules
+annotation-app/.gitlab-ci.yml
+annotation-app/.npmrc
+annotation-app/docker-entrypoint.sh
+annotation-app/Dockerfile
+annotation-app/protractor.config.js
+annotation-app/e2e
+annotation-app/chart
+annotation-app/src/environments/environment.stg.ts
+annotation-app/src/environments/environment.test.ts
+annotation-app/package-lock.json
+annotation-app/tsconfig.spec.json
+
+
+# annotation-service
+annotation-service/node_modules
+annotation-service/downloadProject
+annotation-service/config/app-local.js
+annotation-service/config/app-poc.js
+
+
+# active-learning-service
+*__pycache__*
+active-learning-service/venv/
+active-learning-service/.idea
+active-learning-service/logs
+active-learning-service/models
+active-learning-service/config/app_local.py
+active-learning-service/config/app_poc.py
