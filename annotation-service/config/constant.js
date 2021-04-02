@@ -73,10 +73,6 @@ module.exports = {
     },
     YES: "Yes",
     NO: "No",
-    TEAM:{
-        ESP: "VMware InstaML Loop",
-        OSS: "Data-Annotator-For-Machine-Learning",
-    },
     S3OPERATIONS:{
         GETOBJECT: 'getObject',
     },

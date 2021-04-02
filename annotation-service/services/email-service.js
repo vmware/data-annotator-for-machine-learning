@@ -13,7 +13,7 @@ const authForNoe = require("../utils/authForNoe.service");
 const config = require("../config/config");
 const AWS = require('aws-sdk');
 const STS = require('../utils/sts');
-const { ACCESS_TIME_15, TEAM } = require('../config/constant')
+const { ACCESS_TIME_15 } = require('../config/constant')
 const nodemailer = require("nodemailer");
 
 //email template
@@ -55,7 +55,7 @@ async function sendGenerationEmailToOwner(user, fileName) {
 
 async function sendEmail(subject, htmlTemplate, toAddresses) {
     if (config.ESP) {
-        htmlTemplate = htmlTemplate.replace(/\${team}/g, TEAM.ESP);
+        htmlTemplate = htmlTemplate.replace(/\${team}/g, config.teamTitle);
         let toList = [];
         for (const email of toAddresses) {
             toList.push({address: email});
@@ -79,7 +79,7 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
         if (!config.enableEmail) {
             return
         }
-        htmlTemplate = htmlTemplate.replace(/\${team}/g, TEAM.OSS);
+        htmlTemplate = htmlTemplate.replace(/\${team}/g, config.teamTitle);
         if (config.useAWSSES) {
             const data = await STS.prepareCredentials(config.s3RoleArn, ACCESS_TIME_15);
             await AWS.config.update({

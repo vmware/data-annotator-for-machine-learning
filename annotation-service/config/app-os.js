@@ -43,5 +43,7 @@ module.exports  = {
   emailPassword: process.env.EMAIL_PASSWORD || null,
   emailServerHost: process.env.EMAIL_SERVER_HOST || null,
   emailServerPort: process.env.EMAIL_SERVER_PORT || 465,
+  //teamTitle for sending email
+  teamTitle: process.env.TEAM_TITILE || "Data-Annotator-For-Machine-Learning",
 
 };

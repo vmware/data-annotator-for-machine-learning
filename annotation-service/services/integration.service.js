@@ -14,7 +14,7 @@ const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
 const { findFrequentlyElementInArray } = require('../utils/common.utils');
 const FileService = require('./file-service');
 const { PAGINATELIMIT } = require("../config/constant");
-const { instamlApiUrl } = require("../config/config");
+const { internalMLApiUrl } = require("../config/config");
 const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
@@ -94,8 +94,8 @@ async function SyncLabelledCaseToInstaML(req){
     }
     config.headers.Authorization = req.headers.authorization;
     
-    console.log(`[ INTEGRATION ] Service send data to InstaML`);
-    await axios.post(`${instamlApiUrl}/datasets`, form, config);
+    console.log(`[ INTEGRATION ] Service send data to INTERNAL_ML`);
+    await axios.post(`${internalMLApiUrl}/datasets`, form, config);
     
     console.log(`[ INTEGRATION ] Service delete tep csv file`);
     await FileService.deleteTempFile(fileName);
