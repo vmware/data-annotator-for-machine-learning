@@ -29,8 +29,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           up to 500MB can be uploaded through the “My Datasets” tab and used to create a new project. <i
             *ngIf="env.config.authUrl" style="font-style: normal;">If you have
             GB
-            size datasets, we can support this through a backend script. Please contact instaml-dev@vmware.com or
-            #instaml.</i> </clr-accordion-content>
+            size datasets, we can support this through a backend script. Please contact {{env.config.contactEmail}} or
+            {{env.config.contactSlack}}.</i> </clr-accordion-content>
       </clr-accordion-panel>
 
       <clr-accordion-panel>

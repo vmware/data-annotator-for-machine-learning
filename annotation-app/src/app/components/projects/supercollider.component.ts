@@ -11,6 +11,7 @@ import { QueryDatasetData, DatasetUtil } from '../../model/index';
 import { FormValidatorUtil } from '../../shared/form-validators/form-validator-util';
 import { DatasetValidator } from '../../shared/form-validators/dataset-validator';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { EnvironmentsService } from 'app/services/environments.service';
 
 @Component({
   selector: 'supercollider',
@@ -42,6 +43,8 @@ export class SupercolliderComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private avaService: AvaService,
+    public env: EnvironmentsService,
+
   ) {
     this.userQuestionUpdate.pipe(
       debounceTime(400),
@@ -56,7 +59,7 @@ export class SupercolliderComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.infoMessage = "You should test and validate your query before trying to run the query on InstaML.";
+    this.infoMessage = "You should test and validate your query before trying to run the query on" + this.env.config.serviceTitle + ".";
     this.createForm();
   }
 

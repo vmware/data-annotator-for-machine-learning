@@ -19,4 +19,7 @@ export interface Env {
     feedbackUrl?: string,
     videoSrc?: string,
     googleTrackId?: string,
+    enableAWSS3?: boolean
+    contactEmail?: string,
+    contactSlack?: string
 }
