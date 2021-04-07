@@ -21,7 +21,8 @@ async function s3Client(){
         apiVersion: '2006-03-01',
         accessKeyId: data.Credentials.AccessKeyId,
         secretAccessKey: data.Credentials.SecretAccessKey,
-        sessionToken: data.Credentials.SessionToken
+        sessionToken: data.Credentials.SessionToken,
+        signatureVersion: 'v4'
     });
     
 }
@@ -52,9 +53,7 @@ async function uploadObject(Key, Body){
 async function signedUrlByS3(operation, key, S3) {
     if(!S3){
         S3 = await s3Client();
-    }
-    S3.signatureVersion= 'v4';
-    
+    }    
     const params = { 
         Bucket: config.bucketName, 
         Key: key, 
