@@ -171,4 +171,15 @@ router.delete(APIs.SRS_DELETE_LABEL, (req, res) => {
     });
 });
 
+router.patch(APIs.SRS_REVIEW, (req, res) => {
+    console.log(`[ SRS ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+    srsService.updateSrsUserInput(req).then(response =>{
+        console.log(`[ SRS ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+        res.status(200).json(response);
+    }).catch(error => {
+        console.log(`[ SRS ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+        res.status(500).send(error);
+    });
+});
+
 module.exports = router;

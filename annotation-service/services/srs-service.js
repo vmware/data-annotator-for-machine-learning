@@ -17,7 +17,7 @@ const csv = require('csvtojson');
 const alService = require('./activelearning.service');
 const ENRService = require('./ner.service');
 const _ = require("lodash");
-const { ProjectModel, UserModel, ImgModel, SrModel } = require("../db/db-connect");
+const { ProjectModel, UserModel, ImgModel, SrModel, LogModel } = require("../db/db-connect");
 const mongoDb = require("../db/mongo.db");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const imgImporter = require("../utils/imgImporter");
@@ -688,6 +688,14 @@ async function deleteLabel(req){
     
 }
 
+async function reviewTicket(req) {
+    const conditions = {_id: Object(req.body.tid)};
+    if (req.body.reReview) {
+        update = {$set: {"reveiwInfo.reReview": true}}
+    } 
+    await mongoDb.updateByConditions(LogModel, conditions, update);
+}
+
 module.exports = {
     updateSrsUserInput,
     getCategoriesSrs,
@@ -707,4 +715,5 @@ module.exports = {
     slienceFlagSrs,
     deleteSrs,
     deleteLabel,
+    reviewTicket,
 }

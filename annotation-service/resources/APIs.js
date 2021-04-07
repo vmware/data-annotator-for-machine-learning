@@ -54,6 +54,7 @@ module.exports = {
     SRS_USER_FLAGS: "/projects/tickets/users/flags", // swagger
     PROJECT_FLAGS: "/projects/tickets/flags",  // swagger
     PROJECT_FLAGS_SLIENCE: "/projects/tickets/flags/silence", //swagger
+    SRS_REVIEW: "/projects/tickets/review",
 
 
     //file

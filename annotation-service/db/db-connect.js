@@ -82,6 +82,12 @@ const logSchema = new mongoose.Schema({
     flag: {
         users: [],
         silence: { type: Boolean, default: false }
+    },
+    reveiwInfo:{
+        user: { type: String },
+        reviewed: { type: Boolean, default: false },
+        reReview: { type: Boolean, default: false },
+        reviewedTime: { type: String }
     }
 }, { _id: true });
 logSchema.set("toJSON", { virtuals: true });
