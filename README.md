@@ -2,19 +2,21 @@
 
 Data Annotator for Machine Learning is an application that helps machine learning teams facilitating the creation and management of annotations.
 
-Specifically, the core features are:
-- Supported annotation tasks:
+Core features include:
+- Support for common annotation tasks:
   - Text classification
   - Named Entity Recognition
   - Tabular classification and regresion
   - Images recognition with bounding boxes and polygons
-  - Log annotations 
-- Active learning with uncertainly sampling to distribute unlabeled data
-- Project tracking with real time data aggregation
+  - Log labeling 
+- Active learning with uncertainly sampling to query unlabeled data
+- Project tracking with real time data aggregation and review process
 - User management panel with role-based access control
 - Data management
-  - export to a common ML task format in CSV
-  - data sharing through a community datasets tab
+  - import common data formats
+  - export in ML friendly formats
+  - data sharing through community datasets
+- Swagger API for programmatic labeling, connect to data pipelines and more
 
 ## Table of Contents
 
@@ -29,23 +31,17 @@ Specifically, the core features are:
 
 ## What is included
 
-Data Annotator for Machine Learning project containes three components, and you need to set up all components before you can start to use the application.
+You ahve to set up and configure three components in  Data Annotator for Machine Learning before you can use the application.
 
 #### [___annotation-app___](./annotation-app)
-This is the front-end application built with Angular 8.x that with
-- **AngularCLI** 8.3.17
-- **Node** 10+
-- **NPM** 6+
+This is the front-end application built with **Angular** 8.x, **Node** 10+, **NPM** 6+
 
 #### [___annotation-service___](./annotation-service)
-This is the back-end service that provides all the api for annotation-app.  It is built with Node.js and and MongoDB
-- [__Node__](https://nodejs.org/en/) 10+
-- [__mongodb__](https://www.mongodb.com/download-center/community) 3.5+
-- [__express__](https://www.npmjs.com/package/express) 4.17.1
+This is the back-end service that provides all the api for annotation-app built with [__Node__](https://nodejs.org/en/) 10+, [__mongodb__](https://www.mongodb.com/download-center/community) 3.5+, [__express__](https://www.npmjs.com/package/express) 4.17.1
+
 #### [___active-learning-service___](./active-learning-service)
-This is the back-end service that provides all active learning api.  It is built with Python and Django service in addition to Modal
-- [__Python__](https://www.python.org/) 3.6+
-- [__Django__](https://www.djangoproject.com/) 3.0.7
+This is the back-end service that provides all active learning api.  It is built with [__Python__](https://www.python.org/) 3.6+ and [__Django__](https://www.djangoproject.com/) 3.0.7 service in addition to Modal
+
 ## Quick start
 
 Instructions to set up the three service components:
