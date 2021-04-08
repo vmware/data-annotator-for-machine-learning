@@ -1,16 +1,17 @@
 <div align='center'> <h1>Data Annotator for Machine Learning</h1> </div>
 
-Data Annotator for Machine Learning is an application that helps machine learning teams facilitate the creation and management of annotations.
+Data Annotator for Machine Learning is an application that helps machine learning teams facilitating the creation and management of annotations.
 
 Specifically, the core features are:
 - Supported annotation tasks:
-  - text classification
-  - named entity recognition
-  - tabular classification and regresion
-  - image recognition with bounding boxes and polygons
+  - Text classification
+  - Named Entity Recognition
+  - Tabular classification and regresion
+  - Images recognition with bounding boxes and polygons
+  - Log annotations 
 - Active learning with uncertainly sampling to distribute unlabeled data
 - Project tracking with real time data aggregation
-- User management panel with RBAC
+- User management panel with role-based access control
 - Data management
   - export to a common ML task format in CSV
   - data sharing through a community datasets tab
