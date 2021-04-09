@@ -84,7 +84,7 @@ async function execute(req, sendEmail, annotators, append) {
             originalData: textLines,
             fileInfo:{
               fileSize: size,
-              fileName: fileName
+              fileName: filePath
             }
           };
 
