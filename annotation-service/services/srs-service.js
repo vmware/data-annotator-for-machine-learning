@@ -689,11 +689,26 @@ async function deleteLabel(req){
 }
 
 async function reviewTicket(req) {
-    const conditions = {_id: Object(req.body.tid)};
-    if (req.body.reReview) {
-        update = {$set: {"reveiwInfo.reReview": true}}
-    } 
-    await mongoDb.updateByConditions(LogModel, conditions, update);
+    if (req.body.review) {
+        await flagToReview(req);
+    }else if (req.body.modify) {
+       return await modifyReview(req);
+    }else if (!req.body.modify) {
+        return await passReview(req);
+    }
+}
+
+async function flagToReview(req) {
+    
+    const conditions = {_id: {$in: _ids}};
+    const update = {$set: {"reviewInfo.review": true}};
+    await mongoDb.updateManyByConditions(LogModel, conditions, update);
+}
+async function passReview(req) {
+    
+}
+async function modifyReview(req) {
+    
 }
 
 module.exports = {

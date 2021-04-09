@@ -38,7 +38,13 @@ const srSchema = new mongoose.Schema({
         silence: { type: Boolean, default: false }
     },
     text_vector: { type: String },
-    al_test: { type: Boolean }
+    al_test: { type: Boolean },
+    reviewInfo:{
+        user: { type: String },
+        reviewed: { type: Boolean, default: false },
+        review: { type: Boolean, default: false },
+        reviewedTime: { type: String }
+    }
 }, { _id: true });
 srSchema.set("toJSON", { virtuals: true });
 srSchema.index({ projectName: 1 });
@@ -60,6 +66,12 @@ const imgSchema = new mongoose.Schema({
     flag: {
         users: [],
         silence: { type: Boolean, default: false }
+    },
+    reviewInfo:{
+        user: { type: String },
+        reviewed: { type: Boolean, default: false },
+        review: { type: Boolean, default: false },
+        reviewedTime: { type: String }
     }
 }, { _id: true });
 imgSchema.set("toJSON", { virtuals: true });
@@ -83,10 +95,10 @@ const logSchema = new mongoose.Schema({
         users: [],
         silence: { type: Boolean, default: false }
     },
-    reveiwInfo:{
+    reviewInfo:{
         user: { type: String },
         reviewed: { type: Boolean, default: false },
-        reReview: { type: Boolean, default: false },
+        review: { type: Boolean, default: false },
         reviewedTime: { type: String }
     }
 }, { _id: true });
@@ -132,6 +144,11 @@ const projectSchema = new mongoose.Schema({
         user: { type: String },
         completeCase: { type: Number, default: 0 },
         skip: { type: Number, default: 0 },
+        reviewed: { type: Number, default: 0 },
+    }],
+    reviewInfo:[{
+        user: { type: String },
+        reviewedCase: { type: Number, default: 0 },
     }],
     maxAnnotation: { type: Number },
     categoryList: { type: String },
