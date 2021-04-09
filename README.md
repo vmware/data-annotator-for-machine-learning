@@ -31,7 +31,7 @@ Core features include:
 
 ## What is included
 
-You ahve to set up and configure three components in  Data Annotator for Machine Learning before you can use the application.
+You have to set up and configure three components in  Data Annotator for Machine Learning before you can use the application.
 
 #### [___annotation-app___](./annotation-app)
 This is the front-end application built with **Angular** 8.x, **Node** 10+, **NPM** 6+
