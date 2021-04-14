@@ -43,7 +43,8 @@ const srSchema = new mongoose.Schema({
         user: { type: String },
         reviewed: { type: Boolean, default: false },
         review: { type: Boolean, default: false },
-        reviewedTime: { type: String }
+        reviewedTime: { type: String },
+        modified: { type: Boolean, default: false }
     }
 }, { _id: true });
 srSchema.set("toJSON", { virtuals: true });
@@ -71,7 +72,8 @@ const imgSchema = new mongoose.Schema({
         user: { type: String },
         reviewed: { type: Boolean, default: false },
         review: { type: Boolean, default: false },
-        reviewedTime: { type: String }
+        reviewedTime: { type: String },
+        modified: { type: Boolean, default: false }
     }
 }, { _id: true });
 imgSchema.set("toJSON", { virtuals: true });
@@ -99,7 +101,8 @@ const logSchema = new mongoose.Schema({
         user: { type: String },
         reviewed: { type: Boolean, default: false },
         review: { type: Boolean, default: false },
-        reviewedTime: { type: String }
+        reviewedTime: { type: String },
+        modified: { type: Boolean, default: false }
     }
 }, { _id: true });
 logSchema.set("toJSON", { virtuals: true });
@@ -149,6 +152,7 @@ const projectSchema = new mongoose.Schema({
     reviewInfo:[{
         user: { type: String },
         reviewedCase: { type: Number, default: 0 },
+        skip: { type: Number, default: 0 },
     }],
     maxAnnotation: { type: Number },
     categoryList: { type: String },

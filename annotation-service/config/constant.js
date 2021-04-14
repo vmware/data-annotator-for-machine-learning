@@ -81,4 +81,8 @@ module.exports = {
         TGZ: "tgz",
         CSV: "csv",
     },
+    QUERYORDER:{
+        RANDOM: "random",
+        SEQUENTIAL: "sequential",
+    },
 }

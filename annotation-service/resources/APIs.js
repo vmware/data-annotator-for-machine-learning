@@ -39,6 +39,7 @@ module.exports = {
     SRS_DELETE_LABEL: "/projects/labels",//swagger
     PROJECT_PREVIEW: "/projects/annotations", // swagger
     SRS_PROGRESS: "/projects/users/progression",//no
+    PROJECT_REVIEW_LIST: "/projects/review",
     
     //tickets
     SRS_UPDATE: "/projects/tickets",//swagger
@@ -55,6 +56,7 @@ module.exports = {
     PROJECT_FLAGS: "/projects/tickets/flags",  // swagger
     PROJECT_FLAGS_SLIENCE: "/projects/tickets/flags/silence", //swagger
     SRS_REVIEW: "/projects/tickets/review",
+    SRS_QUERY_FOR_REVIEW: "/projects/tickets/review",
 
 
     //file

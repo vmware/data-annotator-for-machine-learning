@@ -11,7 +11,7 @@ const srsDB = require('../db/srs-db');
 const projectDB = require('../db/project-db');
 const projectService = require('./project.service');
 const validator = require('../utils/validator');
-const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
+const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDER } = require("../config/constant");
 const request = require('request');
 const csv = require('csvtojson');
 const alService = require('./activelearning.service');
@@ -226,7 +226,7 @@ async function getOneSrs(req) {
             { $match: conditions},
             { $project: filterFileds }, 
             { $skip: usc.skip},
-            {$limit: limitation}
+            { $limit: limitation}
         ];
         srs = await mongoDb.aggregateBySchema(mp.model, schema);
     }
@@ -306,27 +306,97 @@ async function getSelectedSrsById(req) {
 async function getProgress(req) {
     console.log(`[ SRS ] Service getProgress query user completed case `);
     const projectInfo = await projectDB.queryProjectById(ObjectId(req.query.pid));
+    const user = req.auth.email;
+    if (req.query.review) {
+        await validator.checkAnnotator(user);
+        const userReview = projectInfo.reviewInfo.find(ri => ri.user == user);
+        
+        let userIds = [user], userComReviewed = [], userFullName="";
+        projectInfo.userCompleteCase.forEach(uc =>{userIds.push(uc.user)});
+        const conditions = {_id:{ $in: userIds } };
+        const users = await mongoDb.findByConditions(UserModel, conditions, "fullName");
+        for (const u of users) {
+            for (const uc of projectInfo.userCompleteCase) {
+                if (uc.user == u._id) {
+                    userComReviewed.push({
+                        completeCase: uc.completeCase,
+                        reviewed: uc.reviewed,
+                        user: uc.user,
+                        fullName: u.fullName
+                    });
+                }
+            }
+            if (u._id == user) {
+                userFullName = u.fullName;
+            }
+        }
+        
+        return {
+            totalCase: projectInfo.totalCase,
+            projectCompleteCase: projectInfo.projectCompleteCase,
+            completeCase: userReview? userReview.reviewedCase: 0,
+            user: user,
+            fullName: userFullName,
+            userCompleteCase: userComReviewed
+        };
+    }else{
+        console.log(`[ SRS ] Service sort out user completed case `);
+        const userComp = projectInfo.userCompleteCase.find(time => time.user == user);
+        return {
+            totalCase: projectInfo.totalCase,
+            projectCompleteCase: projectInfo.projectCompleteCase,
+            completeCase: userComp.completeCase,
+            user: user
+        };
+    }
     
-    console.log(`[ SRS ] Service sort out user completed case `);
-    const userComp = projectInfo.userCompleteCase.find(time => time.user == req.auth.email);
-    let info = {
-        totalCase: projectInfo.totalCase,
-        projectCompleteCase: projectInfo.projectCompleteCase,
-        completeCase: userComp.completeCase,
-        user: req.auth.email
-    };
-    return info;
 }
 
 async function skipOne(req){
-    console.log(`[ SRS ] Service skipOne save info to DB`);
-    const conditions = { _id: ObjectId(req.body.pid), "userCompleteCase.user": req.auth.email };
-    const update = { $inc: { "userCompleteCase.$.skip": 1 }, $pull: {"al.queriedSr": ObjectId(req.body.tid)} };
-    await projectDB.findUpdateProject(conditions, update);
+    
+    const pid = req.body.pid;
+    const tid = req.body.tid;
+    const user = req.auth.email;
+    const token = req.headers.authorization;
+    const review = req.body.review;
+    const request = { 'query': { 'pid': pid}, 'auth': {"email": user}, headers:{authorization: token} };
 
-    console.log(`[ SRS ] Service skipOne.getOneSrs`);
-    const request = { 'query': { 'pid': req.body.pid}, 'auth': {"email": req.auth.email}, headers:{authorization: req.headers.authorization} }
-    return await getOneSrs(request);
+    if (review) {
+        console.log(`[ SRS ] Service reviewer skipOne save info to DB`);
+
+        const project = await mongoDb.findById(ProjectModel, pid);
+        const findUser = await project.reviewInfo.find( info => { 
+            if (info.user == user){
+                info.skip += 1;
+                return true;
+            } 
+        });
+
+        if (!findUser) {
+            project.reviewInfo.push({
+                user: user,
+                reviewedCase: 0,
+                skip: 1
+            });
+        }
+        const conditionsP = {_id: ObjectId(pid)};
+        const update = {$set: {reviewInfo: project.reviewInfo}};
+        await mongoDb.findOneAndUpdate(ProjectModel,conditionsP, update);
+        
+        console.log(`[ SRS ] Service reviewer skipOne.getOneSrs`);
+        request.query.user = req.body.user;
+        return await queryTicketsForReview(request);
+
+    }else{
+        console.log(`[ SRS ] Service user skipOne save info to DB`);
+        const conditions = { _id: ObjectId(pid), "userCompleteCase.user": user };
+        const update = { $inc: { "userCompleteCase.$.skip": 1 }, $pull: {"al.queriedSr": ObjectId(tid)} };
+        await projectDB.findUpdateProject(conditions, update);
+    
+        console.log(`[ SRS ] Service user skipOne.getOneSrs`);
+        return await getOneSrs(request);
+    }
+    
 }
 
 async function appendSrsDataByForms(req, originalHeaders){
@@ -689,27 +759,167 @@ async function deleteLabel(req){
 }
 
 async function reviewTicket(req) {
+    //annotator have no right to access
+    const user = req.auth.email;
+    await validator.checkAnnotator(user);
+    
+    let tids = [];
+    const pid = req.body.pid;
+    req.body.tid.forEach(_id =>{tids.push(ObjectId(_id))});
+    
     if (req.body.review) {
-        await flagToReview(req);
+        await flagToReview(tids);
     }else if (req.body.modify) {
-       return await modifyReview(req);
+        await modifyReview(tids,user, req.body.problemCategory);
+        await calculateReviewdCase(pid, tids, user);
     }else if (!req.body.modify) {
-        return await passReview(req);
+        await passReview(tids,user);
+        await calculateReviewdCase(pid, tids, user);
     }
 }
 
-async function flagToReview(req) {
-    
-    const conditions = {_id: {$in: _ids}};
-    const update = {$set: {"reviewInfo.review": true}};
+async function flagToReview(tids) {
+    const conditions = {_id: {$in: tids}};
+    const update = { $set: {"reviewInfo.review": true} };
     await mongoDb.updateManyByConditions(LogModel, conditions, update);
 }
-async function passReview(req) {
-    
+async function passReview(tids,user) {
+    const conditions = {_id: {$in: tids}};
+    const update = { $set: {
+        "reviewInfo.review": false, 
+        "reviewInfo.reviewed": true,
+        "reviewInfo.modified": false,
+        "reviewInfo.user": user,
+        "reviewInfo.reviewedTime": Date.now()
+    }};
+    await mongoDb.updateManyByConditions(LogModel, conditions, update);
 }
-async function modifyReview(req) {
-    
+async function modifyReview(tids,user,problemCategory) {
+    const conditions = {_id: tids[0]};
+    const update = { $set: {
+        "reviewInfo.review": false, 
+        "reviewInfo.reviewed": true,
+        "reviewInfo.modified": true,
+        "reviewInfo.user": user,
+        "reviewInfo.reviewedTime": Date.now(),
+        "userInputs.0.problemCategory": problemCategory
+    }};
+    await mongoDb.updateByConditions(LogModel, conditions, update);
 }
+
+async function calculateReviewdCase(pid, tids, user) {
+    
+    // update project owner reviewed case
+    const project = await mongoDb.findById(ProjectModel, pid);
+
+    const findUser = await project.reviewInfo.find( info => { 
+        if (info.user == user){
+            info.reviewedCase += tids.length;
+            return true;
+        } 
+    });
+
+    if (!findUser) {
+        project.reviewInfo.push({
+            user: user,
+            reviewedCase: tids.length,
+            skip: 0
+        });
+    }
+    
+    // update annotator was reviewed case
+    const conditions = {_id: {$in: tids}};
+    const tickets = await mongoDb.findByConditions(LogModel, conditions, "userInputs");
+    for (const ticket of tickets) {
+        for (const input of ticket.userInputs) {
+            for (const uc of project.userCompleteCase) {
+                if (input.user == uc.user) {
+                    uc.reviewed += 1;
+                }
+            }
+        }
+    }
+    const conditionsP = {_id: ObjectId(pid)}
+    const update = {$set: {reviewInfo: project.reviewInfo, userCompleteCase: project.userCompleteCase}};
+    await mongoDb.findOneAndUpdate(ProjectModel,conditionsP, update)
+}
+
+async function queryTicketsForReview(req) {
+    const user = req.auth.email;
+    await validator.checkAnnotator(user);
+
+    const pid = req.query.pid;
+    const byUser = req.query.user;
+    let ticket=[];
+
+    const conditions = {_id: ObjectId(pid)};
+    const projects = await validator.checkProjectByconditions(conditions, true);
+    const projectName = projects[0].projectName;
+
+    const findUser = await projects[0].reviewInfo.find( info => info.user == user);
+    const skip = findUser? findUser.skip: 0;
+
+
+    if (byUser) {
+        //1.user defined the query rules
+        const order = req.query.order;
+        ticket = await specailQueryForReview(projectName, byUser, order, skip);
+
+    }else{
+        //2. query need reReview tickets
+        ticket = await reReviewQueryForReview(projectName);
+        //3.if the step2 is empty query from default
+        if (!ticket[0]) {
+            ticket = await defualtQueryForReview(projectName, skip);
+        }
+    }
+
+    if (!ticket[0]) {
+        if (!skip) {
+            return { CODE: 5001, "MSG": "No Data Found" };
+        }else{
+            console.log(`[ SRS ] Service remove marked skipped case`);
+            await projectService.removeSkippedCase(pid, user, true);
+
+            return await queryTicketsForReview(req);
+        }
+    }
+    return ticket;
+}
+
+
+async function specailQueryForReview(projectName, byUser, order, skip) {
+
+    const conditions = {
+        projectName: projectName, 
+        userInputsLength: 1, 
+        "userInputs.user": byUser, 
+        "reviewInfo.reviewed": {$ne: true }
+    };
+    if (order == QUERYORDER.SEQUENTIAL) {
+        const options = { skip: skip, limit: 1 };
+        return await mongoDb.findByConditions(LogModel, conditions, null, options);
+    }else{
+        const schema = [
+            { $match: conditions }, 
+            { $skip: skip },
+            { $sample: { size: 1 } }
+        ]
+        return await mongoDb.aggregateBySchema(LogModel, schema);
+    }
+
+}
+async function reReviewQueryForReview(projectName) {
+    const conditions = {projectName: projectName, userInputsLength: 1, "reviewInfo.review": true};
+    const options = { limit: 1 };
+    return await mongoDb.findByConditions(LogModel, conditions, null, options);
+}
+async function defualtQueryForReview(projectName, skip) {
+    const conditions = {projectName: projectName, userInputsLength: 1, "reviewInfo.reviewed": {$ne: true }};
+    const options = { skip: skip, limit: 1 };
+    return await mongoDb.findByConditions(LogModel, conditions, null, options);
+}
+
 
 module.exports = {
     updateSrsUserInput,
@@ -731,4 +941,12 @@ module.exports = {
     deleteSrs,
     deleteLabel,
     reviewTicket,
+    flagToReview,
+    passReview,
+    modifyReview,
+    calculateReviewdCase,
+    reReviewQueryForReview,
+    defualtQueryForReview,
+    specailQueryForReview,
+    queryTicketsForReview,
 }
