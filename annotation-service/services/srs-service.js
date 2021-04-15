@@ -307,7 +307,7 @@ async function getProgress(req) {
     console.log(`[ SRS ] Service getProgress query user completed case `);
     const projectInfo = await projectDB.queryProjectById(ObjectId(req.query.pid));
     const user = req.auth.email;
-    if (req.query.review) {
+    if (await validator.checkRequired(req.query.review)) {
         await validator.checkAnnotator(user);
         const userReview = projectInfo.reviewInfo.find(ri => ri.user == user);
         
@@ -361,7 +361,7 @@ async function skipOne(req){
     const review = req.body.review;
     const request = { 'query': { 'pid': pid}, 'auth': {"email": user}, headers:{authorization: token} };
 
-    if (review) {
+    if (await validator.checkRequired(review)) {
         console.log(`[ SRS ] Service reviewer skipOne save info to DB`);
 
         const project = await mongoDb.findById(ProjectModel, pid);
@@ -767,12 +767,12 @@ async function reviewTicket(req) {
     const pid = req.body.pid;
     req.body.tid.forEach(_id =>{tids.push(ObjectId(_id))});
     
-    if (req.body.review) {
+    if (await validator.checkRequired(req.body.review)) {
         await flagToReview(tids);
-    }else if (req.body.modify) {
+    }else if (await validator.checkRequired(req.body.modify)) {
         await modifyReview(tids,user, req.body.problemCategory);
         await calculateReviewdCase(pid, tids, user);
-    }else if (!req.body.modify) {
+    }else if (!await validator.checkRequired(req.body.modify)) {
         await passReview(tids,user);
         await calculateReviewdCase(pid, tids, user);
     }
@@ -860,7 +860,7 @@ async function queryTicketsForReview(req) {
     const skip = findUser? findUser.skip: 0;
 
 
-    if (byUser) {
+    if (await validator.checkRequired(byUser)) {
         //1.user defined the query rules
         const order = req.query.order;
         ticket = await specailQueryForReview(projectName, byUser, order, skip);

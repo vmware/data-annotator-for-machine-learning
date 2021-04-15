@@ -85,4 +85,16 @@ module.exports = {
         RANDOM: "random",
         SEQUENTIAL: "sequential",
     },
+    SPECAILCHARTOSTRING:{
+        "UNDEFINED":"undefined",
+        "NULL":"null",
+        "TRUE":"true",
+        "FALSE":"false",
+        "ZERO":"0",
+        "NAN":"NaN",
+        "STRING":"string",
+        "NUMBER":"number",
+        "OBJECT":"object",
+        "BOOLEAN":"boolean",
+    },
 }
