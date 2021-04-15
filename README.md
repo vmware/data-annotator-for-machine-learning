@@ -127,7 +127,7 @@ module.exports  = {
 
 As _annotation-service_ uses AWS S3 to save datasets and SQS to generate large datasets. Configuration of these AWS services is required.
 
-If you are new to AWS you can reference the [AWS official guideline](https://docs.aws.amazon.com/en_us/). You can also see the step by step config guidelines in the resources branch [AWS-step-by-step-config-with-chart.docx](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-chart.docx) or [AWS-step-by-step-config-with-descriptions.md](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-descriptions.md).
+If you are new to AWS you can reference the [AWS official guideline](https://docs.aws.amazon.com/en_us/). You can also use DAML step by step [AWS config guideline](https://github.com/vmware/data-annotator-for-machine-learning/wiki/AWS-Config).
 
 To enable email notifications, you need to set _enableEmail_ to true. If you use AWS SES, set _useAWSSES_ to true and provide _sender_. For personal or special accounts, set _useAWSSES_ to false and provide _sender, emailPassword, emailServerHost, emailServerPort_.
 
