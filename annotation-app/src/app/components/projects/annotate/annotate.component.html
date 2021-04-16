@@ -304,11 +304,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
 
           <div class="actions">
-
-            <button *ngIf='isMultipleLabel || projectType=="ner" || projectType=="image" || projectType=="log"'
+            <button *ngIf='(isMultipleLabel || projectType=="image" || projectType=="log")&&(projectType!=="ner")'
               class="btn btn-success submit" type="submit"
               [disabled]="multipleLabelList.length==0 && spansList.length==0 && currentBoundingData.length==0"
               title="{{ multipleLabelList.length>0 || spansList.length>0 || currentBoundingData.length>0 ? '' : 'You can only submit after annotating' }}">Submit</button>
+            <button *ngIf='projectType=="ner"' class="btn btn-success submit" type="submit">Submit</button>
             <button class="btn btn-outline" type="button" (click)="onSkipGame()">
               <clr-icon shape="ban"></clr-icon>
               Skip
