@@ -19,20 +19,20 @@ import { AvaService } from "../../services/ava.service";
 export class GameFormComponent implements OnInit {
 
   @ViewChild('dataGird', { static: true }) dataGird;
+  @ViewChild('reviewDataGird', { static: true }) reviewDataGird;
 
-  user: string;
+  user: any;
   datasets: any = [];
-
-  taskParamId: number;
+  reviewDatasets: any = [];
   datasetClrDatagridStateInterface;
-  deleteDatasetDialog: boolean = false;
-  previewDatasetDialog: boolean = false;
-  selectedDataset;
-  isBrowsing: boolean;
+  // deleteDatasetDialog: boolean = false;
+  // previewDatasetDialog: boolean = false;
+  // selectedDataset;
+  // isBrowsing: boolean;
+  // taskParamId: number;
 
   loading: boolean;
   errorMessage: string = '';
-  infoMessage: string = '';
   refresh: any;
   tableState: ClrDatagridStateInterface;
   pageSize: number;
@@ -40,20 +40,27 @@ export class GameFormComponent implements OnInit {
   totalItems: number;
   showFlagModal: boolean = false;
   flagData;
+  pageSizeReview: number;
+  pageReview: number;
+  totalItemsReview: number;
 
   constructor(
-    private route: ActivatedRoute,
+    // private route: ActivatedRoute,
     private avaService: AvaService,
     private userAuthService: UserAuthService,
+    private router: Router
+
   ) {
 
-    this.user = this.userAuthService.loggedUser().email;
+    this.user = this.userAuthService.loggedUser();
     this.page = 1;
     this.pageSize = 10;
+    this.pageReview = 1;
+    this.pageSizeReview = 10;
 
-    this.route.queryParams.subscribe(params => {
-      this.taskParamId = Number(params['id']);
-    });
+    // this.route.queryParams.subscribe(params => {
+    //   this.taskParamId = Number(params['id']);
+    // });
 
 
   }
@@ -61,9 +68,11 @@ export class GameFormComponent implements OnInit {
   ngOnInit() {
 
     this.loading = false;
-    this.isBrowsing = (this.taskParamId) ? false : true;
+    // this.isBrowsing = (this.taskParamId) ? false : true;
     this.getProjects();
-
+    if (this.user.role === 'Project Owner' || this.user.role === 'Admin') {
+      this.getReviewProjects();
+    }
   }
 
   valueChange(value: number) {
@@ -73,6 +82,32 @@ export class GameFormComponent implements OnInit {
     }, 100);
   }
 
+  reviewValueChange(value: number) {
+    this.pageSizeReview = value;
+    setTimeout(() => {
+      this.reviewDataGird.stateProvider.debouncer._change.next();
+    }, 100);
+  }
+
+
+  getReviewProjects() {
+    this.avaService.getProjectsReviewList().subscribe(res => {
+      for (let i = 0; i < res.length; i++) {
+        res[i].isExtend = true;
+        for (let j = 0; j < res[i].userCompleteCase.length; j++) {
+          if (res[i].userCompleteCase[j].completeCase > 0) {
+            res[i].disableReview = true;
+            break;
+          }
+        }
+      };
+      this.reviewDatasets = res;
+      this.totalItemsReview = res.length;
+    }, (error) => {
+      console.log(error);
+      this.errorMessage = "Failed to load the datasets";
+    })
+  }
 
   private getProjects(params?: any) {
     this.loading = true;
@@ -99,6 +134,20 @@ export class GameFormComponent implements OnInit {
   receiveCloseFlagModal(e) {
     this.showFlagModal = false;
     this.flagData = null;
+  };
+
+
+  startAnnotate(name, type, id, leftCase) {
+    this.router.navigate(['annotate'], { queryParams: { name: name, projectType: type, id: id, from: 'annotate' } })
+  };
+
+
+  more(id) {
+    for (let i = 0; i < this.reviewDatasets.length; i++) {
+      if (this.reviewDatasets[i].id == id) {
+        this.reviewDatasets[i].isExtend = !this.reviewDatasets[i].isExtend;
+      }
+    }
   }
 
 

@@ -11,7 +11,6 @@ import * as _ from "lodash";
 import { ActivatedRoute } from '@angular/router';
 import { LabelStudioService } from 'app/services/label-studio.service';
 import { EnvironmentsService } from 'app/services/environments.service';
-import { debug } from 'util';
 enableProdMode();
 
 
@@ -86,6 +85,8 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
     imagePolyLabelTemplate: any;
     imageRectLabelTemplate: any;
     imageHeader: any;
+
+    selectedLogsToModify: any = [];
 
 
 
@@ -275,7 +276,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                         let file = this.resetLogOriginalData(res[w])
                         // let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview.slice(0, 100) + '...' };
                         let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview };
-
                         res[w].originalData = flag;
                         res[w].projectType = 'log';
                     }
@@ -461,6 +461,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
             this.getALLSrs();
         }
         this.isInit = 0;
+        this.selectedLogsToModify = [];
     }
 
     refreshFlag(event) {
@@ -538,15 +539,11 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
             this.avaService.deleteTicket(param).subscribe(response => {
                 this.getALLFlag();
                 this.selected = [];
-
             }, error => {
                 console.log("delete_error:", error);
                 this.loadingFlag = false;
-
             });
         }
-
-
     };
 
 
@@ -566,12 +563,14 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
             }, error => {
                 console.log("silenceError:::", error);
             });
-
         };
-
-
-
     };
+
+
+
+    modify(data, type) {
+        console.log("data-type:::", data, type)
+    }
 
 
 
@@ -650,6 +649,11 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
     };
 
 
+    selectionLogsChanged(e) {
+        console.log(9, e)
+    }
+
+
     sortLabelForImage(categories, annotationQuestion) {
         let coloursRainbow = [
             "#00ffff",
@@ -698,8 +702,17 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
             let preview = '';
             let res;
             _.forIn(sr.originalData, function (value, key) {
-                flag.push({ index: key, text: value });
-                preview = preview + (key + '. ' + value)
+                let a = { index: key, text: value };
+                preview = preview + (key + '. ' + value);
+                // to add label to resetLogOriginalData
+                if (sr.userInputs.length > 0 && sr.userInputs[0].problemCategory) {
+                    for (let i = 0; i < sr.userInputs[0].problemCategory.length; i++) {
+                        if (key === sr.userInputs[0].problemCategory[i].line) {
+                            a['label'] = sr.userInputs[0].problemCategory[i].label;
+                        }
+                    }
+                };
+                flag.push(a);
             });
             sr.originalData = flag;
             res = { originalData: sr.originalData, preview: preview }

@@ -380,31 +380,38 @@ export class CreateNewComponent implements OnInit {
 
 
   assigneeBlur(e: any) {
-    let val = e.target.value;
-    if (this.env.config.authUrl) {
-      this.emailReg = RegExp("@vmware.com\\s*$").test(val);
-    } else {
-      this.emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val);
-      // this.emailReg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(val)
-    }
-    if (this.emailReg && this.inputAssigneeValidation == false) {
-      this.assigneeList.push(val);
-      this.dsDialogForm.get("assignee").setValue(this.assigneeList);
-      this.assignee.nativeElement.value = null;
-    }
-    if (this.assigneeList.length != 0) {
-      this.emailReg = true;
-    }
+    this.toRegEmail(e.target.value)
   }
 
   onEnter(e) {
+    this.toRegEmail(e);
+  }
+
+  toRegEmail(value) {
+    let emails = value.split(/,|;/)
     if (this.env.config.authUrl) {
-      this.emailReg = RegExp("@vmware.com\\s*$").test(e);
+      for (let i = 0; i < emails.length; i++) {
+        if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
+          this.emailReg = false;
+          return;
+        };
+        this.emailReg = true;
+      }
     } else {
-      this.emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
+      for (let i = 0; i < emails.length; i++) {
+        if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
+          this.emailReg = false;
+          return;
+        };
+        this.emailReg = true;
+      }
     }
     if (this.emailReg && this.inputAssigneeValidation == false) {
-      this.assigneeList.push(e);
+      emails.forEach(element => {
+        if (this.assigneeList.indexOf(element.trim()) == -1) {
+          this.assigneeList.push(element.trim());
+        }
+      });
       this.dsDialogForm.get("assignee").setValue(this.assigneeList);
       this.assignee.nativeElement.value = null;
     }

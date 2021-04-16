@@ -134,15 +134,33 @@ export class EditProjectComponent implements OnInit {
 
 
   onInputingProjectOwner(e) {
+    let emails = e.target.value.split(/,|;/)
     if (this.env.config.authUrl) {
-      this.emailRegForOwner = RegExp('@vmware.com\\s*$').test(e.target.value);
+      for (let i = 0; i < emails.length; i++) {
+        if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
+          this.emailRegForOwner = false;
+          return;
+        };
+        this.emailRegForOwner = true;
+      }
     } else {
-      this.emailRegForOwner = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.target.value);
+      for (let i = 0; i < emails.length; i++) {
+        if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
+          this.emailRegForOwner = false;
+          return;
+        };
+        this.emailRegForOwner = true;
+      }
     };
     if (this.emailRegForOwner && this.inputOwnerValidation == false) {
-      this.ownerList.push(e.target.value);
+      emails.forEach(element => {
+        if (this.ownerList.indexOf(element.trim()) == -1) {
+          this.ownerList.push(element.trim());
+        }
+      });
       e.target.value = '';
     };
+
   };
 
 
@@ -185,13 +203,30 @@ export class EditProjectComponent implements OnInit {
 
 
   onInputingAssignee(e) {
+    let emails = e.target.value.split(/,|;/)
     if (this.env.config.authUrl) {
-      this.emailReg = RegExp('@vmware.com\\s*$').test(e.target.value);
+      for (let i = 0; i < emails.length; i++) {
+        if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
+          this.emailReg = false;
+          return;
+        };
+        this.emailReg = true;
+      }
     } else {
-      this.emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.target.value);
+      for (let i = 0; i < emails.length; i++) {
+        if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
+          this.emailReg = false;
+          return;
+        };
+        this.emailReg = true;
+      }
     };
     if (this.emailReg && this.inputAssigneeValidation == false) {
-      this.assigneeList.push(e.target.value);
+      emails.forEach(element => {
+        if (this.assigneeList.indexOf(element.trim()) == -1) {
+          this.assigneeList.push(element.trim());
+        }
+      });
       e.target.value = '';
     };
   };

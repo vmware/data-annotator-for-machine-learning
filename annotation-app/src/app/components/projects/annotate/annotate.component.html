@@ -1,7 +1,8 @@
 <!-- Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
-<form class="clr-form" [formGroup]="questionForm" (ngSubmit)="onSubmit()" novalidate>
+<form class="clr-form" [formGroup]="questionForm" (ngSubmit)="onSubmit()" (keydown.enter)="$event.preventDefault()"
+  novalidate>
   <div formGroupName="questionGroup">
     <section class="clr-form-block">
 
@@ -34,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="line"></div>
           </div>
 
-          <h3>Project Info</h3>
+          <h3 style="margin-top: -0.6rem">Project Info</h3>
           <div class="clr-form-group left-project-info clr-row">
             <label for="name" class="label-leftBoard">Name: </label>&nbsp;&nbsp;
             <div style="word-break: break-all;">{{selectParam}}</div>
@@ -53,29 +54,89 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="line"></div>
           </div>
 
-          <h3>Progress</h3>
+          <h3>{{projectType==='log' && startFrom==='review'?'Review':'Annotation'}} Progress</h3>
           <div class="clr-form-group left-project-info clr-row">
             <label for="name" class="label-leftBoard">This session:</label>&nbsp;&nbsp;
             <div>{{progressInfo?.totalCase}}</div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
-            <label for="owner" class="label-leftBoard">Annotations: </label>&nbsp;&nbsp;
+            <label for="owner"
+              class="label-leftBoard">{{projectType==='log' && startFrom==='review'?'Reviewed':'Annotations'}} :
+            </label>&nbsp;&nbsp;
             <div>{{progressInfo?.completeCase}}</div>
           </div>
           <div class="clr-form-group left-project-info clr-row ">
             <clr-progress-bar clrValue='{{percentage}}' clrLabeled clrDisplayval='{{percentage}}%'>
             </clr-progress-bar>
-            <div class="line"></div>
           </div>
+          <div *ngIf="projectType==='log' && startFrom==='review'">
+            <div class="clr-form-group left-project-info clr-row">
+              <label for="name" class="label-leftBoard">Reviewee:</label>&nbsp;&nbsp;
+              <div class="clr-select-wrapper" style="width: 70%;">
+                <select style="width: 95%;" (change)="onSelectingReviewee($event)" formControlName="reviewee">
+                  <option value=""></option>
+                  <option *ngFor="let item of progressInfo.userCompleteCase" value="{{item.user}}">{{item.fullName}}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="clr-form-group left-project-info clr-row">
+              <label for="assignmentLogic" class="label-leftBoard" style="margin-right: 1.3rem;">Review Assignment
+                Logic:
+              </label>
+              <div class="clr-row">
+                <label class="md-check format clr-row" style="margin-left: 0.5rem;">
+                  <clr-radio-wrapper>
+                    <input type="radio" clrRadio class="clr-radio" value="random" id="random" name="reviewOrder"
+                      [(ngModel)]="reviewOrder" [ngModelOptions]="{standalone: true}" checked
+                      (change)="changeReviewOrder($event)" />
+                    <label for="random">Random</label>
+                  </clr-radio-wrapper>
+                  &nbsp;&nbsp;
+                  <clr-radio-wrapper>
+                    <input type="radio" clrRadio class="clr-radio" value="sequential" id="sequential" name="reviewOrder"
+                      [(ngModel)]="reviewOrder" [ngModelOptions]="{standalone: true}"
+                      (change)="changeReviewOrder($event)" />
+                    <label for="sequential">Sequential</label>
+                  </clr-radio-wrapper>
+                </label>
+              </div>
+            </div>
+            <div class="clr-form-group left-project-info">
+              <div class="clr-row" style="margin-bottom: 0.3rem;" *ngFor="let item of progressInfo.userCompleteCase">
+                <label class="clr-col-3 keepAllWord" title="{{item.fullName}}">{{item.fullName}}</label>
+                <!-- <div class="progress-group"> -->
+                <!-- <div class="progress-static">
+                    <div class="progress-meter" data-value="{{item.annotatedTickets / progressInfo.totalCase * 100}}"
+                      data-displayval="{{item.annotatedTickets / progressInfo.totalCase * 100}}%"></div>
+                    <span>{{item.annotatedTickets / progressInfo.totalCase * 100}}%</span>
+                  </div>
+                  <div class="progress-static success">
+                    <div class="progress-meter" data-value="{{item.reviewedTickets/item.annotatedTickets*100}}"
+                      data-displayval="{{item.reviewedTickets}}/{{item.annotatedTickets}}"></div>
+                    <span>{{item.reviewedTickets}}/{{item.annotatedTickets}}</span>
+                  </div> -->
+                <div class="clr-col">
+                  <clr-progress-bar clrValue='{{item.completeCase / progressInfo.totalCase * 100}}' clrLabeled
+                    clrDisplayval='{{item.completeCase / progressInfo.totalCase * 100 | mathRoundPipe}}%'>
+                  </clr-progress-bar>
+                  <clr-progress-bar clrValue='{{item.reviewed/progressInfo.totalCase*100}}' clrSuccess clrLabeled
+                    clrDisplayval='{{item.reviewed}}/{{item.completeCase}}'>
+                  </clr-progress-bar>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="line"></div>
 
-          <h3>History</h3>
+          <h3 style="margin-top: 0.2rem">History</h3>
 
           <ng-container>
             <div class="historyBox">
 
               <div *ngFor="let item of annotationHistory; let i = index" style="position: relative;">
-                <div class="clr-form-group left-project-info clr-row historyPosition"
-                  (click)="historyBack(i,item.srId)">
+                <div [ngClass]="{ 'selectedHistory':item.srId===sr._id}"
+                  class="clr-form-group left-project-info clr-row historyPosition" (click)="historyBack(i,item.srId)">
                   <div *ngFor="let flag of item.historyDescription;" class="historyText">
                     <div *ngIf="projectType=='ner' || projectType=='log'" title="{{flag.text}}">{{flag.text}}</div>
                     <div *ngIf="projectType=='image'" title="{{flag.fileName}}">{{flag.fileName}}</div>
@@ -128,9 +189,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="clr-input-wrapper  ">
                   <input #filters autocomplete="off" type="text"
                     [placeholder]="filterType=='keyword'?'Type keyword to filter, for example, abc .':'Type custom regex rule to filter, for example, /[A-Z]/' "
-                    class="clr-input filterText" formControlName="filterText"
-                    (keyup.enter)="onEnterFilter(filters.value)" (blur)="blurFilter($event)"
-                    (ngModelChange)='updateFilterText($event)'>
+                    class="clr-input filterText" formControlName="filterText" (keyup.enter)="onEnterFilter(filters)"
+                    (blur)="blurFilter($event)" (ngModelChange)='updateFilterText($event)'>
                 </div>
                 <span *ngIf='regexErr' class="clr-subtext regexErr">Wrong format!</span>
               </div>
@@ -145,9 +205,9 @@ SPDX-License-Identifier: Apache-2.0 -->
 
           </div>
           <div class="questionContainer">
-            <div *ngIf='projectType!=="ner" && projectType!=="image" && projectType!=="log"'>
+            <div *ngIf='projectType!=="ner" && projectType!=="image" && projectType!=="log"' class="textBox">
               <div *ngFor="let ticket of sr.originalData;">
-                <p class="question-paragraph">
+                <p class="question-paragraph" style="word-break: break-word">
                   <span class="ticketColumn">{{ticket.key}}</span>
                   <span>:&nbsp;&nbsp;</span>
                   <span>{{ticket.value}}</span></p><br>
@@ -212,8 +272,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="questionContainer"
             *ngIf="!isShowDropDown && !isNumeric && !isMultipleLabel  && (projectType == 'text' || projectType=='tabular')">
             <div>
-              <button *ngFor="let label of categories; let i = index" class="btn labels label label{{ i }} submit"
-                style="margin: 0.3rem 0.2rem;" type="submit" (click)="onSelectingCategory(label, i)" [ngClass]="
+              <button *ngFor="let label of categories; let i = index"
+                class="btn labels label label{{ i }} submit cleanColor" style="margin: 0.3rem 0.2rem;" type="submit"
+                (click)="onSelectingCategory(label, i)" [ngClass]="
                   active == i && i == 0
                     ? 'clickActive0'
                     : active == i && i == 1
@@ -239,10 +300,11 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <!-- dropdown labels -->
-          <div class="clr-form-group category clr-row" *ngIf="isShowDropDown" (change)="onSelectingDropDown($event)">
-            <label for="category" class="label-tooltip">Labels: </label>
-            <div class="clr-select-wrapper">
-              <select formControlName="category" (click)="dropDownSubmit()">
+          <div class="clr-form-group category clr-row" *ngIf="isShowDropDown && !isMultipleLabel"
+            (change)="onSelectingDropDown($event)">
+            <label for="category" class="label-tooltip">Labels : </label>
+            <div class="clr-select-wrapper" style="min-width: 20%">
+              <select formControlName="category" (click)="dropDownSubmit()" style="min-width: 90%">
                 <option *ngFor="let category of categories" [value]="category">
                   {{ category }}</option>
               </select>
@@ -290,7 +352,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="questionContainer" *ngIf="projectType == 'log'">
             <div>
               <button *ngFor="let item of logCategories; let i = index"
-                class="logCategories logCategories{{i}} btn labels label logEntityLabel"
+                class="logCategories logCategories{{i}} btn labels label logEntityLabel" type="button"
                 [ngClass]="{'logEntitySelected': i==selectedEntityID, 'logEntityLabel': i!==selectedEntityID}"
                 [ngStyle]="{'border-left-color':item.color,'background-color':i==selectedEntityID?item.color:'','border-left-width':'6px','box-shadow':'1px 1px 3px 0px '+ '#9A9A9A'}"
                 (click)="onSelectingEntity($event,label, i)">{{ item.label }}</button>
@@ -304,11 +366,36 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
 
           <div class="actions">
-
+            <div *ngIf="actionError" class="alert alert-info alert-md" role="alert"
+              style="margin-top: 1rem; margin-bottom: -1rem;">
+              <div class="alert-items">
+                <div class="alert-item static">
+                  <div class="alert-icon-wrapper">
+                    <clr-icon class="alert-icon" shape="info-circle"></clr-icon>
+                  </div>
+                  <div class="alert-text">{{actionError}}</div>
+                </div>
+              </div>
+              <button type="button" class="close" aria-label="Close" style="margin-top: 0px !important">
+                <clr-icon aria-hidden="true" shape="close" (click)="actionError=null"></clr-icon>
+              </button>
+            </div>
+            <!-- <clr-alert *ngIf="error">
+              <clr-alert-item>
+                <span class="alert-text">
+                  {{error}}
+                </span>
+              </clr-alert-item>
+            </clr-alert> -->
             <button *ngIf='isMultipleLabel || projectType=="ner" || projectType=="image" || projectType=="log"'
               class="btn btn-success submit" type="submit"
               [disabled]="multipleLabelList.length==0 && spansList.length==0 && currentBoundingData.length==0"
               title="{{ multipleLabelList.length>0 || spansList.length>0 || currentBoundingData.length>0 ? '' : 'You can only submit after annotating' }}">Submit</button>
+            <button *ngIf="projectType==='log' && startFrom==='review'" class="btn btn-outline" type="button"
+              (click)="pass()">
+              <clr-icon shape="check"></clr-icon>
+              Pass
+            </button>
             <button class="btn btn-outline" type="button" (click)="onSkipGame()">
               <clr-icon shape="ban"></clr-icon>
               Skip
@@ -374,6 +461,23 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
 </clr-modal>
 
+<!-- <clr-modal [(clrModalOpen)]="isHistoryBackDialog" [clrModalClosable]="false">
+  <h3 class="modal-title">Are you sure you want back to history?</h3>
+  <div class="modal-body">
+    <p *ngIf="labelChoose!=''||questionForm.get('questionGroup.category').value">
+      You already provided a new label
+    </p>
+  </div>
+  <div class="modal-footer modal-footer-annotate">
+    <button class="btn btn-outline" type="button" (click)="isHistoryBackDialog = false">
+      No
+    </button>
+    <button type="button" class="btn btn-primary" (click)="onSubmit()" title="submit the change and get a new ticket">
+      Yes
+    </button>
+  </div>
+</clr-modal> -->
+
 <clr-modal [(clrModalOpen)]="error" [clrModalClosable]="false">
 
   <div class="modal-body">
@@ -394,8 +498,5 @@ SPDX-License-Identifier: Apache-2.0 -->
       [queryParams]="{ hash: 'max' }" routerLinkActive="active">
       OK
     </button>
-    <!-- <button *ngIf="maxAnnotationError" class="btn btn-primary" type="button" (click)="clickNext()">
-      NEXT
-    </button> -->
   </div>
 </clr-modal>

@@ -129,9 +129,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <clr-tab>
                     <button clrTabLink id="link1">Annotation</button>
                     <clr-tab-content id="content1" *clrIfActive="labelType=='numericLabel'">
+                        <div style="margin-top: 0.5rem;">
+                            <div class="btn-group btn-primary btn-icon">
+                                <button class="btn" (click)="modify(data,'multiple')">
+                                    <clr-icon shape="note" title="To modify the annotated tickets"
+                                        style="margin-right: 0.3rem;"></clr-icon>Modify
+                                </button>
+                            </div>
+                        </div>
                         <div style=" margin-bottom: 2rem" class="annotationDataTable">
                             <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)"
-                                *ngIf=!firstLoadTable>
+                                *ngIf=!firstLoadTable [(clrDgSelected)]="selectedLogsToModify"
+                                (clrDgSelectedChange)="selectionLogsChanged($event)">
                                 <clr-dg-column class="ellipsis-datagrid" style="max-width:90px">Index</clr-dg-column>
                                 <clr-dg-column *ngFor="let header of previewSrsHeader" class="ellipsis-datagrid"
                                     style="max-width:650px;">
@@ -141,6 +150,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 </clr-dg-column>
 
                                 <clr-dg-column class="ellipsis-datagrid" style="min-width:250px">Annotator
+                                </clr-dg-column>
+                                <clr-dg-column *ngIf="projectType==='log'" class="ellipsis-datagrid"
+                                    style="min-width:250px">Action
                                 </clr-dg-column>
                                 <ng-container>
                                     <clr-dg-row *ngFor="let dataset of previewSrs; let i=index" [clrDgItem]="dataset">
@@ -182,7 +194,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                                     clrSignpostTrigger>
                                                                     show details
                                                                 </button>
-                                                                <!-- <clr-icon shape="details" clrSignpostTrigger></clr-icon> -->
                                                                 <clr-signpost-content [clrPosition]="'right-bottom'"
                                                                     *clrIfOpen>
                                                                     <p><strong>Txt FileContent:</strong></p>
@@ -190,7 +201,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                                         *ngFor="let log of dataset.originalData.fileContent">
                                                                         <span
                                                                             style="margin-right: 0.5rem">{{log.index}}</span>
-                                                                        <span>{{log.text}}</span>
+                                                                        <span *ngIf="log.label"
+                                                                            class="labelInFilecontent">{{log.label}}</span>
+                                                                        <span
+                                                                            [ngClass]="{'textInFilecontent': log.label}">{{log.text}}</span>
                                                                     </p>
                                                                 </clr-signpost-content>
                                                             </clr-signpost>
@@ -212,14 +226,19 @@ SPDX-License-Identifier: Apache-2.0 -->
                                             class="ellipsis-datagrid previewHeight" style="min-width:250px">
                                             <div *ngFor="let a of dataset.userInputs">{{a.user}}</div>
                                         </clr-dg-cell>
+                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
+                                            class="ellipsis-datagrid previewHeight" style="min-width:250px">
+                                            <div class="clr-row">
+                                                <button class="btn btn-sm"
+                                                    (click)="modify(dataset,'single')">Modify</button>
+                                            </div>
+                                        </clr-dg-cell>
                                         <ng-container ngProjectAs="clr-dg-row-detail"
                                             *ngIf="dataset.userInputsLength>0 ||dataset?.originalInputs>0">
                                             <!-- <clr-dg-row-detail *clrIfExpanded style="margin-bottom: 1rem;"> -->
                                             <clr-dg-row-detail (clrIfExpanded)='true' style="margin-bottom: 1rem;">
+                                                <!-- <clr-dg-row-detail [clrIfExpanded]='true' style="margin-bottom: 1rem;"> -->
                                                 <clr-datagrid>
-                                                    <!-- <clr-dg-column *ngFor="let item of previewHeadDatas">
-                                                        {{item}}
-                                                    </clr-dg-column> -->
                                                     <clr-dg-column>
                                                         Annotator
                                                     </clr-dg-column>
