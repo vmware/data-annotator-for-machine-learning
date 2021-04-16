@@ -599,20 +599,47 @@ async function sampleSr(req){
 }
 
 async function flagSr(req){
-    console.log(`[ SRS ] Service flagSr`, req.body.tid);
-    const queryPro = { _id: ObjectId(req.body.pid)};
-    const mp = await getModelProject(queryPro);
-
-    const conditions = {_id: ObjectId(req.body.tid)};
-    const update = { $push: { 'flag.users': req.auth.email } };
-    await mongoDb.findOneAndUpdate(mp.model, conditions, update);
+    const tid = req.body.tid;
+    const pid = req.body.pid;
+    const user = req.auth.email;
+    const token = req.headers.authorization;
+    const review = req.body.review;
     
-    console.log(`[ SRS ] Service pull the sr from queried sr list`);
-    const updatePro = { $pull: {"al.queriedSr": ObjectId(req.body.tid)} };
-    await mongoDb.findOneAndUpdate(ProjectModel, queryPro, updatePro);
+    const request = { 'query': { 'pid': pid}, 'auth': {"email": user}, headers:{authorization: token} };
 
-    const request = { 'query': { 'pid': req.body.pid}, 'auth': {"email": req.auth.email}, headers:{authorization: req.headers.authorization} };
-    return await getOneSrs(request);
+    if (await validator.checkRequired(review)) {
+        await validator.checkAnnotator(user);
+        
+        const byUser = req.body.user;
+        const order = req.body.order;
+        
+        request.query.user = byUser;
+        request.query.order = order;
+
+        const conditions = {_id: ObjectId(tid)};
+        const update = { $push: { 'flag.users': user } };
+        await mongoDb.findOneAndUpdate(LogModel, conditions, update);
+
+        return await queryTicketsForReview(request);
+
+    }else{
+
+        console.log(`[ SRS ] Service flagSr`, tid);
+        const queryPro = { _id: ObjectId(pid)};
+        const mp = await getModelProject(queryPro);
+
+        const conditions = {_id: ObjectId(tid)};
+        const update = { $push: { 'flag.users': user } };
+        await mongoDb.findOneAndUpdate(mp.model, conditions, update);
+        
+        console.log(`[ SRS ] Service pull the sr from queried sr list`);
+        const updatePro = { $pull: {"al.queriedSr": ObjectId(tid)} };
+        await mongoDb.findOneAndUpdate(ProjectModel, queryPro, updatePro);
+    
+        return await getOneSrs(request);
+    }
+
+    
 }
 
 async function unflagSr(req){
@@ -863,14 +890,14 @@ async function queryTicketsForReview(req) {
     if (await validator.checkRequired(byUser)) {
         //1.user defined the query rules
         const order = req.query.order;
-        ticket = await specailQueryForReview(projectName, byUser, order, skip);
+        ticket = await specailQueryForReview(projectName, byUser, order, skip, user);
 
     }else{
         //2. query need reReview tickets
-        ticket = await reReviewQueryForReview(projectName);
+        ticket = await reReviewQueryForReview(projectName, user);
         //3.if the step2 is empty query from default
         if (!ticket[0]) {
-            ticket = await defualtQueryForReview(projectName, skip);
+            ticket = await defualtQueryForReview(projectName, skip, user);
         }
     }
 
@@ -888,13 +915,14 @@ async function queryTicketsForReview(req) {
 }
 
 
-async function specailQueryForReview(projectName, byUser, order, skip) {
+async function specailQueryForReview(projectName, byUser, order, skip, user) {
 
     const conditions = {
         projectName: projectName, 
         userInputsLength: 1, 
         "userInputs.user": byUser, 
-        "reviewInfo.reviewed": {$ne: true }
+        "reviewInfo.reviewed": {$ne: true },
+        "flag.users": { $ne: user }
     };
     if (order == QUERYORDER.SEQUENTIAL) {
         const options = { skip: skip, limit: 1 };
@@ -909,13 +937,13 @@ async function specailQueryForReview(projectName, byUser, order, skip) {
     }
 
 }
-async function reReviewQueryForReview(projectName) {
-    const conditions = {projectName: projectName, userInputsLength: 1, "reviewInfo.review": true};
+async function reReviewQueryForReview(projectName, user) {
+    const conditions = {projectName: projectName, userInputsLength: 1, "reviewInfo.review": true, "flag.users": { $ne: user } };
     const options = { limit: 1 };
     return await mongoDb.findByConditions(LogModel, conditions, null, options);
 }
-async function defualtQueryForReview(projectName, skip) {
-    const conditions = {projectName: projectName, userInputsLength: 1, "reviewInfo.reviewed": {$ne: true }};
+async function defualtQueryForReview(projectName, skip, user) {
+    const conditions = {projectName: projectName, userInputsLength: 1, "reviewInfo.reviewed": {$ne: true }, "flag.users": { $ne: user } };
     const options = { skip: skip, limit: 1 };
     return await mongoDb.findByConditions(LogModel, conditions, null, options);
 }

@@ -90,7 +90,7 @@ async function checkAnnotator(uid){
             return true;
         }
     }else if (paramType == SPECAILCHARTOSTRING.OBJECT) {
-        if (Object.keys(parameters)[0]) {
+        if (Object.keys(parameters).length) {
             return true;
         }
     }else if (paramType == SPECAILCHARTOSTRING.STRING) {
