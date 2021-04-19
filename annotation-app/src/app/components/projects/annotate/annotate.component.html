@@ -147,6 +147,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
                 <clr-icon *ngIf="item.type==='submit'" class="historyIcon" shape="success-standard"></clr-icon>
                 <clr-icon *ngIf="item.type==='skip'" class="historyIcon" shape="ban"></clr-icon>
+                <clr-icon *ngIf="item.type==='pass'" class="historyIcon" shape="checkbox-list"></clr-icon>
               </div>
             </div>
           </ng-container>
@@ -387,15 +388,19 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </span>
               </clr-alert-item>
             </clr-alert> -->
-            <button *ngIf='isMultipleLabel || projectType=="ner" || projectType=="image" || projectType=="log"'
+            <button
+              *ngIf='((isMultipleLabel&&projectType!=="log") || projectType=="image" || (projectType=="log"&& startFrom!=="review"))&&(projectType!=="ner")'
               class="btn btn-success submit" type="submit"
               [disabled]="multipleLabelList.length==0 && spansList.length==0 && currentBoundingData.length==0"
               title="{{ multipleLabelList.length>0 || spansList.length>0 || currentBoundingData.length>0 ? '' : 'You can only submit after annotating' }}">Submit</button>
+            <button *ngIf='projectType=="ner" || (projectType=="log"&&startFrom=="review")'
+              class="btn btn-success submit" type="submit">Submit</button>
             <button *ngIf="projectType==='log' && startFrom==='review'" class="btn btn-outline" type="button"
               (click)="pass()">
-              <clr-icon shape="check"></clr-icon>
+              <clr-icon shape="checkbox-list"></clr-icon>
               Pass
             </button>
+
             <button class="btn btn-outline" type="button" (click)="onSkipGame()">
               <clr-icon shape="ban"></clr-icon>
               Skip

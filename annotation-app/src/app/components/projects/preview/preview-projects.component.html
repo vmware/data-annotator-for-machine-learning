@@ -230,6 +230,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                             class="ellipsis-datagrid previewHeight" style="min-width:250px">
                                             <div class="clr-row">
                                                 <button class="btn btn-sm"
+                                                    [disabled]="dataset.userInputsLength<=0||dataset.reviewInfo.review"
                                                     (click)="modify(dataset,'single')">Modify</button>
                                             </div>
                                         </clr-dg-cell>

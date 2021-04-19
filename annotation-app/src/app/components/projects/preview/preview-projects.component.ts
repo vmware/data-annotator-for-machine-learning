@@ -278,7 +278,9 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                         let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview };
                         res[w].originalData = flag;
                         res[w].projectType = 'log';
+                        res[w].selected = false;
                     }
+                    console.log(999, res)
                 } else {
                     if (flag.length > 0) {
                         let pre = [];
@@ -570,6 +572,27 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
 
     modify(data, type) {
         console.log("data-type:::", data, type)
+        let param = {
+            pid: this.projectId,
+            review: true,
+            tid: []
+        }
+        if (type === 'single') {
+            param.tid = [data._id]
+        } else {
+            let aa = [];
+            this.selectedLogsToModify.forEach(element => {
+                aa.push(element._id)
+            });
+            param.tid = aa;
+        }
+        this.avaService.passTicket(param).subscribe(res => {
+            console.log('modify-in-preview:::', res)
+            this.getALLSrsParam.pageNumber = this.page;
+            this.getALLSrsParam.limit = this.pageSize;
+            this.getALLSrs();
+        })
+
     }
 
 
@@ -650,7 +673,17 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
 
 
     selectionLogsChanged(e) {
-        console.log(9, e)
+        let aa = [];
+        e.forEach((element, index) => {
+            if (!element.reviewInfo.review && element.userInputsLength > 0) {
+                aa.push(element);
+            }
+        });
+
+        console.log(8, e)
+        console.log(9, this.selectedLogsToModify)
+        this.selectedLogsToModify = aa;
+
     }
 
 

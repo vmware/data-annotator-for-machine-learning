@@ -292,7 +292,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   }
 
 
-  getOneReview() {
+  getOneReview(from?) {
     this.loading = true;
     this.avaService.getOneReview(this.projectId, this.questionForm.get('questionGroup.reviewee').value, this.reviewOrder).subscribe(res => {
       this.loading = false;
@@ -300,7 +300,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         this.error = this.sr.MSG;
         return;
       } else {
-        this.submitAndHistory([this.sr]);
+        this.submitAndHistory([this.sr], from);
         this.sr = res;
         this.sr = this.resetLogSrData(this.sr);
         console.log('getOneReview:::sr', this.sr);
@@ -331,19 +331,24 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   }
 
 
+  pass() {
+    this.isSkipOrBack('pass')
+  }
+
+
   dropDownSubmit() {
     this.questionForm.get('questionGroup.category').reset();
   }
 
 
-  onSubmit(): void {
+  onSubmit(from?): void {
     this.clearCheckbox();
     this.silenceStatus = false;
     this.error = null;
     this.actionError = null;
     this.maxAnnotationError = null;
     if (this.startFrom === 'review') {
-      this.submitReview();
+      this.submitReview(from);
 
     } else {
       let srUserInput: SrUserInput = {
@@ -418,17 +423,21 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   }
 
 
-  submitReview() {
+  submitReview(from?) {
     this.loading = true;
-    this.modifyChangeHistory();
+    this.modifyChangeHistory(null, from);
     let param = {
       pid: this.projectId,
-      tid: [this.sr._id],
-      modify: true,
-      problemCategory: this.spansList
+      tid: [this.sr._id]
     };
+    if (from === 'pass') {
+      param['modify'] = false
+    } else {
+      param['modify'] = true;
+      param['problemCategory'] = this.spansList
+    }
     this.avaService.passTicket(param).subscribe(res => {
-      this.getOneReview();
+      this.getOneReview(from);
     })
   }
 
@@ -448,7 +457,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   }
 
 
-  modifyChangeHistory(originalLabel?) {
+  modifyChangeHistory(originalLabel?, from?) {
     for (let i = 0; i < this.annotationHistory.length; i++) {
       if (this.isShowDropDown && !this.isMultipleLabel) {
         // case dropdown
@@ -507,24 +516,34 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
               };
               let aa = this.annotationHistory[i].category.sort(this.sortBy(this.projectType === 'ner' ? "start" : (this.projectType === 'log' ? "line" : "sort"), "ascending"));
               let bb = isCategory.sort(this.sortBy(this.projectType === 'ner' ? "start" : (this.projectType === 'log' ? "line" : "sort"), "ascending"));
-              for (let i = 0; i < aa.length; i++) {
+
+              for (let n = 0; n < aa.length; n++) {
                 let aaString;
                 let bbString;
                 if (this.projectType === 'ner') {
-                  aaString = aa[i].text + aa[i].ids + aa[i].label;
-                  bbString = bb[i].text + bb[i].ids + bb[i].label;
+                  aaString = aa[n].text + aa[n].ids + aa[n].label;
+                  bbString = bb[n].text + bb[n].ids + bb[n].label;
                 } else if (this.projectType === 'log') {
-                  aaString = aa[i].line + aa[i].label + aa[i].freeText;
-                  bbString = bb[i].line + bb[i].label + bb[i].freeText;
+                  aaString = aa[n].line + aa[n].label + aa[n].freeText;
+                  bbString = bb[n].line + bb[n].label + bb[n].freeText;
                 } else if (this.projectType === 'image') {
-                  aaString = aa[i].valueInfo;
-                  bbString = bb[i].valueInfo;
+                  aaString = aa[n].valueInfo;
+                  bbString = bb[n].valueInfo;
                 }
                 if (aaString !== bbString) {
                   this.annotationHistory.splice(i, 1);
                   this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
                   return;
                 };
+                // all userInputs are same no any changes there
+                if (this.projectType === 'log' && n >= aa.length - 1) {
+                  console.log(this.annotationHistory[i])
+                  console.log(9, n, aa.length)
+                  if (from === 'pass') {
+                    this.annotationHistory.splice(i, 1);
+                    this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+                  }
+                }
               };
             } else {
               this.annotationHistory.splice(i, 1);
@@ -565,14 +584,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   }
 
 
-  submitAndHistory(newSr) {
+  submitAndHistory(newSr, from?) {
     //add to the history
     if (this.maxAnnotationError == null && this.sr._id !== 0) {
 
       let OldSr = JSON.parse(JSON.stringify(this.sr));
       let addSubmit = {
         srId: OldSr._id,
-        type: 'submit',
+        type: from === 'pass' ? 'pass' : 'submit',
         category: this.categoryFunc(),
         rewrite: '',
         solution: '',
@@ -582,15 +601,21 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       if (this.projectType == 'ner' || this.projectType == 'image') {
         addSubmit['historyDescription'] = [OldSr.originalData]
       } else if (this.projectType == 'log') {
-        addSubmit.category.forEach(element => {
-          for (let i = 0; i < OldSr.originalData.length; i++) {
-            if (element.line == OldSr.originalData[i].line) {
-              element.text = OldSr.originalData[i].text;
-              break;
+        if (addSubmit.category.length > 0) {
+          addSubmit.category.forEach(element => {
+            for (let i = 0; i < OldSr.originalData.length; i++) {
+              if (element.line == OldSr.originalData[i].line) {
+                element.text = OldSr.originalData[i].text;
+                break;
+              }
             }
-          }
-        });
-        addSubmit['historyDescription'] = addSubmit.category;
+          });
+          addSubmit['historyDescription'] = addSubmit.category;
+        } else {
+          addSubmit['historyDescription'] = [{ text: OldSr.originalData[0].text }]
+        }
+
+
       } else {
         addSubmit['historyDescription'] = OldSr.originalData.slice(0, 10);
       };
@@ -905,7 +930,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   }
 
 
-  isActionErr(isCategory, id, from?) {
+  isActionErr(isCategory, id?, from?) {
+    debugger
     if (!this.sr.userInputsLength && !this.sr.userInputs) {
       this.actionError = "You already provided a new label, please do submit first.";
       return;
@@ -924,6 +950,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       };
       if (from == 'skip') {
         this.skipAndFetchNewQuestion()
+      } else if (from == 'pass') {
+        this.onSubmit(from)
       } else {
         if (!this.actionError) {
           this.clearCheckbox();
@@ -1072,6 +1100,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
           this.getSrById(param, index, 'history');
         } else if (type === 'skip') {
           this.skipAndFetchNewQuestion();
+        } else if (type === 'pass') {
+          this.onSubmit(type);
         }
       } else {
         this.actionError = "You already provided a new label, please do submit first.";
@@ -1197,6 +1227,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       tid: this.sr._id,
       pid: this.projectId
     };
+    if (this.startFrom === 'review') {
+      param['review'] = true;
+      param['order'] = this.reviewOrder;
+      this.questionForm.get('questionGroup.reviewee').value ? param['user'] = this.questionForm.get('questionGroup.reviewee').value : null
+
+    }
     let aa = this.avaService.toFlagTicket(param).subscribe(response => {
       this.sr = response;
       if (this.sr.MSG) {
@@ -2274,19 +2310,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   }
 
 
-  pass() {
-    console.log('pass:::', this.sr)
-    let param = {
-      pid: this.projectId,
-      tid: [this.sr._id],
-      modify: false
-    };
-    this.avaService.passTicket(param).subscribe(res => {
-      this.getOneReview()
-    }, error => {
-      this.loading = false;
-    })
-  }
+
 
 
 
