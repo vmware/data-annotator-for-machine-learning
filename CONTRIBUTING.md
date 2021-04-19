@@ -1,5 +1,5 @@
 # Contributing to Data Annotator for Machine Learning
-The Data Annotator for Machine Learning (DAML) project team welcomes contributions from the community.   Together, we can grow DAML and make it a better framework.
+The Data Annotator for Machine Learning (DAML) project team welcomes contributions from the community. Together, we can grow DAML and make it a better framework.
 
 ## Contribution Guidelines
 
