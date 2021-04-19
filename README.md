@@ -1,19 +1,22 @@
 <div align='center'> <h1>Data Annotator for Machine Learning</h1> </div>
 
-Data Annotator for Machine Learning is an application that helps machine learning teams facilitate the creation and management of annotations.
+Data Annotator for Machine Learning is an application that helps machine learning teams facilitating the creation and management of annotations.
 
-Specifically, the core features are:
-- Supported annotation tasks:
-  - text classification
-  - named entity recognition
-  - tabular classification and regresion
-  - image recognition with bounding boxes and polygons
-- Active learning with uncertainly sampling to distribute unlabeled data
-- Project tracking with real time data aggregation
-- User management panel with RBAC
+Core features include:
+- Support for common annotation tasks:
+  - Text classification
+  - Named entity recognition
+  - Tabular classification and regresion
+  - Images recognition with bounding boxes and polygons
+  - Log labeling 
+- Active learning with uncertainly sampling to query unlabeled data
+- Project tracking with real time data aggregation and review process
+- User management panel with role-based access control
 - Data management
-  - export to a common ML task format in CSV
-  - data sharing through a community datasets tab
+  - Import common data formats
+  - Export in ML friendly formats
+  - Data sharing through community datasets
+- Swagger API for programmatic labeling, connect to data pipelines and more
 
 ## Table of Contents
 
@@ -22,29 +25,24 @@ Specifically, the core features are:
   - [Installation](#installation)
   - [Configuration](#configuration)
   - [Run at Local](#run-at-local)
+- [Contributing](#contributing)
 - [Bugs and feature requests](#bugs-and-feature-requests)
 - [Copyright and license](#copyright-and-license)
 <br>
 
 ## What is included
 
-Data Annotator for Machine Learning project containes three components, and you need to set up all components before you can start to use the application.
+You have to set up and configure three components in  Data Annotator for Machine Learning before you can use the application.
 
 #### [___annotation-app___](./annotation-app)
-This is the front-end application built with Angular 8.x that with
-- **AngularCLI** 8.3.17
-- **Node** 10+
-- **NPM** 6+
+This is the front-end application built with **Angular** 8.x, **Node** 10+, **NPM** 6+
 
 #### [___annotation-service___](./annotation-service)
-This is the back-end service that provides all the api for annotation-app.  It is built with Node.js and and MongoDB
-- [__Node__](https://nodejs.org/en/) 10+
-- [__mongodb__](https://www.mongodb.com/download-center/community) 3.5+
-- [__express__](https://www.npmjs.com/package/express) 4.17.1
+This is the back-end service that provides all the api for annotation-app built with [__Node__](https://nodejs.org/en/) 10+, [__mongodb__](https://www.mongodb.com/download-center/community) 3.5+, [__express__](https://www.npmjs.com/package/express) 4.17.1
+
 #### [___active-learning-service___](./active-learning-service)
-This is the back-end service that provides all active learning api.  It is built with Python and Django service in addition to Modal
-- [__Python__](https://www.python.org/) 3.6+
-- [__Django__](https://www.djangoproject.com/) 3.0.7
+This is the back-end service that provides all active learning api.  It is built with [__Python__](https://www.python.org/) 3.6+ and [__Django__](https://www.djangoproject.com/) 3.0.7 service in addition to Modal
+
 ## Quick start
 
 Instructions to set up the three service components:
@@ -75,27 +73,24 @@ $ python -m spacy download en_core_web_md
 
 ##### Configuring annotation-app environments
 
-The annotation-app/src/environments/ folder contains the base configuration file, environment.ts and environment.prod.ts. 
-<br>
-In order to run the annotation-app **in local**, you **need to configure the environment.ts to setup the required variables**. 
+You need to configure the following required variables in environment.ts file before run the annotation-app in local.
 	   
-For example,	
 
 ```javascript
 export const environment: Env = {
 
-  // This is required
+  // This section is required
   production: false,
-  annotationService: 'http://localhost:3000', // Service API host.
-  serviceTitle: 'Data-annotation', // The UI name of annotation-app.
-  provider: 'Data-annotation', // This will be saved in user's detailed info to show where does this user come from and supported by which service.
-  USER_KEY: 'data-annotation-user', // Once the user logged in successfully this user's detailed info will be saved in localstorage with this key name.
-  redirectUrl: '/home', // If there has no logged user or token occured err then will redirect to home page.
+  annotationService: 'http://localhost:3000', // Annotation service url
+  serviceTitle: 'Data-annotation', // UI name of annotation-app.
+  provider: 'Data-annotation', // Authentcation provider
+  USER_KEY: 'data-annotation-user', // user key name in localstorage
+  redirectUrl: '/home', // redirect URL after logout or token is expired
 
-  // This is optional
-  videoSrc: null, // Allow to set the demo video which will show in home page, or set null to show nothing.
-  googleTrackId: null, // Allow to set google track ID or set null.
-  enableSendEmail: true //  Allow set true/false. Set true will trigger the send-email functionality after project created, assigned and generated. While set false will disable the send-email functionality.
+  // This section is optional
+  videoSrc: null, // demo video link in home page, or set null to show nothing
+  googleTrackId: null, // google track ID
+  enableSendEmail: true // Set to true to enable email notification for project creation or annotator assignment
 }
 ```
 
@@ -120,7 +115,7 @@ module.exports  = {
   sqsRoleArn: process.env.SQS_ARN || null,
   sqsUrl: process.env.SQS_URL || null,
 
-  //annotation-service url
+  //annotation-app url
   WebClientUrl: process.env.WEBCLIENT_URL || 'http://localhost:4200',
   //active-learning-service url
   loopALApiUrl: process.env.LOOP_AL_URL || "http://localhost:8000/api",
@@ -130,18 +125,17 @@ module.exports  = {
 };
 ```
 
-AS _annotation-service_ uses AWS S3 to save datasets and SQS to generate large datasets. Configuration of these AWS services is mandatory.
+As _annotation-service_ uses AWS S3 to save datasets and SQS to generate large datasets. Configuration of these AWS services is required.
 
-If you are new to AWS you can reference the [AWS official guideline](https://docs.aws.amazon.com/en_us/) You also can see the step by step config guidelines we provide in the resources branch [AWS-step-by-step-config-with-chart.docx](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-chart.docx) or [AWS-step-by-step-config-with-descriptions.md](https://github.com/vmware/data-annotator-for-machine-learning/blob/resources/AWS/AWS-step-by-step-config-with-descriptions.md)
+If you are new to AWS you can reference the [AWS official guideline](https://docs.aws.amazon.com/en_us/). You can also use DAML step by step [AWS config guideline](https://github.com/vmware/data-annotator-for-machine-learning/wiki/AWS-Config).
 
-If you want to use the email function. we support AWS SES and your personal or special accounts. You must set _enableEmail_ to true. If use AWS SES you need set _useAWSSES_ to true and provide _sender_. For personal or special accounts, leave _useAWSSES_ as false and provide _sender, emailPassword, emailServerHost, emailServerPort_.
+To enable email notifications, you need to set _enableEmail_ to true. If you use AWS SES, set _useAWSSES_ to true and provide _sender_. For personal or special accounts, set _useAWSSES_ to false and provide _sender, emailPassword, emailServerHost, emailServerPort_.
 
-You can copy app-os.js file and change the name to app-xxx.js, deploy to different environment. such as local,sandbox,uat,prod.  you can change the value at [annotation-service/config/config.js](./annotation-service/config/config.js) just need change the "os" to "xxx", but we recommend configuring this in your server environment since it's easy to build and deploy to any environment.
+You can copy app-os.js file and change the name to app-xxx.js and deploy to different environments, such as local,sandbox,uat and prod.  You can change the sysEnv at [annotation-service/config/config.js](./annotation-service/config/config.js) or get the value from server environment (_process.env.xxx_) for easy build and deployment.
 
 ```javascript
 const sysEnv = process.env.SYS_ENV || "os"
 ```
-All these config values can also be set in the server environment variable, _process.env.xxx_ is the way to get the value from the enviroment. if you set the values both in the environment and config files, it will get the value from the environment first instead of the config files.
 
 ------------
 #### active-learning-service
@@ -161,15 +155,14 @@ app = {
     "S3_ROLE_ARN": os.getenv("S3_ROLE_ARN", None),
 }
 ```
-Use the same mongodb, AWS configs from [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) and replace the None and default value.
+Use the same mongodb, AWS configs from [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) and replace the default values.
 
 
-you can copy app_os.py file and change the name to app_xxx.py, deploy to different environment, such as local, sandbox, uat, prod. Just need change "os" to "xxx", in [active-learning-service/config/config.py](./active-learning-service/config/config.py) file. but we recommend setting the value SYS_ENV='xxx' in your server environment since it's easy to build and deploy to any environment.
+You can copy app_os.py file and change the name to app_xxx.py and deploy to different environments, such as local, sandbox, uat, prod. You can change the default env at  in [active-learning-service/config/config.py](./active-learning-service/config/config.py) file or set the SYS_ENV='xxx' in your server environment for easy build and deployment.
 
 ```python
 env = os.getenv('SYS_ENV', 'os')
 ```
-All these config values can also be set in the server environment variable, os.getenv("xxx") is the way to get the value from the enviroment. if you set the values both in the environment and config files, it will get the value from the environment first instead of the config files.
 
 ------------
 ### Run at Local
@@ -182,12 +175,16 @@ $ npm start
 
 # go into annotation-service's directory
 $ cd annotation-service
-$ npm run start
+$ npm start
 
 # go into active-learning-service's directory
 $ cd active-learning-service
-$ python manage.py runserver 127.0.0.1:8000
+$ python manage.py runserver localhost:8000
 ```
+
+## Contributing
+
+The Data Annotator for Machine Learning (DAML) project team welcomes contributions from the community. For more detailed information, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Bugs and feature requests
 
