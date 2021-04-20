@@ -137,10 +137,20 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 </button>
                             </div>
                         </div>
-                        <div style=" margin-bottom: 2rem" class="annotationDataTable">
-                            <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)"
+                        <div style="margin-bottom: 2rem" class="annotationDataTable">
+                            <!-- <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)"
                                 *ngIf=!firstLoadTable [(clrDgSelected)]="selectedLogsToModify"
-                                (clrDgSelectedChange)="selectionLogsChanged($event)">
+                                (clrDgSelectedChange)="selectionLogsChanged($event)"> -->
+                            <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)"
+                                *ngIf=!firstLoadTable>
+                                <clr-dg-column *ngIf="projectType==='log'" class="ellipsis-datagrid"
+                                    style="max-width:90px">
+                                    <clr-checkbox-wrapper>
+                                        <input type="checkbox" clrCheckbox name="option" class="selectAll"
+                                            (change)="selectionLogsChanged($event, 'multiple')"
+                                            [(ngModel)]="selectAllStatus" />
+                                    </clr-checkbox-wrapper>
+                                </clr-dg-column>
                                 <clr-dg-column class="ellipsis-datagrid" style="max-width:90px">Index</clr-dg-column>
                                 <clr-dg-column *ngFor="let header of previewSrsHeader" class="ellipsis-datagrid"
                                     style="max-width:650px;">
@@ -155,8 +165,19 @@ SPDX-License-Identifier: Apache-2.0 -->
                                     style="min-width:250px">Action
                                 </clr-dg-column>
                                 <ng-container>
+                                    <!-- <clr-dg-row *ngFor="let dataset of previewSrs; let i=index" [clrDgItem]="dataset"
+                                        [(clrDgSelected)]="dataset.selected"> -->
                                     <clr-dg-row *ngFor="let dataset of previewSrs; let i=index" [clrDgItem]="dataset">
-
+                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
+                                            class="ellipsis-datagrid previewHeight" style="max-width:90px">
+                                            <clr-checkbox-wrapper>
+                                                <input type="checkbox" clrCheckbox name="options"
+                                                    [(ngModel)]="dataset.selected"
+                                                    (ngModelChange)="selectionLogsChanged($event,'single',dataset)"
+                                                    [disabled]="dataset.userInputsLength<=0||dataset.reviewInfo.review"
+                                                    [ngClass]="{'disabled-checkbox':dataset.userInputsLength<=0||dataset.reviewInfo.review}" />
+                                            </clr-checkbox-wrapper>
+                                        </clr-dg-cell>
                                         <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width:90px">
                                             {{i+1}}
                                         </clr-dg-cell>
@@ -241,10 +262,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                 <!-- <clr-dg-row-detail [clrIfExpanded]='true' style="margin-bottom: 1rem;"> -->
                                                 <clr-datagrid>
                                                     <clr-dg-column>
-                                                        Annotator
+                                                        {{dataset.reviewInfo.reviewedTime?"Reviewer":"Annotator"}}
                                                     </clr-dg-column>
                                                     <clr-dg-column>
-                                                        Annotate Time
+                                                        {{dataset.reviewInfo.reviewedTime?"Review":"Annotate"}} Time
                                                     </clr-dg-column>
                                                     <clr-dg-column class="studioCell"
                                                         *ngIf='projectType=="image" || projectType=="ner"|| projectType=="log"'>
@@ -256,10 +277,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                         Re-Label
                                                     </clr-dg-column>
                                                     <clr-dg-row *ngFor="let flag of dataset.userInputs; let j=index">
-                                                        <clr-dg-cell style="word-break:break-all;">{{flag.user}}
+                                                        <clr-dg-cell style="word-break:break-all;">
+                                                            {{dataset.reviewInfo.user?dataset.reviewInfo.user:flag.user}}
                                                         </clr-dg-cell>
                                                         <clr-dg-cell>
-                                                            {{flag.timestamp | date:'yyyy-MM-dd HH:mm:ss'}}
+                                                            {{dataset.reviewInfo.reviewedTime?(dataset.reviewInfo.reviewedTime | date:'yyyy-MM-dd HH:mm:ss'):(flag.timestamp | date:'yyyy-MM-dd HH:mm:ss')}}
                                                         </clr-dg-cell>
                                                         <clr-dg-cell
                                                             *ngIf='projectType!="ner" && projectType!="image"&& projectType!="log"'
