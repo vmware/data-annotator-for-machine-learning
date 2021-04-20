@@ -797,11 +797,11 @@ async function reviewTicket(req) {
     if (await validator.checkRequired(req.body.review)) {
         await flagToReview(tids);
     }else if (await validator.checkRequired(req.body.modify)) {
+        await calculateReviewdCase(pid, tids, user);
         await modifyReview(tids,user, req.body.problemCategory);
-        await calculateReviewdCase(pid, tids, user);
     }else if (!await validator.checkRequired(req.body.modify)) {
-        await passReview(tids,user);
         await calculateReviewdCase(pid, tids, user);
+        await passReview(tids,user);  
     }
 }
 
@@ -836,28 +836,21 @@ async function modifyReview(tids,user,problemCategory) {
 
 async function calculateReviewdCase(pid, tids, user) {
     
-    // update project owner reviewed case
+    let ticketsLegth = tids.length;
     const project = await mongoDb.findById(ProjectModel, pid);
 
-    const findUser = await project.reviewInfo.find( info => { 
-        if (info.user == user){
-            info.reviewedCase += tids.length;
-            return true;
-        } 
-    });
-
-    if (!findUser) {
-        project.reviewInfo.push({
-            user: user,
-            reviewedCase: tids.length,
-            skip: 0
-        });
-    }
+    const conditions = {_id: {$in: tids}};
+    const columns = {userInputs: 1, reviewInfo: 1};
+    const tickets = await mongoDb.findByConditions(LogModel, conditions, columns);
     
     // update annotator was reviewed case
-    const conditions = {_id: {$in: tids}};
-    const tickets = await mongoDb.findByConditions(LogModel, conditions, "userInputs");
     for (const ticket of tickets) {
+        if (ticket.reviewInfo.user == user) {
+            ticketsLegth -= 1;
+        }
+        if (ticket.reviewInfo.reviewed) {
+            continue;
+        }
         for (const input of ticket.userInputs) {
             for (const uc of project.userCompleteCase) {
                 if (input.user == uc.user) {
@@ -866,6 +859,22 @@ async function calculateReviewdCase(pid, tids, user) {
             }
         }
     }
+    // update project owner reviewed case
+    const findUser = await project.reviewInfo.find( info => { 
+        if (info.user == user){
+            info.reviewedCase += ticketsLegth;
+            return true;
+        } 
+    });
+
+    if (!findUser) {
+        project.reviewInfo.push({
+            user: user,
+            reviewedCase: ticketsLegth,
+            skip: 0
+        });
+    }
+    
     const conditionsP = {_id: ObjectId(pid)}
     const update = {$set: {reviewInfo: project.reviewInfo, userCompleteCase: project.userCompleteCase}};
     await mongoDb.findOneAndUpdate(ProjectModel,conditionsP, update)
