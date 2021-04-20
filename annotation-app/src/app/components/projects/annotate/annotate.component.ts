@@ -297,7 +297,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     this.avaService.getOneReview(this.projectId, this.questionForm.get('questionGroup.reviewee').value, this.reviewOrder).subscribe(res => {
       this.loading = false;
       if (res && res.MSG) {
-        this.error = this.sr.MSG;
+        this.error = res.MSG;
         return;
       } else {
         this.submitAndHistory([this.sr], from);

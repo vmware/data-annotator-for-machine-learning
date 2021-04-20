@@ -25,7 +25,7 @@ declare function modelChart(options: any): any;
     styleUrls: ['./preview-projects.component.scss']
 })
 export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestroy {
-    @ViewChild('dataGird', { static: true }) dataGird;
+    @ViewChild('dataGird', { static: false }) dataGird;
     @ViewChild('userChart', { static: false }) userChart: ElementRef;
     @ViewChild('categoryChart', { static: false }) categoryChart: ElementRef;
     @ViewChild('modelChart', { static: false }) modelChart: ElementRef;
@@ -87,7 +87,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
     imageHeader: any;
 
     selectedLogsToModify: any = [];
-
+    selectAllStatus: boolean;
 
 
     constructor(
@@ -144,6 +144,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
         this.innerTable = this.projectType == 'ner' ? ['Entity', 'Text', 'Start_idx', 'End_idx'] : ['LineNumber', 'LineContent', 'Label', 'FreeText']
         this.getALLSrs();
         this.getALLFlag();
+
 
     }
 
@@ -281,6 +282,10 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                         res[w].selected = false;
                     }
                     console.log(999, res)
+                    setTimeout(() => {
+                        console.log(88, this.dataGird)
+                    }, 1000);
+
                 } else {
                     if (flag.length > 0) {
                         let pre = [];
@@ -391,6 +396,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                     this.toRenewPreviewSrs();
                 }
                 this.firstLoadTable = false;
+
             }
         }, (error: any) => {
             this.loading = false;
@@ -450,7 +456,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
             this.previewFlagContent = res;
             this.firstLoadFlag = false;
             this.loadingFlag = false;
-
         }, (error: any) => {
             this.loadingFlag = false;
         });
@@ -464,6 +469,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
         }
         this.isInit = 0;
         this.selectedLogsToModify = [];
+        this.selectAllStatus = false;
     }
 
     refreshFlag(event) {
@@ -580,18 +586,27 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
         if (type === 'single') {
             param.tid = [data._id]
         } else {
-            let aa = [];
-            this.selectedLogsToModify.forEach(element => {
-                aa.push(element._id)
-            });
-            param.tid = aa;
+            // let aa = [];
+
+            // this.selectedLogsToModify.forEach(element => {
+            //     if (!element.reviewInfo.review && element.userInputsLength > 0) {
+            //         aa.push(element._id)
+            //     }
+
+            // });
+            param.tid = this.selectedLogsToModify;
+        };
+        if (param.tid.length > 0) {
+            this.avaService.passTicket(param).subscribe(res => {
+                console.log('modify-in-preview:::', res)
+                this.getALLSrsParam.pageNumber = this.page;
+                this.getALLSrsParam.limit = this.pageSize;
+                this.getALLSrs();
+                this.selectedLogsToModify = [];
+                this.selectAllStatus = false;
+            })
         }
-        this.avaService.passTicket(param).subscribe(res => {
-            console.log('modify-in-preview:::', res)
-            this.getALLSrsParam.pageNumber = this.page;
-            this.getALLSrsParam.limit = this.pageSize;
-            this.getALLSrs();
-        })
+
 
     }
 
@@ -672,18 +687,53 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
     };
 
 
-    selectionLogsChanged(e) {
-        let aa = [];
-        e.forEach((element, index) => {
-            if (!element.reviewInfo.review && element.userInputsLength > 0) {
-                aa.push(element);
+    selectionLogsChanged(e, from, data) {
+        // e.forEach((element, index) => {
+        //     for (let i = 0; i < this.previewSrs.length; i++) {
+        //         if (element._id == this.previewSrs[i]._id && (element.reviewInfo.review || element.userInputsLength <= 0)) {
+        //             this.previewSrs[i].selected = false;
+        //             break;
+        //         }
+        //     }
+        // });
+        // console.log(9, this.selectedLogsToModify)
+        console.log(8, e, from, data)
+        if (from == 'multiple') {
+            if (e.target.checked) {
+                this.selectedLogsToModify = [];
+                this.previewSrs.forEach(element => {
+                    if (!(element.reviewInfo.review || element.userInputsLength <= 0)) {
+                        element.selected = true;
+                        this.selectedLogsToModify.push(element._id)
+                    }
+                });
+            } else {
+                this.previewSrs.forEach(element => {
+                    element.selected = false;
+                    this.selectedLogsToModify = [];
+                });
             }
-        });
+        } else {
+            if (e) {
+                if (this.selectedLogsToModify.indexOf(data._id) == -1) {
+                    this.selectedLogsToModify.push(data._id)
+                }
+            } else {
+                if (this.selectedLogsToModify.indexOf(data._id) > -1) {
+                    this.selectedLogsToModify.splice(this.selectedLogsToModify.indexOf(data._id), 1)
+                }
+            };
+            let a = 0;
+            this.previewSrs.forEach(element => {
+                if (!(element.reviewInfo.review || element.userInputsLength <= 0)) {
+                    a++;
+                }
+            });
+            this.selectedLogsToModify.length == a ? this.selectAllStatus = true : this.selectAllStatus = false
+        }
 
-        console.log(8, e)
-        console.log(9, this.selectedLogsToModify)
-        this.selectedLogsToModify = aa;
 
+        console.log(666, this.selectedLogsToModify)
     }
 
 

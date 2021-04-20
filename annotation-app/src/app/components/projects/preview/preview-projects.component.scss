@@ -170,3 +170,16 @@ SPDX-License-Identifier: Apache-2.0
 .signpost-content {
   max-width: 20rem !important;
 }
+
+.selectAll {
+  height: 0.666667rem;
+  width: 0.666667rem;
+  border: 1px solid #999;
+  border-radius: 0.125rem;
+}
+
+::ng-deep input.disabled-checkbox + label::before {
+  background-color: #eee;
+  cursor: not-allowed;
+  opacity: 0.3;
+}
