@@ -386,8 +386,9 @@ async function getReviewList(req) {
     const user = req.auth.email;
     await validator.checkAnnotator(user);
     
-    const conditions = { creator: { $regex: user }, projectType: PROJECTTYPE.LOG };  
-    return await mongoDb.findByConditions(ProjectModel, conditions);
+    const conditions = { creator: { $regex: user }, projectType: PROJECTTYPE.LOG };
+    const options = { sort: { updatedDate: -1 } };
+    return await mongoDb.findByConditions(ProjectModel, conditions, null, options);
 }
 
 module.exports = {
