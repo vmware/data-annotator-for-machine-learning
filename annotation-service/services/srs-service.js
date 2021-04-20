@@ -876,7 +876,7 @@ async function calculateReviewdCase(pid, tids, user) {
     }
     
     const conditionsP = {_id: ObjectId(pid)}
-    const update = {$set: {reviewInfo: project.reviewInfo, userCompleteCase: project.userCompleteCase}};
+    const update = {$set: {reviewInfo: project.reviewInfo, userCompleteCase: project.userCompleteCase, updatedDate: Date.now()}};
     await mongoDb.findOneAndUpdate(ProjectModel,conditionsP, update)
 }
 
