@@ -443,7 +443,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <button class="btn btn-outline" type="button" (click)="isEndingGameDialog = false">
       No
     </button>
-    <button type="button" class="btn btn-primary" [routerLink]="['/game']" routerLinkActive="active">
+    <button type="button" class="btn btn-primary" (click)="outOfPage()" routerLinkActive="active">
       Yes
     </button>
   </div>
@@ -499,8 +499,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
   <div class="modal-footer modal-footer-annotate">
-    <button *ngIf="error" class="btn btn-primary" type="button" (click)="error = null" [routerLink]="['/game']"
-      [queryParams]="{ hash: 'max' }" routerLinkActive="active">
+    <button *ngIf="error" class="btn btn-primary" type="button" (click)="outOfPage()" routerLinkActive="active">
       OK
     </button>
   </div>

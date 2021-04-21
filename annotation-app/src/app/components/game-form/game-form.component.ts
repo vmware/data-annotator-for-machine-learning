@@ -25,12 +25,6 @@ export class GameFormComponent implements OnInit {
   datasets: any = [];
   reviewDatasets: any = [];
   datasetClrDatagridStateInterface;
-  // deleteDatasetDialog: boolean = false;
-  // previewDatasetDialog: boolean = false;
-  // selectedDataset;
-  // isBrowsing: boolean;
-  // taskParamId: number;
-
   loading: boolean;
   errorMessage: string = '';
   refresh: any;
@@ -43,54 +37,62 @@ export class GameFormComponent implements OnInit {
   pageSizeReview: number;
   pageReview: number;
   totalItemsReview: number;
+  isShowReviewTab: boolean = false;
 
   constructor(
-    // private route: ActivatedRoute,
     private avaService: AvaService,
     private userAuthService: UserAuthService,
-    private router: Router
-
+    private router: Router,
+    private route: ActivatedRoute,
   ) {
-
     this.user = this.userAuthService.loggedUser();
     this.page = 1;
     this.pageSize = 10;
     this.pageReview = 1;
     this.pageSizeReview = 10;
-
-    // this.route.queryParams.subscribe(params => {
-    //   this.taskParamId = Number(params['id']);
-    // });
-
-
+    this.route.queryParams.subscribe(data => {
+      data.outfrom == 'review' ? this.isShowReviewTab = true : this.isShowReviewTab = false;
+    });
   }
 
   ngOnInit() {
 
     this.loading = false;
-    // this.isBrowsing = (this.taskParamId) ? false : true;
-    this.getProjects();
-    if (this.user.role === 'Project Owner' || this.user.role === 'Admin') {
+    if (!this.isShowReviewTab) {
+      this.getProjects();
+    }
+    if ((this.user.role === 'Project Owner' || this.user.role === 'Admin') && this.isShowReviewTab == true) {
       this.getReviewProjects();
     }
   }
 
+
+  clickAnnotate() {
+    this.getProjects()
+  }
+
+  clickReview() {
+    this.getReviewProjects();
+  }
+
+
   valueChange(value: number) {
     this.pageSize = value;
-    setTimeout(() => {
-      this.dataGird.stateProvider.debouncer._change.next();
-    }, 100);
+    // setTimeout(() => {
+    //   this.dataGird.stateProvider.debouncer._change.next();
+    // }, 100);
   }
 
   reviewValueChange(value: number) {
     this.pageSizeReview = value;
-    setTimeout(() => {
-      this.reviewDataGird.stateProvider.debouncer._change.next();
-    }, 100);
+    // setTimeout(() => {
+    //   this.reviewDataGird.stateProvider.debouncer._change.next();
+    // }, 100);
   }
 
 
   getReviewProjects() {
+    this.loading = true;
     this.avaService.getProjectsReviewList().subscribe(res => {
       for (let i = 0; i < res.length; i++) {
         res[i].isExtend = true;
@@ -103,9 +105,11 @@ export class GameFormComponent implements OnInit {
       };
       this.reviewDatasets = res;
       this.totalItemsReview = res.length;
+      this.loading = false;
     }, (error) => {
       console.log(error);
       this.errorMessage = "Failed to load the datasets";
+      this.loading = false;
     })
   }
 
@@ -115,7 +119,6 @@ export class GameFormComponent implements OnInit {
       this.loading = false;
       this.datasets = res;
       this.totalItems = res.length;
-      // this.filterTasks(res.result, params);
     }, (error: any) => {
       console.log(error);
       this.errorMessage = "Failed to load the datasets";

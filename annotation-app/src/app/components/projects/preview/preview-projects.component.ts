@@ -281,11 +281,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                         res[w].projectType = 'log';
                         res[w].selected = false;
                     }
-                    console.log(999, res)
-                    setTimeout(() => {
-                        console.log(88, this.dataGird)
-                    }, 1000);
-
                 } else {
                     if (flag.length > 0) {
                         let pre = [];
@@ -577,7 +572,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
 
 
     modify(data, type) {
-        console.log("data-type:::", data, type)
         let param = {
             pid: this.projectId,
             review: true,
@@ -688,16 +682,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
 
 
     selectionLogsChanged(e, from, data) {
-        // e.forEach((element, index) => {
-        //     for (let i = 0; i < this.previewSrs.length; i++) {
-        //         if (element._id == this.previewSrs[i]._id && (element.reviewInfo.review || element.userInputsLength <= 0)) {
-        //             this.previewSrs[i].selected = false;
-        //             break;
-        //         }
-        //     }
-        // });
-        // console.log(9, this.selectedLogsToModify)
-        console.log(8, e, from, data)
+
         if (from == 'multiple') {
             if (e.target.checked) {
                 this.selectedLogsToModify = [];
@@ -731,9 +716,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
             });
             this.selectedLogsToModify.length == a ? this.selectAllStatus = true : this.selectAllStatus = false
         }
-
-
-        console.log(666, this.selectedLogsToModify)
     }
 
 

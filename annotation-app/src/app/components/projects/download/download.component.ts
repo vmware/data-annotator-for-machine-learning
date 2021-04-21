@@ -48,7 +48,7 @@ export class DownloadComponent implements OnInit {
     this.format = 'standard';
     // setTimeout(() => {
     //   console.log("DownloadComponent:::", this.msg)
-    // }, 500);
+    // }, 3000);
   }
 
 

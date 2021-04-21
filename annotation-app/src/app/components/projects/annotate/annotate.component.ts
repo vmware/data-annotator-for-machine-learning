@@ -5,7 +5,6 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Component, OnInit, ElementRef, Renderer2, ViewChild, HostListener, AfterViewInit } from '@angular/core';
 import { AvaService } from '../../../services/ava.service';
-import { Observable } from 'rxjs';
 import 'rxjs/Rx'
 import { SR, SrUserInput } from '../../../model/sr';
 import { FormGroup, FormBuilder } from '@angular/forms';
@@ -15,7 +14,6 @@ import { LabelStudioService } from 'app/services/label-studio.service';
 import { GetElementService } from 'app/services/common/dom.service';
 import { ToolService } from 'app/services/common/tool.service';
 import { UserAuthService } from 'app/services/user-auth.service';
-import { typeWithParameters } from '@angular/compiler/src/render3/util';
 
 
 @Component({
@@ -29,8 +27,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
 
   @ViewChild('numericInput', { static: false }) numericInput;
-
-
   user: any;
   questionForm: FormGroup;
   sr: SR;
@@ -39,12 +35,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   error: string;
   actionError: string;
   maxAnnotationError: string;
-  // isSubmittingDialog: boolean;
   isEndingGameDialog: boolean;
   isSkippingGameDialog: boolean;
-  // isHistoryBackDialog: boolean;
-  // isOptOutDialog: boolean;
-  // pointsEarnedOnSubmission: number;
   projects: any;
   selectParam: string;
   projectInfo: any;
@@ -119,7 +111,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   ];
   startFrom: string;
   annotationPrevious: any = [];
-  // reviewee: string;
   reviewOrder: string = 'random';
 
 
@@ -151,13 +142,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     this.isEndingGameDialog = false;
     this.isSkippingGameDialog = false;
     this.silenceStatus = false;
-
     this.isNumeric = false;
     this.clrErrorTip = false;
-    // this.pointsEarnedOnSubmission = 0;
-    // this.isSubmittingDialog = false;
-    // this.isOptOutDialog = false;
-
     this.active = -1;
     this.labelChoose = null;
     this.idName = '';
@@ -303,7 +289,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         this.submitAndHistory([this.sr], from);
         this.sr = res;
         this.sr = this.resetLogSrData(this.sr);
-        console.log('getOneReview:::sr', this.sr);
         if (this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
         };
@@ -537,8 +522,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
                 };
                 // all userInputs are same no any changes there
                 if (this.projectType === 'log' && n >= aa.length - 1) {
-                  console.log(this.annotationHistory[i])
-                  console.log(9, n, aa.length)
                   if (from === 'pass') {
                     this.annotationHistory.splice(i, 1);
                     this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
@@ -614,14 +597,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         } else {
           addSubmit['historyDescription'] = [{ text: OldSr.originalData[0].text }]
         }
-
-
       } else {
         addSubmit['historyDescription'] = OldSr.originalData.slice(0, 10);
       };
-      if (!this.srInHistory()) { this.annotationHistory.unshift(addSubmit); }
-      this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory))
-      console.log("getOne.annotationHistory:::", this.annotationHistory, this.annotationPrevious);
+      if (from !== 'order') {
+        if (!this.srInHistory()) { this.annotationHistory.unshift(addSubmit); }
+        this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory))
+      }
+
+      // console.log("getOne.annotationHistory:::", this.annotationHistory, this.annotationPrevious);
     }
     this.sr = newSr;
     this.currentBoundingData = [];
@@ -672,9 +656,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   //   });
   // }
 
+
+
   onEndGame(): void {
     if (this.isFormPrestine()) {
-      this.router.navigate(['/game']);
+      this.router.navigate(['/game'], { queryParams: { outfrom: this.startFrom == 'review' ? 'review' : 'annotate', hash: 'max' } })
     } else {
       this.isEndingGameDialog = true;
     }
@@ -931,7 +917,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
 
   isActionErr(isCategory, id?, from?) {
-    debugger
     if (!this.sr.userInputsLength && !this.sr.userInputs) {
       this.actionError = "You already provided a new label, please do submit first.";
       return;
@@ -1019,7 +1004,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
   isSkipOrBack(type, id?, index?) {
     let isCategory = this.categoryFunc();
-    console.log(66, this.sr)
     let flag1;
     let flag2;
     if (this.projectType == 'ner' || this.projectType == 'log') {
@@ -1119,7 +1103,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       this.silenceStatus = false;
       this.clrErrorTip = false;
       let isCategory = this.categoryFunc();
-      console.log('isCategory:::', isCategory, this.annotationHistory)
       if (isCategory.length > 0) {
         if (this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
           this.isActionErr(isCategory, this.annotationPrevious[0].srId);
@@ -1191,7 +1174,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
             pid: this.projectId
           }
           this.getSrById(param, 0, 'previous');
-          console.log(this.annotationHistory, this.annotationPrevious)
         }
 
       } else {
@@ -1266,7 +1248,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
         this.toFilterLog(this.filterList);
-
+        if (this.sr.userInputsLength > 0) {
+          this.categoryBackFunc();
+          this.sortLabelForColor(this.categories);
+          this.getProgress();
+        };
       };
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
@@ -1389,22 +1375,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
   categoryBackFunc(index?, from?) {
     if (this.isShowDropDown && !this.isMultipleLabel && !this.isNumeric) {
-      // case dropdown
-      // if (this.sr.userInputs.length > 0) {
-      //   for (let i = 0; i < this.sr.userInputs.length; i++) {
-      //     if (this.sr.userInputs[i].user == this.user.email) {
-      //       this.questionForm.get('questionGroup.category').setValue(this.sr.userInputs[i].problemCategory);
-      //       break;
-      //     }
-      //   }
-      // } else if (this.sr.userInputs.length == 0) {
-      //   this.questionForm.get('questionGroup.category').reset();
-      // }
       this.questionForm.get('questionGroup.category').setValue(this.getProblemCategory());
     } else if (!this.isNumeric && !this.isShowDropDown && !this.isMultipleLabel && this.projectType != 'ner' && this.projectType !== 'image') {
       //to storage the ticket label
-      // this.labelChoose = this.annotationHistory[index].category[0];
-      // let labelIndex = this.annotationHistory[index].activeClass;
       this.el.nativeElement.querySelectorAll('.cleanColor').forEach(element => {
         this.renderer2.setStyle(element, 'background-color', 'unset');
       });
@@ -1435,7 +1408,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     } else if (this.isNumeric) {
       this.labelChoose = this.getProblemCategory();
     } else if (!this.isNumeric && this.isMultipleLabel && this.projectType != 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
-      // this.multipleLabelList = this.annotationHistory[index].category;
       this.el.nativeElement.querySelectorAll('.labelCheckbox').forEach(element => {
         this.renderer2.setStyle(element, 'background-color', 'unset');
         this.renderer2.setStyle(element, 'border-color', '#eee');
@@ -1584,7 +1556,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       part.ids = IDs.join('-');
       this.spansList.push(part);
       this.actionError = null;
-      console.log('spansList:::0', this.spansList)
+      // console.log('spansList:::', this.spansList)
     }
   }
 
@@ -1710,10 +1682,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
           });
         };
         if (this.projectType == 'image') {
-          // this.historyTask = [{ "result": this.annotationHistory[index].images }];
-          console.log(78, this.annotationHistory, this.annotationPrevious)
           this.historyTask = [{ "result": from == "previous" ? this.annotationPrevious[index].images : this.annotationHistory[index].images }];
-
           setTimeout(() => {
             let option = {
               dom: 'label-studio',
@@ -2022,7 +1991,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
       }
     }
-    console.log('this.spansList:::', this.spansList)
+    // console.log('this.spansList:::', this.spansList)
     this.actionError = null;
     this.toCheckSpanslist(this.spansList);
   }
@@ -2196,14 +2165,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       this.filterList.push({ filterType: this.filterType, filterText: e.value });
       this.questionForm.get('questionGroup.filterText').reset();
       this.toFilterLog(this.filterList);
-
-
     }
   }
 
 
   blurFilter(e) {
-    console.log(7776, this.selectedEntityID)
 
     if (e.target.value) {
       if (this.filterType == 'regex') {
@@ -2298,20 +2264,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   }
 
 
-
   onSelectingReviewee(e) {
-    this.getOneReview();
+    this.getOneReview('order');
   }
 
 
   changeReviewOrder(e) {
     this.reviewOrder = e.target.value;
-    this.getOneReview();
+    this.getOneReview('order');
   }
 
 
 
-
+  outOfPage() {
+    this.error = null;
+    this.router.navigate(['game'], { queryParams: { outfrom: this.startFrom == 'review' ? 'review' : 'annotate', hash: 'max' } })
+  }
 
 
   ngOnDestroy() {
