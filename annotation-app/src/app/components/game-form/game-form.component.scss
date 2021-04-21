@@ -17,10 +17,27 @@ SPDX-License-Identifier: Apache-2.0
   line-height: 0.7rem;
 }
 
-// ::ng-deep .datagrid-table {
-//   width: 100%;
-// }
+.annotatorCellWordBreak {
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 4.1rem;
+  line-height: 0.7rem;
+}
 
-// ::ng-deep .datagrid-table-wrapper {
-//   height: 100%;
-// }
+.isShowHide {
+  margin-top: 5px;
+  color: #0077b8;
+}
+
+.isShowHide:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.showIcon {
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  transform: rotate(180deg);
+}

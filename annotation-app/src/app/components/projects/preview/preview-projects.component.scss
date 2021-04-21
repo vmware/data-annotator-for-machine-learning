@@ -154,10 +154,32 @@ SPDX-License-Identifier: Apache-2.0
   outline-color: currentColor;
 }
 
-// ::ng-deep .annotationDataTable .datagrid-table .datagrid-cell {
-//   flex: 1 1 !important;
-// }
+.labelInFilecontent {
+  color: white;
+  background-color: #2f8400;
+  margin-right: 0.5rem;
+  padding: 0 0.3rem 0 0.3rem;
+  border-radius: 4px;
+}
 
-// ::ng-deep .annotationDataTable .datagrid-table .datagrid-column {
-//   flex: 1 1 !important;
-// }
+.textInFilecontent {
+  color: #2f8400;
+  font-weight: bold;
+}
+
+.signpost-content {
+  max-width: 20rem !important;
+}
+
+.selectAll {
+  height: 0.666667rem;
+  width: 0.666667rem;
+  border: 1px solid #999;
+  border-radius: 0.125rem;
+}
+
+::ng-deep input.disabled-checkbox + label::before {
+  background-color: #eee;
+  cursor: not-allowed;
+  opacity: 0.3;
+}

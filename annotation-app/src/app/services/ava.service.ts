@@ -134,7 +134,7 @@ export class AvaService {
 
 
   public getProgress(payload: any): Observable<any> {
-    return this.http.get(`${this.baseUrl}/projects/users/progression?pid=${payload.id}`);
+    return this.http.get(`${this.baseUrl}/projects/users/progression?pid=${payload.id}&review=${payload.review}`);
   }
 
 
@@ -280,6 +280,21 @@ export class AvaService {
 
   public getToken(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/token`);
+  }
+
+
+  public getProjectsReviewList(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/projects/review`);
+  }
+
+
+  public getOneReview(pid: any, user?: string, order?: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/projects/tickets/review?pid=${pid}&user=${user}&order=${order}`);
+  }
+
+
+  public passTicket(payload: any): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/projects/tickets/review`, payload);
   }
 
 }

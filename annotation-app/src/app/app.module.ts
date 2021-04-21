@@ -49,6 +49,7 @@ import { UnZipService } from "./services/common/up-zip.service";
 import { DownloadService } from "./services/common/download.service";
 import { ToolService } from "./services/common/tool.service";
 import { SliceTextPipe } from "./pipes/sliceText.pipe";
+import { MathRoundPipe } from "./pipes/math-round.pipe";
 
 
 @NgModule({
@@ -60,6 +61,7 @@ import { SliceTextPipe } from "./pipes/sliceText.pipe";
     AuthenticationComponent,
     FullNamePipe,
     SliceTextPipe,
+    MathRoundPipe,
     FooterComponent,
     ProjectsComponent,
     DropdownPage,
