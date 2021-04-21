@@ -9,7 +9,7 @@
 
 const projectDB = require('../db/project-db');
 const userDB = require('../db/user-db');
-const {ROLES} = require('../config/constant');
+const {ROLES, SPECAILCHARTOSTRING} = require('../config/constant');
 const dataSetDB = require('../db/dataSet-db');
 
 function isASCII(str) {
@@ -78,6 +78,30 @@ async function checkAnnotator(uid){
     return ds;
  }
 
+
+ async function checkRequired(parameters) {
+    
+    const paramType = typeof parameters;
+    if (!parameters) {
+        return false;
+    }
+    if (paramType == SPECAILCHARTOSTRING.BOOLEAN || paramType == SPECAILCHARTOSTRING.NUMBER) {
+        if (parameters) {
+            return true;
+        }
+    }else if (paramType == SPECAILCHARTOSTRING.OBJECT) {
+        if (Object.keys(parameters).length) {
+            return true;
+        }
+    }else if (paramType == SPECAILCHARTOSTRING.STRING) {
+        const p = parameters.trim();
+        if (p && p != SPECAILCHARTOSTRING.ZERO && p != SPECAILCHARTOSTRING.FALSE  && p != SPECAILCHARTOSTRING.UNDEFINED && p != SPECAILCHARTOSTRING.NULL && p != SPECAILCHARTOSTRING.NAN ) {
+            return true;
+        }
+    }
+    return false;
+ }
+
 module.exports = {
     isASCII,
     isNumeric,
@@ -86,4 +110,5 @@ module.exports = {
     checkUserRole,
     checkAnnotator,
     checkDataSet,
+    checkRequired,
 };

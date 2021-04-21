@@ -19,20 +19,14 @@ import { AvaService } from "../../services/ava.service";
 export class GameFormComponent implements OnInit {
 
   @ViewChild('dataGird', { static: true }) dataGird;
+  @ViewChild('reviewDataGird', { static: true }) reviewDataGird;
 
-  user: string;
+  user: any;
   datasets: any = [];
-
-  taskParamId: number;
+  reviewDatasets: any = [];
   datasetClrDatagridStateInterface;
-  deleteDatasetDialog: boolean = false;
-  previewDatasetDialog: boolean = false;
-  selectedDataset;
-  isBrowsing: boolean;
-
   loading: boolean;
   errorMessage: string = '';
-  infoMessage: string = '';
   refresh: any;
   tableState: ClrDatagridStateInterface;
   pageSize: number;
@@ -40,39 +34,84 @@ export class GameFormComponent implements OnInit {
   totalItems: number;
   showFlagModal: boolean = false;
   flagData;
+  pageSizeReview: number;
+  pageReview: number;
+  totalItemsReview: number;
+  isShowReviewTab: boolean = false;
 
   constructor(
-    private route: ActivatedRoute,
     private avaService: AvaService,
     private userAuthService: UserAuthService,
+    private router: Router,
+    private route: ActivatedRoute,
   ) {
-
-    this.user = this.userAuthService.loggedUser().email;
+    this.user = this.userAuthService.loggedUser();
     this.page = 1;
     this.pageSize = 10;
-
-    this.route.queryParams.subscribe(params => {
-      this.taskParamId = Number(params['id']);
+    this.pageReview = 1;
+    this.pageSizeReview = 10;
+    this.route.queryParams.subscribe(data => {
+      data.outfrom == 'review' ? this.isShowReviewTab = true : this.isShowReviewTab = false;
     });
-
-
   }
 
   ngOnInit() {
 
     this.loading = false;
-    this.isBrowsing = (this.taskParamId) ? false : true;
-    this.getProjects();
-
+    if (!this.isShowReviewTab) {
+      this.getProjects();
+    }
+    if ((this.user.role === 'Project Owner' || this.user.role === 'Admin') && this.isShowReviewTab == true) {
+      this.getReviewProjects();
+    }
   }
+
+
+  clickAnnotate() {
+    this.getProjects()
+  }
+
+  clickReview() {
+    this.getReviewProjects();
+  }
+
 
   valueChange(value: number) {
     this.pageSize = value;
-    setTimeout(() => {
-      this.dataGird.stateProvider.debouncer._change.next();
-    }, 100);
+    // setTimeout(() => {
+    //   this.dataGird.stateProvider.debouncer._change.next();
+    // }, 100);
   }
 
+  reviewValueChange(value: number) {
+    this.pageSizeReview = value;
+    // setTimeout(() => {
+    //   this.reviewDataGird.stateProvider.debouncer._change.next();
+    // }, 100);
+  }
+
+
+  getReviewProjects() {
+    this.loading = true;
+    this.avaService.getProjectsReviewList().subscribe(res => {
+      for (let i = 0; i < res.length; i++) {
+        res[i].isExtend = true;
+        for (let j = 0; j < res[i].userCompleteCase.length; j++) {
+          if (res[i].userCompleteCase[j].completeCase > 0) {
+            res[i].disableReview = true;
+            break;
+          }
+        }
+      };
+      this.reviewDatasets = res;
+      this.totalItemsReview = res.length;
+      this.loading = false;
+    }, (error) => {
+      console.log(error);
+      this.errorMessage = "Failed to load the datasets";
+      this.loading = false;
+    })
+  }
 
   private getProjects(params?: any) {
     this.loading = true;
@@ -80,7 +119,6 @@ export class GameFormComponent implements OnInit {
       this.loading = false;
       this.datasets = res;
       this.totalItems = res.length;
-      // this.filterTasks(res.result, params);
     }, (error: any) => {
       console.log(error);
       this.errorMessage = "Failed to load the datasets";
@@ -99,6 +137,20 @@ export class GameFormComponent implements OnInit {
   receiveCloseFlagModal(e) {
     this.showFlagModal = false;
     this.flagData = null;
+  };
+
+
+  startAnnotate(name, type, id, leftCase) {
+    this.router.navigate(['annotate'], { queryParams: { name: name, projectType: type, id: id, from: 'annotate' } })
+  };
+
+
+  more(id) {
+    for (let i = 0; i < this.reviewDatasets.length; i++) {
+      if (this.reviewDatasets[i].id == id) {
+        this.reviewDatasets[i].isExtend = !this.reviewDatasets[i].isExtend;
+      }
+    }
   }
 
 

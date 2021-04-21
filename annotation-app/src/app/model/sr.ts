@@ -15,12 +15,14 @@ export interface SR {
   userInputs?: UserInput[],
   MSG?: string,
   flag?: any,
-  images?: any
+  images?: any,
+  userInputsLength?: number
 }
 export interface UserInput {
   problemCategory: any,
   timestamp?: string,
-  tid: number
+  tid: number,
+  user: string
 }
 
 export interface SrUserInput {

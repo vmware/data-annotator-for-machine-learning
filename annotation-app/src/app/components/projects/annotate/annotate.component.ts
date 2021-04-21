@@ -3,9 +3,8 @@ Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import { Component, OnInit, ElementRef, Renderer2, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, ElementRef, Renderer2, ViewChild, HostListener, AfterViewInit } from '@angular/core';
 import { AvaService } from '../../../services/ava.service';
-import { Observable } from 'rxjs';
 import 'rxjs/Rx'
 import { SR, SrUserInput } from '../../../model/sr';
 import { FormGroup, FormBuilder } from '@angular/forms';
@@ -14,6 +13,8 @@ import * as _ from "lodash";
 import { LabelStudioService } from 'app/services/label-studio.service';
 import { GetElementService } from 'app/services/common/dom.service';
 import { ToolService } from 'app/services/common/tool.service';
+import { UserAuthService } from 'app/services/user-auth.service';
+
 
 @Component({
   selector: 'app-annotate',
@@ -22,22 +23,20 @@ import { ToolService } from 'app/services/common/tool.service';
 })
 
 
-export class AnnotateComponent implements OnInit {
+export class AnnotateComponent implements OnInit, AfterViewInit {
 
 
   @ViewChild('numericInput', { static: false }) numericInput;
-
+  user: any;
   questionForm: FormGroup;
   sr: SR;
   categories: string[];
   loading: boolean;
   error: string;
+  actionError: string;
   maxAnnotationError: string;
-  isSubmittingDialog: boolean;
   isEndingGameDialog: boolean;
   isSkippingGameDialog: boolean;
-  isOptOutDialog: boolean;
-  pointsEarnedOnSubmission: number;
   projects: any;
   selectParam: string;
   projectInfo: any;
@@ -72,7 +71,7 @@ export class AnnotateComponent implements OnInit {
   highlightedNode: any;
   projectType: string;
   historyTask: any = [];
-  antTags: any;
+  labelType: any;
   logCategories: any = [];
   filterList: any = [];
   filterType: string = 'keyword';
@@ -110,6 +109,11 @@ export class AnnotateComponent implements OnInit {
     "#9DA3DB",
     "#ffff00"
   ];
+  startFrom: string;
+  annotationPrevious: any = [];
+  reviewOrder: string = 'random';
+
+
 
   constructor(
     private renderer2: Renderer2,
@@ -120,25 +124,26 @@ export class AnnotateComponent implements OnInit {
     private el: ElementRef,
     private LabelStudioService: LabelStudioService,
     private getElementService: GetElementService,
-    private toolService: ToolService
+    private toolService: ToolService,
+    private userAuthService: UserAuthService,
 
-  ) { }
+
+  ) {
+    this.user = this.userAuthService.loggedUser();
+  }
 
 
+  ngAfterViewInit() { }
 
   ngOnInit(): void {
     this.loading = true;
     this.error = null;
     this.maxAnnotationError = null;
-    this.isSubmittingDialog = false;
     this.isEndingGameDialog = false;
     this.isSkippingGameDialog = false;
-    this.isOptOutDialog = false;
     this.silenceStatus = false;
-
     this.isNumeric = false;
     this.clrErrorTip = false;
-    this.pointsEarnedOnSubmission = 0;
     this.active = -1;
     this.labelChoose = null;
     this.idName = '';
@@ -146,16 +151,8 @@ export class AnnotateComponent implements OnInit {
       this.selectParam = data.name;
       this.projectId = data.id;
       this.projectType = data.projectType;
-      this.avaService.getProjectInfo(this.projectId).subscribe(response => {
-        response.taskInstructions = response.taskInstructions.replace(/(\r\n|\n|\r)/gm, "<br/>");
-        this.projectInfo = response;
-        this.max = response.maxAnnotation;
-        this.isMultipleLabel = response.isMultipleLabel;
-        this.fetchData();
-
-      }, error => {
-        console.log(error);
-      });
+      this.startFrom = data.from;
+      this.toGetProjectInfo(this.projectId)
     });
     this.createForm();
     this.getProjectsList();
@@ -185,85 +182,81 @@ export class AnnotateComponent implements OnInit {
         answer: [null],
         selectProject: [this.selectParam],
         filterText: [null],
+        reviewee: [null]
       })
     );
   }
 
+
   fetchData(): void {
     this.silenceStatus = false;
-
+    this.error = null;
     let paramSr = {
       id: this.projectId,
     }
     this.loading = true;
-    Observable.forkJoin(
-      this.avaService.getRandomSr(paramSr),
-      this.avaService.getProblemCategories(this.projectId)
-    ).subscribe(
+    this.avaService.getRandomSr(paramSr).subscribe(
       response => {
-        let index = 0;
-        this.sr = response[index++] as SR;
-        let categoryResponse = response[index++];
-
+        this.sr = response;
         if (this.sr.MSG) {
           this.error = "All cases have been completely annotated.";
           return;
-        };
-        if (this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'regression') {
-          this.sr = this.resetTabularSrData(this.sr);
-        };
-        if (this.projectType == 'ner') {
-          this.sr = this.resetNerSrData(this.sr);
-          this.toShowExistingLabel();
-        };
-        if (this.projectType == 'image') {
-          // console.log("fetchData.this.sr:::", this.sr);
-          this.sr = this.resetImageSrData(this.sr);
-          setTimeout(() => {
-            this.sortLabelForColor(this.categories);
-            let option = {
-              dom: 'label-studio',
-              imageRectLabelTemplate: this.imageRectLabelTemplate,
-              imagePolyLabelTemplate: this.imagePolyLabelTemplate,
-              url: this.sr.originalData.location,
-              historyCompletions: this.historyTask,
-              annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
-              from: 'annotate'
-            }
-            this.toCallStudio(option);
-          }, 0);
-        };
-        if (this.projectType == 'log') {
-          this.sr = this.resetLogSrData(this.sr)
-        };
-        if (this.sr.flag && this.sr.flag.silence) {
-          this.silenceStatus = true;
-        };
-        if (categoryResponse.labelType == 'numericLabel') {
-          this.isNumeric = true;
-          this.numericMessage = 'Allowed values are between ' + categoryResponse.min + ' and ' + categoryResponse.max + ' .';
-          this.minLabel = categoryResponse.min;
-          this.maxLabel = categoryResponse.max;
-          setTimeout(() => {
-            this.numericInput.nativeElement.focus();
-          }, 500);
         } else {
-
-          this.categories = categoryResponse.lables;
-          if (this.projectType == 'log') {
-            this.sortLabelForColor(this.categories)
-          }
-          this.isShowDropDown = false;
-          if (this.categories.length > 6 && this.projectType != 'ner' && this.projectType != 'image' && this.projectType != 'log') {
-            this.isShowDropDown = true;
+          if (this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'regression') {
+            this.sr = this.resetTabularSrData(this.sr);
           };
+          if (this.projectType == 'ner') {
+            this.sr = this.resetNerSrData(this.sr);
+            this.toShowExistingLabel();
+          };
+          if (this.projectType == 'image') {
+            // console.log("fetchData.this.sr:::", this.sr);
+            this.sr = this.resetImageSrData(this.sr);
+            setTimeout(() => {
+              this.sortLabelForColor(this.categories);
+              let option = {
+                dom: 'label-studio',
+                imageRectLabelTemplate: this.imageRectLabelTemplate,
+                imagePolyLabelTemplate: this.imagePolyLabelTemplate,
+                url: this.sr.originalData.location,
+                historyCompletions: this.historyTask,
+                annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
+                from: 'annotate'
+              }
+              this.toCallStudio(option);
+            }, 0);
+          };
+          if (this.projectType == 'log') {
+            this.sr = this.resetLogSrData(this.sr)
+          };
+          if (this.sr.flag && this.sr.flag.silence) {
+            this.silenceStatus = true;
+          };
+          if (this.labelType == 'numericLabel') {
+            this.isNumeric = true;
+            this.numericMessage = 'Allowed values are between ' + this.minLabel + ' and ' + this.maxLabel + ' .';
+            setTimeout(() => {
+              this.numericInput.nativeElement.focus();
+            }, 500);
+          } else {
+
+            if (this.projectType == 'log') {
+              this.sortLabelForColor(this.categories)
+            }
+            this.isShowDropDown = false;
+            if (this.categories.length > 6 && this.projectType != 'ner' && this.projectType != 'image' && this.projectType != 'log') {
+              this.isShowDropDown = true;
+            };
+          }
         }
       }, error => {
         this.error = "All cases have been completely annotated.";
         console.log('Unable to fetch SR data from ava server: ', JSON.stringify(error, null, 2));
         this.loading = false;
       }, () => {
-        this.loading = false;
+        if (!this.sr.MSG) {
+          this.loading = false;
+        }
         if (this.projectType == 'log') {
           setTimeout(() => {
             this.el.nativeElement.querySelector('.logCategories' + this.selectedEntityID).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
@@ -284,6 +277,34 @@ export class AnnotateComponent implements OnInit {
     );
   }
 
+
+  getOneReview(from?) {
+    this.loading = true;
+    this.avaService.getOneReview(this.projectId, this.questionForm.get('questionGroup.reviewee').value, this.reviewOrder).subscribe(res => {
+      this.loading = false;
+      if (res && res.MSG) {
+        this.error = res.MSG;
+        return;
+      } else {
+        this.submitAndHistory([this.sr], from);
+        this.sr = res;
+        this.sr = this.resetLogSrData(this.sr);
+        if (this.sr.flag && this.sr.flag.silence) {
+          this.silenceStatus = true;
+        };
+        this.sortLabelForColor(this.categories);
+        this.categoryBackFunc();
+        this.getProgress();
+      }
+    }, error => {
+      console.log(error);
+      this.loading = false;
+    }, () => {
+      this.loading = false;
+    })
+  }
+
+
   onSelectingCategory(label, index) {
     this.active = index;
     this.labelChoose = label;
@@ -295,54 +316,230 @@ export class AnnotateComponent implements OnInit {
   }
 
 
+  pass() {
+    this.isSkipOrBack('pass')
+  }
+
+
   dropDownSubmit() {
     this.questionForm.get('questionGroup.category').reset();
   }
 
 
-  onSubmit(): void {
-
+  onSubmit(from?): void {
     this.clearCheckbox();
     this.silenceStatus = false;
     this.error = null;
+    this.actionError = null;
     this.maxAnnotationError = null;
-    let category = [];
-    category = this.categoryFunc()
-    // let freeText = this.questionForm.get('questionGroup.freeText').value;
-    // let answer = this.questionForm.get('questionGroup.answer').value;
-    // this.pointsEarnedOnSubmission = this.calculatePointsEarned(category, freeText, answer);
-    let srUserInput: SrUserInput = {
-      pid: this.projectId,
-      userInput: [{
-        problemCategory: category,
-        tid: this.sr._id,
-      }],
-    };
+    if (this.startFrom === 'review') {
+      this.submitReview(from);
 
-    if (this.projectType == 'image') {
-      srUserInput.userInput[0].problemCategory = this.currentBoundingData;
-      this.sr.images = this.currentBoundingData;
-    };
+    } else {
+      let srUserInput: SrUserInput = {
+        pid: this.projectId,
+        userInput: [{
+          problemCategory: this.categoryFunc(),
+          tid: this.sr._id,
+        }],
+      };
 
-    this.loading = true;
-    this.avaService.putSrUserInput(srUserInput).subscribe(response => {
+      if (this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
+        // case multiple checkbox
+        if (this.sr.userInputs) {
+          let originalLabel = [];
+          if (this.sr.userInputs.length > 0) {
+            for (let j = 0; j < this.sr.userInputs.length; j++) {
+              if (this.sr.userInputs[j].user === this.user.email) {
+                originalLabel.push(this.sr.userInputs[j].problemCategory);
+              }
+            };
+          } else if (this.sr.userInputs.length == 0) {
+            originalLabel = [];
+          };
+          this.modifyChangeHistory(originalLabel);
 
-      if (response && response.MSG) {
-        this.getOne();
-        this.maxAnnotationError = "Annotate invalid because the previous ticket has already meet the maxAnnotation.";
-        setTimeout(() => {
-          this.maxAnnotationError = null;
-        }, 10000);
+        }
+
+      } else if (this.projectType == 'ner') {
+        this.modifyChangeHistory();
+      } else if (this.projectType == 'image') {
+        srUserInput.userInput[0].problemCategory = this.currentBoundingData;
+        this.sr.images = this.currentBoundingData;
+        this.modifyChangeHistory()
+      } else if (this.projectType == 'log') {
+        this.modifyChangeHistory()
       } else {
-        this.maxAnnotationError = null;
-        this.getOne();
+        if (this.sr.userInputs) {
+          let originalLabel;
+          if (this.sr.userInputs.length > 0) {
+            for (let j = 0; j < this.sr.userInputs.length; j++) {
+              if (this.sr.userInputs[j].user === this.user.email) {
+                originalLabel = this.sr.userInputs[j].problemCategory;
+                this.modifyChangeHistory(originalLabel);
+                break;
+              }
+            };
+          } else if (this.sr.userInputs.length == 0) {
+            originalLabel = '';
+            this.modifyChangeHistory(originalLabel);
+          }
+        }
       }
-    }, error => {
-      console.log(error)
-      this.getOne();
+      this.loading = true;
+      this.avaService.putSrUserInput(srUserInput).subscribe(response => {
 
-    });
+        if (response && response.MSG) {
+          this.getOne();
+          this.maxAnnotationError = "Annotate invalid because the previous ticket has already meet the maxAnnotation.";
+          setTimeout(() => {
+            this.maxAnnotationError = null;
+          }, 10000);
+        } else {
+          this.maxAnnotationError = null;
+          this.getOne();
+        }
+      }, error => {
+        console.log(error)
+        this.getOne();
+
+      });
+    }
   }
+
+
+  submitReview(from?) {
+    this.loading = true;
+    this.modifyChangeHistory(null, from);
+    let param = {
+      pid: this.projectId,
+      tid: [this.sr._id]
+    };
+    if (from === 'pass') {
+      param['modify'] = false
+    } else {
+      param['modify'] = true;
+      param['problemCategory'] = this.spansList
+    }
+    this.avaService.passTicket(param).subscribe(res => {
+      this.getOneReview(from);
+    })
+  }
+
+
+  srInHistory() {
+    // if user doesn't modify the history ticket then should keep the annotationhistory not change
+    let a = 0;
+    if (this.annotationHistory.length > 0) {
+      for (let i = 0; i < this.annotationHistory.length; i++) {
+        if (this.annotationHistory[i].srId === this.sr._id) {
+          a++;
+          break;
+        }
+      }
+      return a > 0 ? true : false;
+    };
+  }
+
+
+  modifyChangeHistory(originalLabel?, from?) {
+    for (let i = 0; i < this.annotationHistory.length; i++) {
+      if (this.isShowDropDown && !this.isMultipleLabel) {
+        // case dropdown
+        if (this.annotationHistory[i].srId === this.sr._id && originalLabel !== this.questionForm.get('questionGroup.category').value) {
+          this.annotationHistory.splice(i, 1);
+          this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+          break;
+        }
+      } else if (!this.isShowDropDown && !this.isMultipleLabel && (this.projectType == 'text' || this.projectType == 'tabular')) {
+        // case 6 labels or numeric
+        if (this.annotationHistory[i].srId === this.sr._id && originalLabel !== this.labelChoose) {
+          this.annotationHistory.splice(i, 1);
+          this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+          break;
+        }
+      } else if (this.isMultipleLabel && (this.projectType == 'text' || this.projectType == 'tabular')) {
+        // case multiple
+        for (let i = 0; i < this.annotationHistory.length; i++) {
+          let difference = [];
+          if (originalLabel.length - this.multipleLabelList.length >= 0) {
+            difference = _.difference(originalLabel, this.multipleLabelList);
+          } else {
+            difference = _.difference(this.multipleLabelList, originalLabel);
+          };
+          if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
+            this.annotationHistory.splice(i, 1);
+            this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+            break;
+
+          }
+        };
+      } else if (this.projectType === 'ner' || this.projectType === 'log' || this.projectType === 'image') {
+        let isCategory = this.categoryFunc();
+        for (let i = 0; i < this.annotationHistory.length; i++) {
+          if (this.annotationHistory[i].srId === this.sr._id) {
+            if (this.annotationHistory[i].category.length === isCategory.length) {
+              if (this.projectType === 'image') {
+                this.annotationHistory[i].category.forEach(element => {
+                  if (element.type === 'rectanglelabels') {
+                    element.valueInfo = JSON.stringify(element.value);
+                    element.sort = element.value.x
+                  } else if (element.type === 'polygonlabels') {
+                    element.valueInfo = JSON.stringify(element.value.points);
+                    element.sort = element.value.points[0][0];
+                  }
+                });
+                isCategory.forEach(element => {
+                  if (element.type === 'rectanglelabels') {
+                    element.valueInfo = JSON.stringify(element.value);
+                    element.sort = element.value.x
+                  } else if (element.type === 'polygonlabels') {
+                    element.valueInfo = JSON.stringify(element.value.points);
+                    element.sort = element.value.points[0][0];
+                  }
+                });
+              };
+              let aa = this.annotationHistory[i].category.sort(this.sortBy(this.projectType === 'ner' ? "start" : (this.projectType === 'log' ? "line" : "sort"), "ascending"));
+              let bb = isCategory.sort(this.sortBy(this.projectType === 'ner' ? "start" : (this.projectType === 'log' ? "line" : "sort"), "ascending"));
+
+              for (let n = 0; n < aa.length; n++) {
+                let aaString;
+                let bbString;
+                if (this.projectType === 'ner') {
+                  aaString = aa[n].text + aa[n].ids + aa[n].label;
+                  bbString = bb[n].text + bb[n].ids + bb[n].label;
+                } else if (this.projectType === 'log') {
+                  aaString = aa[n].line + aa[n].label + aa[n].freeText;
+                  bbString = bb[n].line + bb[n].label + bb[n].freeText;
+                } else if (this.projectType === 'image') {
+                  aaString = aa[n].valueInfo;
+                  bbString = bb[n].valueInfo;
+                }
+                if (aaString !== bbString) {
+                  this.annotationHistory.splice(i, 1);
+                  this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+                  return;
+                };
+                // all userInputs are same no any changes there
+                if (this.projectType === 'log' && n >= aa.length - 1) {
+                  if (from === 'pass') {
+                    this.annotationHistory.splice(i, 1);
+                    this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+                  }
+                }
+              };
+            } else {
+              this.annotationHistory.splice(i, 1);
+              this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+
+            };
+          }
+        };
+      }
+    }
+  }
+
+
 
 
   getOne() {
@@ -354,22 +551,40 @@ export class AnnotateComponent implements OnInit {
       if (newSr && newSr.MSG) {
         this.error = "All cases have been completely annotated.";
         return;
+      };
+      this.submitAndHistory(newSr);
+    }, error => {
+      this.error = JSON.stringify(error, null, 2);
+      this.loading = false;
+    }, () => {
+      this.loading = false;
+      if (this.projectType == 'log') {
+        setTimeout(() => {
+          this.el.nativeElement.querySelector('.logCategories' + this.selectedEntityID).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
+        }, 5);
       }
-      //add to the history
-      if (this.maxAnnotationError == null) {
-        let OldSr = JSON.parse(JSON.stringify(this.sr));
-        let addSubmit = {
-          srId: OldSr._id,
-          type: 'submit',
-          category: this.categoryFunc(),
-          rewrite: '',
-          solution: '',
-          activeClass: this.active,
-          images: OldSr.images
-        };
-        if (this.projectType == 'ner' || this.projectType == 'image') {
-          addSubmit['historyDescription'] = [OldSr.originalData]
-        } else if (this.projectType == 'log') {
+    });
+  }
+
+
+  submitAndHistory(newSr, from?) {
+    //add to the history
+    if (this.maxAnnotationError == null && this.sr._id !== 0) {
+
+      let OldSr = JSON.parse(JSON.stringify(this.sr));
+      let addSubmit = {
+        srId: OldSr._id,
+        type: from === 'pass' ? 'pass' : 'submit',
+        category: this.categoryFunc(),
+        rewrite: '',
+        solution: '',
+        activeClass: this.active,
+        images: OldSr.images
+      };
+      if (this.projectType == 'ner' || this.projectType == 'image') {
+        addSubmit['historyDescription'] = [OldSr.originalData]
+      } else if (this.projectType == 'log') {
+        if (addSubmit.category.length > 0) {
           addSubmit.category.forEach(element => {
             for (let i = 0; i < OldSr.originalData.length; i++) {
               if (element.line == OldSr.originalData[i].line) {
@@ -380,78 +595,72 @@ export class AnnotateComponent implements OnInit {
           });
           addSubmit['historyDescription'] = addSubmit.category;
         } else {
-          addSubmit['historyDescription'] = OldSr.originalData.slice(0, 10);
+          addSubmit['historyDescription'] = [{ text: OldSr.originalData[0].text }]
         }
-        this.annotationHistory.unshift(addSubmit);
-        // console.log("getOne.annotationHistory:::", this.annotationHistory);
+      } else {
+        addSubmit['historyDescription'] = OldSr.originalData.slice(0, 10);
+      };
+      if (from !== 'order') {
+        if (!this.srInHistory()) { this.annotationHistory.unshift(addSubmit); }
+        this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory))
       }
-      this.sr = newSr;
-      this.currentBoundingData = [];
-      if (this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'regression') {
-        this.sr = this.resetTabularSrData(this.sr);
-      };
-      if (this.projectType == 'ner') {
-        this.sr = this.resetNerSrData(this.sr);
-        this.toShowExistingLabel();
-      };
-      if (this.projectType == 'image') {
-        this.sr = this.resetImageSrData(this.sr);
-        // console.log("getOne.this.sr:::", this.sr)
-        setTimeout(() => {
-          let option = {
-            dom: 'label-studio',
-            imageRectLabelTemplate: this.imageRectLabelTemplate,
-            imagePolyLabelTemplate: this.imagePolyLabelTemplate,
-            url: this.sr.originalData.location,
-            historyCompletions: this.historyTask,
-            annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
-            from: 'annotate'
 
-          }
-          this.toCallStudio(option);
-        }, 0);
-      };
-      if (this.projectType == 'log') {
-        this.sr = this.resetLogSrData(this.sr);
-        this.toFilterLog(this.filterList);
-      }
-      if (this.sr.flag && this.sr.flag.silence) {
-        this.silenceStatus = true;
-      };
-      if (this.isNumeric) {
-        setTimeout(() => {
-          this.numericInput.nativeElement.focus();
-        }, 300);
-      };
-      this.showSubmitDialog();
-      this.clearUserInput();
+      // console.log("getOne.annotationHistory:::", this.annotationHistory, this.annotationPrevious);
+    }
+    this.sr = newSr;
+    this.currentBoundingData = [];
+    if (this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'regression') {
+      this.sr = this.resetTabularSrData(this.sr);
+    };
+    if (this.projectType == 'ner') {
+      this.sr = this.resetNerSrData(this.sr);
+      this.toShowExistingLabel();
+    };
+    if (this.projectType == 'image') {
+      this.sr = this.resetImageSrData(this.sr);
+      // console.log("getOne.this.sr:::", this.sr)
+      setTimeout(() => {
+        let option = {
+          dom: 'label-studio',
+          imageRectLabelTemplate: this.imageRectLabelTemplate,
+          imagePolyLabelTemplate: this.imagePolyLabelTemplate,
+          url: this.sr.originalData.location,
+          historyCompletions: this.historyTask,
+          annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
+          from: 'annotate'
 
-    }, error => {
-      this.error = JSON.stringify(error, null, 2);
-      this.loading = false;
-      this.showSubmitDialog();
-    }, () => {
-      this.loading = false;
-      if (this.projectType == 'log') {
-        setTimeout(() => {
-          this.el.nativeElement.querySelector('.logCategories' + this.selectedEntityID).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
-        }, 5);
-      }
-      this.showSubmitDialog();
-    });
+        }
+        this.toCallStudio(option);
+      }, 0);
+    };
+    if (this.projectType == 'log') {
+      this.sr = this.resetLogSrData(this.sr);
+      this.toFilterLog(this.filterList);
+    }
+    if (this.sr.flag && this.sr.flag.silence) {
+      this.silenceStatus = true;
+    };
+    if (this.isNumeric) {
+      setTimeout(() => {
+        this.numericInput.nativeElement.focus();
+      }, 300);
+    };
+    this.clearUserInput();
   }
 
 
-  showSubmitDialog(): void {
-    this.isSubmittingDialog = true;
-    Observable.interval(3500).take(1).subscribe(time => {
-      this.isSubmittingDialog = false;
-    });
-  }
+  // showSubmitDialog(): void {
+  //   this.isSubmittingDialog = true;
+  //   Observable.interval(3500).take(1).subscribe(time => {
+  //     this.isSubmittingDialog = false;
+  //   });
+  // }
+
+
 
   onEndGame(): void {
     if (this.isFormPrestine()) {
-      this.router.navigate(['/game']);
+      this.router.navigate(['/game'], { queryParams: { outfrom: this.startFrom == 'review' ? 'review' : 'annotate', hash: 'max' } })
     } else {
       this.isEndingGameDialog = true;
     }
@@ -464,7 +673,40 @@ export class AnnotateComponent implements OnInit {
       this.active = -1;
       this.skipAndFetchNewQuestion();
     } else {
-      this.isSkippingGameDialog = true;
+      if (this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
+        if (!this.sr.userInputsLength && !this.sr.userInputs) {
+          // this.skipAndFetchNewQuestion();
+          let isCategory = this.categoryFunc();
+          this.isActionErr(isCategory, null, 'skip');
+        } else {
+          for (let i = 0; i < this.annotationHistory.length; i++) {
+            if (this.annotationHistory[i].srId === this.sr._id) {
+              let difference = [];
+              if (this.annotationHistory[i].category.length - this.multipleLabelList.length >= 0) {
+                difference = _.difference(this.annotationHistory[i].category, this.multipleLabelList);
+              } else {
+                difference = _.difference(this.multipleLabelList, this.annotationHistory[i].category);
+              };
+              if (difference.length > 0) {
+                this.actionError = "You already provided a new label, please do submit first.";
+                return;
+              } else {
+                this.skipAndFetchNewQuestion();
+                return;
+              }
+            }
+          };
+        }
+      } else if (this.projectType == 'ner') {
+        this.isSkipOrBack('skip');
+      } else if (this.projectType == 'image') {
+        this.isSkipOrBack('skip')
+      } else if (this.projectType == 'log') {
+        this.isSkipOrBack('skip');
+      } else {
+        this.skipAndFetchNewQuestion();
+      }
+
     }
   }
 
@@ -476,21 +718,32 @@ export class AnnotateComponent implements OnInit {
     let paramSr = {
       pid: this.projectId,
       tid: this.sr._id,
+    };
+    if (this.startFrom === 'review') {
+      paramSr['review'] = true;
+      paramSr['order'] = this.reviewOrder;
+      this.questionForm.get('questionGroup.reviewee').value ? paramSr['user'] = this.questionForm.get('questionGroup.reviewee').value : null
     }
     this.avaService.skipToNext(paramSr).subscribe(responseSr => {
+      if (responseSr && responseSr.MSG) {
+        this.error = this.sr.MSG;
+        return;
+      }
       //skip to the history
       let OldSr = JSON.parse(JSON.stringify(this.sr));
       let addSkip = {
         srId: OldSr._id,
         historyDescription: (this.projectType == 'ner' || this.projectType == 'image') ? [OldSr.originalData] : OldSr.originalData.slice(0, 10),
         type: 'skip',
-        category: [],
+        category: (this.projectType == 'ner' || this.projectType == 'log') ? this.spansList : [],
         rewrite: '',
         solution: '',
         activeClass: -1,
         images: []
       };
-      this.annotationHistory.unshift(addSkip);
+      if (!this.srInHistory()) { this.annotationHistory.unshift(addSkip); }
+      this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory))
+
       this.sr = responseSr;
       this.currentBoundingData = [];
       if (this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'regression') {
@@ -519,6 +772,11 @@ export class AnnotateComponent implements OnInit {
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
         this.toFilterLog(this.filterList);
+        if (this.sr.userInputsLength > 0) {
+          this.categoryBackFunc();
+          this.sortLabelForColor(this.categories);
+          this.getProgress();
+        };
 
       };
       if (this.sr.flag && this.sr.flag.silence) {
@@ -572,11 +830,20 @@ export class AnnotateComponent implements OnInit {
 
 
   getProjectsList() {
-    this.avaService.getProjectsList().subscribe(response => {
-      this.projects = response;
-    }, error => {
-      console.log(error)
-    });
+    if (this.startFrom === 'review') {
+      this.avaService.getProjectsReviewList().subscribe(response => {
+        this.projects = response;
+      }, error => {
+        console.log(error)
+      });
+    } else {
+      this.avaService.getProjectsList().subscribe(response => {
+        this.projects = response;
+      }, error => {
+        console.log(error)
+      });
+    }
+
 
   }
 
@@ -590,33 +857,57 @@ export class AnnotateComponent implements OnInit {
     for (let i = 0; i < this.projects.length; i++) {
       if (this.projects[i].projectName == e.target.value) {
         this.projectId = this.projects[i].id;
-        this.avaService.getProjectInfo(this.projectId).subscribe(response => {
-          this.projectInfo = response;
-          this.max = response.maxAnnotation;
-          this.isMultipleLabel = response.isMultipleLabel;
-          this.projectType = response.projectType;
-        }, error => {
-          console.log(error);
-          this.loading = false;
-        });
+        this.toGetProjectInfo(this.projectId);
       }
     }
-    this.fetchData();
     this.getProgress();
     this.annotationHistory = [];
+    this.annotationPrevious = [];
     this.idName = '';
     this.clearUserInput();
     this.filterList = [];
     this.selectedEntityID = 0;
+    this.reviewOrder = 'random';
+    this.questionForm.get('questionGroup.reviewee').reset();
+  }
 
+
+
+  toGetProjectInfo(pid) {
+    this.avaService.getProjectInfo(pid).subscribe(response => {
+      response.taskInstructions = response.taskInstructions.replace(/(\r\n|\n|\r)/gm, "<br/>");
+      this.projectInfo = response;
+      this.max = response.maxAnnotation;
+      this.isMultipleLabel = response.isMultipleLabel;
+      this.projectType = response.projectType;
+      this.labelType = response.labelType;
+      if (this.labelType === 'numericLabel') {
+        this.minLabel = response.min;
+        this.maxLabel = response.max;
+      } else {
+        this.categories = response.categoryList.split(',');
+      }
+      if (this.startFrom === 'review') {
+        this.getOneReview();
+      } else {
+        this.fetchData();
+      }
+    }, error => {
+      console.log(error);
+      this.loading = false;
+    });
   }
 
 
   getProgress() {
     let param = {
       id: this.projectId,
+      review: this.startFrom === 'review' ? true : null
     }
     this.avaService.getProgress(param).subscribe(response => {
+      if (this.startFrom === 'review') {
+        response.userCompleteCase = response.userCompleteCase.sort(this.sortBy("completeCase", "descending"));
+      };
       this.progressInfo = response;
       this.percentage = Math.round(this.progressInfo.completeCase / this.progressInfo.totalCase * 10000) / 100
     }, error => {
@@ -625,40 +916,275 @@ export class AnnotateComponent implements OnInit {
   }
 
 
-  historyBack(index, id) {
+  isActionErr(isCategory, id?, from?) {
+    if (!this.sr.userInputsLength && !this.sr.userInputs) {
+      this.actionError = "You already provided a new label, please do submit first.";
+      return;
+    } else {
+      for (let i = 0; i < this.annotationHistory.length; i++) {
+        let difference = [];
+        if (this.annotationHistory[i].category.length - isCategory.length >= 0) {
+          difference = _.difference(this.annotationHistory[i].category, isCategory);
+        } else {
+          difference = _.difference(isCategory, this.annotationHistory[i].category);
+        };
+        if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
+          this.actionError = "You already provided a new label, please do submit first.";
+          return;
+        }
+      };
+      if (from == 'skip') {
+        this.skipAndFetchNewQuestion()
+      } else if (from == 'pass') {
+        this.onSubmit(from)
+      } else {
+        if (!this.actionError) {
+          this.clearCheckbox();
+          this.multipleLabelList = [];
+          let param = {
+            id: id,
+            pid: this.projectId
+          }
+          this.getSrById(param, 0, 'previous');
+        }
+      }
 
+    }
+  }
+
+
+  historyBack(index, id) {
     this.silenceStatus = false;
     let isCategory = this.categoryFunc();
 
+    // to update the annotationprevious list from the index
+    if (this.projectType !== 'image') {
+      this.annotationPrevious = this.annotationHistory.slice(index + 1);
+    }
+
+
     if (isCategory.length > 0) {
-      this.isSkippingGameDialog = true;
+      if (this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
+        this.isActionErr(isCategory, id);
+      } else if (this.projectType == 'ner') {
+        this.isSkipOrBack('history', id);
+      } else if (this.projectType == 'image') {
+        this.isSkipOrBack('history', id, index);
+      } else if (this.projectType == 'log') {
+        this.isSkipOrBack('history', id);
+      } else {
+        let param = {
+          id: id,
+          pid: this.projectId
+        }
+        this.getSrById(param, index, 'history');
+      }
     } else {
       this.clearCheckbox();
       let param = {
         id: id,
         pid: this.projectId
       };
-      this.getSrById(param, index);
+      this.getSrById(param, index, 'history');
     }
   }
 
+
+  sortBy(field, order) {
+    return function (a, b) {
+      if (order == 'ascending') {
+        return a[field] - b[field];
+      } else {
+        return b[field] - a[field];
+      }
+
+    }
+  }
+
+
+  isSkipOrBack(type, id?, index?) {
+    let isCategory = this.categoryFunc();
+    let flag1;
+    let flag2;
+    if (this.projectType == 'ner' || this.projectType == 'log') {
+      flag1 = (this.sr.userInputs && this.sr.userInputs.length > 0 && this.sr.userInputs[0].problemCategory.length > 0)
+    } else {
+      flag1 = (this.sr.userInputs && this.sr.userInputs.length > 0)
+    }
+    if (flag1) {
+      let a = []
+      if (this.projectType === 'image') {
+        this.sr.userInputs.forEach(e => {
+          if (e.user == this.user.email) {
+            a.push(e.problemCategory);
+          }
+        })
+        flag2 = (isCategory.length == a.length)
+      } else {
+        flag2 = (isCategory.length == this.sr.userInputs[0].problemCategory.length)
+      };
+      if (flag2) {
+        if (this.projectType === 'image') {
+          a.forEach(element => {
+            if (element.type === 'rectanglelabels') {
+              element.valueInfo = JSON.stringify(element.value);
+              element.sort = element.value.x
+            } else if (element.type === 'polygonlabels') {
+              element.valueInfo = JSON.stringify(element.value.points);
+              element.sort = element.value.points[0][0];
+            }
+          });
+          isCategory.forEach(element => {
+            if (element.type === 'rectanglelabels') {
+              element.valueInfo = JSON.stringify(element.value);
+              element.sort = element.value.x
+            } else if (element.type === 'polygonlabels') {
+              element.valueInfo = JSON.stringify(element.value.points);
+              element.sort = element.value.points[0][0];
+            }
+          });
+        };
+        let aa = isCategory.sort(this.sortBy(this.projectType === 'ner' ? "start" : (this.projectType === 'log' ? "line" : "sort"), "ascending"));
+        let bb;
+        if (this.projectType === 'image') {
+          bb = a.sort(this.sortBy("sort", "ascending"));
+        } else {
+          bb = this.sr.userInputs[0].problemCategory.sort(this.sortBy(this.projectType === 'ner' ? "start" : "line", "ascending"));
+        }
+        for (let i = 0; i < aa.length; i++) {
+          let aaString;
+          let bbString;
+          if (this.projectType === 'ner') {
+            aaString = aa[i].text + aa[i].ids + aa[i].label;
+            bbString = bb[i].text + bb[i].ids + bb[i].label;
+          } else if (this.projectType === 'log') {
+            aaString = aa[i].line + aa[i].label + aa[i].freeText;
+            bbString = bb[i].line + bb[i].label + bb[i].freeText;
+          } else if (this.projectType === 'image') {
+            aaString = aa[i].valueInfo;
+            bbString = bb[i].valueInfo;
+          }
+          if (aaString !== bbString) {
+            this.actionError = "You already provided a new label, please do submit first.";
+            return false;
+          };
+        };
+        this.loading = true;
+        if (type === 'previous') {
+          let param = {
+            id: this.annotationPrevious.length > 0 ? this.annotationPrevious[0].srId : this.sr._id,
+            pid: this.projectId
+          }
+          this.getSrById(param, 0, 'previous');
+        } else if (type === 'history') {
+          let param = {
+            id: id,
+            pid: this.projectId
+          }
+          this.getSrById(param, index, 'history');
+        } else if (type === 'skip') {
+          this.skipAndFetchNewQuestion();
+        } else if (type === 'pass') {
+          this.onSubmit(type);
+        }
+      } else {
+        this.actionError = "You already provided a new label, please do submit first.";
+        return false;
+      };
+    } else {
+      this.actionError = "You already provided a new label, please do submit first.";
+      return;
+    }
+  }
+
+
   isBack() {
-    if (this.annotationHistory.length > 0) {
-      this.clearCheckbox();
+    if (this.annotationPrevious.length > 0) {
       this.silenceStatus = false;
       this.clrErrorTip = false;
       let isCategory = this.categoryFunc();
       if (isCategory.length > 0) {
-        this.isSkippingGameDialog = true;
+        if (this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
+          this.isActionErr(isCategory, this.annotationPrevious[0].srId);
+        } else if (this.projectType == 'ner' || this.projectType == 'log' || this.projectType == 'image') {
+          let flag = false;
+          for (let i = 0; i < this.annotationHistory.length; i++) {
+            if (this.annotationHistory[i].srId === this.sr._id) {
+              flag = true;
+              if (this.annotationHistory[i].category.length == isCategory.length) {
+                if (this.projectType === 'image') {
+                  this.annotationHistory[i].category.forEach(element => {
+                    if (element.type === 'rectanglelabels') {
+                      element.valueInfo = JSON.stringify(element.value);
+                      element.sort = element.value.x
+                    } else if (element.type === 'polygonlabels') {
+                      element.valueInfo = JSON.stringify(element.value.points);
+                      element.sort = element.value.points[0][0];
+                    }
+                  });
+                  isCategory.forEach(element => {
+                    if (element.type === 'rectanglelabels') {
+                      element.valueInfo = JSON.stringify(element.value);
+                      element.sort = element.value.x
+                    } else if (element.type === 'polygonlabels') {
+                      element.valueInfo = JSON.stringify(element.value.points);
+                      element.sort = element.value.points[0][0];
+                    }
+                  });
+                };
+                let aa = this.annotationHistory[i].category.sort(this.sortBy(this.projectType === 'ner' ? "start" : (this.projectType === 'log' ? "line" : "sort"), "ascending"));
+                let bb = isCategory.sort(this.sortBy(this.projectType === 'ner' ? "start" : (this.projectType === 'log' ? "line" : "sort"), "ascending"));
+                for (let i = 0; i < aa.length; i++) {
+                  let aaString;
+                  let bbString;
+                  if (this.projectType === 'ner') {
+                    aaString = aa[i].text + aa[i].ids + aa[i].label;
+                    bbString = bb[i].text + bb[i].ids + bb[i].label;
+                  } else if (this.projectType === 'log') {
+                    aaString = aa[i].line + aa[i].label + aa[i].freeText;
+                    bbString = bb[i].line + bb[i].label + bb[i].freeText;
+                  } else if (this.projectType === 'image') {
+                    aaString = aa[i].valueInfo;
+                    bbString = bb[i].valueInfo;
+                  }
+                  if (aaString !== bbString) {
+                    this.actionError = "You already provided a new label, please do submit first.";
+                    return false;
+                  };
+                };
+                this.loading = true;
+                let param = {
+                  id: this.annotationPrevious[0].srId,
+                  pid: this.projectId
+                }
+                this.getSrById(param, 0, 'previous');
+
+              } else {
+                this.actionError = "You already provided a new label, please do submit first.";
+                return;
+              };
+            }
+          };
+          if (!flag) {
+            this.isSkipOrBack('previous');
+          }
+        } else {
+          let param = {
+            id: this.annotationPrevious[0].srId,
+            pid: this.projectId
+          }
+          this.getSrById(param, 0, 'previous');
+        }
+
       } else {
         let param = {
-          id: this.annotationHistory[0].srId,
+          id: this.annotationPrevious[0].srId,
           pid: this.projectId
         }
-        this.getSrById(param, 0);
+        this.getSrById(param, 0, 'previous');
       }
     } else {
-      console.log('no history')
+      this.actionError = "There has no previous ticket."
     }
   }
 
@@ -674,6 +1200,8 @@ export class AnnotateComponent implements OnInit {
       for (let i = 0; i < this.annotationHistory.length; i++) {
         if (this.annotationHistory[i].srId == this.sr._id) {
           this.annotationHistory.splice(i, 1);
+          this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory))
+
         }
       }
     };
@@ -681,6 +1209,12 @@ export class AnnotateComponent implements OnInit {
       tid: this.sr._id,
       pid: this.projectId
     };
+    if (this.startFrom === 'review') {
+      param['review'] = true;
+      param['order'] = this.reviewOrder;
+      this.questionForm.get('questionGroup.reviewee').value ? param['user'] = this.questionForm.get('questionGroup.reviewee').value : null
+
+    }
     let aa = this.avaService.toFlagTicket(param).subscribe(response => {
       this.sr = response;
       if (this.sr.MSG) {
@@ -714,7 +1248,11 @@ export class AnnotateComponent implements OnInit {
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
         this.toFilterLog(this.filterList);
-
+        if (this.sr.userInputsLength > 0) {
+          this.categoryBackFunc();
+          this.sortLabelForColor(this.categories);
+          this.getProgress();
+        };
       };
       if (this.sr.flag && this.sr.flag.silence) {
         this.silenceStatus = true;
@@ -761,6 +1299,7 @@ export class AnnotateComponent implements OnInit {
 
 
   selectLabel(e, i) {
+    this.actionError = null;
     let isChecked = e.target.checked;
     let checkedValue = e.target.value;
     if (isChecked) {
@@ -821,14 +1360,30 @@ export class AnnotateComponent implements OnInit {
     }
   }
 
-  categoryBackFunc(index) {
+
+  getProblemCategory() {
+    if (this.sr.userInputs.length > 0) {
+      for (let i = 0; i < this.sr.userInputs.length; i++) {
+        if (this.sr.userInputs[i].user == this.user.email) {
+          return this.sr.userInputs[i].problemCategory;
+        }
+      }
+    } else if (this.sr.userInputs.length == 0) {
+      return;
+    }
+  }
+
+  categoryBackFunc(index?, from?) {
     if (this.isShowDropDown && !this.isMultipleLabel && !this.isNumeric) {
-      this.questionForm.get('questionGroup.category').setValue(this.annotationHistory[index].category[0]);
-    } else if ((!this.isShowDropDown && !this.isMultipleLabel && this.projectType != 'ner' && this.projectType !== 'image') || this.isNumeric) {
+      this.questionForm.get('questionGroup.category').setValue(this.getProblemCategory());
+    } else if (!this.isNumeric && !this.isShowDropDown && !this.isMultipleLabel && this.projectType != 'ner' && this.projectType !== 'image') {
       //to storage the ticket label
-      this.labelChoose = this.annotationHistory[index].category[0];
+      this.el.nativeElement.querySelectorAll('.cleanColor').forEach(element => {
+        this.renderer2.setStyle(element, 'background-color', 'unset');
+      });
+      this.labelChoose = this.getProblemCategory();
       //get the previous label color
-      let labelIndex = this.annotationHistory[index].activeClass;
+      let labelIndex = this.categories.indexOf(this.labelChoose);
       this.idName = 'label' + labelIndex;
       switch (labelIndex) {
         case 0:
@@ -850,8 +1405,28 @@ export class AnnotateComponent implements OnInit {
           this.renderer2.setStyle(this.el.nativeElement.querySelector('.' + this.idName), 'background-color', '#ff9c32');
           break;
       };
+    } else if (this.isNumeric) {
+      this.labelChoose = this.getProblemCategory();
     } else if (!this.isNumeric && this.isMultipleLabel && this.projectType != 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
-      this.multipleLabelList = this.annotationHistory[index].category
+      this.el.nativeElement.querySelectorAll('.labelCheckbox').forEach(element => {
+        this.renderer2.setStyle(element, 'background-color', 'unset');
+        this.renderer2.setStyle(element, 'border-color', '#eee');
+        this.renderer2.setStyle(element, 'border-bottom-width', '1px');
+        this.renderer2.setStyle(element.lastChild, 'font-weight', '400');
+      });
+      if (this.sr.userInputs) {
+        let originalLabel = [];
+        if (this.sr.userInputs.length > 0) {
+          for (let j = 0; j < this.sr.userInputs.length; j++) {
+            if (this.sr.userInputs[j].user === this.user.email) {
+              originalLabel.push(this.sr.userInputs[j].problemCategory);
+            }
+          };
+        } else if (this.sr.userInputs.length == 0) {
+          originalLabel = [];
+        };
+        this.multipleLabelList = originalLabel;
+      }
       this.multipleLabelList.forEach(e => {
         let multiLabelClass = 'multiLabel' + this.categories.indexOf(e);;
         this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].checked = true;
@@ -861,7 +1436,7 @@ export class AnnotateComponent implements OnInit {
         this.renderer2.setStyle(this.el.nativeElement.querySelector('.' + multiLabelClass + " label"), 'font-weight', 'bold');
       })
     } else if (!this.isShowDropDown && !this.isNumeric && this.isMultipleLabel && this.projectType == 'ner') {
-
+      this.spansList = [];
       let annotations = this.sr.userInputs;
       let annotatedIDs = [];
       setTimeout(() => {
@@ -874,6 +1449,7 @@ export class AnnotateComponent implements OnInit {
         });
       }, 10);
     } else if (this.projectType == 'log') {
+      this.spansList = [];
       setTimeout(() => {
         if (this.sr.userInputs.length > 0) {
           this.sr.userInputs[0].problemCategory.forEach(element => {
@@ -888,7 +1464,11 @@ export class AnnotateComponent implements OnInit {
         }
       }, 10)
     }
-    this.annotationHistory.splice(index, 1);
+
+    if (from == 'previous') {
+      this.annotationPrevious.splice(index, 1)
+    }
+
   }
 
 
@@ -925,7 +1505,6 @@ export class AnnotateComponent implements OnInit {
 
 
   onMouseUp(e, data, selectedEntityID0) {
-
     this.spanEnd = null;
 
     if (data == 'historyBack') {
@@ -976,6 +1555,7 @@ export class AnnotateComponent implements OnInit {
       part.label = this.categories[data == 'historyBack' ? selectedEntityID0 : this.selectedEntityID];
       part.ids = IDs.join('-');
       this.spansList.push(part);
+      this.actionError = null;
       // console.log('spansList:::', this.spansList)
     }
   }
@@ -1032,6 +1612,8 @@ export class AnnotateComponent implements OnInit {
               this.spansList.splice(i, 1)
             }
           });
+          this.actionError = null;
+
         }
       })
     };
@@ -1088,12 +1670,10 @@ export class AnnotateComponent implements OnInit {
 
 
 
-  getSrById(data, index) {
-
+  getSrById(data, index, from) {
     this.avaService.getSrById(data).subscribe(responseSr => {
-
       if (responseSr) {
-
+        this.loading = false;
         let flag = [];
         if (this.projectType != 'ner' && this.projectType != 'image' && this.projectType != 'log') {
           _.forIn(responseSr.originalData, function (value, key) {
@@ -1102,21 +1682,26 @@ export class AnnotateComponent implements OnInit {
           });
         };
         if (this.projectType == 'image') {
-          this.historyTask = [{ "result": this.annotationHistory[index].images }];
+          this.historyTask = [{ "result": from == "previous" ? this.annotationPrevious[index].images : this.annotationHistory[index].images }];
           setTimeout(() => {
             let option = {
               dom: 'label-studio',
               imageRectLabelTemplate: this.imageRectLabelTemplate,
               imagePolyLabelTemplate: this.imagePolyLabelTemplate,
-              url: this.annotationHistory[index].historyDescription[0].location,
+              url: from == "previous" ? this.annotationPrevious[index].historyDescription[0].location : this.annotationHistory[index].historyDescription[0].location,
               historyCompletions: this.historyTask,
               annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
               from: 'annotate'
             }
             this.toCallStudio(option);
             this.historyTask = [];
-            this.currentBoundingData = this.annotationHistory[index].images;
-            this.annotationHistory.splice(index, 1);
+            this.currentBoundingData = (from == "previous" ? this.annotationPrevious[index].images : this.annotationHistory[index].images);
+
+            if (from == 'previous') {
+              this.annotationPrevious.splice(index, 1);
+            } else if (from == 'history') {
+              this.annotationPrevious = this.annotationHistory.slice(index + 1)
+            }
           }, 0);
         };
         if (this.projectType == 'log') {
@@ -1129,13 +1714,15 @@ export class AnnotateComponent implements OnInit {
         if (responseSr.flag && responseSr.flag.silence) {
           this.silenceStatus = true;
         };
-
+        if (this.projectType === 'ner') {
+          this.resetNerSrData([responseSr]);
+        };
         this.sr._id = responseSr._id;
         this.sr.originalData = responseSr.originalData;
         this.sr.flag = responseSr.flag;
         this.sr.userInputs = responseSr.userInputs;
         if (this.projectType !== 'image') {
-          this.categoryBackFunc(index);
+          this.categoryBackFunc(index, from);
         };
         if (this.isNumeric) {
           setTimeout(() => {
@@ -1146,7 +1733,8 @@ export class AnnotateComponent implements OnInit {
         console.log('failed to get data')
       }
     }, error => {
-      console.log(error)
+      console.log(error);
+      this.loading = false;
     });
   }
 
@@ -1166,7 +1754,7 @@ export class AnnotateComponent implements OnInit {
               ids.push(bb[i].id);
               if (ids.length == 2) {
                 if (ids[0] == ids[1]) {
-                  aa[j].ids = String(ids[0])
+                  aa[j].ids = String(ids[0]);
                 } else {
                   let flag = [];
                   for (let k = ids[0]; k < ids[1] + 1; k++) {
@@ -1292,6 +1880,7 @@ export class AnnotateComponent implements OnInit {
     if (this.LabelStudioService.imageLabelInfo && this.LabelStudioService.imageLabelInfo.completionStore) {
       this.currentBoundingData = this.LabelStudioService.imageLabelInfo.completionStore.selected.serializeCompletion();
       this.highlightedNode = this.LabelStudioService.imageLabelInfo.completionStore.selected.highlightedNode;
+      // this.actionError = null;
       // console.log("currentBoundingData:::", this.currentBoundingData)
       // console.log("highlightedNode:::", this.highlightedNode)
       if (this.highlightedNode && this.highlightedNode.type === "rectangleregion") {
@@ -1301,6 +1890,8 @@ export class AnnotateComponent implements OnInit {
       }
     }
   }
+
+
 
 
   onMouseDownTxt(data, row) {
@@ -1333,8 +1924,75 @@ export class AnnotateComponent implements OnInit {
       this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
       this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd));
       this.spansList = this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + this.spanEnd), this.spansList, indexDom, this.el.nativeElement.querySelector('.customBadge' + this.spanEnd));
+    } else if (this.spanEnd > this.spanStart) {
+      for (let a = this.spanStart; a < this.spanEnd + 1; a++) {
+        let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
+        let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
+        let indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
+        this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
+        if (pDom) {
+          pDom.style.backgroundColor = this.toolService.hexToRgb(this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID]);
+          if (_.indexOf(this.toGetLogLines(this.spansList), pDom.classList[0].split('-').pop()) < 0) {
+            this.spansList.push({ line: pDom.classList[0].split('-').pop(), label: this.categories[this.selectedEntityID], freeText: this.questionForm.get('questionGroup.freeText').value, index: a, selected: false })
+          } else {
+            for (let i = 0; i < this.spansList.length; i++) {
+              if (this.spansList[i].line == pDom.classList[0].split('-').pop()) {
+                this.spansList[i].label = this.categories[this.selectedEntityID];
+                this.spansList[i].freeText = this.questionForm.get('questionGroup.freeText').value;
+                this.spansList[i].index = a;
+                this.spansList[i].selected = false;
+                break;
+              }
+            }
+          };
+        }
+
+        if (txtRowEntityDom) {
+          txtRowEntityDom.style.backgroundColor = this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID];
+        }
+        this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
+        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList, indexDom, this.el.nativeElement.querySelector('.customBadge' + a));
+        this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+
+        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a), this.spansList, indexDom, this.el.nativeElement.querySelector('.customBadge' + a));
+      }
+    } else {
+      for (let a = this.spanEnd; a < this.spanStart + 1; a++) {
+        let pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
+        let indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
+        this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
+        if (pDom) {
+          pDom.style.backgroundColor = this.toolService.hexToRgb(this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID]);
+          if (_.indexOf(this.toGetLogLines(this.spansList), pDom.classList[0].split('-').pop()) < 0) {
+            this.spansList.push({ line: pDom.classList[0].split('-').pop(), label: this.categories[this.selectedEntityID], freeText: this.questionForm.get('questionGroup.freeText').value, index: a, selected: false })
+          } else {
+            for (let i = 0; i < this.spansList.length; i++) {
+              if (this.spansList[i].line == pDom.classList[0].split('-').pop()) {
+                this.spansList[i].label = this.categories[this.selectedEntityID];
+                this.spansList[i].freeText = this.questionForm.get('questionGroup.freeText').value;
+                this.spansList[i].index = a;
+                this.spansList[i].selected = false;
+                break;
+              }
+            }
+          };
+        };
+
+        let txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
+        if (txtRowEntityDom) {
+          txtRowEntityDom.style.backgroundColor = this.colorsRainbow[from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID];
+        }
+        this.getElementService.toFindDomAddText(txtRowEntityDom, this.categories[this.selectedEntityID], 'txtEntityLabel');
+        this.getElementService.toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList, indexDom, this.el.nativeElement.querySelector('.customBadge' + a));
+        this.getElementService.toListenMouseIn(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toListenMouseOut(pDom, this.el.nativeElement.querySelector('.clear-' + a));
+        this.getElementService.toClearSelected(txtRowEntityDom, pDom, this.el.nativeElement.querySelector('.clear-' + a), this.spansList, indexDom, this.el.nativeElement.querySelector('.customBadge' + a));
+
+      }
     }
     // console.log('this.spansList:::', this.spansList)
+    this.actionError = null;
     this.toCheckSpanslist(this.spansList);
   }
 
@@ -1491,10 +2149,10 @@ export class AnnotateComponent implements OnInit {
 
 
   onEnterFilter(e) {
-    if (e) {
+    if (e.value) {
       if (this.filterType == 'regex') {
         try {
-          this.toolService.regexExec(e, 'test');
+          this.toolService.regexExec(e.value, 'test');
           this.regexErr = false;
         } catch (err) {
           console.log("regErr:", err);
@@ -1504,16 +2162,15 @@ export class AnnotateComponent implements OnInit {
       } else {
         this.regexErr = false;
       }
-      this.filterList.push({ filterType: this.filterType, filterText: e });
+      this.filterList.push({ filterType: this.filterType, filterText: e.value });
       this.questionForm.get('questionGroup.filterText').reset();
       this.toFilterLog(this.filterList);
-
-
     }
   }
 
 
   blurFilter(e) {
+
     if (e.target.value) {
       if (this.filterType == 'regex') {
         try {
@@ -1604,9 +2261,25 @@ export class AnnotateComponent implements OnInit {
         });
       }, 10);
     }
-
   }
 
+
+  onSelectingReviewee(e) {
+    this.getOneReview('order');
+  }
+
+
+  changeReviewOrder(e) {
+    this.reviewOrder = e.target.value;
+    this.getOneReview('order');
+  }
+
+
+
+  outOfPage() {
+    this.error = null;
+    this.router.navigate(['game'], { queryParams: { outfrom: this.startFrom == 'review' ? 'review' : 'annotate', hash: 'max' } })
+  }
 
 
   ngOnDestroy() {

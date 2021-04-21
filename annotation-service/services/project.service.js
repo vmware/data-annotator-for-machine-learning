@@ -363,17 +363,33 @@ async function projectLeaderBoard(req) {
     return result;
 }
 
-async function removeSkippedCase(id, user) {
+async function removeSkippedCase(id, user, review) {
     
     console.log(`[ PROJECT ] Service removeSkippedCase.findUpdateProject`);
-    
-    const conditions = { _id: ObjectId(id), "userCompleteCase.user": user };
-    const update = { $set: { "userCompleteCase.$.skip": 0 } };
+
+    if (review) {
+        conditions = { _id: ObjectId(id), "reviewInfo.user": user };
+        update = { $set: { "reviewInfo.$.skip": 0 } };
+    }else{
+        conditions = { _id: ObjectId(id), "userCompleteCase.user": user };
+        update = { $set: { "userCompleteCase.$.skip": 0 } };
+    }
+
     const options = { new: true };
     
     return await projectDB.findUpdateProject(conditions, update, options);
 }
 
+async function getReviewList(req) {
+    
+    console.log(`[ PROJECT ] Service getReviewList.checkAnnotator`);
+    const user = req.auth.email;
+    await validator.checkAnnotator(user);
+    
+    const conditions = { creator: { $regex: user }, projectType: PROJECTTYPE.LOG };
+    const options = { sort: { updatedDate: -1 } };
+    return await mongoDb.findByConditions(ProjectModel, conditions, null, options);
+}
 
 module.exports = {
     getProjects,
@@ -386,4 +402,5 @@ module.exports = {
     projectLeaderBoard,
     removeSkippedCase,
     checkProjectName,
+    getReviewList,
 }

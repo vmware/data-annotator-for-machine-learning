@@ -222,7 +222,7 @@ export class AdminComponent implements OnInit {
           this.setUserErrMessage = 'Wrong format! Only accept email address';
         }
       } else {
-        emailReg = RegExp("@vmware.com\\s*$").test(this.inputEmail);
+        emailReg = /^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/.test(this.inputEmail);
         if (!emailReg) {
           this.setUserErrMessage = 'Wrong format! Email only accept vmware emailbox';
         }

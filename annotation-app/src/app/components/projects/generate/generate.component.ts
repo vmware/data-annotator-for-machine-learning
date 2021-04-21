@@ -80,7 +80,6 @@ export class GenerateComponent implements OnInit {
 
   downloadOriginal(urls) {
     this.downloadService.downloadMultiple(urls);
-
   }
 
 }
