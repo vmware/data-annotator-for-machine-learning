@@ -8,8 +8,8 @@ SPDX-License-Identifier: Apache-2.0 -->
   <h2>Projects</h2>
   <clr-tabs>
     <clr-tab>
-      <button clrTabLink>Annotate</button>
-      <clr-tab-content id="content1" *clrIfActive="true">
+      <button clrTabLink (click)='clickAnnotate()'>Annotate</button>
+      <clr-tab-content id="content1" *clrIfActive="!isShowReviewTab">
         <div class="row clr-row">
           <div class="clr-col-md-10 clr-col-12">
             <div class="row clr-row">
@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid" style="max-width:300px">Creator
           </clr-dg-column>
           <clr-dg-column [clrDgField]="'createdDate'" class="ellipsis-datagrid">Created Date</clr-dg-column>
-          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">Annotation Updated Date</clr-dg-column>
+          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">Updated Date</clr-dg-column>
           <clr-dg-column [clrDgField]="'dataSource'" class="ellipsis-datagrid" style="max-width:300px">Data Source
           </clr-dg-column>
           <clr-dg-column [clrDgField]="'assignmentLogic'" class="ellipsis-datagrid">Assignment Logic</clr-dg-column>
@@ -94,8 +94,8 @@ SPDX-License-Identifier: Apache-2.0 -->
       </clr-tab-content>
     </clr-tab>
     <clr-tab *ngIf="user.role=='Admin' || user.role=='Project Owner'">
-      <button clrTabLink>Review</button>
-      <clr-tab-content *clrIfActive>
+      <button clrTabLink (click)='clickReview()'>Review</button>
+      <clr-tab-content *clrIfActive="isShowReviewTab">
         <div class="row clr-row">
           <div class="clr-col-md-10 clr-col-12">
             <div class="row clr-row">
@@ -116,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid" style="max-width:300px">Creator
           </clr-dg-column>
           <clr-dg-column [clrDgField]="'createdDate'" class="ellipsis-datagrid">Created Date</clr-dg-column>
-          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">Review Updated Date</clr-dg-column>
+          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">Updated Date</clr-dg-column>
           <clr-dg-column [clrDgField]="'dataSource'" class="ellipsis-datagrid" style="max-width:300px">Data Source
           </clr-dg-column>
           <clr-dg-column [clrDgField]="'userCompleteCase'" class="ellipsis-datagrid" style="min-width:300px">

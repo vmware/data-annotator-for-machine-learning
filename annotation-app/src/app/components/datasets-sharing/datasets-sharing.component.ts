@@ -153,7 +153,8 @@ export class DatasetsSharingComponent implements OnInit {
           projectName: e.projectName,
           src: 'community',
           labelType: e.labelType,
-          projectType: e.projectType
+          projectType: e.projectType,
+          originalDataSets: res.originalDataSets
         };
       }
     }, (error: any) => {
