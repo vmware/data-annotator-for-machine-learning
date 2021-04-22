@@ -105,22 +105,13 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="clr-form-group left-project-info">
               <div class="clr-row" style="margin-bottom: 0.3rem;" *ngFor="let item of progressInfo.userCompleteCase">
                 <label class="clr-col-3 keepAllWord" title="{{item.fullName}}">{{item.fullName}}</label>
-                <!-- <div class="progress-group"> -->
-                <!-- <div class="progress-static">
-                    <div class="progress-meter" data-value="{{item.annotatedTickets / progressInfo.totalCase * 100}}"
-                      data-displayval="{{item.annotatedTickets / progressInfo.totalCase * 100}}%"></div>
-                    <span>{{item.annotatedTickets / progressInfo.totalCase * 100}}%</span>
-                  </div>
-                  <div class="progress-static success">
-                    <div class="progress-meter" data-value="{{item.reviewedTickets/item.annotatedTickets*100}}"
-                      data-displayval="{{item.reviewedTickets}}/{{item.annotatedTickets}}"></div>
-                    <span>{{item.reviewedTickets}}/{{item.annotatedTickets}}</span>
-                  </div> -->
                 <div class="clr-col">
-                  <clr-progress-bar clrValue='{{item.completeCase / progressInfo.totalCase * 100}}' clrLabeled
+                  <clr-progress-bar title="Annotation progress: (annotated tickets / total tickets)%"
+                    clrValue='{{item.completeCase / progressInfo.totalCase * 100}}' clrLabeled
                     clrDisplayval='{{item.completeCase / progressInfo.totalCase * 100 | mathRoundPipe}}%'>
                   </clr-progress-bar>
-                  <clr-progress-bar clrValue='{{item.reviewed/progressInfo.totalCase*100}}' clrSuccess clrLabeled
+                  <clr-progress-bar title="Review progress: reviewed tickets / annotated tickets"
+                    clrValue='{{item.reviewed/progressInfo.totalCase*100}}' clrSuccess clrLabeled
                     clrDisplayval='{{item.reviewed}}/{{item.completeCase}}'>
                   </clr-progress-bar>
                 </div>
