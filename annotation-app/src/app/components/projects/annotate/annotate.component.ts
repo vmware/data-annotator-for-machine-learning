@@ -1804,14 +1804,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     if (!sr.MSG) {
       let flag = [];
       sr = sr[0];
-      let a = 0;
-      // _.forIn(sr.originalData, function (value, key) {
-      //   flag.push({ index: a, line: key, text: value, freeText: '' });
-      //   a++
-      // });
-
-      // sr.originalData = flag;
       if (Object.prototype.toString.call(sr.originalData) !== '[object Array]') {
+        let a = 0;
         _.forIn(sr.originalData, function (value, key) {
           flag.push({ index: a, line: key, text: value, freeText: '' });
           a++
@@ -2087,7 +2081,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
 
   toFilterLog(e) {
-    console.log('updateFilterText:::', this.sr)
     let filterRowsIndex = [];
     this.sr.originalData.forEach(element => {
       element.filter = true;
