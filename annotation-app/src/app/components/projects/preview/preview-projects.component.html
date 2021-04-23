@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <clr-tab>
                     <button clrTabLink id="link1">Annotation</button>
                     <clr-tab-content id="content1" *clrIfActive="labelType=='numericLabel'">
-                        <div style="margin-top: 0.5rem;">
+                        <div *ngIf="projectType==='log'" style="margin-top: 0.5rem;">
                             <div class="btn-group btn-primary btn-icon">
                                 <button class="btn" (click)="modify(data,'multiple')">
                                     <clr-icon shape="note" title="To modify the annotated tickets"
