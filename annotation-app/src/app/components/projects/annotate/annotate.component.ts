@@ -286,7 +286,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         this.error = res.MSG;
         return;
       } else {
-        this.submitAndHistory([this.sr], from);
+        // this.submitAndHistory([this.sr], from);
+        this.submitAndHistory(res, from);
         this.sr = res;
         this.sr = this.resetLogSrData(this.sr);
         if (this.sr.flag && this.sr.flag.silence) {
@@ -635,6 +636,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     };
     if (this.projectType == 'log') {
       this.sr = this.resetLogSrData(this.sr);
+
       this.toFilterLog(this.filterList);
     }
     if (this.sr.flag && this.sr.flag.silence) {
@@ -1802,13 +1804,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     if (!sr.MSG) {
       let flag = [];
       sr = sr[0];
-      let a = 0;
-      _.forIn(sr.originalData, function (value, key) {
-        flag.push({ index: a, line: key, text: value, freeText: '' });
-        a++
-      });
+      if (Object.prototype.toString.call(sr.originalData) !== '[object Array]') {
+        let a = 0;
+        _.forIn(sr.originalData, function (value, key) {
+          flag.push({ index: a, line: key, text: value, freeText: '' });
+          a++
+        });
 
-      sr.originalData = flag;
+        sr.originalData = flag;
+      }
       return sr;
     } else {
       return sr;
@@ -2077,7 +2081,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
 
   toFilterLog(e) {
-    // console.log('updateFilterText:::', e)
     let filterRowsIndex = [];
     this.sr.originalData.forEach(element => {
       element.filter = true;
