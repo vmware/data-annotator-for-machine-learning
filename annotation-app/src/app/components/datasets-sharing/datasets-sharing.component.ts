@@ -98,7 +98,6 @@ export class DatasetsSharingComponent implements OnInit {
 
   generateProject(e) {
 
-
     if (e.labelType == 'numericLabel') {
       for (let i = 0; i < this.datasets.length; i++) {
         if (this.datasets[i].id == e.id) {
@@ -132,8 +131,17 @@ export class DatasetsSharingComponent implements OnInit {
       });
     } else {
       e.src = 'community';
-      this.msgGenerate = e;
       this.showGenerateDatasets = true;
+      if (e.projectType == 'log') {
+        this.avaService.downloadProject(e.id).subscribe(res => {
+          if (res) {
+            e.originalDataSets = res.originalDataSets;
+            this.msgGenerate = e;
+          }
+        }, (error: any) => {
+          console.log(error);
+        });
+      }
     }
   }
 
