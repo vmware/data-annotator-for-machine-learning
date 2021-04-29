@@ -309,9 +309,10 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="clr-control-container clr-col-6" style="margin-top: 1rem;"
               [ngClass]="{'clr-error': clrErrorTip}">
               <div class="clr-input-wrapper">
-                <input #numericInput autocomplete="off" type="text" id="example" placeholder="Enter value here"
-                  class="clr-input" style="width: 90%;" (keydown.enter)="enterNumeric($event)"
-                  (keyup)="enterNumericUp($event)" [(ngModel)]="labelChoose" [ngModelOptions]="{standalone: true}">
+                <input #numericInput autocomplete="off" type="text" id="example"
+                  placeholder="Input value here and press enter" class="clr-input" style="width: 90%;"
+                  (keyup.enter)="enterNumeric($event)" (keyup)="enterNumericUp($event)" [(ngModel)]="labelChoose"
+                  [ngModelOptions]="{standalone: true}">
                 <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
               </div>
               <span class="clr-subtext">{{numericMessage}}</span>
