@@ -1287,6 +1287,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     } else {
       this.labelChoose = e.target.value;
       this.clrErrorTip = false;
+      this.onSubmit();
     }
   };
 
