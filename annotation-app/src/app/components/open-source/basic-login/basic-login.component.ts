@@ -11,7 +11,7 @@ import { AvaService } from 'app/services/ava.service';
 import { UserAuthService } from 'app/services/user-auth.service';
 import { SessionStatus } from "../../../model/authentication";
 import { Router } from '@angular/router';
-
+import { EnvironmentsService } from 'app/services/environments.service';
 
 @Component({
   selector: 'app-login',
@@ -32,6 +32,7 @@ export class basicLoginComponent implements OnInit {
     private avaService: AvaService,
     private userAuthService: UserAuthService,
     private router: Router,
+    public env: EnvironmentsService,
   ) { }
 
 
@@ -105,7 +106,7 @@ export class basicLoginComponent implements OnInit {
           email: res.email,
           name: res.fullName,
           fullName: res.fullName,
-          provider: 'Data-annotation',
+          provider: this.env.config.serviceTitle,
           token: res.token
         };
         this.userAuthService.addUserToStorage(user, true)
