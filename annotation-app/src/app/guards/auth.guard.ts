@@ -39,7 +39,7 @@ export class AuthGuard implements CanActivate {
 
 
   checkRole(url) {
-    const role = JSON.parse(localStorage.getItem(this.env.config.USER_KEY)).role;
+    const role = JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).role;
     if (role && role != '') {
       if (role == 'Annotator' && (url.includes('projects') || url.includes('admin') || url.includes('myDatasets') || url.includes('appendNewEntries'))) {
         this.router.navigate(['home']);

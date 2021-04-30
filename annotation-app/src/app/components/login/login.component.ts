@@ -59,7 +59,7 @@ export class LoginComponent implements OnInit {
         if (state !== this.env.config.STATE) {
           return Observable.throw("Wrong state...");
         }
-        let redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl);
+        let redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl ? this.env.config.redirectUrl : '/home');
         return this.userAuthService.loging(code, this.env.config.CLIENT_ID, redirectUrl);
       }))
       .subscribe(
