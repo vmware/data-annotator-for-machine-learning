@@ -79,9 +79,9 @@ export class HeaderComponent implements OnInit {
     this.avaService.getUserRole().subscribe(userInfo => {
       if (userInfo) {
         this.role = userInfo.role;
-        let resNew = JSON.parse(localStorage.getItem(this.env.config.USER_KEY));
+        let resNew = JSON.parse(localStorage.getItem(this.env.config.serviceTitle));
         resNew.role = this.role;
-        localStorage.setItem(this.env.config.USER_KEY, JSON.stringify(resNew));
+        localStorage.setItem(this.env.config.serviceTitle, JSON.stringify(resNew));
         // this.handleRole.handler.next(this.role);
         if (this.role == 'Project Owner') {
           this.showProjectTab = true;
