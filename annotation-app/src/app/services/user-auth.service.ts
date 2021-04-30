@@ -46,7 +46,7 @@ export class UserAuthService {
   }
 
   private storageEventListener(event: StorageEvent) {
-    if (event.storageArea === localStorage && event.key === this.env.config.USER_KEY) {
+    if (event.storageArea === localStorage && event.key === this.env.config.serviceTitle) {
       if (event.newValue) {
 
         const authUser: AuthUser = JSON.parse(event.newValue);
@@ -59,10 +59,10 @@ export class UserAuthService {
 
   public addUserToStorage(user: AuthUser, persistent: boolean) {
     if (persistent) {
-      localStorage.setItem(this.env.config.USER_KEY, JSON.stringify(user));
+      localStorage.setItem(this.env.config.serviceTitle, JSON.stringify(user));
 
     } else {
-      sessionStorage.setItem(this.env.config.USER_KEY, JSON.stringify(user));
+      sessionStorage.setItem(this.env.config.serviceTitle, JSON.stringify(user));
     }
   }
 
@@ -70,7 +70,7 @@ export class UserAuthService {
 
 
   public loggedUser(): AuthUser {
-    const storedUser = localStorage.getItem(this.env.config.USER_KEY);
+    const storedUser = localStorage.getItem(this.env.config.serviceTitle);
     if (storedUser) {
       const user = JSON.parse(storedUser);
       if (AuthUtil.isValidUser(user)) {
@@ -103,14 +103,14 @@ export class UserAuthService {
 
   public clearSession(): void {
     this.userSubject.next(null);
-    localStorage.removeItem(this.env.config.USER_KEY);
-    sessionStorage.removeItem(this.env.config.USER_KEY);
+    localStorage.removeItem(this.env.config.serviceTitle);
+    sessionStorage.removeItem(this.env.config.serviceTitle);
   }
 
 
 
   redirectToLogin() {
-    const redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl);
+    const redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl ? this.env.config.redirectUrl : '/home');
     window.location.href = `${this.env.config.authUrl}/authorize?response_type=code&client_id=${this.env.config.CLIENT_ID}&redirect_uri=${redirectUrl}&state=${this.env.config.STATE}&bypass_uri_check=true`;
   }
 
@@ -134,7 +134,7 @@ export class UserAuthService {
 
 
   clearCurrentSession() {
-    localStorage.removeItem(this.env.config.USER_KEY);
+    localStorage.removeItem(this.env.config.serviceTitle);
     this.currentSession.next(null);
   }
 
@@ -260,9 +260,9 @@ export class UserAuthService {
     this.http.get(`${this.env.config.annotationService}/api/v1.0/token`, {
       headers: new HttpHeaders().append('Authorization', this.loggedUser().token.access_token),
     }).subscribe(res => {
-      let storedUser = JSON.parse(localStorage.getItem(this.env.config.USER_KEY));
+      let storedUser = JSON.parse(localStorage.getItem(this.env.config.serviceTitle));
       storedUser.token = res;
-      localStorage.setItem(this.env.config.USER_KEY, JSON.stringify(storedUser));
+      localStorage.setItem(this.env.config.serviceTitle, JSON.stringify(storedUser));
       this.autoRefreshToken();
     }, err => {
       this.sessionLifetimeSubject.next(SessionStatus.EXPIRED);
@@ -275,16 +275,5 @@ export class UserAuthService {
     const redirectUrl = window.location.origin + this.location.prepareExternalUrl('/');
     window.location.href = `${redirectUrl}`;
   }
-
-  // addRoleToUser(email, user) {
-  //   this.http.get(`${this.env.config.annotationService}/api/v1.0/users/roles`, {
-  //     headers: new HttpHeaders().append('Authorization', this.loggedUser().token.access_token),
-  //   }).subscribe(res => {
-  //     let resNew = JSON.parse(JSON.stringify(res));
-  //     user.role = resNew.role;
-  //     localStorage.setItem(USER_KEY, JSON.stringify(user));
-  //   })
-  // }
-
 
 }

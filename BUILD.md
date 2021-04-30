@@ -1,16 +1,18 @@
 # Data Annotator for Machine Learning (DAML) build and development setup
 
 The project includes three components:
-- [___annotation-app___](./annotation-app): Angular application built with **Angular** 8.x, **NPM** 6+
-- [___annotation-service___](./annotation-service): Backend services built with [__Node__](https://nodejs.org/en/) 10+, [__mongodb__](https://www.mongodb.com/download-center/community) 3.5+, [__express__](https://www.npmjs.com/package/express) 4.17.1
-- [___active-learning-service___](./active-learning-service): Django application providing active learning api built with Python 3.6+ and Django 3.2 and modAL library for pool-based uncertainty sampling to rank the unlabelled data
+
+- [**_annotation-app_**](./annotation-app): Angular application built with **Angular** 8.x, **NPM** 6+
+- [**_annotation-service_**](./annotation-service): Backend services built with [**Node**](https://nodejs.org/en/) 10+, [**mongodb**](https://www.mongodb.com/download-center/community) 3.5+, [**express**](https://www.npmjs.com/package/express) 4.17.1
+- [**_active-learning-service_**](./active-learning-service): Django application providing active learning api built with Python 3.6+ and Django 3.2 and modAL library for pool-based uncertainty sampling to rank the unlabelled data
 
 ## Tools used
 
 Building requires:
-* Node 10+
-* NPM 6+
-* Python 3.6+
+
+- Node 10+
+- NPM 6+
+- Python 3.6+
 
 ## Installation
 
@@ -18,7 +20,7 @@ Building requires:
 # clone the repo
 $ git clone https://github.com/vmware/data-annotator-for-machine-learning.git
 
-# install annotation-app 
+# install annotation-app
 $ cd annotation-app
 $ npm install
 
@@ -40,31 +42,29 @@ You need to set the following required variables in the environment.ts file to r
 
 ```javascript
 export const environment: Env = {
-
   // This section is required
   production: false,
-  annotationService: 'http://localhost:3000', // Annotation service url
-  serviceTitle: 'Data-annotation', // UI name of annotation-app.
-  provider: 'Data-annotation', // Authentcation provider
-  USER_KEY: 'data-annotation-user', // user key name in localstorage
-  redirectUrl: '/home', // redirect URL after logout or token is expired
+  annotationService: "http://localhost:3000", // Annotation service url
+  serviceTitle: "Data Annotator for Machine Learning", // UI name of annotation-app.
 
   // This section is optional
+  redirectUrl: "/home", // redirect URL after logout or token is expired
   videoSrc: null, // demo video link in home page, or set null to show nothing
   googleTrackId: null, // google track ID
-  enableSendEmail: true // Set to true to enable email notification for project creation or annotator assignment
-}
+  enableSendEmail: false // Set to true to enable email notification for project creation, annotator assignment or edit project owner
+};
 ```
-	
+
 To configure specific environments for dev, staging, production, go to annotation-app/src/app/services/environment.service.ts and set variables in different environments with the key **APP_CONFIG**. Then you can read the value in this environment.service.ts.
 
-------------
+---
+
 ### annotation-service
 
 You need to set the following required variables in [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) file to run the annotation-service locally.
 
 ```javascript
-module.exports  = {
+module.exports = {
   //AWS CONFIG IAM
   region: process.env.REGION || null,
   accessKeyId: process.env.ACCESSKEY_ID || null,
@@ -77,12 +77,11 @@ module.exports  = {
   sqsUrl: process.env.SQS_URL || null,
 
   //annotation-app url
-  WebClientUrl: process.env.WEBCLIENT_URL || 'http://localhost:4200',
+  WebClientUrl: process.env.WEBCLIENT_URL || "http://localhost:4200",
   //active-learning-service url
   loopALApiUrl: process.env.LOOP_AL_URL || "http://localhost:8000/api",
   //mongodb url
-  mongoDBUrl: process.env.MONGODB_URL || 'mongodb://localhost/loop',
-
+  mongoDBUrl: process.env.MONGODB_URL || "mongodb://localhost/loop"
 };
 ```
 
@@ -95,10 +94,11 @@ To enable email notifications, you need to set _enableEmail_ to true. If you use
 You can change the sysEnv at [annotation-service/config/config.js](./annotation-service/config/config.js) or get the value from server environment (_process.env.xxx_) for easy build and deployment.
 
 ```javascript
-const sysEnv = process.env.SYS_ENV || "os"
+const sysEnv = process.env.SYS_ENV || "os";
 ```
 
-------------
+---
+
 ### active-learning-service
 
 You need to set the following required variables in [active-learning-service/config/app_os.py](./active-learning-service/config/app_os.py) file to run the active-learning-service locally.
@@ -125,6 +125,7 @@ env = os.getenv('SYS_ENV', 'os')
 ```
 
 ## Run at Local
+
 After the installation and configuration of DAML, you can run the DAML application as follow:
 
 ```bash
