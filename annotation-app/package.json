@@ -38,7 +38,7 @@
     "js-untar": "^2.0.0",
     "jszip": "3.5.0",
     "label-studio": "0.8.0",
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "mutationobserver-shim": "0.3.2",
     "ng2-charts": "1.6.0",
     "ngx-papaparse": "4.0.4",
