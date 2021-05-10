@@ -29,7 +29,8 @@
         "sqs-consumer": "^5.5.0",
         "swagger-ui-express": "^4.1.6",
         "universal-analytics": "^0.4.23",
-        "unzip-stream": "^0.3.1"
+        "unzip-stream": "^0.3.1",
+        "hosted-git-info": ">=2.8.9"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "2.11.0",
