@@ -33,7 +33,6 @@
     "aws-amplify-angular": "4.1.7",
     "aws-sdk": "2.628.0",
     "buffer": "5.5.0",
-    "chart.js": "2.7.2",
     "core-js": "2.4.1",
     "js-untar": "^2.0.0",
     "jszip": "3.5.0",
