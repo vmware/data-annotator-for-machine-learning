@@ -65,7 +65,7 @@ async function execute(req, sendEmail, annotators, append) {
     const path2 = filePath.toLowerCase().split(".");
     const fileType = path2[path2.length-1];
   
-    if (type.toLowerCase() == 'file' && size && !fileName.startsWith("._") && fileType == DATASETTYPE.LOG) {
+    if (type.toLowerCase() == 'file' && !fileName.startsWith("._") && fileType == DATASETTYPE.LOG) {
       
       let index = 0, textLines = {};
       const readInterface = readline.createInterface({ input: stream });
