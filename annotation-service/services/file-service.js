@@ -227,7 +227,7 @@ async function prepareContents(srData, project, format) {
             });
             
             await srs.userInputs.forEach(async item => {
-                await item.problemCategory.forEach(async lb =>{
+                await item.problemCategory.sort((a,b) => {return a.line - b.line}).forEach(async lb =>{
                     await project.categoryList.split(",").forEach((label) => {
                         if (lb.label === label) {
                             const line = lb.line;
