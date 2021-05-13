@@ -14,7 +14,7 @@ const { PROJECTTYPE, SRCS, LABELTYPE, ROLES } = require("../config/constant");
 const validator = require('../utils/validator');
 const mongoDb = require('../db/mongo.db');
 const { getModelProject } = require('../utils/mongoModel.utils');
-const { ProjectModel, UserModel } = require('../db/db-connect');
+const { ProjectModel, UserModel, LogModel } = require('../db/db-connect');
 
 async function getProjects(req) {
     console.log(`[ PROJECT ] Service getProjects query user role`);
@@ -391,6 +391,18 @@ async function getReviewList(req) {
     return await mongoDb.findByConditions(ProjectModel, conditions, null, options);
 }
 
+async function getLogProjectFileList(req) {
+    
+    console.log(`[ PROJECT ] Service getReviewList.checkAnnotator`);
+    const condition = {_id: ObjectId(req.query.pid)}
+    const pro = await validator.checkProjectByconditions(condition, true);
+    const schema = [
+        { $match: { projectName: pro[0].projectName } },
+        { $project: {fileName: "$fileInfo.fileName"}}
+    ]
+    return await mongoDb.aggregateBySchema(LogModel, schema);
+}
+
 module.exports = {
     getProjects,
     getProjectByAnnotator,
@@ -403,4 +415,6 @@ module.exports = {
     removeSkippedCase,
     checkProjectName,
     getReviewList,
+    getLogProjectFileList,
+
 }
