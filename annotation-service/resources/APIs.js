@@ -41,6 +41,7 @@ module.exports = {
     SRS_PROGRESS: "/projects/users/progression",//no
     PROJECT_REVIEW_LIST: "/projects/review",
     PROJECT_LOG_FILE_LIST:"/projects/log/files",
+    PROJECT_LOG_FILE_FILTER:"/projects/log/filter",
     
     //tickets
     SRS_UPDATE: "/projects/tickets",//swagger
