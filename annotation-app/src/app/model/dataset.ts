@@ -45,7 +45,8 @@ export class DatasetUtil {
       min: null,
       max: null,
       multipleLabel: null,
-      selectedText: null
+      selectedText: null,
+      isShowFilename: false
 
     };
   }
@@ -91,6 +92,7 @@ export interface DatasetData {
   max: any;
   multipleLabel: boolean;
   selectedText: string;
+  isShowFilename: boolean;
 }
 
 export interface DatasetFile {
