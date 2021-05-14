@@ -103,7 +103,8 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         projectType: req.body.projectType,
         encoder: req.body.encoder,
         isMultipleLabel: req.body.isMultipleLabel === 'true'? true: false,
-        regression: req.body.regression === 'true'? true: false
+        regression: req.body.regression === 'true'? true: false,
+        isShowFilename: req.body.isShowFilename === 'true'? true: false,
     };
     return await projectDB.saveProject(project);
 }

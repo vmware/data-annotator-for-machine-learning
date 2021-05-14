@@ -29,7 +29,7 @@ async function getProjects(req) {
     if (src == SRCS.ANNOTATE) {
         console.log(`[ PROJECT ] Service query current annotator project list`);
         condition = { annotator: { $regex: email } };
-        project = "projectName taskInstructions creator  createdDate updatedDate dataSource assignmentLogic totalCase projectCompleteCase userCompleteCase categoryList labelType min max projectType isMultipleLabel";
+        project = "projectName taskInstructions creator  createdDate updatedDate dataSource assignmentLogic totalCase projectCompleteCase userCompleteCase categoryList labelType min max projectType isMultipleLabel isShowFilename";
         let projectInfo = await projectDB.queryProjectByConditions(condition, project, options);
 
         if (projectInfo.length == 0) {
@@ -176,6 +176,9 @@ async function updateProject(req) {
     }
     if (req.body.trigger) {
         update.$set['al.trigger'] = req.body.trigger;
+    }
+    if (req.body.isShowFilename) {
+        update.$set['isShowFilename'] = req.body.isShowFilename;
     }
 
     //edit lables
