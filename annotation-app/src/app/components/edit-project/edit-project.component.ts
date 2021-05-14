@@ -66,6 +66,7 @@ export class EditProjectComponent implements OnInit {
   isShowDeleteModal: boolean = false;
   deleteLabelInfo: any;
   deleteLabelComplete: boolean = false;
+  isShowFilename: any;
 
   constructor(
     private avaService: AvaService,
@@ -103,6 +104,7 @@ export class EditProjectComponent implements OnInit {
     this.assigneeList = JSON.parse(JSON.stringify(this.msg.annotator));
     this.ownerList = JSON.parse(JSON.stringify(this.msg.creator));
     this.assignmentLogicEdit = this.msg.assignmentLogic;
+    this.isShowFilename = this.msg.isShowFilename?'yes':'no';
     this.oldMax = this.msg.max;
     this.oldMin = this.msg.min;
     this.msg.categoryList.split(',').forEach(element => {
@@ -322,6 +324,9 @@ export class EditProjectComponent implements OnInit {
         param.addLabels = [];
         param.editLabels = {};
       };
+      if(this.msg.projectType==='log'){
+        param['isShowFilename']=this.isShowFilename=='yes'?true:false;
+      }
       this.avaService.saveProjectEdit(param).subscribe(res => {
         if (this.env.config.enableSendEmail) {
           let param: object = {

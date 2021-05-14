@@ -16,7 +16,8 @@ export interface SR {
   MSG?: string,
   flag?: any,
   images?: any,
-  userInputsLength?: number
+  userInputsLength?: number,
+  fileInfo?:any
 }
 export interface UserInput {
   problemCategory: any,

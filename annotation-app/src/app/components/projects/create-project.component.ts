@@ -3,7 +3,7 @@ Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import { Component, OnInit, Input, Output, EventEmitter, Renderer2, ɵConsole } from "@angular/core";
+import { Component, OnInit, Input, Output, EventEmitter, Renderer2 } from "@angular/core";
 import { FormGroup, FormBuilder } from "@angular/forms";
 import { Observable, Subject } from "rxjs";
 import { AvaService } from "../../services/ava.service";
@@ -59,7 +59,6 @@ export class CreateNewComponent implements OnInit {
   descriptions = [];
   chooseLabel = [];
   selectDescription = [];
-  // selectLabel: string;
   selectColumns = [];
   pageSize: number;
   page: number;
@@ -186,7 +185,8 @@ export class CreateNewComponent implements OnInit {
       selectedClassifier: ["", DatasetValidator.required()],
       selectedEncoder: ["", DatasetValidator.required()],
       multipleLabel: [this.dataset.multipleLabel, null],
-      selectedText: [this.dataset.selectedText, ""]
+      selectedText: [this.dataset.selectedText, ""],
+      isShowFilename: [this.dataset.isShowFilename, ""]
     });
   }
 
@@ -304,6 +304,10 @@ export class CreateNewComponent implements OnInit {
     } else {
       formData.append("labels", this.dsDialogForm.value.labels);
     };
+    if (this.projectType === 'log') {
+      formData.append("isShowFilename", JSON.stringify(this.dsDialogForm.get("isShowFilename").value));
+
+    }
     return this.avaService.postDataset(formData);
   }
 
@@ -454,7 +458,7 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogForm.get("multipleLabel").setValue(null);
     this.isMultipleLabel = null;
     this.dsDialogForm.get("selectedText").setValue(null);
-
+    this.dsDialogForm.get("isShowFilename").setValue(false);
 
     this.categoryList = [];
     this.minLabel = null;
@@ -536,7 +540,6 @@ export class CreateNewComponent implements OnInit {
     this.isShowNumeric = false;
     this.dsDialogForm.get("selectLabels").reset();
     this.selectDescription = [];
-    // this.selectLabel = "";
     this.setDataComplete = false;
     this.isSelectWrongColumn = false;
     this.selectColumns = [];
@@ -544,7 +547,7 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogForm.get("multipleLabel").setValue(null);
     this.isMultipleLabel = null;
     this.dsDialogForm.get("selectedText").setValue(null);
-
+    this.dsDialogForm.get("isShowFilename").setValue(false);
 
     this.datasetsList.forEach((dataset) => {
       if (dataset.dataSetName === e.target.value) {
@@ -1079,7 +1082,7 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-
+  // in tabular case to change the variable type
   // updateColumnFormat(column, e) {
   //   if (e.target.value != column.type) {
   //     this.isChangeVariable = true;
@@ -1089,7 +1092,6 @@ export class CreateNewComponent implements OnInit {
   //   } else {
   //     this.isChangeVariable = false;
   //   }
-
   // }
 
 
