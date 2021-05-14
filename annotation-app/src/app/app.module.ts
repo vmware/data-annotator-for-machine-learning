@@ -50,7 +50,7 @@ import { DownloadService } from "./services/common/download.service";
 import { ToolService } from "./services/common/tool.service";
 import { SliceTextPipe } from "./pipes/sliceText.pipe";
 import { MathRoundPipe } from "./pipes/math-round.pipe";
-
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
   declarations: [
@@ -94,7 +94,8 @@ import { MathRoundPipe } from "./pipes/math-round.pipe";
     ROUTING,
     ChartsModule,
     CoreModule,
-    SharedModule
+    SharedModule,
+    NgSelectModule
 
   ],
   providers: [
