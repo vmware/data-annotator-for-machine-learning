@@ -167,6 +167,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                         </clr-tooltip>
                     </div>
                 </div>
+                <div class="prev-info clr-row" *ngIf="msg.projectType=='log'">
+                    <label for="isShowFilename" class="label-tooltip clr-col-12 clr-col-md-4">Show File Name</label>
+                    <div class="clr-input-wrapper clr-col-12 clr-col-md-7">
+                        <label class="md-check format clr-row" style="margin-left:0.1rem;">
+                            <clr-radio-wrapper>
+                                <input type="radio" clrRadio class="clr-radio" [(ngModel)]="isShowFilename" value="yes"
+                                    id="yes" name="isShowFilename" />
+                                <label for="yes">&nbsp;Yes</label>
+                            </clr-radio-wrapper>&nbsp; &nbsp;
+                            <clr-radio-wrapper style="margin-left: 1.2rem;">
+                                <input type="radio" clrRadio class="clr-radio" [(ngModel)]="isShowFilename" value="no"
+                                    id="no" name="isShowFilename" />
+                                <label for="no">&nbsp;No</label>
+                            </clr-radio-wrapper>
+                        </label>
+                    </div>
+                </div>
                 <div class="prev-info clr-row"
                     *ngIf="!(labelType=='numericLabel' || msg.projectType=='ner' || msg.isMultipleLabel) && msg.src=='admin'">
                     <label for="trigger" class="label-tooltip clr-col-12 clr-col-md-4">Active Learning Threshold</label>

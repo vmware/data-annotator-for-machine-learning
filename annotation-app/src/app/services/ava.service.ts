@@ -297,4 +297,8 @@ export class AvaService {
     return this.http.patch(`${this.baseUrl}/projects/tickets/review`, payload);
   }
 
+  public getAllLogFilename(pid: any): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/projects/log/files?pid=${pid}`);
+  }
+
 }

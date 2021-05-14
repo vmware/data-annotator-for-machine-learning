@@ -112,7 +112,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   startFrom: string;
   annotationPrevious: any = [];
   reviewOrder: string = 'random';
-
+  selectedFile: number;
+  currentLogFile: string = 'nimbus-test-launcher.txt'
+  logFiles: any = [];
 
 
   constructor(
@@ -157,6 +159,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     this.createForm();
     this.getProjectsList();
     this.getProgress();
+    if (this.startFrom === 'review') {
+      this.getAllLogFilename();
+    }
 
   };
 
@@ -2278,6 +2283,37 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     this.getOneReview('order');
   }
 
+
+  getAllLogFilename() {
+    this.avaService.getAllLogFilename(this.projectId).subscribe(response => {
+
+      if (response) {
+        // response.forEach((element, index) => {
+        //   element.index = index + 1;
+        // });
+        this.logFiles = response;
+        this.selectedFile = this.logFiles[3]._id;
+        console.log(100, this.logFiles)
+      } else {
+        console.log(response)
+      }
+    }, error => {
+      console.log(error)
+    });
+  }
+
+
+  getTargetFile(file) {
+    console.log('getTargetFile:::', file)
+  }
+
+
+  blurFilename() {
+    console.log('blurFilename:::', this.selectedFile)
+    if (!this.selectedFile) {
+      this.selectedFile = this.selectedFile[3]._id;
+    }
+  }
 
 
   outOfPage() {
