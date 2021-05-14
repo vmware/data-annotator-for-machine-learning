@@ -393,12 +393,25 @@ async function getReviewList(req) {
 
 async function getLogProjectFileList(req) {
     
-    console.log(`[ PROJECT ] Service getReviewList.checkAnnotator`);
+    console.log(`[ PROJECT ] Service getLogProjectFileList`);
     const condition = {_id: ObjectId(req.query.pid)}
     const pro = await validator.checkProjectByconditions(condition, true);
     const schema = [
         { $match: { projectName: pro[0].projectName } },
-        { $project: {fileName: "$fileInfo.fileName"}}
+        { $project: {_id: 0, fileName: "$fileInfo.fileName"}},
+    ]
+    return await mongoDb.aggregateBySchema(LogModel, schema);
+}
+
+async function fileterLogTicketsByFileName(req) {
+    
+    console.log(`[ PROJECT ] Service fileterLogTicketsByFileName`);    
+    await validator.validateRequired(req.query.fname);
+
+    const condition = {_id: ObjectId(req.query.pid)}
+    const pro = await validator.checkProjectByconditions(condition, true);
+    const schema = [
+        { $match: { projectName: pro[0].projectName, "fileInfo.fileName": { $regex: req.query.fname } } },
     ]
     return await mongoDb.aggregateBySchema(LogModel, schema);
 }
@@ -416,5 +429,6 @@ module.exports = {
     checkProjectName,
     getReviewList,
     getLogProjectFileList,
+    fileterLogTicketsByFileName,
 
 }
