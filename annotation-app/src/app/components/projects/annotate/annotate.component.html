@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
         <div class=" leftBoard" [ngClass]="{ 'clr-col-3':!isDrawer, 'isDrawer':isDrawer}">
-          <h2>Annotate Details</h2>
+          <h2>{{startFrom==='review'?'Review Details':'Annotate Details'}}</h2>
 
           <div class="clr-form-group form-group clr-row">
             <label for="selectProject" class="label-leftBoard">Projects </label>&nbsp;&nbsp;
@@ -167,31 +167,28 @@ SPDX-License-Identifier: Apache-2.0 -->
             <span *ngIf='silenceStatus' style="color: #2F8400;font-size: 0.5em;">Reviewed for accuracy</span>
           </h2>
           <!-- to show the filename -->
-          <div *ngIf='projectType==="log" && startFrom!=="review"'>
+          <div *ngIf='projectType==="log" && startFrom!=="review" && projectInfo.isShowFilename' style="font-size:0.54167rem;">
             <div class="clr-row" style="margin-bottom: 0.7rem;">
-              <div class="clr-col-2" style="color: #999">
+              <div class="clr-col-2">
                 File Name
               </div>
-              <div class="clr-col-8">
-                <div class="clr-input-wrapper">
-                  <input type="text" class="clr-input filterText" style="color: #999;" readonly
-                    [(ngModel)]="currentLogFile" [ngModelOptions]="{standalone: true}">
-                </div>
+              <div class="clr-col-10">
+                <div style="margin-left: -0.5rem;word-break: break-all;"><span>{{currentLogFile}}</span></div>
               </div>
             </div>
           </div>
           <!-- to search the filename -->
-          <div *ngIf='projectType==="log" && startFrom==="review"'>
+          <div *ngIf='projectType==="log" && startFrom==="review"' style="font-size:0.54167rem;">
             <div class="clr-row">
-              <div class="clr-col-2" style="color: #999">
+              <div class="clr-col-2" style="margin-top: -0.15rem;;"> 
                 File Name
               </div>
-              <div class="clr-col-8">
-                <ng-select [items]="logFiles" bindLabel="fileName" bindValue="_id" [(ngModel)]="selectedFile"
+              <div class="clr-col-10">
+                <ng-select [items]="logFiles" bindLabel="fileName" bindValue="index" [(ngModel)]="selectedFile"
                   [ngModelOptions]="{standalone: true}" [searchable]=true [readonly]=fasle [markFirst]=true
                   [clearable]=false [virtualScroll]=true notFoundText="No file found" (change)="getTargetFile($event)"
                   (blur)="blurFilename()">
-                  <ng-option *ngFor="let logFile of logFiles" [value]="logFile._id" title="{{logFile.fileName}}">
+                  <ng-option *ngFor="let logFile of logFiles" [value]="logFile.index">
                     {{logFile.fileName}}
                   </ng-option>
                 </ng-select>
@@ -208,7 +205,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </select>
               </div>
 
-              <div class="clr-control-container clr-col-8 filterInput">
+              <div class="clr-control-container clr-col-10 filterInput">
                 <div class="clr-input-wrapper  ">
                   <input #filters autocomplete="off" type="text"
                     [placeholder]="filterType=='keyword'?'Type keyword to filter, for example, abc .':'Type custom regex rule to filter, for example, /[A-Z]/' "
