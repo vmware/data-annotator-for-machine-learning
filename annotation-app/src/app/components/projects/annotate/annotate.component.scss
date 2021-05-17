@@ -598,9 +598,8 @@ label .label-leftBoard {
 
 .filterSelect {
   width: 100%;
-  border: 1px solid #999;
+  border: 1px solid;
   border-radius: 3px;
-  color: #999;
   padding-left: 0.3rem;
   outline: unset;
 }
@@ -713,13 +712,13 @@ label .label-leftBoard {
 }
 
 ::ng-deep .ng-select .ng-select-container:after {
-  border-bottom-color: #999 !important;
+  // border-bottom-color: #999 !important;
   bottom: 0.3rem;
 }
 
-::ng-deep .ng-select .ng-arrow-wrapper .ng-arrow {
-  color: #999 !important;
-}
+// ::ng-deep .ng-select .ng-arrow-wrapper .ng-arrow {
+//   color: #999 !important;
+// }
 
 ::ng-deep .ng-select .ng-select-container {
   margin-top: -1rem;
@@ -743,10 +742,13 @@ label .label-leftBoard {
   .ng-select-container
   .ng-value-container
   .ng-value {
-  color: #999;
   margin-top: 0.6rem;
-  white-space: unset !important;
+  white-space: normal !important;
+  word-break: break-all;
 }
+
+
+
 
 ::ng-deep .ng-select .ng-select-container .ng-value-container {
   align-items: stretch;
@@ -755,19 +757,9 @@ label .label-leftBoard {
 }
 
 ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
-  // line-height: 0.1rem;
-  white-space: normal;
+  line-height: 0.8rem;
+  white-space: normal !important;
+  word-break: break-all;
+  margin-bottom: 0.3rem;
 }
 
-// ::ng-deep
-//   .ng-select.ng-select-focused
-//   .ng-select-container
-//   .ng-value-container
-//   .ng-placeholder {
-//   transform: translateY(-2rem);
-// }
-
-// ::ng-deep .ng-select .ng-select-container .ng-value-container .ng-placeholder {
-//   top: 1rem !important;
-//   color: transparent;
-// }
