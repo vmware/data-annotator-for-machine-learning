@@ -112,7 +112,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   annotationPrevious: any = [];
   reviewOrder: string = 'random';
   selectedFile: number;
-  currentLogFile: string = 'nimbus-test-launcher.txt'
+  currentLogFile: string;
   logFiles: any = [];
 
 
@@ -157,9 +157,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     });
     this.createForm();
     this.getProgress();
-    if (this.startFrom === 'review') {
-      this.getAllLogFilename();
-    }
+   
 
   };
 
@@ -231,7 +229,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
           };
           if (this.projectType == 'log') {
             this.sr = this.resetLogSrData(this.sr);
-            this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? this.sr.fileInfo.fileName : '';
+            this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?this.sr.fileInfo.fileName:'';
           };
           if (this.sr.flag && this.sr.flag.silence) {
             this.silenceStatus = true;
@@ -294,7 +292,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         this.submitAndHistory(res, from);
         this.sr = res;
         this.sr = this.resetLogSrData(this.sr);
-        this.currentLogFile = this.sr.fileInfo.fileName;
+        this.currentLogFile=this.sr.fileInfo.fileName;
         if (this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
         };
@@ -642,7 +640,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     };
     if (this.projectType == 'log') {
       this.sr = this.resetLogSrData(this.sr);
-      this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? this.sr.fileInfo.fileName : '';
+      this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?this.sr.fileInfo.fileName:'';
       this.toFilterLog(this.filterList);
     }
     if (this.sr.flag && this.sr.flag.silence) {
@@ -779,7 +777,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       };
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
-        this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? this.sr.fileInfo.fileName : '';
+        this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?this.sr.fileInfo.fileName:'';
         this.setSelectedFile();
         this.toFilterLog(this.filterList);
         if (this.sr.userInputsLength > 0) {
@@ -899,7 +897,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       }
       if (this.startFrom === 'review') {
         this.getOneReview();
-
+        
       } else {
         this.fetchData();
       }
@@ -1263,7 +1261,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       };
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
-        this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? this.sr.fileInfo.fileName : '';
+        this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?this.sr.fileInfo.fileName:'';
         this.setSelectedFile();
         this.toFilterLog(this.filterList);
         if (this.sr.userInputsLength > 0) {
@@ -1740,7 +1738,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         this.sr.originalData = responseSr.originalData;
         this.sr.flag = responseSr.flag;
         this.sr.userInputs = responseSr.userInputs;
-        this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? responseSr.fileInfo.fileName : '';
+        this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?responseSr.fileInfo.fileName:'';
         this.setSelectedFile();
         if (this.projectType !== 'image') {
           this.categoryBackFunc(index, from);
@@ -2299,7 +2297,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
   getAllLogFilename() {
     this.avaService.getAllLogFilename(this.projectId).subscribe(response => {
-
       if (response) {
         response.forEach((element, index) => {
           element.index = index;
