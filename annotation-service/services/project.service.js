@@ -177,7 +177,7 @@ async function updateProject(req) {
     if (req.body.trigger) {
         update.$set['al.trigger'] = req.body.trigger;
     }
-    if (req.body.isShowFilename) {
+    if (req.body.isShowFilename == true || req.body.isShowFilename == false) {
         update.$set['isShowFilename'] = req.body.isShowFilename;
     }
 
