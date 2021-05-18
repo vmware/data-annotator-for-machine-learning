@@ -32,8 +32,6 @@ export class GameFormComponent implements OnInit {
   pageSize: number;
   page: number;
   totalItems: number;
-  showFlagModal: boolean = false;
-  flagData;
   pageSizeReview: number;
   pageReview: number;
   totalItemsReview: number;
@@ -78,16 +76,10 @@ export class GameFormComponent implements OnInit {
 
   valueChange(value: number) {
     this.pageSize = value;
-    // setTimeout(() => {
-    //   this.dataGird.stateProvider.debouncer._change.next();
-    // }, 100);
   }
 
   reviewValueChange(value: number) {
     this.pageSizeReview = value;
-    // setTimeout(() => {
-    //   this.reviewDataGird.stateProvider.debouncer._change.next();
-    // }, 100);
   }
 
 
@@ -126,18 +118,6 @@ export class GameFormComponent implements OnInit {
     });
   };
 
-
-
-  clickProjectName(data) {
-    this.showFlagModal = true;
-    this.flagData = data;
-  };
-
-
-  receiveCloseFlagModal(e) {
-    this.showFlagModal = false;
-    this.flagData = null;
-  };
 
 
   startAnnotate(name, type, id, leftCase) {
