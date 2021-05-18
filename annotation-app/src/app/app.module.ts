@@ -35,7 +35,6 @@ import { AppendNewEntriesComponent } from "./components/projects/appendNewEntrie
 import { FAQComponent } from "./components/faq/faq.component";
 import { DownloadComponent } from "./components/projects/download/download.component";
 import { GenerateComponent } from "./components/projects/generate/generate.component";
-import { FlagComponent } from "./components/game-form/flag/flag.component";
 import { UploadComponent } from "./components/upload/upload.component";
 import { ToUpperCasePipe } from './pipes/to-upper-case.pipe';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
@@ -76,7 +75,6 @@ import { NgSelectModule } from '@ng-select/ng-select';
     FAQComponent,
     DownloadComponent,
     GenerateComponent,
-    FlagComponent,
     UploadComponent,
     ToUpperCasePipe,
     PageNotFoundComponent,
