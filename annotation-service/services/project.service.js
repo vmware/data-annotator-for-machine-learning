@@ -400,7 +400,7 @@ async function getLogProjectFileList(req) {
     const condition = {_id: ObjectId(req.query.pid)}
     const pro = await validator.checkProjectByconditions(condition, true);
     const schema = [
-        { $match: { projectName: pro[0].projectName } },
+        { $match: { projectName: pro[0].projectName, userInputsLength:1 } },
         { $project: {_id: 0, fileName: "$fileInfo.fileName"}},
     ]
     return await mongoDb.aggregateBySchema(LogModel, schema);
