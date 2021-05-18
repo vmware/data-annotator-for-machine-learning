@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="clr-select-wrapper" style="width: 70%;">
                 <select style="width: 95%;" (change)="onSelectingReviewee($event)" formControlName="reviewee">
                   <option value=""></option>
-                  <option *ngFor="let item of progressInfo.userCompleteCase" value="{{item.user}}">{{item.fullName}}
+                  <option *ngFor="let item of progressInfo.userCompleteCase" [value]="item.user">{{item.fullName}}
                   </option>
                 </select>
               </div>
@@ -167,7 +167,8 @@ SPDX-License-Identifier: Apache-2.0 -->
             <span *ngIf='silenceStatus' style="color: #2F8400;font-size: 0.5em;">Reviewed for accuracy</span>
           </h2>
           <!-- to show the filename -->
-          <div *ngIf='projectType==="log" && startFrom!=="review" && projectInfo.isShowFilename' style="font-size:0.54167rem;">
+          <div *ngIf='projectType==="log" && startFrom!=="review" && projectInfo.isShowFilename'
+            style="font-size:0.54167rem;">
             <div class="clr-row" style="margin-bottom: 0.7rem;">
               <div class="clr-col-2">
                 File Name
@@ -180,7 +181,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <!-- to search the filename -->
           <div *ngIf='projectType==="log" && startFrom==="review"' style="font-size:0.54167rem;">
             <div class="clr-row">
-              <div class="clr-col-2" style="margin-top: -0.15rem;;"> 
+              <div class="clr-col-2" style="margin-top: -0.15rem;;">
                 File Name
               </div>
               <div class="clr-col-10">

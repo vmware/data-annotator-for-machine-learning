@@ -157,9 +157,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       this.toGetProjectInfo(this.projectId)
     });
     this.createForm();
-    this.getProjectsList();
     this.getProgress();
-   
+    this.getProjectsList();
 
   };
 
@@ -231,7 +230,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
           };
           if (this.projectType == 'log') {
             this.sr = this.resetLogSrData(this.sr);
-            this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?this.sr.fileInfo.fileName:'';
+            this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? this.sr.fileInfo.fileName : '';
           };
           if (this.sr.flag && this.sr.flag.silence) {
             this.silenceStatus = true;
@@ -294,7 +293,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         this.submitAndHistory(res, from);
         this.sr = res;
         this.sr = this.resetLogSrData(this.sr);
-        this.currentLogFile=this.sr.fileInfo.fileName;
+        this.currentLogFile = this.sr.fileInfo.fileName;
         if (this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
         };
@@ -423,10 +422,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       tid: [this.sr._id]
     };
     if (from === 'pass') {
-      param['modify'] = false
+      param['modify'] = false;
     } else {
       param['modify'] = true;
-      param['problemCategory'] = this.spansList
+      param['problemCategory'] = this.spansList;
     }
     this.avaService.passTicket(param).subscribe(res => {
       this.getOneReview(from);
@@ -642,7 +641,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     };
     if (this.projectType == 'log') {
       this.sr = this.resetLogSrData(this.sr);
-      this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?this.sr.fileInfo.fileName:'';
+      this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? this.sr.fileInfo.fileName : '';
       this.toFilterLog(this.filterList);
     }
     if (this.sr.flag && this.sr.flag.silence) {
@@ -779,7 +778,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       };
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
-        this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?this.sr.fileInfo.fileName:'';
+        this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? this.sr.fileInfo.fileName : '';
         this.setSelectedFile();
         this.toFilterLog(this.filterList);
         if (this.sr.userInputsLength > 0) {
@@ -899,7 +898,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       }
       if (this.startFrom === 'review') {
         this.getOneReview();
-        
+
       } else {
         this.fetchData();
       }
@@ -917,7 +916,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     }
     this.avaService.getProgress(param).subscribe(response => {
       if (this.startFrom === 'review') {
-        response.userCompleteCase = response.userCompleteCase.sort(this.sortBy("completeCase", "descending"));
+        if (response.userCompleteCase.length === 1) {
+          this.questionForm.get('questionGroup.reviewee').setValue(response.userCompleteCase[0].user);
+
+        } else {
+          response.userCompleteCase = response.userCompleteCase.sort(this.sortBy("completeCase", "descending"));
+        }
       };
       this.progressInfo = response;
       this.percentage = Math.round(this.progressInfo.completeCase / this.progressInfo.totalCase * 10000) / 100
@@ -1258,7 +1262,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       };
       if (this.projectType == 'log') {
         this.sr = this.resetLogSrData(this.sr);
-        this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?this.sr.fileInfo.fileName:'';
+        this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? this.sr.fileInfo.fileName : '';
         this.setSelectedFile();
         this.toFilterLog(this.filterList);
         if (this.sr.userInputsLength > 0) {
@@ -1735,7 +1739,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         this.sr.originalData = responseSr.originalData;
         this.sr.flag = responseSr.flag;
         this.sr.userInputs = responseSr.userInputs;
-        this.currentLogFile=(this.projectInfo.isShowFilename||this.startFrom==='review')?responseSr.fileInfo.fileName:'';
+        this.currentLogFile = (this.projectInfo.isShowFilename || this.startFrom === 'review') ? responseSr.fileInfo.fileName : '';
         this.setSelectedFile();
         if (this.projectType !== 'image') {
           this.categoryBackFunc(index, from);
@@ -2295,9 +2299,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   getAllLogFilename() {
     this.avaService.getAllLogFilename(this.projectId).subscribe(response => {
       if (response) {
-        response.forEach((element,index) => {
-          element.index=index;
-          if(element.fileName===this.currentLogFile){
+        response.forEach((element, index) => {
+          element.index = index;
+          if (element.fileName === this.currentLogFile) {
             this.selectedFile = index;
           }
         });
@@ -2312,32 +2316,32 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
 
   getTargetFile(file) {
-    let param={
-      pid:this.projectId,
-      fname:file.fileName
+    let param = {
+      pid: this.projectId,
+      fname: file.fileName
     };
-    this.loading=true;
+    this.loading = true;
     this.avaService.getSrByFilename(param).subscribe(response => {
       if (response) {
         if (response && response.MSG) {
           this.error = this.sr.MSG;
           return;
         };
-          this.sr = this.resetLogSrData(response);
-          this.toFilterLog(this.filterList);
-          if (this.sr.userInputsLength > 0) {
-            this.categoryBackFunc();
-            this.sortLabelForColor(this.categories);
-            this.getProgress();
-          };
-  
+        this.sr = this.resetLogSrData(response);
+        this.toFilterLog(this.filterList);
+        if (this.sr.userInputsLength > 0) {
+          this.categoryBackFunc();
+          this.sortLabelForColor(this.categories);
+          this.getProgress();
+        };
+
         if (this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
         };
         this.loading = false;
         this.isSkippingGameDialog = false;
         this.clearUserInput();
-        
+
       } else {
         console.log(response)
       }
@@ -2355,9 +2359,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   }
 
 
-  setSelectedFile(){
-    for(let i=0; i<this.logFiles.length; i++){
-      if(this.currentLogFile===this.logFiles[i].fileName){
+  setSelectedFile() {
+    for (let i = 0; i < this.logFiles.length; i++) {
+      if (this.currentLogFile === this.logFiles[i].fileName) {
         this.selectedFile = this.logFiles[i].index;
         break;
       }

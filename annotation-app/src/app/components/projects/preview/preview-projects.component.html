@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <div class="btn-group btn-primary btn-icon">
                                 <button class="btn" (click)="modify(data,'multiple')">
                                     <clr-icon shape="note" title="To modify the annotated tickets"
-                                        style="margin-right: 0.3rem;"></clr-icon>Modify
+                                        style="margin-right: 0.3rem;"></clr-icon>Return all to annotator
                                 </button>
                             </div>
                         </div>
@@ -165,8 +165,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                                     style="min-width:250px">Action
                                 </clr-dg-column>
                                 <ng-container>
-                                    <!-- <clr-dg-row *ngFor="let dataset of previewSrs; let i=index" [clrDgItem]="dataset"
-                                        [(clrDgSelected)]="dataset.selected"> -->
                                     <clr-dg-row *ngFor="let dataset of previewSrs; let i=index" [clrDgItem]="dataset">
                                         <clr-dg-cell *ngIf="dataset.projectType=='log'"
                                             class="ellipsis-datagrid previewHeight" style="max-width:90px">
@@ -252,14 +250,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                             <div class="clr-row">
                                                 <button class="btn btn-sm"
                                                     [disabled]="dataset.userInputsLength<=0||dataset.reviewInfo.review"
-                                                    (click)="modify(dataset,'single')">Modify</button>
+                                                    (click)="modify(dataset,'single')">Return to annotator</button>
                                             </div>
                                         </clr-dg-cell>
                                         <ng-container ngProjectAs="clr-dg-row-detail"
                                             *ngIf="dataset.userInputsLength>0 ||dataset?.originalInputs>0">
-                                            <!-- <clr-dg-row-detail *clrIfExpanded style="margin-bottom: 1rem;"> -->
                                             <clr-dg-row-detail (clrIfExpanded)='true' style="margin-bottom: 1rem;">
-                                                <!-- <clr-dg-row-detail [clrIfExpanded]='true' style="margin-bottom: 1rem;"> -->
                                                 <clr-datagrid>
                                                     <clr-dg-column>
                                                         {{dataset.reviewInfo.reviewedTime?"Reviewer":"Annotator"}}
@@ -421,7 +417,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                                                                     clrSignpostTrigger>
                                                                     show details
                                                                 </button>
-                                                                <!-- <clr-icon shape="details" clrSignpostTrigger></clr-icon> -->
                                                                 <clr-signpost-content [clrPosition]="'right-bottom'"
                                                                     *clrIfOpen>
                                                                     <p><strong>Txt FileContent:</strong></p>
@@ -476,8 +471,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </clr-tab-content>
                 </clr-tab>
             </clr-tabs>
-
-
         </div>
     </div>
 </div>
