@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { UserAuthService } from '../../services/user-auth.service';
 import { AvaService } from "../../services/ava.service";
 import { QueryDatasetData, DatasetUtil, UploadData } from '../../model/index';
@@ -19,6 +19,9 @@ import * as _ from "lodash";
 import * as JSZip from 'jszip';
 import * as Pako from 'pako';
 import untar from "js-untar";
+import { EnvironmentsService } from 'app/services/environments.service';
+import { UnZipService } from 'app/services/common/up-zip.service';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'upload',
@@ -60,12 +63,16 @@ export class UploadComponent implements OnInit {
   waitingTip: boolean = false;
   errorMessageTop: string;
   columnInfo: any = [];
+  flagSubscription: Subscription;
 
   constructor(
     private formBuilder: FormBuilder,
     private avaService: AvaService,
     private userAuthService: UserAuthService,
     private papa: Papa,
+    public env: EnvironmentsService,
+    private unZipService: UnZipService,
+    private sanitizer: DomSanitizer,
 
   ) {
     this.userQuestionUpdate.pipe(
@@ -187,6 +194,9 @@ export class UploadComponent implements OnInit {
               };
               this.previewContentDatas = previewData.slice(0, 5);
             };
+            if (!this.env.config.enableAWSS3) {
+              this.toPostBinary();
+            }
           };
         }
       });
@@ -238,7 +248,13 @@ export class UploadComponent implements OnInit {
 
 
   toPostDatasets(data, uploadFormat, formData, params) {
-    this.avaService.uploadDateset(uploadFormat == 'image' ? formData : params).subscribe(
+    let postData;
+    if (this.env.config.enableAWSS3) {
+      uploadFormat == 'image' ? postData = formData : postData = params
+    } else {
+      postData = formData;
+    }
+    this.avaService.uploadDateset(postData).subscribe(
       res => {
 
         let params = {
@@ -289,7 +305,27 @@ export class UploadComponent implements OnInit {
     );
   }
 
+  toPostBinary() {
 
+    let formData = new FormData();
+    formData.append('file', this.inputFile);
+    formData.append("dsname", this.uploadGroup.get('datasetsName').value);
+    formData.append("format", this.uploadGroup.get('fileFormat').value);
+    // formData.append("fileName", this.inputFile.name);
+    // formData.append("fileSize", this.inputFile.size);
+    if (this.uploadGroup.get('fileFormat').value == 'txt') {
+      let topReview = [];
+      this.previewContentDatas.previewExample.forEach(element => {
+        topReview.push({ fileName: element.name, fileSize: element.size, fileContent: element.content.slice(0, 501) })
+      });
+      formData.append("topReview", JSON.stringify(topReview));
+      formData.append("totalRows", this.previewContentDatas.exampleEntries);
+    } else if (this.uploadGroup.get('fileFormat').value == 'csv' || this.uploadGroup.get('fileFormat').value == 'tabular') {
+      formData.append("hasHeader", this.uploadGroup.get('hasHeader').value);
+      formData.append("topReview", JSON.stringify({ header: this.previewHeadDatas, topRows: this.previewContentDatas }));
+    };
+    this.toPostDatasets(null, this.uploadGroup.get('fileFormat').value, formData, null)
+  }
 
   uploadToS3(file) {
 
@@ -349,21 +385,58 @@ export class UploadComponent implements OnInit {
         this.inputFile.size < 10485760 ? this.waitingTip = false : this.waitingTip = true;
         if (this.uploadGroup.get('fileFormat').value == "csv") {
           this.parseCSV();
-          this.uploadToS3(this.inputFile);
+          if (this.env.config.enableAWSS3) {
+            this.uploadToS3(this.inputFile);
+          }
 
         } else if (this.uploadGroup.get('fileFormat').value == "tabular") {
           this.parseTabular();
-          this.uploadToS3(this.inputFile);
+          if (this.env.config.enableAWSS3) {
+            this.uploadToS3(this.inputFile);
+          }
 
         } else if (this.uploadGroup.get('fileFormat').value == "image") {
-          this.unzipImages();
+          if (this.env.config.enableAWSS3) {
+            this.unzipImagesToS3();
+          } else {
+            let flag;
+            this.unZipService.unzipImages(this.inputFile).then(e => {
+              console.log(99, e)
+              // to preview the img
+              flag = e;
+              let entries = flag.entry;
+              let a = 1
+              var that = this;
+              let objectKey = Object.keys(entries.files)
+              let cc = []
+              for (let i = 0; i < objectKey.length; i++) {
+                if (objectKey[i].split('/')[1] != '' && that.unZipService.validImageType(objectKey[i])) {
+                  cc.push(objectKey[i])
+                  if (cc.length == 3) { break }
+                }
+              }
+              for (let j = 0; j < cc.length; j++) {
+                entries.files[cc[j]].async('blob').then(function (blob) {
+                  let reader = new FileReader();
+                  reader.readAsDataURL(blob);
+                  reader.onloadend = (r) => {
+                    that.previewContentDatas.push({ _id: a++, fileName: cc[j], fileSize: (blob.size / 1024).toFixed(2), location: that.sanitizer.bypassSecurityTrustUrl((reader.result).toString()) })
+                  };
+                })
+              };
+              this.toPostBinary();
+
+            });
+          }
         } else if (this.uploadGroup.get('fileFormat').value == "txt") {
           if (this.inputFile.name.split('.').pop().toLowerCase() == 'zip') {
             this.unZip();
           } else {
             this.unTgz();
           }
-          this.uploadToS3(this.inputFile);
+          if (this.env.config.enableAWSS3) {
+            this.uploadToS3(this.inputFile);
+          }
         };
       }
     }
@@ -394,7 +467,7 @@ export class UploadComponent implements OnInit {
 
 
 
-  unzipImages() {
+  unzipImagesToS3() {
     this.avaService.getS3UploadConfig().subscribe(async res => {
       if (res) {
 
@@ -423,13 +496,13 @@ export class UploadComponent implements OnInit {
           for (let i = 0; i < 6; i++) { outNo += Math.floor(Math.random() * 10); }
           outNo = new Date().getTime() + outNo;
           entries.forEach((path, file) => {
-            if (!file.dir && that.validImageType(path)) {
+            if (!file.dir && that.unZipService.validImageType(path)) {
               realEntryLength++;
             }
           });
 
           _.forIn(entries.files, function (value1, key1) {
-            if (!value1.dir && that.validImageType(value1.name)) {
+            if (!value1.dir && that.unZipService.validImageType(value1.name)) {
               value1.async('blob').then(async function (blob) {
                 realEntryIndex++;
                 let uploadParams = { Bucket: new Buffer(res.bucket, 'base64').toString(), Key: new Buffer(res.key, 'base64').toString() + '/' + outNo + '/' + value1.name, Body: blob };
@@ -473,19 +546,19 @@ export class UploadComponent implements OnInit {
 
 
 
-  validImageType(fileName) {
-    if (!fileName.startsWith('__MACOSX')) {
-      let types = ['png', 'jpg', 'jpeg', 'tif', 'bmp'];
-      let type = fileName.split('.').pop();
-      if (types.indexOf(type.toLowerCase()) > -1) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  };
+  // validImageType(fileName) {
+  //   if (!fileName.startsWith('__MACOSX')) {
+  //     let types = ['png', 'jpg', 'jpeg', 'tif', 'bmp'];
+  //     let type = fileName.split('.').pop();
+  //     if (types.indexOf(type.toLowerCase()) > -1) {
+  //       return true;
+  //     } else {
+  //       return false;
+  //     }
+  //   } else {
+  //     return false;
+  //   }
+  // };
 
 
   changeFileFormat(e) {
@@ -541,7 +614,12 @@ export class UploadComponent implements OnInit {
               e.content = data;
             });
           });
-          that.previewContentDatas = { previewExample: previewExample, exampleEntries: example }
+          that.previewContentDatas = { previewExample: previewExample, exampleEntries: example };
+          if (!that.env.config.enableAWSS3) {
+            setTimeout(() => {
+              that.toPostBinary()
+            }, 100);
+          }
         });
     }
   }
@@ -582,6 +660,11 @@ export class UploadComponent implements OnInit {
         })
       });
       that.previewContentDatas = { previewExample: previewExample, exampleEntries: example };
+      if (!that.env.config.enableAWSS3) {
+        setTimeout(() => {
+          that.toPostBinary()
+        }, 100);
+      }
     })
   }
 

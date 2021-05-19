@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 
-import { Component, OnInit, Input, Output, EventEmitter, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import * as _ from "lodash";
 import * as JSZip from 'jszip';
 import * as Pako from 'pako';
@@ -19,7 +19,7 @@ export class UnZipService {
 
 
 
-    unZip(inputFile) {
+    unZipTxt(inputFile) {
 
         var that = this;
         return new Promise(function (resolve) {
@@ -43,7 +43,8 @@ export class UnZipService {
                 });
                 let res = { previewExample: previewExample, exampleEntries: example }
                 resolve(res);
-            })
+            });
+
         })
     };
 
@@ -83,14 +84,28 @@ export class UnZipService {
                         let res = { previewExample: previewExample, exampleEntries: example }
                         resolve(res)
                     });
-            }
-        })
+            };
+        });
+    };
 
 
-    }
+    unzipImages(inputFile) {
 
-
-
+        var that = this;
+        return new Promise(function (resolve) {
+            let jsZip = new JSZip();
+            jsZip.loadAsync(inputFile).then(function (entries) {
+                let realEntryLength = 0;
+                entries.forEach((path, file) => {
+                    if (!file.dir && that.validImageType(path)) {
+                        realEntryLength++
+                    }
+                });
+                let res = { entry: entries, realEntryLength: realEntryLength };
+                resolve(res);
+            });
+        });
+    };
 
 
     toReadBlobToText(blob) {
@@ -100,9 +115,9 @@ export class UnZipService {
             reader.onload = function (event) {
                 let res: any = (event.target as any).result;
                 resolve(res)
-            }
-        })
-    }
+            };
+        });
+    };
 
 
     validTxtType(fileName) {

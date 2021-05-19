@@ -371,7 +371,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 </div>
 
 
-<clr-modal [(clrModalOpen)]="addLoading" [clrModalClosable]="false">
+<!-- <clr-modal [(clrModalOpen)]="addLoading" [clrModalClosable]="false">
     <div class="modal-body" style="margin-bottom: 1rem;">
         <div class="alert alert-text">
             <div class="alert-items">
@@ -387,4 +387,46 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
         </div>
     </div>
-</clr-modal>
+</clr-modal> -->
+
+<div class="modal" *ngIf="addLoading">
+    <div class="modal-dialog" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header" *ngIf="appendErrMessage">
+                <button aria-label="Close" class="close" type="button">
+                    <clr-icon aria-hidden="true" shape="close" (click)="appendErrMessage=null;addLoading=false">
+                    </clr-icon>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-text" *ngIf="!appendErrMessage">
+                    <div class="alert-items">
+                        <div class="alert-item static">
+                            <div class="alert-icon-wrapper">
+                                <clr-spinner clrSmall clrAssertive
+                                    style="min-height: 0.75rem;min-width: 0.75rem;height: 0.75rem;width: 0.75rem;margin-top: 0rem !important;">
+                                    loading
+                                </clr-spinner>
+                            </div>
+                            <span class="alert-text">Message: Adding large dataset takes some time, please
+                                wait...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-danger" *ngIf="appendErrMessage">
+                    <div class="alert-items">
+                        <div class="alert-item static" role="alert">
+                            <div class="alert-icon-wrapper">
+                                <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                            </div>
+                            <span class="alert-text">
+                                {{appendErrMessage.message}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop" *ngIf="addLoading" aria-hidden="true"></div>
