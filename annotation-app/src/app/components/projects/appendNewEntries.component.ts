@@ -22,6 +22,8 @@ import { Buffer } from 'buffer';
 import { DomSanitizer } from '@angular/platform-browser';
 import * as JSZip from 'jszip'
 import { UnZipService } from 'app/services/common/up-zip.service';
+import { EnvironmentsService } from 'app/services/environments.service';
+
 @Component({
     selector: 'app-append',
     templateUrl: './appendNewEntries.component.html',
@@ -59,9 +61,9 @@ export class AppendNewEntriesComponent implements OnInit {
     columnInfo: any;
     isLabelBoxShow: boolean = true;
     datasetsList: any = [];
-    unzipEntry = new Subject<any>();
-    flagSubscription: Subscription;
-
+    appendErrMessage: string;
+    // unzipEntry = new Subject<any>();
+    // flagSubscription: Subscription;
 
     constructor(
         private route: ActivatedRoute,
@@ -73,7 +75,9 @@ export class AppendNewEntriesComponent implements OnInit {
         private el: ElementRef,
         private renderer2: Renderer2,
         private sanitizer: DomSanitizer,
-        private UnZipService: UnZipService
+        private UnZipService: UnZipService,
+        public env: EnvironmentsService
+
 
     ) {
         this.user = this.userAuthService.loggedUser().email;
@@ -179,9 +183,7 @@ export class AppendNewEntriesComponent implements OnInit {
 
 
     inputDescription(e, row, column) {
-        // console.log(e.target.value);
-        // console.log(e);
-        // console.log(row, column);
+        // console.log(e,e.target.value,row, column);
         // console.log('inputDescription_newAddedData:', this.newAddedData)
 
         if (!this.isASCII(e.target.value)) {
@@ -460,17 +462,20 @@ export class AppendNewEntriesComponent implements OnInit {
             this.nonEnglish = 0;
             this.columnInfo = [];
             this.uploadGroup.get('localFile').setValue(this.inputFile);
-            // this.unzipEntry.next(null);
 
 
             if (this.projectType == 'tabular') {
                 this.parseTabular();
             } else if (this.projectType == 'image') {
                 this.previewHeadDatas = ['Id', 'ImageName', 'ImageSize(KB)', 'Image'];
-                this.localUnzipGetEntries(this.inputFile);
-                this.flagSubscription = this.unzipEntry.subscribe(e => {
+                // this.localUnzipGetEntries(this.inputFile);
+                // this.flagSubscription = this.unzipEntry.subscribe(e => {
+                let flag;
+                this.UnZipService.unzipImages(this.inputFile).then(e => {
                     // to preview the img
-                    let entries = e.entry;
+                    // let entries = e.entry;
+                    flag = e;
+                    let entries = flag.entry;
                     let a = 1
                     var that = this;
                     let objectKey = Object.keys(entries.files)
@@ -488,8 +493,8 @@ export class AppendNewEntriesComponent implements OnInit {
                             reader.onloadend = (r) => {
                                 that.previewContentDatas.push({ _id: a++, fileName: cc[j], fileSize: (blob.size / 1024).toFixed(2), location: that.sanitizer.bypassSecurityTrustUrl((reader.result).toString()) })
                                 that.loadPreviewTable = false;
-                                that.uploadGroup.get("totalRow").setValue(e.realEntryLength);
-                                that.flagSubscription.unsubscribe();
+                                that.uploadGroup.get("totalRow").setValue(flag.realEntryLength);
+                                // that.flagSubscription.unsubscribe();
                             };
                         })
                     }
@@ -500,7 +505,7 @@ export class AppendNewEntriesComponent implements OnInit {
                 this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
                 let flag;
                 if (this.inputFile.name.split('.').pop().toLowerCase() == 'zip') {
-                    this.UnZipService.unZip(this.inputFile).then(e => {
+                    this.UnZipService.unZipTxt(this.inputFile).then(e => {
                         flag = e;
                         this.previewContentDatas = flag.previewExample;
                         this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
@@ -730,7 +735,12 @@ export class AppendNewEntriesComponent implements OnInit {
                 this.appendSrs(appendParams);
 
             } else {
-                this.uploadToS3(this.inputFile, 'zip');
+                // this.uploadToS3(this.inputFile, 'zip');
+                if (this.env.config.enableAWSS3) {
+                    this.uploadToS3(this.inputFile, 'zip');
+                } else {
+                    this.toPostBinary('fromZip');
+                }
             }
 
         }
@@ -836,21 +846,23 @@ export class AppendNewEntriesComponent implements OnInit {
                     this.errorMessage = '';
                 }, 3000);
                 return;
-            }
+            };
         };
 
 
-        this.avaService.uploadDateset(key == 'image' ? formData : params).subscribe(res => {
-            // let appendParams = {
-            //     pname: this.projectName,
-            //     isFile: from == 'fromSingle' ? false : true,
-            //     selectedHeaders: this.originalHead,
-            //     location: this.projectType == 'image' ? null : data.Key,
-            //     projectType: this.projectType,
-            //     images: (this.projectType == 'image' && from == 'fromSingle') ? data : [],
-            //     selectedDataset: from == 'fromSingle' ? null : this.uploadGroup.get('datasetsName').value,
+        this.toPostDatasets(data, from, key, formData, params)
 
-            // };
+    }
+
+
+    toPostDatasets(data, from, key, formData, params) {
+        let postData;
+        if (this.env.config.enableAWSS3) {
+            postData = key == 'image' ? formData : params;
+        } else {
+            postData = formData;
+        }
+        this.avaService.uploadDateset(postData).subscribe(res => {
             let appendParams = {
                 pname: this.projectName,
                 isFile: true,
@@ -876,6 +888,28 @@ export class AppendNewEntriesComponent implements OnInit {
         );
     }
 
+    toPostBinary(from) {
+
+        let formData = new FormData();
+        let format = this.projectType == 'log' ? 'txt' : (this.projectType == 'ner' ? 'text' : this.projectType);
+        formData.append('file', this.inputFile);
+        formData.append("dsname", from == 'fromSingle' ? new Date().getTime() : this.uploadGroup.get('datasetsName').value);
+        formData.append("format", format);
+        if (this.projectType == 'log') {
+            let a = [];
+            this.previewContentDatas.forEach(element => {
+                a.push({ fileName: element.name, fileSize: element.size, fileContent: element.content.slice(0, 501) })
+            });
+            formData.append("topReview", JSON.stringify(a));
+            formData.append("totalRows", this.uploadGroup.get("totalRow").value);
+        } else if (this.projectType == 'text' || this.projectType == 'tabular') {
+            formData.append("hasHeader", 'yes');
+            formData.append("topReview", JSON.stringify({ header: this.previewHeadDatas, topRows: this.previewContentDatas }));
+        };
+        this.toPostDatasets(null, from, format, formData, null)
+
+    }
+
 
     appendSrs(params) {
         this.addLoading = true;
@@ -894,6 +928,7 @@ export class AppendNewEntriesComponent implements OnInit {
             this.columnInfo = [];
 
         }, (error: any) => {
+            this.appendErrMessage = error;
             console.log(error);
         });
     };
@@ -951,29 +986,30 @@ export class AppendNewEntriesComponent implements OnInit {
 
 
 
-    localUnzipGetEntries(inputFile) {
+    // localUnzipGetEntries(inputFile) {
 
-        let jsZip = new JSZip();
-        var that = this;
-        jsZip.loadAsync(inputFile).then(function (entries) {
-            let realEntryLength = 0;
-            entries.forEach((path, file) => {
-                if (!file.dir && that.UnZipService.validImageType(path)) {
-                    realEntryLength++
-                }
-            });
-            that.unzipEntry.next({ entry: entries, realEntryLength: realEntryLength });
-            return that.unzipEntry.asObservable();
+    //     let jsZip = new JSZip();
+    //     var that = this;
+    //     jsZip.loadAsync(inputFile).then(function (entries) {
+    //         let realEntryLength = 0;
+    //         entries.forEach((path, file) => {
+    //             if (!file.dir && that.UnZipService.validImageType(path)) {
+    //                 realEntryLength++
+    //             }
+    //         });
+    //         that.unzipEntry.next({ entry: entries, realEntryLength: realEntryLength });
+    //         return that.unzipEntry.asObservable();
 
-        });
-    };
+    //     });
+    // };
 
 
     uploadImages(file, s3, s3Config) {
-        this.localUnzipGetEntries(file);
-        this.unzipEntry.subscribe(e => {
-            let entry = e.entry;
-            let realEntryLength = e.realEntryLength
+        let flag;
+        this.UnZipService.unzipImages(file).then(e => {
+            flag = e;
+            let entry = flag.entry;
+            let realEntryLength = flag.realEntryLength
             if (entry) {
                 let outNo = "";
                 for (let i = 0; i < 6; i++) { outNo += Math.floor(Math.random() * 10); }
