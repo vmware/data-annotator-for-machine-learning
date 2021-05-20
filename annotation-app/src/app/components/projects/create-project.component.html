@@ -260,10 +260,16 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="form-group clr-row" *ngIf="isShowSetHeader=='txt'">
               <div class="clr-col-12 clr-col-md-3"></div>
               <div class="preview clr-col-12 clr-col-md-8">
+                <div class="clr-checkbox-wrapper isShowFilename ">
+                  <input type="checkbox" id="isShowFilename" name="checkbox-basic" value="isShowFilename"
+                    class="clr-checkbox" formControlName="isShowFilename">
+                  <label for="isShowFilename"> Show fileName to annotator?</label>
+                </div>
                 <clr-tabs>
                   <clr-tab>
                     <button clrTabLink id="link1">
                       Preview TXT</button>
+
                     <clr-tab-content id="content1" *clrIfActive>
 
                       <div *ngIf="loadingPreviewData" class="setData"
@@ -288,7 +294,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             <tr *ngFor="let previewCont of previewContentDatas">
                               <td class="left">{{previewCont.fileName}}</td>
-                              <td class="left">{{previewCont.fileSize}}</td>
                               <td class="left">{{previewCont.fileContent}}</td>
                             </tr>
                           </tbody>

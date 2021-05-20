@@ -35,7 +35,6 @@ import { AppendNewEntriesComponent } from "./components/projects/appendNewEntrie
 import { FAQComponent } from "./components/faq/faq.component";
 import { DownloadComponent } from "./components/projects/download/download.component";
 import { GenerateComponent } from "./components/projects/generate/generate.component";
-import { FlagComponent } from "./components/game-form/flag/flag.component";
 import { UploadComponent } from "./components/upload/upload.component";
 import { ToUpperCasePipe } from './pipes/to-upper-case.pipe';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
@@ -50,7 +49,7 @@ import { DownloadService } from "./services/common/download.service";
 import { ToolService } from "./services/common/tool.service";
 import { SliceTextPipe } from "./pipes/sliceText.pipe";
 import { MathRoundPipe } from "./pipes/math-round.pipe";
-
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
   declarations: [
@@ -76,7 +75,6 @@ import { MathRoundPipe } from "./pipes/math-round.pipe";
     FAQComponent,
     DownloadComponent,
     GenerateComponent,
-    FlagComponent,
     UploadComponent,
     ToUpperCasePipe,
     PageNotFoundComponent,
@@ -94,7 +92,8 @@ import { MathRoundPipe } from "./pipes/math-round.pipe";
     ROUTING,
     ChartsModule,
     CoreModule,
-    SharedModule
+    SharedModule,
+    NgSelectModule
 
   ],
   providers: [

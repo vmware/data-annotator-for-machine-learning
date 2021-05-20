@@ -102,6 +102,12 @@ async function checkAnnotator(uid){
     return false;
  }
 
+ async function validateRequired(parameters) {
+    if (!await checkRequired(parameters)) {
+     throw {4003: "input field invalid"}   
+    }
+ }
+
 module.exports = {
     isASCII,
     isNumeric,
@@ -111,4 +117,5 @@ module.exports = {
     checkAnnotator,
     checkDataSet,
     checkRequired,
+    validateRequired,
 };

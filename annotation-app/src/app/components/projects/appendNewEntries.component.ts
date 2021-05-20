@@ -419,10 +419,10 @@ export class AppendNewEntriesComponent implements OnInit {
                     this.previewContentDatas = choosedDataset.topReview;
                     this.uploadGroup.get("totalRow").setValue(choosedDataset.images.length);
                 } else if (this.projectType == 'log') {
-                    this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
+                    this.previewHeadDatas = ['FileName', 'FileContent'];
                     let a = [];
                     choosedDataset.topReview.forEach(element => {
-                        a.push({ name: element.fileName, size: (element.fileSize / 1024).toFixed(2), content: element.fileContent })
+                        a.push({ name: element.fileName, content: element.fileContent })
                     });
                     this.previewContentDatas = a;
                     this.uploadGroup.get("totalRow").setValue(choosedDataset.totalRows);
@@ -497,7 +497,7 @@ export class AppendNewEntriesComponent implements OnInit {
                     console.log(err)
                 });
             } else if (this.projectType == 'log') {
-                this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
+                this.previewHeadDatas = ['FileName', 'FileContent'];
                 let flag;
                 if (this.inputFile.name.split('.').pop().toLowerCase() == 'zip') {
                     this.UnZipService.unZip(this.inputFile).then(e => {
@@ -513,15 +513,6 @@ export class AppendNewEntriesComponent implements OnInit {
                         this.previewContentDatas = flag.previewExample;
                         this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
                         this.loadPreviewTable = false;
-                        // setTimeout(() => {
-                        //     this.previewContentDatas = flag.previewExample;
-                        //     this.previewContentDatas.forEach(element => {
-                        //         topReview.push({ fileName: element.name, fileSize: element.size, fileContent: element.content })
-                        //     });
-                        //     this.previewContentDatas = topReview;
-                        //     this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
-                        //     this.loadPreviewTable = false;
-                        // }, 1000);
 
                     });
                 };
@@ -826,7 +817,7 @@ export class AppendNewEntriesComponent implements OnInit {
                     params['totalRows'] = this.uploadGroup.get("totalRow").value;
                     let a = [];
                     this.previewContentDatas.forEach(element => {
-                        a.push({ fileName: element.name, fileSize: element.size, fileContent: element.content.slice(0, 501) })
+                        a.push({ fileName: element.name, fileContent: element.content.slice(0, 501) })
                     });
                     params.topReview = a;
                 }
@@ -841,16 +832,6 @@ export class AppendNewEntriesComponent implements OnInit {
 
 
         this.avaService.uploadDateset(key == 'image' ? formData : params).subscribe(res => {
-            // let appendParams = {
-            //     pname: this.projectName,
-            //     isFile: from == 'fromSingle' ? false : true,
-            //     selectedHeaders: this.originalHead,
-            //     location: this.projectType == 'image' ? null : data.Key,
-            //     projectType: this.projectType,
-            //     images: (this.projectType == 'image' && from == 'fromSingle') ? data : [],
-            //     selectedDataset: from == 'fromSingle' ? null : this.uploadGroup.get('datasetsName').value,
-
-            // };
             let appendParams = {
                 pname: this.projectName,
                 isFile: true,

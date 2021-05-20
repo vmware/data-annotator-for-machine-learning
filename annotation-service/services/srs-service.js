@@ -178,9 +178,15 @@ async function getOneSrs(req) {
     const project = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
     
     let limitation = req.query.limit? Number.parseInt(req.query.limit): 1;
-    const filterFileds = { _id:1, originalData:1, flag: 1 };
-    if (project.regression && project.projectType == PROJECTTYPE.NER) { filterFileds.userInputs = 1 };
     
+    const filterFileds = { _id:1, originalData:1, flag: 1 };
+    if (project.regression && project.projectType == PROJECTTYPE.NER) { 
+        filterFileds.userInputs = 1;
+    };
+    if (project.isShowFilename && project.projectType == PROJECTTYPE.LOG) {
+        filterFileds.fileInfo = 1;
+    }
+
     let srs, conditions, alQueriedSr;
     
     const mp = await getModelProject({ _id: ObjectId(req.query.pid)});

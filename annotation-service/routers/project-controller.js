@@ -151,4 +151,27 @@ router.get(APIs.PROJECT_REVIEW_LIST, (req, res) => {
   });
 });
 
+router.get(APIs.PROJECT_LOG_FILE_LIST, (req, res) => {
+  console.log(`[ PROJECT ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+  projectService.getLogProjectFileList(req).then(response => {
+    console.log(`[ PROJECT ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+    res.status(200).json(response);
+  }).catch(error => {
+    console.error(`[ PROJECT ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+    res.status(500).send(error);
+  });
+});
+
+router.get(APIs.PROJECT_LOG_FILE_FILTER, (req, res) => {
+  console.log(`[ PROJECT ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+  projectService.fileterLogTicketsByFileName(req).then(response => {
+    console.log(`[ PROJECT ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+    res.status(200).json(response);
+  }).catch(error => {
+    console.error(`[ PROJECT ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+    res.status(500).send(error);
+  });
+});
+
+
 module.exports = router;

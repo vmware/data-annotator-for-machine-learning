@@ -40,6 +40,8 @@ module.exports = {
     PROJECT_PREVIEW: "/projects/annotations", // swagger
     SRS_PROGRESS: "/projects/users/progression",//no
     PROJECT_REVIEW_LIST: "/projects/review",
+    PROJECT_LOG_FILE_LIST:"/projects/log/files",
+    PROJECT_LOG_FILE_FILTER:"/projects/log/filter",
     
     //tickets
     SRS_UPDATE: "/projects/tickets",//swagger
@@ -57,7 +59,6 @@ module.exports = {
     PROJECT_FLAGS_SLIENCE: "/projects/tickets/flags/silence", //swagger
     SRS_REVIEW: "/projects/tickets/review",
     SRS_QUERY_FOR_REVIEW: "/projects/tickets/review",
-
 
     //file
     FILE_S3_CONFIGS: "/datasets/s3/credentials",//no
