@@ -81,6 +81,7 @@ ul li {
   padding-top: 0.5rem;
   margin-left: 0.5rem;
   box-shadow: 0 0.125rem 0 0 #d7d7d7;
+  position: relative;
 }
 
 .previewTable {
@@ -162,4 +163,10 @@ table thead th:first-child {
   color: grey;
   opacity: 0.65;
   font-size: 0.5rem;
+}
+
+.isShowFilename {
+  position: absolute;
+  right: 0.5rem;
+  top: 1rem;
 }

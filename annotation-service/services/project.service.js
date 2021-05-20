@@ -14,7 +14,7 @@ const { PROJECTTYPE, SRCS, LABELTYPE, ROLES } = require("../config/constant");
 const validator = require('../utils/validator');
 const mongoDb = require('../db/mongo.db');
 const { getModelProject } = require('../utils/mongoModel.utils');
-const { ProjectModel, UserModel } = require('../db/db-connect');
+const { ProjectModel, UserModel, LogModel } = require('../db/db-connect');
 
 async function getProjects(req) {
     console.log(`[ PROJECT ] Service getProjects query user role`);
@@ -29,7 +29,7 @@ async function getProjects(req) {
     if (src == SRCS.ANNOTATE) {
         console.log(`[ PROJECT ] Service query current annotator project list`);
         condition = { annotator: { $regex: email } };
-        project = "projectName taskInstructions creator  createdDate updatedDate dataSource assignmentLogic totalCase projectCompleteCase userCompleteCase categoryList labelType min max projectType isMultipleLabel";
+        project = "projectName taskInstructions creator  createdDate updatedDate dataSource assignmentLogic totalCase projectCompleteCase userCompleteCase categoryList labelType min max projectType isMultipleLabel isShowFilename";
         let projectInfo = await projectDB.queryProjectByConditions(condition, project, options);
 
         if (projectInfo.length == 0) {
@@ -176,6 +176,9 @@ async function updateProject(req) {
     }
     if (req.body.trigger) {
         update.$set['al.trigger'] = req.body.trigger;
+    }
+    if (req.body.isShowFilename == true || req.body.isShowFilename == false) {
+        update.$set['isShowFilename'] = req.body.isShowFilename;
     }
 
     //edit lables
@@ -391,6 +394,31 @@ async function getReviewList(req) {
     return await mongoDb.findByConditions(ProjectModel, conditions, null, options);
 }
 
+async function getLogProjectFileList(req) {
+    
+    console.log(`[ PROJECT ] Service getLogProjectFileList`);
+    const condition = {_id: ObjectId(req.query.pid)}
+    const pro = await validator.checkProjectByconditions(condition, true);
+    const schema = [
+        { $match: { projectName: pro[0].projectName, userInputsLength:1 } },
+        { $project: {_id: 0, fileName: "$fileInfo.fileName"}},
+    ]
+    return await mongoDb.aggregateBySchema(LogModel, schema);
+}
+
+async function fileterLogTicketsByFileName(req) {
+    
+    console.log(`[ PROJECT ] Service fileterLogTicketsByFileName`);    
+    await validator.validateRequired(req.query.fname);
+
+    const condition = {_id: ObjectId(req.query.pid)}
+    const pro = await validator.checkProjectByconditions(condition, true);
+    const schema = [
+        { $match: { projectName: pro[0].projectName, "fileInfo.fileName": { $regex: req.query.fname } } },
+    ]
+    return await mongoDb.aggregateBySchema(LogModel, schema);
+}
+
 module.exports = {
     getProjects,
     getProjectByAnnotator,
@@ -403,4 +431,7 @@ module.exports = {
     removeSkippedCase,
     checkProjectName,
     getReviewList,
+    getLogProjectFileList,
+    fileterLogTicketsByFileName,
+
 }

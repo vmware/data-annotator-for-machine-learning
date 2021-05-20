@@ -43,8 +43,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <ng-container>
             <clr-dg-row *clrDgItems="let dataset of datasets" [clrDgItem]="dataset">
               <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{dataset.projectName}}"
-                style="max-width:250px">
-                <a style="cursor: pointer" (click)="clickProjectName(dataset)">{{dataset.projectName}}</a>
+                style="max-width:250px">{{dataset.projectName}}
               </clr-dg-cell>
               <clr-dg-cell class="cellWordBreak" title="{{dataset.taskInstructions}}" style="max-width:250px">
                 {{dataset.taskInstructions}}
@@ -129,8 +128,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <ng-container>
             <clr-dg-row *clrDgItems="let dataset of reviewDatasets" [clrDgItem]="dataset">
               <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{dataset.projectName}}"
-                style="max-width:250px">
-                <a style="cursor: pointer" (click)="clickProjectName(dataset)">{{dataset.projectName}}</a>
+                style="max-width:250px">{{dataset.projectName}}
               </clr-dg-cell>
               <clr-dg-cell class="cellWordBreak" title="{{dataset.taskInstructions}}" style="max-width:250px">
                 {{dataset.taskInstructions}}
@@ -192,9 +190,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                   [queryParams]="{ name: dataset.projectName,projectType:dataset.projectType,id:dataset.id,from:'review'}"
                   [disabled]="dataset.totalCase==0 || !dataset.disableReview" style="margin: 0;"
                   title="Start Annotate">Review</button>
-                <!-- <button
-                      *ngIf="dataset.totalCase!=0 && (dataset.totalCase==dataset.userCompleteCase || dataset.projectCompleteCase>=dataset.totalCase)"
-                      class="btn btn-sm btn-primary" style="margin: 0;" title="Annotation Finished" disabled>Done</button> -->
               </clr-dg-cell>
             </clr-dg-row>
           </ng-container>
@@ -210,8 +205,4 @@ SPDX-License-Identifier: Apache-2.0 -->
       </clr-tab-content>
     </clr-tab>
   </clr-tabs>
-
 </div>
-
-
-<flag *ngIf="showFlagModal" [msg]="flagData" (closeFlagModal)="receiveCloseFlagModal($event)"></flag>
