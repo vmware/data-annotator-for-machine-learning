@@ -491,9 +491,6 @@ export class CreateNewComponent implements OnInit {
       });
       this.dsDialogForm.get("totalRow").setValue(e.images.length);
     } else if (this.msg.type == 'log') {
-      this.previewContentDatas.forEach(element => {
-        element.fileSize = (element.fileSize / 1024).toFixed(2)
-      });
       this.location = e.location;
       this.dsDialogForm.get("totalRow").setValue(e.totalRows);
     } else {
@@ -578,11 +575,7 @@ export class CreateNewComponent implements OnInit {
           this.previewContentDatas = choosedDataset.topReview;
           this.dsDialogForm.get("totalRow").setValue(choosedDataset.images.length);
         } else if (choosedDataset.format == 'txt') {
-          this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
-          let a = 0;
-          choosedDataset.topReview.forEach(element => {
-            element.fileSize = (element.fileSize / 1024).toFixed(2);
-          });
+          this.previewHeadDatas = ['FileName', 'FileContent'];
           this.previewContentDatas = choosedDataset.topReview;
           this.dsDialogForm.get("totalRow").setValue(choosedDataset.totalRows);
           this.location = choosedDataset.location;

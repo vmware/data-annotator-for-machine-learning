@@ -25,7 +25,6 @@ import { UserAuthService } from 'app/services/user-auth.service';
 
 export class AnnotateComponent implements OnInit, AfterViewInit {
 
-
   @ViewChild('numericInput', { static: false }) numericInput;
   user: any;
   questionForm: FormGroup;
