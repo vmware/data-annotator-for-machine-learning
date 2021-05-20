@@ -195,12 +195,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                                         </clr-dg-cell>
                                         <clr-dg-cell *ngIf="dataset.projectType=='log'"
                                             class="previewHeight ellipsis-datagrid"
-                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;"
-                                            title="{{dataset.originalData.fileSize}}">
-                                            {{dataset.originalData.fileSize}}
-                                        </clr-dg-cell>
-                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
-                                            class="previewHeight ellipsis-datagrid"
                                             title="{{dataset.originalData.filePreview}}"
                                             style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;overflow: hidden;">
                                             {{dataset.originalData.filePreview | SliceTextPipe}}
@@ -397,12 +391,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                                             style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
                                             title="{{dataset.originalData.fileName}}">
                                             {{dataset.originalData.fileName}}
-                                        </clr-dg-cell>
-                                        <clr-dg-cell *ngIf="dataset.projectType=='log'"
-                                            class="previewHeight ellipsis-datagrid"
-                                            style="word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 5;overflow: hidden;max-width:650px"
-                                            title="{{dataset.originalData.fileSize}}">
-                                            {{dataset.originalData.fileSize}}
                                         </clr-dg-cell>
                                         <clr-dg-cell *ngIf="dataset.projectType=='log'"
                                             class="previewHeight ellipsis-datagrid"

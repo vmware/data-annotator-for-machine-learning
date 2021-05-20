@@ -229,10 +229,12 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="questionContainer">
             <div *ngIf='projectType!=="ner" && projectType!=="image" && projectType!=="log"' class="textBox">
               <div *ngFor="let ticket of sr.originalData;">
-                <p class="question-paragraph" style="word-break: break-word">
+
+                <p class="question-paragraph" style="word-break: break-word;white-space: pre;">
                   <span class="ticketColumn">{{ticket.key}}</span>
                   <span>:&nbsp;&nbsp;</span>
-                  <span>{{ticket.value}}</span></p><br>
+                  <span>{{ticket.value}}</span>
+                </p><br>
               </div>
             </div>
             <div *ngIf='projectType==="image"'>
