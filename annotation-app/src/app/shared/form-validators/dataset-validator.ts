@@ -87,7 +87,7 @@ export class DatasetValidator {
         return { 'msg': { value: DatasetValidator.REQUIRED_FIELD } };
       }
 
-      let pattern = /^\w+@[a-z0-9]+\.[a-z]{2,4}$/;
+      let pattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
       if (pattern.test(control.value)) {
         return null
       } else {
