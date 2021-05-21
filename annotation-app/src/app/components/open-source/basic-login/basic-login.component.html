@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     {{dsForm.get('password').errors.msg.value}}</clr-control-error>
             </clr-password-container>
 
-            <div class="error active" *ngIf=error>
+            <div *ngIf="error" class="error active">
                 Invalid user name or password
             </div>
             <clr-alert *ngIf="registerSuccess" [clrAlertType]="'success'" (clrAlertClosedChange)="registerSuccess=''">
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </clr-alert-item>
             </clr-alert>
             <button *ngIf="!loading && !isClickSignup" style="margin-top: 1rem;" type="submit" class="btn btn-primary"
-                (click)="clickLog()">log in</button>
+                id="login-button" (click)="clickLog()">log in</button>
             <button *ngIf="!loading && isClickSignup" style="margin-top: 1rem;" type="submit" class="btn btn-primary"
                 (click)="clickSign()">sign up</button>
             <button *ngIf="loading" style="margin-top: 1rem;" type="button" class="btn loading">
@@ -77,9 +77,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                 account</a>
             <a *ngIf="isClickSignup" href="javascript://" class="signup" (click)="clickSignin()">Sign
                 in</a>
-
-
-
         </div>
     </form>
 </div>

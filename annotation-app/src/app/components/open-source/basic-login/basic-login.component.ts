@@ -130,6 +130,7 @@ export class basicLoginComponent implements OnInit {
   clickSign() {
     this.registerFailed = '';
     this.registerSuccess = '';
+    this.error = false;
     FormValidatorUtil.markControlsAsTouched(this.dsForm);
     if (!this.dsForm.invalid) {
       this.loading = true;
