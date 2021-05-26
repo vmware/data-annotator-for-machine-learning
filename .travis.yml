@@ -56,6 +56,12 @@ script: >
     docker-compose up -d
     docker-compose ps
     sleep 5
+    echo Curl register
+    curl -X PUT -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password","uname":"Joe K Qiao"}' http://localhost:3000/api/v1.0/register
+    echo Curl End register
+    echo Curl Start login
+    curl -X POST -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password"}' http://localhost:3000/api/v1.0/login
+    echo Curl End login
     echo Smoke Test Start
     cd autotest
     npm install
