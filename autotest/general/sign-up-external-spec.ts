@@ -29,7 +29,7 @@ describe('Service', () => {
 
     it('sign up with normal user successfully', async (done) => {
         await loginBusiness.signUp(Constant.firstname, Constant.lastname, Constant.username, Constant.password);
-        console.log('getPromptText:::', loginPage.getPromptText())
+        browser.sleep(5000);
         since('prompt should show up and content correct').expect(loginPage.getPromptText()).not.toEqual('');
         done();
     })
