@@ -22,16 +22,16 @@ services:
     networks:
       - bridge
   
-  active-learning-service:
-    build: ./active-learning-service
-    container_name: active
-    image: active-learning-service
-    depends_on:
-      - mongo
-    ports:
-      - "8000:8000"
-    networks:
-      - bridge
+#   active-learning-service:
+#     build: ./active-learning-service
+#     container_name: active
+#     image: active-learning-service
+#     depends_on:
+#       - mongo
+#     ports:
+#       - "8000:8000"
+#     networks:
+#       - bridge
 
   mongo:
     image: mongo:3.6.4
