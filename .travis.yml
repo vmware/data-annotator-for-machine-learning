@@ -1,3 +1,6 @@
+dist: Xenial
+sudo: false
+group: deprecated-2017Q4
 language: node_js
 node_js:
   - "10"
@@ -24,9 +27,13 @@ jobs:
     env: TEST=code_scan
   - name: "Smoke Test"
     env: TEST=smoke_test
+before_script:
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+      sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6';
+    fi
 script: >
   if [ x${TEST} = xcheck_header ]; then
-    git clone --branch=devops https://github.com/kevinchcn/data-annotator-for-machine-learning.git devops
+    git clone --branch=devops https://github.com/vmware/data-annotator-for-machine-learning.git devops
     echo $TRAVIS_BUILD_DIR
     cp $TRAVIS_BUILD_DIR/devops/check_headers.py .
     chmod +x check_headers.py
@@ -34,6 +41,7 @@ script: >
   fi &&
   if [ x${TEST} = xunit_test ]; then
     echo unit test Start
+    echo unit test
     echo unit test End
   fi &&
   if [ x${TEST} = xcode_scan ]; then
@@ -41,13 +49,13 @@ script: >
     echo Scan End
   fi &&
   if [ x${TEST} = xsmoke_test ]; then
-    git clone --branch=devops https://github.com/kevinchcn/data-annotator-for-machine-learning.git devops
-    echo $TRAVIS_BUILD_DIR
+    sudo sh -c 'echo "\n::1 localhost\n" >> /etc/hosts'
+    git clone --branch=devops https://github.com/vmware/data-annotator-for-machine-learning.git devops
     cp -r $TRAVIS_BUILD_DIR/devops/* .
     chmod +x annotation-app/docker-entrypoint.sh
     docker-compose up -d
     docker-compose ps
-    docker ps
+    sleep 5
     echo Smoke Test Start
     cd autotest
     npm install
