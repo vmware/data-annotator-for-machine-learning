@@ -1,0 +1,12 @@
+{
+  "TextProject": {
+    "Instruction": "this is e2e test project task instruction",
+    "Annotator": "test1@gmail.com",
+    "Labels": "test1,test2"
+  },
+  "TextMultipleLabelsProject": {
+    "Instruction": "this is e2e test multiple labels project task instruction",
+    "Annotator": "test1@gmail.com",
+    "Labels": "test1,test2"
+  }
+}

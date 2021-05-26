@@ -23,7 +23,7 @@ module.exports  = {
   //active-learning-service url
   loopALApiUrl: process.env.LOOP_AL_URL || "http://localhost:8000/api",
   //mongodb url
-  mongoDBUrl: process.env.MONGODB_URL || 'mongodb://localhost/loop',
+  mongoDBUrl: process.env.MONGODB_URL || 'mongodb://mo/loop',
 
   
   //-------------------- optional configs --------------------//
