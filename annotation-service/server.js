@@ -75,8 +75,11 @@ authService.authentication().then(data => {
     routers.forEach(
       api => app.use(`/api/${API_VERSION}`, require(api))
     );
-    //consume SQS message
-    consumeSQSMessage();
+    if (config.ESP || config.useAWS == true &&  config.sqsRoleArn && config.sqsUrl) {
+      //consume SQS message
+      consumeSQSMessage();
+    }
+
     const server = http.createServer(app);
     server.listen(config.serverPort, () => console.log(`[ SERVER ] API running on localhost:${config.serverPort}`));
 });

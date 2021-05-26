@@ -30,7 +30,7 @@ router.get(APIs.FILE_S3_CONFIGS, (req, res) => {
 });
 
 // create new project table and insert new project info
-router.post(APIs.FILE_PROJECT_CREATE, upload.none(), (req, res) => {
+router.post(APIs.FILE_PROJECT_CREATE, upload.single("file"), (req, res) => {
     console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
     fileService.createProject(req).then(response => {
         console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
