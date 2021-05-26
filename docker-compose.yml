@@ -1,0 +1,46 @@
+version: '2'
+services:
+  annotation-app:
+    build: ./annotation-app
+    container_name: app
+    image: annotation-app
+    depends_on:
+      - annotation-service
+    ports:
+      - "4200:5000"
+    networks:
+      - bridge
+      
+  annotation-service:
+    build: ./annotation-service
+    container_name: service
+    image: annotation-service
+    depends_on:
+      - mongo
+    ports:
+      - "3000:3000"
+    networks:
+      - bridge
+  
+  active-learning-service:
+    build: ./active-learning-service
+    container_name: active
+    image: active-learning-service
+    depends_on:
+      - mongo
+    ports:
+      - "8000:8000"
+    networks:
+      - bridge
+
+  mongo:
+    image: mongo:3.6.4
+    container_name: mo
+    ports:
+      - "27017:27017"
+    networks:
+      - bridge
+
+networks:
+  bridge:
+    driver: bridge
