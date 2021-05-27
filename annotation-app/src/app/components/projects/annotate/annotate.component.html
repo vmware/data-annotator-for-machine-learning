@@ -60,8 +60,8 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div>{{progressInfo?.totalCase}}</div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
-            <label for="owner"
-              class="label-leftBoard">{{projectType==='log' && startFrom==='review'?'Reviewed':'Annotations'}} :
+            <label for="owner" class="label-leftBoard">{{projectType==='log' &&
+              startFrom==='review'?'Reviewed':'Annotations'}} :
             </label>&nbsp;&nbsp;
             <div>{{progressInfo?.completeCase}}</div>
           </div>
@@ -188,7 +188,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <ng-select [items]="logFiles" bindLabel="fileName" bindValue="index" [(ngModel)]="selectedFile"
                   [ngModelOptions]="{standalone: true}" [searchable]=true [readonly]=fasle [markFirst]=true
                   [clearable]=false [virtualScroll]=true notFoundText="No file found" (change)="getTargetFile($event)"
-                  (blur)="blurFilename()">
+                  (blur)="blurFilename()" (focus)="focusFilename($event)">
                   <ng-option *ngFor="let logFile of logFiles" [value]="logFile.index">
                     {{logFile.fileName}}
                   </ng-option>
