@@ -29,8 +29,8 @@ describe('Service', () => {
 
     it('sign up with normal user successfully', async (done) => {
         await loginBusiness.signUp(Constant.firstname, Constant.lastname, Constant.username, Constant.password);
-        browser.sleep(5000);
-        since('prompt should show up and content correct').expect(loginPage.getPromptText()).not.toEqual('');
+        browser.sleep(10000);
+        since('prompt should show up and content correct').expect(await loginPage.getPromptText()).not.toEqual('');
         done();
     })
 })
