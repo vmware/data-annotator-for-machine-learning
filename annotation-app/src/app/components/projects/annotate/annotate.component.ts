@@ -649,7 +649,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     if (this.isNumeric) {
       setTimeout(() => {
         this.numericInput.nativeElement.focus();
-      }, 300);
+      }, 500);
     };
     this.clearUserInput();
   }
@@ -795,7 +795,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       if (this.isNumeric) {
         setTimeout(() => {
           this.numericInput.nativeElement.focus();
-        }, 300);
+        }, 500);
       };
       this.clearUserInput();
 
@@ -820,7 +820,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     if (this.isNumeric) {
       setTimeout(() => {
         this.numericInput.nativeElement.focus();
-      }, 300);
+      }, 500);
     };
     let freeText = this.questionForm.get('questionGroup.freeText').value;
     let answer = this.questionForm.get('questionGroup.answer').value;
@@ -1282,7 +1282,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       if (this.isNumeric) {
         setTimeout(() => {
           this.numericInput.nativeElement.focus();
-        }, 300);
+        }, 500);
       };
     }, error => {
       this.loading = false;
@@ -1746,7 +1746,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         if (this.isNumeric) {
           setTimeout(() => {
             this.numericInput.nativeElement.focus();
-          }, 300);
+          }, 500);
         };
       } else {
         console.log('failed to get data')
@@ -2304,7 +2304,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
             this.selectedFile = index;
           }
         });
-        this.logFiles = response;
+        this.logFiles = response.sort((a, b) => a['fileName'].localeCompare(b['fileName']));
       } else {
         console.log(response)
       }
@@ -2315,46 +2315,51 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
 
   getTargetFile(file) {
-    let param = {
-      pid: this.projectId,
-      fname: file.fileName
-    };
-    this.loading = true;
-    this.avaService.getSrByFilename(param).subscribe(response => {
-      if (response) {
-        if (response && response.MSG) {
-          this.error = this.sr.MSG;
-          return;
-        };
-        this.sr = this.resetLogSrData(response);
-        this.toFilterLog(this.filterList);
-        if (this.sr.userInputsLength > 0) {
-          this.categoryBackFunc();
-          this.sortLabelForColor(this.categories);
-          this.getProgress();
-        };
+    if (file && file.fileName && file.fileName !== this.currentLogFile) {
+      let param = {
+        pid: this.projectId,
+        fname: file.fileName
+      };
+      this.loading = true;
+      this.avaService.getSrByFilename(param).subscribe(response => {
+        if (response) {
+          if (response && response.MSG) {
+            this.error = this.sr.MSG;
+            return;
+          };
+          this.sr = this.resetLogSrData(response);
+          this.currentLogFile = this.sr.fileInfo.fileName;
+          this.toFilterLog(this.filterList);
+          if (this.sr.userInputsLength > 0) {
+            this.categoryBackFunc();
+            this.sortLabelForColor(this.categories);
+            this.getProgress();
+          };
 
-        if (this.sr.flag && this.sr.flag.silence) {
-          this.silenceStatus = true;
-        };
-        this.loading = false;
-        this.isSkippingGameDialog = false;
-        this.clearUserInput();
+          if (this.sr.flag && this.sr.flag.silence) {
+            this.silenceStatus = true;
+          };
+          this.loading = false;
+          this.isSkippingGameDialog = false;
+          this.clearUserInput();
 
-      } else {
-        console.log(response)
-      }
-    }, error => {
-      console.log(error)
-    });
+        } else {
+          console.log(response)
+        }
+      }, error => {
+        console.log(error)
+      });
+    }
   }
 
 
   blurFilename() {
+    this.setSelectedFile();
+  }
 
-    if (!this.selectedFile) {
-      this.setSelectedFile();
-    }
+
+  focusFilename(e) {
+    this.selectedFile = null;
   }
 
 

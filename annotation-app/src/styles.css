@@ -7,6 +7,3 @@ SPDX-License-Identifier: Apache-2.0
 a {
   color: currentColor;
 }
-ng-select .ng-dropdown-panel {
-  /* width: 150% !important; */
-}
