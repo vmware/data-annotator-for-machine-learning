@@ -52,6 +52,8 @@ script: >
     echo Curl Start login
     curl -X POST -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password"}' http://localhost:3000/api/v1.0/login
     echo Curl End login
+    wget -o download.log URL http://localhost:4200
+    cat download.log
     echo Smoke Test Start
     cd autotest
     npm install
