@@ -86,7 +86,8 @@ export class CommonPage {
     }
 
     getPromptText() {
-        return this.PROMPT.getText()
+        //return this.PROMPT.getText();
+        return FunctionUtil.getElementText(this.PROMPT);
     }
 
     scrollToFarRight(element: ElementFinder) {
