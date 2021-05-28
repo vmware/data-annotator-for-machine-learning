@@ -58,5 +58,5 @@ script: >
     npm run webdriver
     npm run e2e
     echo Smoke Test End
-    docker logs -f service
+    docker logs -f app
   fi
