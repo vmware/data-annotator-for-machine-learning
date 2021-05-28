@@ -29,6 +29,7 @@ describe('Service', () => {
     })
 
     it('should login with normal user successfully', async (done) => {
+        console.log(`---->login with normal user<-----`);
         await loginBusiness.login(Constant.username, Constant.password);
         done();
     })
