@@ -4,7 +4,7 @@ COPY package.json .
 RUN npm i && mkdir /app && cp -R ./node_modules ./app
 WORKDIR /app
 COPY . .
-ARG BUILD_ENV=production
+# ARG BUILD_ENV=production
 RUN npm run build -- -c $BUILD_ENV
 
 ### STAGE 2: Setup ###
