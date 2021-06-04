@@ -157,7 +157,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     });
     this.createForm();
     this.getProgress();
-   
+    this.getProjectsList();
 
   };
 
