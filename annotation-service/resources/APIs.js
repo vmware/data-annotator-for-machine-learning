@@ -68,6 +68,7 @@ module.exports = {
     FILE_DATASET_DELETE: "/datasets",//swagger
     FILE_DATASET_NAME_UNIQUE: "/datasets/names",//no
     FILE_SUPER_COLLIDER_QUERY: "/query-from-superCollider",// swagger
+    FILE_SET_DATA: "/datasets/set-data",
     
     //email
     EMAIL_TO_OWNER: "/emails/send-to-owners",//swagger

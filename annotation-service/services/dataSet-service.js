@@ -8,20 +8,32 @@
 
 const DataSetDB = require('../db/dataSet-db');
 const S3Utils = require('../utils/s3');
-const {DATASETTYPE, S3OPERATIONS} = require('../config/constant');
+const {DATASETTYPE, S3OPERATIONS, FILEPATH} = require('../config/constant');
 const ObjectId = require("mongodb").ObjectID;
-const { isASCII } = require('../utils/validator');
 const validator = require('../utils/validator');
+const config = require('../config/config');
+const localFileSysService = require('./localFileSys.service');
 
 async function saveDataSetInfo(req) {
 
     await validator.checkDataSet({ dataSetName: req.body.dsname }, false);
-    
+    const user = req.auth.email;
+    let location = req.body.location;
+    let fileKey = req.body.fileKey;
+    if (config.useLocalFileSys) {
+
+        const folder = `./${FILEPATH.UPLOAD}/${user}`;
+        location = `${folder}/${req.file.originalname}`;
+        fileKey = process.cwd();
+        await localFileSysService.checkFileExistInLocalSys(folder, true);
+        await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
+
+    }
     let dataSet = {
         dataSetName: req.body.dsname,
         fileName: req.body.fileName,
         fileSize: req.body.fileSize,
-        user: req.auth.email,
+        user: user,
         description: req.body.description,
         format: req.body.format,
         createTime: Date.now(),
@@ -42,7 +54,7 @@ async function saveDataSetInfo(req) {
 
         req.body.topReview.topRows.forEach(row => {
             for (let i = 0; i < row.length; i++) {
-                if (!isASCII(row[i])) {
+                if (!validator.isASCII(row[i])) {
                     row = null;
                     break;
                 }
@@ -52,15 +64,15 @@ async function saveDataSetInfo(req) {
             }
         });
 
-        dataSet.fileKey = req.body.location;
+        dataSet.fileKey = fileKey;
         dataSet.hasHeader = req.body.hasHeader;
-        dataSet.location = req.body.location;
+        dataSet.location = location;
         dataSet.columnInfo = req.body.columnInfo;
         dataSet.topReview = reviews;
 
     }else if (req.body.format == DATASETTYPE.LOG) {
-        dataSet.fileKey = req.body.fileKey;
-        dataSet.location = req.body.location;
+        dataSet.fileKey = fileKey;
+        dataSet.location = location;
         dataSet.topReview = req.body.topReview;
         dataSet.totalRows = req.body.totalRows;
     }
@@ -98,7 +110,7 @@ async function queryDataSetByUser(req) {
 }
 
 async function imageTopPreview(datasets, singleData) {
-    
+    if (config.useLocalFileSys) return datasets;
     if (singleData) datasets = [datasets];
     const S3 = await S3Utils.s3Client();
 

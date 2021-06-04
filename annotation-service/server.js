@@ -75,7 +75,7 @@ authService.authentication().then(data => {
     routers.forEach(
       api => app.use(`/api/${API_VERSION}`, require(api))
     );
-    if (config.ESP || config.useAWS == true &&  config.sqsRoleArn && config.sqsUrl) {
+    if (config.ESP || config.useAWS &&  config.sqsRoleArn && config.sqsUrl) {
       //consume SQS message
       consumeSQSMessage();
     }

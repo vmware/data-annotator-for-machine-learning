@@ -11,11 +11,12 @@ const validator = require('./validator');
 const srsDB = require('../db/srs-db');
 const request = require('request');
 const config = require("../config/config");
-const { PAGINATELIMIT, PROJECTTYPE, ENCODE, S3OPERATIONS } = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, ENCODE, S3OPERATIONS, FILEPATH } = require("../config/constant");
 const projectDB = require('../db/project-db');
 const emailService = require('../services/email-service');
 const axios = require("axios");
 const S3Utils = require('./s3');
+const localFileSysService = require('../services/localFileSys.service');
 
 module.exports = {
     execute: async function (req, annotators) {
@@ -30,6 +31,7 @@ module.exports = {
         header = (typeof header === 'string'? JSON.parse(header):header);
         let selectedColumn = req.body.selectDescription;
         selectedColumn = (typeof selectedColumn === 'string'? JSON.parse(selectedColumn):selectedColumn);
+        const user = req.auth.email;
 
         let totalCase = 0;
         let docs = [];
@@ -46,13 +48,21 @@ module.exports = {
         if (projectType == PROJECTTYPE.TEXT) {
             headerRule.checkType = false;
         }
-        
-        console.log(`[ SRS ] Utils S3Utils.signedUrlByS3`);
-        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
+        let fileStream;
+        if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
+            console.log(`[ SRS ] Utils S3Utils.signedUrlByS3`);
+            const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
+            fileStream = request.get(signedUrl);
+        }else if (config.useLocalFileSys) {
+            const filePath = `./${FILEPATH.UPLOAD}/${user}/${req.body.fileName}`;
+            fileStream = await localFileSysService.readFileFromLocalSys(filePath);
+        }else{
+            throw {CODE:4007, MSG: "NO VALID FILE SYSTEM"};
+        }
         
         console.log(`[ SRS ] Utils import data to db start: `, Date.now());
         // chunking line by line to read
-        csv(headerRule).fromStream(request.get(signedUrl)).subscribe((oneData) => {
+        csv(headerRule).fromStream(fileStream).subscribe((oneData) => {
             saveData(oneData);
         }, async (error) => {
             console.log(`[ SRS ] [ERROR] Utils import data have ${error}: `, Date.now());
@@ -138,7 +148,7 @@ module.exports = {
                         annotator: annotators,
                         pname: req.body.pname
                     },
-                    auth:{ email: req.auth.email }
+                    auth:{ email: user }
                 }
                 await emailService.sendEmailToAnnotator(param);
                 

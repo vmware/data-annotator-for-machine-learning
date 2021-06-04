@@ -29,7 +29,8 @@ const { DataSetModel } = require("../db/db-connect");
 const compressing = require('compressing');
 const streamifier = require('streamifier');
 const readline = require('readline');
-
+const localFileSysService = require('./localFileSys.service');
+const _ = require("lodash");
 
 async function createProject(req) {
 
@@ -578,6 +579,57 @@ async function uploadFile(req) {
 
 }
 
+async function setData(req) {
+    const label = req.body.label;
+    const columns = req.body.columns;
+    const location = req.body.location;
+    const noheader = req.body.hasHeader == "yes"? false: true;
+
+    let labels = [], totalCase = 0, perLbExLmt = false, totLbExLmt = false;
+
+    if (columns.includes(label)) {
+        throw {CODE: 4008, MSG: "LABEL SHOULD NOT CONTAINS IN COLUMNS"};
+    }
+
+    const headerRule = {
+        noheader: false,
+        fork: true,
+        flatKeys: true,
+        noheader: noheader
+    }
+    let readStream = await localFileSysService.readFileFromLocalSys(location);
+    await csv(headerRule).fromStream(readStream).subscribe(async (oneData, index) =>{
+        let lable = oneData[label];
+        if (lable.length > 50) {
+            perLbExLmt = true;
+            lable = oneData[label].toString().substr(0, 50);
+        }
+        labels.push(lable);
+
+        let select="";
+        await columns.forEach( item =>{ select += oneData[item]});
+        let selectedData = select.replace(new RegExp(',', 'g'),'').trim();
+        if(selectedData && validator.isASCII(selectedData)){
+            totalCase += 1;
+        }
+        if (index > 50 && _.uniq(labels).length > 50) {
+            readStream.emit('end');
+            totLbExLmt = true;
+        }
+
+    },(err)=>{
+        console.error("[ FILE ] [ ERROR ] Service handle set-data", err);
+        throw{CODE: 500, MSG: "HANDLE DATA ERROR"}
+    },()=>{
+        if (totLbExLmt) {
+            labels = [];
+            totalCase = 0;
+        }
+    });
+    
+    return {perLbExLmt: perLbExLmt, totLbExLmt: totLbExLmt, totalCase:totalCase, labels: _.uniq(labels)};
+}
+
 module.exports = {
     createProject,
     generateFileFromDB,
@@ -592,6 +644,7 @@ module.exports = {
     csvContentsSrs,
     saveProjectInfo,
     uploadFile,
+    setData,
 }
 
 
