@@ -21,8 +21,11 @@ module.exports  = {
   serverPort: process.env.SERVER_PORT || 3000,
   //Google Analytics tracking id [optional configs]
   trackingId: process.env.TRACKING_ID || null,
+  
+  //IF USE DEFAULT value true will use local file system to save files
+  useLocalFileSys: process.env.USE_LOCAL_FILE_SYS || true,
   //-------------------- aws config --------------------//
-  // IF USE DEFAULT value false will use local file system and below aws config can be skip
+  // IF USE DEFAULT value false below aws config can be skip will not save files to aws-s3
   useAWS: process.env.USE_AWS || false,
   //if useAWS=true, AWS CONFIG IAM must be set
   region: process.env.REGION || null,

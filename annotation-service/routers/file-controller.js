@@ -30,7 +30,7 @@ router.get(APIs.FILE_S3_CONFIGS, (req, res) => {
 });
 
 // create new project table and insert new project info
-router.post(APIs.FILE_PROJECT_CREATE, upload.single("file"), (req, res) => {
+router.post(APIs.FILE_PROJECT_CREATE, upload.none(), (req, res) => {
     console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
     fileService.createProject(req).then(response => {
         console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
@@ -133,6 +133,17 @@ router.post(APIs.FILE_SUPER_COLLIDER_QUERY, (req, res) => {
 router.post(APIs.FILE_UPLOAD, upload.single("file"), (req, res) => {
     console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
     fileService.uploadFile(req).then((response) => {
+        console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+        res.status(200).json(response);
+    }).catch(error => {
+        console.error(`[ FILE ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+        res.status(500).send(error);
+    });
+});
+
+router.post(APIs.FILE_SET_DATA, (req, res) => {
+    console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+    fileService.setData(req, res).then((response) => {
         console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
         res.status(200).json(response);
     }).catch(error => {
