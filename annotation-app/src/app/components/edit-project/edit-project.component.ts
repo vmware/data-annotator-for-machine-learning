@@ -104,7 +104,7 @@ export class EditProjectComponent implements OnInit {
     this.assigneeList = JSON.parse(JSON.stringify(this.msg.annotator));
     this.ownerList = JSON.parse(JSON.stringify(this.msg.creator));
     this.assignmentLogicEdit = this.msg.assignmentLogic;
-    this.isShowFilename = this.msg.isShowFilename?'yes':'no';
+    this.isShowFilename = 'no';
     this.oldMax = this.msg.max;
     this.oldMin = this.msg.min;
     this.msg.categoryList.split(',').forEach(element => {
