@@ -112,7 +112,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
   annotationPrevious: any = [];
   reviewOrder: string = 'random';
   selectedFile: number;
-  currentLogFile: string;
+  currentLogFile: string = 'nimbus-test-launcher.txt'
   logFiles: any = [];
 
 
@@ -157,7 +157,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     });
     this.createForm();
     this.getProgress();
-    this.getProjectsList();
+    if (this.startFrom === 'review') {
+      this.getAllLogFilename();
+    }
 
   };
 
@@ -2297,6 +2299,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
   getAllLogFilename() {
     this.avaService.getAllLogFilename(this.projectId).subscribe(response => {
+
       if (response) {
         response.forEach((element, index) => {
           element.index = index;

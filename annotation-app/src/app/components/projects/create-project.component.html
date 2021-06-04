@@ -262,7 +262,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="preview clr-col-12 clr-col-md-8">
                 <div class="clr-checkbox-wrapper isShowFilename ">
                   <input type="checkbox" id="isShowFilename" name="checkbox-basic" value="isShowFilename"
-                    class="clr-checkbox" formControlName="isShowFilename">
+                    class="clr-checkbox" (click)="isShowFilename($event)" formControlName="isShowFilename">
                   <label for="isShowFilename"> Show fileName to annotator?</label>
                 </div>
                 <clr-tabs>
