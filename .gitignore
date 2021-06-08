@@ -18,7 +18,7 @@ annotation-service/node_modules
 annotation-service/downloadProject
 annotation-service/config/app-local.js
 annotation-service/config/app-poc.js
-
+annotation-service/FILE_SYS
 
 # active-learning-service
 *__pycache__*
