@@ -105,12 +105,12 @@ async function directlyDownload(data, req){
     const file = await FileService.generateFileFromDB(data.id, data.format, data.onlyLabelled, data.user);
     console.log(`[ SQS ] Service directlyDownload.generateFileFromDB-done`, file);
     
-    const key = `download/${data.id}/${file.fileName}`;
-    const fileLocation = `./${FILEPATH.DOWNLOAD}/${data.user}/${file.fileName}`;
+    const key = `download/${data.id}/${file}`;
+    const fileLocation = `./${FILEPATH.DOWNLOAD}/${data.user}/${file}`;
     const upload = await S3Service.uploadFileToS3(fileLocation, key);
     console.log(`[ SQS ] Service directlyDownload.uploadFileToS3-done: `, upload.Location);
 
-    console.log(`[ SQS ] Service directlyDownload.deleteFileFromLocalSys`, file.fileName);
+    console.log(`[ SQS ] Service directlyDownload.deleteFileFromLocalSys`, file);
     await localFileSysService.deleteFileFromLocalSys(fileLocation);
 
     console.log(`[ SQS ] Service directlyDownload save file position and generate status to db`);

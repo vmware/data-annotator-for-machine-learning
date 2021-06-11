@@ -26,8 +26,12 @@ async function generateLabelledCaseAsCSV(pid, user){
     const proInfo = await projectDB.queryProjectById(ObjectId(pid));
 
     const csvHeaders = ['text','label'];
+    const filePath = `./${FILEPATH.DOWNLOAD}/${user}`;
+    const filePosition = `${filePath}/${proInfo.dataSource}`
+    await localFileSysService.checkFileExistInLocalSys(filePath, true);
+
     let csvWriterOptions = {
-        path: `./${FILEPATH.DOWNLOAD}/${user}/${proInfo.dataSource}`,
+        path: filePosition,
         header: csvHeaders,
         alwaysQuote: true
     }

@@ -21,7 +21,7 @@ async function deleteFileFromLocalSys(filePath){
 async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFile){
   const exist = fs.existsSync(filePath);
   if (!exist && createDir) {
-    fs.mkdirSync(filePath);
+    fs.mkdirSync(filePath, {recursive: true});
   }
   if (!exist && thowError) {
     throw {CODE: 5002, MSG: `DIRECTORY OR FILE NOT EXIST`};
