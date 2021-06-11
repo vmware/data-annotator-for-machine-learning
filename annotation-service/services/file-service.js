@@ -31,6 +31,7 @@ const streamifier = require('streamifier');
 const readline = require('readline');
 const localFileSysService = require('./localFileSys.service');
 const _ = require("lodash");
+const config = require('../config/config');
 
 async function createProject(req) {
 
@@ -118,7 +119,7 @@ async function generateFileFromDB(id, format, onlyLabelled, user) {
 
     const fileName = await prepareCsv(mp, format, onlyLabelled, user);
     console.log(`[ FILE ] Service generateFileFromDB end within:[ ${(Date.now() - start) / 1000}s]`);
-    return { fileName: fileName };
+    return fileName;
 }
 
 async function prepareHeaders(project, format) {
@@ -305,8 +306,13 @@ async function prepareCsv(mp, format, onlyLabelled, user) {
 
     const now = moment().format('MMDDYYYYHHmmss');
     const fileName = `Export_${mp.project.dataSource.replace('.csv', "").replace('.zip', "").replace('.tgz', "")}_${now}.csv`;
+
+    const filePath = `./${FILEPATH.DOWNLOAD}/${user}`;
+    const filePosition = `${filePath}/${fileName}`
+    await localFileSysService.checkFileExistInLocalSys(filePath, true);
+
     let csvWriterOptions = {
-        path: `./${FILEPATH.DOWNLOAD}/${user}/${fileName}`,
+        path: filePosition,
         header: headerArray,
         alwaysQuote: true
     };

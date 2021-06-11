@@ -59,8 +59,8 @@ async function consumeSQSMessage(){
             console.log('[ SQS ] Utils handleMessage.generateFileFromDB-Done', file);
 
             console.log("[ SQS ] Utils upload file to s3");
-            const fileLocation = `./${FILEPATH.DOWNLOAD}/${data.user}/${file.fileName}`;
-            const key = `download/${data.id}/${file.fileName}`;
+            const fileLocation = `./${FILEPATH.DOWNLOAD}/${data.user}/${file}`;
+            const key = `download/${data.id}/${file}`;
             const upload = await S3Service.uploadFileToS3(fileLocation, key);
 
             console.log("[ SQS ] Utils delete temp file");
@@ -71,7 +71,7 @@ async function consumeSQSMessage(){
             await FileService.updateGenerateStatus(data.id, GENERATESTATUS.DONE, upload.Key, null, data.format, data.onlyLabelled);
             
             console.log("[ SQS ] Utils send generation email to owner");    
-            await EmailService.sendGenerationEmailToOwner(data.user, file.fileName);
+            await EmailService.sendGenerationEmailToOwner(data.user, file);
             
             console.log(`[ SQS ] Utils handleMessage：${message.Body}  end: `, Date.now());
         }
