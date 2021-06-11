@@ -28,6 +28,7 @@ async function saveDataSetInfo(req) {
         await localFileSysService.checkFileExistInLocalSys(folder, true);
         await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
 
+        typeof req.body.topReview == "string"? req.body.topReview=JSON.parse(req.body.topReview) : null;
     }
     let dataSet = {
         dataSetName: req.body.dsname,
@@ -139,9 +140,16 @@ async function deleteDataSet(req) {
     
     const ds = await validator.checkDataSet({ dataSetName: req.body.dsname }, true);
 
-    if (ds[0].format == DATASETTYPE.CSV || ds[0].format == DATASETTYPE.TABULAR) {
-        console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteAnObject`);
-        await S3Utils.deleteAnObject(req.body.fileKey);
+    if (ds[0].format == DATASETTYPE.CSV || ds[0].format == DATASETTYPE.TABULAR || ds[0].format == DATASETTYPE.LOG) {
+
+        if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
+            console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteAnObject`);
+            await S3Utils.deleteAnObject(req.body.fileKey);
+        }else if (config.useLocalFileSys) {
+            console.log(`[ DATASET ] Service localFileSysService.deleteFileFromLocalSys`);
+            await localFileSysService.deleteFileFromLocalSys(req.body.fileKey)
+        }
+        
     }
 
     console.log(`[ DATASET ] Service deleteDataSet.removeDataSet`);

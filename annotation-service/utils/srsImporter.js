@@ -9,14 +9,12 @@
 const csv = require('csvtojson');
 const validator = require('./validator');
 const srsDB = require('../db/srs-db');
-const request = require('request');
 const config = require("../config/config");
-const { PAGINATELIMIT, PROJECTTYPE, ENCODE, S3OPERATIONS, FILEPATH } = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, ENCODE} = require("../config/constant");
 const projectDB = require('../db/project-db');
 const emailService = require('../services/email-service');
 const axios = require("axios");
-const S3Utils = require('./s3');
-const localFileSysService = require('../services/localFileSys.service');
+const fileSystemUtils = require('./fileSystem.utils');
 
 module.exports = {
     execute: async function (req, annotators) {
@@ -48,20 +46,10 @@ module.exports = {
         if (projectType == PROJECTTYPE.TEXT) {
             headerRule.checkType = false;
         }
-        let fileStream;
-        if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
-            console.log(`[ SRS ] Utils S3Utils.signedUrlByS3`);
-            const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
-            fileStream = request.get(signedUrl);
-        }else if (config.useLocalFileSys) {
-            const filePath = `./${FILEPATH.UPLOAD}/${user}/${req.body.fileName}`;
-            fileStream = await localFileSysService.readFileFromLocalSys(filePath);
-        }else{
-            throw {CODE:4007, MSG: "NO VALID FILE SYSTEM"};
-        }
-        
-        console.log(`[ SRS ] Utils import data to db start: `, Date.now());
+        let fileStream = await fileSystemUtils.handleFileStream(req.body.location);  
+
         // chunking line by line to read
+        console.log(`[ SRS ] Utils import data to db start: `, Date.now());
         csv(headerRule).fromStream(fileStream).subscribe((oneData) => {
             saveData(oneData);
         }, async (error) => {

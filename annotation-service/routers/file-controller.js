@@ -15,6 +15,7 @@ const APIs = require('../resources/APIs');
 const s3Service = require('../services/s3.service');
 const sqsService = require('../services/sqs.service');
 const superColliderService = require('../services/supercollider.service');
+const localFileSysService = require('../services/localFileSys.service');
 const upload = multer();
 
 
@@ -52,7 +53,7 @@ router.get(APIs.FILE_PROJECT_DOWNLOAD, (req, res) => {
     });
 });
 
-router.get(APIs.FILE_PROJECT_GENERATE, (req, res) => {
+router.get(APIs.FILE_PROJECT_GENERATE, (req) => {
     console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
     sqsService.generateFile(req).then((response) => {
         console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
@@ -146,6 +147,17 @@ router.post(APIs.FILE_SET_DATA, (req, res) => {
     fileService.setData(req, res).then((response) => {
         console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
         res.status(200).json(response);
+    }).catch(error => {
+        console.error(`[ FILE ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+        res.status(500).send(error);
+    });
+});
+
+router.get(APIs.FILE_DOWNLOAD_FROM_LOCAL_SYSTEM, (req, res) => {
+    console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+    localFileSysService.downloadFileFromLocalSystem(req, res).then((response) => {
+        console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+        res.download(response);
     }).catch(error => {
         console.error(`[ FILE ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
         res.status(500).send(error);

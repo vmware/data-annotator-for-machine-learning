@@ -8,12 +8,13 @@
 
 const AWS = require('aws-sdk');
 const { Consumer } = require('sqs-consumer');
-const { GENERATESTATUS, ACCESS_TIME_60, TOKEN_EXPIRED_MESSAGE } = require('../config/constant');
+const { GENERATESTATUS, ACCESS_TIME_60, TOKEN_EXPIRED_MESSAGE, FILEPATH } = require('../config/constant');
 const config = require('../config/config');
 const STS = require('./sts');
 const FileService = require('../services/file-service');
 const S3Service = require('../services/s3.service');
 const EmailService = require('../services/email-service');
+const localFileSysService = require('../services/localFileSys.service');
 
 async function sqsClient(sqsArn){
 
@@ -54,15 +55,17 @@ async function consumeSQSMessage(){
             await FileService.updateGenerateStatus(data.id, GENERATESTATUS.GENERATING);
             
             console.log("[ SQS ] Utils generate scv file from db");  
-            const file = await FileService.generateFileFromDB(data.id, data.format, data.onlyLabelled);
+            const file = await FileService.generateFileFromDB(data.id, data.format, data.onlyLabelled, data.user);
             console.log('[ SQS ] Utils handleMessage.generateFileFromDB-Done', file);
 
             console.log("[ SQS ] Utils upload file to s3");
+            const fileLocation = `./${FILEPATH.DOWNLOAD}/${data.user}/${file.fileName}`;
             const key = `download/${data.id}/${file.fileName}`;
-            const upload = await S3Service.uploadFileToS3(file.fileName, key);
+            const upload = await S3Service.uploadFileToS3(fileLocation, key);
 
             console.log("[ SQS ] Utils delete temp file");
-            await FileService.deleteTempFile(file.fileName);
+
+            await localFileSysService.deleteFileFromLocalSys(fileLocation);
 
             console.log("[ SQS ] Utils save file position and generate status to db");    
             await FileService.updateGenerateStatus(data.id, GENERATESTATUS.DONE, upload.Key, null, data.format, data.onlyLabelled);

@@ -11,7 +11,7 @@ const projectDB = require('../db/project-db');
 const srsDB = require('../db/srs-db');
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
-const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE } = require("../config/constant");
+const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH } = require("../config/constant");
 const fs = require('fs');
 const ObjectId = require("mongodb").ObjectID;
 const moment = require('moment');
@@ -110,15 +110,13 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     return await projectDB.saveProject(project);
 }
 
-async function generateFileFromDB(id, format, onlyLabelled) {
+async function generateFileFromDB(id, format, onlyLabelled, user) {
 
     const start = Date.now();
     console.log(`[ FILE ] Service generateFileFromDB start: ${start}`);
-    // const project = await projectDB.queryProjectById(ObjectId(id));
-
     const mp = await getModelProject({_id: ObjectId(id)});
 
-    const fileName = await prepareCsv(mp, format, onlyLabelled);
+    const fileName = await prepareCsv(mp, format, onlyLabelled, user);
     console.log(`[ FILE ] Service generateFileFromDB end within:[ ${(Date.now() - start) / 1000}s]`);
     return { fileName: fileName };
 }
@@ -300,15 +298,15 @@ async function prepareContents(srData, project, format) {
     return cvsData;
 }
 
-async function prepareCsv(mp, format, onlyLabelled) {
+async function prepareCsv(mp, format, onlyLabelled, user) {
     console.log(`[ FILE ] Service prepareCsv`);
 
     let headerArray = await prepareHeaders(mp.project, format);
 
     const now = moment().format('MMDDYYYYHHmmss');
-    const fileName = `Export_${mp.project.dataSource.replace('.csv', "")}_${now}.csv`;
+    const fileName = `Export_${mp.project.dataSource.replace('.csv', "").replace('.zip', "").replace('.tgz', "")}_${now}.csv`;
     let csvWriterOptions = {
-        path: `./downloadProject/${fileName}`,
+        path: `./${FILEPATH.DOWNLOAD}/${user}/${fileName}`,
         header: headerArray,
         alwaysQuote: true
     };
@@ -337,16 +335,6 @@ async function prepareCsv(mp, format, onlyLabelled) {
         }
     }
     return fileName
-}
-
-async function deleteTempFile(fileName) {
-    const file = `./downloadProject/${fileName}`;
-    console.error(`[ FILE ] Service deleteTempFile ${file}`);
-    fs.unlink(file, error => {
-        if (error) {
-            console.error(`[ FILE ] [ERROR] Service deleteTempFile ${file}`, error);
-        }
-    });
 }
 
 async function updateGenerateStatus(id, status, file, messageId, format, onlyLabelled) {
@@ -378,36 +366,48 @@ async function updateGenerateStatus(id, status, file, messageId, format, onlyLab
 
 async function queryFileForDownlad(req) {
 
-    console.error(`[ FILE ] Service query file generate info`);
+    console.log(`[ FILE ] Service query file generate info`);
     const data = await projectDB.queryProjectById(ObjectId(req.query.pid));
     data._doc.generateInfo.labelType = data.labelType ? data.labelType : LABELTYPE.TEXT;
-
-    const S3 = await S3Utils.s3Client();
     let response = data.generateInfo;
-    originalDataSets = []
+    let originalDataSets = [];
+    const generatedFile = data.generateInfo.file;
 
-    if (data.generateInfo.file) {//data.generateInfo alway not null
-        console.error(`[ FILE ] Service found file: ${data.generateInfo.file}`);
-        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, data.generateInfo.file, S3);
-        response.file = Buffer.from(signedUrl).toString("base64");
-    }
-    if (data.projectType != PROJECTTYPE.IMGAGE) {
-        for (const dataset of data.selectedDataset) {
-            const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
-            const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
-            originalDataSets.push(signedUrl)
+    if (config.useLocalFileSys) {
+
+        if (data.projectType != PROJECTTYPE.IMGAGE) {
+            for (const dataset of data.selectedDataset) {
+                const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
+                originalDataSets.push(ds.location);
+            }
+        }
+
+    }else{
+        const S3 = await S3Utils.s3Client();
+    
+        if (generatedFile) {//data.generateInfo alway not null
+            console.log(`[ FILE ] Service found file: ${generatedFile}`);
+            const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, generatedFile, S3);
+            response.file = Buffer.from(signedUrl).toString("base64");
+        }
+        if (data.projectType != PROJECTTYPE.IMGAGE) {
+            for (const dataset of data.selectedDataset) {
+                const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
+                const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
+                originalDataSets.push(signedUrl)
+            }
         }
     }
+    
     data._doc.generateInfo.originalDataSets = originalDataSets;
     
     return response;
-
 }
 
-async function arrayWriteTempCSVFile(fileName, headerArray, csvData) {
-    console.error(`[ FILE ] Service arrayWriteTempCSVFile ${fileName}`);
+async function arrayWriteTempCSVFile(filePosition, headerArray, csvData) {
+    console.error(`[ FILE ] Service arrayWriteTempCSVFile ${filePosition}`);
     let csvWriterOptions = {
-        path: `./downloadProject/${fileName}`,
+        path: filePosition,
         header: headerArray,
         alwaysQuote: true
     };
@@ -422,10 +422,10 @@ async function getFileSizeInBytes(file) {
     return fileSizeInBytes
 }
 
-async function generateAllSr(projectName) {
+async function generateAllSr(projectName, filePosition) {
 
     let csvWriterOptions = {
-        path: `./downloadProject/${projectName}.csv`,
+        path: filePosition,
         header: ['id', 'text', 'label'],
         alwaysQuote: true
     };
@@ -633,7 +633,6 @@ async function setData(req) {
 module.exports = {
     createProject,
     generateFileFromDB,
-    deleteTempFile,
     arrayWriteTempCSVFile,
     updateGenerateStatus,
     queryFileForDownlad,

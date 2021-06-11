@@ -8,13 +8,14 @@
 
 const SQS = require('../utils/sqs');
 const config = require('../config/config');
-const { GENERATESTATUS, FILESIZE, PROJECTTYPE, FILEFORMAT, S3OPERATIONS } = require('../config/constant');
+const { GENERATESTATUS, FILESIZE, PROJECTTYPE, FILEFORMAT, S3OPERATIONS, FILEPATH } = require('../config/constant');
 const FileService = require('./file-service');
 const ProjectDB = require('../db/project-db');
 const ObjectId = require("mongodb").ObjectID;
 const S3Service = require('./s3.service');
 const communityService = require('./community.service');
 const S3Utils = require('../utils/s3');
+const localFileSysService = require('./localFileSys.service');
 
 async function generateFile(req){
     
@@ -31,24 +32,42 @@ async function generateFile(req){
     const pro = await ProjectDB.queryProjectById(ObjectId(data.id));
     const gen = pro.generateInfo;
 
-    if ((pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.IMGAGE) && data.format != FILEFORMAT.STANDARD) return {CODE: 4001, MSG: "ERROR FORMAT"};
-
-    if((gen.status == GENERATESTATUS.PREPARE) || (gen.status == GENERATESTATUS.GENERATING)){
-        response.Info = GENERATESTATUS.GENERATING;
-        response.Body = { MSG: "file is generating please wait!" };
-        console.log(`[ SQS ] Service file status: `, gen.status);
-    }else if(gen.updateTime > pro.updatedDate && gen.format == data.format && gen.onlyLabelled == data.onlyLabelled){
-        response.Info = GENERATESTATUS.DONE;
-        response.Body = await avoidRegeneration(pro, req);
-    }else if(pro.fileSize !=0 && pro.fileSize < FILESIZE){
-        console.log(`[ SQS ] Service file is less than ${FILESIZE} derectly download`);
-        response.Info = GENERATESTATUS.DONE;
-        response.Body = await directlyDownload(data, req);
-    }else{
-        console.log(`[ SQS ] Service file is more than ${FILESIZE} need generate send message to sqs`);
-        response.Info = GENERATESTATUS.PREPARE;
-        response.Body = await sendMessageToSQS(data, req);
+    if ((pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.IMGAGE) && data.format != FILEFORMAT.STANDARD){
+        return {CODE: 4001, MSG: "ERROR FORMAT"};
     }
+    
+    if (config.useLocalFileSys) {
+        
+        if(gen.updateTime > pro.updatedDate && gen.format == data.format && gen.onlyLabelled == data.onlyLabelled){
+            response.Body = gen;
+        }else{
+            response.Body = await localSysGenerateFile(data);
+        }
+        
+        console.log(`[ SQS ] Service communityService.countCommunityDownload`);
+        await communityService.countCommunityDownload(req);
+        
+        response.Info = GENERATESTATUS.DONE;
+
+    }else{
+        if((gen.status == GENERATESTATUS.PREPARE) || (gen.status == GENERATESTATUS.GENERATING)){
+            response.Info = GENERATESTATUS.GENERATING;
+            response.Body = { MSG: "file is generating please wait!" };
+            console.log(`[ SQS ] Service file status: `, gen.status);
+        }else if(gen.updateTime > pro.updatedDate && gen.format == data.format && gen.onlyLabelled == data.onlyLabelled){
+            response.Info = GENERATESTATUS.DONE;
+            response.Body = await avoidRegeneration(pro, req);
+        }else if(pro.fileSize !=0 && pro.fileSize < FILESIZE){
+            console.log(`[ SQS ] Service file is less than ${FILESIZE} derectly download`);
+            response.Info = GENERATESTATUS.DONE;
+            response.Body = await directlyDownload(data, req);
+        }else{
+            console.log(`[ SQS ] Service file is more than ${FILESIZE} need generate send message to sqs`);
+            response.Info = GENERATESTATUS.PREPARE;
+            response.Body = await sendMessageToSQS(data, req);
+        }
+    }
+
     return response;
 
 }
@@ -83,15 +102,16 @@ async function sendMessageToSQS(message, req){
 
 async function directlyDownload(data, req){
     console.log(`[ SQS ] Service directlyDownload.generateFileFromDB`);
-    const file = await FileService.generateFileFromDB(data.id, data.format, data.onlyLabelled);
+    const file = await FileService.generateFileFromDB(data.id, data.format, data.onlyLabelled, data.user);
     console.log(`[ SQS ] Service directlyDownload.generateFileFromDB-done`, file);
     
     const key = `download/${data.id}/${file.fileName}`;
-    const upload = await S3Service.uploadFileToS3(file.fileName, key);
+    const fileLocation = `./${FILEPATH.DOWNLOAD}/${data.user}/${file.fileName}`;
+    const upload = await S3Service.uploadFileToS3(fileLocation, key);
     console.log(`[ SQS ] Service directlyDownload.uploadFileToS3-done: `, upload.Location);
 
-    console.log(`[ SQS ] Service directlyDownload.deleteTempFile`, file.fileName);
-     await FileService.deleteTempFile(file.fileName);
+    console.log(`[ SQS ] Service directlyDownload.deleteFileFromLocalSys`, file.fileName);
+    await localFileSysService.deleteFileFromLocalSys(fileLocation);
 
     console.log(`[ SQS ] Service directlyDownload save file position and generate status to db`);
     await FileService.updateGenerateStatus(data.id, GENERATESTATUS.DONE, upload.Key, null, data.format, data.onlyLabelled);
@@ -106,9 +126,25 @@ async function directlyDownload(data, req){
     return response;
 }
 
+async function localSysGenerateFile(data){
+    console.log(`[ SQS ] Service directlyDownload.generateFileFromDB`);
+    const file = await FileService.generateFileFromDB(data.id, data.format, data.onlyLabelled, data.user);
+    
+    console.log(`[ SQS ] Service directlyDownload save file position and generate status to db`);
+    const fileLocation = `./${FILEPATH.DOWNLOAD}/${data.user}/${file}`;
+    await FileService.updateGenerateStatus(data.id, GENERATESTATUS.DONE, fileLocation, null, data.format, data.onlyLabelled);
+
+    console.log(`[ SQS ] Service directlyDownload.queryFileForDownlad`);
+    const request = {query: {pid: data.id}};
+    const response = await FileService.queryFileForDownlad(request);
+
+    return response;
+}
+
 module.exports = {
     generateFile,
     sendMessageToSQS,
     directlyDownload,
     avoidRegeneration,
+    localSysGenerateFile,
 }

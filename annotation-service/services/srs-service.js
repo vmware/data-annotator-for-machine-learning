@@ -12,17 +12,18 @@ const projectDB = require('../db/project-db');
 const projectService = require('./project.service');
 const validator = require('../utils/validator');
 const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDER } = require("../config/constant");
-const request = require('request');
 const csv = require('csvtojson');
 const alService = require('./activelearning.service');
 const ENRService = require('./ner.service');
 const _ = require("lodash");
-const { ProjectModel, UserModel, ImgModel, SrModel, LogModel } = require("../db/db-connect");
+const { ProjectModel, UserModel, LogModel } = require("../db/db-connect");
 const mongoDb = require("../db/mongo.db");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const imgImporter = require("../utils/imgImporter");
 const S3Utils = require('../utils/s3');
 const logImporter = require('../utils/logImporter');
+const fileSystemUtils = require('../utils/fileSystem.utils');
+
 
 async function updateSrsUserInput(req) {
     
@@ -453,8 +454,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders){
     const update = { $set: { "appendSr": APPENDSR.ADDING, updatedDate: Date.now() }};
     await projectDB.findUpdateProject( conditions, update );
 
-    console.log(`[ SRS ] Service S3Utils.signedUrlByS3`);
-    const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
+    let fileStream = await fileSystemUtils.handleFileStream(req.body.location);
     
     const headerRule = {
         noheader: false,
@@ -463,7 +463,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders){
     };
     let caseNum = 0;
     let docs = [];
-    csv(headerRule).fromStream(request.get(signedUrl)).subscribe( async (oneData, index) => {
+    csv(headerRule).fromStream(fileStream).subscribe( async (oneData, index) => {
         if (index==0) {
             await validator.checkAppendTicketsHeaders(Object.keys(oneData), originalHeaders)
         }
