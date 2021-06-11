@@ -13,20 +13,21 @@ const ObjectId = require("mongodb").ObjectID;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
 const { findFrequentlyElementInArray } = require('../utils/common.utils');
 const FileService = require('./file-service');
-const { PAGINATELIMIT } = require("../config/constant");
+const { PAGINATELIMIT, FILEPATH } = require("../config/constant");
 const { internalMLApiUrl } = require("../config/config");
 const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
+const localFileSysService = require('./localFileSys.service');
 
-async function generateLabelledCaseAsCSV(pid){
+async function generateLabelledCaseAsCSV(pid, user){
     
     console.log(`[ INTEGRATION ] Service generateLabelledCaseAsCSV.queryProjectById`);
     const proInfo = await projectDB.queryProjectById(ObjectId(pid));
 
     const csvHeaders = ['text','label'];
     let csvWriterOptions = {
-        path: `./downloadProject/${proInfo.dataSource}`,
+        path: `./${FILEPATH.DOWNLOAD}/${user}/${proInfo.dataSource}`,
         header: csvHeaders,
         alwaysQuote: true
     }
@@ -72,22 +73,23 @@ async function generateLabelledCaseAsCSV(pid){
 
 
 async function SyncLabelledCaseToInstaML(req){
-
+    const user = req.auth.email;
     console.log(`[ INTEGRATION ] Service generate temp labelled csv`);
-    const fileName = await generateLabelledCaseAsCSV(req.body.pid);
- 
+    const fileName = await generateLabelledCaseAsCSV(req.body.pid, user);
+    const fileLocation = `./${FILEPATH.DOWNLOAD}/${user}/${fileName}`;
+
     console.log(`[ INTEGRATION ] Service query project Info`);
     const proInfo = await projectDB.queryProjectById(ObjectId(req.body.pid));
     
     console.log(`[ INTEGRATION ] Service sort out FormData`);
     let form = new FormData();
-    form.append('user', req.auth.email);
+    form.append('user', user);
     form.append('name', proInfo.projectName);
     form.append('description', proInfo.taskInstructions);
     form.append('source', '');
     form.append('hasHeader', 'Yes');
     form.append('format', 'csv');
-    form.append('docfile', fs.createReadStream(`./downloadProject/${proInfo.dataSource}`));
+    form.append('docfile', fs.createReadStream(fileLocation));
     
     let config = {
         headers: form.getHeaders(),
@@ -98,7 +100,7 @@ async function SyncLabelledCaseToInstaML(req){
     await axios.post(`${internalMLApiUrl}/datasets`, form, config);
     
     console.log(`[ INTEGRATION ] Service delete tep csv file`);
-    await FileService.deleteTempFile(fileName);
+    await localFileSysService.deleteFileFromLocalSys(fileLocation);
 
     return { CODE: 0000, MSG: "SUCCESS" };
 

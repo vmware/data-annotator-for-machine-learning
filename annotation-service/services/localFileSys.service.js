@@ -1,5 +1,4 @@
 
-const {FILEPATH} = require('../config/constant');
 const fs = require('fs');
 
 async function saveFileToLocalSys(filePath, file){
@@ -16,6 +15,7 @@ async function readFileFromLocalSys(filePath){
 
 async function deleteFileFromLocalSys(filePath){
   await checkFileExistInLocalSys(filePath, false, true, true);
+  fs.unlink(filePath);
 }
 
 async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFile){
@@ -35,9 +35,18 @@ async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFil
   return exist;
 }
 
+async function downloadFileFromLocalSystem(req) {
+  
+  const filePath = req.query.file;
+  await checkFileExistInLocalSys(filePath, false, true, true);
+  
+  return filePath;
+}
+
 module.exports={
   saveFileToLocalSys,
   readFileFromLocalSys,
   deleteFileFromLocalSys,
   checkFileExistInLocalSys,
+  downloadFileFromLocalSystem,
 }

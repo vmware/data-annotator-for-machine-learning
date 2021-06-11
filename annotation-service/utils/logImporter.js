@@ -6,18 +6,16 @@
 ***/
 
 
-const { PAGINATETEXTLIMIT, PROJECTTYPE, S3OPERATIONS, FILETYPE, APPENDSR, DATASETTYPE, FILEPATH } = require("../config/constant");
+const { PAGINATETEXTLIMIT, PROJECTTYPE, FILETYPE, APPENDSR, DATASETTYPE } = require("../config/constant");
 const { LogModel, ProjectModel } = require("../db/db-connect");
 const emailService = require('../services/email-service');
 const mongoDb = require('../db/mongo.db');
 const validator = require("./validator");
-const S3Utils = require('./s3');
 const compressing = require('compressing');
 const readline = require('readline');
-const request = require('request');
 const unzip = require('unzip-stream');
-const config = require("../config/config");
-const localFileSysService = require('../services/localFileSys.service');
+const fileSystemUtils = require('./fileSystem.utils');
+
 
 async function execute(req, sendEmail, annotators, append) {
       
@@ -32,18 +30,8 @@ async function execute(req, sendEmail, annotators, append) {
   const projectName = req.body.pname;
   const urlsplit = req.body.location.split(".");
   const fileType = urlsplit[urlsplit.length-1].toLowerCase();
-
-  let fileStream;
-  if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
-    console.log(`[ SRS ] Utils S3Utils.signedUrlByS3`);
-    const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
-    fileStream = request.get(signedUrl);
-  }else if (config.useLocalFileSys) {
-      const filePath = `./${FILEPATH.UPLOAD}/${user}/${req.body.fileName}`;
-      fileStream = await localFileSysService.readFileFromLocalSys(filePath);
-  }else{
-      throw {CODE:4007, MSG: "NO VALID FILE SYSTEM"};
-  }
+  
+  let fileStream = await fileSystemUtils.handleFileStream(req.body.location);
 
   if (fileType  == FILETYPE.ZIP) {
     unzipstream = unzip.Parse();
