@@ -15,7 +15,7 @@ async function readFileFromLocalSys(filePath){
 
 async function deleteFileFromLocalSys(filePath){
   await checkFileExistInLocalSys(filePath, false, true, true);
-  fs.unlink(filePath);
+  fs.unlinkSync(filePath);
 }
 
 async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFile){

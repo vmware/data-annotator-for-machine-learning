@@ -144,13 +144,25 @@ router.post(APIs.FILE_UPLOAD, upload.single("file"), (req, res) => {
 
 router.post(APIs.FILE_SET_DATA, (req, res) => {
     console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
-    fileService.setData(req, res).then((response) => {
-        console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
-        res.status(200).json(response);
-    }).catch(error => {
-        console.error(`[ FILE ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
-        res.status(500).send(error);
-    });
+    
+    const filePath = req.query.file;
+    if (filePath) {
+        localFileSysService.readFileFromLocalSys(filePath).then((response) => {
+            console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+            response.pipe(res);
+        }).catch(error => {
+            console.error(`[ FILE ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+            res.status(500).send(error);
+        });
+    }else{
+        fileService.setData(req, res).then((response) => {
+            console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+            res.status(200).json(response);
+        }).catch(error => {
+            console.error(`[ FILE ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+            res.status(500).send(error);
+        });
+    }
 });
 
 router.get(APIs.FILE_DOWNLOAD_FROM_LOCAL_SYSTEM, (req, res) => {
