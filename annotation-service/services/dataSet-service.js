@@ -26,6 +26,10 @@ async function saveDataSetInfo(req) {
         location = `${folder}/${req.file.originalname}`;
         fileKey = process.cwd();
         await localFileSysService.checkFileExistInLocalSys(folder, true);
+        const exist = await localFileSysService.checkFileExistInLocalSys(location);
+        if (exist) {
+            return {CODE: 200, MSG: "DATASET ALREADY EXIST"};
+        }
         await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
 
         typeof req.body.topReview == "string"? req.body.topReview=JSON.parse(req.body.topReview) : null;
