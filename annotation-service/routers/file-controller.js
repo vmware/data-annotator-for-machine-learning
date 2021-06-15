@@ -145,7 +145,7 @@ router.post(APIs.FILE_UPLOAD, upload.single("file"), (req, res) => {
 router.post(APIs.FILE_SET_DATA, (req, res) => {
     console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
     
-    const filePath = req.query.file;
+    const filePath = req.body.file;
     if (filePath) {
         localFileSysService.readFileFromLocalSys(filePath).then((response) => {
             console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
