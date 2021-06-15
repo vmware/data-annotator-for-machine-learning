@@ -598,6 +598,7 @@ async function setData(req) {
     let totalCase = 0;
     let perLbExLmt = false;
     let totLbExLmt = false;
+    let removedCase = 0;
 
     if (columns.includes(label)) {
         throw {CODE: 4008, MSG: "LABEL SHOULD NOT CONTAINS IN COLUMNS"};
@@ -630,6 +631,8 @@ async function setData(req) {
         let selectedData = select.replace(new RegExp(',', 'g'),'').trim();
         if(selectedData && validator.isASCII(selectedData)){
             totalCase += 1;
+        }else{
+            removedCase += 1;
         }
         if (!numberLabel && index > 50 && _.uniq(labels).length > 50) {
             readStream.emit('end');
@@ -643,6 +646,7 @@ async function setData(req) {
         if (totLbExLmt) {
             labels = [];
             totalCase = 0;
+            removedCase = 0;
         }
     });
     
@@ -657,7 +661,14 @@ async function setData(req) {
         labels.push(max);
     }
 
-    return {perLbExLmt: perLbExLmt, totLbExLmt: totLbExLmt, totalCase:totalCase, lableType: lableType, labels: labels};
+    return {
+        perLbExLmt: perLbExLmt, 
+        totLbExLmt: totLbExLmt, 
+        totalCase:totalCase, 
+        removedCase: removedCase, 
+        lableType: lableType, 
+        labels: labels
+    };
 }
 
 module.exports = {
