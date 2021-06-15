@@ -607,6 +607,7 @@ async function setData(req) {
         noheader: false,
         fork: true,
         flatKeys: true,
+        checkType:true,
         noheader: noheader
     }
     let readStream = await localFileSysService.readFileFromLocalSys(location);
@@ -630,7 +631,7 @@ async function setData(req) {
         if(selectedData && validator.isASCII(selectedData)){
             totalCase += 1;
         }
-        if (index > 50 && _.uniq(labels).length > 50) {
+        if (!numberLabel && index > 50 && _.uniq(labels).length > 50) {
             readStream.emit('end');
             totLbExLmt = true;
         }
@@ -647,7 +648,7 @@ async function setData(req) {
     
     labels = _.uniq(labels);
     
-    if (lable && numberLabel) {
+    if (labels.length && numberLabel) {
         lableType = "number";
         const max = _.max(labels);
         const min = _.min(labels);
@@ -656,7 +657,7 @@ async function setData(req) {
         labels.push(max);
     }
 
-    return {perLbExLmt: perLbExLmt, totLbExLmt: totLbExLmt, totalCase:totalCase, labels: labels, lableType: lableType};
+    return {perLbExLmt: perLbExLmt, totLbExLmt: totLbExLmt, totalCase:totalCase, lableType: lableType, labels: labels};
 }
 
 module.exports = {
