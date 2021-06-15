@@ -25,7 +25,8 @@ def download_file(condition, remote_file, local_file,  token):
         if not os.path.exists(local_file):
             log.error(f"LOCAL FILE NOT EXIST {local_file}")
             raise Exception(500, f"LOCAL FILE NOT EXIST {local_file}")
-    elif condition and not os.path.exists(local_file):
-        S3.download_file_from_s3(remote_file, local_file, token)
+    elif condition:
+        if not os.path.exists(local_file):
+            S3.download_file_from_s3(remote_file, local_file, token)
     else:
         S3.download_file_from_s3(remote_file, local_file, token)
