@@ -586,12 +586,18 @@ async function uploadFile(req) {
 }
 
 async function setData(req) {
+
     const label = req.body.label;
     const columns = req.body.columns;
     const location = req.body.location;
     const noheader = req.body.hasHeader == "yes"? false: true;
-
-    let labels = [], totalCase = 0, perLbExLmt = false, totLbExLmt = false;
+    
+    let numberLabel = true;
+    let lableType = "string";
+    let labels = [];
+    let totalCase = 0;
+    let perLbExLmt = false;
+    let totLbExLmt = false;
 
     if (columns.includes(label)) {
         throw {CODE: 4008, MSG: "LABEL SHOULD NOT CONTAINS IN COLUMNS"};
@@ -606,11 +612,17 @@ async function setData(req) {
     let readStream = await localFileSysService.readFileFromLocalSys(location);
     await csv(headerRule).fromStream(readStream).subscribe(async (oneData, index) =>{
         let lable = oneData[label];
-        if (lable.length > 50) {
-            perLbExLmt = true;
-            lable = oneData[label].toString().substr(0, 50);
+        if (lable) {
+            if (typeof lable != 'number') {
+                numberLabel = false;
+            }
+            if (!numberLabel && lable.length > 50) {
+                perLbExLmt = true;
+                lable = oneData[label].toString().substr(0, 50);
+            }
+            labels.push(lable);
         }
-        labels.push(lable);
+        
 
         let select="";
         await columns.forEach( item =>{ select += oneData[item]});
@@ -633,7 +645,18 @@ async function setData(req) {
         }
     });
     
-    return {perLbExLmt: perLbExLmt, totLbExLmt: totLbExLmt, totalCase:totalCase, labels: _.uniq(labels)};
+    labels = _.uniq(labels);
+    
+    if (lable && numberLabel) {
+        lableType = "number";
+        const max = _.max(labels);
+        const min = _.min(labels);
+        labels = [];
+        labels.push(min);
+        labels.push(max);
+    }
+
+    return {perLbExLmt: perLbExLmt, totLbExLmt: totLbExLmt, totalCase:totalCase, labels: labels, lableType: lableType};
 }
 
 module.exports = {
