@@ -53,7 +53,7 @@ router.get(APIs.FILE_PROJECT_DOWNLOAD, (req, res) => {
     });
 });
 
-router.get(APIs.FILE_PROJECT_GENERATE, (req) => {
+router.get(APIs.FILE_PROJECT_GENERATE, (req, res) => {
     console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
     sqsService.generateFile(req).then((response) => {
         console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
