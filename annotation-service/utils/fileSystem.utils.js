@@ -1,4 +1,11 @@
 
+/***
+ * 
+ * Copyright 2019-2021 VMware, Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+***/
+
 const config = require("../config/config");
 const localFileSysService = require('../services/localFileSys.service');
 const request = require('request');
