@@ -1,3 +1,7 @@
+
+# Copyright 2019-2021 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 import logging
 import os
 import src.aws.s3 as S3
