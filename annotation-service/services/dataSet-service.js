@@ -28,7 +28,7 @@ async function saveDataSetInfo(req) {
         await localFileSysService.checkFileExistInLocalSys(folder, true);
         const exist = await localFileSysService.checkFileExistInLocalSys(location);
         if (exist) {
-            return {CODE: 200, MSG: "DATASET ALREADY EXIST"};
+            throw {CODE: 5001, MSG: "DATASET ALREADY EXIST"};
         }
         await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
 
