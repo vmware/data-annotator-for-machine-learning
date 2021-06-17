@@ -283,7 +283,7 @@ export class UploadComponent implements OnInit {
         let params = {
           dataSetName: this.uploadGroup.get('datasetsName').value,
           isShowSetHeader: res.format,
-          previewHeadDatas: uploadFormat == 'image' ? ['Id', 'ImageName', 'ImageSize(KB)', 'Image'] : (uploadFormat == 'txt' ? ['FileName', 'FileSize(KB)', 'FileContent'] : this.previewHeadDatas),
+          previewHeadDatas: uploadFormat == 'image' ? ['Id', 'ImageName', 'ImageSize(KB)', 'Image'] : (uploadFormat == 'txt' ? ['FileName', 'FileContent'] : this.previewHeadDatas),
           previewContentDatas: (uploadFormat == 'image' || uploadFormat == 'txt') ? res.topReview : this.previewContentDatas,
           chooseLabel: (uploadFormat == 'image' || uploadFormat == 'txt') ? null : this.previewHeadDatas,
           columnInfo: (uploadFormat == 'image' || uploadFormat == 'txt') ? null : res.columnInfo,

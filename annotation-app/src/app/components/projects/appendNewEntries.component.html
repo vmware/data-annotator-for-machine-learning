@@ -159,8 +159,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <label for="datasetsName" class="label-tooltip clr-col-12 clr-col-md-1">Name
                         </label>
                         <div class="clr-input-wrapper clr-col-12 clr-col-md-5">
-                            <!-- <input id="datasetsName" type="text" formControlName="datasetsName" class="clr-input"
-                                (ngModelChange)="this.userQuestionUpdate.next($event)"> -->
                             <input id="datasetsName" type="text" formControlName="datasetsName" class="clr-input"
                                 (ngModelChange)="changeDatasetName($event)">
                         </div>
@@ -282,7 +280,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                                     <tbody *ngIf="projectType=='log'">
                                         <tr *ngFor="let previewCont of previewContentDatas">
                                             <td class="left">{{previewCont.name}}</td>
-                                            <td class="left">{{previewCont.size/1000}}</td>
                                             <td class="left"
                                                 style="margin-bottom: 0.5rem;padding-bottom: unset; word-break:break-all;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 20;overflow: hidden;"
                                                 title="{{previewCont.content}}">
@@ -326,24 +323,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </clr-tooltip-content>
                         </clr-tooltip>
                     </div>
-
-
-
-
                     <div class="form-group clr-row">
                         <div class="clr-col-12 clr-col-md-1">
                             <button class="btn btn-primary btn-md" (click)="createNewCsv()">
                                 Publish
                             </button>
-
                         </div>
                         <div class="clr-col-12 clr-col-md-5"></div>
                         <div class="clr-col-12 clr-col-md-2"></div>
                         <div class="clr-col-12 clr-col-md-4"></div>
                     </div>
-
                 </form>
-
             </clr-tab-content>
         </clr-tab>
     </clr-tabs>

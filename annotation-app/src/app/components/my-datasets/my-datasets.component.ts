@@ -145,10 +145,7 @@ export class MyDatasetsComponent implements OnInit {
       });
       this.topRowContent = data.topReview;
     } else if (data.format == 'txt') {
-      this.topRowHeader = ['FileName', 'FileSize(KB)', 'FileContent'];
-      data.topReview.forEach(element => {
-        element.fileSize = (element.fileSize / 1024).toFixed(2)
-      });
+      this.topRowHeader = ['FileName', 'FileContent'];
       this.topRowContent = data.topReview;
     } else {
       this.topRowHeader = data.topReview.header == null ? [] : data.topReview.header;

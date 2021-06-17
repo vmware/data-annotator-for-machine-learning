@@ -14,7 +14,7 @@ from sklearn.preprocessing import OneHotEncoder
 import pickle
 import json
 
-from src.aws.s3 import upload_file_to_s3
+import src.utils.fileSystem as fileSystem
 
 modelDir = "models/"
 log = logging.getLogger('loop_al')
@@ -52,8 +52,7 @@ def srs_vector(request):
 
                 local_file = str("./"+modelDir + model_name)
                 upload_file = modelDir + str(pro[0]["_id"])+'/' + model_name
-                log.info(f'upload {local_file} to s3 {upload_file}')
-                upload_file_to_s3(local_file, upload_file, token)
+                upload_file = fileSystem.upload_file(upload_file, local_file, token)
 
             # save vector model name to db
             update = {

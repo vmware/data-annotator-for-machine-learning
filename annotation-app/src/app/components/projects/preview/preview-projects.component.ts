@@ -271,12 +271,11 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                         res[w].originalData = flag;
                     }
                 } else if (this.projectType == 'log') {
-                    this.previewSrsHeader = ['FileName', 'FileSize(KB)', 'FileContent'];
+                    this.previewSrsHeader = ['FileName', 'FileContent'];
                     for (let w = 0; w < res.length; w++) {
                         this.resetLoguserInputs(res[w]);
                         let file = this.resetLogOriginalData(res[w])
-                        // let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview.slice(0, 100) + '...' };
-                        let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview };
+                        let flag = { fileName: res[w].fileInfo.fileName, fileContent: file.originalData, filePreview: file.preview };
                         res[w].originalData = flag;
                         res[w].projectType = 'log';
                         res[w].selected = false;
@@ -418,10 +417,10 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
                     res[w].flag = res[w].flag.users
                 }
             } else if (this.projectType == 'log') {
-                this.previewFlagHeader = ['FileName', 'FileSize(KB)', 'FileContent'];
+                this.previewFlagHeader = ['FileName', 'FileContent'];
                 for (let w = 0; w < res.length; w++) {
                     let file = this.resetLogOriginalData(res[w])
-                    let flag = { fileName: res[w].fileInfo.fileName, fileSize: ((res[w].fileInfo.fileSize) / 1024).toFixed(2), fileContent: file.originalData, filePreview: file.preview.slice(0, 100) + '...' };
+                    let flag = { fileName: res[w].fileInfo.fileName, fileContent: file.originalData, filePreview: file.preview.slice(0, 100) + '...' };
                     res[w].originalData = flag;
                     res[w].flag = res[w].flag.users
                     res[w].projectType = 'log';

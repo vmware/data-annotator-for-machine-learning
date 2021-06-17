@@ -7,6 +7,8 @@ app = {
     "MONGODB_URL": os.getenv("MONGODB_URL", "mongodb://localhost:27017/loop"),
     "MONGODB_COLLECTION": os.getenv("MONGODB_COLLECTION", "loop"),
 
+    "USE_LOCAL_FILE_SYS": os.getenv("USE_LOCAL_FILE_SYS", True),
+    "USE_AWS": os.getenv("USE_AWS", False),
     "REGION": os.getenv("REGION", None),
     "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID", None),
     "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY", None),

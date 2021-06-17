@@ -25,7 +25,6 @@ import { UserAuthService } from 'app/services/user-auth.service';
 
 export class AnnotateComponent implements OnInit, AfterViewInit {
 
-
   @ViewChild('numericInput', { static: false }) numericInput;
   user: any;
   questionForm: FormGroup;
@@ -504,7 +503,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
                     element.sort = element.value.points[0][0];
                   }
                 });
-              };
+              }
               let aa = this.annotationHistory[i].category.sort(this.sortBy(this.projectType === 'ner' ? "start" : (this.projectType === 'log' ? "line" : "sort"), "ascending"));
               let bb = isCategory.sort(this.sortBy(this.projectType === 'ner' ? "start" : (this.projectType === 'log' ? "line" : "sort"), "ascending"));
 
@@ -525,7 +524,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
                   this.annotationHistory.splice(i, 1);
                   this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
                   return;
-                };
+                }
                 // all userInputs are same no any changes there
                 if (this.projectType === 'log' && n >= aa.length - 1) {
                   if (from === 'pass') {
@@ -533,14 +532,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
                     this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
                   }
                 }
-              };
+              }
             } else {
               this.annotationHistory.splice(i, 1);
               this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
 
-            };
+            }
           }
-        };
+        }
       }
     }
   }
@@ -650,7 +649,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     if (this.isNumeric) {
       setTimeout(() => {
         this.numericInput.nativeElement.focus();
-      }, 300);
+      }, 500);
     };
     this.clearUserInput();
   }
@@ -682,7 +681,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     } else {
       if (this.isMultipleLabel && this.projectType !== 'ner' && this.projectType !== 'image' && this.projectType !== 'log') {
         if (!this.sr.userInputsLength && !this.sr.userInputs) {
-          // this.skipAndFetchNewQuestion();
           let isCategory = this.categoryFunc();
           this.isActionErr(isCategory, null, 'skip');
         } else {
@@ -796,7 +794,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       if (this.isNumeric) {
         setTimeout(() => {
           this.numericInput.nativeElement.focus();
-        }, 300);
+        }, 500);
       };
       this.clearUserInput();
 
@@ -821,7 +819,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     if (this.isNumeric) {
       setTimeout(() => {
         this.numericInput.nativeElement.focus();
-      }, 300);
+      }, 500);
     };
     let freeText = this.questionForm.get('questionGroup.freeText').value;
     let answer = this.questionForm.get('questionGroup.answer').value;
@@ -898,7 +896,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       }
       if (this.startFrom === 'review') {
         this.getOneReview();
-
       } else {
         this.fetchData();
       }
@@ -1283,7 +1280,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
       if (this.isNumeric) {
         setTimeout(() => {
           this.numericInput.nativeElement.focus();
-        }, 300);
+        }, 500);
       };
     }, error => {
       this.loading = false;
@@ -1747,7 +1744,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
         if (this.isNumeric) {
           setTimeout(() => {
             this.numericInput.nativeElement.focus();
-          }, 300);
+          }, 500);
         };
       } else {
         console.log('failed to get data')
@@ -1902,9 +1899,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
     if (this.LabelStudioService.imageLabelInfo && this.LabelStudioService.imageLabelInfo.completionStore) {
       this.currentBoundingData = this.LabelStudioService.imageLabelInfo.completionStore.selected.serializeCompletion();
       this.highlightedNode = this.LabelStudioService.imageLabelInfo.completionStore.selected.highlightedNode;
-      // this.actionError = null;
-      // console.log("currentBoundingData:::", this.currentBoundingData)
-      // console.log("highlightedNode:::", this.highlightedNode)
       if (this.highlightedNode && this.highlightedNode.type === "rectangleregion") {
         this.onRects();
       } else if (this.highlightedNode && this.highlightedNode.type === "polygonregion") {
@@ -2305,7 +2299,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
             this.selectedFile = index;
           }
         });
-        this.logFiles = response;
+        this.logFiles = response.sort((a, b) => a['fileName'].localeCompare(b['fileName']));
       } else {
         console.log(response)
       }
@@ -2316,46 +2310,51 @@ export class AnnotateComponent implements OnInit, AfterViewInit {
 
 
   getTargetFile(file) {
-    let param = {
-      pid: this.projectId,
-      fname: file.fileName
-    };
-    this.loading = true;
-    this.avaService.getSrByFilename(param).subscribe(response => {
-      if (response) {
-        if (response && response.MSG) {
-          this.error = this.sr.MSG;
-          return;
-        };
-        this.sr = this.resetLogSrData(response);
-        this.toFilterLog(this.filterList);
-        if (this.sr.userInputsLength > 0) {
-          this.categoryBackFunc();
-          this.sortLabelForColor(this.categories);
-          this.getProgress();
-        };
+    if (file && file.fileName && file.fileName !== this.currentLogFile) {
+      let param = {
+        pid: this.projectId,
+        fname: file.fileName
+      };
+      this.loading = true;
+      this.avaService.getSrByFilename(param).subscribe(response => {
+        if (response) {
+          if (response && response.MSG) {
+            this.error = this.sr.MSG;
+            return;
+          };
+          this.sr = this.resetLogSrData(response);
+          this.currentLogFile = this.sr.fileInfo.fileName;
+          this.toFilterLog(this.filterList);
+          if (this.sr.userInputsLength > 0) {
+            this.categoryBackFunc();
+            this.sortLabelForColor(this.categories);
+            this.getProgress();
+          };
 
-        if (this.sr.flag && this.sr.flag.silence) {
-          this.silenceStatus = true;
-        };
-        this.loading = false;
-        this.isSkippingGameDialog = false;
-        this.clearUserInput();
+          if (this.sr.flag && this.sr.flag.silence) {
+            this.silenceStatus = true;
+          };
+          this.loading = false;
+          this.isSkippingGameDialog = false;
+          this.clearUserInput();
 
-      } else {
-        console.log(response)
-      }
-    }, error => {
-      console.log(error)
-    });
+        } else {
+          console.log(response)
+        }
+      }, error => {
+        console.log(error)
+      });
+    }
   }
 
 
   blurFilename() {
+    this.setSelectedFile();
+  }
 
-    if (!this.selectedFile) {
-      this.setSelectedFile();
-    }
+
+  focusFilename(e) {
+    this.selectedFile = null;
   }
 
 
