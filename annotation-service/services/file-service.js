@@ -11,7 +11,7 @@ const projectDB = require('../db/project-db');
 const srsDB = require('../db/srs-db');
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
-const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE } = require("../config/constant");
+const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH } = require("../config/constant");
 const fs = require('fs');
 const ObjectId = require("mongodb").ObjectID;
 const moment = require('moment');
@@ -29,7 +29,9 @@ const { DataSetModel } = require("../db/db-connect");
 const compressing = require('compressing');
 const streamifier = require('streamifier');
 const readline = require('readline');
-
+const localFileSysService = require('./localFileSys.service');
+const _ = require("lodash");
+const config = require('../config/config');
 
 async function createProject(req) {
 
@@ -109,17 +111,15 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     return await projectDB.saveProject(project);
 }
 
-async function generateFileFromDB(id, format, onlyLabelled) {
+async function generateFileFromDB(id, format, onlyLabelled, user) {
 
     const start = Date.now();
     console.log(`[ FILE ] Service generateFileFromDB start: ${start}`);
-    // const project = await projectDB.queryProjectById(ObjectId(id));
-
     const mp = await getModelProject({_id: ObjectId(id)});
 
-    const fileName = await prepareCsv(mp, format, onlyLabelled);
+    const fileName = await prepareCsv(mp, format, onlyLabelled, user);
     console.log(`[ FILE ] Service generateFileFromDB end within:[ ${(Date.now() - start) / 1000}s]`);
-    return { fileName: fileName };
+    return fileName;
 }
 
 async function prepareHeaders(project, format) {
@@ -299,15 +299,20 @@ async function prepareContents(srData, project, format) {
     return cvsData;
 }
 
-async function prepareCsv(mp, format, onlyLabelled) {
+async function prepareCsv(mp, format, onlyLabelled, user) {
     console.log(`[ FILE ] Service prepareCsv`);
 
     let headerArray = await prepareHeaders(mp.project, format);
 
     const now = moment().format('MMDDYYYYHHmmss');
-    const fileName = `Export_${mp.project.dataSource.replace('.csv', "")}_${now}.csv`;
+    const fileName = `Export_${mp.project.dataSource.replace('.csv', "").replace('.zip', "").replace('.tgz', "")}_${now}.csv`;
+
+    const filePath = `./${FILEPATH.DOWNLOAD}/${user}`;
+    const filePosition = `${filePath}/${fileName}`
+    await localFileSysService.checkFileExistInLocalSys(filePath, true);
+
     let csvWriterOptions = {
-        path: `./downloadProject/${fileName}`,
+        path: filePosition,
         header: headerArray,
         alwaysQuote: true
     };
@@ -336,16 +341,6 @@ async function prepareCsv(mp, format, onlyLabelled) {
         }
     }
     return fileName
-}
-
-async function deleteTempFile(fileName) {
-    const file = `./downloadProject/${fileName}`;
-    console.error(`[ FILE ] Service deleteTempFile ${file}`);
-    fs.unlink(file, error => {
-        if (error) {
-            console.error(`[ FILE ] [ERROR] Service deleteTempFile ${file}`, error);
-        }
-    });
 }
 
 async function updateGenerateStatus(id, status, file, messageId, format, onlyLabelled) {
@@ -377,36 +372,48 @@ async function updateGenerateStatus(id, status, file, messageId, format, onlyLab
 
 async function queryFileForDownlad(req) {
 
-    console.error(`[ FILE ] Service query file generate info`);
+    console.log(`[ FILE ] Service query file generate info`);
     const data = await projectDB.queryProjectById(ObjectId(req.query.pid));
     data._doc.generateInfo.labelType = data.labelType ? data.labelType : LABELTYPE.TEXT;
-
-    const S3 = await S3Utils.s3Client();
     let response = data.generateInfo;
-    originalDataSets = []
+    let originalDataSets = [];
+    const generatedFile = data.generateInfo.file;
 
-    if (data.generateInfo.file) {//data.generateInfo alway not null
-        console.error(`[ FILE ] Service found file: ${data.generateInfo.file}`);
-        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, data.generateInfo.file, S3);
-        response.file = Buffer.from(signedUrl).toString("base64");
-    }
-    if (data.projectType != PROJECTTYPE.IMGAGE) {
-        for (const dataset of data.selectedDataset) {
-            const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
-            const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
-            originalDataSets.push(signedUrl)
+    if (config.useLocalFileSys) {
+
+        if (data.projectType != PROJECTTYPE.IMGAGE) {
+            for (const dataset of data.selectedDataset) {
+                const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
+                originalDataSets.push(ds.location);
+            }
+        }
+
+    }else{
+        const S3 = await S3Utils.s3Client();
+    
+        if (generatedFile) {//data.generateInfo alway not null
+            console.log(`[ FILE ] Service found file: ${generatedFile}`);
+            const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, generatedFile, S3);
+            response.file = Buffer.from(signedUrl).toString("base64");
+        }
+        if (data.projectType != PROJECTTYPE.IMGAGE) {
+            for (const dataset of data.selectedDataset) {
+                const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
+                const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
+                originalDataSets.push(signedUrl)
+            }
         }
     }
+    
     data._doc.generateInfo.originalDataSets = originalDataSets;
     
     return response;
-
 }
 
-async function arrayWriteTempCSVFile(fileName, headerArray, csvData) {
-    console.error(`[ FILE ] Service arrayWriteTempCSVFile ${fileName}`);
+async function arrayWriteTempCSVFile(filePosition, headerArray, csvData) {
+    console.error(`[ FILE ] Service arrayWriteTempCSVFile ${filePosition}`);
     let csvWriterOptions = {
-        path: `./downloadProject/${fileName}`,
+        path: filePosition,
         header: headerArray,
         alwaysQuote: true
     };
@@ -421,10 +428,10 @@ async function getFileSizeInBytes(file) {
     return fileSizeInBytes
 }
 
-async function generateAllSr(projectName) {
+async function generateAllSr(projectName, filePosition) {
 
     let csvWriterOptions = {
-        path: `./downloadProject/${projectName}.csv`,
+        path: filePosition,
         header: ['id', 'text', 'label'],
         alwaysQuote: true
     };
@@ -578,10 +585,95 @@ async function uploadFile(req) {
 
 }
 
+async function setData(req) {
+
+    const label = req.body.label;
+    const columns = req.body.columns;
+    const location = req.body.location;
+    const noheader = req.body.hasHeader == "yes"? false: true;
+    
+    let numberLabel = true;
+    let lableType = "string";
+    let labels = [];
+    let totalCase = 0;
+    let perLbExLmt = false;
+    let totLbExLmt = false;
+    let removedCase = 0;
+
+    if (columns.includes(label)) {
+        throw {CODE: 4008, MSG: "LABEL SHOULD NOT CONTAINS IN COLUMNS"};
+    }
+
+    const headerRule = {
+        noheader: false,
+        fork: true,
+        flatKeys: true,
+        checkType:true,
+        noheader: noheader
+    }
+    let readStream = await localFileSysService.readFileFromLocalSys(location);
+    await csv(headerRule).fromStream(readStream).subscribe(async (oneData, index) =>{
+        let lable = oneData[label];
+        if (lable) {
+            if (typeof lable != 'number') {
+                numberLabel = false;
+            }
+            if (!numberLabel && lable.length > 50) {
+                perLbExLmt = true;
+                lable = oneData[label].toString().substr(0, 50);
+            }
+            labels.push(lable);
+        }
+        
+
+        let select="";
+        await columns.forEach( item =>{ select += oneData[item]});
+        let selectedData = select.replace(new RegExp(',', 'g'),'').trim();
+        if(selectedData && validator.isASCII(selectedData)){
+            totalCase += 1;
+        }else{
+            removedCase += 1;
+        }
+        if (!numberLabel && index > 50 && _.uniq(labels).length > 50) {
+            readStream.emit('end');
+            totLbExLmt = true;
+        }
+
+    },(err)=>{
+        console.error("[ FILE ] [ ERROR ] Service handle set-data", err);
+        throw{CODE: 500, MSG: "HANDLE DATA ERROR"}
+    },()=>{
+        if (totLbExLmt) {
+            labels = [];
+            totalCase = 0;
+            removedCase = 0;
+        }
+    });
+    
+    labels = _.uniq(labels);
+    
+    if (labels.length && numberLabel) {
+        lableType = "number";
+        const max = _.max(labels);
+        const min = _.min(labels);
+        labels = [];
+        labels.push(min);
+        labels.push(max);
+    }
+
+    return {
+        perLbExLmt: perLbExLmt, 
+        totLbExLmt: totLbExLmt, 
+        totalCase:totalCase, 
+        removedCase: removedCase, 
+        lableType: lableType, 
+        labels: labels
+    };
+}
+
 module.exports = {
     createProject,
     generateFileFromDB,
-    deleteTempFile,
     arrayWriteTempCSVFile,
     updateGenerateStatus,
     queryFileForDownlad,
@@ -592,6 +684,7 @@ module.exports = {
     csvContentsSrs,
     saveProjectInfo,
     uploadFile,
+    setData,
 }
 
 

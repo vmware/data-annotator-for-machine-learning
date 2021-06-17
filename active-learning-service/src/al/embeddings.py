@@ -7,7 +7,7 @@ from fastai.tabular import *
 
 from src.al.project_service import update_project
 from src.al.sr_service import query_all_srs
-from src.aws.s3 import upload_file_to_s3, download_file_from_s3
+import src.utils.fileSystem as fileSystem
 
 modelDir = "models/"
 log = logging.getLogger('loop_al')
@@ -87,8 +87,7 @@ def train_embedding_model_gain_vector(project_id, project_name, sr_text, token):
 
     # upload model to s3
     upload_file = modelDir + project_id + '/' + model_name
-    upload_file_to_s3(local_file, upload_file, token)
-    log.info(f'upload {local_file} to s3 {upload_file}')
+    upload_file = fileSystem.upload_file(upload_file, local_file, token)
 
     # update al info
     update = {"$set": {
@@ -129,8 +128,7 @@ def gain_srs_embedding_vector(sr_text, vector_model, project_id, num_col, token)
     # download embeddings model if not exist
     model_name = project_id + "_vaporizer_model.pkl"
     local_file = str("./" + modelDir + model_name)
-    if not os.path.exists(local_file):
-        download_file_from_s3(vector_model, local_file, token)
+    fileSystem.download_file(True, vector_model, local_file, token)
 
     # load embedding model to get sr vectors
     with open(local_file, 'rb') as model_vec:

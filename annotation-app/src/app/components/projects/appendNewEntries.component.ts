@@ -188,7 +188,6 @@ export class AppendNewEntriesComponent implements OnInit {
             this.newAddedData[row].map(element => {
                 if (element.key == column) {
                     element.format = false;
-
                 }
             });
         } else {
@@ -453,10 +452,10 @@ export class AppendNewEntriesComponent implements OnInit {
                     this.previewContentDatas = choosedDataset.topReview;
                     this.uploadGroup.get("totalRow").setValue(choosedDataset.images.length);
                 } else if (this.projectType == 'log') {
-                    this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
+                    this.previewHeadDatas = ['FileName', 'FileContent'];
                     let a = [];
                     choosedDataset.topReview.forEach(element => {
-                        a.push({ name: element.fileName, size: (element.fileSize / 1024).toFixed(2), content: element.fileContent })
+                        a.push({ name: element.fileName, content: element.fileContent })
                     });
                     this.previewContentDatas = a;
                     this.uploadGroup.get("totalRow").setValue(choosedDataset.totalRows);
@@ -528,7 +527,7 @@ export class AppendNewEntriesComponent implements OnInit {
                     console.log(err)
                 });
             } else if (this.projectType == 'log') {
-                this.previewHeadDatas = ['FileName', 'FileSize(KB)', 'FileContent'];
+                this.previewHeadDatas = ['FileName', 'FileContent'];
                 let flag;
                 if (this.inputFile.name.split('.').pop().toLowerCase() == 'zip') {
                     this.UnZipService.unZipTxt(this.inputFile).then(e => {
@@ -689,7 +688,7 @@ export class AppendNewEntriesComponent implements OnInit {
                     params['totalRows'] = this.uploadGroup.get("totalRow").value;
                     let a = [];
                     this.previewContentDatas.forEach(element => {
-                        a.push({ fileName: element.name, fileSize: element.size, fileContent: element.content.slice(0, 501) })
+                        a.push({ fileName: element.name, fileContent: element.content.slice(0, 501) })
                     });
                     params.topReview = a;
                 }
@@ -830,7 +829,6 @@ export class AppendNewEntriesComponent implements OnInit {
             this.renderer2.setStyle(dom, "display", "none");
             let imageDom = this.el.nativeElement.querySelector('.' + "image" + index);
             this.renderer2.setStyle(imageDom, "opacity", "1");
-
         }
     }
 
@@ -968,7 +966,6 @@ export class AppendNewEntriesComponent implements OnInit {
                 this.newAddedData[index].format = false;
                 this.newAddedData[index].file = null;
                 this.newAddedData[index].fileContent = '/';
-
             }
         }
     }

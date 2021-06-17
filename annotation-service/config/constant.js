@@ -97,4 +97,8 @@ module.exports = {
         "OBJECT":"object",
         "BOOLEAN":"boolean",
     },
+    FILEPATH:{
+        UPLOAD: "FILE_SYS/UPLOAD",
+        DOWNLOAD: "FILE_SYS/DOWNLOAD",
+    }
 }
