@@ -13,6 +13,7 @@ import { UserAuthService } from '../../services/user-auth.service';
 import { AvaService } from "../../services/ava.service";
 import { EnvironmentsService } from "app/services/environments.service";
 import { Buffer } from 'buffer';
+import { DownloadService } from 'app/services/common/download.service';
 
 @Component({
   selector: 'app-projects',
@@ -73,6 +74,9 @@ export class ProjectsComponent implements OnInit {
     private avaService: AvaService,
     private userAuthService: UserAuthService,
     public env: EnvironmentsService,
+    private downloadService: DownloadService
+
+
   ) {
     this.download = `${this.env.config.annotationService}/api`;
     this.user = this.userAuthService.loggedUser().email;
@@ -165,7 +169,7 @@ export class ProjectsComponent implements OnInit {
                 this.datasets[i].generateInfo.status = 'done'
               }
             }
-            this.downloadUrl = new Buffer(res.Body.file, 'base64').toString();
+            this.downloadUrl = this.env.config.enableAWSS3 ? new Buffer(res.Body.file, 'base64').toString() : res.Body.file;
             this.downloadProject();
           } else if (res.Info == 'generating') {
             this.infoMessage = 'Dataset with annotations is already being generated. Please refresh the page.';
@@ -210,7 +214,7 @@ export class ProjectsComponent implements OnInit {
           latestAnnotationTime: e.updatedDate,
           generateDoneTime: res.updateTime,
           format: res.format,
-          downloadUrl: new Buffer(res.file, 'base64').toString(),
+          downloadUrl: this.env.config.enableAWSS3 ? new Buffer(res.file, 'base64').toString() : res.file,
           datasets: this.datasets,
           id: e.id,
           projectName: e.projectName,
@@ -232,7 +236,7 @@ export class ProjectsComponent implements OnInit {
 
   downloadProject() {
     this.loading = false;
-    window.location.href = this.downloadUrl;
+    this.downloadService.downloadFile(this.downloadUrl);
   }
 
 
@@ -406,7 +410,7 @@ export class ProjectsComponent implements OnInit {
         this.getProjects();
       } else if (e.Info == 'done') {
         this.infoMessage = 'Dataset with annotations is already been generated. Please refresh the page.';
-        this.downloadUrl = new Buffer(e.Body.file, 'base64').toString();
+        this.downloadUrl = this.env.config.enableAWSS3 ? new Buffer(e.Body.file, 'base64').toString() : e.Body.file;
         this.downloadProject();
         this.getProjects();
       } else if (e.Info == 'generating') {

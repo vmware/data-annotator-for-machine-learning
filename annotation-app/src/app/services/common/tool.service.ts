@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Injectable } from '@angular/core';
 import * as _ from "lodash";
+import { EnvironmentsService } from 'app/services/environments.service';
 
 
 
@@ -13,7 +14,9 @@ import * as _ from "lodash";
 export class ToolService {
 
 
-    constructor() { }
+    constructor(
+        public env: EnvironmentsService,
+    ) { }
 
     hexToRgb(c) {
         if (c.length == 4) {
@@ -29,6 +32,31 @@ export class ToolService {
         return a;
         // return eval(reg).exec(text);
 
+    }
+
+
+
+    isASCII(str) {
+        return /^[\x00-\xFF\u2013-\u2122]*$/.test(str);
+    }
+
+
+    toRegEmail(emails) {
+        if (this.env.config.authUrl) {
+            for (let i = 0; i < emails.length; i++) {
+                if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            for (let i = 0; i < emails.length; i++) {
+                if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
 

@@ -20,9 +20,9 @@ import { Papa } from 'ngx-papaparse';
 import AWS from 'aws-sdk/lib/aws';
 import { Buffer } from 'buffer';
 import { DomSanitizer } from '@angular/platform-browser';
-import * as JSZip from 'jszip'
 import { UnZipService } from 'app/services/common/up-zip.service';
 import { EnvironmentsService } from 'app/services/environments.service';
+import { ToolService } from 'app/services/common/tool.service';
 
 @Component({
     selector: 'app-append',
@@ -62,21 +62,20 @@ export class AppendNewEntriesComponent implements OnInit {
     isLabelBoxShow: boolean = true;
     datasetsList: any = [];
     appendErrMessage: string;
-    // unzipEntry = new Subject<any>();
-    // flagSubscription: Subscription;
 
     constructor(
         private route: ActivatedRoute,
         private avaService: AvaService,
         private userAuthService: UserAuthService,
         private formBuilder: FormBuilder,
-        private papa: Papa,
         private router: Router,
         private el: ElementRef,
         private renderer2: Renderer2,
         private sanitizer: DomSanitizer,
         private UnZipService: UnZipService,
-        public env: EnvironmentsService
+        public env: EnvironmentsService,
+        private toolService: ToolService,
+
 
 
     ) {
@@ -183,10 +182,8 @@ export class AppendNewEntriesComponent implements OnInit {
 
 
     inputDescription(e, row, column) {
-        // console.log(e,e.target.value,row, column);
-        // console.log('inputDescription_newAddedData:', this.newAddedData)
 
-        if (!this.isASCII(e.target.value)) {
+        if (!this.toolService.isASCII(e.target.value)) {
             e.target.style.color = 'red';
             this.newAddedData[row].map(element => {
                 if (element.key == column) {
@@ -231,9 +228,6 @@ export class AppendNewEntriesComponent implements OnInit {
                     }
                 }
             })
-
-
-
         } else if (this.projectType == 'log') {
             let formData = new FormData();
             this.newAddedData.forEach(element => {
@@ -255,7 +249,7 @@ export class AppendNewEntriesComponent implements OnInit {
                 for (let j = 0; j < this.newAddedData[i].length; j++) {
                     if (this.newAddedData[i][j].format == false) {
                         return;
-                    };
+                    }
                     allValue.push(this.newAddedData[i][j].value);
                     rowArry.push(this.newAddedData[i][j].value)
                     flag[this.newAddedData[i][j].key] = this.newAddedData[i][j].value;
@@ -271,7 +265,7 @@ export class AppendNewEntriesComponent implements OnInit {
                     srdata: srdata
                 };
                 this.appendSrs(params);
-            };
+            }
         }
     }
 
@@ -315,68 +309,106 @@ export class AppendNewEntriesComponent implements OnInit {
                 console.log(error);
             }
         );
-    };
+    }
 
 
     toCaculateTotalRow(choosedDataset, originalHead) {
-        let indexArray = [];
-        for (let k = 0; k < choosedDataset.topReview.header.length; k++) {
-            indexArray.push(originalHead.indexOf(choosedDataset.topReview.header[k]));
-        }
-        this.avaService.getCloudUrl(choosedDataset.id).subscribe(
-            (res) => {
-                let count = 0;
-                let invalidCount = 0;
-                this.papa.parse(res, {
-                    header: false,
-                    download: true,
-                    dynamicTyping: true,
-                    skipEmptyLines: true,
-                    worker: true,
-                    error: (error) => {
-                        // console.log('parse_error: ', error);
-                    },
-                    chunk: (results, parser) => {
-                        let chunkData = results.data;
-                        count += chunkData.length;
-                        let newArray = [];
-
-                        for (let a = 0; a < chunkData.length; a++) {
-                            let newArray2 = [];
-                            for (let c = 0; c < indexArray.length; c++) {
-                                newArray2.push(chunkData[a][indexArray[c]]);
-                            };
-                            newArray.push(newArray2);
-                        };
-
-                        for (let b = 0; b < newArray.length; b++) {
-                            if (_.sortedUniq(newArray[b]).length == 1 && _.sortedUniq(newArray[b])[0] == null) {
-                                invalidCount += 1;
-                            } else {
-                                for (let j = 0; j < newArray[b].length; j++) {
-                                    if (!this.isASCII(String(newArray[b][j]).trim())) {
-                                        invalidCount += 1;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    complete: (result) => {
-
-                        if (choosedDataset.hasHeader == 'yes') { count = count - 1; };
-                        this.totalCase = count;
-                        this.nonEnglish = invalidCount;
-                        // this.totalRow = this.totalCase - this.nonEnglish;
+        let flag;
+        let count;
+        if (this.env.config.enableAWSS3) {
+            this.avaService.getCloudUrl(choosedDataset.id).subscribe(
+                (res) => {
+                    this.UnZipService.parseCSVChunk(res, false, true, choosedDataset.topReview.header, originalHead, this.previewContentDatas).then(e => {
+                        flag = e;
+                        if (choosedDataset.hasHeader == 'yes') { count = flag.count - 1; };
+                        this.totalCase = flag.count;
+                        this.nonEnglish = flag.invalidCount;
                         this.uploadGroup.get("totalRow").setValue(this.totalCase - this.nonEnglish);
                         this.loadPreviewTable = false;
-                    }
-                });
-            },
-            (error) => {
-                console.log("Error:", error);
-            }
-        );
+                    })
+                },
+                (error) => {
+                    console.log("Error:", error);
+                }
+            );
+        } else {
+            let params = {
+                columns: choosedDataset.topReview.header,
+                location: choosedDataset.location,
+                hasHeader: choosedDataset.hasHeader
+            };
+            this.avaService.getSetData(params).subscribe(
+                (res) => {
+                    if (choosedDataset.hasHeader == 'yes') { count = res.totalCase - 1; };
+                    this.totalCase = res.totalCase + res.removedCase;
+                    this.nonEnglish = res.removedCase;
+                    this.uploadGroup.get("totalRow").setValue(this.totalCase - this.nonEnglish);
+                    this.loadPreviewTable = false;
+                },
+                (error) => {
+                    console.log("Error:", error);
+                }
+            );
+        }
+
+        // let indexArray = [];
+        // for (let k = 0; k < choosedDataset.topReview.header.length; k++) {
+        //     indexArray.push(originalHead.indexOf(choosedDataset.topReview.header[k]));
+        // }
+        // this.avaService.getCloudUrl(choosedDataset.id).subscribe(
+        //     (res) => {
+        //         let count = 0;
+        //         let invalidCount = 0;
+        //         this.papa.parse(res, {
+        //             header: false,
+        //             download: true,
+        //             dynamicTyping: true,
+        //             skipEmptyLines: true,
+        //             worker: true,
+        //             error: (error) => {
+        //                 // console.log('parse_error: ', error);
+        //             },
+        //             chunk: (results, parser) => {
+        //                 let chunkData = results.data;
+        //                 count += chunkData.length;
+        //                 let newArray = [];
+
+        //                 for (let a = 0; a < chunkData.length; a++) {
+        //                     let newArray2 = [];
+        //                     for (let c = 0; c < indexArray.length; c++) {
+        //                         newArray2.push(chunkData[a][indexArray[c]]);
+        //                     };
+        //                     newArray.push(newArray2);
+        //                 };
+
+        //                 for (let b = 0; b < newArray.length; b++) {
+        //                     if (_.sortedUniq(newArray[b]).length == 1 && _.sortedUniq(newArray[b])[0] == null) {
+        //                         invalidCount += 1;
+        //                     } else {
+        //                         for (let j = 0; j < newArray[b].length; j++) {
+        //                             if (!this.toolService.isASCII(String(newArray[b][j]).trim())) {
+        //                                 invalidCount += 1;
+        //                                 break;
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             },
+        //             complete: (result) => {
+
+        //                 if (choosedDataset.hasHeader == 'yes') { count = count - 1; };
+        //                 this.totalCase = count;
+        //                 this.nonEnglish = invalidCount;
+        //                 // this.totalRow = this.totalCase - this.nonEnglish;
+        //                 this.uploadGroup.get("totalRow").setValue(this.totalCase - this.nonEnglish);
+        //                 this.loadPreviewTable = false;
+        //             }
+        //         });
+        //     },
+        //     (error) => {
+        //         console.log("Error:", error);
+        //     }
+        // );
     }
 
 
@@ -438,9 +470,9 @@ export class AppendNewEntriesComponent implements OnInit {
                     } else {
                         this.loadPreviewTable = false;
                     }
-                };
+                }
                 return;
-            };
+            }
         }
     }
 
@@ -464,16 +496,11 @@ export class AppendNewEntriesComponent implements OnInit {
             this.uploadGroup.get('localFile').setValue(this.inputFile);
 
 
-            if (this.projectType == 'tabular') {
-                this.parseTabular();
-            } else if (this.projectType == 'image') {
+            if (this.projectType == 'image') {
                 this.previewHeadDatas = ['Id', 'ImageName', 'ImageSize(KB)', 'Image'];
-                // this.localUnzipGetEntries(this.inputFile);
-                // this.flagSubscription = this.unzipEntry.subscribe(e => {
                 let flag;
                 this.UnZipService.unzipImages(this.inputFile).then(e => {
                     // to preview the img
-                    // let entries = e.entry;
                     flag = e;
                     let entries = flag.entry;
                     let a = 1
@@ -494,7 +521,6 @@ export class AppendNewEntriesComponent implements OnInit {
                                 that.previewContentDatas.push({ _id: a++, fileName: cc[j], fileSize: (blob.size / 1024).toFixed(2), location: that.sanitizer.bypassSecurityTrustUrl((reader.result).toString()) })
                                 that.loadPreviewTable = false;
                                 that.uploadGroup.get("totalRow").setValue(flag.realEntryLength);
-                                // that.flagSubscription.unsubscribe();
                             };
                         })
                     }
@@ -518,21 +544,11 @@ export class AppendNewEntriesComponent implements OnInit {
                         this.previewContentDatas = flag.previewExample;
                         this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
                         this.loadPreviewTable = false;
-                        // setTimeout(() => {
-                        //     this.previewContentDatas = flag.previewExample;
-                        //     this.previewContentDatas.forEach(element => {
-                        //         topReview.push({ fileName: element.name, fileSize: element.size, fileContent: element.content })
-                        //     });
-                        //     this.previewContentDatas = topReview;
-                        //     this.uploadGroup.get("totalRow").setValue(flag.exampleEntries);
-                        //     this.loadPreviewTable = false;
-                        // }, 1000);
-
                     });
                 };
             } else {
                 this.parseCSV();
-            };
+            }
             event.target.value = '';
         }
     }
@@ -542,173 +558,21 @@ export class AppendNewEntriesComponent implements OnInit {
 
 
     parseCSV() {
-        // let previewData = [];
-        let count = 0;
-        let invalidCount = 0;
-        let indexArray = [];
-        for (let k = 0; k < this.originalHead.length; k++) {
-            indexArray.push(this.previewHeadDatas.indexOf(this.originalHead[k]));
-        };
-        this.papa.parse(this.inputFile, {
-            header: true,
-            dynamicTyping: true,
-            skipEmptyLines: true,
-            worker: true,
-            error: (error) => {
-                console.log('parse_error: ', error);
-            },
-            chunk: (results, parser) => {
-
-                let chunkData = results.data;
-                let newArray = [];
-                let previewData = [];
-                count += chunkData.length;
-                previewData = chunkData;
-                this.previewHeadDatas = _.keys(previewData[0]);
-                if (this.previewContentDatas.length < 5) {
-                    for (let i = 0; i < previewData.length; i++) {
-                        if (!(_.sortedUniq(_.values(previewData[i])).length == 1 && _.sortedUniq(_.values(previewData[i]))[0] == null)) {
-                            this.previewContentDatas.push(_.values(previewData[i]))
-                        };
-                        if (this.previewContentDatas.length > 4) { break; };
-
-                    };
-                }
-
-                for (let a = 0; a < chunkData.length; a++) {
-                    let newArray2 = [];
-                    for (let c = 0; c < this.originalHead.length; c++) {
-                        let key = this.originalHead[c];
-                        newArray2.push(chunkData[a][key]);
-                    }
-                    newArray.push(newArray2);
-
-                };
-                for (let b = 0; b < newArray.length; b++) {
-                    if (_.sortedUniq(newArray[b]).length == 1 && _.sortedUniq(newArray[b])[0] == null) {
-                        invalidCount += 1;
-                        // console.log('empty' + b + ':', newArray[b])
-                    } else {
-                        for (let j = 0; j < newArray[b].length; j++) {
-                            if (!this.isASCII(String(newArray[b][j]).trim())) {
-                                invalidCount += 1;
-                                break;
-                            }
-                        }
-                    }
-                };
-            },
-            complete: () => {
-                this.fixHeader = _.difference(this.originalHead, this.previewHeadDatas);
-                if (this.fixHeader.length == 0) {
-                    this.totalCase = count;
-                    this.nonEnglish = invalidCount;
-                    // this.totalRow = this.totalCase - this.nonEnglish
-                    this.uploadGroup.get("totalRow").setValue(this.totalCase - this.nonEnglish);
-                }
-                this.columnInfo = [];
-                this.loadPreviewTable = false;
+        let res;
+        this.UnZipService.parseCSVChunk(this.inputFile, true, false, this.originalHead, this.previewHeadDatas, this.previewContentDatas).then(e => {
+            res = e;
+            this.originalHead = res.originalHead;
+            this.previewContentDatas = res.previewContentDatas;
+            this.previewHeadDatas = res.previewHeadDatas;
+            this.fixHeader = _.difference(this.originalHead, this.previewHeadDatas);
+            if (this.fixHeader.length == 0) {
+                this.totalCase = res.count;
+                this.nonEnglish = res.invalidCount;
+                this.uploadGroup.get("totalRow").setValue(this.totalCase - this.nonEnglish);
             }
-        });
-
-    }
-
-    parseTabular() {
-        // let previewData = [];
-        let count = 0;
-        let invalidCount = 0;
-        let indexArray = [];
-        for (let k = 0; k < this.originalHead.length; k++) {
-            indexArray.push(this.previewHeadDatas.indexOf(this.originalHead[k]));
-        };
-        this.papa.parse(this.inputFile, {
-            header: true,
-            dynamicTyping: true,
-            skipEmptyLines: true,
-            error: (error) => {
-                console.log('parse_error: ', error);
-            },
-            complete: (result) => {
-                let chunkData = result.data;
-                let newArray = [];
-                let previewData = [];
-                let tabularArray = [];
-                count = chunkData.length;
-                previewData = chunkData;
-                this.previewHeadDatas = _.keys(previewData[0]);
-                for (let i = 0; i < previewData.length; i++) {
-                    if (!(_.sortedUniq(_.values(previewData[i])).length == 1 && _.sortedUniq(_.values(previewData[i]))[0] == null)) {
-                        this.previewContentDatas.push(_.values(previewData[i]))
-                    };
-                    if (this.previewContentDatas.length > 4) { break; };
-
-                };
-                for (let a = 0; a < chunkData.length; a++) {
-                    let newArray2 = [];
-                    for (let c = 0; c < this.originalHead.length; c++) {
-                        let key = this.originalHead[c];
-                        newArray2.push(chunkData[a][key]);
-                    }
-                    newArray.push(newArray2);
-
-                };
-                for (let b = 0; b < newArray.length; b++) {
-                    if (_.sortedUniq(newArray[b]).length == 1 && _.sortedUniq(newArray[b])[0] == null) {
-                        invalidCount += 1;
-                    } else {
-                        for (let j = 0; j < newArray[b].length; j++) {
-                            if (!this.isASCII(String(newArray[b][j]).trim())) {
-                                invalidCount += 1;
-                                break;
-                            }
-                        }
-                    }
-                };
-                this.fixHeader = _.difference(this.originalHead, this.previewHeadDatas);
-                if (this.fixHeader.length == 0) {
-                    this.totalCase = count;
-                    this.nonEnglish = invalidCount;
-                    // this.totalRow = this.totalCase - this.nonEnglish
-                    this.uploadGroup.get("totalRow").setValue(this.totalCase - this.nonEnglish);
-
-                }
-                for (let a = 0; a < chunkData.length; a++) {
-                    let newArray2 = [];
-                    for (let c = 0; c < this.previewHeadDatas.length; c++) {
-                        let key = this.previewHeadDatas[c];
-                        newArray2.push(chunkData[a][key]);
-                    }
-                    tabularArray.push(newArray2);
-
-                };
-                this.caculateColumnInfo(this.previewHeadDatas, tabularArray, 'no')
-                this.loadPreviewTable = false;
-            }
-        });
-    }
-
-
-    caculateColumnInfo(head, data, header) {
-        let newData = [];
-        let columnInfo = [];
-        let j;
-        header == "yes" ? j = 1 : j = 0;
-        head.forEach(element => {
-            newData.push([]);
-            columnInfo.push({ name: element, type: '', uniqueLength: 0 })
-        });
-        for (j; j < data.length; j++) {
-            for (let k = 0; k < data[j].length; k++) {
-                newData[k].push(data[j][k]);
-            }
-        }
-        newData.forEach((element, index) => {
-            let dataLength = _.uniq(_.without(element, null)).length;
-            dataLength > 50 ? columnInfo[index].type = "Numeric" : columnInfo[index].type = "Categorical";
-            columnInfo[index].uniqueLength = dataLength;
-
-        });
-        this.columnInfo = columnInfo;
+            this.columnInfo = [];
+            this.loadPreviewTable = false;
+        })
     }
 
 
@@ -719,14 +583,6 @@ export class AppendNewEntriesComponent implements OnInit {
         if (!this.uploadGroup.invalid && this.nameExist == false && this.fixHeader.length == 0) {
             this.addLoading = true;
             if (this.uploadGroup.get('localFile').value == null) {
-                // let appendParams = {
-                //     pname: this.projectName,
-                //     isFile: true,
-                //     selectedHeaders: this.originalHead,
-                //     location: this.location,
-                //     projectType: this.projectType,
-                //     selectedDataset: this.uploadGroup.get('selectedDataset').value,
-                // }
                 let appendParams = {
                     pname: this.projectName,
                     isFile: true,
@@ -735,7 +591,6 @@ export class AppendNewEntriesComponent implements OnInit {
                 this.appendSrs(appendParams);
 
             } else {
-                // this.uploadToS3(this.inputFile, 'zip');
                 if (this.env.config.enableAWSS3) {
                     this.uploadToS3(this.inputFile, 'zip');
                 } else {
@@ -786,18 +641,17 @@ export class AppendNewEntriesComponent implements OnInit {
                     let data = await s3.upload(uploadParams).promise();
                     this.updateDatasets(data, uploadParams.Key, '');
                 }
-            };
+            }
         }, error => {
-            this.errorMessage = 'Upload file to S3 failed, please try again later.';
+            // this.errorMessage = 'Upload file to S3 failed, please try again later.';
+            this.errorMessage = JSON.stringify(error);
             setTimeout(() => {
                 this.errorMessage = '';
             }, 10000);
             console.log(error);
             this.addLoading = false;
             this.nameExist = false;
-
         });
-
     }
 
 
@@ -825,7 +679,6 @@ export class AppendNewEntriesComponent implements OnInit {
             formData.append("images", JSON.stringify(data));
         } else {
             if (data) {
-
                 params.hasHeader = 'yes';
                 params.fileKey = key;
                 params.location = data.Key;
@@ -846,12 +699,9 @@ export class AppendNewEntriesComponent implements OnInit {
                     this.errorMessage = '';
                 }, 3000);
                 return;
-            };
-        };
-
-
+            }
+        }
         this.toPostDatasets(data, from, key, formData, params)
-
     }
 
 
@@ -871,14 +721,14 @@ export class AppendNewEntriesComponent implements OnInit {
             if (from == 'fromSingle') {
                 appendParams.isFile = false;
                 appendParams.selectedDataset = null;
-            };
+            }
             if (this.projectType == 'image' && from == 'fromSingle') {
                 appendParams['images'] = data;
             }
             this.appendSrs(appendParams);
         }, error => {
             console.log('Error:', error);
-            this.errorMessage = 'Save file into db failed, please try again later.';
+            this.errorMessage = JSON.stringify(error);
             setTimeout(() => {
                 this.errorMessage = '';
             }, 10000);
@@ -891,10 +741,12 @@ export class AppendNewEntriesComponent implements OnInit {
     toPostBinary(from) {
 
         let formData = new FormData();
-        let format = this.projectType == 'log' ? 'txt' : (this.projectType == 'ner' ? 'text' : this.projectType);
+        let format = this.projectType == 'tabular' ? 'tabular' : (this.projectType == 'log' ? 'txt' : 'csv');
         formData.append('file', this.inputFile);
         formData.append("dsname", from == 'fromSingle' ? new Date().getTime() : this.uploadGroup.get('datasetsName').value);
         formData.append("format", format);
+        formData.append("fileName", this.inputFile.name);
+        formData.append("fileSize", this.inputFile.size);
         if (this.projectType == 'log') {
             let a = [];
             this.previewContentDatas.forEach(element => {
@@ -905,9 +757,8 @@ export class AppendNewEntriesComponent implements OnInit {
         } else if (this.projectType == 'text' || this.projectType == 'tabular') {
             formData.append("hasHeader", 'yes');
             formData.append("topReview", JSON.stringify({ header: this.previewHeadDatas, topRows: this.previewContentDatas }));
-        };
-        this.toPostDatasets(null, from, format, formData, null)
-
+        }
+        this.toPostDatasets(null, from, format, formData, null);
     }
 
 
@@ -957,9 +808,8 @@ export class AppendNewEntriesComponent implements OnInit {
                 this.newAddedData[index].file = null;
 
             }
-
         }
-    };
+    }
 
 
 
@@ -971,7 +821,7 @@ export class AppendNewEntriesComponent implements OnInit {
             this.renderer2.setStyle(imageDom, "opacity", "0.2");
         }
 
-    };
+    }
 
 
     leaveImage(index) {
@@ -982,26 +832,8 @@ export class AppendNewEntriesComponent implements OnInit {
             this.renderer2.setStyle(imageDom, "opacity", "1");
 
         }
-    };
+    }
 
-
-
-    // localUnzipGetEntries(inputFile) {
-
-    //     let jsZip = new JSZip();
-    //     var that = this;
-    //     jsZip.loadAsync(inputFile).then(function (entries) {
-    //         let realEntryLength = 0;
-    //         entries.forEach((path, file) => {
-    //             if (!file.dir && that.UnZipService.validImageType(path)) {
-    //                 realEntryLength++
-    //             }
-    //         });
-    //         that.unzipEntry.next({ entry: entries, realEntryLength: realEntryLength });
-    //         return that.unzipEntry.asObservable();
-
-    //     });
-    // };
 
 
     uploadImages(file, s3, s3Config) {
@@ -1030,22 +862,21 @@ export class AppendNewEntriesComponent implements OnInit {
                                         await s3.upload(e.uploadParams).promise().then(function (data, err) {
                                             if (err) {
                                                 console.log('uploadImageErr:::', err)
-                                            };
+                                            }
                                             if (data) {
                                                 imagesLocation.push({ fileName: e.fileName, location: data.Key, fileSize: e.fileSize })
                                             }
                                         })
-                                    }));
-                                };
+                                    }))
+                                }
                                 that.updateDatasets(imagesLocation, 'image', 'fromZip')
                             }
-
                         })
                     }
                 })
             }
         })
-    };
+    }
 
 
     uploadSingleImage(outNo, s3, s3Config, entry) {
@@ -1082,7 +913,7 @@ export class AppendNewEntriesComponent implements OnInit {
         this.uploadGroup.get("selectedDataset").setValidators(DatasetValidator.required());
         this.uploadGroup.get("selectedDataset").updateValueAndValidity();
 
-    };
+    }
 
 
     validInputfile() {
@@ -1092,13 +923,13 @@ export class AppendNewEntriesComponent implements OnInit {
         this.uploadGroup.get("selectedDataset").setValidators(null);
         this.uploadGroup.get("selectedDataset").updateValueAndValidity();
 
-    };
+    }
 
 
     changeDatasetName(e) {
         if (this.uploadGroup.get("selectedDataset").value && this.uploadGroup.get("selectedDataset").value !== '') {
             return;
-        };
+        }
         this.userQuestionUpdate.next(e);
     }
 
@@ -1139,17 +970,8 @@ export class AppendNewEntriesComponent implements OnInit {
                 this.newAddedData[index].fileContent = '/';
 
             }
-
         }
     }
-
-
-
-    isASCII(str) {
-        // return /^[\x00-\x7F]*$/.test(str);
-        return /^[\x00-\xFF\u2013-\u2122]*$/.test(str);
-
-    };
 
 
 

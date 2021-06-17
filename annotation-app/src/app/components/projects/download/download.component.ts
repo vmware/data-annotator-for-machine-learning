@@ -64,7 +64,7 @@ export class DownloadComponent implements OnInit {
 
   downloadProject(url) {
     this.loading = false;
-    window.location.href = url;
+    this.downloadService.downloadFile(url);
     //let backend know download
     if (this.msg.src == 'community') {
       this.loadingDownload = true;

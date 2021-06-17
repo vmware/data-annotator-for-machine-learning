@@ -15,6 +15,8 @@ import { User } from '../../model/user';
 import { EnvironmentsService } from "app/services/environments.service";
 import { Buffer } from 'buffer';
 import { DatasetValidator } from "../../shared/form-validators/dataset-validator";
+import { DownloadService } from 'app/services/common/download.service';
+import { ToolService } from 'app/services/common/tool.service';
 
 @Component({
   selector: "app-admin",
@@ -90,9 +92,9 @@ export class AdminComponent implements OnInit {
     private userAuthService: UserAuthService,
     private avaService: AvaService,
     public env: EnvironmentsService,
-    private formBuilder: FormBuilder
-
-
+    private formBuilder: FormBuilder,
+    private downloadService: DownloadService,
+    private toolService: ToolService
 
   ) {
     this.page = 1;
@@ -214,19 +216,19 @@ export class AdminComponent implements OnInit {
     if (!this.inputEmail) {
       this.setUserErrMessage = 'This field is required';
     } else {
-      let emailReg;
-      if (!this.env.config.authUrl) {
-        this.setUserErrMessage = '';
-        emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.inputEmail);
-        if (!emailReg) {
-          this.setUserErrMessage = 'Wrong format! Only accept email address';
-        }
-      } else {
-        emailReg = /^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/.test(this.inputEmail);
-        if (!emailReg) {
-          this.setUserErrMessage = 'Wrong format! Email only accept vmware emailbox';
-        }
-      };
+      let emailReg = this.toolService.toRegEmail([this.inputEmail]);
+      // if (!this.env.config.authUrl) {
+      //   this.setUserErrMessage = '';
+      //   emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.inputEmail);
+      //   if (!emailReg) {
+      //     this.setUserErrMessage = 'Wrong format! Only accept email address';
+      //   }
+      // } else {
+      //   emailReg = /^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/.test(this.inputEmail);
+      //   if (!emailReg) {
+      //     this.setUserErrMessage = 'Wrong format! Email only accept vmware emailbox';
+      //   }
+      // };
       if (emailReg) {
         this.setUserErrMessage = '';
         let str = this.inputEmail.split('@')[0];
@@ -250,6 +252,8 @@ export class AdminComponent implements OnInit {
           this.createUserDialog = false;
 
         });
+      } else {
+        this.setUserErrMessage = this.env.config.enableAWSS3 ? 'Wrong format! Email only accept vmware emailbox' : 'Wrong format! Only accept email address';
       }
     }
 
@@ -391,7 +395,7 @@ export class AdminComponent implements OnInit {
 
 
   downloadProject() {
-    window.location.href = this.downloadUrl;
+    this.downloadService.downloadFile(this.downloadUrl);
   }
 
 

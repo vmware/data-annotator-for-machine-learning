@@ -187,8 +187,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                         </div>
                     </div>
                     <div class="form-group clr-row">
-                        <label for="localFile"
-                            class="label-tooltip clr-col-12 clr-col-md-1">{{(projectType=="image" || projectType=="log")?"ZIP":"CSV"}}
+                        <label for="localFile" class="label-tooltip clr-col-12 clr-col-md-1">{{(projectType=="image" ||
+                            projectType=="log")?"ZIP":"CSV"}}
                             Upload
                             <clr-tooltip>
                                 <clr-icon clrTooltipTrigger shape="info-circle" size="18" aria-label="Uniq tooltip 5">
@@ -219,10 +219,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </label>
 
                             <span>{{inputFile?.name}}</span>
-                            <!-- <input *ngIf="projectType!=='image'" id="upfiles" name="localFileFile" type="file"
-                                (change)="onLocalFileChange($event)" accept=".csv,.CSV" class="fileInput">
-                            <input *ngIf="projectType=='image'" id="upfiles" name="localFileFile" type="file"
-                                (change)="onLocalFileChange($event)" accept=".zip,.ZIP" class="fileInput"> -->
                             <input id="upfiles" name="localFileFile" type="file" (change)="onLocalFileChange($event)"
                                 [accept]="projectType=='image'?'.zip,.ZIP':(projectType=='log'?'.zip,.ZIP,.tgz,.TGZ':'.csv,.CSV')"
                                 class="fileInput">
@@ -240,16 +236,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                                     <span>{{(uploadGroup.get('localFile').errors.msg.value)||(uploadGroup.get('selectedDataset').errors.msg.value)}}</span>
                                 </clr-tooltip-content>
                             </clr-tooltip>
-                            <!-- <clr-tooltip
-                                *ngIf="">
-                                <clr-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red;"
-                                    class="valid-tooltip">
-                                </clr-icon>
-                                <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md"
-                                    *clrIfOpen>
-                                    <span>{{uploadGroup.get('selectedDataset').errors.msg.value}}</span>
-                                </clr-tooltip-content>
-                            </clr-tooltip> -->
                             <clr-tooltip *ngIf="fixHeader.length>0">
                                 <clr-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red;"
                                     class="valid-tooltip">
@@ -323,13 +309,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <label for="totalRow" class="label-tooltip">Total
                                 {{projectType=="image"?"Items":"Rows"}}</label>
                         </div>
-                        <!-- <div class="clr-col-12 clr-col-md-11">
-                            <span>{{totalRow}}</span>&nbsp;&nbsp;
-                            <span *ngIf="nonEnglish!==0">(The total case number is {{totalCase}}, and
-                                will remove
-                                {{nonEnglish}} NON-ASCII
-                                cases)</span>
-                        </div> -->
                         <div class="clr-input-wrapper clr-col-12 clr-col-md-5">
                             <input style="width: auto !important;" id="totalRow" type="text" formControlName="totalRow"
                                 class="clr-input" readonly>

@@ -109,7 +109,7 @@ export class MyDatasetsComponent implements OnInit {
   deleteDataset(e) {
     this.loading = true;
     let param = {
-      fileKey: e.fileKey,
+      fileKey: e.location,
       dsname: e.dataSetName
     };
     this.avaService.deleteMyDataset(param).subscribe(res => {
@@ -163,7 +163,7 @@ export class MyDatasetsComponent implements OnInit {
     this.getMyDatasets();
     setTimeout(() => {
       this.infoMessage = '';
-    }, 3000);
+    }, 10000);
   }
 
 
@@ -174,7 +174,7 @@ export class MyDatasetsComponent implements OnInit {
     this.getMyDatasets();
     setTimeout(() => {
       this.errorMessageTop = '';
-    }, 3000);
+    }, 10000);
 
   }
 
