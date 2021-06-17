@@ -305,4 +305,9 @@ export class AvaService {
     return this.http.get<any>(`${this.baseUrl}/projects/log/filter?pid=${data.pid}&fname=${data.fname}`);
   }
 
+
+  public getSetData(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/datasets/set-data`, payload);
+  }
+
 }

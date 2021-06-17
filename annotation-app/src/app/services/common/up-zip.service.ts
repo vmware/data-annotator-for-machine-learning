@@ -9,13 +9,19 @@ import * as _ from "lodash";
 import * as JSZip from 'jszip';
 import * as Pako from 'pako';
 import untar from "js-untar";
+import { Papa } from 'ngx-papaparse';
+import { ToolService } from 'app/services/common/tool.service';
 
 
 @Injectable()
 export class UnZipService {
 
 
-    constructor() { }
+    constructor(
+        private papa: Papa,
+        private toolService: ToolService
+
+    ) { }
 
 
 
@@ -39,10 +45,13 @@ export class UnZipService {
                         e.content = res;
                         e.size = e._data.uncompressedSize
                     }, function error(e) {
+                        console.log('error:::', e)
                     })
                 });
                 let res = { previewExample: previewExample, exampleEntries: example }
-                resolve(res);
+                setTimeout(() => {
+                    resolve(res)
+                }, 1000);
             });
 
         })
@@ -82,7 +91,9 @@ export class UnZipService {
                             });
                         });
                         let res = { previewExample: previewExample, exampleEntries: example }
-                        resolve(res)
+                        setTimeout(() => {
+                            resolve(res)
+                        }, 1000);
                     });
             };
         });
@@ -149,6 +160,74 @@ export class UnZipService {
             return false;
         }
     };
+
+
+    parseCSVChunk(file, header, download, originalHead, previewHeadDatas, previewContentDatas) {
+        let count = 0;
+        let invalidCount = 0;
+        let indexArray = [];
+        for (let k = 0; k < originalHead.length; k++) {
+            indexArray.push(previewHeadDatas.indexOf(originalHead[k]));
+        }
+        return new Promise((resolve, reject) => {
+
+            this.papa.parse(file, {
+                header: header,
+                download: download,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                worker: true,
+                error: (error) => {
+                    console.log('parse_error: ', error);
+                },
+
+                chunk: (results, parser) => {
+
+                    let chunkData = results.data;
+                    let newArray = [];
+                    let previewData = [];
+                    count += chunkData.length;
+                    previewData = chunkData;
+                    previewHeadDatas = _.keys(previewData[0]);
+                    if (previewContentDatas.length < 5) {
+                        for (let i = 0; i < previewData.length; i++) {
+                            if (!(_.sortedUniq(_.values(previewData[i])).length == 1 && _.sortedUniq(_.values(previewData[i]))[0] == null)) {
+                                previewContentDatas.push(_.values(previewData[i]))
+                            }
+                            if (previewContentDatas.length > 4) { break; }
+
+                        }
+                    }
+
+                    for (let a = 0; a < chunkData.length; a++) {
+                        let newArray2 = [];
+                        for (let c = 0; c < originalHead.length; c++) {
+                            let key = originalHead[c];
+                            newArray2.push(chunkData[a][key]);
+                        }
+                        newArray.push(newArray2);
+
+                    };
+                    for (let b = 0; b < newArray.length; b++) {
+                        if (_.sortedUniq(newArray[b]).length == 1 && _.sortedUniq(newArray[b])[0] == null) {
+                            invalidCount += 1;
+                        } else {
+                            for (let j = 0; j < newArray[b].length; j++) {
+                                if (!this.toolService.isASCII(String(newArray[b][j]).trim())) {
+                                    invalidCount += 1;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                },
+                complete: () => {
+                    let res = { originalHead: originalHead, previewHeadDatas: previewHeadDatas, previewContentDatas: previewContentDatas, count: count, invalidCount: invalidCount }
+                    resolve(res);
+                }
+            });
+        });
+    }
 
 
 

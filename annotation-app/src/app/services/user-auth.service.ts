@@ -165,7 +165,6 @@ export class UserAuthService {
           this.clearSession();
           let redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl);
           window.location.href = `${this.env.config.logoutUrl}?client_id=${this.env.config.CLIENT_ID}&redirect_uri=${redirectUrl}&state=${this.env.config.STATE}`;
-          // window.location.href = `${this.env.config.logoutUrl}?client_id=${this.env.config.CLIENT_ID}&logout_uri=${window.location.origin}/home`;
         }
         this.sessionLifetimeSubject.next(SessionStatus.NOT_AUTHENTICATED);
         if (this.tokenExpirationTimer) {

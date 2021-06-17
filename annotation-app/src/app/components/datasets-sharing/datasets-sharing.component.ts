@@ -11,6 +11,7 @@ import { UserAuthService } from '../../services/user-auth.service';
 import { AvaService } from "../../services/ava.service";
 import { EnvironmentsService } from 'app/services/environments.service';
 import { Buffer } from 'buffer';
+import { DownloadService } from 'app/services/common/download.service';
 
 
 @Component({
@@ -50,7 +51,9 @@ export class DatasetsSharingComponent implements OnInit {
     private route: ActivatedRoute,
     private avaService: AvaService,
     private userAuthService: UserAuthService,
-    public env: EnvironmentsService
+    public env: EnvironmentsService,
+    private downloadService: DownloadService
+
 
   ) {
     this.download = `${this.env.config.annotationService}/api`;
@@ -114,7 +117,7 @@ export class DatasetsSharingComponent implements OnInit {
                 this.datasets[i].generateInfo.status = 'done'
               }
             }
-            this.downloadUrl = new Buffer(res.Body.file, 'base64').toString();
+            this.downloadUrl = this.env.config.enableAWSS3 ? new Buffer(res.Body.file, 'base64').toString() : res.Body.file;
             this.downloadProject();
             this.getProjects();
           } else if (res.Info == 'generating') {
@@ -154,7 +157,7 @@ export class DatasetsSharingComponent implements OnInit {
           selectedDownloadFile: e.dataSource,
           latestAnnotationTime: e.updatedDate,
           generateDoneTime: res.updateTime,
-          downloadUrl: new Buffer(res.file, 'base64').toString(),
+          downloadUrl: this.env.config.enableAWSS3 ? new Buffer(res.file, 'base64').toString() : res.file,
           datasets: this.datasets,
           id: e.id,
           format: res.format,
@@ -173,7 +176,7 @@ export class DatasetsSharingComponent implements OnInit {
 
 
   downloadProject() {
-    window.location.href = this.downloadUrl;
+    this.downloadService.downloadFile(this.downloadUrl);
   };
 
 
@@ -204,7 +207,7 @@ export class DatasetsSharingComponent implements OnInit {
         this.getProjects();
       } else if (e.Info == 'done') {
         this.infoMessage = 'Dataset with annotations is already been generated. Please refresh the page.';
-        this.downloadUrl = new Buffer(e.Body.file, 'base64').toString();
+        this.downloadUrl = this.env.config.enableAWSS3 ? new Buffer(e.Body.file, 'base64').toString() : e.Body.file;
         this.downloadProject();
         this.getProjects();
       } else if (e.Info == 'generating') {

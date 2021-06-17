@@ -2,7 +2,8 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 <form class="form" [formGroup]="dsDialogForm" autocomplete="off" (keydown.enter)="$event.preventDefault()">
-  <clr-alert *ngIf="errorMessageTop" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessageTop=''">
+  <clr-alert *ngIf="errorMessageTop" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessageTop=''"
+    style="margin-bottom: 1rem;">
     <div class="alert-item"><span class="alert-text">{{errorMessageTop}}</span></div>
   </clr-alert>
   <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage=''">
@@ -54,8 +55,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="form-group">
             <div class="form-group clr-row">
               <div class="clr-col-12 clr-col-md-1"></div>
-              <label for="selectedDataset"
-                class="label-tooltip clr-col-12 clr-col-md-2">{{msg.type=='image'?'Images Upload':'File Upload'}}
+              <label for="selectedDataset" class="label-tooltip clr-col-12 clr-col-md-2">{{msg.type=='image'?'Images
+                Upload':'File Upload'}}
                 <span>*</span></label>
               <div class="clr-select-wrapper clr-col-12 clr-col-md-8">
                 <select id="select-basic" class="clr-select" formControlName="selectedDataset"
@@ -347,8 +348,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
           <div class="form-group clr-row" style="margin-top: 0rem !important">
             <div class="clr-col-12 clr-col-md-1"></div>
-            <label for="totalRow"
-              class="label-tooltip clr-col-12 clr-col-md-2">{{msg.type=='image'?'Total Items':'Total Rows'}}</label>
+            <label for="totalRow" class="label-tooltip clr-col-12 clr-col-md-2">{{msg.type=='image'?'Total Items':'Total
+              Rows'}}</label>
             <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
               <input style="width: auto !important;" id="totalRow" type="text" formControlName="totalRow"
                 class="clr-input" readonly>

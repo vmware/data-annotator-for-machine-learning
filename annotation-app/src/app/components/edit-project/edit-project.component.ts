@@ -9,6 +9,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import * as _ from "lodash";
 import { EnvironmentsService } from "app/services/environments.service";
+import { ToolService } from 'app/services/common/tool.service';
 
 @Component({
   selector: 'app-edit-project',
@@ -70,7 +71,8 @@ export class EditProjectComponent implements OnInit {
 
   constructor(
     private avaService: AvaService,
-    private env: EnvironmentsService
+    private env: EnvironmentsService,
+    private toolService: ToolService
 
 
   ) {
@@ -104,7 +106,7 @@ export class EditProjectComponent implements OnInit {
     this.assigneeList = JSON.parse(JSON.stringify(this.msg.annotator));
     this.ownerList = JSON.parse(JSON.stringify(this.msg.creator));
     this.assignmentLogicEdit = this.msg.assignmentLogic;
-    this.isShowFilename = this.msg.isShowFilename?'yes':'no';
+    this.isShowFilename = this.msg.isShowFilename ? 'yes' : 'no';
     this.oldMax = this.msg.max;
     this.oldMin = this.msg.min;
     this.msg.categoryList.split(',').forEach(element => {
@@ -136,24 +138,25 @@ export class EditProjectComponent implements OnInit {
 
 
   onInputingProjectOwner(e) {
-    let emails = e.target.value.split(/,|;/)
-    if (this.env.config.authUrl) {
-      for (let i = 0; i < emails.length; i++) {
-        if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
-          this.emailRegForOwner = false;
-          return;
-        };
-        this.emailRegForOwner = true;
-      }
-    } else {
-      for (let i = 0; i < emails.length; i++) {
-        if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
-          this.emailRegForOwner = false;
-          return;
-        };
-        this.emailRegForOwner = true;
-      }
-    };
+    let emails = e.target.value.split(/,|;/);
+    this.emailRegForOwner = this.toolService.toRegEmail(emails);
+    // if (this.env.config.authUrl) {
+    //   for (let i = 0; i < emails.length; i++) {
+    //     if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
+    //       this.emailRegForOwner = false;
+    //       return;
+    //     };
+    //     this.emailRegForOwner = true;
+    //   }
+    // } else {
+    //   for (let i = 0; i < emails.length; i++) {
+    //     if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
+    //       this.emailRegForOwner = false;
+    //       return;
+    //     };
+    //     this.emailRegForOwner = true;
+    //   }
+    // };
     if (this.emailRegForOwner && this.inputOwnerValidation == false) {
       emails.forEach(element => {
         if (this.ownerList.indexOf(element.trim()) == -1) {
@@ -205,24 +208,25 @@ export class EditProjectComponent implements OnInit {
 
 
   onInputingAssignee(e) {
-    let emails = e.target.value.split(/,|;/)
-    if (this.env.config.authUrl) {
-      for (let i = 0; i < emails.length; i++) {
-        if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
-          this.emailReg = false;
-          return;
-        };
-        this.emailReg = true;
-      }
-    } else {
-      for (let i = 0; i < emails.length; i++) {
-        if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
-          this.emailReg = false;
-          return;
-        };
-        this.emailReg = true;
-      }
-    };
+    let emails = e.target.value.split(/,|;/);
+    this.emailReg = this.toolService.toRegEmail(emails);
+    // if (this.env.config.authUrl) {
+    //   for (let i = 0; i < emails.length; i++) {
+    //     if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
+    //       this.emailReg = false;
+    //       return;
+    //     };
+    //     this.emailReg = true;
+    //   }
+    // } else {
+    //   for (let i = 0; i < emails.length; i++) {
+    //     if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
+    //       this.emailReg = false;
+    //       return;
+    //     };
+    //     this.emailReg = true;
+    //   }
+    // };
     if (this.emailReg && this.inputAssigneeValidation == false) {
       emails.forEach(element => {
         if (this.assigneeList.indexOf(element.trim()) == -1) {
@@ -324,8 +328,8 @@ export class EditProjectComponent implements OnInit {
         param.addLabels = [];
         param.editLabels = {};
       };
-      if(this.msg.projectType==='log'){
-        param['isShowFilename']=this.isShowFilename=='yes'?true:false;
+      if (this.msg.projectType === 'log') {
+        param['isShowFilename'] = this.isShowFilename == 'yes' ? true : false;
       }
       this.avaService.saveProjectEdit(param).subscribe(res => {
         if (this.env.config.enableSendEmail) {
