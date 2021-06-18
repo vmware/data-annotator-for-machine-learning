@@ -7,6 +7,8 @@
 ***/
 
 const fs = require('fs');
+const config = require('../config/config');
+const {FILEPATH} = require('../config/constant');
 
 async function saveFileToLocalSys(filePath, file){
 
@@ -15,9 +17,9 @@ async function saveFileToLocalSys(filePath, file){
   });
 
 }
-async function readFileFromLocalSys(filePath){
+async function readFileFromLocalSys(filePath, options){
   await checkFileExistInLocalSys(filePath, false, true, true);
-  return fs.createReadStream(filePath);
+  return fs.createReadStream(filePath, options);
 }
 
 async function deleteFileFromLocalSys(filePath){
@@ -50,7 +52,18 @@ async function downloadFileFromLocalSystem(req) {
   return filePath;
 }
 
+async function checkFileExist(req) {
+  const file = req.query.file;
+  const user = req.auth.email;
+  if (config.useLocalFileSys) {
+    const path = `./${FILEPATH.UPLOAD}/${user}/${file}`;
+    const exist = await checkFileExistInLocalSys(path);
+    return {fileExist: exist};
+  }
+}
+
 module.exports={
+  checkFileExist,
   saveFileToLocalSys,
   readFileFromLocalSys,
   deleteFileFromLocalSys,

@@ -176,4 +176,15 @@ router.get(APIs.FILE_DOWNLOAD_FROM_LOCAL_SYSTEM, (req, res) => {
     });
 });
 
+router.get(APIs.FILE_DATASET_FILE_UNIQUE, (req, res) => {
+    console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+    localFileSysService.checkFileExist(req).then((response) => {
+        console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+        res.status(200).json(response);
+    }).catch(error => {
+        console.error(`[ FILE ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+        res.status(500).send(error);
+    });
+});
+
 module.exports = router;
