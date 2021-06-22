@@ -13,13 +13,27 @@ const ObjectId = require("mongodb").ObjectID;
 const validator = require('../utils/validator');
 const config = require('../config/config');
 const localFileSysService = require('./localFileSys.service');
+const EventEmitter = require('events');
 
 async function saveDataSetInfo(req) {
 
     await validator.checkDataSet({ dataSetName: req.body.dsname }, false);
+    
     const user = req.auth.email;
     let location = req.body.location;
     let fileKey = req.body.fileKey;
+
+    let dataSet = {
+        dataSetName: req.body.dsname,
+        fileName: req.body.fileName,
+        fileSize: req.body.fileSize,
+        user: user,
+        description: req.body.description,
+        format: req.body.format,
+        createTime: Date.now(),
+        updateTime: Date.now()
+    };
+    
     if (config.useLocalFileSys) {
 
         const folder = `./${FILEPATH.UPLOAD}/${user}`;
@@ -34,22 +48,22 @@ async function saveDataSetInfo(req) {
 
         typeof req.body.topReview == "string"? req.body.topReview=JSON.parse(req.body.topReview) : null;
     }
-    let dataSet = {
-        dataSetName: req.body.dsname,
-        fileName: req.body.fileName,
-        fileSize: req.body.fileSize,
-        user: user,
-        description: req.body.description,
-        format: req.body.format,
-        createTime: Date.now(),
-        updateTime: Date.now()
-    };
     
     if (req.body.format == DATASETTYPE.IMGAGE) {
-        if (req.body.images) {
-            dataSet.images = JSON.parse(req.body.images);
+        if (config.useLocalFileSys) {
+            const statusCheck = new EventEmitter();
+            const unzipFolder = `./${FILEPATH.UPLOAD}/${user}`;
+            await localFileSysService.singleUnzipStreamToLocalSystem(req.file.buffer, unzipFolder, statusCheck);
+            await new Promise((resolve) => statusCheck.on('done', (images)=>{ resolve(dataSet.images = images) }));
+            dataSet.fileKey = fileKey;
+            dataSet.location = location;
+ 
         }else{
-            dataSet.images = await JSON.parse(Buffer.from(req.file.buffer).toString()).images;
+            if (req.body.images) {
+                dataSet.images = JSON.parse(req.body.images);
+            }else{
+                dataSet.images = await JSON.parse(Buffer.from(req.file.buffer).toString()).images;
+            }
         }
         
     }else if (req.body.format == DATASETTYPE.CSV || req.body.format == DATASETTYPE.TABULAR) {
@@ -115,23 +129,39 @@ async function queryDataSetByUser(req) {
 }
 
 async function imageTopPreview(datasets, singleData) {
-    if (config.useLocalFileSys) return datasets;
+   
     if (singleData) datasets = [datasets];
-    const S3 = await S3Utils.s3Client();
-
-    for (const ds of datasets) {
-        if (ds.format == DATASETTYPE.IMGAGE) {
-            let preveiw = [], index = 0;
-            
-            for (const image of ds.images) { 
-                if (index>2) break;
-                image.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, image.location, S3);
-                preveiw.push(image);
-                index++;
+    
+    if (config.useLocalFileSys){
+        for (const ds of datasets) {
+            if (ds.format == DATASETTYPE.IMGAGE) {
+                let preveiw = [], index = 0;
+                
+                for (const image of ds.images) { 
+                    if (index>2) break;
+                    preveiw.push(image);
+                    index++;
+                }
+                ds._doc.topReview = preveiw;
             }
-            ds._doc.topReview = preveiw;
+        }
+    }else{
+        const S3 = await S3Utils.s3Client();
+        for (const ds of datasets) {
+            if (ds.format == DATASETTYPE.IMGAGE) {
+                let preveiw = [], index = 0;
+                
+                for (const image of ds.images) { 
+                    if (index>2) break;
+                    image.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, image.location, S3);
+                    preveiw.push(image);
+                    index++;
+                }
+                ds._doc.topReview = preveiw;
+            }
         }
     }
+
     return singleData? datasets[0]: datasets;
 }
 

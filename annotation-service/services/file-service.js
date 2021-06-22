@@ -381,7 +381,7 @@ async function queryFileForDownlad(req) {
 
     if (config.useLocalFileSys) {
 
-        if (data.projectType != PROJECTTYPE.IMGAGE) {
+        if (data.projectType == PROJECTTYPE.LOG) {
             for (const dataset of data.selectedDataset) {
                 const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
                 originalDataSets.push(ds.location);
@@ -396,7 +396,7 @@ async function queryFileForDownlad(req) {
             const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, generatedFile, S3);
             response.file = Buffer.from(signedUrl).toString("base64");
         }
-        if (data.projectType != PROJECTTYPE.IMGAGE) {
+        if (data.projectType == PROJECTTYPE.LOG) {
             for (const dataset of data.selectedDataset) {
                 const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
                 const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);

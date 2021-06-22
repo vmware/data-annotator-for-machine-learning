@@ -23,6 +23,7 @@ const imgImporter = require("../utils/imgImporter");
 const S3Utils = require('../utils/s3');
 const logImporter = require('../utils/logImporter');
 const fileSystemUtils = require('../utils/fileSystem.utils');
+const config =require('../config/config');
 
 
 async function updateSrsUserInput(req) {
@@ -241,7 +242,9 @@ async function getOneSrs(req) {
     if (srs.length) {
         
         if (project.projectType == PROJECTTYPE.IMGAGE) {
-            srs[0].originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, srs[0].originalData.location);
+            if (config.useAWS) {
+                srs[0].originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, srs[0].originalData.location);
+            }
             return srs;
         }
 
@@ -286,7 +289,7 @@ async function getALLSrs(req) {
         prevPage: data.prevPage,
         nextPage: data.nextPage
     };
-    if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
+    if (config.useAWS && mp.project.projectType == PROJECTTYPE.IMGAGE) {
         const S3 = await S3Utils.s3Client();
         for (const ticket of data.docs) {
             ticket.originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ticket.originalData.location, S3);
@@ -302,7 +305,7 @@ async function getSelectedSrsById(req) {
     const mp = await getModelProject({ _id: ObjectId(req.query.pid)});
     
     let srs = await mongoDb.findById(mp.model, ObjectId(req.query.tid));
-    if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
+    if (config.useAWS && mp.project.projectType == PROJECTTYPE.IMGAGE) {
         srs.originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, srs.originalData.location);
     }
     const token = req.headers.authorization.split("Bearer ")[1];
