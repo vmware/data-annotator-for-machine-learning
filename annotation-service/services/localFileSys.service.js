@@ -9,6 +9,10 @@
 const fs = require('fs');
 const config = require('../config/config');
 const {FILEPATH} = require('../config/constant');
+const compressing = require('compressing');
+const path = require('path');
+const mkdirp = require('mkdirp');
+
 
 async function saveFileToLocalSys(filePath, file){
 
@@ -62,6 +66,39 @@ async function checkFileExist(req) {
   }
 }
 
+async function unzipStreamToLocalSystem(fileStream, filePath) {
+  await checkFileExistInLocalSys(filePath, true);
+  await compressing.zip.uncompress(fileStream, filePath);
+}
+
+async function singleUnzipStreamToLocalSystem(filePosition, unzipFolder, statusCheck) {
+  let dataSet = [];
+  await checkFileExistInLocalSys(unzipFolder, true);
+  await new compressing.zip.UncompressStream({source: filePosition})
+    .on('entry', (header, stream, next) => {
+        stream.on('end', next);
+
+      if(header.name.startsWith("__MACOSX")){ 
+        stream.resume() 
+      }else if (header.type === 'file') {
+        stream.pipe(fs.createWriteStream(path.join(unzipFolder, header.name)));
+        dataSet.push({
+          fileName: header.name,
+          location: `${unzipFolder}/${header.name}`,
+          fileSize: header.yauzl.uncompressedSize
+        });
+      } else { // directory
+        mkdirp(path.join(unzipFolder, header.name), err => {
+          if (err) console.error("[ UNZIP-ERROR-mkdirp ]", err);
+          stream.resume();
+        });
+      }
+  }).on('error', (err)=>{console.error("[ UNZIP-ERROR ]", err)})
+    .on('finish', ()=>{ statusCheck.emit('done', dataSet)})
+}
+
+
+
 module.exports={
   checkFileExist,
   saveFileToLocalSys,
@@ -69,4 +106,7 @@ module.exports={
   deleteFileFromLocalSys,
   checkFileExistInLocalSys,
   downloadFileFromLocalSystem,
+  unzipStreamToLocalSystem,
+  singleUnzipStreamToLocalSystem,
+
 }
