@@ -10,11 +10,9 @@ import { UserAuthService } from 'app/services/user-auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class SSOGuard implements CanActivate {
-  constructor(private userAuthService: UserAuthService) { }
+  constructor(private userAuthService: UserAuthService) {}
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-  ): Observable<boolean> | Promise<boolean> | boolean {
+  canActivate(route: ActivatedRouteSnapshot): Observable<boolean> | Promise<boolean> | boolean {
     const sso = route.queryParams['sso'];
     if (!this.userAuthService.isLoggedIn() && sso === 'true') {
       this.userAuthService.redirectToLogin();

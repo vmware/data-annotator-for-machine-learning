@@ -10,20 +10,8 @@ import { ClarityModule } from '@clr/angular';
 import { RouterModule } from '@angular/router';
 
 @NgModule({
-  declarations: [
-  ],
-  imports: [
-    CommonModule,
-    ClarityModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModule,
-  ],
-  exports: [
-    FormsModule,
-    CommonModule,
-    ReactiveFormsModule,
-    ClarityModule,
-  ]
+  declarations: [],
+  imports: [CommonModule, ClarityModule, FormsModule, ReactiveFormsModule, RouterModule],
+  exports: [FormsModule, CommonModule, ReactiveFormsModule, ClarityModule],
 })
-export class SharedModule { }
+export class SharedModule {}

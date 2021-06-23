@@ -2,28 +2,38 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 <div class="container mainArea">
-  <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage=''">
-    <div class="alert-item"><span class="alert-text">{{errorMessage}}</span></div>
+  <clr-alert
+    *ngIf="errorMessage"
+    [clrAlertType]="'danger'"
+    (clrAlertClosedChange)="errorMessage = ''"
+  >
+    <div class="alert-item">
+      <span class="alert-text">{{ errorMessage }}</span>
+    </div>
   </clr-alert>
-  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage=''">
-    <div class="alert-item"><span class="alert-text">{{infoMessage}}</span></div>
+  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+    <div class="alert-item">
+      <span class="alert-text">{{ infoMessage }}</span>
+    </div>
   </clr-alert>
   <h2>Datasets</h2>
-  <p>{{env.config.serviceTitle}} Community Datasets provides access to annotated data by {{env.config.serviceTitle}}
-    users just like you. These datasets may be used
-    as
-    a starting point for new projects or used as features in an existing project. We encourage you to share your
-    datasets
-    so other {{env.config.provider}} teams can leverage you work. If you have specific questions or want to help
-    annotate, please contact
-    the project owner.</p>
+  <p>
+    {{ env.config.serviceTitle }} Community Datasets provides access to annotated data by
+    {{ env.config.serviceTitle }} users just like you. These datasets may be used as a starting
+    point for new projects or used as features in an existing project. We encourage you to share
+    your datasets so other {{ env.config.provider }} teams can leverage you work. If you have
+    specific questions or want to help annotate, please contact the project owner.
+  </p>
 
   <div class="row clr-row">
     <div class="clr-col-md-10 clr-col-12">
       <div class="row clr-row">
         <div class="clr-col-md-6 clr-col-12" *ngIf="pagination">
-          <dropdown-pagesize (valueChange)="valueChange($event)" [allCounts]="pagination.totalItems">
-          </dropdown-pagesize>
+          <app-dropdown-pagesize
+            (valueChange)="valueChange($event)"
+            [allCounts]="pagination.totalItems"
+          >
+          </app-dropdown-pagesize>
         </div>
       </div>
     </div>
@@ -32,83 +42,154 @@ SPDX-License-Identifier: Apache-2.0 -->
   <!-- <clr-datagrid #dataGird (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading" class="gridHeight"> -->
   <clr-datagrid #dataGird [clrDgLoading]="loading" class="gridHeight">
     <clr-dg-placeholder>We couldn't find any dataset here!</clr-dg-placeholder>
-    <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid" style="max-width:300px">Project Name
+    <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid" style="max-width: 300px"
+      >Project Name
     </clr-dg-column>
-    <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid" style="max-width:300px">Project Owner
+    <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid" style="max-width: 300px"
+      >Project Owner
     </clr-dg-column>
-    <clr-dg-column [clrDgField]="'shareDescription'" class="ellipsis-datagrid" style="max-width:300px">Description
+    <clr-dg-column
+      [clrDgField]="'shareDescription'"
+      class="ellipsis-datagrid"
+      style="max-width: 300px"
+      >Description
     </clr-dg-column>
-    <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">Updated Date</clr-dg-column>
-    <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">Generate Updated Date</clr-dg-column>
+    <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid"
+      >Updated Date</clr-dg-column
+    >
+    <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid"
+      >Generate Updated Date</clr-dg-column
+    >
 
     <clr-dg-column [clrDgField]="'totalCase'" class="ellipsis-datagrid">Entries No.</clr-dg-column>
-    <clr-dg-column [clrDgField]="'completeCase'" class="ellipsis-datagrid">Annotations No.</clr-dg-column>
-    <clr-dg-column [clrDgField]="'dataset.categoryList.length'" class="ellipsis-datagrid">Labels No.</clr-dg-column>
-    <clr-dg-column [clrDgField]="'categoryList'" class="ellipsis-datagrid labels" style="max-width:400px">Labels
+    <clr-dg-column [clrDgField]="'completeCase'" class="ellipsis-datagrid"
+      >Annotations No.</clr-dg-column
+    >
+    <clr-dg-column [clrDgField]="'dataset.categoryList.length'" class="ellipsis-datagrid"
+      >Labels No.</clr-dg-column
+    >
+    <clr-dg-column
+      [clrDgField]="'categoryList'"
+      class="ellipsis-datagrid labels"
+      style="max-width: 400px"
+      >Labels
     </clr-dg-column>
     <clr-dg-column [clrDgField]="'completeCase'" class="ellipsis-datagrid">Downloads</clr-dg-column>
     <clr-dg-column class="column-action">Action</clr-dg-column>
 
     <ng-container>
       <clr-dg-row *clrDgItems="let dataset of datasets" [clrDgItem]="dataset">
-        <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{dataset.projectName}}" style="max-width:300px">
-          {{dataset.projectName}}
+        <clr-dg-cell
+          class="ellipsis-datagrid cellWordBreak"
+          title="{{ dataset.projectName }}"
+          style="max-width: 300px"
+        >
+          {{ dataset.projectName }}
         </clr-dg-cell>
-        <clr-dg-cell class="cellWordBreak" title="{{dataset.creator}}" style="max-width:300px">{{dataset.creator}}
+        <clr-dg-cell class="cellWordBreak" title="{{ dataset.creator }}" style="max-width: 300px"
+          >{{ dataset.creator }}
         </clr-dg-cell>
-        <clr-dg-cell class="cellWordBreak" title="{{dataset.shareDescription}}" style="max-width:300px">
-          {{dataset.shareDescription}}
+        <clr-dg-cell
+          class="cellWordBreak"
+          title="{{ dataset.shareDescription }}"
+          style="max-width: 300px"
+        >
+          {{ dataset.shareDescription }}
         </clr-dg-cell>
-        <clr-dg-cell>{{dataset.updatedDate | date:'yyyy-MM-dd HH:mm:ss'}}</clr-dg-cell>
+        <clr-dg-cell>{{ dataset.updatedDate | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
         <clr-dg-cell *ngIf="dataset.generateInfo.updateTime">
-          {{dataset.generateInfo.updateTime | date:'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+          {{ dataset.generateInfo.updateTime | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell
+        >
         <clr-dg-cell *ngIf="!dataset.generateInfo.updateTime">--</clr-dg-cell>
-        <clr-dg-cell>{{dataset.totalCase}}</clr-dg-cell>
-        <clr-dg-cell>{{dataset.completeCase}}</clr-dg-cell>
-        <clr-dg-cell>{{dataset.labelCount}}</clr-dg-cell>
-        <clr-dg-cell class="cellWordBreak"
-          title="{{dataset.labelType=='numericLabel'?dataset.min+'--'+dataset.max:dataset.categoryList}}"
-          style="max-width:400px">
-          {{dataset.labelType=='numericLabel'?dataset.min+'--'+dataset.max:dataset.categoryList}}</clr-dg-cell>
-        <clr-dg-cell>{{dataset.downloadCount?dataset.downloadCount.community:0}}</clr-dg-cell>
+        <clr-dg-cell>{{ dataset.totalCase }}</clr-dg-cell>
+        <clr-dg-cell>{{ dataset.completeCase }}</clr-dg-cell>
+        <clr-dg-cell>{{ dataset.labelCount }}</clr-dg-cell>
+        <clr-dg-cell
+          class="cellWordBreak"
+          title="{{
+            dataset.labelType == 'numericLabel'
+              ? dataset.min + '--' + dataset.max
+              : dataset.categoryList
+          }}"
+          style="max-width: 400px"
+        >
+          {{
+            dataset.labelType == 'numericLabel'
+              ? dataset.min + '--' + dataset.max
+              : dataset.categoryList
+          }}</clr-dg-cell
+        >
+        <clr-dg-cell>{{ dataset.downloadCount ? dataset.downloadCount.community : 0 }}</clr-dg-cell>
 
         <clr-dg-cell>
-
-          <button *ngIf="dataset.generateInfo?.status=='pending'" type="button" class="btn btn-icon actionClass"
-            (click)="selectedDataset = dataset;generateProject(selectedDataset)" role="tooltip" aria-haspopup="true"
-            title="Download Project">
+          <button
+            *ngIf="dataset.generateInfo?.status == 'pending'"
+            type="button"
+            class="btn btn-icon actionClass"
+            (click)="selectedDataset = dataset; generateProject(selectedDataset)"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Download Project"
+          >
             <clr-icon shape="download"></clr-icon>
           </button>
-          <button *ngIf="dataset.generateInfo?.status=='prepare'||dataset.generateInfo?.status=='generating'"
-            type="button" class="btn btn-icon actionClass" role="tooltip" aria-haspopup="true"
-            title="Download Processing" style="cursor: not-allowed">
+          <button
+            *ngIf="
+              dataset.generateInfo?.status == 'prepare' ||
+              dataset.generateInfo?.status == 'generating'
+            "
+            type="button"
+            class="btn btn-icon actionClass"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Download Processing"
+            style="cursor: not-allowed"
+          >
             <clr-spinner clrSmall>loading</clr-spinner>
           </button>
-          <button *ngIf="dataset.generateInfo?.status=='done'" type="button"
+          <button
+            *ngIf="dataset.generateInfo?.status == 'done'"
+            type="button"
             class="btn btn-icon actionClass btn-success greenBtn"
-            (click)="selectedDataset = dataset;clickDownload(selectedDataset)" role="tooltip" aria-haspopup="true"
-            title="Download Project">
+            (click)="selectedDataset = dataset; clickDownload(selectedDataset)"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Download Project"
+          >
             <clr-icon shape="download"></clr-icon>
           </button>
-
         </clr-dg-cell>
       </clr-dg-row>
     </ng-container>
 
     <clr-dg-footer>
       <clr-dg-column-toggle [hidden]="true"></clr-dg-column-toggle>
-      {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}} of {{pagination.totalItems}} Projects
-      <clr-dg-pagination #pagination [clrDgPageSize]="pageSize" [clrDgTotalItems]="totalItems" [(clrDgPage)]="page">
+      {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
+      {{ pagination.totalItems }} Projects
+      <clr-dg-pagination
+        #pagination
+        [clrDgPageSize]="pageSize"
+        [clrDgTotalItems]="totalItems"
+        [(clrDgPage)]="page"
+      >
       </clr-dg-pagination>
     </clr-dg-footer>
   </clr-datagrid>
 </div>
 
-
 <!-- popup dialog - confirmation to download dataset -->
-<download *ngIf="showDownloadDatasets" [msg]="msg" (onCloseDownloadDialog)="receiveCloseDownloadInfo($event)"
-  (generateDownloadProject)="receiveGenerateInfo($event)">
-</download>
+<app-download
+  *ngIf="showDownloadDatasets"
+  [msg]="msg"
+  (onCloseDownloadDialog)="receiveCloseDownloadInfo($event)"
+  (generateDownloadProject)="receiveGenerateInfo($event)"
+>
+</app-download>
 
-<generate *ngIf="showGenerateDatasets" [msg]="msgGenerate" (onCloseGenerateDialog)="receiveCloseGenerateInfo($event)"
-  (refreshProject)="receiveGenerateInfo($event)"></generate>
+<app-generate
+  *ngIf="showGenerateDatasets"
+  [msg]="msgGenerate"
+  (onCloseGenerateDialog)="receiveCloseGenerateInfo($event)"
+  (refreshProject)="receiveGenerateInfo($event)"
+>
+</app-generate>

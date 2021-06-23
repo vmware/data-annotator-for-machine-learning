@@ -2,171 +2,315 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 <div class="container mainArea">
-  <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage=''">
-    <div class="alert-item"><span class="alert-text">{{errorMessage}}</span></div>
+  <clr-alert
+    *ngIf="errorMessage"
+    [clrAlertType]="'danger'"
+    (clrAlertClosedChange)="errorMessage = ''"
+  >
+    <div class="alert-item">
+      <span class="alert-text">{{ errorMessage }}</span>
+    </div>
   </clr-alert>
-  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage=''">
-    <div class="alert-item"><span class="alert-text">{{infoMessage}}</span></div>
+  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+    <div class="alert-item">
+      <span class="alert-text">{{ infoMessage }}</span>
+    </div>
   </clr-alert>
   <h2>Projects</h2>
 
   <a
-    href="http://localhost:4200/FILE_SYS/DOWNLOAD/test1@gmail.com/Export_launcher-logs-200_06152021173351.csv">download</a>
+    href="http://localhost:4200/FILE_SYS/DOWNLOAD/test1@gmail.com/Export_launcher-logs-200_06152021173351.csv"
+    >download</a
+  >
   <div class="row clr-row">
     <div class="clr-col-md-10 clr-col-12">
       <div class="row clr-row">
         <div class="clr-col-md-6 clr-col-12" *ngIf="pagination">
-          <dropdown-pagesize (valueChange)="valueChange($event)" [allCounts]="pagination.totalItems">
-          </dropdown-pagesize>
+          <app-dropdown-pagesize
+            (valueChange)="valueChange($event)"
+            [allCounts]="pagination.totalItems"
+          >
+          </app-dropdown-pagesize>
         </div>
       </div>
     </div>
     <div class="clr-col-md-2 clr-col-12 float-right createBtn">
-
       <clr-dropdown class="float-right">
-        <button class="btn btn-sm btn-primary add-doc float-right" type="button" clrDropdownTrigger>Create
-          New Annotation Project
+        <button class="btn btn-sm btn-primary add-doc float-right" type="button" clrDropdownTrigger>
+          Create New Annotation Project
           <clr-icon shape="caret down"></clr-icon>
         </button>
         <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
           <label class="dropdown-header">Classification</label>
-          <a class="dropdown-item active" [routerLink]="['/projects/create/text']">Text
-            Classification</a>
+          <a class="dropdown-item active" [routerLink]="['/projects/create/text']"
+            >Text Classification</a
+          >
           <a class="dropdown-item" [routerLink]="['/projects/create/tabular']">Tabular</a>
-          <a class="dropdown-item" [routerLink]="['/projects/create/ner']">Named Entity Recognition</a>
-          <a class="dropdown-item" [routerLink]="['/projects/create/image']">Image Classification</a>
+          <a class="dropdown-item" [routerLink]="['/projects/create/ner']"
+            >Named Entity Recognition</a
+          >
+          <a class="dropdown-item" [routerLink]="['/projects/create/image']"
+            >Image Classification</a
+          >
           <a class="dropdown-item" [routerLink]="['/projects/create/log']">Log Classification</a>
-
         </clr-dropdown-menu>
       </clr-dropdown>
     </div>
   </div>
   <clr-datagrid #dataGird [clrDgLoading]="loading" class="gridHeight">
     <clr-dg-placeholder>We couldn't find any project for you!</clr-dg-placeholder>
-    <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid" style="max-width:300px">Project Name
+    <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid" style="max-width: 300px"
+      >Project Name
     </clr-dg-column>
-    <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid" style="max-width:200px">Updated
-      Date</clr-dg-column>
-    <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid" style="max-width:200px">Generate Updated Date
+    <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid" style="max-width: 200px"
+      >Updated Date
+    </clr-dg-column>
+    <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid" style="max-width: 200px"
+      >Generate Updated Date
     </clr-dg-column>
 
-    <clr-dg-column [clrDgField]="'dataSource'" class="ellipsis-datagrid" style="max-width:300px">Data Source
+    <clr-dg-column [clrDgField]="'dataSource'" class="ellipsis-datagrid" style="max-width: 300px"
+      >Data Source
     </clr-dg-column>
-    <clr-dg-column [clrDgField]="'completeCase'" class="ellipsis-datagrid" style="min-width:250px">
-      Annotator/Complete/Total</clr-dg-column>
-    <clr-dg-column [clrDgField]="'categoryList'" class="ellipsis-datagrid" style="max-width:300px">Labels
+    <clr-dg-column [clrDgField]="'completeCase'" class="ellipsis-datagrid" style="min-width: 250px">
+      Annotator/Complete/Total</clr-dg-column
+    >
+    <clr-dg-column [clrDgField]="'categoryList'" class="ellipsis-datagrid" style="max-width: 300px"
+      >Labels
     </clr-dg-column>
-    <clr-dg-column class="column-action" style="min-width:280px !important;padding-right: 0.3rem">Actions
+    <clr-dg-column class="column-action" style="min-width: 280px !important; padding-right: 0.3rem"
+      >Actions
     </clr-dg-column>
 
     <ng-container>
-      <clr-dg-row *clrDgItems="let dataset of datasets;let i=index" [clrDgItem]="dataset"
-        style="margin-bottom: 0.2rem;">
-        <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{dataset.projectName}}" style="max-width:300px">
-          <a style="cursor: pointer" (click)="clickToPreview(dataset)">{{dataset.projectName}}</a>
+      <clr-dg-row
+        *clrDgItems="let dataset of datasets; let i = index"
+        [clrDgItem]="dataset"
+        style="margin-bottom: 0.2rem"
+      >
+        <clr-dg-cell
+          class="ellipsis-datagrid cellWordBreak"
+          title="{{ dataset.projectName }}"
+          style="max-width: 300px"
+        >
+          <a style="cursor: pointer" (click)="clickToPreview(dataset)">{{ dataset.projectName }}</a>
         </clr-dg-cell>
-        <clr-dg-cell style="max-width:200px">{{dataset.updatedDate | date:'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
-        <clr-dg-cell *ngIf="dataset.generateInfo.updateTime" style="max-width:200px">
-          {{dataset.generateInfo.updateTime | date:'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
-        <clr-dg-cell *ngIf="!dataset.generateInfo.updateTime" style="max-width:200px">--</clr-dg-cell>
-        <clr-dg-cell class="cellWordBreak" title="{{dataset.dataSource}}" style="max-width:300px">{{dataset.dataSource}}
+        <clr-dg-cell style="max-width: 200px">{{
+          dataset.updatedDate | date: 'yyyy-MM-dd HH:mm:ss'
+        }}</clr-dg-cell>
+        <clr-dg-cell *ngIf="dataset.generateInfo.updateTime" style="max-width: 200px">
+          {{ dataset.generateInfo.updateTime | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell
+        >
+        <clr-dg-cell *ngIf="!dataset.generateInfo.updateTime" style="max-width: 200px"
+          >--</clr-dg-cell
+        >
+        <clr-dg-cell class="cellWordBreak" title="{{ dataset.dataSource }}" style="max-width: 300px"
+          >{{ dataset.dataSource }}
         </clr-dg-cell>
-        <clr-dg-cell style="min-width:250px">
-          <div *ngIf="dataset.annotator.length<6">
-            <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px;">{{assignee.user}}
-              <span *ngIf="dataset.totalCase != assignee.completeCase"
-                class="badge badge-1">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
-              <span *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase!=0"
-                class="badge badge-success">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
-              <span *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase==0"
-                class="badge badge-1">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
+        <clr-dg-cell style="min-width: 250px">
+          <div *ngIf="dataset.annotator.length < 6">
+            <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
+              {{ assignee.user }}
+              <span *ngIf="dataset.totalCase != assignee.completeCase" class="badge badge-1"
+                >{{ assignee.completeCase }}/{{ dataset.totalCase }}</span
+              >
+              <span
+                *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase != 0"
+                class="badge badge-success"
+                >{{ assignee.completeCase }}/{{ dataset.totalCase }}</span
+              >
+              <span
+                *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase == 0"
+                class="badge badge-1"
+                >{{ assignee.completeCase }}/{{ dataset.totalCase }}</span
+              >
             </div>
           </div>
-          <div *ngIf="dataset.annotator.length>=6&&dataset.isExtend" class="annotatorCellWordBreak">
-            <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px;">{{assignee.user}}
-              <span *ngIf="dataset.totalCase != assignee.completeCase"
-                class="badge badge-1">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
-              <span *ngIf="dataset.totalCase == assignee.completeCase&& dataset.totalCase!=0"
-                class="badge badge-success">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
-              <span *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase==0"
-                class="badge badge-1">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
+          <div
+            *ngIf="dataset.annotator.length >= 6 && dataset.isExtend"
+            class="annotatorCellWordBreak"
+          >
+            <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
+              {{ assignee.user }}
+              <span *ngIf="dataset.totalCase != assignee.completeCase" class="badge badge-1"
+                >{{ assignee.completeCase }}/{{ dataset.totalCase }}</span
+              >
+              <span
+                *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase != 0"
+                class="badge badge-success"
+                >{{ assignee.completeCase }}/{{ dataset.totalCase }}</span
+              >
+              <span
+                *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase == 0"
+                class="badge badge-1"
+                >{{ assignee.completeCase }}/{{ dataset.totalCase }}</span
+              >
             </div>
           </div>
-          <div *ngIf="dataset.annotator.length>=6&&!dataset.isExtend">
-            <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px;">{{assignee.user}}
-              <span *ngIf="dataset.totalCase != assignee.completeCase"
-                class="badge badge-1">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
-              <span *ngIf="dataset.totalCase == assignee.completeCase&& dataset.totalCase!=0"
-                class="badge badge-success">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
-              <span *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase==0"
-                class="badge badge-1">{{assignee.completeCase}}/{{dataset.totalCase}}</span>
+          <div *ngIf="dataset.annotator.length >= 6 && !dataset.isExtend">
+            <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
+              {{ assignee.user }}
+              <span *ngIf="dataset.totalCase != assignee.completeCase" class="badge badge-1"
+                >{{ assignee.completeCase }}/{{ dataset.totalCase }}</span
+              >
+              <span
+                *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase != 0"
+                class="badge badge-success"
+                >{{ assignee.completeCase }}/{{ dataset.totalCase }}</span
+              >
+              <span
+                *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase == 0"
+                class="badge badge-1"
+                >{{ assignee.completeCase }}/{{ dataset.totalCase }}</span
+              >
             </div>
           </div>
-          <div *ngIf="dataset.annotator.length>=6&&dataset.isExtend" (click)="more(dataset.id)" class="isShowHide">show
+          <div
+            *ngIf="dataset.annotator.length >= 6 && dataset.isExtend"
+            (click)="more(dataset.id)"
+            class="isShowHide"
+          >
+            show
             <clr-icon class="showIcon" shape="angle"></clr-icon>
           </div>
-          <div *ngIf="dataset.annotator.length>=6&&!dataset.isExtend" (click)="more(dataset.id)" class="isShowHide">hide
+          <div
+            *ngIf="dataset.annotator.length >= 6 && !dataset.isExtend"
+            (click)="more(dataset.id)"
+            class="isShowHide"
+          >
+            hide
             <clr-icon shape="angle"></clr-icon>
           </div>
         </clr-dg-cell>
 
-        <clr-dg-cell class="cellWordBreak"
-          title="{{dataset.labelType=='numericLabel'?dataset.min+'--'+dataset.max:dataset.categoryList}}"
-          style="max-width:300px">
-          {{dataset.labelType=='numericLabel'?dataset.min+'--'+dataset.max:dataset.categoryList}}</clr-dg-cell>
+        <clr-dg-cell
+          class="cellWordBreak"
+          title="{{
+            dataset.labelType == 'numericLabel'
+              ? dataset.min + '--' + dataset.max
+              : dataset.categoryList
+          }}"
+          style="max-width: 300px"
+        >
+          {{
+            dataset.labelType == 'numericLabel'
+              ? dataset.min + '--' + dataset.max
+              : dataset.categoryList
+          }}</clr-dg-cell
+        >
 
         <clr-dg-cell style="padding-right: 0.3rem">
-          <button type="button" class="btn btn-icon actionClass"
-            (click)="selectedDataset = dataset; editProjectDialog = true; deleteDatasetDialog=false; showProjectEdit(selectedDataset)"
-            role="tooltip" aria-haspopup="true" title="Edit Project">
+          <button
+            type="button"
+            class="btn btn-icon actionClass"
+            (click)="
+              selectedDataset = dataset;
+              editProjectDialog = true;
+              deleteDatasetDialog = false;
+              showProjectEdit(selectedDataset)
+            "
+            role="tooltip"
+            aria-haspopup="true"
+            title="Edit Project"
+          >
             <clr-icon aria-hidden="true" shape="note"></clr-icon>
           </button>
 
-
-          <button *ngIf="dataset.generateInfo?.status=='pending'" type="button" class="btn btn-icon actionClass"
-            (click)="selectedDataset = dataset;generateProject(selectedDataset)" role="tooltip" aria-haspopup="true"
-            title="Download Project">
+          <button
+            *ngIf="dataset.generateInfo?.status == 'pending'"
+            type="button"
+            class="btn btn-icon actionClass"
+            (click)="selectedDataset = dataset; generateProject(selectedDataset)"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Download Project"
+          >
             <clr-icon shape="download"></clr-icon>
           </button>
-          <button *ngIf="dataset.generateInfo?.status=='prepare'||dataset.generateInfo?.status=='generating'"
-            type="button" class="btn btn-icon actionClass" role="tooltip" aria-haspopup="true"
-            title="Download Processing" style="cursor: not-allowed">
+          <button
+            *ngIf="
+              dataset.generateInfo?.status == 'prepare' ||
+              dataset.generateInfo?.status == 'generating'
+            "
+            type="button"
+            class="btn btn-icon actionClass"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Download Processing"
+            style="cursor: not-allowed"
+          >
             <clr-spinner clrSmall>loading</clr-spinner>
           </button>
-          <button *ngIf="dataset.generateInfo?.status=='done'" type="button"
+          <button
+            *ngIf="dataset.generateInfo?.status == 'done'"
+            type="button"
             class="btn btn-icon actionClass btn-success greenBtn"
-            (click)="selectedDataset = dataset;clickDownload(selectedDataset)" role="tooltip" aria-haspopup="true"
-            title="Download Project">
+            (click)="selectedDataset = dataset; clickDownload(selectedDataset)"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Download Project"
+          >
             <clr-icon shape="download"></clr-icon>
           </button>
 
-
-          <button type="button" class="btn btn-icon actionClass"
-            (click)="selectedDataset = dataset; isShare(dataset.shareStatus)" role="tooltip" aria-haspopup="true"
-            title="Share Datasets">
-            <clr-icon *ngIf="dataset.shareStatus==false||dataset.shareStatus==undefined" shape="folder"></clr-icon>
-            <clr-icon *ngIf="dataset.shareStatus==true" shape="folder-open" class="is-solid">
+          <button
+            type="button"
+            class="btn btn-icon actionClass"
+            (click)="selectedDataset = dataset; isShare(dataset.shareStatus)"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Share Datasets"
+          >
+            <clr-icon
+              *ngIf="dataset.shareStatus == false || dataset.shareStatus == undefined"
+              shape="folder"
+            >
+            </clr-icon>
+            <clr-icon *ngIf="dataset.shareStatus == true" shape="folder-open" class="is-solid">
             </clr-icon>
           </button>
 
-          <button *ngIf="dataset.appendSr=='pending'" type="button" class="btn btn-icon actionClass" role="tooltip"
-            aria-haspopup="true" title="Click to Append New Entries"
-            (click)='checkAddStatus(dataset.id,dataset.projectName,dataset.projectType)'>
+          <button
+            *ngIf="dataset.appendSr == 'pending'"
+            type="button"
+            class="btn btn-icon actionClass"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Click to Append New Entries"
+            (click)="checkAddStatus(dataset.id, dataset.projectName, dataset.projectType)"
+          >
             <clr-icon shape="add-text"></clr-icon>
           </button>
-          <button *ngIf="dataset.appendSr=='adding'" type="button" class="btn btn-icon actionClass" role="tooltip"
-            aria-haspopup="true" title="New entries is being inserted">
+          <button
+            *ngIf="dataset.appendSr == 'adding'"
+            type="button"
+            class="btn btn-icon actionClass"
+            role="tooltip"
+            aria-haspopup="true"
+            title="New entries is being inserted"
+          >
             <clr-spinner clrSmall>loading</clr-spinner>
           </button>
-          <button *ngIf="dataset.appendSr=='done'" type="button" class="btn btn-icon actionClass btn-success greenBtn"
-            role="tooltip" aria-haspopup="true" title="Click to Append New Entries"
-            (click)='availableNewEntry(dataset.id,dataset.projectName,dataset.projectType)'>
+          <button
+            *ngIf="dataset.appendSr == 'done'"
+            type="button"
+            class="btn btn-icon actionClass btn-success greenBtn"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Click to Append New Entries"
+            (click)="availableNewEntry(dataset.id, dataset.projectName, dataset.projectType)"
+          >
             <clr-icon shape="add-text"></clr-icon>
           </button>
 
-          <button type="button" class="btn btn-icon actionClass"
-            (click)="selectedDataset = dataset; deleteDatasetDialog = true" role="tooltip" aria-haspopup="true"
-            title="Delete Project">
+          <button
+            type="button"
+            class="btn btn-icon actionClass"
+            (click)="selectedDataset = dataset; deleteDatasetDialog = true"
+            role="tooltip"
+            aria-haspopup="true"
+            title="Delete Project"
+          >
             <clr-icon aria-hidden="true" shape="trash"></clr-icon>
           </button>
         </clr-dg-cell>
@@ -175,33 +319,48 @@ SPDX-License-Identifier: Apache-2.0 -->
 
     <clr-dg-footer>
       <clr-dg-column-toggle [hidden]="true"></clr-dg-column-toggle>
-      {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}} of {{pagination.totalItems}} Projects
-      <clr-dg-pagination #pagination [clrDgPageSize]="pageSize" [clrDgTotalItems]="totalItems" [(clrDgPage)]="page">
+      {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
+      {{ pagination.totalItems }} Projects
+      <clr-dg-pagination
+        #pagination
+        [clrDgPageSize]="pageSize"
+        [clrDgTotalItems]="totalItems"
+        [(clrDgPage)]="page"
+      >
       </clr-dg-pagination>
     </clr-dg-footer>
   </clr-datagrid>
 </div>
 
-
 <!-- popup dialog - confirmation to delete dataset -->
 <clr-modal [(clrModalOpen)]="deleteDatasetDialog" [clrModalClosable]="false">
   <h3 class="modal-title">Delete Project</h3>
   <div class="modal-body">
-    <p>Please be sure this is not reversible, still delete selected project? </p>
+    <p>Please be sure this is not reversible, still delete selected project?</p>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline" (click)="deleteDatasetDialog = false">Cancel</button>
-    <button type="button" class="btn btn-primary"
-      (click)="deleteDatasetDialog = false; deleteProject(selectedDataset)">OK</button>
+    <button type="button" class="btn btn-outline" (click)="deleteDatasetDialog = false">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="deleteDatasetDialog = false; deleteProject(selectedDataset)"
+    >
+      OK
+    </button>
   </div>
 </clr-modal>
 
-
 <!-- popup dialog - edit project  -->
-<app-edit-project *ngIf='editProjectDialog' [msgInEdit]='msgEdit' (onCloseEditDialog)='receiveCloseEdit($event)'
-  (onSubmitEdit)="receiveSubmitEdit($event)" (onDeleteLabel)="receiveDeleteLabel($event)">
+<app-edit-project
+  *ngIf="editProjectDialog"
+  [msgInEdit]="msgEdit"
+  (onCloseEditDialog)="receiveCloseEdit($event)"
+  (onSubmitEdit)="receiveSubmitEdit($event)"
+  (onDeleteLabel)="receiveDeleteLabel($event)"
+>
 </app-edit-project>
-
 
 <!-- popup dialog - confirmation to share dataset -->
 <clr-modal [(clrModalOpen)]="shareDatasets" [clrModalClosable]="false">
@@ -209,16 +368,21 @@ SPDX-License-Identifier: Apache-2.0 -->
   <div class="modal-body">
     <div class="clr-row">
       <label for="description" class="label-tooltip clr-col-12 clr-col-md-3">Description</label>
-      <div class="clr-textarea-wrapper clr-col-12 clr-col-md-8 ">
-        <textarea id="description" class="clr-textarea inputDescription"
-          placeholder="Please describe what this dataset is for?" [(ngModel)]="inputDescription"></textarea>
+      <div class="clr-textarea-wrapper clr-col-12 clr-col-md-8">
+        <textarea
+          id="description"
+          class="clr-textarea inputDescription"
+          placeholder="Please describe what this dataset is for?"
+          [(ngModel)]="inputDescription"
+        ></textarea>
       </div>
     </div>
     <div class="clr-row">
-      <p class="shareTip clr-col-12 clr-col-md-11">Note: Thanks for sharing the annotated data to the
-        {{env.config.serviceTitle}} Community
-        Datasets for other {{env.config.provider}} teams to use. And, at anytime you can un-share to make this dataset
-        private.</p>
+      <p class="shareTip clr-col-12 clr-col-md-11">
+        Note: Thanks for sharing the annotated data to the {{ env.config.serviceTitle }} Community
+        Datasets for other {{ env.config.provider }} teams to use. And, at anytime you can un-share
+        to make this dataset private.
+      </p>
     </div>
     <div *ngIf="inputDescriptionTip" class="alert alert-danger" role="alert">
       <div class="alert-items">
@@ -226,20 +390,32 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="alert-icon-wrapper">
             <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
           </div>
-          <span class="alert-text">
-            Please give a description before share.
-          </span>
+          <span class="alert-text"> Please give a description before share. </span>
         </div>
       </div>
     </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="cancelShare()">Cancel</button>
-    <button *ngIf="!shareDataComplete" type="button" class="btn btn-primary"
-      (click)="toggleShare(selectedDataset)">OK</button>
+    <button
+      *ngIf="!shareDataComplete"
+      type="button"
+      class="btn btn-primary"
+      (click)="toggleShare(selectedDataset)"
+    >
+      OK
+    </button>
     <button *ngIf="shareDataComplete" type="button" class="btn uploadLoading">
-      <clr-spinner clrAssertive
-        style="min-height: 0.75rem;min-width: 0.75rem;height: 0.75rem;width: 0.75rem;margin-top: 0.09rem;">loading
+      <clr-spinner
+        clrAssertive
+        style="
+          min-height: 0.75rem;
+          min-width: 0.75rem;
+          height: 0.75rem;
+          width: 0.75rem;
+          margin-top: 0.09rem;
+        "
+        >loading
       </clr-spinner>
     </button>
   </div>
@@ -253,19 +429,40 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline" (click)="unShareDatasets = false">Cancel</button>
-    <button *ngIf="!shareDataComplete" type="button" class="btn btn-primary"
-      (click)="toggleShare(selectedDataset)">OK</button>
+    <button
+      *ngIf="!shareDataComplete"
+      type="button"
+      class="btn btn-primary"
+      (click)="toggleShare(selectedDataset)"
+    >
+      OK
+    </button>
     <button *ngIf="shareDataComplete" type="button" class="btn uploadLoading">
-      <clr-spinner clrAssertive
-        style="min-height: 0.75rem;min-width: 0.75rem;height: 0.75rem;width: 0.75rem;margin-top: 0.09rem;">loading
+      <clr-spinner
+        clrAssertive
+        style="
+          min-height: 0.75rem;
+          min-width: 0.75rem;
+          height: 0.75rem;
+          width: 0.75rem;
+          margin-top: 0.09rem;
+        "
+        >loading
       </clr-spinner>
     </button>
   </div>
 </clr-modal>
 
+<app-download
+  *ngIf="showDownloadDatasets"
+  [msg]="msg"
+  (onCloseDownloadDialog)="receiveCloseDownloadInfo($event)"
+  (generateDownloadProject)="receiveGenerateInfo($event)"
+></app-download>
 
-<download *ngIf="showDownloadDatasets" [msg]="msg" (onCloseDownloadDialog)="receiveCloseDownloadInfo($event)"
-  (generateDownloadProject)="receiveGenerateInfo($event)"></download>
-
-<generate *ngIf="showGenerateDatasets" [msg]="msgGenerate" (onCloseGenerateDialog)="receiveCloseGenerateInfo($event)"
-  (refreshProject)="receiveGenerateInfo($event)"></generate>
+<app-generate
+  *ngIf="showGenerateDatasets"
+  [msg]="msgGenerate"
+  (onCloseGenerateDialog)="receiveCloseGenerateInfo($event)"
+  (refreshProject)="receiveGenerateInfo($event)"
+></app-generate>
