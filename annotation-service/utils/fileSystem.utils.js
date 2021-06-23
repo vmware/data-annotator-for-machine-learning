@@ -10,7 +10,7 @@ const config = require("../config/config");
 const localFileSysService = require('../services/localFileSys.service');
 const request = require('request');
 const S3Utils = require('./s3');
-
+const { S3OPERATIONS } = require('../config/constant');
 
 async function handleFileStream(fileLocation) {
 
