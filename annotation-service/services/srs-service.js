@@ -541,7 +541,7 @@ async function appendSrsData(req){
 
     if (projectType == PROJECTTYPE.IMGAGE) {
         const update = { $set: { appendSr: APPENDSR.DONE, updatedDate: Date.now() } };
-        if (req.body.isFile) {
+        if (req.body.isFile == true || req.body.isFile == 'true') {
             //file append
             await imgImporter.execute(req,false);
             update.$push = { selectedDataset: dataset };
@@ -549,6 +549,7 @@ async function appendSrsData(req){
 
         }else{
             //quick append
+            typeof req.body.images == "string" ? req.body.images = JSON.parse(req.body.images): null;
             await imgImporter.quickAppendImages(req, mp.project.selectedDataset[0]);
             update.$inc = { totalCase: req.body.images.length };
         }

@@ -6,13 +6,14 @@
 ***/
 
 
-const { PAGINATELIMIT, PROJECTTYPE } = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, FILEPATH } = require("../config/constant");
 const { ImgModel, DataSetModel } = require("../db/db-connect");
 const emailService = require('../services/email-service');
 const mongoDb = require('../db/mongo.db');
 const validator = require("./validator");
 const { ObjectId } = require("mongodb");
-
+const config = require("../config/config");
+const localFileSysService = require('../services/localFileSys.service');
 
 async function execute(req, sendEmail, annotators) {
       
@@ -64,10 +65,24 @@ async function execute(req, sendEmail, annotators) {
 
 async function quickAppendImages(req, dsName){
   console.log(`[ IMAGE ] Utils imgImporter.quickAppendImages`);
-  
+  const user = req.auth.email;
+
   //save to tickets db
   let docs = [];
   for (const imgage of req.body.images) {
+    //support local file system
+    if (config.useLocalFileSys) {
+      for (const file of req.files) {
+        if (file.originalname == imgage.fileName) {
+          const filePath = `./${FILEPATH.UPLOAD}/${user}/appendFiles/`;
+          imgage.location = filePath + imgage.fileName;
+          imgage.fileSize = file.size;
+
+          await localFileSysService.checkFileExistInLocalSys(filePath, true);
+          await localFileSysService.saveFileToLocalSys(imgage.location, file.buffer);
+        }
+      }
+    }
 
     let data = Object.assign({_id: ObjectId()}, imgage);
     let sechema = {
