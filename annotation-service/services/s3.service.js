@@ -45,8 +45,8 @@ async function deleteOriginalFile(key) {
 }
 
 async function uploadFileToS3(file, key) {
-    console.log(`[ S3 ] Service uploadFileToS3 read temp file stream`, fileName);
-    let fileStream = localFileSysService.readFileFromLocalSys(file);
+    console.log(`[ S3 ] Service uploadFileToS3 read temp file stream`, file);
+    let fileStream = await localFileSysService.readFileFromLocalSys(file);
 
     console.log(`[ S3 ] Service uploadFileToS3.S3.uploadObject`, key);
     return S3.uploadObject(key, fileStream);
