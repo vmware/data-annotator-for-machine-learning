@@ -11,27 +11,21 @@ import { UserAuthService } from 'app/services/user-auth.service';
 @Component({
   selector: 'app-footer',
   templateUrl: './footer.component.html',
-  styleUrls: ['./footer.component.scss']
+  styleUrls: ['./footer.component.scss'],
 })
-
 export class FooterComponent implements OnInit {
-
-
-
   constructor(
     public env: EnvironmentsService,
     private feedback: FeedbackService,
-    private userAuthService: UserAuthService
-  ) { }
+    private userAuthService: UserAuthService,
+  ) {}
 
   ngOnInit() {
     if (this.env.config.feedbackUrl) {
       this.feedback.showFeedback();
-      this.userAuthService.loggedUserListener().subscribe(user => {
+      this.userAuthService.loggedUserListener().subscribe((user) => {
         this.feedback.identifyUser(user);
       });
     }
-
   }
-
 }

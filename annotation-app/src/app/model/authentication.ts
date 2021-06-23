@@ -20,7 +20,6 @@ export interface AuthRequestToken {
   password?: string;
   refresh_token?: string;
   bypass_uri_check?: boolean;
-
 }
 
 export interface AuthResponseToken {
@@ -32,37 +31,35 @@ export interface AuthResponseToken {
 }
 
 export interface AuthUser {
-  email?: string,
-  provider?: string,
-  sub?: string,
-  username?: string,
-  exp?: number,
-  iat?: number,
-  iss?: string,
-  name?: string,
-  ob_sso_cookie?: string,
-  token?: AuthResponseToken,
+  email?: string;
+  provider?: string;
+  sub?: string;
+  username?: string;
+  exp?: number;
+  iat?: number;
+  iss?: string;
+  name?: string;
+  ob_sso_cookie?: string;
+  token?: AuthResponseToken;
 
-  id?: string,
-  btoa?: string,
-  fullName?: string,
-  srs?: number[],
-  srCount?: number,
-  optOutProducts?: string[],
-  points?: number,
-  percentage?: number,
-  role?: any
+  id?: string;
+  btoa?: string;
+  fullName?: string;
+  srs?: number[];
+  srCount?: number;
+  optOutProducts?: string[];
+  points?: number;
+  percentage?: number;
+  role?: any;
 }
 
 export class AuthUtil {
-
   public static isValidUser(user: AuthUser): boolean {
     if (user && user.email && user.token && user.token.access_token && user.token.refresh_token) {
       return true;
     }
     return false;
-  };
-
+  }
 
   public static isValidBasicUser(user: AuthUser): boolean {
     if (user && user.email && user.token && user.token.access_token && user.token.expires_time) {
@@ -71,5 +68,3 @@ export class AuthUtil {
     return false;
   }
 }
-
-
