@@ -213,8 +213,8 @@ async function deleteDataSet(req) {
  
             const folder = `./${FILEPATH.UPLOAD}/${user}/${FILEPATH.UNZIPIMAGE}/`;
             //images dataset has single appened images
-            let fileFolders = ds[0].images.reduce((arr, curr) => arr.push(curr.location.split(FILEPATH.UNZIPIMAGE)[1].split("/")[1]), []);
-            fileFolders = _.uniq(fileFolders);
+            let fileFolders = await ds[0].images.reduce((arr, curr) => arr.concat(curr.location.split(FILEPATH.UNZIPIMAGE)[1].split("/")[1]), []);
+            fileFolders = await _.uniq(fileFolders);
             // delete the zip file
             await localFileSysService.deleteFileFromLocalSys(ds[0].location);
             // dalete the unziped files

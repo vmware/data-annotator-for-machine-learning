@@ -113,9 +113,10 @@ async function validateRequired(parameters) {
 async function checkDataSetInUse(dataSetName, throwError) {
     const conditions = { selectedDataset: dataSetName};
     const pro = await mongoDb.findByConditions(ProjectModel, conditions, "projectName");
-    if (!pro[0] && throwError) {
+    console.log(pro)
+    if (pro[0] && throwError) {
         const pnames = await pro.reduce((pnameString, curr) => `${pnameString} / ${curr.projectName}`, "");
-        throw {CODE: 4001, MSG: `DATA-SET USING BY:  ${pnames}`};
+        throw {CODE: 4001, MSG: `DATA-SET USING BY: ${pnames}`};
     }
     return pro;
 }

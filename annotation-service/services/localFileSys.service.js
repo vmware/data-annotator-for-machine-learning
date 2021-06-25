@@ -16,6 +16,7 @@ const mkdirp = require('mkdirp');
 
 async function saveFileToLocalSys(filePath, file){
 
+  console.log(`[ LOCAL-FILE-SYSTEM ] SERVICE saveFileToLocalSys ${filePath}`);
   fs.writeFile(filePath, file, (err) => {
     if (err) throw {CODE: 5001, MSG: `SAVE FILE ERROR ${err}`};
   });
@@ -28,12 +29,16 @@ async function readFileFromLocalSys(filePath, options){
 
 async function deleteFileFromLocalSys(filePath){
   await checkFileExistInLocalSys(filePath, false, true, true);
-  fs.unlink(filePath);
+  
+  console.log(`[ LOCAL-FILE-SYSTEM ] SERVICE deleteFileFromLocalSys ${filePath}`);
+  fs.unlinkSync(filePath);
 }
 
 async function deleteFileFolderFromLocalSys(filePath){
   await checkFileExistInLocalSys(filePath, false, true);
-  fs.mkdirSync(filePath, {recursive: true});
+  
+  console.log(`[ LOCAL-FILE-SYSTEM ] SERVICE deleteFileFolderFromLocalSys ${filePath}`);
+  fs.rmdirSync(filePath, {recursive: true});
 }
 
 async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFile){
