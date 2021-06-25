@@ -82,9 +82,6 @@ export class EditProjectComponent implements OnInit {
   }
 
   ngOnInit() {
-    // setTimeout(() => {
-    //   console.log('EditProjectComponent:::', this.msgInEdit)
-    // }, 500);
     this.msg = JSON.parse(JSON.stringify(this.msgInEdit));
     const al = this.msg.al;
     this.previousProjectName = this.msg.projectName;
@@ -127,23 +124,6 @@ export class EditProjectComponent implements OnInit {
   onInputingProjectOwner(e) {
     const emails = e.target.value.split(/,|;/);
     this.emailRegForOwner = this.toolService.toRegEmail(emails);
-    // if (this.env.config.authUrl) {
-    //   for (let i = 0; i < emails.length; i++) {
-    //     if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
-    //       this.emailRegForOwner = false;
-    //       return;
-    //     };
-    //     this.emailRegForOwner = true;
-    //   }
-    // } else {
-    //   for (let i = 0; i < emails.length; i++) {
-    //     if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
-    //       this.emailRegForOwner = false;
-    //       return;
-    //     };
-    //     this.emailRegForOwner = true;
-    //   }
-    // };
     if (this.emailRegForOwner && this.inputOwnerValidation == false) {
       emails.forEach((element) => {
         if (this.ownerList.indexOf(element.trim()) == -1) {
@@ -187,23 +167,6 @@ export class EditProjectComponent implements OnInit {
   onInputingAssignee(e) {
     const emails = e.target.value.split(/,|;/);
     this.emailReg = this.toolService.toRegEmail(emails);
-    // if (this.env.config.authUrl) {
-    //   for (let i = 0; i < emails.length; i++) {
-    //     if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
-    //       this.emailReg = false;
-    //       return;
-    //     };
-    //     this.emailReg = true;
-    //   }
-    // } else {
-    //   for (let i = 0; i < emails.length; i++) {
-    //     if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
-    //       this.emailReg = false;
-    //       return;
-    //     };
-    //     this.emailReg = true;
-    //   }
-    // };
     if (this.emailReg && this.inputAssigneeValidation == false) {
       emails.forEach((element) => {
         if (this.assigneeList.indexOf(element.trim()) == -1) {

@@ -6,7 +6,6 @@ SPDX-License-Identifier: Apache-2.0
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { ClrDatagridStateInterface } from '@clr/angular';
-// import 'rxjs/Rx';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
 import { UserAuthService } from '../../services/user-auth.service';
@@ -213,18 +212,6 @@ export class AdminComponent implements OnInit {
       this.setUserErrMessage = 'This field is required';
     } else {
       const emailReg = this.toolService.toRegEmail([this.inputEmail]);
-      // if (!this.env.config.authUrl) {
-      //   this.setUserErrMessage = '';
-      //   emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.inputEmail);
-      //   if (!emailReg) {
-      //     this.setUserErrMessage = 'Wrong format! Only accept email address';
-      //   }
-      // } else {
-      //   emailReg = /^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/.test(this.inputEmail);
-      //   if (!emailReg) {
-      //     this.setUserErrMessage = 'Wrong format! Email only accept vmware emailbox';
-      //   }
-      // };
       if (emailReg) {
         this.setUserErrMessage = '';
         const str = this.inputEmail.split('@')[0];
@@ -333,7 +320,9 @@ export class AdminComponent implements OnInit {
                   this.projectData[i].generateInfo.status = 'done';
                 }
               }
-              this.downloadUrl = new Buffer(res.Body.file, 'base64').toString();
+              this.downloadUrl = this.env.config.enableAWSS3
+                ? new Buffer(res.Body.file, 'base64').toString()
+                : res.Body.file;
               this.downloadProject();
             } else if (res.Info == 'generating') {
               this.infoMessage =
@@ -382,7 +371,9 @@ export class AdminComponent implements OnInit {
             latestAnnotationTime: e.updatedDate,
             generateDoneTime: res.updateTime,
             format: res.format,
-            downloadUrl: new Buffer(res.file, 'base64').toString(),
+            downloadUrl: this.env.config.enableAWSS3
+              ? new Buffer(res.file, 'base64').toString()
+              : res.file,
             datasets: this.datasets,
             id: e.id,
             projectName: e.projectName,
@@ -558,7 +549,9 @@ export class AdminComponent implements OnInit {
       } else if (e.Info == 'done') {
         this.infoMessage =
           'Dataset with annotations is already been generated. Please refresh the page.';
-        this.downloadUrl = new Buffer(e.Body.file, 'base64').toString();
+        this.downloadUrl = this.env.config.enableAWSS3
+          ? new Buffer(e.Body.file, 'base64').toString()
+          : e.Body.file;
         this.downloadProject();
         this.getProjects();
       } else if (e.Info == 'generating') {

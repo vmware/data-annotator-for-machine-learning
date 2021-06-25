@@ -421,20 +421,20 @@ export class AppendNewEntriesComponent implements OnInit {
             element.fileSize = (element.fileSize / 1024).toFixed(2);
             if (this.env.config.enableAWSS3) {
               const img = new Image();
+              let m = this;
               img.src = element.location;
               img.onload = function () {
                 a++;
+                if (a == Math.round(flag.length / 2)) {
+                  m.loadPreviewTable = false;
+                }
               };
             } else {
-              a++;
               element.location = `${
                 this.env.config.annotationService
               }/api/v1.0/datasets/set-data?file=${element.location}&token=${
                 JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
               }`;
-            }
-            if (a == Math.round(flag.length / 2)) {
-              this.loadPreviewTable = false;
             }
           });
           this.previewContentDatas = flag;

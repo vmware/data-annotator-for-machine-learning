@@ -4,7 +4,6 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 import { Component, OnInit, ViewChild } from '@angular/core';
-// import 'rxjs/Rx';
 import * as _ from 'lodash';
 import { ActivatedRoute } from '@angular/router';
 import { UserAuthService } from '../../services/user-auth.service';

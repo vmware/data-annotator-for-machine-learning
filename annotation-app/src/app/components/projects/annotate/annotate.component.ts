@@ -14,7 +14,6 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { AvaService } from '../../../services/ava.service';
-// import 'rxjs/Rx';
 import { SR, SrUserInput } from '../../../model/sr';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -281,7 +280,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!this.sr.MSG) {
           this.loading = false;
         }
-        if (this.projectType == 'log') {
+        if (this.projectType == 'log' && !this.error) {
           setTimeout(() => {
             this.el.nativeElement.querySelector(
               '.logCategories' + this.selectedEntityID,
@@ -736,13 +735,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.clearUserInput();
   }
-
-  // showSubmitDialog(): void {
-  //   this.isSubmittingDialog = true;
-  //   Observable.interval(3500).take(1).subscribe(time => {
-  //     this.isSubmittingDialog = false;
-  //   });
-  // }
 
   onEndGame(): void {
     if (this.isFormPrestine()) {
