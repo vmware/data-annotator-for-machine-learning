@@ -5,7 +5,6 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ClrDatagridStateInterface } from '@clr/angular';
-// import 'rxjs/Rx';
 import * as _ from 'lodash';
 import { UserAuthService } from '../../services/user-auth.service';
 import { AvaService } from '../../services/ava.service';
@@ -109,7 +108,7 @@ export class MyDatasetsComponent implements OnInit {
       },
       (error: any) => {
         console.log(error);
-        this.errorMessage = 'Delete the dataset failed.';
+        this.errorMessage = `Delete dataset failed. ${error.error.MSG}`;
         this.loading = false;
         setTimeout(() => {
           this.errorMessage = '';

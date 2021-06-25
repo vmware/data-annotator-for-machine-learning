@@ -20,7 +20,6 @@ import { FormValidatorUtil } from '../../shared/form-validators/form-validator-u
 import { DatasetData, Dataset, UploadData } from '../../model/index';
 import { UserAuthService } from '../../services/user-auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
-// import 'rxjs/Rx';
 import { DatasetUtil } from 'app/model/index';
 import { DatasetValidator } from '../../shared/form-validators/dataset-validator';
 import { Papa } from 'ngx-papaparse';
@@ -425,23 +424,6 @@ export class CreateNewComponent implements OnInit {
   toRegEmail(value) {
     const emails = value.split(/,|;/);
     this.emailReg = this.toolService.toRegEmail(emails);
-    // if (this.env.config.authUrl) {
-    //   for (let i = 0; i < emails.length; i++) {
-    //     if (!(/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/).test(emails[i].trim())) {
-    //       this.emailReg = false;
-    //       return;
-    //     };
-    //     this.emailReg = true;
-    //   }
-    // } else {
-    //   for (let i = 0; i < emails.length; i++) {
-    //     if (!(/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emails[i].trim()))) {
-    //       this.emailReg = false;
-    //       return;
-    //     }
-    //     this.emailReg = true;
-    //   }
-    // }
     if (this.emailReg && this.inputAssigneeValidation == false) {
       emails.forEach((element) => {
         if (this.assigneeList.indexOf(element.trim()) == -1) {
@@ -608,20 +590,20 @@ export class CreateNewComponent implements OnInit {
             element.fileSize = (element.fileSize / 1024).toFixed(2);
             if (this.env.config.enableAWSS3) {
               const img = new Image();
+              let m = this;
               img.src = element.location;
               img.onload = function () {
                 a++;
+                if (a == Math.round(flag.length / 2)) {
+                  m.loadingPreviewData = false;
+                }
               };
             } else {
-              a++;
               element.location = `${
                 this.env.config.annotationService
               }/api/v1.0/datasets/set-data?file=${element.location}&token=${
                 JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
               }`;
-            }
-            if (a == Math.round(flag.length / 2)) {
-              this.loadingPreviewData = false;
             }
           });
           this.previewContentDatas = flag;
@@ -1371,18 +1353,6 @@ export class CreateNewComponent implements OnInit {
       this.isNumeric = false;
     }
   }
-
-  // in tabular case to change the variable type
-  // updateColumnFormat(column, e) {
-  //   if (e.target.value != column.type) {
-  //     this.isChangeVariable = true;
-  //     setTimeout(() => {
-  //       this.isChangeVariable = false;
-  //     }, 2000);
-  //   } else {
-  //     this.isChangeVariable = false;
-  //   }
-  // }
 
   isMultiple(e) {
     this.isMultipleLabel = e.target.checked;

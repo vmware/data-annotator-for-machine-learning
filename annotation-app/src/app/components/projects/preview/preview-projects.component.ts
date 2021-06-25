@@ -266,18 +266,11 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
           const flag = [];
           const cellContent = [];
           res = res.data;
-          // for (let i = 0; i < res.length; i++) {
-          //     flag.push(res[i].originalData)
-          // };
           for (const item of res) {
             flag.push(item.originalData);
           }
           if (this.projectType == 'image') {
             this.previewSrsHeader = ['Id', 'ImageName', 'ImageSize(KB)'];
-            // for (let w = 0; w < res.length; w++) {
-            //     let flag = [res[w].id, res[w].originalData.fileName, ((res[w].originalData.fileSize) / 1024).toFixed(2)];
-            //     res[w].originalData = flag;
-            // }
             for (const item of res) {
               const flag = [
                 item.id,
@@ -331,25 +324,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
               }
             });
           }
-
-          // to reset the problemcategory data
-          // if (this.projectType == 'ner') {
-          //     for (let i = 0; i < res.length; i++) {
-          //         let datasort = [];
-          //         for (let j = 0; j < res[i].userInputs.length; j++) {
-          //             for (let k = 0; k < this.selectedCategoryList.length; k++) {
-          //                 let flag = [];
-          //                 for (let w = 0; w < res[i].userInputs[j].problemCategory.length; w++) {
-          //                     if (res[i].userInputs[j].problemCategory[w].label == this.selectedCategoryList[k]) {
-          //                         flag.push(res[i].userInputs[j].problemCategory[w].text);
-          //                     };
-          //                 };
-          //                 datasort.push(flag);
-          //             };
-          //             res[i].userInputs[j].problemCategory = datasort;
-          //         };
-          //     };
-          // };
 
           this.previewSrs = res;
           // console.log('this.previewSrs:::', this.previewSrs)

@@ -40,9 +40,6 @@ export class DownloadComponent implements OnInit {
 
   ngOnInit() {
     this.format = 'standard';
-    // setTimeout(() => {
-    //   console.log("DownloadComponent:::", this.msg)
-    // }, 3000);
   }
 
   onCloseDownloadDialog() {

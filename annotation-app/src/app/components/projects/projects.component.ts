@@ -6,7 +6,6 @@ SPDX-License-Identifier: Apache-2.0
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { ClrDatagridStateInterface } from '@clr/angular';
-// import 'rxjs/Rx';
 import * as _ from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserAuthService } from '../../services/user-auth.service';
@@ -241,23 +240,6 @@ export class ProjectsComponent implements OnInit {
     this.downloadService.downloadFile(this.downloadUrl);
   }
 
-  // inputFrequencyBlur(e) {
-
-  //   let pattern = `^[0-9]+$`;
-  //   let argRegEx = new RegExp(pattern, 'g');
-  //   if (!String(e.target.value).match(argRegEx)) {
-  //     this.notNumber = true;
-  //   } else {
-  //     this.notNumber = false;
-  //     if (e.target.value < 50) {
-  //       this.minThreshold = true;
-  //     } else {
-  //       this.minThreshold = false;
-  //     };
-  //   };
-
-  // }
-
   more(id) {
     for (let i = 0; i < this.datasets.length; i++) {
       if (this.datasets[i].id == id) {
@@ -392,11 +374,6 @@ export class ProjectsComponent implements OnInit {
                 projectType,
               },
             });
-            // let navigationExtras: NavigationExtras = {
-            //   queryParams: dataset,
-            //   fragment: 'anchor'
-            // };
-            // this.router.navigate(['appendNewEntries'], navigationExtras);
           }
         },
         (error: any) => {

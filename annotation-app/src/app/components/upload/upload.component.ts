@@ -17,11 +17,8 @@ import AWS from 'aws-sdk/lib/aws';
 import { Buffer } from 'buffer';
 import * as _ from 'lodash';
 import * as JSZip from 'jszip';
-// import * as Pako from 'pako';
-// import untar from "js-untar";
 import { EnvironmentsService } from 'app/services/environments.service';
 import { UnZipService } from 'app/services/common/up-zip.service';
-// import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-upload',
@@ -69,9 +66,8 @@ export class UploadComponent implements OnInit {
     private userAuthService: UserAuthService,
     private papa: Papa,
     public env: EnvironmentsService,
-    private unZipService: UnZipService,
-  ) // private sanitizer: DomSanitizer,
-  {
+    private unZipService: UnZipService, // private sanitizer: DomSanitizer,
+  ) {
     this.userQuestionUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       if (value != '') {
         this.checkName(value);
@@ -84,7 +80,6 @@ export class UploadComponent implements OnInit {
   ngOnInit() {
     this.user = this.userAuthService.loggedUser().email;
     this.createUploadForm();
-    console.log(12, this.msg);
   }
 
   onKeydown(e) {
@@ -346,28 +341,6 @@ export class UploadComponent implements OnInit {
     );
   }
 
-  // toPostBinary() {
-
-  //   let formData = new FormData();
-  //   formData.append('file', this.inputFile);
-  //   formData.append("dsname", this.uploadGroup.get('datasetsName').value);
-  //   formData.append("format", this.uploadGroup.get('fileFormat').value);
-  //   // formData.append("fileName", this.inputFile.name);
-  //   // formData.append("fileSize", this.inputFile.size);
-  //   if (this.uploadGroup.get('fileFormat').value == 'txt') {
-  //     let topReview = [];
-  //     this.previewContentDatas.previewExample.forEach(element => {
-  //       topReview.push({ fileName: element.name, fileSize: element.size, fileContent: element.content.slice(0, 501) })
-  //     });
-  //     formData.append("topReview", JSON.stringify(topReview));
-  //     formData.append("totalRows", this.previewContentDatas.exampleEntries);
-  //   } else if (this.uploadGroup.get('fileFormat').value == 'csv' || this.uploadGroup.get('fileFormat').value == 'tabular') {
-  //     formData.append("hasHeader", this.uploadGroup.get('hasHeader').value);
-  //     formData.append("topReview", JSON.stringify({ header: this.previewHeadDatas, topRows: this.previewContentDatas }));
-  //   };
-  //   this.toPostDatasets(this.uploadGroup.get('fileFormat').value, formData, null)
-  // }
-
   uploadToS3(file) {
     this.avaService.getS3UploadConfig().subscribe(
       async (res) => {
@@ -444,43 +417,6 @@ export class UploadComponent implements OnInit {
             this.unzipImagesToS3();
           } else {
             this.updateDatasets('data');
-            // let flag;
-            // this.unZipService.unzipImages(this.inputFile).then((e) => {
-            //   console.log(99, e);
-            //   // to preview the img
-            //   flag = e;
-            //   const entries = flag.entry;
-            //   let a = 1;
-            //   const that = this;
-            //   const objectKey = Object.keys(entries.files);
-            //   const cc = [];
-            //   for (let i = 0; i < objectKey.length; i++) {
-            //     if (
-            //       objectKey[i].split('/')[1] != '' &&
-            //       that.unZipService.validImageType(objectKey[i])
-            //     ) {
-            //       cc.push(objectKey[i]);
-            //       if (cc.length == 3) {
-            //         break;
-            //       }
-            //     }
-            //   }
-            //   for (let j = 0; j < cc.length; j++) {
-            //     entries.files[cc[j]].async('blob').then(function (blob) {
-            //       const reader = new FileReader();
-            //       reader.readAsDataURL(blob);
-            //       reader.onloadend = (r) => {
-            //         that.previewContentDatas.push({
-            //           _id: a++,
-            //           fileName: cc[j],
-            //           fileSize: (blob.size / 1024).toFixed(2),
-            //           location: that.sanitizer.bypassSecurityTrustUrl(reader.result.toString()),
-            //         });
-            //       };
-            //     });
-            //   }
-            //   // this.toPostBinary();
-            // });
           }
         } else if (this.uploadGroup.get('fileFormat').value == 'txt') {
           if (this.inputFile.name.split('.').pop().toLowerCase() == 'zip') {
@@ -630,101 +566,4 @@ export class UploadComponent implements OnInit {
       this.uploadGroup.get('localFile').updateValueAndValidity();
     }
   }
-
-  // validTxtType(fileName) {
-  //   let name = fileName.split('/').pop();
-  //   if (!(name.startsWith('__MACOSX') || name.startsWith('._'))) {
-  //     let types = ['txt'];
-  //     let type = name.split('.').pop();
-  //     if (types.indexOf(type.toLowerCase()) > -1) {
-  //       return true;
-  //     } else {
-  //       return false;
-  //     }
-  //   } else {
-  //     return false;
-  //   }
-  // }
-
-  // unTgz() {
-  //   var that = this;
-  //   var reader = new FileReader();
-  //   return new Promise((resolve, reject) => {
-  //     reader.readAsArrayBuffer(that.inputFile);
-  //     reader.onload = function (event) {
-  //       let result: any = (event.target as any).result;
-  //       const inflator = new Pako.Inflate();
-  //       inflator.push(result);
-  //       if (inflator.err) {
-  //         console.log('inflator-err:::', inflator.msg);
-  //       }
-  //       const output = inflator.result;
-  //       untar(output.buffer)
-  //         .then((extractedFiles) => {
-  //           let example = 0;
-  //           let txtList = [];
-  //           extractedFiles.forEach(element => {
-  //             if (element.type == 0 || element.type == null) {
-  //               if (that.validTxtType(element.name)) {
-  //                 example++;
-  //                 txtList.push(element);
-  //               }
-  //             }
-  //           })
-  //           let previewExample = txtList.splice(0, 3)
-  //           previewExample.forEach(e => {
-  //             that.toReadBlobToText(e.blob).then(data => {
-  //               e.content = data;
-  //             })
-  //           })
-  //           that.previewContentDatas = { previewExample: previewExample, exampleEntries: example };
-  //           setTimeout(() => {
-  //             resolve(that.previewContentDatas);
-  //           }, 1000);
-  //         })
-  //     }
-  //   })
-  // }
-
-  // toReadBlobToText(blob) {
-  //   return new Promise(function (resolve) {
-  //     var reader = new FileReader();
-  //     reader.readAsText(blob)
-  //     reader.onload = function (event) {
-  //       let res: any = (event.target as any).result;
-  //       resolve(res)
-  //     }
-  //   })
-  // }
-
-  // unZip() {
-  //   let jsZip = new JSZip();
-  //   var that = this;
-  //   let example = 0;
-  //   let txtList = [];
-  //   return new Promise((resolve, reject) => {
-  //     jsZip.loadAsync(that.inputFile).then(function (entries) {
-  //       entries.forEach((path, file) => {
-  //         if (!file.dir && that.validTxtType(path)) {
-  //           example++;
-  //           txtList.push(file);
-  //         }
-  //       });
-  //       let previewExample = txtList.splice(0, 3)
-
-  //       previewExample.forEach(e => {
-  //         jsZip.file(e.name).async('string').then(function success(res) {
-  //           e.content = res;
-  //           e.size = e._data.uncompressedSize
-  //         }, function error(e) {
-  //           console.log('error:::', e)
-  //         })
-  //       })
-  //       that.previewContentDatas = { previewExample: previewExample, exampleEntries: example };
-  //       setTimeout(() => {
-  //         resolve(that.previewContentDatas)
-  //       }, 1000);
-  //     })
-  //   })
-  // }
 }

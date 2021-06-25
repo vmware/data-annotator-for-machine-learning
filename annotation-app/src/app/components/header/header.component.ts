@@ -73,7 +73,6 @@ export class HeaderComponent implements OnInit {
         const resNew = JSON.parse(localStorage.getItem(this.env.config.serviceTitle));
         resNew.role = this.role;
         localStorage.setItem(this.env.config.serviceTitle, JSON.stringify(resNew));
-        // this.handleRole.handler.next(this.role);
         if (this.role == 'Project Owner') {
           this.showProjectTab = true;
           this.showDatasetTab = true;

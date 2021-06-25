@@ -43,9 +43,6 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // this.userAuthService.loggedUserListener().subscribe(user => {
-    //   this.loggedUser = user;
-    // })
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
     this.loading = true;

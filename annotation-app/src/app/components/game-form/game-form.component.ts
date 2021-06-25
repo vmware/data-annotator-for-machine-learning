@@ -5,7 +5,6 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ClrDatagridStateInterface } from '@clr/angular';
-// import 'rxjs/Rx';
 import * as _ from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserAuthService } from '../../services/user-auth.service';

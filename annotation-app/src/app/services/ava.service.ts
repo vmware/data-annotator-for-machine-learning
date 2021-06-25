@@ -283,10 +283,8 @@ export class AvaService {
       map(
         (res) => {
           if (res.fileExist) {
-            console.log(1, res.fileExist);
             return true;
           } else {
-            console.log(2, res.fileExist);
             return false;
           }
         },
