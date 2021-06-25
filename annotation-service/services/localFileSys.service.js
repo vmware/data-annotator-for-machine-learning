@@ -28,13 +28,18 @@ async function readFileFromLocalSys(filePath, options){
 
 async function deleteFileFromLocalSys(filePath){
   await checkFileExistInLocalSys(filePath, false, true, true);
-  fs.unlinkSync(filePath);
+  fs.unlink(filePath);
+}
+
+async function deleteFileFolderFromLocalSys(filePath){
+  await checkFileExistInLocalSys(filePath, false, true);
+  fs.rmdir(filePath, {recursive: true});
 }
 
 async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFile){
   const exist = fs.existsSync(filePath);
   if (!exist && createDir) {
-    fs.mkdirSync(filePath, {recursive: true});
+    await fs.mkdir(filePath, {recursive: true});
   }
   if (!exist && thowError) {
     throw {CODE: 5002, MSG: `DIRECTORY OR FILE NOT EXIST`};
@@ -50,10 +55,22 @@ async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFil
 
 async function downloadFileFromLocalSystem(req) {
   
+  const user = req.auth.email;
   const filePath = req.query.file;
+
+  //check file permission
+  await checkFilePermission(user, filePath);
+  //check file exist
   await checkFileExistInLocalSys(filePath, false, true, true);
   
   return filePath;
+}
+
+
+async function checkFilePermission(user, filePath) {
+  if (filePath.indexOf(user) == -1) {
+    throw {CODE: 4001, MSG: "PERMISSION DENIED"};
+  }
 }
 
 async function checkFileExist(req) {
@@ -104,9 +121,11 @@ module.exports={
   saveFileToLocalSys,
   readFileFromLocalSys,
   deleteFileFromLocalSys,
+  deleteFileFolderFromLocalSys,
   checkFileExistInLocalSys,
   downloadFileFromLocalSystem,
   unzipStreamToLocalSystem,
   singleUnzipStreamToLocalSystem,
+  checkFilePermission,
 
 }

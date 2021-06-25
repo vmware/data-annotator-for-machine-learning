@@ -142,11 +142,12 @@ router.post(APIs.FILE_UPLOAD, upload.single("file"), (req, res) => {
     });
 });
 
-router.use(APIs.FILE_SET_DATA, (req, res) => {
+router.use(APIs.FILE_SET_DATA, async (req, res) => {
     console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
     
     const filePath = req.query.file;
     if (filePath) {
+        await localFileSysService.checkFilePermission(req.auth.email, filePath);
         localFileSysService.readFileFromLocalSys(filePath).then((response) => {
             console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
             response.pipe(res);

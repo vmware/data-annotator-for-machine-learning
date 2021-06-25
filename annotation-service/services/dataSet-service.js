@@ -14,6 +14,9 @@ const validator = require('../utils/validator');
 const config = require('../config/config');
 const localFileSysService = require('./localFileSys.service');
 const EventEmitter = require('events');
+const _ = require("lodash");
+const fs = require('fs');
+
 
 async function saveDataSetInfo(req) {
 
@@ -52,7 +55,7 @@ async function saveDataSetInfo(req) {
     if (req.body.format == DATASETTYPE.IMGAGE) {
         if (config.useLocalFileSys) {
             const statusCheck = new EventEmitter();
-            const unzipFolder = `./${FILEPATH.UPLOAD}/${user}`;
+            const unzipFolder = `./${FILEPATH.UPLOAD}/${user}/${FILEPATH.UNZIPIMAGE}/${Date.now()}`;
             await localFileSysService.singleUnzipStreamToLocalSystem(req.file.buffer, unzipFolder, statusCheck);
             await new Promise((resolve) => statusCheck.on('done', (images)=>{ resolve(dataSet.images = images) }));
             dataSet.fileKey = fileKey;
@@ -173,6 +176,7 @@ async function queryDataSetByDataSetName(req) {
 async function deleteDataSet(req) {
     
     const ds = await validator.checkDataSet({ dataSetName: req.body.dsname }, true);
+    const user = req.auth.email;
 
     if (ds[0].format == DATASETTYPE.CSV || ds[0].format == DATASETTYPE.TABULAR || ds[0].format == DATASETTYPE.LOG) {
 
@@ -184,6 +188,41 @@ async function deleteDataSet(req) {
             await localFileSysService.deleteFileFromLocalSys(req.body.fileKey)
         }
         
+    }else if (ds[0].format == DATASETTYPE.IMGAGE) {
+
+        await validator.checkDataSetInUse(req.body.dsname, true);
+        
+        if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
+            console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteMultiObjects`);
+            // delete unziped images at s3
+           let index = 0; keys = [];
+           for await (const img of ds[0].images) {
+                keys.push({Key: img.location});
+                index += 1;
+                if (index == 1000) {
+                    await S3Utils.deleteMultiObjects(keys);
+                    keys = [];
+                    index = 0;
+                }
+           }
+           if (!keys.length) {
+            await S3Utils.deleteMultiObjects(keys);
+           }
+            
+        }else if (config.useLocalFileSys) {
+ 
+            const folder = `./${FILEPATH.UPLOAD}/${user}/${FILEPATH.UNZIPIMAGE}/`;
+            //images dataset has single appened images
+            let fileFolders = ds[0].images.reduce((arr, curr) => arr.push(curr.location.split(FILEPATH.UNZIPIMAGE)[1].split("/")[1]), []);
+            fileFolders = _.uniq(fileFolders);
+            // delete the zip file
+            await localFileSysService.deleteFileFromLocalSys(ds[0].location);
+            // dalete the unziped files
+            for (const fo of fileFolders) {
+                await localFileSysService.deleteFileFolderFromLocalSys(folder+fo);
+            }
+        }
+
     }
 
     console.log(`[ DATASET ] Service deleteDataSet.removeDataSet`);
@@ -191,6 +230,7 @@ async function deleteDataSet(req) {
     
     return { CODE: 0000, MSG: "delete success" };
 }
+
 
 async function signS3Url(req) {
 
