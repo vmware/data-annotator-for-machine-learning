@@ -65,6 +65,7 @@ async function execute(req, sendEmail, annotators) {
 
 async function quickAppendImages(req, dsName){
   console.log(`[ IMAGE ] Utils imgImporter.quickAppendImages`);
+  const startTime = Date.now();
   const user = req.auth.email;
 
   //save to tickets db
@@ -74,7 +75,7 @@ async function quickAppendImages(req, dsName){
     if (config.useLocalFileSys) {
       for (const file of req.files) {
         if (file.originalname == imgage.fileName) {
-          const filePath = `./${FILEPATH.UPLOAD}/${user}/appendFiles/`;
+          const filePath = `./${FILEPATH.UPLOAD}/${user}/${FILEPATH.UNZIPIMAGE}/${startTime}/`;
           imgage.location = filePath + imgage.fileName;
           imgage.fileSize = file.size;
 

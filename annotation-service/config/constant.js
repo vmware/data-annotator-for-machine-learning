@@ -100,5 +100,6 @@ module.exports = {
     FILEPATH:{
         UPLOAD: "FILE_SYS/UPLOAD",
         DOWNLOAD: "FILE_SYS/DOWNLOAD",
+        UNZIPIMAGE: "_UNZIPED-IMAGES_",
     }
 }
