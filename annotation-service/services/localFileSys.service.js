@@ -33,13 +33,13 @@ async function deleteFileFromLocalSys(filePath){
 
 async function deleteFileFolderFromLocalSys(filePath){
   await checkFileExistInLocalSys(filePath, false, true);
-  fs.rmdir(filePath, {recursive: true});
+  fs.mkdirSync(filePath, {recursive: true});
 }
 
 async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFile){
   const exist = fs.existsSync(filePath);
   if (!exist && createDir) {
-    await fs.mkdir(filePath, {recursive: true});
+    fs.mkdirSync(filePath, {recursive: true});
   }
   if (!exist && thowError) {
     throw {CODE: 5002, MSG: `DIRECTORY OR FILE NOT EXIST`};
