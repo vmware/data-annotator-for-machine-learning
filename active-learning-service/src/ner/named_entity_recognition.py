@@ -5,11 +5,14 @@ import logging
 import spacy
 import json
 
+from src.ner.tokenizer_config import custom_tokenizer
+
 nlp = spacy.load("en_core_web_md")
 log = logging.getLogger('loop_al')
 
 
 def get_user_tokens(request):
+    nlp.tokenizer = custom_tokenizer(nlp)
 
     req = json.loads(request.body)
     tickets_data = []
