@@ -17,6 +17,7 @@ const sqsService = require('../services/sqs.service');
 const superColliderService = require('../services/supercollider.service');
 const localFileSysService = require('../services/localFileSys.service');
 const upload = multer();
+const config = require('../config/config');
 
 
 router.get(APIs.FILE_S3_CONFIGS, (req, res) => {
@@ -147,7 +148,9 @@ router.use(APIs.FILE_SET_DATA, async (req, res) => {
     
     const filePath = req.query.file;
     if (filePath) {
-        await localFileSysService.checkFilePermission(req.auth.email, filePath);
+        if (config.adminDefault.indexOf(req.auth.email) == -1) {
+            await localFileSysService.checkFilePermission(req.auth.email, filePath);
+        }
         localFileSysService.readFileFromLocalSys(filePath).then((response) => {
             console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
             response.pipe(res);
