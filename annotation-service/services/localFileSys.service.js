@@ -62,9 +62,10 @@ async function downloadFileFromLocalSystem(req) {
   
   const user = req.auth.email;
   const filePath = req.query.file;
-
-  //check file permission
-  await checkFilePermission(user, filePath);
+  if (config.adminDefault.indexOf(req.auth.email) == -1) {
+    //check file permission
+    await checkFilePermission(user, filePath);
+  }
   //check file exist
   await checkFileExistInLocalSys(filePath, false, true, true);
   
