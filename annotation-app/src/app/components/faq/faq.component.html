@@ -31,9 +31,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           ><span>A&nbsp;:</span> Files up to 100MB can be uploaded while creating a new project.
           Files up to 500MB can be uploaded through the “My Datasets” tab and used to create a new
           project.
-          <i *ngIf="env.config.authUrl" style="font-style: normal"
+          <em *ngIf="env.config.authUrl" style="font-style: normal"
             >If you have GB size datasets, we can support this through a backend script. Please
-            contact {{ env.config.contactEmail }} or {{ env.config.contactSlack }}.</i
+            contact {{ env.config.contactEmail }} or {{ env.config.contactSlack }}.</em
           >
         </clr-accordion-content>
       </clr-accordion-panel>
