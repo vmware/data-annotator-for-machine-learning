@@ -12,7 +12,8 @@ const {FILEPATH} = require('../config/constant');
 const compressing = require('compressing');
 const path = require('path');
 const mkdirp = require('mkdirp');
-
+const userService = require('../services/user-service');
+const {ROLES} = require('../config/constant');
 
 async function saveFileToLocalSys(filePath, file){
 
@@ -62,10 +63,12 @@ async function downloadFileFromLocalSystem(req) {
   
   const user = req.auth.email;
   const filePath = req.query.file;
-  if (config.adminDefault.indexOf(req.auth.email) == -1) {
-    //check file permission
+
+  const userSaved = await userService.queryUserById(req.auth.email);
+  if (userSaved.role != ROLES.ADMIN) {
     await checkFilePermission(user, filePath);
   }
+
   //check file exist
   await checkFileExistInLocalSys(filePath, false, true, true);
   
