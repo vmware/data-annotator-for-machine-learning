@@ -384,12 +384,14 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="preview clr-col-12 clr-col-md-10">
               <div *ngIf="!loadPreviewTable" class="previewTable">
                 <table
+                  aria-describedby="previewTable"
                   class="table"
                   style="margin-top: 0rem !important; border-collapse: collapse !important"
                 >
                   <thead>
                     <tr>
                       <th
+                        id="itemHeader"
                         class="left"
                         *ngFor="let itemHeader of previewHeadDatas"
                         style="vertical-align: baseline; border: 1px solid #ccc"

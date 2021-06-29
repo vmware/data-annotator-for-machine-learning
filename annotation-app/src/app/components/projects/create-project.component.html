@@ -186,11 +186,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <table
                           *ngIf="!loadingPreviewData"
                           class="table"
+                          aria-describedby="previewTable"
                           style="margin-top: 0rem !important; border-top: transparent"
                         >
                           <thead>
                             <tr>
                               <th
+                                id="itemHeaderCsv"
                                 class="left"
                                 *ngFor="let itemHeader of previewHeadDatas"
                                 style="vertical-align: baseline; border-left: 1px solid #ccc"
@@ -442,11 +444,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <table
                           *ngIf="!loadingPreviewData"
                           class="table"
+                          aria-describedby="previewTable"
                           style="margin-top: 0rem !important; border-top: transparent"
                         >
                           <thead>
                             <tr>
                               <th
+                                id="itemHeaderTxt"
                                 class="left"
                                 *ngFor="let itemHeader of previewHeadDatas"
                                 style="vertical-align: baseline; border-left: 1px solid #ccc"
@@ -485,11 +489,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <table
                     *ngIf="!loadingPreviewData"
                     class="table"
+                    aria-describedby="previewTable"
                     style="margin-top: 0rem !important"
                   >
                     <thead>
                       <tr>
                         <th
+                          id="itemHeaderImage"
                           class="left"
                           *ngFor="let itemHeader of previewHeadDatas"
                           style="vertical-align: baseline; border-left: 1px solid #ccc"

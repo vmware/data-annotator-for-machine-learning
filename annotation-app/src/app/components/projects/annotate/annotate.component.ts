@@ -811,9 +811,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.startFrom === 'review') {
       paramSr['review'] = true;
       paramSr['order'] = this.reviewOrder;
-      this.questionForm.get('questionGroup.reviewee').value
-        ? (paramSr['user'] = this.questionForm.get('questionGroup.reviewee').value)
-        : null;
+      if (this.questionForm.get('questionGroup.reviewee').value) {
+        paramSr['user'] = this.questionForm.get('questionGroup.reviewee').value;
+      }
     }
     this.avaService.skipToNext(paramSr).subscribe(
       (responseSr) => {
@@ -1374,9 +1374,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.startFrom === 'review') {
       param['review'] = true;
       param['order'] = this.reviewOrder;
-      this.questionForm.get('questionGroup.reviewee').value
-        ? (param['user'] = this.questionForm.get('questionGroup.reviewee').value)
-        : null;
+      if (this.questionForm.get('questionGroup.reviewee').value) {
+        param['user'] = this.questionForm.get('questionGroup.reviewee').value;
+      }
     }
     const aa = this.avaService.toFlagTicket(param).subscribe(
       (response) => {
@@ -1740,7 +1740,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.questionForm.get('questionGroup.answer').reset();
     this.multipleLabelList = [];
     this.spansList = [];
-    this.projectType == 'log' ? this.questionForm.get('questionGroup.filterText').reset() : null;
+    if (this.projectType === 'log') {
+      this.questionForm.get('questionGroup.filterText').reset();
+    }
     this.regexErr = false;
   }
 
