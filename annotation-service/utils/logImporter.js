@@ -158,7 +158,7 @@ async function quickAppendLogs(req){
         originalData: textLines,
         fileInfo:{
           fileSize: file.size,
-          fileName: file.originalname
+          fileName: `append_${Date.now()}_${file.originalname}`
         }
       };  
       docs.push(sechema);

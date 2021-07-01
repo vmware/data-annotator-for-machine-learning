@@ -30,23 +30,8 @@ async function getProjects(req) {
         console.log(`[ PROJECT ] Service query current annotator project list`);
         condition = { annotator: { $regex: email } };
         project = "projectName taskInstructions creator  createdDate updatedDate dataSource assignmentLogic totalCase projectCompleteCase userCompleteCase categoryList labelType min max projectType isMultipleLabel isShowFilename";
-        let projectInfo = await projectDB.queryProjectByConditions(condition, project, options);
-
-        if (projectInfo.length == 0) {
-            console.log(`[ PROJECT ] Service current annotator no project list`);
-            return projectInfo;
-        }
-        //annotator shouldn't see others info
-        console.log(`[ PROJECT ] Service sort out current annotator project list data`);
-        for (const pro of projectInfo) {
-            for (const uCase of pro.userCompleteCase) {
-                if (uCase.user == email) {
-                    pro._doc.userCompleteCase = uCase.completeCase;
-                    break;
-                }
-            }
-        }
-        return projectInfo;
+        return projectDB.queryProjectByConditions(condition, project, options);
+        
     } else if (src == SRCS.PROJECTS && user.role != "Annotator") {
         condition = { creator: { $regex: email } };
     } else if (src == SRCS.ADMIN && user.role == "Admin") {
@@ -76,28 +61,28 @@ async function getProjects(req) {
         throw { CODE: 1001, MSG: "ERROR ID or src" };
     }
     console.log(`[ PROJECT ] Service query user: ${email} src:  ${src} project list`);
-    return await projectDB.queryProjectByConditions(condition, null, options);
+    return projectDB.queryProjectByConditions(condition, null, options);
 }
 
 async function getProjectByAnnotator(req) {
     console.log(`[ PROJECT ] Service query project name by annotator: ${req.auth.email}`);
     const condition = { annotator: { $regex: req.auth.email } };
     const columns = "projectName";
-    return await projectDB.queryProjectByConditions(condition, columns);
+    return projectDB.queryProjectByConditions(condition, columns);
 }
 
 async function getProjectName(req) {
-    return await checkProjectName(req.query.pname);
+    return checkProjectName(req.query.pname);
 }
 
 async function checkProjectName(pname) {
     console.log(`[ PROJECT ] Service query project name by projectName: ${pname}`);
-    return await projectDB.queryProjectByConditions({ projectName: pname });
+    return projectDB.queryProjectByConditions({ projectName: pname });
 }
 
 async function getProjectInfo(req) {
     console.log(`[ PROJECT ] Service query Project info by pid: ${req.query.pid}`);
-    return await projectDB.queryProjectById(ObjectId(req.query.pid))
+    return projectDB.queryProjectById(ObjectId(req.query.pid))
 }
 
 async function deleteProject(req) {
