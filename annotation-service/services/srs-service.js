@@ -276,7 +276,10 @@ async function getALLSrs(req) {
     const projectName = mp.project.projectName;
 
     console.log(`[ SRS ] Service paginateQuerySrsData`);
-    const query = { projectName: projectName }; 
+    let query = { projectName: projectName }; 
+    if (req.query.fname && mp.project.projectType == PROJECTTYPE.LOG) {
+        query["fileInfo.fileName"] = { $regex: req.query.fname };
+    }
     let options = { page: req.query.page, limit: req.query.limit, sort:{userInputsLength: -1} };
     const data = await mongoDb.paginateQuery(mp.model, query, options);
 
@@ -896,7 +899,6 @@ async function queryTicketsForReview(req) {
 
     const pid = req.query.pid;
     const byUser = req.query.user;
-    let ticket=[];
 
     const conditions = {_id: ObjectId(pid)};
     const projects = await validator.checkProjectByconditions(conditions, true);
@@ -905,21 +907,19 @@ async function queryTicketsForReview(req) {
     const findUser = await projects[0].reviewInfo.find( info => info.user == user);
     const skip = findUser? findUser.skip: 0;
 
-
-    if (await validator.checkRequired(byUser)) {
-        //1.user defined the query rules
-        const order = req.query.order;
-        ticket = await specailQueryForReview(projectName, byUser, order, skip, user);
-
-    }else{
-        //2. query need reReview tickets
-        ticket = await reReviewQueryForReview(projectName, user);
-        //3.if the step2 is empty query from default
-        if (!ticket[0]) {
+    //1. query need reReview tickets
+    let ticket = await reReviewQueryForReview(projectName, user);
+    if (!ticket[0]) {
+        if (await validator.checkRequired(byUser)) {
+            //2.user defined the query rules
+            const order = req.query.order;
+            ticket = await specailQueryForReview(projectName, byUser, order, skip, user);
+        }else{
+            //3.if the step2 is empty query from default
             ticket = await defualtQueryForReview(projectName, skip, user);
         }
     }
-
+    
     if (!ticket[0]) {
         if (!skip) {
             return { CODE: 5001, "MSG": "No Data Found" };
