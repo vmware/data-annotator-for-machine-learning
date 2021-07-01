@@ -23,16 +23,14 @@ export class HeaderComponent implements OnInit {
   showAdminTab = false;
   role: string;
   showDatasetTab = false;
-  isVisible: boolean;
+  errMessage: string;
 
   constructor(
     private router: Router,
     private userAuthService: UserAuthService,
     private avaService: AvaService,
     public env: EnvironmentsService,
-  ) {
-    this.isVisible = false;
-  }
+  ) {}
 
   ngOnInit() {
     this.userAuthService.loggedUserListener().subscribe((res) => {
@@ -56,33 +54,30 @@ export class HeaderComponent implements OnInit {
     this.router.navigateByUrl('/home');
   }
 
-  reLogOut() {
-    this.isVisible = false;
-    this.logOut();
-  }
-
-  reLogin() {
-    this.isVisible = false;
-    this.login();
-  }
-
   getUserRole() {
-    this.avaService.getUserRole().subscribe((userInfo) => {
-      if (userInfo) {
-        this.role = userInfo.role;
-        const resNew = JSON.parse(localStorage.getItem(this.env.config.serviceTitle));
-        resNew.role = this.role;
-        localStorage.setItem(this.env.config.serviceTitle, JSON.stringify(resNew));
-        if (this.role == 'Project Owner') {
-          this.showProjectTab = true;
-          this.showDatasetTab = true;
+    this.avaService.getUserRole().subscribe(
+      (userInfo) => {
+        if (userInfo) {
+          this.errMessage = '';
+          this.role = userInfo.role;
+          const resNew = JSON.parse(localStorage.getItem(this.env.config.serviceTitle));
+          resNew.role = this.role;
+          localStorage.setItem(this.env.config.serviceTitle, JSON.stringify(resNew));
+          if (this.role == 'Project Owner') {
+            this.showProjectTab = true;
+            this.showDatasetTab = true;
+          }
+          if (this.role == 'Admin') {
+            this.showProjectTab = true;
+            this.showAdminTab = true;
+            this.showDatasetTab = true;
+          }
         }
-        if (this.role == 'Admin') {
-          this.showProjectTab = true;
-          this.showAdminTab = true;
-          this.showDatasetTab = true;
-        }
-      }
-    });
+      },
+      (err) => {
+        console.log('getUserRoleErr:::', err);
+        this.errMessage = JSON.stringify(err);
+      },
+    );
   }
 }

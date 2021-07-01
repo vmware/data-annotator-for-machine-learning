@@ -2,6 +2,9 @@
 Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
+clr-header {
+  position: relative;
+}
 
 .clr-icon {
   &.clr-clarity-logo {
@@ -39,4 +42,13 @@ clr-header.header {
 
 .points span.last {
   margin-right: 20px;
+}
+
+.error {
+  // position: absolute;
+  // bottom: -61%;
+  // font-size: 0.8em;
+  // overflow-x: unset !important;
+  // overflow-y: unset !important;
+  // height: 0.8rem;
 }
