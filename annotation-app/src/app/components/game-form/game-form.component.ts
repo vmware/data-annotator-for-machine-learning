@@ -110,6 +110,11 @@ export class GameFormComponent implements OnInit {
     this.avaService.getProjects('annotate').subscribe(
       (res) => {
         this.loading = false;
+        res.forEach((project) => {
+          if (project.projectType === 'log' && project.creator.indexOf(this.user.email) > -1) {
+            project.allowOwnerReview = true;
+          }
+        });
         this.datasets = res;
         this.totalItems = res.length;
       },

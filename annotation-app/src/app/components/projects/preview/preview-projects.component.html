@@ -284,12 +284,22 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   <p><strong>Txt FileContent:</strong></p>
                                   <p *ngFor="let log of dataset.originalData.fileContent">
                                     <span style="margin-right: 0.5rem">{{ log.index }}</span>
-                                    <span *ngIf="log.label" class="labelInFilecontent">{{
-                                      log.label
-                                    }}</span>
-                                    <span [ngClass]="{ textInFilecontent: log.label }">{{
-                                      log.text
-                                    }}</span>
+                                    <span
+                                      *ngIf="log.label"
+                                      class="labelInFilecontent"
+                                      [ngStyle]="{
+                                        'background-color': log.backgroundColorLabel
+                                      }"
+                                      >{{ log.label }}</span
+                                    >
+                                    <span
+                                      [ngStyle]="{
+                                        'background-color': log.backgroundColorText,
+                                        'font-weight': 'bold !important',
+                                        color: 'black !important'
+                                      }"
+                                      >{{ log.text }}</span
+                                    >
                                   </p>
                                 </clr-signpost-content>
                               </clr-signpost>
