@@ -288,15 +288,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                                       *ngIf="log.label"
                                       class="labelInFilecontent"
                                       [ngStyle]="{
-                                        'background-color': log.backgroundColorLabel
+                                        'background-color': log.backgroundColorLabel,
+                                        'font-weight': log.backgroundColorLabel ? 700 : 400
                                       }"
                                       >{{ log.label }}</span
                                     >
                                     <span
                                       [ngStyle]="{
                                         'background-color': log.backgroundColorText,
-                                        'font-weight': 'bold !important',
-                                        color: 'black !important'
+                                        'font-weight': log.backgroundColorText ? 700 : 400,
+                                        color: log.backgroundColorText ? 'black' : 'currentColor',
+                                        'padding-left': log.backgroundColorText ? '0.3rem' : 'unset'
                                       }"
                                       >{{ log.text }}</span
                                     >
