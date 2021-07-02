@@ -76,7 +76,8 @@ export class HeaderComponent implements OnInit {
       },
       (err) => {
         console.log('getUserRoleErr:::', err);
-        this.errMessage = JSON.stringify(err);
+        this.errMessage =
+          'Failed to read the user from the database, please refresh the page and log in later';
       },
     );
   }

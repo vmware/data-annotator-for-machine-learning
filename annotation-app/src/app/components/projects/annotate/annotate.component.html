@@ -429,12 +429,30 @@ SPDX-License-Identifier: Apache-2.0 -->
               >
             </div>
             <!-- here is log annotation content -->
-            <div *ngIf="projectType === 'log'" class="txtBox">
-              <div *ngIf="filterList.length <= 0">
-                <p
+            <div *ngIf="projectType === 'log'">
+              <div class="editBar">
+                <button
+                  type="button"
+                  class="btn btn-icon"
+                  [ngClass]="{ wrap: !wrapText, noWrap: wrapText }"
+                  role="tooltip"
+                  aria-haspopup="true"
+                  title="Wrap Text"
+                  (click)="toWrapText()"
+                >
+                  <clr-icon
+                    aria-hidden="true"
+                    shape="redo"
+                    style="transform: rotate(180deg); margin-top: -0.2rem"
+                  ></clr-icon>
+                </button>
+              </div>
+              <div class="txtBox" *ngIf="filterList.length <= 0">
+                <!-- <p
                   *ngFor="let ticket of sr.originalData; let i = index"
                   id="c-{{ i }}"
-                  class="txtRow txtRow{{ i }}"
+                  class=" txtRow{{ i }}"
+                  [ngClass]="{ txtRow: !wrapText, txtRowWrap: wrapText }"
                   title="{{ ticket.freeText }}"
                 >
                   <span class="logIndex{{ i }} rowIndex" (click)="clickIndex($event, ticket, i)"
@@ -444,17 +462,51 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <span class="txtRowEntity{{ i }}"></span>
                   <span
                     class="logLine-{{ ticket.line }} txtRowContent{{ i }} "
+                    [ngClass]="{}"
                     (mousedown)="onMouseDownTxt(ticket, i)"
                     (mouseup)="onMouseUpTxt(ticket, i, 'current')"
                     >{{ ticket.text }}</span
                   >
-                </p>
+                </p> -->
+                <div
+                  *ngFor="let ticket of sr.originalData; let i = index"
+                  id="c-{{ i }}"
+                  class="clr-row txtRow{{ i }}"
+                  title="{{ ticket.freeText }}"
+                >
+                  <div
+                    class="clr-col-1 logIndex{{ i }} rowIndex"
+                    (click)="clickIndex($event, ticket, i)"
+                  >
+                    {{ i + 1 }}
+                    <input
+                      type="text"
+                      id="basic"
+                      placeholder="Enter free text here"
+                      class="clr-input singleFreetext freeTextInput{{ i }}"
+                      autocomplete="off"
+                    />
+                    <!-- <span class="customBadge customBadge{{ i }}"></span> -->
+                  </div>
+                  <div class="clr-col-10" [ngClass]="{ txtRow: !wrapText, txtRowWrap: wrapText }">
+                    <span class="txtRowEntity{{ i }}"></span>
+                    <span
+                      class="logLine-{{ ticket.line }} txtRowContent{{ i }} "
+                      [ngClass]="{}"
+                      (mousedown)="onMouseDownTxt(ticket, i)"
+                      (mouseup)="onMouseUpTxt(ticket, i, 'current')"
+                    >
+                      {{ ticket.text }}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div *ngIf="filterList.length > 0">
+              <div class="txtBox" *ngIf="filterList.length > 0">
                 <div *ngFor="let ticket of sr.originalData; let i = index">
                   <p
                     id="c-{{ ticket.index }}"
-                    class="txtRow txtRow{{ ticket.index }}"
+                    class="txtRow{{ ticket.index }}"
+                    [ngClass]="{ txtRow: !wrapText, txtRowWrap: wrapText }"
                     title="{{ ticket.freeText }}"
                   >
                     <span

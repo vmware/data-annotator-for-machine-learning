@@ -119,6 +119,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedFile: number;
   currentLogFile: string;
   logFiles: any = [];
+  wrapText: boolean;
 
   constructor(
     private renderer2: Renderer2,
@@ -2421,11 +2422,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   clickIndex(e, data, index) {
     // to clean all the selected rowIndex first
     if (this.spansList.length > 0) {
-      this.spansList.forEach((e) => {
-        if (e.index != data.index) {
-          if (e.selected) {
-            e.selected = false;
-            const dom = this.el.nativeElement.querySelector('.logIndex' + e.index);
+      console.log(111, e, data, index);
+      console.log(222, this.spansList);
+
+      this.spansList.forEach((value) => {
+        if (value.index != data.index) {
+          if (value.selected) {
+            value.selected = false;
+            const dom = this.el.nativeElement.querySelector('.logIndex' + value.index);
             this.renderer2.removeClass(dom, 'selectedRowIndex');
             this.renderer2.addClass(dom, 'rowIndex');
           }
@@ -2435,8 +2439,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (
       e.target.nextElementSibling &&
-      e.target.nextElementSibling.className &&
-      e.target.nextElementSibling.className.indexOf('txtEntityLabel') > 0
+      e.target.nextElementSibling.firstChild &&
+      e.target.nextElementSibling.firstChild.className &&
+      e.target.nextElementSibling.firstChild.className.indexOf('txtEntityLabel') > 0
     ) {
       // to show the original freetext enable edit
       for (let i = 0; i < this.spansList.length; i++) {
@@ -2760,6 +2765,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectedFile = this.logFiles[i].index;
         break;
       }
+    }
+  }
+
+  toWrapText() {
+    this.wrapText = !this.wrapText;
+    if (this.wrapText) {
+      this.renderer2.setStyle(
+        this.el.nativeElement.querySelector('.' + this.idName),
+        'background-color',
+        '#ff9c32',
+      );
     }
   }
 
