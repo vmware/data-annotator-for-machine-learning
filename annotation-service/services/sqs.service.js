@@ -70,7 +70,7 @@ async function avoidRegeneration(project, req) {
 
 async function sendMessageToSQS(message, req){
     console.log(`[ SQS ] Service sendMessageToSQS.sendSQSMessage`);
-    const data = await SQS.sendSQSMessage(config.sqsUrl, JSON.stringify(message), config.sqsRoleArn);
+    const data = await SQS.sendSQSMessage(config.sqsUrl, JSON.stringify(message));
 
     console.log(`[ SQS ] Service sendMessageToSQS.updateGenerateStatus`);
     await FileService.updateGenerateStatus(message.id, GENERATESTATUS.PREPARE, null, data.MessageId, null, message.onlyLabelled);
