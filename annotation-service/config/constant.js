@@ -97,4 +97,8 @@ module.exports = {
         "OBJECT":"object",
         "BOOLEAN":"boolean",
     },
+    AWSRESOURCE:{
+        S3: "S3",
+        SQS: "SQS"
+    }
 }
