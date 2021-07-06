@@ -48,7 +48,7 @@ def esp_sts_credentials(token):
 
 
 def aws_credentials(token):
-    if "ESP" in config and config["ESP"] and (config["ENV"] == 'stg' or config["ENV"] == 'prod'):
+    if "ESP" in config and config["ESP"]:
         credentials = esp_sts_credentials(token)
     else:
         credentials = sts_role(config["S3_ROLE_ARN"], 'loop_al')
