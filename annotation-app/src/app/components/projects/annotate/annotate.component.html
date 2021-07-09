@@ -1,6 +1,6 @@
 <!-- Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
-
+<!-- <div class="modalHide" (click)="clickModalHide()"></div> -->
 <form
   class="clr-form"
   [formGroup]="questionForm"
@@ -474,36 +474,106 @@ SPDX-License-Identifier: Apache-2.0 -->
                   class="clr-row txtRow{{ i }}"
                   title="{{ ticket.freeText }}"
                 >
-                  <div
-                    class="clr-col-1 logIndex{{ i }} rowIndex"
-                    (click)="clickIndex($event, ticket, i)"
-                  >
-                    {{ i + 1 }}
-                    <input
-                      type="text"
-                      id="basic"
-                      placeholder="Enter free text here"
-                      class="clr-input singleFreetext freeTextInput{{ i }}"
-                      autocomplete="off"
-                    />
-                    <!-- <span class="customBadge customBadge{{ i }}"></span> -->
+                  <div class=" clr-col-1 logIndex{{ i }} rowIndex">
+                    <div class="signpost-item">
+                      <div class="trigger-item">
+                        <clr-signpost>
+                          <div clrSignpostTrigger>
+                            {{ i + 1 }}
+                            <clr-icon
+                              shape="ellipsis-vertical"
+                              size="12"
+                              style="margin-left: -0.2rem"
+                              class="freeTextIcon{{ i }}"
+                              [ngClass]="{ hasText: ticket.freeText, noText: !ticket.freeText }"
+                            >
+                            </clr-icon>
+                          </div>
+
+                          <clr-signpost-content [clrPosition]="'right-bottom'" *clrIfOpen>
+                            <input
+                              type="text"
+                              id="basic"
+                              placeholder="Enter free text here"
+                              [disabled]="!ticket.annotate"
+                              class="clr-input singleFreetext freeTextInput{{ i }}"
+                              autocomplete="off"
+                              [ngModelOptions]="{ standalone: true }"
+                              [(ngModel)]="ticket.freeText"
+                              (ngModelChange)="updateFreeText($event, i)"
+                            />
+                          </clr-signpost-content>
+                        </clr-signpost>
+                      </div>
+                    </div>
                   </div>
-                  <div class="clr-col-10" [ngClass]="{ txtRow: !wrapText, txtRowWrap: wrapText }">
+                  <div
+                    class="clr-col-10"
+                    [ngClass]="{ txtRow: !wrapText, txtRowWrap: wrapText }"
+                    (mousedown)="onMouseDownTxt(ticket, i)"
+                    (mouseup)="onMouseUpTxt(ticket, i, 'current')"
+                  >
                     <span class="txtRowEntity{{ i }}"></span>
-                    <span
-                      class="logLine-{{ ticket.line }} txtRowContent{{ i }} "
-                      [ngClass]="{}"
-                      (mousedown)="onMouseDownTxt(ticket, i)"
-                      (mouseup)="onMouseUpTxt(ticket, i, 'current')"
-                    >
+                    <span class="logLine-{{ ticket.line }} txtRowContent{{ i }} ">
                       {{ ticket.text }}
                     </span>
                   </div>
                 </div>
               </div>
               <div class="txtBox" *ngIf="filterList.length > 0">
-                <div *ngFor="let ticket of sr.originalData; let i = index">
-                  <p
+                <div
+                  *ngFor="let ticket of sr.originalData; let i = index"
+                  id="c-{{ ticket.index }}"
+                  class="clr-row txtRow{{ ticket.index }}"
+                  title="{{ ticket.freeText }}"
+                >
+                  <div *ngIf="ticket.filter" class=" clr-col-1 logIndex{{ ticket.index }} rowIndex">
+                    <div class="signpost-item">
+                      <div class="trigger-item">
+                        <clr-signpost>
+                          <div clrSignpostTrigger>
+                            {{ ticket.index + 1 }}
+                            <clr-icon
+                              shape="ellipsis-vertical"
+                              size="12"
+                              style="margin-left: -0.2rem"
+                              class="freeTextIcon{{ ticket.index }}"
+                              [ngClass]="{ hasText: ticket.freeText, noText: !ticket.freeText }"
+                            >
+                            </clr-icon>
+                          </div>
+
+                          <clr-signpost-content [clrPosition]="'right-bottom'" *clrIfOpen>
+                            <input
+                              type="text"
+                              id="basic"
+                              placeholder="Enter free text here"
+                              [disabled]="!ticket.annotate"
+                              class="clr-input singleFreetext freeTextInput{{ ticket.index }}"
+                              autocomplete="off"
+                              [ngModelOptions]="{ standalone: true }"
+                              [(ngModel)]="ticket.freeText"
+                              (ngModelChange)="updateFreeText($event, ticket.index)"
+                            />
+                          </clr-signpost-content>
+                        </clr-signpost>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    *ngIf="ticket.filter"
+                    class="clr-col-10"
+                    [ngClass]="{ txtRow: !wrapText, txtRowWrap: wrapText }"
+                    (mousedown)="onMouseDownTxt(ticket, ticket.index)"
+                    (mouseup)="onMouseUpTxt(ticket, ticket.index, 'current')"
+                  >
+                    <span class="txtRowEntity{{ ticket.index }}"></span>
+                    <span class="logLine-{{ ticket.line }} txtRowContent{{ ticket.index }} ">
+                      {{ ticket.text }}
+                    </span>
+                  </div>
+                </div>
+                <!-- <p
                     id="c-{{ ticket.index }}"
                     class="txtRow{{ ticket.index }}"
                     [ngClass]="{ txtRow: !wrapText, txtRowWrap: wrapText }"
@@ -524,8 +594,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       (mouseup)="onMouseUpTxt(ticket, ticket.index, 'current')"
                       >{{ ticket.text }}</span
                     >
-                  </p>
-                </div>
+                  </p> -->
               </div>
             </div>
           </div>
@@ -689,10 +758,10 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="clr-textarea-wrapper clr-col-12" style="padding-left: 0.3rem">
               <textarea
                 class="clr-textarea log-textarea"
-                formControlName="freeText"
+                formControlName="logFreeText"
                 placeholder="( Optional ) Please provide more details about the log above."
                 rows="1"
-                (ngModelChange)="updateFreeText($event)"
+                (ngModelChange)="updateLogFreeText($event)"
               ></textarea>
             </div>
           </div>
@@ -823,23 +892,6 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
 </clr-modal>
 
-<!-- <clr-modal [(clrModalOpen)]="isHistoryBackDialog" [clrModalClosable]="false">
-  <h3 class="modal-title">Are you sure you want back to history?</h3>
-  <div class="modal-body">
-    <p *ngIf="labelChoose!=''||questionForm.get('questionGroup.category').value">
-      You already provided a new label
-    </p>
-  </div>
-  <div class="modal-footer modal-footer-annotate">
-    <button class="btn btn-outline" type="button" (click)="isHistoryBackDialog = false">
-      No
-    </button>
-    <button type="button" class="btn btn-primary" (click)="onSubmit()" title="submit the change and get a new ticket">
-      Yes
-    </button>
-  </div>
-</clr-modal> -->
-
 <clr-modal [(clrModalOpen)]="error" [clrModalClosable]="false">
   <div class="modal-body">
     <div class="alert alert-text">
@@ -849,7 +901,6 @@ SPDX-License-Identifier: Apache-2.0 -->
             <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
           </div>
           <span class="alert-text" *ngIf="error"> Message: {{ error }} </span>
-          <!-- <span class="alert-text" *ngIf="maxAnnotationError"> Message: {{ maxAnnotationError }} </span> -->
         </div>
       </div>
     </div>

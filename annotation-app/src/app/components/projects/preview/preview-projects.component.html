@@ -187,8 +187,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   class="ellipsis-datagrid"
                   style="max-width: 650px"
                 >
-                  {{ header }}</clr-dg-column
-                >
+                  {{ header }}
+                  <clr-dg-filter *ngIf="header == 'FileName'" [clrDgFilter]="myFilter">
+                    <my-filter (filter)="receiveFilename($event)" #myFilter></my-filter>
+                  </clr-dg-filter>
+                </clr-dg-column>
                 <clr-dg-column class="ellipsis-datagrid" style="min-width: 80px; max-width: 120px">
                   Annotations No.
                 </clr-dg-column>

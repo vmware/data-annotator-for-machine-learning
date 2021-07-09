@@ -62,9 +62,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           <clr-dg-column [clrDgField]="'assignmentLogic'" class="ellipsis-datagrid"
             >Assignment Logic</clr-dg-column
           >
-          <clr-dg-column [clrDgField]="'userCompleteCase'" class="ellipsis-datagrid"
+          <!-- <clr-dg-column [clrDgField]="'userCompleteCase'" class="ellipsis-datagrid"
             >Complete/Total</clr-dg-column
-          >
+          > -->
           <clr-dg-column
             [clrDgField]="'userCompleteCase'"
             class="ellipsis-datagrid"
@@ -134,9 +134,10 @@ SPDX-License-Identifier: Apache-2.0 -->
               >
                 Active learning</clr-dg-cell
               >
-              <clr-dg-cell>{{ dataset.userCompleteCase }}/{{ dataset.totalCase }}</clr-dg-cell>
+              <!-- <clr-dg-cell>{{ dataset.userCompleteCase }}/{{ dataset.totalCase }}</clr-dg-cell> -->
               <clr-dg-cell>
-                <div *ngIf="dataset.projectType == 'log'">
+                <!-- <div *ngIf="dataset.projectType == 'log'"> -->
+                <div>
                   <div *ngIf="dataset.userCompleteCase.length < 6">
                     <div
                       *ngFor="let assignee of dataset.userCompleteCase"
@@ -238,7 +239,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <clr-icon shape="angle"></clr-icon>
                   </div>
                 </div>
-                <div *ngIf="dataset.projectType !== 'log'">/</div>
               </clr-dg-cell>
               <clr-dg-cell
                 class="cellWordBreak"
@@ -339,7 +339,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </clr-datagrid>
       </clr-tab-content>
     </clr-tab>
-    <clr-tab *ngIf="user.role == 'Admin' || user.role == 'Project Owner'">
+    <!-- <clr-tab *ngIf="user.role == 'Admin' || user.role == 'Project Owner'">
       <button clrTabLink (click)="clickReview()">Review</button>
       <clr-tab-content *clrIfActive="isShowReviewTab">
         <div class="row clr-row">
@@ -572,6 +572,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </clr-dg-footer>
         </clr-datagrid>
       </clr-tab-content>
-    </clr-tab>
+    </clr-tab> -->
   </clr-tabs>
 </div>
