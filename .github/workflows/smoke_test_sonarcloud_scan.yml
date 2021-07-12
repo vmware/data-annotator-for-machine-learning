@@ -141,7 +141,6 @@ jobs:
             -Dsonar.cpp.file.suffixes=- 
             -Dsonar.objc.file.suffixes=-
         env: 
-          GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   scan_annotation_service:
@@ -179,7 +178,6 @@ jobs:
             -Dsonar.cpp.file.suffixes=- 
             -Dsonar.objc.file.suffixes=-
         env: 
-          GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   scan_active_learning_service:
@@ -201,7 +199,7 @@ jobs:
 
       - name: SonarCloud setup for active-learning-service
         working-directory: ./devops/sonar
-        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service -ProjectKey ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
+        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-active-learning-service -ProjectKey ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan active-learning-service
         uses: sonarsource/sonarcloud-github-action@master  
@@ -217,6 +215,5 @@ jobs:
             -Dsonar.cpp.file.suffixes=- 
             -Dsonar.objc.file.suffixes=-
         env: 
-          GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
