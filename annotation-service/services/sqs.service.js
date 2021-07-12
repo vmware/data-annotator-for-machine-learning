@@ -47,14 +47,12 @@ async function generateFile(req){
         console.log(`[ SQS ] Service communityService.countCommunityDownload`);
         await communityService.countCommunityDownload(req);
         
-        response.Info = GENERATESTATUS.DONE;
-
     }else{
         if((gen.status == GENERATESTATUS.PREPARE) || (gen.status == GENERATESTATUS.GENERATING)){
             response.Info = GENERATESTATUS.GENERATING;
             response.Body = { MSG: "file is generating please wait!" };
             console.log(`[ SQS ] Service file status: `, gen.status);
-        }else if(gen.updateTime > pro.updatedDate && gen.format == data.format && gen.onlyLabelled == data.onlyLabelled){
+        }else if(gen.updateTime > pro.updatedDate && gen.format == data.format && gen.onlyLabelled == data.onlyLabelled && gen.status == GENERATESTATUS.DONE){
             response.Info = GENERATESTATUS.DONE;
             response.Body = await avoidRegeneration(pro, req);
         }else if(pro.fileSize !=0 && pro.fileSize < FILESIZE){
@@ -89,7 +87,7 @@ async function avoidRegeneration(project, req) {
 
 async function sendMessageToSQS(message, req){
     console.log(`[ SQS ] Service sendMessageToSQS.sendSQSMessage`);
-    const data = await SQS.sendSQSMessage(config.sqsUrl, JSON.stringify(message), config.sqsRoleArn);
+    const data = await SQS.sendSQSMessage(config.sqsUrl, JSON.stringify(message));
 
     console.log(`[ SQS ] Service sendMessageToSQS.updateGenerateStatus`);
     await FileService.updateGenerateStatus(message.id, GENERATESTATUS.PREPARE, null, data.MessageId, null, message.onlyLabelled);
