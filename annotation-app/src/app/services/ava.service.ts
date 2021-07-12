@@ -269,7 +269,6 @@ export class AvaService {
 
 
   public register(payload: any): Observable<any> {
-    console.log(`${this.baseUrl}/register`);
     return this.http.put(`${this.baseUrl}/register`, payload);
   }
 
