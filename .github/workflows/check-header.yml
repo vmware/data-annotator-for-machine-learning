@@ -1,0 +1,31 @@
+name: check-header
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches: [master]
+
+jobs:
+  check-header:
+    runs-on: ubuntu-latest # runs a test on Ubuntu
+
+    env:
+      GITHUB_CONTEXT: ${{ toJson(github) }}
+
+    steps:
+      - name: Setup Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Pull code from VMware repo DecoupleAws branch
+        run: |
+          git clone -b devops https://github.com/vmware/data-annotator-for-machine-learning.git devops
+
+      - name: Check Header
+        run: |
+          chmod +x ./devops/check_headers.py
+          python --version
+          python ./devops/check_headers.py -f "$(git diff --name-only --diff-filter=d $GITHUB_CONTEXT)"
