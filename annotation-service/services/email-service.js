@@ -62,7 +62,7 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
         }
         
         console.log(`[ EMAIL ] Service sendEmailToOwner.getEsp2NoeToken`);
-        const token = await authForNoe.getEsp2NoeToken();
+        const emailToken = await authForNoe.getEsp2NoeToken();
         
         return await axios.post(`${config.noeServiceUrl}/noe/send/message`, {
             subject: subject,
@@ -72,7 +72,7 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
             options: { foreach: ["true"] }
         }, { 
             headers: { "x-noe-auth-type": "jwt-esp" },
-            auth: { username: config.esp2NoeClientId, password: token }
+            auth: { username: config.esp2NoeClientId, password: emailToken }
         });
 
     }else{
@@ -81,7 +81,7 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
         }
         htmlTemplate = htmlTemplate.replace(/\${team}/g, config.teamTitle);
         if (config.useAWSSES) {
-            const data = await STS.prepareCredentials(config.s3RoleArn, ACCESS_TIME_15);
+            const data = await STS.prepareCredentials(AWSRESOURCE.S3, ACCESS_TIME_15);
             await AWS.config.update({
                 region: config.region,
                 accessKeyId: data.Credentials.AccessKeyId,

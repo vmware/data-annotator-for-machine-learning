@@ -9,11 +9,11 @@
 const AWS = require('aws-sdk');
 const STS = require('./sts');
 const config = require('../config/config');
-const { ACCESS_TIME_60 } = require('../config/constant');
+const { ACCESS_TIME_60, AWSRESOURCE } = require('../config/constant');
 
 async function s3Client(){
     console.log('[ S3 ] Utils s3Client.STS.prepareCredentials');
-    const data = await STS.prepareCredentials(config.s3RoleArn, ACCESS_TIME_60);
+    const data = await STS.prepareCredentials(AWSRESOURCE.S3, ACCESS_TIME_60);
     
     console.log('[ S3 ] Utils s3Client create AWS.S3');
     return new AWS.S3({
