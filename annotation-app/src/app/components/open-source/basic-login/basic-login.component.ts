@@ -128,7 +128,6 @@ export class basicLoginComponent implements OnInit {
 
 
   clickSign() {
-    console.log(`end-2-end-test-clickSign`);
     this.registerFailed = '';
     this.registerSuccess = '';
     this.error = false;
@@ -145,7 +144,6 @@ export class basicLoginComponent implements OnInit {
         password: this.dsForm.get('password').value,
         uname: fullName.join(' ')
       };
-      console.log(`end-2-end-test-register`);
       this.avaService.register(param).subscribe(res => {
         if (!res.MSG) {
           this.registerSuccess = 'Sign Up Complete!'
