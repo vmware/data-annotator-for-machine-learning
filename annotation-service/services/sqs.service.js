@@ -37,7 +37,7 @@ async function generateFile(req){
         response.Info = GENERATESTATUS.GENERATING;
         response.Body = { MSG: "file is generating please wait!" };
         console.log(`[ SQS ] Service file status: `, gen.status);
-    }else if(gen.updateTime > pro.updatedDate && gen.format == data.format && gen.onlyLabelled == data.onlyLabelled){
+    }else if(gen.updateTime > pro.updatedDate && gen.format == data.format && gen.onlyLabelled == data.onlyLabelled && gen.status == GENERATESTATUS.DONE){
         response.Info = GENERATESTATUS.DONE;
         response.Body = await avoidRegeneration(pro, req);
     }else if(pro.fileSize !=0 && pro.fileSize < FILESIZE){
