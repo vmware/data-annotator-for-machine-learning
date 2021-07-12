@@ -1,4 +1,4 @@
-import { Component, OnInit, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
 import { ClrDatagridFilterInterface, ClrDatagridFilter } from '@clr/angular';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -8,25 +8,19 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   templateUrl: './datagridFilter.component.html',
   styleUrls: ['./datagridFilter.component.scss'],
 })
-export class MyFilter implements OnInit {
+export class MyFilter implements ClrDatagridFilterInterface<any> {
+  @Input() filterMsg: boolean;
   @Output() filter = new EventEmitter();
+  @ViewChild('filenameFilterEl', { static: false }) filenameFilterEl: ElementRef;
 
   filename: string = '';
   filenameFilter = new Subject<string>();
+  changes = new Subject<any>();
 
-  constructor() {
-    console.log(
-      1111,
-      this.filenameFilter,
-      this.filenameFilter.pipe(debounceTime(400), distinctUntilChanged()),
-    );
-  }
-
-  ngOnInit() {
-    this.filenameFilter.pipe(debounceTime(400)).subscribe((value) => {
-      if (value.trim() != '') {
-        this.filter.emit(value);
-      }
+  constructor(private filterContainer: ClrDatagridFilter) {
+    filterContainer.setFilter(this);
+    this.filenameFilter.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
+      this.filter.emit(value);
     });
   }
 

@@ -48,11 +48,8 @@ export class GetElementService {
           spansList.forEach((e, i) => {
             if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
               spansList.splice(i, 1);
-              // this.renderer.removeClass(indexDom, 'selectedRowIndex');
-              // this.renderer.addClass(indexDom, 'rowIndex');
             }
           });
-          console.log(7, spansList);
           resolve(spansList);
         });
       });
@@ -93,17 +90,13 @@ export class GetElementService {
             this.renderer.removeClass(pDom, 'selectedTxtRow');
             pDom.style.backgroundColor = '';
             txtRowEntityDom.style.backgroundColor = '';
-            // badgeDom.style.background = '';
 
             // to update the spansList
             spansList.forEach((e, i) => {
               if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
                 spansList.splice(i, 1);
-                // this.renderer.removeClass(indexDom, 'selectedRowIndex');
-                // this.renderer.addClass(indexDom, 'rowIndex');
               }
             });
-            console.log(8, spansList);
             resolve(spansList);
           }
         });
@@ -116,17 +109,13 @@ export class GetElementService {
             this.renderer.removeClass(pDom, 'selectedTxtRow');
             pDom.style.backgroundColor = '';
             txtRowEntityDom.style.backgroundColor = '';
-            // badgeDom.style.background = '';
 
             // to update the spansList
             spansList.forEach((e, i) => {
               if (e.line == classList[0].split('-').pop()) {
                 spansList.splice(i, 1);
-                // this.renderer.removeClass(indexDom, 'selectedRowIndex');
-                // this.renderer.addClass(indexDom, 'rowIndex');
               }
             });
-            console.log(9, spansList);
 
             resolve(spansList);
           }

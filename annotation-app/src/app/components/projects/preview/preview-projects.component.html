@@ -189,7 +189,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 >
                   {{ header }}
                   <clr-dg-filter *ngIf="header == 'FileName'" [clrDgFilter]="myFilter">
-                    <my-filter (filter)="receiveFilename($event)" #myFilter></my-filter>
+                    <my-filter #myFilter (filter)="receiveFilename($event)"></my-filter>
                   </clr-dg-filter>
                 </clr-dg-column>
                 <clr-dg-column class="ellipsis-datagrid" style="min-width: 80px; max-width: 120px">

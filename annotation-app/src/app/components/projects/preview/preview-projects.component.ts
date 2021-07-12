@@ -95,6 +95,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   selectedLogsToModify: any = [];
   selectAllStatus: boolean;
   categoryList: any = [];
+  formerFilenameFilter: string;
   coloursRainbow = [
     '#00ffff',
     '#ff00ff',
@@ -842,7 +843,10 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   }
 
   receiveFilename(data) {
-    console.log('receiveFilterInfo:::', data);
+    if (this.formerFilenameFilter !== data) {
+      this.formerFilenameFilter = data;
+      this.getALLSrsParam.pageNumber = 1;
+    }
     this.getALLSrsParam.fname = data;
     this.getALLSrs();
   }

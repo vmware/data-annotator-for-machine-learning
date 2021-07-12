@@ -463,6 +463,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       param['modify'] = true;
       param['problemCategory'] = this.spansList;
+      param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
     }
     this.avaService.passTicket(param).subscribe((res) => {
       this.getOneReview(from);
@@ -1747,7 +1748,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.multipleLabelList = [];
     this.spansList = [];
     if (this.projectType === 'log') {
-      this.questionForm.get('questionGroup.filterText').reset();
+      this.questionForm.get('questionGroup.logFreeText').reset();
     }
     this.regexErr = false;
   }
@@ -2205,7 +2206,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.spanEnd == this.spanStart) {
       const pDom = this.el.nativeElement.querySelector('.txtRowContent' + this.spanEnd);
-      // const indexDom = this.el.nativeElement.querySelector('.logIndex' + this.spanEnd);
       this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
       // to give label's color to text
       if (pDom) {
@@ -2255,7 +2255,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               _.map(this.cloneSpanslist, 'index'),
               _.map(this.spansList, 'index'),
             );
-            console.log(12, this.cloneSpanslist, this.spansList, flag);
             this.sr.originalData[flag[0]].annotate = false;
             this.sr.originalData[flag[0]].freeText = null;
           }
@@ -2287,7 +2286,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               _.map(this.cloneSpanslist, 'index'),
               _.map(this.spansList, 'index'),
             );
-            console.log(13, this.cloneSpanslist, this.spansList, flag);
             this.sr.originalData[flag[0]].annotate = false;
             this.sr.originalData[flag[0]].freeText = null;
           }
@@ -2297,7 +2295,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       for (let a = this.spanStart; a < this.spanEnd + 1; a++) {
         const pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
         const txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
-        // const indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
         this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
         if (pDom) {
           pDom.style.backgroundColor = this.toolService.hexToRgb(
@@ -2319,7 +2316,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             for (let i = 0; i < this.spansList.length; i++) {
               if (this.spansList[i].line == pDom.classList[0].split('-').pop()) {
                 this.spansList[i].label = this.categories[this.selectedEntityID];
-                // this.spansList[i].freeText = this.questionForm.get('questionGroup.freeText').value;
                 this.spansList[i].index = a;
                 break;
               }
@@ -2349,7 +2345,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 _.map(this.cloneSpanslist, 'index'),
                 _.map(this.spansList, 'index'),
               );
-              console.log(12.1, this.cloneSpanslist, this.spansList, flag);
               this.sr.originalData[flag[0]].annotate = false;
               this.sr.originalData[flag[0]].freeText = null;
             }
@@ -2373,21 +2368,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           .then((data) => {
             spanslistPromise = data;
             this.spansList = spanslistPromise;
-            // if (this.cloneSpanslist.length > this.spansList.length) {
-            //   let flag = _.difference(
-            //     _.map(this.cloneSpanslist, 'index'),
-            //     _.map(this.spansList, 'index'),
-            //   );
-            //   console.log(14, this.cloneSpanslist, this.spansList, flag);
-            //   this.sr.originalData[flag[0]].annotate = false;
-            //   this.sr.originalData[flag[0]].freeText = null;
-            // }
           });
       }
     } else {
       for (let a = this.spanEnd; a < this.spanStart + 1; a++) {
         const pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
-        // const indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
         this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
         if (pDom) {
           pDom.style.backgroundColor = this.toolService.hexToRgb(
@@ -2409,7 +2394,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             for (let i = 0; i < this.spansList.length; i++) {
               if (this.spansList[i].line == pDom.classList[0].split('-').pop()) {
                 this.spansList[i].label = this.categories[this.selectedEntityID];
-                // this.spansList[i].freeText = this.questionForm.get('questionGroup.freeText').value;
                 this.spansList[i].index = a;
                 break;
               }
@@ -2440,7 +2424,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 _.map(this.cloneSpanslist, 'index'),
                 _.map(this.spansList, 'index'),
               );
-              console.log(12.2, this.cloneSpanslist, this.spansList, flag);
               this.sr.originalData[flag[0]].annotate = false;
               this.sr.originalData[flag[0]].freeText = null;
             }
@@ -2464,22 +2447,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           .then((data) => {
             spanslistPromise = data;
             this.spansList = spanslistPromise;
-            // if (this.cloneSpanslist.length > this.spansList.length) {
-            //   let flag = _.difference(
-            //     _.map(this.cloneSpanslist, 'index'),
-            //     _.map(this.spansList, 'index'),
-            //   );
-            //   console.log(15, this.cloneSpanslist, this.spansList, flag);
-            //   this.sr.originalData[flag[0]].annotate = false;
-            //   this.sr.originalData[flag[0]].freeText = null;
-            // }
           });
       }
     }
-    console.log('this.spansList:::', this.spansList);
+    // console.log('this.spansList:::', this.spansList);
     this.cloneSpanslist = _.cloneDeep(this.spansList);
     this.actionError = null;
-    this.toCheckSpanslist(this.spansList, this.cloneSpanslist);
   }
 
   toGetLogLines(spansList) {
@@ -2490,75 +2463,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     return x;
   }
 
-  clickIndex(e, data, index) {
-    // to clean all the selected rowIndex first
-    // if (this.spansList.length > 0) {
-    //   // console.log(111, e, data, index);
-    //   // console.log(222, this.spansList);
-    //   // this.spansList.forEach((value) => {
-    //   //   if (value.index != data.index) {
-    //   //     if (value.selected) {
-    //   //       value.selected = false;
-    //   //       const dom = this.el.nativeElement.querySelector('.logIndex' + value.index);
-    //   //       this.renderer2.removeClass(dom, 'selectedRowIndex');
-    //   //       this.renderer2.addClass(dom, 'rowIndex');
-    //   //     }
-    //   //   }
-    //   // });
-    //   this.spansList.forEach((value) => {
-    //     if (value.index === data.index) {
-    //       const dom = this.el.nativeElement.querySelector('.freeTextInput' + value.index);
-    //       this.renderer2.setStyle(dom, 'display', 'block');
-    //       // const modalHideDom = this.el.nativeElement.querySelector('.modalHide');
-    //       // this.renderer2.setStyle(modalHideDom, 'display', 'block');
-    //     }
-    //   });
-    // }
-    // if (
-    //   e.target.nextElementSibling &&
-    //   e.target.nextElementSibling.firstChild &&
-    //   e.target.nextElementSibling.firstChild.className &&
-    //   e.target.nextElementSibling.firstChild.className.indexOf('txtEntityLabel') > 0
-    // ) {
-    //   // to show the original freetext enable edit
-    //   for (let i = 0; i < this.spansList.length; i++) {
-    //     if (this.spansList[i].line == data.line) {
-    //       this.questionForm.get('questionGroup.freeText').setValue(this.spansList[i].freeText);
-    //       const classList = e.target.className.split(' ');
-    //       if (classList.indexOf('selectedRowIndex') > -1) {
-    //         classList.splice(classList.indexOf('selectedRowIndex'), 1, 'rowIndex');
-    //         e.target.className = classList.join(' ');
-    //         this.spansList[i].selected = false;
-    //       } else {
-    //         classList.splice(classList.indexOf('rowIndex'), 1, 'selectedRowIndex');
-    //         e.target.className = classList.join(' ');
-    //         this.spansList[i].selected = true;
-    //       }
-    //       this.toCheckSpanslist(this.spansList);
-    //       break;
-    //     }
-    //   }
-    // } else {
-    //   this.questionForm.get('questionGroup.freeText').reset();
-    // }
-  }
-
-  // clickModalHide() {
-  //   const modalHideDom = this.el.nativeElement.querySelector('.modalHide');
-  //   this.renderer2.setStyle(modalHideDom, 'display', 'none');
-  //   const doms = this.el.nativeElement.querySelectorAll('.singleFreetext');
-  //   doms.forEach((element) => {
-  //     this.renderer2.setStyle(element, 'display', 'none');
-  //   });
-  // }
-
   updateFreeText(e, index) {
-    console.log('updateFreeText:::', e);
     if (this.spansList.length > 0) {
       for (let i = 0; i < this.spansList.length; i++) {
         if (this.spansList[i].index === index) {
           this.spansList[i].freeText = e;
-          // this.toCheckSpanslist(this.spansList);
           return;
         }
       }
@@ -2566,20 +2475,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateLogFreeText(e) {
-    this.questionForm.get('questionGroup.freeText').setValue(e);
-  }
-
-  toCheckSpanslist(list, originalSpanslist) {
-    // list.forEach((element) => {
-    //   const dom = this.el.nativeElement.querySelector('.customBadge' + element.index);
-    //   if (dom) {
-    //     if (element.freeText) {
-    //       dom.style.backgroundColor = '#cccccc';
-    //     } else {
-    //       dom.style.backgroundColor = '';
-    //     }
-    //   }
-    // });
+    // this.questionForm.get('questionGroup.logFreeText').setValue(e);
   }
 
   toFilterLog(e) {
@@ -2675,7 +2571,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.regexErr = false;
       }
       this.filterList.push({ filterType: this.filterType, filterText: e.value });
-      this.questionForm.get('questionGroup.filterText').reset();
+      this.questionForm.get('questionGroup.logFreeText').reset();
       this.toFilterLog(this.filterList);
     }
   }
@@ -2695,7 +2591,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.regexErr = false;
       }
       this.filterList.push({ filterType: this.filterType, filterText: e.target.value });
-      this.questionForm.get('questionGroup.filterText').reset();
+      this.questionForm.get('questionGroup.logFreeText').reset();
       this.toFilterLog(this.filterList);
     }
   }
@@ -2861,13 +2757,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toWrapText() {
     this.wrapText = !this.wrapText;
-    // if (this.wrapText) {
-    //   this.renderer2.setStyle(
-    //     this.el.nativeElement.querySelector('.' + this.idName),
-    //     'background-color',
-    //     '#ff9c32',
-    //   );
-    // }
   }
 
   outOfPage() {
