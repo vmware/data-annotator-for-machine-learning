@@ -21,6 +21,8 @@ def s3_client(token):
 
 
 def upload_file_to_s3(file_name,  object_name, token):
+    if not check_aws_config():
+        return False
     try:
         s3_client(token).upload_file(file_name, config["S3_BUCKET_NAME"], object_name)
     except ClientError as e:
@@ -30,6 +32,8 @@ def upload_file_to_s3(file_name,  object_name, token):
 
 
 def download_file_from_s3(key, local_name, token):
+    if not check_aws_config():
+        return False
     try:
         s3_client(token).download_file(config["S3_BUCKET_NAME"], key, local_name)
     except botocore.exceptions.ClientError as e:
@@ -40,4 +44,12 @@ def download_file_from_s3(key, local_name, token):
         return False
     return True
 
+
+def check_aws_config():
+    aws_config = False
+    if "ESP" in config and config["ESP"] or config["USE_AWS"]:
+        aws_config = True
+    elif config["USE_LOCAL_FILE_SYS"]:
+        aws_config = False
+    return aws_config
 

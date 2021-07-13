@@ -1,65 +1,62 @@
 <!-- Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico?v=2" />
+    <link href="https://unpkg.com/label-studio@0.8.0/build/static/css/main.css" rel="stylesheet" />
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
+    <script src="https://unpkg.com/label-studio@0.8.0/build/static/js/main.js"></script>
+  </head>
 
-<head>
-  <meta charset="utf-8">
-  <title></title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico?v=2">
-  <link href="https://unpkg.com/label-studio@0.8.0/build/static/css/main.css" rel="stylesheet">
-  <script src="https://d3js.org/d3.v5.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
-  <script src="https://unpkg.com/label-studio@0.8.0/build/static/js/main.js"></script>
-</head>
+  <body style="overflow: hidden">
+    <app-root>
+      <style type="text/css">
+        #pre-clarity {
+          background-color: #002538;
+          bottom: 0px;
+          left: 0px;
+          position: fixed;
+          right: 0px;
+          top: 0px;
+          z-index: 999999;
+        }
 
-<body style="overflow: hidden;">
-  <my-app>
+        #pre-clarity div.messaging {
+          left: 0px;
+          margin-top: -37px;
+          position: absolute;
+          right: 0px;
+          text-align: center;
+          top: 50%;
+        }
 
-    <style type="text/css">
-      #pre-clarity {
-        background-color: #002538;
-        bottom: 0px;
-        left: 0px;
-        position: fixed;
-        right: 0px;
-        top: 0px;
-        z-index: 999999;
-      }
+        #pre-clarity h1 {
+          color: #fafafa;
+          font-size: 24px;
+          line-height: 35px;
+          margin: 0px 0px 20px 0px;
+          text-transform: inherit;
+          font-weight: 400;
+          font-family: 'Helvetica Neue', Arial, sans-serif;
+          opacity: 0.65;
+        }
+      </style>
 
-      #pre-clarity div.messaging {
-        left: 0px;
-        margin-top: -37px;
-        position: absolute;
-        right: 0px;
-        text-align: center;
-        top: 50%;
-      }
-
-      #pre-clarity h1 {
-        color: #fafafa;
-        font-size: 24px;
-        line-height: 35px;
-        margin: 0px 0px 20px 0px;
-        text-transform: inherit;
-        font-weight: 400;
-        font-family: "Helvetica Neue", Arial, sans-serif;
-        opacity: .65;
-      }
-    </style>
-
-    <div id="pre-clarity">
-      <div class="messaging">
-        <h1 id='helloWords'>
-          <img src="./assets/images/flask.svg" alt="" style="margin-right: 0.5rem">
-          Loading...
-        </h1>
+      <div id="pre-clarity">
+        <div class="messaging">
+          <h1 id="helloWords">
+            <img src="./assets/images/flask.svg" alt="" style="margin-right: 0.5rem" />
+            Loading...
+          </h1>
+        </div>
       </div>
-    </div>
-  </my-app>
-</body>
-
+    </app-root>
+  </body>
 </html>

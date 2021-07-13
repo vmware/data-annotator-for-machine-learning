@@ -5,17 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { basicLoginComponent } from './basic-login/basic-login.component';
+import { BasicLoginComponent } from './basic-login/basic-login.component';
 
 const routes: Routes = [
-
   { path: '', redirectTo: 'basicLogin', pathMatch: 'full' },
   {
     path: 'basicLogin',
-    component: basicLoginComponent,
+    component: BasicLoginComponent,
   },
-
-
 ];
 
 @NgModule({
@@ -23,4 +20,4 @@ const routes: Routes = [
   exports: [RouterModule],
   declarations: [],
 })
-export class OpenSourceRoutingModule { }
+export class OpenSourceRoutingModule {}

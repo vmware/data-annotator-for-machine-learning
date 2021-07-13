@@ -36,8 +36,9 @@ app.use(cors())
 // Enable CORS
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization,Content-Length,yourHeaderFeild");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type,Content-Range, Range, Accept, Authorization,Content-Length,yourHeaderFeild");
   res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+  res.header('Access-Control-Expose-Headers', 'Content-Type, Content-Range, Content-Encoding, Accept-Ranges');
   next();
 });
 
@@ -75,8 +76,11 @@ authService.authentication().then(data => {
     routers.forEach(
       api => app.use(`/api/${API_VERSION}`, require(api))
     );
-    //consume SQS message
-    consumeSQSMessage();
+    if (config.ESP || config.useAWS &&  config.sqsRoleArn && config.sqsUrl) {
+      //consume SQS message
+      consumeSQSMessage();
+    }
+
     const server = http.createServer(app);
     server.listen(config.serverPort, () => console.log(`[ SERVER ] API running on localhost:${config.serverPort}`));
 });

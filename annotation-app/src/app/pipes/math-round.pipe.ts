@@ -10,10 +10,8 @@ import { Pipe, PipeTransform } from '@angular/core';
  */
 @Pipe({ name: 'mathRoundPipe' })
 export class MathRoundPipe implements PipeTransform {
-
   transform(mathRound: number): string {
-    let a = Math.round(mathRound)
+    const a = Math.round(mathRound);
     return String(a);
   }
-
 }

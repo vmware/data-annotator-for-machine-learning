@@ -8,9 +8,11 @@
 
 const axios = require("axios");
 const config = require('../config/config');
+const { FILEPATH } = require('../config/constant');
 const FileService = require('./file-service');
 const S3Service = require('./s3.service');
 const DataSetService = require('./dataSet-service');
+const localFileSysService = require('./localFileSys.service');
 
 async function superColliderQuery(req){
     
@@ -21,19 +23,21 @@ async function superColliderQuery(req){
     console.log('[ SUPER-COLLIDER ] Service query success from SC time: ', Date.now());
     
     console.log('[ SUPER-COLLIDER ] Service writh data to temp csv');
+    const user = req.auth.email;
     const fileName = Date.now()+".csv";
-    const fileKey = `upload/${req.auth.email}/${fileName}`;
-    await FileService.arrayWriteTempCSVFile(fileName, resp.data.columns, resp.data.result);
+    const fileKey = `upload/${user}/${fileName}`;
+    const file =  `./${FILEPATH.DOWNLOAD}/${user}/${fileName}`;
+    
+    await FileService.arrayWriteTempCSVFile(file, resp.data.columns, resp.data.result);
 
     console.log('[ SUPER-COLLIDER ] Service upload file to s3', fileKey);
-    const upload = await S3Service.uploadFileToS3(fileName, fileKey);
+    const upload = await S3Service.uploadFileToS3(file, fileKey);
 
     console.log('[ SUPER-COLLIDER ] Service get file size');
-    const file =  `./downloadProject/${fileName}`;
     const fileSizeInByte = await FileService.getFileSizeInBytes(file);
 
     console.log('[ SUPER-COLLIDER ] Service delete temp csv file fileSizeInByte: ', fileSizeInByte);
-    await FileService.deleteTempFile(fileName);
+    await localFileSysService.deleteFileFromLocalSys(file);
 
     console.log('[ SUPER-COLLIDER ] Service save query data to dataSet DB');
     const header = resp.data.columns;
