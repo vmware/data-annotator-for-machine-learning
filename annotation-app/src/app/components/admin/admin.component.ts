@@ -538,15 +538,15 @@ export class AdminComponent implements OnInit {
   }
 
   receiveGenerateInfo(e) {
-    if (e && e.Info != 'undefined') {
+    if (e && e.Body.status != 'undefined') {
       e.Modal == 'generateDownload'
         ? (this.showDownloadDatasets = false)
         : (this.showGenerateDatasets = false);
-      if (e.Info == 'prepare') {
+      if (e.Body.status == 'prepare') {
         this.infoMessage =
           'Dataset with annotations is being generated. You will receive an email when download is ready.';
         this.getProjects();
-      } else if (e.Info == 'done') {
+      } else if (e.Body.status == 'done') {
         this.infoMessage =
           'Dataset with annotations is already been generated. Please refresh the page.';
         this.downloadUrl = this.env.config.enableAWSS3
@@ -554,7 +554,7 @@ export class AdminComponent implements OnInit {
           : e.Body.file;
         this.downloadProject();
         this.getProjects();
-      } else if (e.Info == 'generating') {
+      } else if (e.Body.status == 'generating') {
         this.infoMessage =
           'Dataset with annotations is already being generated. Please refresh the page.';
         this.getProjects();

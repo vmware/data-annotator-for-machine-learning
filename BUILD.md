@@ -52,6 +52,7 @@ export const environment: Env = {
   videoSrc: null, // demo video link in home page, or set null to show nothing
   googleTrackId: null, // google track ID
   enableSendEmail: false // Set to true to enable email notification for project creation, annotator assignment or edit project owner
+  enableAWSS3: false, // Set to true to upload and download files with AWS S3 that requires some related AWS CONFIG IAM to be configured in annotation-service
 };
 ```
 
@@ -61,8 +62,8 @@ To configure specific environments for dev, staging, production, go to annotatio
 
 ### annotation-service
 
--  If you are a personal user, and just run the code on the local machine, you can use the default settings, don't need to set up any configs.
--  If you are an organization user and want to deploy code to the server, we recommend you use AWS components, saving datasets to S3. You need to set the following required variables and some optional variables in [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) file to run the annotation-service.
+- If you are a personal user, and just run the code on the local machine, you can use the default settings, don't need to set up any configs.
+- If you are an organization user and want to deploy code to the server, we recommend you use AWS components, saving datasets to S3. You need to set the following required variables and some optional variables in [annotation-service/config/app-os.js](./annotation-service/config/app-os.js) file to run the annotation-service.
 
 ```javascript
 module.exports = {
@@ -85,9 +86,9 @@ module.exports = {
   //active-learning-service url
   loopALApiUrl: process.env.LOOP_AL_URL || "http://localhost:8000/api",
   //mongodb url
-  mongoDBUrl: process.env.MONGODB_URL || 'mongodb://localhost:27017/daml',
-  //default admin users can see admin tab at ui. you can add your email list then to register 
-  adminDefault: ['poc-os@poc-os.com'],
+  mongoDBUrl: process.env.MONGODB_URL || "mongodb://localhost:27017/daml",
+  //default admin users can see admin tab at ui. you can add your email list then to register
+  adminDefault: ["poc-os@poc-os.com"],
 };
 ```
 
@@ -107,18 +108,18 @@ const sysEnv = process.env.SYS_ENV || "os";
 
 ### active-learning-service
 
--  If you are a personal user, and just run the code on the local machine, you can use the default settings, don't need to set up any configs.
-- If you are an organization user and want to deploy code to the server, we recommend you use AWS components, saving datasets to S3. You need to set the following required variables and some optional variables in  [active-learning-service/config/app_os.py](./active-learning-service/config/app_os.py) file to run the active-learning-service.
+- If you are a personal user, and just run the code on the local machine, you can use the default settings, don't need to set up any configs.
+- If you are an organization user and want to deploy code to the server, we recommend you use AWS components, saving datasets to S3. You need to set the following required variables and some optional variables in [active-learning-service/config/app_os.py](./active-learning-service/config/app_os.py) file to run the active-learning-service.
 
 ```python
 app = {
     # Mongodb url and collection name
     "MONGODB_URL": os.getenv("MONGODB_URL", "mongodb://localhost:27017/daml"),
     "MONGODB_COLLECTION": os.getenv("MONGODB_COLLECTION", "daml"),
-    
+
     # Change the default value to False, avoid saving datasets on the local
     "USE_LOCAL_FILE_SYS": os.getenv("USE_LOCAL_FILE_SYS", False),
-    
+
     # Change default value to True, will save datasets to S3
     "USE_AWS": os.getenv("USE_AWS", True),
     # AWS IAM
