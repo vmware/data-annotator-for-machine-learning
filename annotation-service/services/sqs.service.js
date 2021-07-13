@@ -43,9 +43,11 @@ async function generateFile(req){
         }else{
             response.Body = await localSysGenerateFile(data);
         }
-        
+
         console.log(`[ SQS ] Service communityService.countCommunityDownload`);
         await communityService.countCommunityDownload(req);
+        
+        response.Info = GENERATESTATUS.DONE;
         
     }else{
         if((gen.status == GENERATESTATUS.PREPARE) || (gen.status == GENERATESTATUS.GENERATING)){
