@@ -55,7 +55,7 @@ async function execute(req, sendEmail, annotators) {
       },
       auth:{ email: req.auth.email }
     }
-    await emailService.sendEmailToAnnotator(param);
+    emailService.sendEmailToAnnotator(param).catch(err => log.error(`[ LOG ][ ERROR ] send email:`, err));
   }
   
   console.log(`[ IMAGE ] Utils imgImporter.execute end: `, Date.now()); 
