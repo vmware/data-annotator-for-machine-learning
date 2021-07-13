@@ -156,7 +156,7 @@ export class AvaService {
 
   public getALLSrs(payload: any): Observable<any> {
     return this.http.get(
-      `${this.baseUrl}/projects/tickets?pid=${payload.id}&page=${payload.pageNumber}&limit=${payload.limit}`,
+      `${this.baseUrl}/projects/tickets?pid=${payload.id}&fname=${payload.fname}&page=${payload.pageNumber}&limit=${payload.limit}`,
     );
   }
 

@@ -481,7 +481,7 @@ label .label-leftBoard {
 }
 
 .rowIndex {
-  margin-right: 1rem;
+  margin-right: 1.5rem;
   color: #cccccc;
   position: relative;
   margin-top: 0.5rem !important;
@@ -745,7 +745,7 @@ label .label-leftBoard {
 .wrap {
   padding: 0.1rem 0.2rem;
   height: 1rem;
-  line-height: 0.9rem;
+  line-height: 0.8rem;
   min-width: 1.5rem;
   margin-top: -0.3rem;
   outline-color: unset !important;
@@ -755,7 +755,7 @@ label .label-leftBoard {
 .noWrap {
   padding: 0.1rem 0.2rem;
   height: 1rem;
-  line-height: 0.9rem;
+  line-height: 0.8rem;
   min-width: 1.5rem;
   margin-top: -0.3rem;
   outline-color: #0077b8 !important;
@@ -763,10 +763,35 @@ label .label-leftBoard {
   color: white;
 }
 
-.singleFreetext {
-  position: absolute;
-  background-color: #fafafa;
-  border-bottom: unset;
-  margin-left: 0.3rem;
+.modalHide {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 88;
+  margin-left: -1rem;
+  margin-top: -1rem;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.5);
   display: none;
+}
+
+.singleFreetext {
+  // position: absolute;
+  // background-color: #fafafa;
+  // border-bottom: unset;
+  // margin-left: 0.3rem;
+  // display: none;
+  // z-index: 99;
+  position: relative;
+  margin-left: -0.5rem;
+  z-index: 99999999999999;
+  width: -webkit-fill-available;
+}
+
+.hasText {
+  color: #0077b8;
+}
+
+.noText {
+  color: #dddddd;
 }

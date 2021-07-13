@@ -10,7 +10,6 @@ import {
   ElementRef,
   Renderer2,
   enableProdMode,
-  OnDestroy,
   AfterViewInit,
 } from '@angular/core';
 import { Observable, fromEvent } from 'rxjs';
@@ -33,7 +32,7 @@ declare function modelChart(options: any): any;
   templateUrl: './preview-projects.component.html',
   styleUrls: ['./preview-projects.component.scss'],
 })
-export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class previewProjectsComponent implements OnInit, AfterViewInit {
   @ViewChild('dataGird', { static: false }) dataGird;
   @ViewChild('userChart', { static: false }) userChart: ElementRef;
   @ViewChild('categoryChart', { static: false }) categoryChart: ElementRef;
@@ -96,6 +95,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
   selectedLogsToModify: any = [];
   selectAllStatus: boolean;
   categoryList: any = [];
+  formerFilenameFilter: string;
   coloursRainbow = [
     '#00ffff',
     '#ff00ff',
@@ -193,7 +193,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
       this.modelChartWidth = this.el.nativeElement.querySelector('.modelChartBox').offsetWidth;
     }
 
-    // Observable.fromEvent(window, 'resize').subscribe((event) => {
     fromEvent(window, 'resize').subscribe((event) => {
       if (this.labelledCase > 0) {
         this.chartWidth = this.el.nativeElement.querySelector('.categoryChart').offsetWidth;
@@ -219,10 +218,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
         }
       }
     });
-  }
-
-  ngOnDestroy() {
-    // this.subscription.unsubscribe();
   }
 
   showUserChart(conf, data, width) {
@@ -289,6 +284,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
       pageNumber: this.page,
       limit: this.pageSize,
       id: this.projectId,
+      fname: '',
     };
   }
 
@@ -844,5 +840,14 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
     } else {
       return sr;
     }
+  }
+
+  receiveFilename(data) {
+    if (this.formerFilenameFilter !== data) {
+      this.formerFilenameFilter = data;
+      this.getALLSrsParam.pageNumber = 1;
+    }
+    this.getALLSrsParam.fname = data;
+    this.getALLSrs();
   }
 }
