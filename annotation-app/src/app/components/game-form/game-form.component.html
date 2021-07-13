@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
         <!-- <clr-datagrid #dataGird (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading" class="gridHeight"> -->
         <clr-datagrid #dataGird [clrDgLoading]="loading" class="gridHeight">
-          <clr-dg-placeholder>We couldn't find any annotation task for you!</clr-dg-placeholder>
+          <clr-dg-placeholder>We couldn't find any project for you!</clr-dg-placeholder>
           <clr-dg-column
             [clrDgField]="'projectName'"
             class="ellipsis-datagrid"
@@ -62,9 +62,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <clr-dg-column [clrDgField]="'assignmentLogic'" class="ellipsis-datagrid"
             >Assignment Logic</clr-dg-column
           >
-          <clr-dg-column [clrDgField]="'userCompleteCase'" class="ellipsis-datagrid"
-            >Complete/Total</clr-dg-column
-          >
+
           <clr-dg-column
             [clrDgField]="'userCompleteCase'"
             class="ellipsis-datagrid"
@@ -134,9 +132,8 @@ SPDX-License-Identifier: Apache-2.0 -->
               >
                 Active learning</clr-dg-cell
               >
-              <clr-dg-cell>{{ dataset.userCompleteCase }}/{{ dataset.totalCase }}</clr-dg-cell>
               <clr-dg-cell>
-                <div *ngIf="dataset.projectType == 'log'">
+                <div>
                   <div *ngIf="dataset.userCompleteCase.length < 6">
                     <div
                       *ngFor="let assignee of dataset.userCompleteCase"
@@ -238,7 +235,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <clr-icon shape="angle"></clr-icon>
                   </div>
                 </div>
-                <div *ngIf="dataset.projectType !== 'log'">/</div>
               </clr-dg-cell>
               <clr-dg-cell
                 class="cellWordBreak"
@@ -333,240 +329,6 @@ SPDX-License-Identifier: Apache-2.0 -->
               [clrDgPageSize]="pageSize"
               [clrDgTotalItems]="totalItems"
               [(clrDgPage)]="page"
-            >
-            </clr-dg-pagination>
-          </clr-dg-footer>
-        </clr-datagrid>
-      </clr-tab-content>
-    </clr-tab>
-    <clr-tab *ngIf="user.role == 'Admin' || user.role == 'Project Owner'">
-      <button clrTabLink (click)="clickReview()">Review</button>
-      <clr-tab-content *clrIfActive="isShowReviewTab">
-        <div class="row clr-row">
-          <div class="clr-col-md-10 clr-col-12">
-            <div class="row clr-row">
-              <div class="clr-col-md-6 clr-col-12" *ngIf="pagination">
-                <app-dropdown-pagesize
-                  (valueChange)="reviewValueChange($event)"
-                  [allCounts]="pagination.totalItemsReview"
-                >
-                </app-dropdown-pagesize>
-              </div>
-            </div>
-          </div>
-        </div>
-        <clr-datagrid #reviewDataGird [clrDgLoading]="loading" class="gridHeight">
-          <clr-dg-placeholder>We couldn't find any review task for you!</clr-dg-placeholder>
-          <clr-dg-column
-            [clrDgField]="'projectName'"
-            class="ellipsis-datagrid"
-            style="max-width: 250px"
-            >Project Name
-          </clr-dg-column>
-          <clr-dg-column
-            [clrDgField]="'taskInstructions'"
-            class="ellipsis-datagrid"
-            style="max-width: 250px"
-            >Task Instructions
-          </clr-dg-column>
-          <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid" style="max-width: 300px"
-            >Creator
-          </clr-dg-column>
-          <clr-dg-column [clrDgField]="'createdDate'" class="ellipsis-datagrid"
-            >Created Date</clr-dg-column
-          >
-          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid"
-            >Updated Date</clr-dg-column
-          >
-          <clr-dg-column
-            [clrDgField]="'dataSource'"
-            class="ellipsis-datagrid"
-            style="max-width: 300px"
-            >Data Source
-          </clr-dg-column>
-          <clr-dg-column
-            [clrDgField]="'userCompleteCase'"
-            class="ellipsis-datagrid"
-            style="min-width: 300px"
-          >
-            Reviewed/Complete/Total
-          </clr-dg-column>
-          <clr-dg-column
-            [clrDgField]="'categoryList'"
-            class="ellipsis-datagrid labels"
-            style="max-width: 300px"
-            >Labels
-          </clr-dg-column>
-          <clr-dg-column class="column-action" style="min-width: 120px">Action</clr-dg-column>
-
-          <ng-container>
-            <clr-dg-row *clrDgItems="let dataset of reviewDatasets" [clrDgItem]="dataset">
-              <clr-dg-cell
-                class="ellipsis-datagrid cellWordBreak"
-                title="{{ dataset.projectName }}"
-                style="max-width: 250px"
-                >{{ dataset.projectName }}
-              </clr-dg-cell>
-              <clr-dg-cell
-                class="cellWordBreak"
-                title="{{ dataset.taskInstructions }}"
-                style="max-width: 250px"
-              >
-                {{ dataset.taskInstructions }}
-              </clr-dg-cell>
-              <clr-dg-cell
-                class="cellWordBreak"
-                title="{{ dataset.creator }}"
-                style="max-width: 300px"
-                >{{ dataset.creator }}
-              </clr-dg-cell>
-              <clr-dg-cell>{{ dataset.createdDate | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
-              <clr-dg-cell>{{ dataset.updatedDate | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
-              <clr-dg-cell
-                class="cellWordBreak"
-                title="{{ dataset.dataSource }}"
-                style="max-width: 300px"
-              >
-                {{ dataset.dataSource }}
-              </clr-dg-cell>
-              <clr-dg-cell>
-                <div *ngIf="dataset.userCompleteCase.length < 6">
-                  <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
-                    {{ assignee.user }}
-                    <span *ngIf="dataset.totalCase != assignee.completeCase" class="badge badge-1"
-                      >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                        dataset.totalCase
-                      }}</span
-                    >
-                    <span
-                      *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase != 0"
-                      class="badge badge-success"
-                      >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                        dataset.totalCase
-                      }}</span
-                    >
-                    <span
-                      *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase == 0"
-                      class="badge badge-1"
-                      >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                        dataset.totalCase
-                      }}</span
-                    >
-                  </div>
-                </div>
-                <div
-                  *ngIf="dataset.userCompleteCase.length >= 6 && dataset.isExtend"
-                  class="annotatorCellWordBreak"
-                >
-                  <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
-                    {{ assignee.user }}
-                    <span *ngIf="dataset.totalCase != assignee.completeCase" class="badge badge-1"
-                      >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                        dataset.totalCase
-                      }}</span
-                    >
-                    <span
-                      *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase != 0"
-                      class="badge badge-success"
-                      >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                        dataset.totalCase
-                      }}</span
-                    >
-                    <span
-                      *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase == 0"
-                      class="badge badge-1"
-                      >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                        dataset.totalCase
-                      }}</span
-                    >
-                  </div>
-                </div>
-                <div *ngIf="dataset.userCompleteCase.length >= 6 && !dataset.isExtend">
-                  <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
-                    {{ assignee.user }}
-                    <span *ngIf="dataset.totalCase != assignee.completeCase" class="badge badge-1"
-                      >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                        dataset.totalCase
-                      }}</span
-                    >
-                    <span
-                      *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase != 0"
-                      class="badge badge-success"
-                      >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                        dataset.totalCase
-                      }}</span
-                    >
-                    <span
-                      *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase == 0"
-                      class="badge badge-1"
-                      >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                        dataset.totalCase
-                      }}</span
-                    >
-                  </div>
-                </div>
-                <div
-                  *ngIf="dataset.userCompleteCase.length >= 6 && dataset.isExtend"
-                  (click)="more(dataset.id)"
-                  class="isShowHide"
-                >
-                  show
-                  <clr-icon class="showIcon" shape="angle"></clr-icon>
-                </div>
-                <div
-                  *ngIf="dataset.userCompleteCase.length >= 6 && !dataset.isExtend"
-                  (click)="more(dataset.id)"
-                  class="isShowHide"
-                >
-                  hide
-                  <clr-icon shape="angle"></clr-icon>
-                </div>
-              </clr-dg-cell>
-              <clr-dg-cell
-                class="cellWordBreak"
-                title="{{
-                  dataset.labelType == 'numericLabel'
-                    ? dataset.min + '--' + dataset.max
-                    : dataset.categoryList
-                }}"
-                style="max-width: 300px"
-              >
-                {{
-                  dataset.labelType == 'numericLabel'
-                    ? dataset.min + '--' + dataset.max
-                    : dataset.categoryList
-                }}</clr-dg-cell
-              >
-
-              <clr-dg-cell style="min-width: 120px">
-                <button
-                  class="btn btn-sm btn-primary"
-                  [routerLink]="['/annotate']"
-                  [queryParams]="{
-                    name: dataset.projectName,
-                    projectType: dataset.projectType,
-                    id: dataset.id,
-                    from: 'review'
-                  }"
-                  [disabled]="dataset.totalCase == 0 || !dataset.disableReview"
-                  style="margin: 0"
-                  title="Start Annotate"
-                >
-                  Review
-                </button>
-              </clr-dg-cell>
-            </clr-dg-row>
-          </ng-container>
-
-          <clr-dg-footer>
-            <clr-dg-column-toggle [hidden]="true"></clr-dg-column-toggle>
-            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
-            {{ pagination.totalItems }} Projects
-            <clr-dg-pagination
-              #pagination
-              [clrDgPageSize]="pageSizeReview"
-              [clrDgTotalItems]="totalItemsReview"
-              [(clrDgPage)]="pageReview"
             >
             </clr-dg-pagination>
           </clr-dg-footer>

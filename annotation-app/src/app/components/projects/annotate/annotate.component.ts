@@ -23,6 +23,7 @@ import { GetElementService } from 'app/services/common/dom.service';
 import { ToolService } from 'app/services/common/tool.service';
 import { UserAuthService } from 'app/services/user-auth.service';
 import { EnvironmentsService } from 'app/services/environments.service';
+import { disable } from 'core-js/core/log';
 
 @Component({
   selector: 'app-annotate',
@@ -120,6 +121,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   currentLogFile: string;
   logFiles: any = [];
   wrapText: boolean;
+  cloneSpanslist: any = [];
 
   constructor(
     private renderer2: Renderer2,
@@ -181,7 +183,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       'questionGroup',
       this.formBuilder.group({
         category: this.sr.problemCategory,
-        freeText: [null],
+        logFreeText: [null],
         answer: [null],
         selectProject: [this.selectParam],
         filterText: [null],
@@ -406,6 +408,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.modifyChangeHistory();
       } else if (this.projectType == 'log') {
         this.modifyChangeHistory();
+        srUserInput.userInput[0]['logFreeText'] = this.questionForm.get(
+          'questionGroup.logFreeText',
+        ).value;
       } else {
         if (this.sr.userInputs) {
           let originalLabel;
@@ -458,6 +463,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       param['modify'] = true;
       param['problemCategory'] = this.spansList;
+      param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
     }
     this.avaService.passTicket(param).subscribe((res) => {
       this.getOneReview(from);
@@ -936,15 +942,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.numericInput.nativeElement.focus();
       }, 500);
     }
-    const freeText = this.questionForm.get('questionGroup.freeText').value;
+    const logFreeText = this.questionForm.get('questionGroup.logFreeText').value;
     const answer = this.questionForm.get('questionGroup.answer').value;
-    return !(category.length > 0 || freeText || answer);
+    return !(category.length > 0 || logFreeText || answer);
   }
 
-  calculatePointsEarned(category, freeText, answer): number {
+  calculatePointsEarned(category, logFreeText, answer): number {
     let questionPoints = 0;
     questionPoints = category.length > 0 ? questionPoints + 1 : questionPoints;
-    questionPoints = freeText ? questionPoints + 5 : questionPoints;
+    questionPoints = logFreeText ? questionPoints + 5 : questionPoints;
     questionPoints = answer ? questionPoints + 10 : questionPoints;
     return questionPoints;
   }
@@ -1737,12 +1743,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       ? this.questionForm.get('questionGroup.category').reset()
       : (this.labelChoose = null);
     this.active = -1;
-    this.questionForm.get('questionGroup.freeText').reset();
+    this.questionForm.get('questionGroup.logFreeText').reset();
     this.questionForm.get('questionGroup.answer').reset();
     this.multipleLabelList = [];
     this.spansList = [];
     if (this.projectType === 'log') {
-      this.questionForm.get('questionGroup.filterText').reset();
+      this.questionForm.get('questionGroup.logFreeText').reset();
     }
     this.regexErr = false;
   }
@@ -2196,9 +2202,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onMouseUpTxt(data, row, from) {
     this.spanEnd = row;
+    let spanslistPromise;
+
     if (this.spanEnd == this.spanStart) {
       const pDom = this.el.nativeElement.querySelector('.txtRowContent' + this.spanEnd);
-      const indexDom = this.el.nativeElement.querySelector('.logIndex' + this.spanEnd);
       this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
       // to give label's color to text
       if (pDom) {
@@ -2213,15 +2220,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.spansList.push({
           line: data.line,
           label: from == 'historyBack' ? data.label : this.categories[this.selectedEntityID],
-          freeText:
-            from == 'historyBack'
-              ? data.freeText
-              : this.questionForm.get('questionGroup.freeText').value,
+          freeText: from == 'historyBack' ? data.freeText : null,
           index: this.spanEnd,
-          selected: false,
         });
+        this.sr.originalData[this.spanEnd].annotate = true;
+        this.sr.originalData[this.spanEnd].freeText = from == 'historyBack' ? data.freeText : null;
+      } else {
+        if (from !== 'historyBack') {
+          this.sr.originalData[this.spanEnd].annotate = false;
+          this.sr.originalData[this.spanEnd].freeText = null;
+        }
       }
-
       const txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
       // to give label's color to entity
       if (txtRowEntityDom) {
@@ -2235,15 +2244,23 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         from == 'historyBack' ? data.label : this.categories[this.selectedEntityID],
         'txtEntityLabel',
       );
-      this.spansList = this.getElementService.toCreateClear(
-        txtRowEntityDom,
-        pDom,
-        'clear-' + this.spanEnd,
-        'clearTxt',
-        this.spansList,
-        indexDom,
-        this.el.nativeElement.querySelector('.customBadge' + this.spanEnd),
-      );
+      this.getElementService
+        .toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt', this.spansList)
+        .then((data) => {
+          spanslistPromise = data;
+          this.spansList = spanslistPromise;
+
+          if (this.cloneSpanslist.length > this.spansList.length) {
+            let flag = _.difference(
+              _.map(this.cloneSpanslist, 'index'),
+              _.map(this.spansList, 'index'),
+            );
+            this.sr.originalData[flag[0]].annotate = false;
+            this.sr.originalData[flag[0]].freeText = null;
+          }
+          this.cloneSpanslist = _.cloneDeep(this.spansList);
+        });
+
       this.getElementService.toListenMouseIn(
         pDom,
         this.el.nativeElement.querySelector('.clear-' + this.spanEnd),
@@ -2252,19 +2269,32 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         pDom,
         this.el.nativeElement.querySelector('.clear-' + this.spanEnd),
       );
-      this.spansList = this.getElementService.toClearSelected(
-        txtRowEntityDom,
-        pDom,
-        this.el.nativeElement.querySelector('.clear-' + this.spanEnd),
-        this.spansList,
-        indexDom,
-        this.el.nativeElement.querySelector('.customBadge' + this.spanEnd),
-      );
+
+      this.getElementService
+        .toClearSelected(
+          txtRowEntityDom,
+          pDom,
+          this.el.nativeElement.querySelector('.clear-' + this.spanEnd),
+          this.spansList,
+        )
+        .then((data) => {
+          spanslistPromise = data;
+          this.spansList = spanslistPromise;
+
+          if (this.cloneSpanslist.length > this.spansList.length) {
+            let flag = _.difference(
+              _.map(this.cloneSpanslist, 'index'),
+              _.map(this.spansList, 'index'),
+            );
+            this.sr.originalData[flag[0]].annotate = false;
+            this.sr.originalData[flag[0]].freeText = null;
+          }
+          this.cloneSpanslist = _.cloneDeep(this.spansList);
+        });
     } else if (this.spanEnd > this.spanStart) {
       for (let a = this.spanStart; a < this.spanEnd + 1; a++) {
         const pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
         const txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + a);
-        const indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
         this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
         if (pDom) {
           pDom.style.backgroundColor = this.toolService.hexToRgb(
@@ -2278,17 +2308,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.spansList.push({
               line: pDom.classList[0].split('-').pop(),
               label: this.categories[this.selectedEntityID],
-              freeText: this.questionForm.get('questionGroup.freeText').value,
+              freeText: null,
               index: a,
-              selected: false,
             });
+            this.sr.originalData[a].annotate = true;
           } else {
             for (let i = 0; i < this.spansList.length; i++) {
               if (this.spansList[i].line == pDom.classList[0].split('-').pop()) {
                 this.spansList[i].label = this.categories[this.selectedEntityID];
-                this.spansList[i].freeText = this.questionForm.get('questionGroup.freeText').value;
                 this.spansList[i].index = a;
-                this.spansList[i].selected = false;
                 break;
               }
             }
@@ -2306,15 +2334,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.categories[this.selectedEntityID],
           'txtEntityLabel',
         );
-        this.getElementService.toCreateClear(
-          txtRowEntityDom,
-          pDom,
-          'clear-' + a,
-          'clearTxt',
-          this.spansList,
-          indexDom,
-          this.el.nativeElement.querySelector('.customBadge' + a),
-        );
+        this.getElementService
+          .toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList)
+          .then((data) => {
+            spanslistPromise = data;
+            this.spansList = spanslistPromise;
+
+            if (this.cloneSpanslist.length > this.spansList.length) {
+              let flag = _.difference(
+                _.map(this.cloneSpanslist, 'index'),
+                _.map(this.spansList, 'index'),
+              );
+              this.sr.originalData[flag[0]].annotate = false;
+              this.sr.originalData[flag[0]].freeText = null;
+            }
+            this.cloneSpanslist = _.cloneDeep(this.spansList);
+          });
         this.getElementService.toListenMouseIn(
           pDom,
           this.el.nativeElement.querySelector('.clear-' + a),
@@ -2323,20 +2358,21 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           pDom,
           this.el.nativeElement.querySelector('.clear-' + a),
         );
-
-        this.getElementService.toClearSelected(
-          txtRowEntityDom,
-          pDom,
-          this.el.nativeElement.querySelector('.clear-' + a),
-          this.spansList,
-          indexDom,
-          this.el.nativeElement.querySelector('.customBadge' + a),
-        );
+        this.getElementService
+          .toClearSelected(
+            txtRowEntityDom,
+            pDom,
+            this.el.nativeElement.querySelector('.clear-' + a),
+            this.spansList,
+          )
+          .then((data) => {
+            spanslistPromise = data;
+            this.spansList = spanslistPromise;
+          });
       }
     } else {
       for (let a = this.spanEnd; a < this.spanStart + 1; a++) {
         const pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
-        const indexDom = this.el.nativeElement.querySelector('.logIndex' + a);
         this.getElementService.toFindDomAddClass(pDom, 'selectedTxtRow');
         if (pDom) {
           pDom.style.backgroundColor = this.toolService.hexToRgb(
@@ -2350,17 +2386,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.spansList.push({
               line: pDom.classList[0].split('-').pop(),
               label: this.categories[this.selectedEntityID],
-              freeText: this.questionForm.get('questionGroup.freeText').value,
+              freeText: null,
               index: a,
-              selected: false,
             });
+            this.sr.originalData[a].annotate = true;
           } else {
             for (let i = 0; i < this.spansList.length; i++) {
               if (this.spansList[i].line == pDom.classList[0].split('-').pop()) {
                 this.spansList[i].label = this.categories[this.selectedEntityID];
-                this.spansList[i].freeText = this.questionForm.get('questionGroup.freeText').value;
                 this.spansList[i].index = a;
-                this.spansList[i].selected = false;
                 break;
               }
             }
@@ -2379,15 +2413,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.categories[this.selectedEntityID],
           'txtEntityLabel',
         );
-        this.getElementService.toCreateClear(
-          txtRowEntityDom,
-          pDom,
-          'clear-' + a,
-          'clearTxt',
-          this.spansList,
-          indexDom,
-          this.el.nativeElement.querySelector('.customBadge' + a),
-        );
+        this.getElementService
+          .toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList)
+          .then((data) => {
+            spanslistPromise = data;
+            this.spansList = spanslistPromise;
+
+            if (this.cloneSpanslist.length > this.spansList.length) {
+              let flag = _.difference(
+                _.map(this.cloneSpanslist, 'index'),
+                _.map(this.spansList, 'index'),
+              );
+              this.sr.originalData[flag[0]].annotate = false;
+              this.sr.originalData[flag[0]].freeText = null;
+            }
+            this.cloneSpanslist = _.cloneDeep(this.spansList);
+          });
         this.getElementService.toListenMouseIn(
           pDom,
           this.el.nativeElement.querySelector('.clear-' + a),
@@ -2396,19 +2437,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           pDom,
           this.el.nativeElement.querySelector('.clear-' + a),
         );
-        this.getElementService.toClearSelected(
-          txtRowEntityDom,
-          pDom,
-          this.el.nativeElement.querySelector('.clear-' + a),
-          this.spansList,
-          indexDom,
-          this.el.nativeElement.querySelector('.customBadge' + a),
-        );
+        this.getElementService
+          .toClearSelected(
+            txtRowEntityDom,
+            pDom,
+            this.el.nativeElement.querySelector('.clear-' + a),
+            this.spansList,
+          )
+          .then((data) => {
+            spanslistPromise = data;
+            this.spansList = spanslistPromise;
+          });
       }
     }
-    // console.log('this.spansList:::', this.spansList)
+    // console.log('this.spansList:::', this.spansList);
+    this.cloneSpanslist = _.cloneDeep(this.spansList);
     this.actionError = null;
-    this.toCheckSpanslist(this.spansList);
   }
 
   toGetLogLines(spansList) {
@@ -2419,76 +2463,19 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     return x;
   }
 
-  clickIndex(e, data, index) {
-    // to clean all the selected rowIndex first
-    if (this.spansList.length > 0) {
-      console.log(111, e, data, index);
-      console.log(222, this.spansList);
-
-      this.spansList.forEach((value) => {
-        if (value.index != data.index) {
-          if (value.selected) {
-            value.selected = false;
-            const dom = this.el.nativeElement.querySelector('.logIndex' + value.index);
-            this.renderer2.removeClass(dom, 'selectedRowIndex');
-            this.renderer2.addClass(dom, 'rowIndex');
-          }
-        }
-      });
-    }
-
-    if (
-      e.target.nextElementSibling &&
-      e.target.nextElementSibling.firstChild &&
-      e.target.nextElementSibling.firstChild.className &&
-      e.target.nextElementSibling.firstChild.className.indexOf('txtEntityLabel') > 0
-    ) {
-      // to show the original freetext enable edit
-      for (let i = 0; i < this.spansList.length; i++) {
-        if (this.spansList[i].line == data.line) {
-          this.questionForm.get('questionGroup.freeText').setValue(this.spansList[i].freeText);
-          const classList = e.target.className.split(' ');
-          if (classList.indexOf('selectedRowIndex') > -1) {
-            classList.splice(classList.indexOf('selectedRowIndex'), 1, 'rowIndex');
-            e.target.className = classList.join(' ');
-            this.spansList[i].selected = false;
-          } else {
-            classList.splice(classList.indexOf('rowIndex'), 1, 'selectedRowIndex');
-            e.target.className = classList.join(' ');
-            this.spansList[i].selected = true;
-          }
-          this.toCheckSpanslist(this.spansList);
-          break;
-        }
-      }
-    } else {
-      this.questionForm.get('questionGroup.freeText').reset();
-    }
-  }
-
-  updateFreeText(e) {
+  updateFreeText(e, index) {
     if (this.spansList.length > 0) {
       for (let i = 0; i < this.spansList.length; i++) {
-        if (this.spansList[i].selected) {
+        if (this.spansList[i].index === index) {
           this.spansList[i].freeText = e;
-          this.toCheckSpanslist(this.spansList);
-          break;
+          return;
         }
       }
     }
   }
 
-  toCheckSpanslist(list) {
-    list.forEach((element) => {
-      const dom = this.el.nativeElement.querySelector('.customBadge' + element.index);
-      if (dom) {
-        if (element.freeText) {
-          dom.style.backgroundColor = '#cccccc';
-        } else {
-          dom.style.backgroundColor = '';
-        }
-      }
-    });
+  updateLogFreeText(e) {
+    // this.questionForm.get('questionGroup.logFreeText').setValue(e);
   }
 
   toFilterLog(e) {
@@ -2544,7 +2531,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         });
       }
-    }, 10);
+    }, 20);
   }
 
   updateFilterSelect(e) {
@@ -2584,7 +2571,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.regexErr = false;
       }
       this.filterList.push({ filterType: this.filterType, filterText: e.value });
-      this.questionForm.get('questionGroup.filterText').reset();
+      this.questionForm.get('questionGroup.logFreeText').reset();
       this.toFilterLog(this.filterList);
     }
   }
@@ -2604,7 +2591,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.regexErr = false;
       }
       this.filterList.push({ filterType: this.filterType, filterText: e.target.value });
-      this.questionForm.get('questionGroup.filterText').reset();
+      this.questionForm.get('questionGroup.logFreeText').reset();
       this.toFilterLog(this.filterList);
     }
   }
@@ -2770,13 +2757,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toWrapText() {
     this.wrapText = !this.wrapText;
-    if (this.wrapText) {
-      this.renderer2.setStyle(
-        this.el.nativeElement.querySelector('.' + this.idName),
-        'background-color',
-        '#ff9c32',
-      );
-    }
   }
 
   outOfPage() {
