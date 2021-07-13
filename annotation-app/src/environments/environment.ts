@@ -9,19 +9,16 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Env } from 'app/model/index';
 
-
 export const environment: Env = {
   // This section is required
   production: false,
-  annotationService: "http://localhost:3000", // Annotation service url
-  serviceTitle: "Data Annotator for Machine Learning", // UI name of annotation-app.
+  annotationService: 'http://localhost:3000', // Annotation service url
+  serviceTitle: 'Data Annotator for Machine Learning', // UI name of annotation-app.
 
   // This section is optional
-  redirectUrl: "/home", // redirect URL after logout or token is expired
+  redirectUrl: '/home', // redirect URL after logout or token is expired
   videoSrc: null, // demo video link in home page, or set null to show nothing
   googleTrackId: null, // google track ID
-  enableSendEmail: false // Set to true to enable email notification for project creation, annotator assignment or edit project owner
+  enableSendEmail: false, // Set to true to enable email notification for project creation, annotator assignment or edit project owner
+  enableAWSS3: false, // Set to true to upload and download files with AWS S3 that requires some related AWS CONFIG IAM to be configured in annotation-service
 };
-
-
-

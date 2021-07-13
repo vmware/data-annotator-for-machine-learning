@@ -97,8 +97,13 @@ module.exports = {
         "OBJECT":"object",
         "BOOLEAN":"boolean",
     },
+    FILEPATH:{
+        UPLOAD: "FILE_SYS/UPLOAD",
+        DOWNLOAD: "FILE_SYS/DOWNLOAD",
+        UNZIPIMAGE: "_UNZIPED-IMAGES_",
+    },
     AWSRESOURCE:{
         S3: "S3",
-        SQS: "SQS"
+        SQS: "SQS",
     }
 }

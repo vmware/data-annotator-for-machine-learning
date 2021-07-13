@@ -4,8 +4,8 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 export interface Incentive {
-  points: number,
-  donation: number,
+  points: number;
+  donation: number;
 }
 
 export const Incentives: Incentive[] = [
@@ -17,4 +17,4 @@ export const Incentives: Incentive[] = [
   { points: 125, donation: 4500 },
   { points: 250, donation: 5250 },
   { points: 500, donation: 6000 },
-]
+];

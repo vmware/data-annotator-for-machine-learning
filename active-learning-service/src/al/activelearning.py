@@ -14,8 +14,8 @@ from src.al.project_service import find_project_by_name, update_project, update_
 from src.al.query_instance import query_instance
 from src.al.teach_model import teach_model
 from src.al.train_model import train_model
-from src.aws.s3 import upload_file_to_s3, download_file_from_s3
 from config.config import config
+import src.utils.fileSystem as fileSystem
 
 modelDir = "models/"
 vec_mod = '_vaporizer_model.pkl'
@@ -37,9 +37,6 @@ def active_learning_train(request):
     for index, label in enumerate(labels):
         label_id[label] = index
 
-    # save text vector to sr table
-    # save_all_sr_text_vectors(req['projectName'])
-
     # query all labeled sr text id and label
     project_type = pro[0]['projectType']
     srs = query_train_srs_by_name(req['projectName'], label_id, project_type)
@@ -51,10 +48,8 @@ def active_learning_train(request):
 
         else:
             # one-hot-encoding download latest vectorModel from s3
-            vector_model = pro[0]['al']['vectorModel']
             vector_local = './' + modelDir + project_id + vec_mod
-            if vector_model and not os.path.exists(vector_local):
-                download_file_from_s3(vector_model, vector_local, token)
+            fileSystem.download_file(pro[0]['al']['vectorModel'], pro[0]['al']['vectorModel'], vector_local, token)
 
             # use sr vector to replace sr text
             srs['sr_text'] = vector_sr(srs['sr_text'], vector_local, project_type, pro[0]['al']['objectColumn'], pro[0]['al']['numberColumn'])
@@ -70,7 +65,7 @@ def active_learning_train(request):
     # upload al-model to s3
     local_file = './' + modelDir + al['model']
     upload_file = modelDir + project_id + "/" + al['model']
-    upload_file_to_s3(local_file, upload_file, token)
+    upload_file = fileSystem.upload_file(upload_file, local_file, token)
 
     # save all test data
     batch_update_srs(al['test'])
@@ -101,8 +96,7 @@ def active_learning_query(request):
 
     # download latest al model from s3 if not exist
     model_file = './' + modelDir + project_id + al_mod
-    if not os.path.exists(model_file):
-        download_file_from_s3(pro[0]['al']['model'], model_file, token)
+    fileSystem.download_file(True, pro[0]['al']['model'], model_file, token)
 
     # random query sr text from db
     project_type = pro[0]['projectType']
@@ -117,10 +111,8 @@ def active_learning_query(request):
             unl_srs['sr_text'] = gain_srs_embedding_vector(unl_srs['sr_text'], pro[0]['al']['vectorModel'], project_id, pro[0]['al']['numberColumn'], token)
         else:
             # one-hot-encoding download latest vectorModel from s3 if not exist
-            vector_model = pro[0]['al']['vectorModel']
             vector_local = './' + modelDir + project_id + vec_mod
-            if vector_model and not os.path.exists(vector_local):
-                download_file_from_s3(vector_model, vector_local, token)
+            fileSystem.download_file(pro[0]['al']['vectorModel'], pro[0]['al']['vectorModel'], vector_local, token)
 
             # use one-hot-encoding vector replace sr_text
             unl_srs['sr_text'] = vector_sr(unl_srs['sr_text'], vector_local, project_type, pro[0]['al']['objectColumn'], pro[0]['al']['numberColumn'])
@@ -159,7 +151,7 @@ def active_learning_teach(request):
 
     # download latest al model from s3 for multiple instance
     model_file = './' + modelDir + project_id + al_mod
-    download_file_from_s3(pro[0]['al']['model'], model_file, token)
+    fileSystem.download_file(False, pro[0]['al']['model'], model_file, token)
 
     # query all labeled sr amount
     srs_labeled_amount = query_all_labeled_sr_amount(req['projectName'])
@@ -179,10 +171,8 @@ def active_learning_teach(request):
         # one-hot-encoding
         else:
             # download latest vector Model from s3
-            vector_model = pro[0]['al']['vectorModel']
             vector_local = './' + modelDir + project_id + vec_mod
-            if vector_model and not os.path.exists(vector_local):
-                download_file_from_s3(vector_model, vector_local, token)
+            fileSystem.download_file(pro[0]['al']['vectorModel'], pro[0]['al']['vectorModel'], vector_local, token)
 
             # use sr vector replace sr_text
             new_labeled_sr['sr_text'] = vector_sr(new_labeled_sr['sr_text'], vector_local, project_type, pro[0]['al']['objectColumn'], pro[0]['al']['numberColumn'])
@@ -217,7 +207,7 @@ def active_learning_teach(request):
     save_sr_vectors(data['id_test'], data['x_test'], project_type)
 
     # upload file trained al model to s3
-    upload_file_to_s3(model_file, pro[0]['al']['model'], token)
+    fileSystem.upload_file(pro[0]['al']['model'], model_file, token)
 
     return {"status": "OK", "data": al['accuracy']}
 

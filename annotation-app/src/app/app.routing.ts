@@ -24,7 +24,7 @@ import { SSOGuard } from './guards/sso.guard';
 
 export const ROUTES: Routes = [
   {
-    path: "",
+    path: '',
     canActivate: [SSOGuard],
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -43,13 +43,13 @@ export const ROUTES: Routes = [
       { path: 'faq', component: FAQComponent },
       {
         path: 'basicLogin',
-        loadChildren: () => import('./components/open-source/openSource.module').then(m => m.OpenSourceModule)
+        loadChildren: () =>
+          import('./components/open-source/openSource.module').then((m) => m.OpenSourceModule),
       },
       { path: '404', component: PageNotFoundComponent },
       { path: '**', redirectTo: '404' },
-    ]
-  }
-
+    ],
+  },
 ];
 
 export const ROUTING: ModuleWithProviders = RouterModule.forRoot(ROUTES);

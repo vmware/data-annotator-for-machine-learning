@@ -8,31 +8,65 @@
 
 const DataSetDB = require('../db/dataSet-db');
 const S3Utils = require('../utils/s3');
-const {DATASETTYPE, S3OPERATIONS} = require('../config/constant');
+const {DATASETTYPE, S3OPERATIONS, FILEPATH} = require('../config/constant');
 const ObjectId = require("mongodb").ObjectID;
-const { isASCII } = require('../utils/validator');
 const validator = require('../utils/validator');
+const config = require('../config/config');
+const localFileSysService = require('./localFileSys.service');
+const EventEmitter = require('events');
+const _ = require("lodash");
+const fs = require('fs');
+
 
 async function saveDataSetInfo(req) {
 
     await validator.checkDataSet({ dataSetName: req.body.dsname }, false);
     
+    const user = req.auth.email;
+    let location = req.body.location;
+    let fileKey = req.body.fileKey;
+
     let dataSet = {
         dataSetName: req.body.dsname,
         fileName: req.body.fileName,
         fileSize: req.body.fileSize,
-        user: req.auth.email,
+        user: user,
         description: req.body.description,
         format: req.body.format,
         createTime: Date.now(),
         updateTime: Date.now()
     };
     
+    if (config.useLocalFileSys) {
+
+        const folder = `./${FILEPATH.UPLOAD}/${user}`;
+        location = `${folder}/${req.file.originalname}`;
+        fileKey = process.cwd();
+        await localFileSysService.checkFileExistInLocalSys(folder, true);
+        const exist = await localFileSysService.checkFileExistInLocalSys(location);
+        if (exist) {
+            throw {CODE: 5001, MSG: "DATASET ALREADY EXIST"};
+        }
+        await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
+
+        typeof req.body.topReview == "string"? req.body.topReview=JSON.parse(req.body.topReview) : null;
+    }
+    
     if (req.body.format == DATASETTYPE.IMGAGE) {
-        if (req.body.images) {
-            dataSet.images = JSON.parse(req.body.images);
+        if (config.useLocalFileSys) {
+            const statusCheck = new EventEmitter();
+            const unzipFolder = `./${FILEPATH.UPLOAD}/${user}/${FILEPATH.UNZIPIMAGE}/${Date.now()}`;
+            await localFileSysService.singleUnzipStreamToLocalSystem(req.file.buffer, unzipFolder, statusCheck);
+            await new Promise((resolve) => statusCheck.on('done', (images)=>{ resolve(dataSet.images = images) }));
+            dataSet.fileKey = fileKey;
+            dataSet.location = location;
+ 
         }else{
-            dataSet.images = await JSON.parse(Buffer.from(req.file.buffer).toString()).images;
+            if (req.body.images) {
+                dataSet.images = JSON.parse(req.body.images);
+            }else{
+                dataSet.images = await JSON.parse(Buffer.from(req.file.buffer).toString()).images;
+            }
         }
         
     }else if (req.body.format == DATASETTYPE.CSV || req.body.format == DATASETTYPE.TABULAR) {
@@ -42,7 +76,7 @@ async function saveDataSetInfo(req) {
 
         req.body.topReview.topRows.forEach(row => {
             for (let i = 0; i < row.length; i++) {
-                if (!isASCII(row[i])) {
+                if (!validator.isASCII(row[i])) {
                     row = null;
                     break;
                 }
@@ -52,15 +86,15 @@ async function saveDataSetInfo(req) {
             }
         });
 
-        dataSet.fileKey = req.body.location;
+        dataSet.fileKey = fileKey;
         dataSet.hasHeader = req.body.hasHeader;
-        dataSet.location = req.body.location;
+        dataSet.location = location;
         dataSet.columnInfo = req.body.columnInfo;
         dataSet.topReview = reviews;
 
     }else if (req.body.format == DATASETTYPE.LOG) {
-        dataSet.fileKey = req.body.fileKey;
-        dataSet.location = req.body.location;
+        dataSet.fileKey = fileKey;
+        dataSet.location = location;
         dataSet.topReview = req.body.topReview;
         dataSet.totalRows = req.body.totalRows;
     }
@@ -98,23 +132,39 @@ async function queryDataSetByUser(req) {
 }
 
 async function imageTopPreview(datasets, singleData) {
-    
+   
     if (singleData) datasets = [datasets];
-    const S3 = await S3Utils.s3Client();
-
-    for (const ds of datasets) {
-        if (ds.format == DATASETTYPE.IMGAGE) {
-            let preveiw = [], index = 0;
-            
-            for (const image of ds.images) { 
-                if (index>2) break;
-                image.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, image.location, S3);
-                preveiw.push(image);
-                index++;
+    
+    if (config.useLocalFileSys){
+        for (const ds of datasets) {
+            if (ds.format == DATASETTYPE.IMGAGE) {
+                let preveiw = [], index = 0;
+                
+                for (const image of ds.images) { 
+                    if (index>2) break;
+                    preveiw.push(image);
+                    index++;
+                }
+                ds._doc.topReview = preveiw;
             }
-            ds._doc.topReview = preveiw;
+        }
+    }else{
+        const S3 = await S3Utils.s3Client();
+        for (const ds of datasets) {
+            if (ds.format == DATASETTYPE.IMGAGE) {
+                let preveiw = [], index = 0;
+                
+                for (const image of ds.images) { 
+                    if (index>2) break;
+                    image.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, image.location, S3);
+                    preveiw.push(image);
+                    index++;
+                }
+                ds._doc.topReview = preveiw;
+            }
         }
     }
+
     return singleData? datasets[0]: datasets;
 }
 
@@ -126,10 +176,53 @@ async function queryDataSetByDataSetName(req) {
 async function deleteDataSet(req) {
     
     const ds = await validator.checkDataSet({ dataSetName: req.body.dsname }, true);
+    const user = req.auth.email;
 
-    if (ds[0].format == DATASETTYPE.CSV || ds[0].format == DATASETTYPE.TABULAR) {
-        console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteAnObject`);
-        await S3Utils.deleteAnObject(req.body.fileKey);
+    if (ds[0].format == DATASETTYPE.CSV || ds[0].format == DATASETTYPE.TABULAR || ds[0].format == DATASETTYPE.LOG) {
+
+        if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
+            console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteAnObject`);
+            await S3Utils.deleteAnObject(req.body.fileKey);
+        }else if (config.useLocalFileSys) {
+            console.log(`[ DATASET ] Service localFileSysService.deleteFileFromLocalSys`);
+            await localFileSysService.deleteFileFromLocalSys(req.body.fileKey)
+        }
+        
+    }else if (ds[0].format == DATASETTYPE.IMGAGE) {
+
+        await validator.checkDataSetInUse(req.body.dsname, true);
+        
+        if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
+            console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteMultiObjects`);
+            // delete unziped images at s3
+           let index = 0; keys = [];
+           for await (const img of ds[0].images) {
+                keys.push({Key: img.location});
+                index += 1;
+                if (index == 1000) {
+                    await S3Utils.deleteMultiObjects(keys);
+                    keys = [];
+                    index = 0;
+                }
+           }
+           if (!keys.length) {
+            await S3Utils.deleteMultiObjects(keys);
+           }
+            
+        }else if (config.useLocalFileSys) {
+ 
+            const folder = `./${FILEPATH.UPLOAD}/${user}/${FILEPATH.UNZIPIMAGE}/`;
+            //images dataset has single appened images
+            let fileFolders = await ds[0].images.reduce((arr, curr) => arr.concat(curr.location.split(FILEPATH.UNZIPIMAGE)[1].split("/")[1]), []);
+            fileFolders = await _.uniq(fileFolders);
+            // delete the zip file
+            await localFileSysService.deleteFileFromLocalSys(ds[0].location);
+            // dalete the unziped files
+            for (const fo of fileFolders) {
+                await localFileSysService.deleteFileFolderFromLocalSys(folder+fo);
+            }
+        }
+
     }
 
     console.log(`[ DATASET ] Service deleteDataSet.removeDataSet`);
@@ -137,6 +230,7 @@ async function deleteDataSet(req) {
     
     return { CODE: 0000, MSG: "delete success" };
 }
+
 
 async function signS3Url(req) {
 

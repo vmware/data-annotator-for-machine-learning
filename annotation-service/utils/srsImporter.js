@@ -9,13 +9,12 @@
 const csv = require('csvtojson');
 const validator = require('./validator');
 const srsDB = require('../db/srs-db');
-const request = require('request');
 const config = require("../config/config");
-const { PAGINATELIMIT, PROJECTTYPE, ENCODE, S3OPERATIONS } = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, ENCODE} = require("../config/constant");
 const projectDB = require('../db/project-db');
 const emailService = require('../services/email-service');
 const axios = require("axios");
-const S3Utils = require('./s3');
+const fileSystemUtils = require('./fileSystem.utils');
 
 module.exports = {
     execute: async function (req, annotators) {
@@ -30,6 +29,7 @@ module.exports = {
         header = (typeof header === 'string'? JSON.parse(header):header);
         let selectedColumn = req.body.selectDescription;
         selectedColumn = (typeof selectedColumn === 'string'? JSON.parse(selectedColumn):selectedColumn);
+        const user = req.auth.email;
 
         let totalCase = 0;
         let docs = [];
@@ -46,13 +46,11 @@ module.exports = {
         if (projectType == PROJECTTYPE.TEXT) {
             headerRule.checkType = false;
         }
-        
-        console.log(`[ SRS ] Utils S3Utils.signedUrlByS3`);
-        const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, req.body.location);
-        
-        console.log(`[ SRS ] Utils import data to db start: `, Date.now());
+        let fileStream = await fileSystemUtils.handleFileStream(req.body.location);  
+
         // chunking line by line to read
-        csv(headerRule).fromStream(request.get(signedUrl)).subscribe((oneData) => {
+        console.log(`[ SRS ] Utils import data to db start: `, Date.now());
+        csv(headerRule).fromStream(fileStream).subscribe((oneData) => {
             saveData(oneData);
         }, async (error) => {
             console.log(`[ SRS ] [ERROR] Utils import data have ${error}: `, Date.now());
@@ -138,9 +136,9 @@ module.exports = {
                         annotator: annotators,
                         pname: req.body.pname
                     },
-                    auth:{ email: req.auth.email }
+                    auth:{ email: user }
                 }
-                await emailService.sendEmailToAnnotator(param);
+                emailService.sendEmailToAnnotator(param).catch(err => log.error(`[ SRS ][ ERROR ] send email:`, err));
                 
                 //trigger tabular one-hot-encoding project generate the vector model
                 if (req.body.encoder == ENCODE.ONEHOT) {
