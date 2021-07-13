@@ -138,7 +138,7 @@ module.exports = {
                     },
                     auth:{ email: user }
                 }
-                await emailService.sendEmailToAnnotator(param);
+                emailService.sendEmailToAnnotator(param).catch(err => log.error(`[ LOG ][ ERROR ] send email:`, err));
                 
                 //trigger tabular one-hot-encoding project generate the vector model
                 if (req.body.encoder == ENCODE.ONEHOT) {
