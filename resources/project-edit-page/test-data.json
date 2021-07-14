@@ -1,0 +1,9 @@
+{
+  "TextProject": {
+    "Owner": "test2@vmware.com",
+    "Annotator": "test2@vmware.com",
+    "Labels": "test3,test4,test5,test6,test7",
+    "Threshold": 55,
+    "Frequency": 15
+  }
+}
