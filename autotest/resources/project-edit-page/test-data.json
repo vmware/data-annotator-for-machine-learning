@@ -1,9 +1,0 @@
-{
-  "TextProject": {
-    "Owner": "test2@gmail.com",
-    "Annotator": "test2@gmail.com",
-    "Labels": "test3,test4,test5,test6,test7",
-    "Threshold": 55,
-    "Frequency": 15
-  }
-}
