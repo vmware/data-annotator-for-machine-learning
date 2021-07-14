@@ -8,7 +8,7 @@
 
 const AWS = require('aws-sdk');
 const { Consumer } = require('sqs-consumer');
-const { GENERATESTATUS, ACCESS_TIME_60, TOKEN_EXPIRED_MESSAGE, FILEPATH } = require('../config/constant');
+const { GENERATESTATUS, ACCESS_TIME_60, TOKEN_EXPIRED_MESSAGE, FILEPATH, AWSRESOURCE } = require('../config/constant');
 const config = require('../config/config');
 const STS = require('./sts');
 const FileService = require('../services/file-service');
@@ -16,12 +16,11 @@ const S3Service = require('../services/s3.service');
 const EmailService = require('../services/email-service');
 const localFileSysService = require('../services/localFileSys.service');
 
-async function sqsClient(sqsArn){
+async function sqsClient(){
 
-    console.log('[ SQS ] Utils prepareCredentials');
-    const data = await STS.prepareCredentials(sqsArn, ACCESS_TIME_60);
+    const data = await STS.prepareCredentials(AWSRESOURCE.SQS, ACCESS_TIME_60);
     
-    console.log('[ SQS ] Utils prepareCredentials done');
+    console.log('[ SQS ] Utils sqsClient.prepareCredentials done');
     return new AWS.SQS({
         region: config.region,
         apiVersion: '2012-11-05',
@@ -30,9 +29,9 @@ async function sqsClient(sqsArn){
         sessionToken: data.Credentials.SessionToken
     });
 }
-async function sendSQSMessage(sqsQueueUrl,sqsMessageBody,sqsArn){
+async function sendSQSMessage(sqsQueueUrl,sqsMessageBody){
     console.log('[ SQS ] Utils sendSQSMessage.sqsClient');
-    const SQSClinet = await sqsClient(sqsArn);
+    const SQSClinet = await sqsClient();
     var params = {
         QueueUrl: sqsQueueUrl,
         MessageBody: sqsMessageBody
@@ -44,7 +43,7 @@ async function consumeSQSMessage(){
     console.log('[ SQS ] Utils consumeSQSMessage');
     let clientHandle = {
         queueUrl: config.sqsUrl,
-        sqs: await sqsClient(config.sqsRoleArn),
+        sqs: await sqsClient(),
         visibilityTimeout: ACCESS_TIME_60,
         handleMessage: async (message) => {
             

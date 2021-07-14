@@ -53,7 +53,7 @@ async function createProject(req) {
     await logImporter.execute(req, true, annotators);
 
     console.log(`[ FILE ] Service save project info to db`);
-    return await saveProjectInfo(req, userCompleteCase, annotators);
+    return saveProjectInfo(req, userCompleteCase, annotators);
 }
 
 async function saveProjectInfo(req, userCompleteCase, annotators){

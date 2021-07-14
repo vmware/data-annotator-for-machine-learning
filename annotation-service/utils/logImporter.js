@@ -130,7 +130,7 @@ async function execute(req, sendEmail, annotators, append) {
         },
         auth:{ email: email }
       }
-      await emailService.sendEmailToAnnotator(param);
+      emailService.sendEmailToAnnotator(param).catch(err => log.error(`[ LOG ][ ERROR ] send email:`, err));
     } 
   }
 }
