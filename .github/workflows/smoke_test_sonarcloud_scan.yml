@@ -195,7 +195,6 @@ jobs:
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service
-          #  -Dsonar.typescript.lcov.reportPaths="./e2e-test/coverage-output/lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
@@ -241,7 +240,6 @@ jobs:
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-active-learning-service
-        #    -Dsonar.typescript.lcov.reportPaths="./e2e-test/coverage-output/lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
