@@ -35,9 +35,10 @@ jobs:
           npm install typescript
           tsc -v
 
-      - name: Pull code from VMware repo DecoupleAws branch
-        run: |
-          git clone -b F-DecoupleAws https://github.com/vmware/data-annotator-for-machine-learning.git F-DecoupleAws
+      - name: Checkout 
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Checkout devops branch
         uses: actions/checkout@v2
@@ -46,17 +47,17 @@ jobs:
           ref: 'devops'
           path: 'devops'
 
-      #copy needed files and folders from DevOps branch to cloned F-DecoupleAws branch from VMware repo
+      #copy needed files and folders from DevOps branch 
       - run: |
           pwd
           ls -l
-          cp -rf devops/annotation-service/* F-DecoupleAws/annotation-service
-          cp -rf devops/annotation-app/* F-DecoupleAws/annotation-app
-          cp -rf devops/autotest F-DecoupleAws/
-          cp -rf devops/docker-compose.yml F-DecoupleAws/
+          cp -rf devops/annotation-service/* ./annotation-service
+          cp -rf devops/annotation-app/* ./annotation-app
+          cp -rf devops/active-learning-service/* ./active-learning-service
+          cp -rf devops/docker-compose.yml .
        
       - name: Bring up Docker 
-        working-directory: ./F-DecoupleAws
+#        working-directory: ./F-DecoupleAws
         run: |
           str=$(printf '=%.0s' {1..50})
           echo $str Docker Start $str
@@ -67,7 +68,7 @@ jobs:
           echo $str Docker Done $str     
 
       - name: Annotation App 
-        working-directory: ./F-DecoupleAws/annotation-app
+        working-directory: ./annotation-app
         run: |
           CI=false npm install
           CI=false npm run build --if-present
@@ -82,8 +83,16 @@ jobs:
           curl -X POST -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password"}' http://localhost:3000/api/v1.0/login
           echo Curl End login
 
+      - name: Checkout e2e-test branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: 'e2e-test'
+          path: 'e2e-test'
+
+
       - name: Run Smoke Test
-        working-directory: ./F-DecoupleAws/autotest
+        working-directory: ./e2e-test/autotest
         run: |
           echo $str Smoke Test Start $str 
           npm install
@@ -96,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: code-coverage-report
-          path: F-DecoupleAws/autotest/coverage-output/lcov.info
+          path: e2e-test/autotest/coverage-output/lcov.info
           retention-days: 1
 
       - name: keep the devops branch folder from test job to subsequent scan jobs
@@ -116,9 +125,17 @@ jobs:
       BRANCH: master
 
     steps:
-      - name: Pull code from VMware repo DecoupleAws branch
-        run: |
-          git clone -b F-DecoupleAws https://github.com/vmware/data-annotator-for-machine-learning.git F-DecoupleAws
+      - name: Checkout 
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Checkout devops branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: 'devops'
+          path: 'devops'
 
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -130,11 +147,11 @@ jobs:
       - name: SonarCloud Scan annotation-app
         uses: sonarsource/sonarcloud-github-action@master  
         with:
-          projectBaseDir: ./F-DecoupleAws/annotation-app
+          projectBaseDir: ./annotation-app
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-app
-            -Dsonar.typescript.lcov.reportPaths="./F-DecoupleAws/autotest/coverage-output/lcov.info" 
+            -Dsonar.typescript.lcov.reportPaths="./e2e-test/autotest/coverage-output/lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
@@ -154,9 +171,17 @@ jobs:
       BRANCH: master
 
     steps:
-      - name: Pull code from VMware repo DecoupleAws branch
-        run: |
-          git clone -b F-DecoupleAws https://github.com/vmware/data-annotator-for-machine-learning.git F-DecoupleAws
+      - name: Checkout 
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Checkout devops branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: 'devops'
+          path: 'devops'
 
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -168,11 +193,11 @@ jobs:
       - name: SonarCloud Scan annotation-service
         uses: sonarsource/sonarcloud-github-action@master  
         with:
-          projectBaseDir: ./F-DecoupleAws/annotation-service
+          projectBaseDir: ./annotation-service
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service
-            -Dsonar.typescript.lcov.reportPaths="./F-DecoupleAws/autotest/coverage-output/lcov.info" 
+            -Dsonar.typescript.lcov.reportPaths="./e2e-test/autotest/coverage-output/lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
@@ -192,9 +217,17 @@ jobs:
       BRANCH: master
 
     steps:  
-      - name: Pull code from VMware repo DecoupleAws branch
-        run: |
-          git clone -b F-DecoupleAws https://github.com/vmware/data-annotator-for-machine-learning.git F-DecoupleAws
+      - name: Checkout 
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Checkout devops branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: 'devops'
+          path: 'devops'
 
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
@@ -206,11 +239,11 @@ jobs:
       - name: SonarCloud Scan active-learning-service
         uses: sonarsource/sonarcloud-github-action@master  
         with:
-          projectBaseDir: ./F-DecoupleAws/active-learning-service
+          projectBaseDir: ./active-learning-service
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-active-learning-service
-            -Dsonar.typescript.lcov.reportPaths="./F-DecoupleAws/autotest/coverage-output/lcov.info" 
+            -Dsonar.typescript.lcov.reportPaths="./e2e-test/autotest/coverage-output/lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
