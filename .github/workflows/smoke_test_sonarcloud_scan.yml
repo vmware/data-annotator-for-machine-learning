@@ -94,8 +94,14 @@ jobs:
         working-directory: ./e2e-test
         run: |
           echo $str Smoke Test Start $str 
+          echo "before npm install"
+          ls -la
           npm install
+          echo "before run webdriver"
+          ls -la
           npm run webdriver
+          echo "before run e2e-smoke"
+          ls -la
           npm run e2e-smoke
           echo "after run e2e-smoke"
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
