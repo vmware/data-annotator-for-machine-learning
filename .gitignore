@@ -2,18 +2,4 @@
 *node_modules*
 *debug.log
 *.vscode
-
-# e2e
-autotest/doc/download
-autotest/doc/reporter
-autotest/package-lock.json
-
-# annotation-app
-
-
-# annotation-service
-
-
-
-# active-learning-service
 *__pycache__*
