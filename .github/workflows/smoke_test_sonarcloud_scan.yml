@@ -55,13 +55,6 @@ jobs:
           cp -rf devops/active-learning-service/* ./active-learning-service
           cp -rf devops/docker-compose.yml .
 
-
-      # - name: Annotation App 
-      #   working-directory: ./annotation-app
-      #   run: |
-      #     CI=false npm install
-      #     CI=false npm run build --if-present
-       
       - name: Bring up Docker 
         run: |
           str=$(printf '=%.0s' {1..50})
@@ -89,19 +82,18 @@ jobs:
           ref: 'e2e-test'
           path: 'e2e-test'
 
+      - name: Annotation App 
+        working-directory: ./annotation-app
+        run: |
+          CI=false npm install
+          CI=false npm run build --if-present
 
       - name: Run Smoke Test
         working-directory: ./e2e-test
         run: |
           echo $str Smoke Test Start $str 
-          echo "before npm install"
-          ls -la
           npm install
-          echo "before run webdriver"
-          ls -la
           npm run webdriver
-          echo "before run e2e-smoke"
-          ls -la
           npm run e2e-smoke
           echo "after run e2e-smoke"
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
