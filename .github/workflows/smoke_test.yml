@@ -116,7 +116,7 @@ jobs:
       
   scan_annotation_app:
     runs-on: ubuntu-latest 
-    needs: test
+    needs: smoke_test
 
     #define variables to be used for SonarCloud scan
     env:
