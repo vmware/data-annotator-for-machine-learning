@@ -49,13 +49,12 @@ jobs:
 
       #copy needed files and folders from DevOps branch 
       - run: |
-          pwd
-          ls -l
+          ls devops/annotation-service/config
           cp -rf devops/annotation-service/* ./annotation-service
           cp -rf devops/annotation-app/* ./annotation-app
           cp -rf devops/active-learning-service/* ./active-learning-service
           cp -rf devops/docker-compose.yml .
-          ls -l ./annotation-service
+
 
       - name: Annotation App 
         working-directory: ./annotation-app
@@ -64,13 +63,12 @@ jobs:
           CI=false npm run build --if-present
        
       - name: Bring up Docker 
-#        working-directory: ./F-DecoupleAws
         run: |
           str=$(printf '=%.0s' {1..50})
           echo $str Docker Start $str
           chmod +x annotation-app/docker-entrypoint.sh
           docker-compose up -d
-          sleep 9
+          sleep 5
           docker-compose ps
           docker logs service
           echo $str Docker Done $str     
@@ -97,8 +95,11 @@ jobs:
         run: |
           echo $str Smoke Test Start $str 
           npm install
+          ls -la
           npm run webdriver
           npm run e2e-smoke
+          echo "after run e2e-smoke"
+          ls -la
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
           echo $str Smoke Test End $str 
 
