@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-name: data-annotator
+name: smoke_test
 
+#will remove push later, only leave pull_request to master
 on:
   push:
     branches: [master]
@@ -12,7 +13,7 @@ on:
     branches: [master]
 
 jobs:
-  test:
+  smoke_test:
     runs-on: ubuntu-latest # runs a test on Ubuntu
 
     steps:
@@ -150,96 +151,6 @@ jobs:
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-app
             -Dsonar.typescript.lcov.reportPaths="./e2e-test/coverage-output/lcov.info" 
-            -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
-            -Dsonar.verbose=true 
-            -Dsonar.c.file.suffixes=- 
-            -Dsonar.cpp.file.suffixes=- 
-            -Dsonar.objc.file.suffixes=-
-        env: 
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
-
-  scan_annotation_service:
-    runs-on: ubuntu-latest 
-#    needs: test
-
-    #define variables to be used for SonarCloud scan
-    env:
-      SONAR_ORG: lyeohvm
-      BRANCH: master
-
-    steps:
-      - name: Checkout 
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Checkout devops branch
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          ref: 'devops'
-          path: 'devops'
-
-      # - name: Download all workflow run artifacts
-      #   uses: actions/download-artifact@v2
-
-      - name: SonarCloud setup for annotation-service
-        working-directory: ./devops/sonar
-        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service -ProjectKey ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Scan annotation-service
-        uses: sonarsource/sonarcloud-github-action@master  
-        with:
-          projectBaseDir: ./annotation-service
-          args: >
-            -Dsonar.organization=${{ env.SONAR_ORG }}
-            -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service
-            -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
-            -Dsonar.verbose=true 
-            -Dsonar.c.file.suffixes=- 
-            -Dsonar.cpp.file.suffixes=- 
-            -Dsonar.objc.file.suffixes=-
-        env: 
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
-
-  scan_active_learning_service:
-    runs-on: ubuntu-latest 
-  #  needs: test
-
-    #define variables to be used for SonarCloud scan
-    env:
-      SONAR_ORG: lyeohvm
-      BRANCH: master
-
-    steps:  
-      - name: Checkout 
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Checkout devops branch
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          ref: 'devops'
-          path: 'devops'
-
-      # - name: Download all workflow run artifacts
-      #   uses: actions/download-artifact@v2
-
-      - name: SonarCloud setup for active-learning-service
-        working-directory: ./devops/sonar
-        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-active-learning-service -ProjectKey ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-active-learning-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Scan active-learning-service
-        uses: sonarsource/sonarcloud-github-action@master  
-        with:
-          projectBaseDir: ./active-learning-service
-          args: >
-            -Dsonar.organization=${{ env.SONAR_ORG }}
-            -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-active-learning-service
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
