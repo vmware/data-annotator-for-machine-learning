@@ -4,8 +4,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 <clr-header>
   <div class="branding">
     <a href="#" [routerLink]="['/home']" class="nav-link">
-      <clr-icon shape="flask" class="is-solid" style="color: #0077b8 !important;"></clr-icon>
-      <span class="title">{{env.config.serviceTitle}}</span>
+      <clr-icon shape="flask" class="is-solid" style="color: #0077b8 !important"></clr-icon>
+      <span class="title">{{ env.config.serviceTitle }}</span>
     </a>
   </div>
   <div class="header-nav" [clr-nav-level]="1">
@@ -18,13 +18,31 @@ SPDX-License-Identifier: Apache-2.0 -->
     <a class="nav-link" href="#" [routerLink]="['/datasets']" routerLinkActive="active">
       <span class="nav-text">Community Datasets</span>
     </a>
-    <a *ngIf="showProjectTab" class="nav-link" href="#" [routerLink]="['/projects']" routerLinkActive="active">
+    <a
+      *ngIf="showProjectTab"
+      class="nav-link"
+      href="#"
+      [routerLink]="['/projects']"
+      routerLinkActive="active"
+    >
       <span class="nav-text">Projects</span>
     </a>
-    <a *ngIf="showAdminTab" class="nav-link" href="#" [routerLink]="['/admin']" routerLinkActive="active">
+    <a
+      *ngIf="showAdminTab"
+      class="nav-link"
+      href="#"
+      [routerLink]="['/admin']"
+      routerLinkActive="active"
+    >
       <span class="nav-text">Admin</span>
     </a>
-    <a *ngIf="showDatasetTab" class="nav-link" href="#" [routerLink]="['/myDatasets']" routerLinkActive="active">
+    <a
+      *ngIf="showDatasetTab"
+      class="nav-link"
+      href="#"
+      [routerLink]="['/myDatasets']"
+      routerLinkActive="active"
+    >
       <span class="nav-text">My Datasets</span>
     </a>
     <a class="nav-link" href="#" [routerLink]="['/faq']" routerLinkActive="active">
@@ -32,13 +50,12 @@ SPDX-License-Identifier: Apache-2.0 -->
     </a>
   </div>
   <div class="header-actions">
-    <a *ngIf="!loggedUser" (click)="login()" class="nav-link nav-text" style="cursor: pointer;">
+    <a *ngIf="!loggedUser" (click)="login()" class="nav-link nav-text" style="cursor: pointer">
       Sign In
     </a>
     <clr-dropdown *ngIf="loggedUser">
-
       <button class="nav-text" clrDropdownTrigger>
-        {{loggedUser.email}}
+        {{ loggedUser.email }}
         <clr-icon shape="caret down"></clr-icon>
       </button>
       <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">

@@ -10,7 +10,7 @@ const STS = require('../utils/sts');
 const S3 = require('../utils/s3');
 const config = require('../config/config');
 const USER = require('../db/user-db');
-const fs = require('fs');
+const localFileSysService = require('./localFileSys.service');
 const { ACCESS_TIME_60, AWSRESOURCE } = require('../config/constant');
 
 
@@ -45,13 +45,9 @@ async function deleteOriginalFile(key) {
     return S3.deleteAnObject(key);
 }
 
-async function uploadFileToS3(fileName, key) {
-    console.log(`[ S3 ] Service uploadFileToS3 read temp file stream`, fileName);
-    const file = `./downloadProject/${fileName}`;
-    let fileStream = fs.createReadStream(file);
-    fileStream.on('error', function (err) {
-        console.log('[ S3 ] [ERROR] Service ', err);
-    });
+async function uploadFileToS3(file, key) {
+    console.log(`[ S3 ] Service uploadFileToS3 read temp file stream`, file);
+    let fileStream = await localFileSysService.readFileFromLocalSys(file);
 
     console.log(`[ S3 ] Service uploadFileToS3.S3.uploadObject`, key);
     return S3.uploadObject(key, fileStream);

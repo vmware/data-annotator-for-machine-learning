@@ -155,7 +155,7 @@ async function getUserRoleById(req) {
 
 async function queryUserById(uid){
     console.log('[ USER ] service queryUserById: ', uid);
-    return await userDB.queryUserById({ _id: uid });
+    return userDB.queryUserById({ _id: uid });
 }
 
 module.exports = {

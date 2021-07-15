@@ -4,14 +4,13 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 export interface Upload {
-    format: string
+  format: string;
 }
 
-
 export class UploadUtil {
-    static init(): Upload {
-        return {
-            format: ''
-        }
-    }
-}  
+  static init(): Upload {
+    return {
+      format: '',
+    };
+  }
+}

@@ -15,19 +15,21 @@ export class EnvironmentsService {
   private configuration = '${APP_CONFIG}';
   private env: any;
   private nodeEnvironment: string;
-  constructor(
-    public router: Router,
-  ) {
-
-    console.log('APP_CONFIG：', this.configuration)
-    this.nodeEnvironment = this.configuration === '' || this.configuration.startsWith('$') ? '' : `.${this.configuration}`;
+  constructor(public router: Router) {
+    console.log('APP_CONFIG：', this.configuration);
+    this.nodeEnvironment =
+      this.configuration === '' || this.configuration.startsWith('$')
+        ? ''
+        : `.${this.configuration}`;
     this.env = require('../../environments/environment' + this.nodeEnvironment);
-    console.log("Environment:", this.nodeEnvironment);
+    console.log('Environment:', this.nodeEnvironment);
     // Global site tag (gtag.js) - Google Analytics Start
     if (this.configuration == 'prod' && this.env.environment.googleTrackId) {
-      this.router.events.subscribe(event => {
+      this.router.events.subscribe((event) => {
         if (event instanceof NavigationEnd) {
-          gtag('config', this.env.environment.googleTrackId, { page_path: event.urlAfterRedirects });
+          gtag('config', this.env.environment.googleTrackId, {
+            page_path: event.urlAfterRedirects,
+          });
         }
       });
     }

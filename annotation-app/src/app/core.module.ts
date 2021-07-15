@@ -19,11 +19,10 @@ export function jwtOptionsFactory(authService: UserAuthService, env: Environment
     },
     whitelistedDomains: [
       `${env.config.annotationService}`.replace(/(http|https):\/\//, ''),
-      `${env.config.authUrl}`.replace(/(http|https):\/\//, '')
+      `${env.config.authUrl}`.replace(/(http|https):\/\//, ''),
     ],
   };
 }
-
 
 @NgModule({
   declarations: [],
@@ -37,7 +36,7 @@ export function jwtOptionsFactory(authService: UserAuthService, env: Environment
       },
     }),
   ],
-  exports: []
+  exports: [],
 })
 export class CoreModule {
   constructor(@Optional() @SkipSelf() core: CoreModule) {

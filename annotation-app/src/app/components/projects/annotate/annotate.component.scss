@@ -357,14 +357,13 @@ label .label-leftBoard {
 .entity {
   color: #0077b8;
   font-size: 0.77em;
-  font-weight: bold;
   margin-left: 8px;
   text-transform: uppercase;
   vertical-align: middle;
   word-break: keep-all;
   white-space: nowrap;
   font-weight: 900;
-  font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+  font-family: 'Roboto Condensed', 'Arial Narrow', sans-serif;
 }
 
 .clear {
@@ -725,10 +724,7 @@ label .label-leftBoard {
   margin-left: -0.7rem;
 }
 
-::ng-deep
-  .ng-dropdown-panel
-  .ng-dropdown-panel-items
-  .ng-option.ng-option-selected {
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected {
   color: currentColor !important;
 }
 
@@ -737,18 +733,11 @@ label .label-leftBoard {
   margin-left: -0.7rem;
 }
 
-::ng-deep
-  .ng-select.ng-select-single
-  .ng-select-container
-  .ng-value-container
-  .ng-value {
+::ng-deep .ng-select.ng-select-single .ng-select-container .ng-value-container .ng-value {
   margin-top: 0.6rem;
   white-space: normal !important;
   word-break: break-all;
 }
-
-
-
 
 ::ng-deep .ng-select .ng-select-container .ng-value-container {
   align-items: stretch;
@@ -762,4 +751,3 @@ label .label-leftBoard {
   word-break: break-all;
   margin-bottom: 0.3rem;
 }
-

@@ -35,7 +35,21 @@ async function deleteAnObject(Key){
         Key: Key, 
     }
     console.log('[ S3 ] Utils deleteAnObject.S3.deleteObject', Key);
-    return await S3.deleteObject(deleteParams).promise();
+    return S3.deleteObject(deleteParams).promise();
+}
+
+async function deleteMultiObjects(Keys){
+    console.log('[ S3 ] Utils deleteMultiObjects.s3Client');
+    const S3 = await s3Client();
+    const deleteParams = {
+        Bucket: config.bucketName, 
+        Delete: {
+            Objects: Keys, // [{Key: "max is 1000"}]
+            Quiet: true
+        }
+    }
+    console.log('[ S3 ] Utils deleteMultiObjects.S3.deleteObjects', Keys.length);
+    return S3.deleteObjects(deleteParams).promise();
 }
 
 async function uploadObject(Key, Body){
@@ -69,5 +83,6 @@ module.exports = {
     deleteAnObject,
     uploadObject,
     signedUrlByS3,
+    deleteMultiObjects,
 
 }

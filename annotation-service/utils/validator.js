@@ -11,6 +11,8 @@ const projectDB = require('../db/project-db');
 const userDB = require('../db/user-db');
 const {ROLES, SPECAILCHARTOSTRING} = require('../config/constant');
 const dataSetDB = require('../db/dataSet-db');
+const mongoDb = require('../db/mongo.db');
+const { ProjectModel } = require('../db/db-connect');
 
 function isASCII(str) {
     return /^[\x00-\xFF\u2013-\u2122]*$/.test(str);
@@ -64,7 +66,7 @@ async function checkAnnotator(uid){
     }
 }
 
- async function checkDataSet(conditions, checkExsit){
+async function checkDataSet(conditions, checkExsit){
      const ds = await dataSetDB.queryDataSetByConditions(conditions);
      if (checkExsit) {
         if (!ds[0]) {
@@ -79,7 +81,7 @@ async function checkAnnotator(uid){
  }
 
 
- async function checkRequired(parameters) {
+async function checkRequired(parameters) {
     
     const paramType = typeof parameters;
     if (!parameters) {
@@ -100,13 +102,24 @@ async function checkAnnotator(uid){
         }
     }
     return false;
- }
+}
 
- async function validateRequired(parameters) {
+async function validateRequired(parameters) {
     if (!await checkRequired(parameters)) {
      throw {4003: "input field invalid"}   
     }
- }
+}
+
+async function checkDataSetInUse(dataSetName, throwError) {
+    const conditions = { selectedDataset: dataSetName};
+    const pro = await mongoDb.findByConditions(ProjectModel, conditions, "projectName");
+    console.log(pro)
+    if (pro[0] && throwError) {
+        const pnames = await pro.reduce((pnameString, curr) => `${pnameString} / ${curr.projectName}`, "");
+        throw {CODE: 4001, MSG: `DATA-SET USING BY: ${pnames}`};
+    }
+    return pro;
+}
 
 module.exports = {
     isASCII,
@@ -118,4 +131,6 @@ module.exports = {
     checkDataSet,
     checkRequired,
     validateRequired,
+    checkDataSetInUse,
+
 };

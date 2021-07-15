@@ -19,7 +19,6 @@ export interface Dataset {
   label?: string;
   columns?: any[];
   source?: string;
-
 }
 
 export class DatasetUtil {
@@ -28,7 +27,7 @@ export class DatasetUtil {
       user: '',
       name: '',
       description: '',
-      annotationQuestion: "What label does this ticket belong to ?",
+      annotationQuestion: 'What label does this ticket belong to ?',
       maxAnnotations: null,
       labels: [],
       assigmentLogic: 'random',
@@ -46,8 +45,7 @@ export class DatasetUtil {
       max: null,
       multipleLabel: null,
       selectedText: null,
-      isShowFilename: false
-
+      isShowFilename: false,
     };
   }
 
@@ -55,7 +53,7 @@ export class DatasetUtil {
     return {
       hasHeader: 'yes',
       localFile: null,
-      fileFormat: null
+      fileFormat: null,
     };
   }
 
@@ -68,11 +66,10 @@ export class DatasetUtil {
       format: 'tabular',
       hasHeader: 'yes',
       isMultiLabel: 'no',
-      query: ''
+      query: '',
     };
   }
 }
-
 
 export interface DatasetData {
   user: string;
@@ -106,7 +103,6 @@ export interface DatasetFile {
   localFile?: string;
   platforms?: string;
   key?: string;
-
 }
 
 export interface DatasetOption {
@@ -131,11 +127,8 @@ export interface QueryDatasetData {
   query: string;
 }
 
-
 export interface UploadData {
   hasHeader: string;
   localFile: any;
   fileFormat: string;
 }
-
-

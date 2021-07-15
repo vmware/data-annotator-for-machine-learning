@@ -16,7 +16,7 @@
     "target": "es5",
     "allowJs": true,
     "typeRoots": ["node_modules/@types"],
-    "types": ["jasmine", "core-js", "node"]
+    "types": ["core-js", "node"]
   },
   "exclude": ["node_modules", "dist"]
 }

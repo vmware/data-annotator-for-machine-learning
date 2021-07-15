@@ -15,14 +15,15 @@ import { EnvironmentsService } from 'app/services/environments.service';
 @Component({
   selector: 'app-authentication',
   templateUrl: './authentication.component.html',
-  styles: [`
-    .filter-artifacts {
-      text-align: right;
-    }
-  `],
+  styles: [
+    `
+      .filter-artifacts {
+        text-align: right;
+      }
+    `,
+  ],
 })
 export class AuthenticationComponent implements OnInit {
-
   returnUrl: string;
   loggedUser: User = null;
   loading: boolean;
@@ -33,29 +34,34 @@ export class AuthenticationComponent implements OnInit {
     private userAuthService: UserAuthService,
     private location: Location,
     private env: EnvironmentsService,
-
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
     this.loading = true;
-    this.route.queryParams.pipe(
-      map(params => params),
-      mergeMap((data: any) => {
-        const code = data['code'];
-        const state = data['state'];
-        if (state !== this.env.config.STATE) {
-          return Observable.throw("Wrong state...");
-        }
-        let redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl ? this.env.config.redirectUrl : '/home');
-        return this.userAuthService.loging(code, this.env.config.CLIENT_ID, redirectUrl);
-      }))
+    this.route.queryParams
+      .pipe(
+        map((params) => params),
+        mergeMap((data: any) => {
+          const code = data['code'];
+          const state = data['state'];
+          if (state !== this.env.config.STATE) {
+            return Observable.throw('Wrong state...');
+          }
+          const redirectUrl =
+            window.location.origin +
+            this.location.prepareExternalUrl(
+              this.env.config.redirectUrl ? this.env.config.redirectUrl : '/home',
+            );
+          return this.userAuthService.loging(code, this.env.config.CLIENT_ID, redirectUrl);
+        }),
+      )
       .subscribe(
-        data => {
+        (data) => {
           this.loading = false;
           this.router.navigate([this.returnUrl]);
         },
-        error => {
+        (error) => {
           this.loading = false;
           this.router.navigate(['/home']);
         },

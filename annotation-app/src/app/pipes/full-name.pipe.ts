@@ -10,10 +10,8 @@ import { Pipe, PipeTransform } from '@angular/core';
  */
 @Pipe({ name: 'fullNamePipe' })
 export class FullNamePipe implements PipeTransform {
-
   transform(fullName: string): string {
     const match = /^([^\d]+)/.exec(fullName);
-    return (match && match[1]) ? match[1] : fullName;
+    return match && match[1] ? match[1] : fullName;
   }
-
 }
