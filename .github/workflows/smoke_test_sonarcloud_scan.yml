@@ -55,6 +55,7 @@ jobs:
           cp -rf devops/annotation-app/* ./annotation-app
           cp -rf devops/active-learning-service/* ./active-learning-service
           cp -rf devops/docker-compose.yml .
+          ls -l ./annotation-service
 
       - name: Annotation App 
         working-directory: ./annotation-app
@@ -69,13 +70,13 @@ jobs:
           echo $str Docker Start $str
           chmod +x annotation-app/docker-entrypoint.sh
           docker-compose up -d
-          sleep 5
+          sleep 9
           docker-compose ps
+          docker logs service
           echo $str Docker Done $str     
 
       - name: Test Connection
         run: |
-          ls
           echo Curl register
           curl -X PUT -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password","uname":"Joe K Qiao"}' http://localhost:3000/api/v1.0/register
           echo Curl End register
