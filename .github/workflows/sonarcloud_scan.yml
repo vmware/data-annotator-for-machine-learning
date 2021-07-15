@@ -49,8 +49,8 @@ jobs:
           ref: 'devops'
           path: 'devops'
 
-      - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v2
+      # - name: Download all workflow run artifacts
+      #   uses: actions/download-artifact@v2
 
       - name: SonarCloud setup for annotation-service
         working-directory: ./devops/sonar
@@ -93,8 +93,8 @@ jobs:
           ref: 'devops'
           path: 'devops'
 
-      - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v2
+      # - name: Download all workflow run artifacts
+      #   uses: actions/download-artifact@v2
 
       - name: SonarCloud setup for active-learning-service
         working-directory: ./devops/sonar
@@ -119,12 +119,18 @@ jobs:
   scan_annotation_app:
     runs-on: ubuntu-latest 
 
+    
+
     #define variables to be used for SonarCloud scan
     env:
       SONAR_ORG: lyeohvm
       BRANCH: master
 
     steps:
+      - run: |
+          python --version
+          pip3 install requests
+
       - name: Checkout 
         uses: actions/checkout@v2
         with:
@@ -137,8 +143,8 @@ jobs:
           ref: 'devops'
           path: 'devops'
 
-      - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v2
+      # - name: Download all workflow run artifacts
+      #   uses: actions/download-artifact@v2
 
       - name: SonarCloud setup for annotation-app
         working-directory: ./devops/sonar
