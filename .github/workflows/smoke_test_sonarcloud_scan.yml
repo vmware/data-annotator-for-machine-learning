@@ -49,7 +49,7 @@ jobs:
 
       #copy needed files and folders from DevOps branch 
       - run: |
-          ls devops/annotation-service/config
+          ls devops/annotation-service
           cp -rf devops/annotation-service/* ./annotation-service
           cp -rf devops/annotation-app/* ./annotation-app
           cp -rf devops/active-learning-service/* ./active-learning-service
@@ -71,7 +71,7 @@ jobs:
           sleep 5
           docker-compose ps
           docker logs service
-          echo $str Docker Done $str     
+          echo $str Docker Done $str  
 
       - name: Test Connection
         run: |
@@ -95,11 +95,9 @@ jobs:
         run: |
           echo $str Smoke Test Start $str 
           npm install
-          ls -la
           npm run webdriver
           npm run e2e-smoke
           echo "after run e2e-smoke"
-          ls -la
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
           echo $str Smoke Test End $str 
 
