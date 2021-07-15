@@ -67,21 +67,21 @@ jobs:
           sleep 5
           echo $str Docker Done $str     
 
-      - name: Annotation App 
-        working-directory: ./annotation-app
-        run: |
-          CI=false npm install
-          CI=false npm run build --if-present
+      # - name: Annotation App 
+      #   working-directory: ./annotation-app
+      #   run: |
+      #     CI=false npm install
+      #     CI=false npm run build --if-present
 
-      - name: Test Connection
-        run: |
-          ls
-          echo Curl register
-          curl -X PUT -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password","uname":"Joe K Qiao"}' http://localhost:3000/api/v1.0/register
-          echo Curl End register
-          echo Curl Start login
-          curl -X POST -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password"}' http://localhost:3000/api/v1.0/login
-          echo Curl End login
+      # - name: Test Connection
+      #   run: |
+      #     ls
+      #     echo Curl register
+      #     curl -X PUT -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password","uname":"Joe K Qiao"}' http://localhost:3000/api/v1.0/register
+      #     echo Curl End register
+      #     echo Curl Start login
+      #     curl -X POST -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password"}' http://localhost:3000/api/v1.0/login
+      #     echo Curl End login
 
       - name: Checkout e2e-test branch
         uses: actions/checkout@v2
