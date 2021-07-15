@@ -55,6 +55,12 @@ jobs:
           cp -rf devops/annotation-app/* ./annotation-app
           cp -rf devops/active-learning-service/* ./active-learning-service
           cp -rf devops/docker-compose.yml .
+
+      - name: Annotation App 
+        working-directory: ./annotation-app
+        run: |
+          CI=false npm install
+          CI=false npm run build --if-present
        
       - name: Bring up Docker 
 #        working-directory: ./F-DecoupleAws
@@ -63,15 +69,9 @@ jobs:
           echo $str Docker Start $str
           chmod +x annotation-app/docker-entrypoint.sh
           docker-compose up -d
-          docker-compose ps
           sleep 5
+          docker-compose ps
           echo $str Docker Done $str     
-
-      - name: Annotation App 
-        working-directory: ./annotation-app
-        run: |
-          CI=false npm install
-          CI=false npm run build --if-present
 
       - name: Test Connection
         run: |
