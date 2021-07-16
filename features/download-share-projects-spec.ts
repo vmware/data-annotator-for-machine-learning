@@ -13,7 +13,7 @@ const path = require("path");
 describe("verify generate-download-share funtion", () => {
   const filename = "Export_text-test-data_";
   // const dirPath = process.cwd() + '\\doc\\download';
-  const dirPath = require("path").join(__dirname, "/doc/download");
+  const dirPath = require("path").join(__dirname, "../doc/download");
 
   let commonPage: CommonPage = new CommonPage();
   let downloadSharePage: DownloadSharePage = new DownloadSharePage();
