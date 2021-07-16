@@ -53,7 +53,7 @@ async function createProject(req) {
     await logImporter.execute(req, true, annotators);
 
     console.log(`[ FILE ] Service save project info to db`);
-    return await saveProjectInfo(req, userCompleteCase, annotators);
+    return saveProjectInfo(req, userCompleteCase, annotators);
 }
 
 async function saveProjectInfo(req, userCompleteCase, annotators){
@@ -127,21 +127,21 @@ async function prepareHeaders(project, format) {
 
     let headerArray = [];
     //selected headers
-    if (project.projectType == PROJECTTYPE.IMGAGE || project.projectType == PROJECTTYPE.LOG) {
-        let param = { id: "fileName", title: "fileName" };
-        headerArray.push(param);
+    if (project.projectType == PROJECTTYPE.IMGAGE) {
+        headerArray.push({ id: "fileName", title: "fileName" });
+    }else if(project.projectType == PROJECTTYPE.LOG){
+        headerArray.push({ id: "fileName", title: "fileName" });
+        headerArray.push({ id: "freeText", title: "freeText" });
     }else{
         await project.selectedColumn.forEach(item => {
-            let param = { id: item, title: item };
-            headerArray.push(param);
+            headerArray.push({ id: item, title: item });
         });
     }
     
     // label info regression project doesn't need
     if (project.labelType != LABELTYPE.NUMERIC) {
         await project.categoryList.split(",").forEach(item => {
-            let param = { id: item, title: item };
-            headerArray.push(param);
+            headerArray.push({ id: item, title: item });
         });
     }
 
@@ -226,8 +226,11 @@ async function prepareContents(srData, project, format) {
             await project.categoryList.split(",").forEach(item => {
                 newCase[item] = [];
             });
-            
+            // log project max annotation is 1
             await srs.userInputs.forEach(async item => {
+                
+                newCase.freeText = item.logFreeText;
+                
                 await item.problemCategory.sort((a,b) => {return a.line - b.line}).forEach(async lb =>{
                     await project.categoryList.split(",").forEach((label) => {
                         if (lb.label === label) {
@@ -399,8 +402,10 @@ async function queryFileForDownlad(req) {
         if (data.projectType == PROJECTTYPE.LOG) {
             for (const dataset of data.selectedDataset) {
                 const ds = await mongoDb.findOneByConditions(DataSetModel, {dataSetName: dataset}, 'location');
-                const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
-                originalDataSets.push(signedUrl)
+                if (ds && ds.location) {
+                    const signedUrl = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ds.location, S3);
+                    originalDataSets.push(signedUrl)
+                }
             }
         }
     }

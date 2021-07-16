@@ -179,7 +179,11 @@ async function deleteDataSet(req) {
     const user = req.auth.email;
 
     if (ds[0].format == DATASETTYPE.CSV || ds[0].format == DATASETTYPE.TABULAR || ds[0].format == DATASETTYPE.LOG) {
-
+        
+        if (ds[0].format == DATASETTYPE.LOG) {
+            await validator.checkDataSetInUse(req.body.dsname, true);
+        }
+        
         if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
             console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteAnObject`);
             await S3Utils.deleteAnObject(req.body.fileKey);

@@ -10,8 +10,9 @@ const STS = require('../utils/sts');
 const S3 = require('../utils/s3');
 const config = require('../config/config');
 const USER = require('../db/user-db');
-const { ACCESS_TIME_60 } = require('../config/constant');
 const localFileSysService = require('./localFileSys.service');
+const { ACCESS_TIME_60, AWSRESOURCE } = require('../config/constant');
+
 
 async function prepareS3Configs(req) {
     console.log(`[ S3 ] Service prepareS3Configs user: `, req.auth.email);
@@ -28,7 +29,7 @@ async function prepareS3Configs(req) {
         apiVersion: Buffer.from('2006-03-01').toString('base64'),
         credentials: ""
     }
-    const data = await STS.prepareCredentials(config.s3RoleArn, ACCESS_TIME_60);
+    const data = await STS.prepareCredentials(AWSRESOURCE.S3, ACCESS_TIME_60);
     reponse.credentials = {
         accessKeyId: Buffer.from(data.Credentials.AccessKeyId).toString('base64'),
         secretAccessKey: Buffer.from(data.Credentials.SecretAccessKey).toString('base64'),
