@@ -104,7 +104,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: code-coverage-report
+          name: coverage-output
           path: ./e2e-test/coverage-output/
           retention-days: 1
 
@@ -112,7 +112,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: code-coverage-report
+          name: allure-results
           path: ./e2e-test/allure-results/
           retention-days: 1
 
