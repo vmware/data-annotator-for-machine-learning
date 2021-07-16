@@ -100,11 +100,20 @@ jobs:
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
           echo $str Smoke Test End $str 
 
-      - name: keep the coverage report  from test job to subsequent scan jobs
+      - name: keep the coverage output folder
+        if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: code-coverage-report
-          path: ./e2e-test/coverage-output/lcov.info
+          path: ./e2e-test/coverage-output/
+          retention-days: 1
+
+      - name: keep the allure results folder
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report
+          path: ./e2e-test/allure-results/
           retention-days: 1
 
       # - name: keep the devops branch folder from test job to subsequent scan jobs
