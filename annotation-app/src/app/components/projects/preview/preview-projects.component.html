@@ -154,9 +154,6 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
             <div style="margin-bottom: 2rem" class="annotationDataTable">
-              <!-- <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)"
-                                *ngIf=!firstLoadTable [(clrDgSelected)]="selectedLogsToModify"
-                                (clrDgSelectedChange)="selectionLogsChanged($event)"> -->
               <clr-datagrid
                 #dataGird
                 [clrDgLoading]="loading"
@@ -469,7 +466,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </clr-tab-content>
         </clr-tab>
         <clr-tab>
-          <button clrTabLink>Flag</button>
+          <button clrTabLink (click)="clickFlagTab()">Flag</button>
           <clr-tab-content *clrIfActive>
             <div style="margin-top: 0.5rem">
               <div class="btn-group btn-primary btn-icon">

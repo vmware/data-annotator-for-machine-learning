@@ -850,4 +850,9 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     this.getALLSrsParam.fname = data;
     this.getALLSrs();
   }
+
+  clickFlagTab() {
+    this.formerFilenameFilter = '';
+    this.getALLSrsParam.fname = '';
+  }
 }

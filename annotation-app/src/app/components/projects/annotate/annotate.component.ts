@@ -1729,6 +1729,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               }
             }
           });
+          this.questionForm
+            .get('questionGroup.logFreeText')
+            .setValue(
+              this.sr.userInputs[0].logFreeText !== '' ? this.sr.userInputs[0].logFreeText : null,
+            );
         }
       }, 10);
     }
@@ -1748,7 +1753,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.multipleLabelList = [];
     this.spansList = [];
     if (this.projectType === 'log') {
-      this.questionForm.get('questionGroup.logFreeText').reset();
+      this.questionForm.get('questionGroup.filterText').reset();
     }
     this.regexErr = false;
   }
@@ -2571,7 +2576,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.regexErr = false;
       }
       this.filterList.push({ filterType: this.filterType, filterText: e.value });
-      this.questionForm.get('questionGroup.logFreeText').reset();
+      this.questionForm.get('questionGroup.filterText').reset();
       this.toFilterLog(this.filterList);
     }
   }
@@ -2591,7 +2596,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.regexErr = false;
       }
       this.filterList.push({ filterType: this.filterType, filterText: e.target.value });
-      this.questionForm.get('questionGroup.logFreeText').reset();
+      this.questionForm.get('questionGroup.filterText').reset();
       this.toFilterLog(this.filterList);
     }
   }
