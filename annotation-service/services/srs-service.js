@@ -73,8 +73,16 @@ async function updateSrsUserInput(req) {
         let userInputs = []
         req.body.userInput.forEach(ui => {
             if (ui.tid == ticket._id.toString()) {
-                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.LOG) {
+                if (pro.projectType == PROJECTTYPE.NER) {
                     userInputs.push({
+                        problemCategory: ui.problemCategory,
+                        user: user,
+                        timestamp: Date.now()
+                    });
+                }else if(pro.projectType == PROJECTTYPE.LOG){
+                    console.log('----------------->', ui);
+                    userInputs.push({
+                        logFreeText: ui.logFreeText,
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
@@ -108,13 +116,21 @@ async function updateSrsUserInput(req) {
         let userInputs = []
         req.body.userInput.forEach(ui => {
             if (ui.tid == id) {
-                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.LOG) {
+                if (pro.projectType == PROJECTTYPE.NER) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
                     });
-                } else {
+                }else if(pro.projectType == PROJECTTYPE.LOG){
+                    console.log('----------------->', ui);
+                    userInputs.push({
+                        logFreeText: ui.logFreeText,
+                        problemCategory: ui.problemCategory,
+                        user: user,
+                        timestamp: Date.now()
+                    });
+                }else {
                     ui.problemCategory.forEach(lb =>{
                         userInputs.push({
                             problemCategory: lb,
@@ -811,7 +827,7 @@ async function reviewTicket(req) {
         await flagToReview(tids);
     }else if (await validator.checkRequired(req.body.modify)) {
         await calculateReviewdCase(pid, tids, user);
-        await modifyReview(tids,user, req.body.problemCategory);
+        await modifyReview(tids,user, req.body.problemCategory, req.body.logFreeText);
     }else if (!await validator.checkRequired(req.body.modify)) {
         await calculateReviewdCase(pid, tids, user);
         await passReview(tids,user);  
@@ -834,7 +850,7 @@ async function passReview(tids,user) {
     }};
     await mongoDb.updateManyByConditions(LogModel, conditions, update);
 }
-async function modifyReview(tids,user,problemCategory) {
+async function modifyReview(tids,user,problemCategory, logFreeText) {
     const conditions = {_id: tids[0]};
     const update = { $set: {
         "reviewInfo.review": false, 
@@ -842,7 +858,8 @@ async function modifyReview(tids,user,problemCategory) {
         "reviewInfo.modified": true,
         "reviewInfo.user": user,
         "reviewInfo.reviewedTime": Date.now(),
-        "userInputs.0.problemCategory": problemCategory
+        "userInputs.0.problemCategory": problemCategory,
+        "userInputs.0.logFreeText": logFreeText
     }};
     await mongoDb.updateByConditions(LogModel, conditions, update);
 }
