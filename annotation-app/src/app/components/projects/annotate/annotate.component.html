@@ -375,15 +375,60 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
 
           <div class="questionContainer">
-            <div
-              *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'"
-              class="textBox"
-            >
-              <div *ngFor="let ticket of sr.originalData">
+            <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'">
+              <div class="textActionBar">
+                <div class="btn-group" style="margin-bottom: 0.5rem">
+                  <div class="radio btn">
+                    <input
+                      type="radio"
+                      name="btn-group-demo-radios"
+                      value="html"
+                      id="btn-demo-radio-1"
+                      (change)="changeRenderFormat($event)"
+                      [(ngModel)]="renderFormat"
+                      [ngModelOptions]="{ standalone: true }"
+                      checked
+                    />
+                    <label for="btn-demo-radio-1"
+                      ><clr-icon
+                        aria-hidden="true"
+                        shape="clipboard"
+                        style="margin-right: 0.3rem"
+                      ></clr-icon
+                      >rendered file</label
+                    >
+                  </div>
+                  <div class="radio btn">
+                    <input
+                      type="radio"
+                      name="btn-group-demo-radios"
+                      value="md"
+                      id="btn-demo-radio-2"
+                      (change)="changeRenderFormat($event)"
+                      [(ngModel)]="renderFormat"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                    <label for="btn-demo-radio-2"
+                      ><clr-icon
+                        aria-hidden="true"
+                        shape="view-list"
+                        style="margin-right: 0.3rem"
+                      ></clr-icon
+                      >source</label
+                    >
+                  </div>
+                </div>
+              </div>
+              <div *ngFor="let ticket of sr.originalData" class="textBox">
                 <p class="question-paragraph" style="word-break: break-word; white-space: pre">
                   <span class="ticketColumn">{{ ticket.key }}</span>
                   <span>:&nbsp;&nbsp;</span>
-                  <span>{{ ticket.value }}</span>
+                  <span
+                    *ngIf="renderFormat !== 'md'"
+                    [innerHtml]="ticket.html"
+                    style="white-space: nowrap"
+                  ></span>
+                  <span *ngIf="renderFormat === 'md'">{{ ticket.value }}</span>
                 </p>
                 <br />
               </div>
@@ -418,6 +463,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <!-- here is LSF image annotation -->
               </div>
             </div>
+            <!-- here is ner annotation content -->
             <div *ngIf="projectType === 'ner'" class="nerBox">
               <span
                 *ngFor="let ticket of sr.originalData.tokens"

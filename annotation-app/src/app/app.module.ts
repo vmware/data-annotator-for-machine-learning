@@ -50,6 +50,7 @@ import { ToolService } from './services/common/tool.service';
 import { SliceTextPipe } from './pipes/sliceText.pipe';
 import { MathRoundPipe } from './pipes/math-round.pipe';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { MarkdownParserService } from './services/common/markdown-parser.service';
 
 @NgModule({
   declarations: [
@@ -105,6 +106,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
     UnZipService,
     DownloadService,
     ToolService,
+    MarkdownParserService,
   ],
   bootstrap: [AppComponent],
 })

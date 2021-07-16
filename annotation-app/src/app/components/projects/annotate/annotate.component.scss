@@ -460,8 +460,10 @@ label .label-leftBoard {
 
 ::ng-deep .textBox {
   overflow: auto;
-  max-height: 18rem;
+  // max-height: 18rem;
+  height: 18rem;
   padding-bottom: 3rem;
+  resize: vertical;
 }
 
 .txtRow {
@@ -750,4 +752,9 @@ label .label-leftBoard {
   white-space: normal !important;
   word-break: break-all;
   margin-bottom: 0.3rem;
+}
+
+.textActionBar {
+  box-shadow: 0 7px 6px -9px #999;
+  margin-bottom: 1rem;
 }

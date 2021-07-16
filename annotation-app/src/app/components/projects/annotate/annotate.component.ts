@@ -23,7 +23,7 @@ import { GetElementService } from 'app/services/common/dom.service';
 import { ToolService } from 'app/services/common/tool.service';
 import { UserAuthService } from 'app/services/user-auth.service';
 import { EnvironmentsService } from 'app/services/environments.service';
-
+import { MarkdownParserService } from 'app/services/common/markdown-parser.service';
 @Component({
   selector: 'app-annotate',
   templateUrl: './annotate.component.html',
@@ -119,6 +119,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedFile: number;
   currentLogFile: string;
   logFiles: any = [];
+  convertedText: string;
+  renderFormat: string = 'html';
 
   constructor(
     private renderer2: Renderer2,
@@ -132,6 +134,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     private toolService: ToolService,
     private userAuthService: UserAuthService,
     private env: EnvironmentsService,
+    private md: MarkdownParserService,
   ) {
     this.user = this.userAuthService.loggedUser();
   }
@@ -245,9 +248,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 ? this.sr.fileInfo.fileName
                 : '';
           }
-          if (this.sr.flag && this.sr.flag.silence) {
+          if (this.sr && this.sr.flag && this.sr.flag.silence) {
             this.silenceStatus = true;
           }
+
           if (this.labelType == 'numericLabel') {
             this.isNumeric = true;
             this.numericMessage =
@@ -277,9 +281,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loading = false;
       },
       () => {
-        if (!this.sr.MSG) {
+        if (this.sr && !this.sr.MSG) {
           this.loading = false;
         }
+
         if (this.projectType == 'log' && !this.error) {
           setTimeout(() => {
             this.el.nativeElement.querySelector(
@@ -322,7 +327,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sr = res;
             this.sr = this.resetLogSrData(this.sr);
             this.currentLogFile = this.sr.fileInfo.fileName;
-            if (this.sr.flag && this.sr.flag.silence) {
+            if (this.sr && this.sr.flag && this.sr.flag.silence) {
               this.silenceStatus = true;
             }
             this.getAllLogFilename();
@@ -725,7 +730,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           : '';
       this.toFilterLog(this.filterList);
     }
-    if (this.sr.flag && this.sr.flag.silence) {
+    if (this.sr && this.sr.flag && this.sr.flag.silence) {
       this.silenceStatus = true;
     }
     if (this.isNumeric) {
@@ -897,7 +902,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.getProgress();
           }
         }
-        if (this.sr.flag && this.sr.flag.silence) {
+        if (this.sr && this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
         }
         this.loading = false;
@@ -1193,6 +1198,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sortBy(this.projectType === 'ner' ? 'start' : 'line', 'ascending'),
           );
         }
+
         for (let i = 0; i < aa.length; i++) {
           let aaString;
           let bbString;
@@ -1433,7 +1439,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.getProgress();
           }
         }
-        if (this.sr.flag && this.sr.flag.silence) {
+        if (this.sr && this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
         }
         this.loading = false;
@@ -1960,6 +1966,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               flag.push({ key, value });
               responseSr.originalData = flag;
             });
+            this.updateOutput(flag[0].value).then((e) => {
+              flag[0].html = e;
+              responseSr.originalData = flag;
+              this.sr.originalData = responseSr.originalData;
+            });
           }
           if (this.projectType == 'image') {
             this.historyTask = [
@@ -2076,15 +2087,39 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  // resetTabularSrData(sr) {
+  //   if (!sr.MSG) {
+  //     const flag = [];
+  //     sr = sr[0];
+  //     _.forIn(sr.originalData, function (value, key) {
+  //       flag.push({ key, value });
+  //     });
+  //     sr.originalData = flag;
+  //     return sr;
+  //   } else {
+  //     return sr;
+  //   }
+  // }
+
   resetTabularSrData(sr) {
+    const vv = [];
     if (!sr.MSG) {
-      const flag = [];
       sr = sr[0];
       _.forIn(sr.originalData, function (value, key) {
-        flag.push({ key, value });
+        vv.push({ key, value });
       });
-      sr.originalData = flag;
-      return sr;
+      this.updateOutput(vv[0].value).then((e) => {
+        vv[0].html = e;
+        sr.originalData = vv;
+        this.sr = sr;
+        if (this.sr && this.sr.flag && this.sr.flag.silence) {
+          this.silenceStatus = true;
+        }
+        if (this.sr && !this.sr.MSG) {
+          this.loading = false;
+        }
+        return sr;
+      });
     } else {
       return sr;
     }
@@ -2729,7 +2764,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               this.getProgress();
             }
 
-            if (this.sr.flag && this.sr.flag.silence) {
+            if (this.sr && this.sr.flag && this.sr.flag.silence) {
               this.silenceStatus = true;
             }
             this.loading = false;
@@ -2761,6 +2796,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       }
     }
+  }
+
+  changeRenderFormat(e) {
+    this.renderFormat = e.target.value;
+  }
+
+  updateOutput(mdText) {
+    return new Promise((resolve) => {
+      this.convertedText = this.md.convert(mdText);
+      resolve(this.convertedText);
+    });
   }
 
   outOfPage() {
