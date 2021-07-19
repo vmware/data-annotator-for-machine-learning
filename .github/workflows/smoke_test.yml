@@ -5,7 +5,6 @@
 
 name: smoke_test
 
-#will remove push later, only leave pull_request to master
 on:
   push:
     branches: [master]
@@ -41,35 +40,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Checkout devops branch
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          ref: 'devops'
-          path: 'devops'
-
-      #copy needed files and folders from DevOps branch 
-      # - run: |
-      #     ls devops/annotation-service
-      #     cp -rf devops/annotation-service/* ./annotation-service
-      #     cp -rf devops/annotation-app/* ./annotation-app
-      #     cp -rf devops/active-learning-service/* ./active-learning-service
-      #     cp -rf devops/docker-compose.yml .
-
-      # - name: Bring up Docker 
-      #   run: |
-      #     str=$(printf '=%.0s' {1..50})
-      #     echo $str Docker Start $str
-      #     chmod +x annotation-app/docker-entrypoint.sh
-      #     MONGODB_URL='mongodb://mo/daml' docker-compose up -d
-      #     sleep 5
-      #     docker-compose ps
-      #     echo Service container logs
-      #     docker logs service
-      #     echo Active container logs
-      #     docker logs active
-      #     echo $str Docker Done $str  
-
       - uses: actions/cache@v2
         with:
           path: ~/.npm
@@ -94,7 +64,6 @@ jobs:
         run: |
           npm install
           npm run start &
-          #pm2 start "npm run start &" --name service # can access
             
       - name: build-and-run-al
         working-directory: ./active-learning-service
@@ -102,7 +71,6 @@ jobs:
           pip install -r requirements.txt
           python -m spacy download en_core_web_md
           python manage.py runserver localhost:8000 &
-          #pm2 start "python manage.py runserver localhost:8000" --name active #can't access
 
       - name: Test Connection
         run: |
@@ -117,9 +85,9 @@ jobs:
           
           access_token=${resp:26:163}
           
-          echo container Start connect-active-learning-service using local host
+          echo container Start connect-active-learning-service 
           curl -X POST -H "Content-Type: application/json" -H "Authorization: ${access_token}" -d '{"data": [{"text": "NERS PROJECT TEST-CONNECT."}]}' http://localhost:8000/api/ner/user-tokens
-          echo container End connect-active-learning-service using local host
+          echo container End connect-active-learning-service 
 
       - name: Checkout e2e-test branch
         uses: actions/checkout@v2
@@ -161,13 +129,6 @@ jobs:
           path: ./e2e-test/allure-results/
           retention-days: 1
 
-      # - name: keep the devops branch folder from test job to subsequent scan jobs
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: devops
-      #     path: devops
-      #     retention-days: 1
-      
   scan_annotation_app:
     runs-on: ubuntu-latest 
     needs: smoke_test
