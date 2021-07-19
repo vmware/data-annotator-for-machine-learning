@@ -443,10 +443,6 @@ label .label-leftBoard {
   background-color: transparent;
 }
 
-// .tagColor {
-//   background-color: pink !important;
-// }
-
 .wordShow {
   white-space: break-spaces;
   word-break: break-all;
@@ -454,8 +450,10 @@ label .label-leftBoard {
 
 .txtBox {
   overflow: auto;
-  max-height: 18rem;
+  // max-height: 18rem;
   padding-bottom: 3rem;
+  height: 18rem;
+  resize: vertical;
 }
 
 ::ng-deep .textBox {
@@ -486,14 +484,6 @@ label .label-leftBoard {
   color: #cccccc;
   position: relative;
 }
-
-// .rowIndex:hover {
-//   background-color: #cccccc;
-//   border-radius: 4px;
-//   padding-right: 5px;
-//   padding-left: 5px;
-//   color: white;
-// }
 
 .selectedRowIndex {
   margin-right: 1rem;

@@ -1962,14 +1962,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.projectType != 'image' &&
             this.projectType != 'log'
           ) {
+            let that = this;
             _.forIn(responseSr.originalData, function (value, key) {
-              flag.push({ key, value });
-              responseSr.originalData = flag;
-            });
-            this.updateOutput(flag[0].value).then((e) => {
-              flag[0].html = e;
-              responseSr.originalData = flag;
-              this.sr.originalData = responseSr.originalData;
+              that.updateOutput(value).then((e) => {
+                flag.push({ key, value, html: e });
+                responseSr.originalData = flag;
+                that.sr.originalData = responseSr.originalData;
+              });
             });
           }
           if (this.projectType == 'image') {
@@ -2103,23 +2102,23 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   resetTabularSrData(sr) {
     const vv = [];
+    let that = this;
     if (!sr.MSG) {
       sr = sr[0];
       _.forIn(sr.originalData, function (value, key) {
-        vv.push({ key, value });
+        that.updateOutput(value).then((e) => {
+          vv.push({ key, value, html: e });
+        });
       });
-      this.updateOutput(vv[0].value).then((e) => {
-        vv[0].html = e;
-        sr.originalData = vv;
-        this.sr = sr;
-        if (this.sr && this.sr.flag && this.sr.flag.silence) {
-          this.silenceStatus = true;
-        }
-        if (this.sr && !this.sr.MSG) {
-          this.loading = false;
-        }
-        return sr;
-      });
+      sr.originalData = vv;
+      this.sr = sr;
+      if (this.sr && this.sr.flag && this.sr.flag.silence) {
+        this.silenceStatus = true;
+      }
+      if (this.sr && !this.sr.MSG) {
+        this.loading = false;
+      }
+      return sr;
     } else {
       return sr;
     }
@@ -2803,8 +2802,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateOutput(mdText) {
+    let source = String(mdText);
     return new Promise((resolve) => {
-      this.convertedText = this.md.convert(mdText);
+      this.convertedText = this.md.convert(source);
       resolve(this.convertedText);
     });
   }

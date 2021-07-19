@@ -375,7 +375,10 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
 
           <div class="questionContainer">
-            <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'">
+            <div
+              *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'"
+              class="textBox"
+            >
               <div class="textActionBar">
                 <div class="btn-group" style="margin-bottom: 0.5rem">
                   <div class="radio btn">
@@ -419,7 +422,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                 </div>
               </div>
-              <div *ngFor="let ticket of sr.originalData" class="textBox">
+              <div *ngFor="let ticket of sr.originalData">
                 <p class="question-paragraph" style="word-break: break-word; white-space: pre">
                   <span class="ticketColumn">{{ ticket.key }}</span>
                   <span>:&nbsp;&nbsp;</span>
