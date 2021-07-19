@@ -79,9 +79,13 @@ jobs:
 
           access_token=${resp:26:163}
 
-          echo container Start connect-active-learning-service
-          curl -X POST -H "Content-Type: application/json" -H "Authorization: ${access_token}" -d '{"data": [{"text": "NERS PROJECT TEST-CONNECT."}]}' http://localhost:8000/api/ner/user-tokens
-          echo container End connect-active-learning-service
+          echo Curl Start connect-active-learning-service
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: $access_token" -d '{"data": [{"text": "NERS PROJECT TEST-CONNECT."}]}' http://active/api/ner/user-tokens
+          echo Curl End connect-active-learning-service
+
+          echo container Start connect-active-learning-service using local host
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: $access_token" -d '{"data": [{"text": "NERS PROJECT TEST-CONNECT."}]}' http://localhost:8000/api/ner/user-tokens
+          echo container End connect-active-learning-service using local host
 
       - name: Checkout e2e-test branch
         uses: actions/checkout@v2
