@@ -3,62 +3,52 @@
     "Instruction": "this is e2e test project task instruction",
     "Annotator": "poc-os@poc-os.com",
     "Labels": "test1,test2",
-    "Source":"text-test-data.csv",
-    "ticketSessions":27
-
+    "Source": "text-test-data.csv",
+    "ticketSessions": 27
   },
   "TextMultipleLabelsProject": {
     "Instruction": "this is e2e test multiple labels project task instruction",
     "Annotator": "poc-os@poc-os.com",
     "Labels": "test1,test2",
-    "Source":"text-test-data.csv",
-    "ticketSessions":27
-
+    "Source": "text-test-data.csv",
+    "ticketSessions": 27
   },
   "TabularNumericLabelsProject": {
     "Instruction": "this is e2e test tabular numeric labels project task instruction",
     "Annotator": "poc-os@poc-os.com",
     "MinLabel": 1,
-    "MaxLabel":100,
-    "Source":"text-test-data.csv",
-    "ticketSessions":27
-
+    "MaxLabel": 100,
+    "Source": "text-test-data.csv",
+    "ticketSessions": 27
   },
   "NerLabelsExistingProject": {
     "Instruction": "this is e2e test ner labels existing project task instruction",
     "Annotator": "poc-os@poc-os.com",
-    "existingLabels":"label1,label2,label3",
+    "existingLabels": "label1,label2,label3",
     "Labels": "test1",
-    "Source":"ner-test-data.csv",
-    "ticketSessions":30
+    "Source": "ner-test-data.csv",
+    "ticketSessions": 29
   },
   "LogProject": {
     "Instruction": "this is e2e test log project task instruction",
     "Annotator": "poc-os@poc-os.com",
     "Labels": "test1,test2",
-    "Source":"log-test-data.tgz",
-    "ticketSessions":30,
-    "keywordFilter":"option",
-    "Freetext":"e2e test",
-    "reviewFreetext":"e2e test from review"
+    "Source": "log-test-data.tgz",
+    "ticketSessions": 30,
+    "keywordFilter": "option",
+    "Freetext": "e2e test",
+    "reviewFreetext": "e2e test from review"
   },
   "ImageProject": {
     "Instruction": "this is e2e test image project task instruction",
     "Annotator": "poc-os@poc-os.com",
     "Labels": "test1,test2",
-    "Source":"image-test-data.zip",
-    "ticketSessions":5,
-    "firstStart":{"x": 30, "y": 30},
-    "firstEnd":{"x": 40, "y": 40},
-    "secondStart":{"x": 50, "y": 30},
-    "secondEnd":{"x": 60, "y": 40},
-    "deletePosition":{"x": 35, "y": 35}
+    "Source": "image-test-data.zip",
+    "ticketSessions": 5,
+    "firstStart": { "x": 30, "y": 30 },
+    "firstEnd": { "x": 40, "y": 40 },
+    "secondStart": { "x": 50, "y": 30 },
+    "secondEnd": { "x": 60, "y": 40 },
+    "deletePosition": { "x": 35, "y": 35 }
   }
 }
- 
- 
-
- 
-
-
-
