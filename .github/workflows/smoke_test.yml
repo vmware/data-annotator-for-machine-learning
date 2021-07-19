@@ -49,26 +49,55 @@ jobs:
           path: 'devops'
 
       #copy needed files and folders from DevOps branch 
-      - run: |
-          ls devops/annotation-service
-          cp -rf devops/annotation-service/* ./annotation-service
-          cp -rf devops/annotation-app/* ./annotation-app
-          cp -rf devops/active-learning-service/* ./active-learning-service
-          cp -rf devops/docker-compose.yml .
+      # - run: |
+      #     ls devops/annotation-service
+      #     cp -rf devops/annotation-service/* ./annotation-service
+      #     cp -rf devops/annotation-app/* ./annotation-app
+      #     cp -rf devops/active-learning-service/* ./active-learning-service
+      #     cp -rf devops/docker-compose.yml .
 
-      - name: Bring up Docker 
+      # - name: Bring up Docker 
+      #   run: |
+      #     str=$(printf '=%.0s' {1..50})
+      #     echo $str Docker Start $str
+      #     chmod +x annotation-app/docker-entrypoint.sh
+      #     MONGODB_URL='mongodb://mo/daml' docker-compose up -d
+      #     sleep 5
+      #     docker-compose ps
+      #     echo Service container logs
+      #     docker logs service
+      #     echo Active container logs
+      #     docker logs active
+      #     echo $str Docker Done $str  
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-       
+            
+      - name: build-and-run-service
+        working-directory: ./annotation-service
         run: |
-          str=$(printf '=%.0s' {1..50})
-          echo $str Docker Start $str
-          chmod +x annotation-app/docker-entrypoint.sh
-          MONGODB_URL='mongodb://mo/daml' docker-compose up -d
-          sleep 5
-          docker-compose ps
-          echo Service container logs
-          docker logs service
-          echo Active container logs
-          docker logs active
-          echo $str Docker Done $str  
+          npm install
+          npm run start &
+          #pm2 start "npm run start &" --name service # can access
+            
+      - name: build-and-run-al
+        working-directory: ./active-learning-service
+        run: |
+          pip install -r requirements.txt
+          python -m spacy download en_core_web_md
+          python manage.py runserver localhost:8000 &
+          #pm2 start "python manage.py runserver localhost:8000" --name active #can't access
 
       - name: Test Connection
         run: |
