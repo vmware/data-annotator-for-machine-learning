@@ -61,7 +61,7 @@ jobs:
           str=$(printf '=%.0s' {1..50})
           echo $str Docker Start $str
           chmod +x annotation-app/docker-entrypoint.sh
-          MONGODB_URL='mongodb://mo/daml' LOOP_AL_URL='http://localhost:8000/api' docker-compose up -d
+          MONGODB_URL='mongodb://mo/daml' LOOP_AL_URL='http://active/api' docker-compose up -d
           sleep 5
           docker-compose ps
           docker logs service
