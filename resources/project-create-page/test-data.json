@@ -34,7 +34,7 @@
     "Annotator": "poc-os@poc-os.com",
     "Labels": "test1,test2",
     "Source": "log-test-data.tgz",
-    "ticketSessions": 30,
+    "ticketSessions": 10,
     "keywordFilter": "option",
     "Freetext": "e2e test",
     "reviewFreetext": "e2e test from review"
