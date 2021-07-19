@@ -64,7 +64,9 @@ jobs:
           MONGODB_URL='mongodb://mo/daml' docker-compose up -d
           sleep 5
           docker-compose ps
+          echo Service container logs
           docker logs service
+          echo Active container logs
           docker logs active
           echo $str Docker Done $str  
 
