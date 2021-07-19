@@ -358,6 +358,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <clr-dg-column>
                             {{ dataset.reviewInfo.reviewedTime ? 'Review' : 'Annotate' }} Time
                           </clr-dg-column>
+                          <clr-dg-column *ngIf="projectType === 'log'">
+                            Log Freetext
+                          </clr-dg-column>
                           <clr-dg-column
                             class="studioCell"
                             *ngIf="
@@ -384,6 +387,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   ? (dataset.reviewInfo.reviewedTime | date: 'yyyy-MM-dd HH:mm:ss')
                                   : (flag.timestamp | date: 'yyyy-MM-dd HH:mm:ss')
                               }}
+                            </clr-dg-cell>
+                            <clr-dg-cell
+                              *ngIf="projectType === 'log'"
+                              style="word-break: break-all"
+                            >
+                              {{ flag.logFreeText }}
                             </clr-dg-cell>
                             <clr-dg-cell
                               *ngIf="
