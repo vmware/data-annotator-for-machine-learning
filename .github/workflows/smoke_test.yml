@@ -72,9 +72,16 @@ jobs:
           echo Curl register
           curl -X PUT -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password","uname":"Joe K Qiao"}' http://localhost:3000/api/v1.0/register
           echo Curl End register
+
           echo Curl Start login
-          curl -X POST -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password"}' http://localhost:3000/api/v1.0/login
+          resp="$(curl -X POST -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password"}' http://localhost:3000/api/v1.0/login)"
           echo Curl End login
+
+          access_token=${resp:26:163}
+
+          echo container Start connect-active-learning-service
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: ${access_token}" -d '{"data": [{"text": "NERS PROJECT TEST-CONNECT."}]}' http://localhost:8000/api/ner/user-tokens
+          echo container End connect-active-learning-service
 
       - name: Checkout e2e-test branch
         uses: actions/checkout@v2
