@@ -24,11 +24,7 @@ jobs:
         with:
           fetch-depth: 3
 
-      - run: wget https://raw.githubusercontent.com/Kai-Qiao/data-annotator-for-machine-learning/devops/check_headers.py
-
-      #- name: Pull code from VMware repo DecoupleAws branch
-      #  run: |
-      #    git clone -b devops https://github.com/vmware/data-annotator-for-machine-learning.git devops
+      - run: wget https://raw.githubusercontent.com/vmware/data-annotator-for-machine-learning/devops/check_headers.py
 
       - name: Check Header
         run: |
