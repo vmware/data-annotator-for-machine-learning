@@ -105,7 +105,7 @@ jobs:
           npm run e2e-smoke
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
           echo $str Smoke Test End $str 
-
+      
       - name: keep the coverage output folder
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
@@ -151,6 +151,8 @@ jobs:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
 
+      - run: cp ./e2e-test/coverage-output/lcov.info ./annotation-app
+
       - name: SonarCloud setup for annotation-app
         working-directory: ./devops/sonar
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
@@ -162,7 +164,7 @@ jobs:
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app
-            -Dsonar.typescript.lcov.reportPaths="../e2e-test/coverage-output/lcov.info" 
+            -Dsonar.typescript.lcov.reportPaths="lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
