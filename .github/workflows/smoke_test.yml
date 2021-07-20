@@ -137,7 +137,7 @@ jobs:
           fetch-depth: 0
 
       #get current branch name
-      - name: Set Branch Name
+      - name: Get Branch Name
         id: branch
         run: echo ::set-output name=branch_name::${GITHUB_REF#refs/*/}
 
@@ -148,8 +148,10 @@ jobs:
           ref: 'devops'
           path: 'devops'
 
-      - name: Download all workflow run artifacts
+      - name: Download coverage-out artifact
         uses: actions/download-artifact@v2
+        with:
+          name: coverage-output
 
       - run: cp ./coverage-output/lcov.info ./annotation-app
 
