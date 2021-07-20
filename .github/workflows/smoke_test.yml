@@ -152,6 +152,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: coverage-output
+          path: ./coverage-output
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ./coverage-output
 
       - run: cp ./coverage-output/lcov.info ./annotation-app
 
