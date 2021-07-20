@@ -128,7 +128,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: ${{ secrets.SONAR_ORG }}
+      SONAR_ORG: lyeohvm
       BRANCH: master
 
     steps:
