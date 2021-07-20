@@ -18,8 +18,8 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: lyeohvm
-      BRANCH: master
+      SONAR_ORG: ${{ secrets.SONAR_ORG }}
+      BRANCH: ${GITHUB_REF##*/}
 
     steps:
       - name: Checkout 
@@ -46,10 +46,12 @@ jobs:
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
+            -Dsonar.coverage.exclusions=**
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
             -Dsonar.cpp.file.suffixes=- 
             -Dsonar.objc.file.suffixes=-
+        #Set below secrets in your Github Actions secrets
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
@@ -60,8 +62,8 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: lyeohvm
-      BRANCH: master
+      SONAR_ORG: ${{ secrets.SONAR_ORG }}
+      BRANCH: ${GITHUB_REF##*/}
 
     steps:  
       - name: Checkout 
@@ -88,10 +90,12 @@ jobs:
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-active-learning-service
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
+            -Dsonar.coverage.exclusions=**
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
             -Dsonar.cpp.file.suffixes=- 
             -Dsonar.objc.file.suffixes=-
+        #Set below secrets in your Github Actions secrets
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
@@ -103,8 +107,8 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: lyeohvm
-      BRANCH: master
+      SONAR_ORG: ${{ secrets.SONAR_ORG }}
+      BRANCH: ${GITHUB_REF##*/}
 
     steps:
       - name: Checkout 
@@ -131,10 +135,12 @@ jobs:
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-app
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
+            -Dsonar.coverage.exclusions=**
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
             -Dsonar.cpp.file.suffixes=- 
             -Dsonar.objc.file.suffixes=-
+        #Set below secrets in your Github Actions secrets
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
