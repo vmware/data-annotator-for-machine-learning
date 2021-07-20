@@ -5,6 +5,7 @@
 
 name: smoke_test
 
+#only trigger in master branch
 on:
   push:
     branches: [master]
@@ -13,20 +14,13 @@ on:
 
 jobs:
   smoke_test:
-    runs-on: ubuntu-latest # runs a test on Ubuntu
+    runs-on: ubuntu-latest 
 
     steps:
       - name: Setup Node 14
         uses: actions/setup-node@v2
         with:
           node-version: '14'
-
-      - name: Setup Python3
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.7
-
-      - run: pip3 install requests
 
       - name: Install Dependency    
         run: |
@@ -96,7 +90,7 @@ jobs:
           ref: 'e2e-test'
           path: 'e2e-test'
 
-      - name: Annotation App 
+      - name: Build Annotation App 
         working-directory: ./annotation-app
         run: |
           CI=false npm install
@@ -109,7 +103,6 @@ jobs:
           npm install
           npm run webdriver
           npm run e2e-smoke
-          echo "after run e2e-smoke"
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
           echo $str Smoke Test End $str 
 

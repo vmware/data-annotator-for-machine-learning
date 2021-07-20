@@ -7,9 +7,9 @@ name: check-header
 
 on:
   push:
-    branches: [master]
+    branches: ['**']
   pull_request:
-    branches: [master]
+    branches: ['**']
 
 jobs:
   check-header:
@@ -19,11 +19,6 @@ jobs:
       GITHUB_CONTEXT: ${{ toJson(github) }}
 
     steps:
-      - name: Setup Python3
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
       - name: Checkout
         uses: actions/checkout@v2
         with:

@@ -12,22 +12,7 @@ on:
     branches: [master]
 
 jobs:
-  # setup:
-  #   runs-on: ubuntu-latest # runs a test on Ubuntu
-
-  #   steps:
-  #     - name: Setup Node 14
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: '14'
-
-  #     - name: Setup Python3
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: 3.8
-
-  #     - run: pip3 install requests
-
+  #sonar cloud scan job for annotation service
   scan_annotation_service:
     runs-on: ubuntu-latest 
 
@@ -49,9 +34,6 @@ jobs:
           ref: 'devops'
           path: 'devops'
 
-      # - name: Download all workflow run artifacts
-      #   uses: actions/download-artifact@v2
-
       - name: SonarCloud setup for annotation-service
         working-directory: ./devops/sonar
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service -ProjectKey ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-annotation-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName annotation-service -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
@@ -72,6 +54,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
 
+  #sonar cloud scan job for active learning service
   scan_active_learning_service:
     runs-on: ubuntu-latest 
 
@@ -93,9 +76,6 @@ jobs:
           ref: 'devops'
           path: 'devops'
 
-      # - name: Download all workflow run artifacts
-      #   uses: actions/download-artifact@v2
-
       - name: SonarCloud setup for active-learning-service
         working-directory: ./devops/sonar
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-active-learning-service -ProjectKey ${{ env.SONAR_ORG }}-DAML-${{ env.BRANCH }}-active-learning-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName active-learning -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
@@ -116,10 +96,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
 
+
+  #sonar cloud scan job for annotation app
   scan_annotation_app:
     runs-on: ubuntu-latest 
-
-    
 
     #define variables to be used for SonarCloud scan
     env:
@@ -127,10 +107,6 @@ jobs:
       BRANCH: master
 
     steps:
-      - run: |
-          python --version
-          pip3 install requests
-
       - name: Checkout 
         uses: actions/checkout@v2
         with:
@@ -142,9 +118,6 @@ jobs:
           fetch-depth: 0
           ref: 'devops'
           path: 'devops'
-
-      # - name: Download all workflow run artifacts
-      #   uses: actions/download-artifact@v2
 
       - name: SonarCloud setup for annotation-app
         working-directory: ./devops/sonar
