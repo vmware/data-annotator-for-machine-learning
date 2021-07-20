@@ -18,7 +18,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: ${{ secrets.SONAR_ORG }}
+      SONAR_ORG: kai-qiao
 
     steps:
       - name: Checkout 
@@ -66,7 +66,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: ${{ secrets.SONAR_ORG }}
+      SONAR_ORG: kai-qiao
 
     steps:  
       - name: Checkout 
@@ -107,6 +107,11 @@ jobs:
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
+      
+      - name:  Echo SonarCloud Report URL
+        run: |
+          echo $SONAR_ORG
+          echo https://sonarcloud.io/dashboard?id=***-DAML-${{ steps.branch.outputs.branch_name }}-active-learning-service&branch=${{ steps.branch.outputs.branch_name }}
 
 
   #sonar cloud scan job for annotation app
@@ -115,7 +120,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: ${{ secrets.SONAR_ORG }}
+      SONAR_ORG: kai-qiao
 
     steps:
       - name: Checkout 
