@@ -151,7 +151,7 @@ jobs:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
 
-      - run: cp ./e2e-test/coverage-output/lcov.info ./annotation-app
+      - run: cp ./coverage-output/lcov.info ./annotation-app
 
       - name: SonarCloud setup for annotation-app
         working-directory: ./devops/sonar
