@@ -16,12 +16,9 @@ jobs:
   scan_annotation_service:
     runs-on: ubuntu-latest 
 
-
-
-
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: lyeohvm
+      SONAR_ORG: ${{ secrets.SONAR_ORG }}
 
     steps:
       - name: Checkout 
@@ -69,7 +66,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: lyeohvm
+      SONAR_ORG: ${{ secrets.SONAR_ORG }}
 
     steps:  
       - name: Checkout 
@@ -118,7 +115,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: lyeohvm
+      SONAR_ORG: ${{ secrets.SONAR_ORG }}
 
     steps:
       - name: Checkout 
