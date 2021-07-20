@@ -68,7 +68,7 @@ jobs:
 
       - name: Test Connection
         run: |
-          sleep 5
+          sleep 10
           echo Curl register
           curl -X PUT -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password","uname":"Joe K Qiao"}' http://localhost:3000/api/v1.0/register
           echo Curl End register
@@ -164,7 +164,6 @@ jobs:
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app
             -Dsonar.typescript.lcov.reportPaths="./e2e-test/coverage-output/lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
-            -Dsonar.coverage.exclusions=**
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
             -Dsonar.cpp.file.suffixes=- 
