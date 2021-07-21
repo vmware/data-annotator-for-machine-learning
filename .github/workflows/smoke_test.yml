@@ -105,7 +105,7 @@ jobs:
           npm run e2e-smoke
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
           echo $str Smoke Test End $str 
-      
+
       - name: keep the coverage output folder
         if: ${{ always() }}
         uses: actions/upload-artifact@v2

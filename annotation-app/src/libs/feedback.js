@@ -25,11 +25,13 @@ var common = {
         };
 
       window[d]._url = c;
-      e = a.createElement(b);
-      e.src = c;
-      e.async = 1;
-      f = a.getElementsByTagName(b)[0];
-      f.parentNode.insertBefore(e, f);
+      let eParam = e;
+      eParam = a.createElement(b);
+      eParam.src = c;
+      eParam.async = 1;
+      let fParam = f;
+      fParam = a.getElementsByTagName(b)[0];
+      fParam.parentNode.insertBefore(eParam, fParam);
     })(document, 'script', url, 'esp');
     this.common.esp = esp;
     return esp;
