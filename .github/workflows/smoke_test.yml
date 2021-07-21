@@ -128,18 +128,13 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: kai-qiao
+      SONAR_ORG:  ${{ secrets.SONAR_ORGN }}
 
     steps:
       - name: Checkout 
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-
-      #get current branch name
-      - name: Get Branch Name
-        id: branch
-        run: echo ::set-output name=branch_name::${GITHUB_REF#refs/*/}
 
       - name: Checkout devops branch
         uses: actions/checkout@v2
@@ -156,7 +151,7 @@ jobs:
 
       - name: SonarCloud setup for annotation-app
         working-directory: ./devops/sonar
-        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
+        run: python ./config_sonar_project.py -ProjectName DAML-annotation-app -ProjectKey DAML-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan annotation-app
         uses: sonarsource/sonarcloud-github-action@master  
@@ -164,7 +159,7 @@ jobs:
           projectBaseDir: ./annotation-app
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
-            -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app
+            -Dsonar.projectKey=DAML-annotation-app
             -Dsonar.typescript.lcov.reportPaths="../coverage-output/lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
