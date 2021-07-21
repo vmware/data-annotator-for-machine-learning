@@ -151,9 +151,6 @@ export class UnZipService {
     let count = 0;
     let invalidCount = 0;
     const indexArray = [];
-    // for (let k = 0; k < originalHead.length; k++) {
-    //   indexArray.push(previewHeadDatas.indexOf(originalHead[k]));
-    // }
     for (let item of originalHead) {
       indexArray.push(previewHeadDatas.indexOf(item));
     }
@@ -192,9 +189,9 @@ export class UnZipService {
           }
 
           for (let a = 0; a < chunkData.length; a++) {
-            const newArray2 = [];
-            for (let c = 0; c < originalHead.length; c++) {
-              const key = originalHead[c];
+            let newArray2 = [];
+            for (let c = 0; c < indexArray.length; c++) {
+              let key = indexArray[c];
               newArray2.push(chunkData[a][key]);
             }
             newArray.push(newArray2);
