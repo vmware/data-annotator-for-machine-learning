@@ -18,7 +18,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: kai-qiao
+      SONAR_ORG: ${{ secrets.SONAR_ORG }}
 
     steps:
       - name: Checkout 
@@ -35,7 +35,7 @@ jobs:
 
       - name: SonarCloud setup for annotation-service
         working-directory: ./devops/sonar
-        run: python ./config_sonar_project.py -ProjectName DAML-annotation-service -ProjectKey DAML-annotation-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName annotation-service -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
+        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-annotation-service -ProjectKey ${{ env.SONAR_ORG }}-DAML-annotation-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName annotation-service -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan annotation-service
         uses: sonarsource/sonarcloud-github-action@master  
@@ -43,7 +43,7 @@ jobs:
           projectBaseDir: ./annotation-service
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
-            -Dsonar.projectKey=DAML-annotation-service
+            -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-annotation-service
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.coverage.exclusions=**
             -Dsonar.verbose=true 
@@ -61,7 +61,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG:  kai-qiao
+      SONAR_ORG:  ${{ secrets.SONAR_ORG }}
 
     steps:  
       - name: Checkout 
@@ -78,7 +78,7 @@ jobs:
 
       - name: SonarCloud setup for active-learning-service
         working-directory: ./devops/sonar
-        run: python ./config_sonar_project.py -ProjectName DAML-active-learning-service -ProjectKey DAML-active-learning-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName active-learning -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
+        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-active-learning-service -ProjectKey ${{ env.SONAR_ORG }}-DAML-active-learning-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName active-learning -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan active-learning-service
         uses: sonarsource/sonarcloud-github-action@master  
@@ -86,7 +86,7 @@ jobs:
           projectBaseDir: ./active-learning-service
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
-            -Dsonar.projectKey=DAML-active-learning-service
+            -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-active-learning-service
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.coverage.exclusions=**
             -Dsonar.verbose=true 
@@ -121,7 +121,7 @@ jobs:
 
       - name: SonarCloud setup for annotation-app
         working-directory: ./devops/sonar
-        run: python ./config_sonar_project.py -ProjectName DAML-annotation-app -ProjectKey DAML-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
+        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-DAML-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan annotation-app
         uses: sonarsource/sonarcloud-github-action@master  
@@ -129,7 +129,7 @@ jobs:
           projectBaseDir: ./annotation-app
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
-            -Dsonar.projectKey=DAML-annotation-app
+            -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-annotation-app
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.coverage.exclusions=**
             -Dsonar.verbose=true 
