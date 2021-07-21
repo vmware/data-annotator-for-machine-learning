@@ -34,20 +34,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-       
-
       - name: set-up-mongodb
         uses: supercharge/mongodb-github-action@1.6.0
         with:
@@ -151,7 +137,7 @@ jobs:
 
       - name: SonarCloud setup for annotation-app
         working-directory: ./devops/sonar
-        run: python ./config_sonar_project.py -ProjectName DAML-annotation-app -ProjectKey DAML-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
+        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-DAML-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan annotation-app
         uses: sonarsource/sonarcloud-github-action@master  
@@ -159,7 +145,7 @@ jobs:
           projectBaseDir: ./annotation-app
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
-            -Dsonar.projectKey=DAML-annotation-app
+            -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-annotation-app
             -Dsonar.typescript.lcov.reportPaths="../coverage-output/lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
