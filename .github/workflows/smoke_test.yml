@@ -154,12 +154,6 @@ jobs:
           name: coverage-output
           path: ./coverage-output
 
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: ./coverage-output
-
-      - run: cp ./coverage-output/lcov.info ./annotation-app
-
       - name: SonarCloud setup for annotation-app
         working-directory: ./devops/sonar
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
@@ -171,7 +165,7 @@ jobs:
           args: >
             -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-${{ steps.branch.outputs.branch_name }}-annotation-app
-            -Dsonar.typescript.lcov.reportPaths="lcov.info" 
+            -Dsonar.typescript.lcov.reportPaths="../coverage-output/lcov.info" 
             -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
             -Dsonar.verbose=true 
             -Dsonar.c.file.suffixes=- 
