@@ -18,7 +18,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG: ${{ secrets.SONAR_ORGN }}
+      SONAR_ORG: ${{ secrets.SONAR_ORG }}
 
     steps:
       - name: Checkout 
@@ -61,7 +61,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG:  ${{ secrets.SONAR_ORGN }}
+      SONAR_ORG:  ${{ secrets.SONAR_ORG }}
 
     steps:  
       - name: Checkout 
@@ -104,7 +104,7 @@ jobs:
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG:  ${{ secrets.SONAR_ORGN }}
+      SONAR_ORG:  ${{ secrets.SONAR_ORG }}
 
     steps:
       - name: Checkout 
