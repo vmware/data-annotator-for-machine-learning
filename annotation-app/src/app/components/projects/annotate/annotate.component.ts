@@ -752,7 +752,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onSkipGame(): void {
-    if (this.isFormPrestine()) {
+    if (this.isFormPrestine() && !this.actionError) {
       this.clearCheckbox();
       this.labelChoose = null;
       this.active = -1;
@@ -783,7 +783,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 );
               }
               if (difference.length > 0) {
-                this.actionError = 'You already provided a new label, please do submit first.';
+                this.actionError =
+                  'The current label is diiferent from the original existing label, please do submit first.';
                 return;
               } else {
                 this.skipAndFetchNewQuestion();
@@ -1056,7 +1057,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isActionErr(isCategory, id?, from?) {
     if (!this.sr.userInputsLength && !this.sr.userInputs) {
-      this.actionError = 'You already provided a new label, please do submit first.';
+      this.actionError =
+        'The current label is diiferent from the original existing label, please do submit first.';
       return;
     } else {
       for (let i = 0; i < this.annotationHistory.length; i++) {
@@ -1067,7 +1069,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           difference = _.difference(isCategory, this.annotationHistory[i].category);
         }
         if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
-          this.actionError = 'You already provided a new label, please do submit first.';
+          this.actionError =
+            'The current label is diiferent from the original existing label, please do submit first.';
           return;
         }
       }
@@ -1213,7 +1216,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             bbString = bb[i].valueInfo;
           }
           if (aaString !== bbString) {
-            this.actionError = 'You already provided a new label, please do submit first.';
+            this.actionError =
+              'The current label is diiferent from the original existing label, please do submit first.';
             return false;
           }
         }
@@ -1236,11 +1240,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.onSubmit(type);
         }
       } else {
-        this.actionError = 'You already provided a new label, please do submit first.';
+        this.actionError =
+          'The current label is diiferent from the original existing label, please do submit first.';
         return false;
       }
     } else {
-      this.actionError = 'You already provided a new label, please do submit first.';
+      this.actionError =
+        'The current label is diiferent from the original existing label, please do submit first.';
       return;
     }
   }
@@ -1322,7 +1328,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                     bbString = bb[i].valueInfo;
                   }
                   if (aaString !== bbString) {
-                    this.actionError = 'You already provided a new label, please do submit first.';
+                    this.actionError =
+                      'The current label is diiferent from the original existing label, please do submit first.';
                     return false;
                   }
                 }
@@ -1333,7 +1340,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 };
                 this.getSrById(param, 0, 'previous');
               } else {
-                this.actionError = 'You already provided a new label, please do submit first.';
+                this.actionError =
+                  'The current label is diiferent from the original existing label, please do submit first.';
                 return;
               }
             }
@@ -2694,18 +2702,32 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.sr.userInputs) {
       const annotations = this.sr.userInputs;
       let annotatedIDs = [];
+      let errLabel = [];
       setTimeout(() => {
         annotations.forEach((element) => {
           element.problemCategory.forEach((element2) => {
-            annotatedIDs = element2.ids.split('-');
-            this.onMouseDown(annotatedIDs[0], 'historyBack');
-            this.onMouseUp(
-              annotatedIDs[annotatedIDs.length - 1],
-              'historyBack',
-              this.categories.indexOf(element2.label),
-            );
+            console.log(3, element2);
+            if (element2.ids) {
+              annotatedIDs = element2.ids.split('-');
+              this.onMouseDown(annotatedIDs[0], 'historyBack');
+              this.onMouseUp(
+                annotatedIDs[annotatedIDs.length - 1],
+                'historyBack',
+                this.categories.indexOf(element2.label),
+              );
+            } else {
+              errLabel.push(element2);
+            }
           });
         });
+        if (errLabel.length > 0) {
+          let stringA = '';
+          errLabel.forEach((label) => {
+            stringA += JSON.stringify(label) + ',';
+          });
+          stringA = stringA.slice(0, stringA.length - 1);
+          this.actionError = `The existing label [${stringA}] hasn't found matched token id, please re-label and then submit.`;
+        }
       }, 10);
     }
   }

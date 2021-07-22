@@ -1,0 +1,32 @@
+#
+# Copyright 2019-2021 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: check-header
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  check-header:
+    runs-on: ubuntu-latest # runs a test on Ubuntu
+
+    env:
+      GITHUB_CONTEXT: ${{ toJson(github) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 3
+
+      - run: wget https://raw.githubusercontent.com/vmware/data-annotator-for-machine-learning/devops/check_headers.py
+
+      - name: Check Header
+        run: |
+          chmod +x ./check_headers.py
+          python ./check_headers.py -f "$(git diff --name-only --diff-filter=d $GITHUB_CONTEXT)"

@@ -1,0 +1,158 @@
+#
+# Copyright 2019-2021 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: smoke_test
+
+#only trigger in master branch
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  smoke_test:
+    runs-on: ubuntu-latest 
+
+    steps:
+      - name: Setup Node 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install Dependency    
+        run: |
+          npm install npm
+          npm install tslint
+          npm install typescript
+          tsc -v
+
+      - name: Checkout 
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: set-up-mongodb
+        uses: supercharge/mongodb-github-action@1.6.0
+        with:
+          mongodb-version: '4.4'
+            
+      - name: build-and-run-service
+        working-directory: ./annotation-service
+        run: |
+          npm install
+          npm run start &
+            
+      - name: build-and-run-al
+        working-directory: ./active-learning-service
+        run: |
+          pip install -r requirements.txt
+          python -m spacy download en_core_web_md
+          python manage.py runserver localhost:8000 &
+
+      - name: Test Connection
+        run: |
+          sleep 10
+          echo Curl register
+          curl -X PUT -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password","uname":"Joe K Qiao"}' http://localhost:3000/api/v1.0/register
+          echo Curl End register
+
+          echo Curl Start login
+          resp="$(curl -X POST -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password"}' http://localhost:3000/api/v1.0/login)"
+          echo Curl End login
+          
+          access_token=${resp:26:163}
+          
+          echo container Start connect-active-learning-service 
+          curl -X POST -H "Content-Type: application/json" -H "Authorization: ${access_token}" -d '{"data": [{"text": "NERS PROJECT TEST-CONNECT."}]}' http://localhost:8000/api/ner/user-tokens
+          echo container End connect-active-learning-service 
+
+      - name: Checkout e2e-test branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: 'e2e-test'
+          path: 'e2e-test'
+
+      - name: Build Annotation App 
+        working-directory: ./annotation-app
+        run: |
+          CI=false npm install
+          CI=false npm run build --if-present
+
+      - name: Run Smoke Test
+        working-directory: ./e2e-test
+        run: |
+          echo $str Smoke Test Start $str 
+          npm install
+          npm run webdriver
+          npm run e2e-smoke
+          sed -i 's/dist\/root\///g' coverage-output/lcov.info
+          echo $str Smoke Test End $str 
+
+      - name: keep the coverage output folder
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-output
+          path: ./e2e-test/coverage-output/
+          retention-days: 1
+
+      - name: keep the allure results folder
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: allure-results
+          path: ./e2e-test/allure-results/
+          retention-days: 1
+
+  scan_annotation_app:
+    runs-on: ubuntu-latest 
+    needs: smoke_test
+
+    #define variables to be used for SonarCloud scan
+    env:
+      SONAR_ORG:  ${{ secrets.SONAR_ORG }}
+
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Checkout devops branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: 'devops'
+          path: 'devops'
+
+      - name: Download coverage-out artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-output
+          path: ./coverage-output
+
+      - name: SonarCloud setup for annotation-app
+        working-directory: ./devops/sonar
+        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-DAML-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
+
+      - name: SonarCloud Scan annotation-app
+        uses: sonarsource/sonarcloud-github-action@master  
+        with:
+          projectBaseDir: ./annotation-app
+          args: >
+            -Dsonar.organization=${{ env.SONAR_ORG }}
+            -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-annotation-app
+            -Dsonar.typescript.lcov.reportPaths="../coverage-output/lcov.info" 
+            -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
+            -Dsonar.verbose=true 
+            -Dsonar.c.file.suffixes=- 
+            -Dsonar.cpp.file.suffixes=- 
+            -Dsonar.objc.file.suffixes=-
+        env: 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
+
