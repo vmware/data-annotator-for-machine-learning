@@ -6,7 +6,6 @@ SPDX-License-Identifier: Apache-2.0
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-// import 'rxjs/Rx';
 import { SR, SrUserInput } from '../model/sr';
 import { DatasetData } from '../model/index';
 import * as _ from 'lodash';
