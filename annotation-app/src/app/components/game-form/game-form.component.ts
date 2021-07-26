@@ -80,31 +80,6 @@ export class GameFormComponent implements OnInit {
     this.pageSizeReview = value;
   }
 
-  // getReviewProjects() {
-  //   this.loading = true;
-  //   this.avaService.getProjectsReviewList().subscribe(
-  //     (res) => {
-  //       for (let i = 0; i < res.length; i++) {
-  //         res[i].isExtend = true;
-  //         for (let j = 0; j < res[i].userCompleteCase.length; j++) {
-  //           if (res[i].userCompleteCase[j].completeCase > 0) {
-  //             res[i].disableReview = true;
-  //             break;
-  //           }
-  //         }
-  //       }
-  //       this.reviewDatasets = res;
-  //       this.totalItemsReview = res.length;
-  //       this.loading = false;
-  //     },
-  //     (error) => {
-  //       console.log(error);
-  //       this.errorMessage = 'Failed to load the datasets';
-  //       this.loading = false;
-  //     },
-  //   );
-  // }
-
   private getProjects(params?: any) {
     this.loading = true;
     this.avaService.getProjects('annotate').subscribe(
@@ -140,9 +115,9 @@ export class GameFormComponent implements OnInit {
   }
 
   more(id) {
-    for (let i = 0; i < this.reviewDatasets.length; i++) {
-      if (this.reviewDatasets[i].id == id) {
-        this.reviewDatasets[i].isExtend = !this.reviewDatasets[i].isExtend;
+    for (let i = 0; i < this.datasets.length; i++) {
+      if (this.datasets[i].id == id) {
+        this.datasets[i].isExtend = !this.datasets[i].isExtend;
       }
     }
   }
