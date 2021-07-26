@@ -749,9 +749,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onEndGame(): void {
     if (this.isFormPrestine()) {
-      this.router.navigate(['/game'], {
-        queryParams: { outfrom: this.startFrom == 'review' ? 'review' : 'annotate', hash: 'max' },
-      });
+      this.router.navigate(['/game']);
     } else {
       this.isEndingGameDialog = true;
     }
@@ -2702,7 +2700,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => {
         annotations.forEach((element) => {
           element.problemCategory.forEach((element2) => {
-            console.log(3, element2);
             if (element2.ids) {
               annotatedIDs = element2.ids.split('-');
               this.onMouseDown(annotatedIDs[0], 'historyBack');
@@ -2832,9 +2829,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   outOfPage() {
     this.error = null;
-    this.router.navigate(['game'], {
-      queryParams: { outfrom: this.startFrom == 'review' ? 'review' : 'annotate', hash: 'max' },
-    });
+    this.router.navigate(['game']);
   }
 
   ngOnDestroy() {
