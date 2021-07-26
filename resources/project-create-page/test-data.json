@@ -36,8 +36,10 @@
     "Source": "log-test-data.tgz",
     "ticketSessions": 10,
     "keywordFilter": "option",
-    "Freetext": "e2e test",
-    "reviewFreetext": "e2e test from review"
+    "rowFreeText": "row freeText",
+    "logFreeText": "log freeText",
+    "reviewRowFreetext": "e2e test from review of rowFreeText",
+    "reviewLogFreetext": "e2e test from review of logFreeText"
   },
   "ImageProject": {
     "Instruction": "this is e2e test image project task instruction",
