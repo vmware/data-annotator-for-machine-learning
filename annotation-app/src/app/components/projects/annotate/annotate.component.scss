@@ -448,14 +448,18 @@ label .label-leftBoard {
 
 .txtBox {
   overflow: auto;
-  max-height: 18rem;
+  // max-height: 18rem;
   padding-bottom: 3rem;
+  height: 18rem;
+  resize: vertical;
 }
 
 ::ng-deep .textBox {
   overflow: auto;
-  max-height: 18rem;
+  // max-height: 18rem;
+  height: 18rem;
   padding-bottom: 3rem;
+  resize: vertical;
 }
 
 .txtRow {
@@ -776,12 +780,6 @@ label .label-leftBoard {
 }
 
 .singleFreetext {
-  // position: absolute;
-  // background-color: #fafafa;
-  // border-bottom: unset;
-  // margin-left: 0.3rem;
-  // display: none;
-  // z-index: 99;
   position: relative;
   margin-left: -0.5rem;
   z-index: 99999999999999;
@@ -794,4 +792,9 @@ label .label-leftBoard {
 
 .noText {
   color: #dddddd;
+}
+
+.textActionBar {
+  box-shadow: 0 7px 6px -9px #999;
+  margin-bottom: 1rem;
 }

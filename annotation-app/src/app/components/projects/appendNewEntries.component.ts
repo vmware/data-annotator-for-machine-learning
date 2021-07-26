@@ -358,7 +358,7 @@ export class AppendNewEntriesComponent implements OnInit {
             if (choosedDataset.hasHeader == 'yes') {
               count = flag.count - 1;
             }
-            this.totalCase = flag.count;
+            this.totalCase = count;
             this.nonEnglish = flag.invalidCount;
             this.uploadGroup.get('totalRow').setValue(this.totalCase - this.nonEnglish);
             this.loadPreviewTable = false;
