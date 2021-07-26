@@ -10,7 +10,6 @@ import {
   ElementRef,
   Renderer2,
   enableProdMode,
-  OnDestroy,
   AfterViewInit,
 } from '@angular/core';
 import { Observable, fromEvent } from 'rxjs';
@@ -20,6 +19,8 @@ import * as _ from 'lodash';
 import { ActivatedRoute } from '@angular/router';
 import { LabelStudioService } from 'app/services/label-studio.service';
 import { EnvironmentsService } from 'app/services/environments.service';
+import { ToolService } from 'app/services/common/tool.service';
+
 enableProdMode();
 
 declare function userChart(options: any): any;
@@ -31,7 +32,7 @@ declare function modelChart(options: any): any;
   templateUrl: './preview-projects.component.html',
   styleUrls: ['./preview-projects.component.scss'],
 })
-export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class previewProjectsComponent implements OnInit, AfterViewInit {
   @ViewChild('dataGird', { static: false }) dataGird;
   @ViewChild('userChart', { static: false }) userChart: ElementRef;
   @ViewChild('categoryChart', { static: false }) categoryChart: ElementRef;
@@ -93,6 +94,40 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
 
   selectedLogsToModify: any = [];
   selectAllStatus: boolean;
+  categoryList: any = [];
+  formerFilenameFilter: string;
+  coloursRainbow = [
+    '#00ffff',
+    '#ff00ff',
+    '#00ff7f',
+    '#ff6347',
+    '#9B0D54',
+    '#00bfff',
+    '#ffa500',
+    '#ff69b4',
+    '#7fffd4',
+    '#ffd700',
+    '#FBC1DA',
+    '#4D007A',
+    '#ffdab9',
+    '#adff2f',
+    '#d2b48c',
+    '#dcdcdc',
+    '#583fcf',
+    '#A32100',
+    '#0F1E82',
+    '#F89997',
+    '#003D79',
+    '#00D4B8',
+    '#6C5F59',
+    '#AADB1E',
+    '#36C9E1',
+    '#D0ACE4',
+    '#798893',
+    '#ED186F',
+    '#9DA3DB',
+    '#ffff00',
+  ];
 
   constructor(
     private avaService: AvaService,
@@ -102,6 +137,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
     private LabelStudioService: LabelStudioService,
     private renderer2: Renderer2,
     private env: EnvironmentsService,
+    private toolService: ToolService,
   ) {
     this.user = this.userAuthService.loggedUser().email;
     this.page = 1;
@@ -157,7 +193,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
       this.modelChartWidth = this.el.nativeElement.querySelector('.modelChartBox').offsetWidth;
     }
 
-    // Observable.fromEvent(window, 'resize').subscribe((event) => {
     fromEvent(window, 'resize').subscribe((event) => {
       if (this.labelledCase > 0) {
         this.chartWidth = this.el.nativeElement.querySelector('.categoryChart').offsetWidth;
@@ -183,10 +218,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
         }
       }
     });
-  }
-
-  ngOnDestroy() {
-    // this.subscription.unsubscribe();
   }
 
   showUserChart(conf, data, width) {
@@ -234,6 +265,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
         this.selectedDataset = response;
         this.projectId = response._id;
         this.totalCase = response.totalCase;
+        this.categoryList = response.categoryList.split(',');
         this.getChartData();
         this.previewHeadDatas = ['Annotator', 'Annotate Time', 'Re-Label'];
         if (this.projectType === 'image') {
@@ -252,6 +284,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
       pageNumber: this.page,
       limit: this.pageSize,
       id: this.projectId,
+      fname: '',
     };
   }
 
@@ -746,44 +779,12 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   sortLabelForImage(categories, annotationQuestion) {
-    const coloursRainbow = [
-      '#00ffff',
-      '#ff00ff',
-      '#00ff7f',
-      '#ff6347',
-      '#9B0D54',
-      '#00bfff',
-      '#ffa500',
-      '#ff69b4',
-      '#7fffd4',
-      '#ffd700',
-      '#FBC1DA',
-      '#4D007A',
-      '#ffdab9',
-      '#adff2f',
-      '#d2b48c',
-      '#dcdcdc',
-      '#583fcf',
-      '#A32100',
-      '#0F1E82',
-      '#F89997',
-      '#003D79',
-      '#00D4B8',
-      '#6C5F59',
-      '#AADB1E',
-      '#36C9E1',
-      '#D0ACE4',
-      '#798893',
-      '#ED186F',
-      '#9DA3DB',
-      '#ffff00',
-    ];
     categories.forEach((element, index) => {
       if (index >= 30) {
         index = index - 30;
       }
-      this.imageRectLabelTemplate += `<Label value="${element}" background="${coloursRainbow[index]}" selectedColor="white"/>`;
-      this.imagePolyLabelTemplate += `<Label value="${element}" background="${coloursRainbow[index]}" selectedColor="white"/>`;
+      this.imageRectLabelTemplate += `<Label value="${element}" background="${this.coloursRainbow[index]}" selectedColor="white"/>`;
+      this.imagePolyLabelTemplate += `<Label value="${element}" background="${this.coloursRainbow[index]}" selectedColor="white"/>`;
     });
     this.imageHeader = `<Header style="display:none" value="${annotationQuestion}"/>`;
   }
@@ -793,6 +794,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
       const flag = [];
       let preview = '';
       let res;
+      let that = this;
       _.forIn(sr.originalData, function (value, key) {
         const a = { index: key, text: value };
         preview = preview + (key + '. ' + value);
@@ -801,6 +803,15 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
           for (let i = 0; i < sr.userInputs[0].problemCategory.length; i++) {
             if (key === sr.userInputs[0].problemCategory[i].line) {
               a['label'] = sr.userInputs[0].problemCategory[i].label;
+              a['backgroundColorLabel'] =
+                that.coloursRainbow[
+                  that.categoryList.indexOf(sr.userInputs[0].problemCategory[i].label)
+                ];
+              a['backgroundColorText'] = that.toolService.hexToRgb(
+                that.coloursRainbow[
+                  that.categoryList.indexOf(sr.userInputs[0].problemCategory[i].label)
+                ],
+              );
             }
           }
         }
@@ -829,5 +840,19 @@ export class previewProjectsComponent implements OnInit, AfterViewInit, OnDestro
     } else {
       return sr;
     }
+  }
+
+  receiveFilename(data) {
+    if (this.formerFilenameFilter !== data) {
+      this.formerFilenameFilter = data;
+      this.getALLSrsParam.pageNumber = 1;
+    }
+    this.getALLSrsParam.fname = data;
+    this.getALLSrs();
+  }
+
+  clickFlagTab() {
+    this.formerFilenameFilter = '';
+    this.getALLSrsParam.fname = '';
   }
 }

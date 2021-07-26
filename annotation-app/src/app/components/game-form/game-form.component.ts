@@ -60,7 +60,7 @@ export class GameFormComponent implements OnInit {
       (this.user.role === 'Project Owner' || this.user.role === 'Admin') &&
       this.isShowReviewTab == true
     ) {
-      this.getReviewProjects();
+      // this.getReviewProjects();
     }
   }
 
@@ -68,9 +68,9 @@ export class GameFormComponent implements OnInit {
     this.getProjects();
   }
 
-  clickReview() {
-    this.getReviewProjects();
-  }
+  // clickReview() {
+  //   this.getReviewProjects();
+  // }
 
   valueChange(value: number) {
     this.pageSize = value;
@@ -80,38 +80,50 @@ export class GameFormComponent implements OnInit {
     this.pageSizeReview = value;
   }
 
-  getReviewProjects() {
-    this.loading = true;
-    this.avaService.getProjectsReviewList().subscribe(
-      (res) => {
-        for (let i = 0; i < res.length; i++) {
-          res[i].isExtend = true;
-          for (let j = 0; j < res[i].userCompleteCase.length; j++) {
-            if (res[i].userCompleteCase[j].completeCase > 0) {
-              res[i].disableReview = true;
-              break;
-            }
-          }
-        }
-        this.reviewDatasets = res;
-        this.totalItemsReview = res.length;
-        this.loading = false;
-      },
-      (error) => {
-        console.log(error);
-        this.errorMessage = 'Failed to load the datasets';
-        this.loading = false;
-      },
-    );
-  }
+  // getReviewProjects() {
+  //   this.loading = true;
+  //   this.avaService.getProjectsReviewList().subscribe(
+  //     (res) => {
+  //       for (let i = 0; i < res.length; i++) {
+  //         res[i].isExtend = true;
+  //         for (let j = 0; j < res[i].userCompleteCase.length; j++) {
+  //           if (res[i].userCompleteCase[j].completeCase > 0) {
+  //             res[i].disableReview = true;
+  //             break;
+  //           }
+  //         }
+  //       }
+  //       this.reviewDatasets = res;
+  //       this.totalItemsReview = res.length;
+  //       this.loading = false;
+  //     },
+  //     (error) => {
+  //       console.log(error);
+  //       this.errorMessage = 'Failed to load the datasets';
+  //       this.loading = false;
+  //     },
+  //   );
+  // }
 
   private getProjects(params?: any) {
     this.loading = true;
     this.avaService.getProjects('annotate').subscribe(
       (res) => {
-        this.loading = false;
+        res.forEach((project) => {
+          if (project.projectType === 'log' && project.creator.indexOf(this.user.email) > -1) {
+            project.allowOwnerReview = true;
+          }
+          project.isExtend = true;
+          for (let j = 0; j < project.userCompleteCase.length; j++) {
+            if (project.userCompleteCase[j].completeCase > 0) {
+              project.disableReview = true;
+              break;
+            }
+          }
+        });
         this.datasets = res;
         this.totalItems = res.length;
+        this.loading = false;
       },
       (error: any) => {
         console.log(error);

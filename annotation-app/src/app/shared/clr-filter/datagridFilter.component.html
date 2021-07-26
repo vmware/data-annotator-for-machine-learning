@@ -1,0 +1,14 @@
+<!-- Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+<form class="clr-form">
+  <input
+    type="text"
+    id="basic"
+    placeholder="Enter value here"
+    class="clr-input filenameFilter"
+    [ngModelOptions]="{ standalone: true }"
+    [(ngModel)]="filename"
+    (ngModelChange)="this.filenameFilter.next($event)"
+    autocomplete="off"
+  />
+</form>
