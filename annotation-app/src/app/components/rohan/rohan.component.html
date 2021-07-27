@@ -1,0 +1,30 @@
+<!-- Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="container mainArea">
+  <clr-datagrid #dataGird class="gridHeight">
+    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'id'" style="max-width: 300px">User ID</clr-dg-column>
+    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'name'" style="max-width: 300px">User Name</clr-dg-column>
+    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'age'" style="max-width: 300px">User age</clr-dg-column>
+    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'description'" style="max-width: 300px">User description</clr-dg-column>
+    <clr-dg-row *clrDgItems="let user of users" [clrDgItem]="user">
+        <clr-dg-cell style="max-width: 300px" >{{user.id}}</clr-dg-cell>[] [()] #   *
+        <clr-dg-cell style="max-width: 300px" title="{{ user.name }}">{{user.name}}</clr-dg-cell>
+        <clr-dg-cell style="max-width: 300px">{{user.age}}</clr-dg-cell>
+        <clr-dg-cell style="max-width: 300px">{{user.description}}</clr-dg-cell>
+    </clr-dg-row>
+  <clr-dg-footer>
+    <clr-dg-column-toggle [hidden]="true"></clr-dg-column-toggle>
+      {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
+      {{ pagination.totalItems }}Users
+      <clr-dg-pagination
+        #pagination
+        [clrDgPageSize]="userPageSize"
+        [clrDgTotalItems]="totalUsers"
+        [(clrDgPage)]="userPage"
+      >
+      </clr-dg-pagination>
+  </clr-dg-footer>
+</clr-datagrid>
+
+</div>

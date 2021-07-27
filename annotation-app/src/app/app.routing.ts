@@ -14,6 +14,7 @@ import { AnnotateComponent } from './components/projects/annotate/annotate.compo
 import { AdminComponent } from './components/admin/admin.component';
 import { CreateNewComponent } from './components/projects/create-project.component';
 import { previewProjectsComponent } from './components/projects/preview/preview-projects.component';
+import { RohanComponent } from './components/rohan/rohan.component';
 import { DatasetsSharingComponent } from './components/datasets-sharing/datasets-sharing.component';
 import { MyDatasetsComponent } from './components/my-datasets/my-datasets.component';
 import { AppendNewEntriesComponent } from './components/projects/appendNewEntries.component';
@@ -41,6 +42,7 @@ export const ROUTES: Routes = [
       { path: 'myDatasets', component: MyDatasetsComponent, canActivate: [AuthGuard] },
       { path: 'appendNewEntries', component: AppendNewEntriesComponent, canActivate: [AuthGuard] },
       { path: 'faq', component: FAQComponent },
+      { path: 'rohan', component: RohanComponent },
       {
         path: 'basicLogin',
         loadChildren: () =>
