@@ -568,7 +568,9 @@ async function appendSrsData(req){
 
         }else{
             //quick append
-            typeof req.body.images == "string" ? req.body.images = JSON.parse(req.body.images): null;
+            if (typeof req.body.images == "string") {
+                req.body.images = JSON.parse(req.body.images)
+            }
             await imgImporter.quickAppendImages(req, mp.project.selectedDataset[0]);
             update.$inc = { totalCase: req.body.images.length };
         }
