@@ -24,6 +24,7 @@ export interface UserInput {
   timestamp?: string;
   tid: number;
   user: string;
+  logFreeText?: string;
 }
 
 export interface SrUserInput {

@@ -49,7 +49,10 @@ async function saveDataSetInfo(req) {
         }
         await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
 
-        typeof req.body.topReview == "string"? req.body.topReview=JSON.parse(req.body.topReview) : null;
+        if (typeof req.body.topReview == "string") {
+            req.body.topReview = JSON.parse(req.body.topReview)
+        }
+
     }
     
     if (req.body.format == DATASETTYPE.IMGAGE) {
@@ -179,7 +182,11 @@ async function deleteDataSet(req) {
     const user = req.auth.email;
 
     if (ds[0].format == DATASETTYPE.CSV || ds[0].format == DATASETTYPE.TABULAR || ds[0].format == DATASETTYPE.LOG) {
-
+        
+        if (ds[0].format == DATASETTYPE.LOG) {
+            await validator.checkDataSetInUse(req.body.dsname, true);
+        }
+        
         if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
             console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteAnObject`);
             await S3Utils.deleteAnObject(req.body.fileKey);

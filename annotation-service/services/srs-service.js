@@ -73,8 +73,16 @@ async function updateSrsUserInput(req) {
         let userInputs = []
         req.body.userInput.forEach(ui => {
             if (ui.tid == ticket._id.toString()) {
-                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.LOG) {
+                if (pro.projectType == PROJECTTYPE.NER) {
                     userInputs.push({
+                        problemCategory: ui.problemCategory,
+                        user: user,
+                        timestamp: Date.now()
+                    });
+                }else if(pro.projectType == PROJECTTYPE.LOG){
+                    console.log('----------------->', ui);
+                    userInputs.push({
+                        logFreeText: ui.logFreeText,
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
@@ -108,13 +116,21 @@ async function updateSrsUserInput(req) {
         let userInputs = []
         req.body.userInput.forEach(ui => {
             if (ui.tid == id) {
-                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.LOG) {
+                if (pro.projectType == PROJECTTYPE.NER) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
                     });
-                } else {
+                }else if(pro.projectType == PROJECTTYPE.LOG){
+                    console.log('----------------->', ui);
+                    userInputs.push({
+                        logFreeText: ui.logFreeText,
+                        problemCategory: ui.problemCategory,
+                        user: user,
+                        timestamp: Date.now()
+                    });
+                }else {
                     ui.problemCategory.forEach(lb =>{
                         userInputs.push({
                             problemCategory: lb,
@@ -276,7 +292,10 @@ async function getALLSrs(req) {
     const projectName = mp.project.projectName;
 
     console.log(`[ SRS ] Service paginateQuerySrsData`);
-    const query = { projectName: projectName }; 
+    let query = { projectName: projectName }; 
+    if (req.query.fname && mp.project.projectType == PROJECTTYPE.LOG) {
+        query["fileInfo.fileName"] = { $regex: req.query.fname };
+    }
     let options = { page: req.query.page, limit: req.query.limit, sort:{userInputsLength: -1} };
     const data = await mongoDb.paginateQuery(mp.model, query, options);
 
@@ -549,7 +568,9 @@ async function appendSrsData(req){
 
         }else{
             //quick append
-            typeof req.body.images == "string" ? req.body.images = JSON.parse(req.body.images): null;
+            if (typeof req.body.images == "string") {
+                req.body.images = JSON.parse(req.body.images)
+            }
             await imgImporter.quickAppendImages(req, mp.project.selectedDataset[0]);
             update.$inc = { totalCase: req.body.images.length };
         }
@@ -808,7 +829,7 @@ async function reviewTicket(req) {
         await flagToReview(tids);
     }else if (await validator.checkRequired(req.body.modify)) {
         await calculateReviewdCase(pid, tids, user);
-        await modifyReview(tids,user, req.body.problemCategory);
+        await modifyReview(tids,user, req.body.problemCategory, req.body.logFreeText);
     }else if (!await validator.checkRequired(req.body.modify)) {
         await calculateReviewdCase(pid, tids, user);
         await passReview(tids,user);  
@@ -831,7 +852,7 @@ async function passReview(tids,user) {
     }};
     await mongoDb.updateManyByConditions(LogModel, conditions, update);
 }
-async function modifyReview(tids,user,problemCategory) {
+async function modifyReview(tids,user,problemCategory, logFreeText) {
     const conditions = {_id: tids[0]};
     const update = { $set: {
         "reviewInfo.review": false, 
@@ -839,7 +860,8 @@ async function modifyReview(tids,user,problemCategory) {
         "reviewInfo.modified": true,
         "reviewInfo.user": user,
         "reviewInfo.reviewedTime": Date.now(),
-        "userInputs.0.problemCategory": problemCategory
+        "userInputs.0.problemCategory": problemCategory,
+        "userInputs.0.logFreeText": logFreeText
     }};
     await mongoDb.updateByConditions(LogModel, conditions, update);
 }
@@ -896,7 +918,6 @@ async function queryTicketsForReview(req) {
 
     const pid = req.query.pid;
     const byUser = req.query.user;
-    let ticket=[];
 
     const conditions = {_id: ObjectId(pid)};
     const projects = await validator.checkProjectByconditions(conditions, true);
@@ -905,21 +926,19 @@ async function queryTicketsForReview(req) {
     const findUser = await projects[0].reviewInfo.find( info => info.user == user);
     const skip = findUser? findUser.skip: 0;
 
-
-    if (await validator.checkRequired(byUser)) {
-        //1.user defined the query rules
-        const order = req.query.order;
-        ticket = await specailQueryForReview(projectName, byUser, order, skip, user);
-
-    }else{
-        //2. query need reReview tickets
-        ticket = await reReviewQueryForReview(projectName, user);
-        //3.if the step2 is empty query from default
-        if (!ticket[0]) {
+    //1. query need reReview tickets
+    let ticket = await reReviewQueryForReview(projectName, user);
+    if (!ticket[0]) {
+        if (await validator.checkRequired(byUser)) {
+            //2.user defined the query rules
+            const order = req.query.order;
+            ticket = await specailQueryForReview(projectName, byUser, order, skip, user);
+        }else{
+            //3.if the step2 is empty query from default
             ticket = await defualtQueryForReview(projectName, skip, user);
         }
     }
-
+    
     if (!ticket[0]) {
         if (!skip) {
             return { CODE: 5001, "MSG": "No Data Found" };

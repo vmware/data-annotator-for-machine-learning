@@ -154,9 +154,6 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
             <div style="margin-bottom: 2rem" class="annotationDataTable">
-              <!-- <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)"
-                                *ngIf=!firstLoadTable [(clrDgSelected)]="selectedLogsToModify"
-                                (clrDgSelectedChange)="selectionLogsChanged($event)"> -->
               <clr-datagrid
                 #dataGird
                 [clrDgLoading]="loading"
@@ -187,8 +184,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   class="ellipsis-datagrid"
                   style="max-width: 650px"
                 >
-                  {{ header }}</clr-dg-column
-                >
+                  {{ header }}
+                  <clr-dg-filter *ngIf="header == 'FileName'" [clrDgFilter]="myFilter">
+                    <my-filter #myFilter (filter)="receiveFilename($event)"></my-filter>
+                  </clr-dg-filter>
+                </clr-dg-column>
                 <clr-dg-column class="ellipsis-datagrid" style="min-width: 80px; max-width: 120px">
                   Annotations No.
                 </clr-dg-column>
@@ -284,12 +284,24 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   <p><strong>Txt FileContent:</strong></p>
                                   <p *ngFor="let log of dataset.originalData.fileContent">
                                     <span style="margin-right: 0.5rem">{{ log.index }}</span>
-                                    <span *ngIf="log.label" class="labelInFilecontent">{{
-                                      log.label
-                                    }}</span>
-                                    <span [ngClass]="{ textInFilecontent: log.label }">{{
-                                      log.text
-                                    }}</span>
+                                    <span
+                                      *ngIf="log.label"
+                                      class="labelInFilecontent"
+                                      [ngStyle]="{
+                                        'background-color': log.backgroundColorLabel,
+                                        'font-weight': log.backgroundColorLabel ? 700 : 400
+                                      }"
+                                      >{{ log.label }}</span
+                                    >
+                                    <span
+                                      [ngStyle]="{
+                                        'background-color': log.backgroundColorText,
+                                        'font-weight': log.backgroundColorText ? 700 : 400,
+                                        color: log.backgroundColorText ? 'black' : 'currentColor',
+                                        'padding-left': log.backgroundColorText ? '0.3rem' : 'unset'
+                                      }"
+                                      >{{ log.text }}</span
+                                    >
                                   </p>
                                 </clr-signpost-content>
                               </clr-signpost>
@@ -346,6 +358,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <clr-dg-column>
                             {{ dataset.reviewInfo.reviewedTime ? 'Review' : 'Annotate' }} Time
                           </clr-dg-column>
+                          <clr-dg-column *ngIf="projectType === 'log'">
+                            Log Freetext
+                          </clr-dg-column>
                           <clr-dg-column
                             class="studioCell"
                             *ngIf="
@@ -372,6 +387,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   ? (dataset.reviewInfo.reviewedTime | date: 'yyyy-MM-dd HH:mm:ss')
                                   : (flag.timestamp | date: 'yyyy-MM-dd HH:mm:ss')
                               }}
+                            </clr-dg-cell>
+                            <clr-dg-cell
+                              *ngIf="projectType === 'log'"
+                              style="word-break: break-all"
+                            >
+                              {{ flag.logFreeText }}
                             </clr-dg-cell>
                             <clr-dg-cell
                               *ngIf="
@@ -454,7 +475,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </clr-tab-content>
         </clr-tab>
         <clr-tab>
-          <button clrTabLink>Flag</button>
+          <button clrTabLink (click)="clickFlagTab()">Flag</button>
           <clr-tab-content *clrIfActive>
             <div style="margin-top: 0.5rem">
               <div class="btn-group btn-primary btn-icon">

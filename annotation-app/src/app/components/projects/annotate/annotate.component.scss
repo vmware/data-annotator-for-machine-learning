@@ -374,7 +374,6 @@ label .label-leftBoard {
   width: 14px;
   height: 14px;
   text-align: center;
-  // line-height: 14px;
   line-height: 11px;
   user-select: none;
   border-radius: 50%;
@@ -425,7 +424,6 @@ label .label-leftBoard {
   border-radius: 4px;
   font-weight: bold;
   border-left-width: 5px !important;
-  // background-color: #fafafa !important;
 }
 
 .panel button {
@@ -443,10 +441,6 @@ label .label-leftBoard {
   background-color: transparent;
 }
 
-// .tagColor {
-//   background-color: pink !important;
-// }
-
 .wordShow {
   white-space: break-spaces;
   word-break: break-all;
@@ -454,20 +448,31 @@ label .label-leftBoard {
 
 .txtBox {
   overflow: auto;
-  max-height: 18rem;
+  // max-height: 18rem;
   padding-bottom: 3rem;
+  height: 18rem;
+  resize: vertical;
 }
 
 ::ng-deep .textBox {
   overflow: auto;
-  max-height: 18rem;
+  // max-height: 18rem;
+  height: 18rem;
   padding-bottom: 3rem;
+  resize: vertical;
 }
 
 .txtRow {
   margin-top: 0.5rem !important;
+  margin-left: -2.5rem;
   word-break: keep-all;
   white-space: nowrap;
+}
+
+.txtRowWrap {
+  margin-top: 0.5rem !important;
+  margin-left: -2.5rem;
+  word-break: break-all;
 }
 
 .txtRow ::selection {
@@ -480,18 +485,11 @@ label .label-leftBoard {
 }
 
 .rowIndex {
-  margin-right: 1rem;
+  margin-right: 1.5rem;
   color: #cccccc;
   position: relative;
+  margin-top: 0.5rem !important;
 }
-
-// .rowIndex:hover {
-//   background-color: #cccccc;
-//   border-radius: 4px;
-//   padding-right: 5px;
-//   padding-left: 5px;
-//   color: white;
-// }
 
 .selectedRowIndex {
   margin-right: 1rem;
@@ -503,7 +501,6 @@ label .label-leftBoard {
 }
 
 .selectedTxtRow {
-  // background-color: #ffe184;
   padding: 0.25em 0.4em 0.25em 0.25em;
   font-weight: bold;
   color: black;
@@ -514,12 +511,10 @@ label .label-leftBoard {
 }
 
 .txtEntityLabel {
-  // background-color: #ffe184;
   font-size: unset;
   font-weight: bold;
   height: 1.5rem;
   outline: unset;
-  // color: #0077b8;
   color: white;
   padding: 0.25em 0.4em 0.25em 0.25em;
   position: relative;
@@ -570,17 +565,6 @@ label .label-leftBoard {
   border-bottom-width: 5px;
 }
 
-.customBadge {
-  // background: #cccccc;
-  color: #fff;
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  top: 0.1rem;
-  right: -0.1rem;
-}
-
 .logCategories {
   border-radius: 0.1rem;
 }
@@ -588,7 +572,6 @@ label .label-leftBoard {
 .logCategories:hover {
   background-color: transparent !important;
   box-shadow: 2px 2px 4px 1px #9a9a9a !important;
-  // border-radius: 0.3rem;
 }
 
 .filterLog {
@@ -711,13 +694,8 @@ label .label-leftBoard {
 }
 
 ::ng-deep .ng-select .ng-select-container:after {
-  // border-bottom-color: #999 !important;
   bottom: 0.3rem;
 }
-
-// ::ng-deep .ng-select .ng-arrow-wrapper .ng-arrow {
-//   color: #999 !important;
-// }
 
 ::ng-deep .ng-select .ng-select-container {
   margin-top: -1rem;
@@ -750,4 +728,61 @@ label .label-leftBoard {
   white-space: normal !important;
   word-break: break-all;
   margin-bottom: 0.3rem;
+}
+
+.editBar {
+  box-shadow: 0 7px 6px -9px #999;
+}
+
+.wrap {
+  padding: 0.1rem 0.2rem;
+  height: 1rem;
+  line-height: 0.8rem;
+  min-width: 1.5rem;
+  margin-top: -0.3rem;
+  outline-color: unset !important;
+  outline-width: 0px;
+}
+
+.noWrap {
+  padding: 0.1rem 0.2rem;
+  height: 1rem;
+  line-height: 0.8rem;
+  min-width: 1.5rem;
+  margin-top: -0.3rem;
+  outline-color: #0077b8 !important;
+  background-color: #0077b8;
+  color: white;
+}
+
+.modalHide {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 88;
+  margin-left: -1rem;
+  margin-top: -1rem;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+}
+
+.singleFreetext {
+  position: relative;
+  margin-left: -0.5rem;
+  z-index: 99999999999999;
+  width: -webkit-fill-available;
+}
+
+.hasText {
+  color: #0077b8;
+}
+
+.noText {
+  color: #dddddd;
+}
+
+.textActionBar {
+  box-shadow: 0 7px 6px -9px #999;
+  margin-bottom: 1rem;
 }

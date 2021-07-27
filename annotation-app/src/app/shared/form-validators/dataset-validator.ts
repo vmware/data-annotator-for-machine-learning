@@ -324,7 +324,6 @@ export class DatasetValidator {
 
   private static validateFileExt(inputFile: any, projectType): boolean {
     const ext = inputFile.name.split('.').pop().toLowerCase();
-    // console.log('validateFileExt:::', projectType, ext)
     if (projectType || projectType == '') {
       if (projectType == 'image') {
         if (ext == 'zip') {

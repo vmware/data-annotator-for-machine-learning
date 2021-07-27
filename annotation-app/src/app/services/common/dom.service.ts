@@ -28,8 +28,8 @@ export class GetElementService {
     }
   }
 
-  toCreateClear(txtRowEntityDom, pDom, newClass, styleClass, spansList, indexDom, badgeDom) {
-    if (txtRowEntityDom && pDom && indexDom && badgeDom) {
+  toCreateClear(txtRowEntityDom, pDom, newClass, styleClass, spansList) {
+    if (txtRowEntityDom && pDom) {
       const dom = this.renderer.createElement('span');
       this.renderer.appendChild(dom, this.renderer.createText('×'));
       this.renderer.appendChild(txtRowEntityDom, dom);
@@ -37,24 +37,23 @@ export class GetElementService {
       this.renderer.addClass(dom, styleClass);
       this.toListenMouseIn(txtRowEntityDom, dom);
       this.toListenMouseOut(txtRowEntityDom, dom);
-      this.renderer.listen(dom, 'mouseup', (e) => {
-        event.stopPropagation();
-        this.renderer.removeClass(this.renderer.parentNode(dom), 'txtEntityLabel');
-        this.renderer.setProperty(this.renderer.parentNode(dom), 'innerHTML', '');
-        this.renderer.removeClass(pDom, 'selectedTxtRow');
-        pDom.style.backgroundColor = '';
-        badgeDom.style.background = '';
-        // to update the spansList
-        spansList.forEach((e, i) => {
-          if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
-            spansList.splice(i, 1);
-            this.renderer.removeClass(indexDom, 'selectedRowIndex');
-            this.renderer.addClass(indexDom, 'rowIndex');
-          }
+      return new Promise((resolve, reject) => {
+        this.renderer.listen(dom, 'mouseup', (e) => {
+          event.stopPropagation();
+          this.renderer.removeClass(this.renderer.parentNode(dom), 'txtEntityLabel');
+          this.renderer.setProperty(this.renderer.parentNode(dom), 'innerHTML', '');
+          this.renderer.removeClass(pDom, 'selectedTxtRow');
+          pDom.style.backgroundColor = '';
+          // to update the spansList
+          spansList.forEach((e, i) => {
+            if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
+              spansList.splice(i, 1);
+            }
+          });
+          resolve(spansList);
         });
       });
     }
-    return spansList;
   }
 
   toListenMouseIn(domMouseover, domTarget) {
@@ -80,51 +79,49 @@ export class GetElementService {
     }
   }
 
-  toClearSelected(txtRowEntityDom, pDom, clearDom, spansList, indexDom, badgeDom) {
-    if (txtRowEntityDom && pDom && indexDom && badgeDom) {
-      this.renderer.listen(txtRowEntityDom, 'click', (e) => {
-        const classList = e.target.className.split(' ');
-        if (classList.indexOf('selected') > -1 && classList.indexOf('txtEntityLabel') > -1) {
-          this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
-          this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
-          this.renderer.removeClass(pDom, 'selectedTxtRow');
-          pDom.style.backgroundColor = '';
-          txtRowEntityDom.style.backgroundColor = '';
-          badgeDom.style.background = '';
+  toClearSelected(txtRowEntityDom, pDom, clearDom, spansList) {
+    if (txtRowEntityDom && pDom) {
+      return new Promise((resolve, reject) => {
+        this.renderer.listen(txtRowEntityDom, 'click', (e) => {
+          const classList = e.target.className.split(' ');
+          if (classList.indexOf('selected') > -1 && classList.indexOf('txtEntityLabel') > -1) {
+            this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
+            this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
+            this.renderer.removeClass(pDom, 'selectedTxtRow');
+            pDom.style.backgroundColor = '';
+            txtRowEntityDom.style.backgroundColor = '';
 
-          // to update the spansList
-          spansList.forEach((e, i) => {
-            if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
-              spansList.splice(i, 1);
-              this.renderer.removeClass(indexDom, 'selectedRowIndex');
-              this.renderer.addClass(indexDom, 'rowIndex');
-            }
-          });
-        }
-      });
+            // to update the spansList
+            spansList.forEach((e, i) => {
+              if (e.line == pDom.className.split(' ')[0].split('-').pop()) {
+                spansList.splice(i, 1);
+              }
+            });
+            resolve(spansList);
+          }
+        });
 
-      this.renderer.listen(pDom, 'click', (e) => {
-        const classList = e.target.className.split(' ');
-        if (classList.indexOf('selected') > -1 && classList.indexOf('selectedTxtRow') > -1) {
-          this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
-          this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
-          this.renderer.removeClass(pDom, 'selectedTxtRow');
-          pDom.style.backgroundColor = '';
-          txtRowEntityDom.style.backgroundColor = '';
-          badgeDom.style.background = '';
+        this.renderer.listen(pDom, 'click', (e) => {
+          const classList = e.target.className.split(' ');
+          if (classList.indexOf('selected') > -1 && classList.indexOf('selectedTxtRow') > -1) {
+            this.renderer.removeClass(txtRowEntityDom, 'txtEntityLabel');
+            this.renderer.setProperty(txtRowEntityDom, 'innerHTML', '');
+            this.renderer.removeClass(pDom, 'selectedTxtRow');
+            pDom.style.backgroundColor = '';
+            txtRowEntityDom.style.backgroundColor = '';
 
-          // to update the spansList
-          spansList.forEach((e, i) => {
-            if (e.line == classList[0].split('-').pop()) {
-              spansList.splice(i, 1);
-              this.renderer.removeClass(indexDom, 'selectedRowIndex');
-              this.renderer.addClass(indexDom, 'rowIndex');
-            }
-          });
-        }
+            // to update the spansList
+            spansList.forEach((e, i) => {
+              if (e.line == classList[0].split('-').pop()) {
+                spansList.splice(i, 1);
+              }
+            });
+
+            resolve(spansList);
+          }
+        });
       });
     }
-    return spansList;
   }
 
   setFilterHighLight(className, originalText, filterList) {
