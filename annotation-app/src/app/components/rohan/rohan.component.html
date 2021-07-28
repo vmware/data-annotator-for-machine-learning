@@ -7,11 +7,29 @@ SPDX-License-Identifier: Apache-2.0 -->
     <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'name'" style="max-width: 300px">User Name</clr-dg-column>
     <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'age'" style="max-width: 300px">User age</clr-dg-column>
     <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'description'" style="max-width: 300px">User description</clr-dg-column>
+    <clr-dg-column class="ellipsis-datagrid" style="max-width: 300px">actions</clr-dg-column>
     <clr-dg-row *clrDgItems="let user of users" [clrDgItem]="user">
-        <clr-dg-cell style="max-width: 300px" >{{user.id}}</clr-dg-cell>[] [()] #   *
+        <clr-dg-cell style="max-width: 300px" >{{user.id}}</clr-dg-cell>
         <clr-dg-cell style="max-width: 300px" title="{{ user.name }}">{{user.name}}</clr-dg-cell>
         <clr-dg-cell style="max-width: 300px">{{user.age}}</clr-dg-cell>
         <clr-dg-cell style="max-width: 300px">{{user.description}}</clr-dg-cell>
+        <clr-dg-cell style="padding-right: 0.3rem">
+          <button
+            type="button"
+            class="btn btn-icon actionClass"
+            (click)="
+              selectedDataset = user;
+              editProjectDialog = true;
+              deleteDatasetDialog = false;
+              showProjectEdit(selectedDataset)
+            "
+            role="tooltip"
+            aria-haspopup="true"
+            title="Edit Project"
+          >
+            <clr-icon aria-hidden="true" shape="note"></clr-icon>
+          </button>
+        </clr-dg-cell>
     </clr-dg-row>
   <clr-dg-footer>
     <clr-dg-column-toggle [hidden]="true"></clr-dg-column-toggle>
@@ -26,5 +44,14 @@ SPDX-License-Identifier: Apache-2.0 -->
       </clr-dg-pagination>
   </clr-dg-footer>
 </clr-datagrid>
+
+<app-edit-project
+  *ngIf="editProjectDialog"
+  [msgInEdit]="msgEdit"
+  (onCloseEditDialog)="receiveCloseEdit($event)"
+  (onSubmitEdit)="receiveSubmitEdit($event)"
+  (onDeleteLabel)="receiveDeleteLabel($event)"
+>
+</app-edit-project>
 
 </div>
