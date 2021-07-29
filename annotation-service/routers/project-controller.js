@@ -14,7 +14,7 @@ const APIs = require('../resources/APIs');
 const alService = require('../services/activelearning.service');
 
 /* GET all projects */
-router.get(APIs.PROJECTS, (req, res) => {
+router.get(APIs.PROJECT_LIST, (req, res) => {
   console.log(`[ PROJECT ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
   projectService.getProjects(req).then(response => {
     console.log(`[ PROJECT ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
