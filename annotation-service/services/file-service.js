@@ -42,8 +42,8 @@ async function createProject(req) {
     annotators = (typeof annotators === 'string'? JSON.parse(annotators):annotators);
     
     let userCompleteCase = [];
-    annotators.forEach(item => {
-        const inintUser = { user: item };
+    await annotators.forEach(item => {
+        const inintUser = { user: item.email, assignedCase: item.assignedCase };
         userCompleteCase.push(inintUser);
     });
     
@@ -108,7 +108,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         regression: req.body.regression === 'true'? true: false,
         isShowFilename: req.body.isShowFilename === 'true'? true: false,
     };
-    return await projectDB.saveProject(project);
+    return projectDB.saveProject(project);
 }
 
 async function generateFileFromDB(id, format, onlyLabelled, user) {

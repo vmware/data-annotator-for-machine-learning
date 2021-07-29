@@ -728,8 +728,9 @@ async function deleteSrs(req){
     const mp = await getModelProject(conditionsP);
 
     console.log(`[ SRS ] Service deleteSrs`, req.body.tids);
-    let srIds = [], pro = mp.project, pcc=0, ucc={}
-
+    let srIds = [], pro = mp.project, pcc = 0, ucc = {};
+    
+    //calculate userCompleteCase and projectCompleteCase
     for (const id of req.body.tids) {
         srIds.push(ObjectId(id));
         const ticket = await mongoDb.findById(mp.model, ObjectId(id));
@@ -747,20 +748,39 @@ async function deleteSrs(req){
             }
         }
     }
-
+    
+    let conditions = {_id:{ $in: srIds } };
+    const srD = await mongoDb.deleteManyByConditions(mp.model, conditions);
+    console.log(`[ SRS ] Service deleteSrs update project total case subtract:`, srD.deletedCount);
+    
+    //calculate userCompleteCase
     for (const uc of pro.userCompleteCase) {
-        console.log(uc);
+        console.log('deleteSrs.userCompleteCase:', uc);
+        //update completeCase
         if (Object.keys(ucc).indexOf(uc.user) != -1) {
             console.log(uc.user, ucc[uc.user]);
             uc.completeCase -= ucc[uc.user];
         }
+        //update assignedCase
+        if (pro.maxAnnotation >= pro.annotator.length) {
+            uc.assignedCase -= srD.deletedCount;
+        }
     }
 
-    let conditions = {_id:{ $in: srIds } };
-    const srD = await mongoDb.deleteManyByConditions(mp.model, conditions);
-
+    //update assignedCase
+    if (pro.maxAnnotation < pro.annotator.length) {
+        const avgCase = Math.floor(srD.deletedCount * pro.maxAnnotation / pro.annotator.length);
+        const perCase = srD.deletedCount * pro.maxAnnotation % pro.annotator.length;
+        if (avgCase > 0) {
+            await pro.userCompleteCase.forEach(uc => uc.assignedCase -= avgCase);
+        }
+        await pro.userCompleteCase.sort((a,b) => a.assignedCase - b.assignedCase).forEach((uc, index) => {
+            if (index < perCase) {
+                uc.assignedCase -= 1;
+            }
+        })
+    }
     
-    console.log(`[ SRS ] Service deleteSrs update project total case subtract:`, srD.deletedCount);
     const update = { 
         $set: { 
             "updatedDate": Date.now(),
@@ -772,7 +792,7 @@ async function deleteSrs(req){
         }
     };
     const options = { new: true };
-    return await mongoDb.findOneAndUpdate(ProjectModel, conditionsP, update, options);
+    return mongoDb.findOneAndUpdate(ProjectModel, conditionsP, update, options);
 }
 
 
