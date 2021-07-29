@@ -249,8 +249,9 @@ async function getOneSrs(req) {
         const schema = [
             { $match: conditions},
             { $project: filterFileds }, 
-            { $skip: usc.skip},
-            { $limit: limitation}
+            { $skip: usc.skip },
+            { $limit: 10000 },
+            { $sample: { size: limitation }}
         ];
         srs = await mongoDb.aggregateBySchema(mp.model, schema);
     }
@@ -568,7 +569,9 @@ async function appendSrsData(req){
 
         }else{
             //quick append
-            typeof req.body.images == "string" ? req.body.images = JSON.parse(req.body.images): null;
+            if (typeof req.body.images == "string") {
+                req.body.images = JSON.parse(req.body.images)
+            }
             await imgImporter.quickAppendImages(req, mp.project.selectedDataset[0]);
             update.$inc = { totalCase: req.body.images.length };
         }

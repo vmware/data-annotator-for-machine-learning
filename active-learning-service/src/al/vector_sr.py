@@ -71,8 +71,8 @@ def srs_vector(request):
         update_project({"projectName": req['projectName']}, {"al.alFailed": True})
         res = {"status": "ERROR", "data": req['projectName'] + " vector srs fail " + str(e)}
         log.error(f'{e}, {traceback.format_exc()}')
-    finally:
-        return res
+
+    return res
 
 
 

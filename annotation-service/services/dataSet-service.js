@@ -49,7 +49,10 @@ async function saveDataSetInfo(req) {
         }
         await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
 
-        typeof req.body.topReview == "string"? req.body.topReview=JSON.parse(req.body.topReview) : null;
+        if (typeof req.body.topReview == "string") {
+            req.body.topReview = JSON.parse(req.body.topReview)
+        }
+
     }
     
     if (req.body.format == DATASETTYPE.IMGAGE) {
