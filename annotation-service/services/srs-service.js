@@ -80,7 +80,6 @@ async function updateSrsUserInput(req) {
                         timestamp: Date.now()
                     });
                 }else if(pro.projectType == PROJECTTYPE.LOG){
-                    console.log('----------------->', ui);
                     userInputs.push({
                         logFreeText: ui.logFreeText,
                         problemCategory: ui.problemCategory,
@@ -123,7 +122,6 @@ async function updateSrsUserInput(req) {
                         timestamp: Date.now()
                     });
                 }else if(pro.projectType == PROJECTTYPE.LOG){
-                    console.log('----------------->', ui);
                     userInputs.push({
                         logFreeText: ui.logFreeText,
                         problemCategory: ui.problemCategory,
@@ -249,8 +247,9 @@ async function getOneSrs(req) {
         const schema = [
             { $match: conditions},
             { $project: filterFileds }, 
-            { $skip: usc.skip},
-            { $limit: limitation}
+            { $skip: usc.skip },
+            { $limit: 10000 },
+            { $sample: { size: limitation }}
         ];
         srs = await mongoDb.aggregateBySchema(mp.model, schema);
     }

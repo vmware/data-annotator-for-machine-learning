@@ -9,6 +9,7 @@ import * as _ from 'lodash';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserAuthService } from '../../services/user-auth.service';
 import { AvaService } from '../../services/ava.service';
+import { ToolService } from 'app/services/common/tool.service';
 
 @Component({
   selector: 'app-game-form',
@@ -40,6 +41,7 @@ export class GameFormComponent implements OnInit {
     private userAuthService: UserAuthService,
     private router: Router,
     private route: ActivatedRoute,
+    private toolService: ToolService,
   ) {
     this.user = this.userAuthService.loggedUser();
     this.page = 1;
@@ -88,6 +90,9 @@ export class GameFormComponent implements OnInit {
           if (project.projectType === 'log' && project.creator.indexOf(this.user.email) > -1) {
             project.allowOwnerReview = true;
           }
+          if (project.annotator.indexOf(this.user.email) > -1) {
+            project.allowStart = true;
+          }
           project.isExtend = true;
           for (let j = 0; j < project.userCompleteCase.length; j++) {
             if (project.userCompleteCase[j].completeCase > 0) {
@@ -120,5 +125,18 @@ export class GameFormComponent implements OnInit {
         this.datasets[i].isExtend = !this.datasets[i].isExtend;
       }
     }
+  }
+
+  clickReview(data) {
+    let flag = data.userCompleteCase.sort(this.toolService.sortBy('completeCase', 'descending'));
+    this.router.navigate(['annotate'], {
+      queryParams: {
+        name: data.projectName,
+        projectType: data.projectType,
+        id: data.id,
+        from: 'review',
+        reviewee: flag[0].user,
+      },
+    });
   }
 }
