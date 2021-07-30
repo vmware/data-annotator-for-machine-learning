@@ -179,17 +179,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <clr-dg-column class="ellipsis-datagrid" style="max-width: 90px"
                   >Index</clr-dg-column
                 >
-                <clr-dg-column
-                  *ngFor="let header of previewSrsHeader"
-                  class="ellipsis-datagrid"
-                  style="max-width: 650px"
-                >
+                <clr-dg-column *ngFor="let header of previewSrsHeader" class="ellipsis-datagrid">
                   {{ header }}
                   <clr-dg-filter *ngIf="header == 'FileName'" [clrDgFilter]="myFilter">
                     <my-filter #myFilter (filter)="receiveFilename($event)"></my-filter>
                   </clr-dg-filter>
                 </clr-dg-column>
-                <clr-dg-column class="ellipsis-datagrid" style="min-width: 80px; max-width: 120px">
+                <clr-dg-column class="ellipsis-datagrid" style="max-width: 90px">
                   Annotations No.
                 </clr-dg-column>
 
@@ -310,10 +306,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         </div>
                       </div>
                     </clr-dg-cell>
-                    <clr-dg-cell
-                      class="ellipsis-datagrid previewHeight"
-                      style="min-width: 80px; max-width: 120px"
-                    >
+                    <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width: 90px">
                       {{ dataset.userInputsLength }}
                     </clr-dg-cell>
 
