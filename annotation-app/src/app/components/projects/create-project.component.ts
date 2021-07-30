@@ -472,7 +472,7 @@ export class CreateNewComponent implements OnInit {
         }
       }
     }
-    console.log(assigneeList);
+    // console.log(assigneeList);
     // assigneeList[1].default = true;
   }
 
