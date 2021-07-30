@@ -465,6 +465,8 @@ async function appendSrsDataByForms(req, originalHeaders){
     const update = { $set: { "appendSr": APPENDSR.DONE, updatedDate: Date.now() }, $inc: { "totalCase": caseNum } };
     await projectDB.findUpdateProject(conditions,update);
 
+    await projectService.updateAssinedCase(conditions, caseNum, true);
+
 }
 
 async function appendSrsDataByCSVFile(req, originalHeaders){
@@ -535,6 +537,8 @@ async function appendSrsDataByCSVFile(req, originalHeaders){
                 $push: { selectedDataset: req.body.selectedDataset }
             };
             await projectDB.findUpdateProject(conditions,update);
+
+            await projectService.updateAssinedCase(conditions, caseNum, true);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
         } catch (error) {
             console.log(`[ SRS ] [ERROR] insert sr done, but fail on update tatalcase or send email ${error}: `, Date.now());
@@ -545,7 +549,8 @@ async function appendSrsDataByCSVFile(req, originalHeaders){
 async function appendSrsData(req){
     //validate user and project
     await validator.checkAnnotator(req.auth.email);
-    const mp = await getModelProject({projectName: req.body.pname});
+    const queryProjectCondition = {projectName: req.body.pname};
+    const mp = await getModelProject(queryProjectCondition);
     
     const dataset = req.body.selectedDataset;
     const projectType = mp.project.projectType;
@@ -573,7 +578,11 @@ async function appendSrsData(req){
             await imgImporter.quickAppendImages(req, mp.project.selectedDataset[0]);
             update.$inc = { totalCase: req.body.images.length };
         }
-        await mongoDb.findOneAndUpdate(ProjectModel, {projectName: req.body.pname}, update);
+        
+        await mongoDb.findOneAndUpdate(ProjectModel, queryProjectCondition, update);
+        
+        const totalCase = update.$inc.totalCase;
+        await projectService.updateAssinedCase(queryProjectCondition, totalCase, true);
 
     } else if(projectType == PROJECTTYPE.TEXT || projectType == PROJECTTYPE.TABULAR || projectType == PROJECTTYPE.NER){  
         //validate pname and headers
@@ -612,6 +621,7 @@ async function sampleSr(req){
     console.log(`[ SRS ] Service sampleSr.aggregateSrsData`);
     const schema = [
         { $match: { projectName: mp.project.projectName}}, 
+        { $limit: 100 },
         { $sample: { size: 1 }}
     ];
     const sr = await mongoDb.aggregateBySchema(mp.model, schema);
@@ -726,8 +736,9 @@ async function deleteSrs(req){
     const mp = await getModelProject(conditionsP);
 
     console.log(`[ SRS ] Service deleteSrs`, req.body.tids);
-    let srIds = [], pro = mp.project, pcc=0, ucc={}
-
+    let srIds = [], pro = mp.project, pcc = 0, ucc = {};
+    
+    //calculate userCompleteCase and projectCompleteCase
     for (const id of req.body.tids) {
         srIds.push(ObjectId(id));
         const ticket = await mongoDb.findById(mp.model, ObjectId(id));
@@ -745,20 +756,23 @@ async function deleteSrs(req){
             }
         }
     }
+    
+    let conditions = {_id:{ $in: srIds } };
+    const srD = await mongoDb.deleteManyByConditions(mp.model, conditions);
+    console.log(`[ SRS ] Service deleteSrs update project total case subtract:`, srD.deletedCount);
+    
+    await projectService.updateAssinedCase(conditionsP, srD.deletedCount);
 
+    //calculate userCompleteCase
     for (const uc of pro.userCompleteCase) {
-        console.log(uc);
+        console.log('deleteSrs.userCompleteCase:', uc);
+        //update completeCase
         if (Object.keys(ucc).indexOf(uc.user) != -1) {
             console.log(uc.user, ucc[uc.user]);
             uc.completeCase -= ucc[uc.user];
         }
     }
-
-    let conditions = {_id:{ $in: srIds } };
-    const srD = await mongoDb.deleteManyByConditions(mp.model, conditions);
-
     
-    console.log(`[ SRS ] Service deleteSrs update project total case subtract:`, srD.deletedCount);
     const update = { 
         $set: { 
             "updatedDate": Date.now(),
@@ -770,7 +784,7 @@ async function deleteSrs(req){
         }
     };
     const options = { new: true };
-    return await mongoDb.findOneAndUpdate(ProjectModel, conditionsP, update, options);
+    return mongoDb.findOneAndUpdate(ProjectModel, conditionsP, update, options);
 }
 
 

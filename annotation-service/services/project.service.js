@@ -235,7 +235,7 @@ async function updateProject(req) {
     console.log(`[ PROJECT ] Service update project info`,completeCase);
     const condition = {projectName: req.body.previousPname};
     const options = { new: true };
-    return await mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
+    return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
 }
 
 async function updateProjectShare(req) {
@@ -249,7 +249,7 @@ async function updateProjectShare(req) {
     };
     const optional = { new: true };
     console.log(`[ PROJECT ] Service updateProjectShare.findUpdateProject`);
-    return await projectDB.findUpdateProject(condition, update, optional);
+    return projectDB.findUpdateProject(condition, update, optional);
 }
 
 async function projectLeaderBoard(req) {
@@ -347,7 +347,7 @@ async function removeSkippedCase(id, user, review) {
 
     const options = { new: true };
     
-    return await projectDB.findUpdateProject(conditions, update, options);
+    return projectDB.findUpdateProject(conditions, update, options);
 }
 
 async function getReviewList(req) {
@@ -358,7 +358,7 @@ async function getReviewList(req) {
     
     const conditions = { creator: { $regex: user }, projectType: PROJECTTYPE.LOG };
     const options = { sort: { updatedDate: -1 } };
-    return await mongoDb.findByConditions(ProjectModel, conditions, null, options);
+    return mongoDb.findByConditions(ProjectModel, conditions, null, options);
 }
 
 async function getLogProjectFileList(req) {
@@ -370,7 +370,7 @@ async function getLogProjectFileList(req) {
         { $match: { projectName: pro[0].projectName, userInputsLength:1 } },
         { $project: {_id: 0, fileName: "$fileInfo.fileName"}},
     ]
-    return await mongoDb.aggregateBySchema(LogModel, schema);
+    return mongoDb.aggregateBySchema(LogModel, schema);
 }
 
 async function fileterLogTicketsByFileName(req) {
@@ -383,7 +383,67 @@ async function fileterLogTicketsByFileName(req) {
     const schema = [
         { $match: { projectName: pro[0].projectName, "fileInfo.fileName": { $regex: req.query.fname } } },
     ]
-    return await mongoDb.aggregateBySchema(LogModel, schema);
+    return mongoDb.aggregateBySchema(LogModel, schema);
+}
+
+
+/**
+ * 
+ * update assignedcase, support append and delete tickets
+ * 
+ * assignedcase calculate according to this method
+ * annoatorsNumber: A
+ * totalCase: T
+ * maxAnnotation: M
+ * 
+ * assignedCase:
+ *      M >= A
+ *          assignedCase=T
+ *      M < A
+ *          assignedCase= M*T/A
+ * 
+ * 
+ * 
+ */
+async function updateAssinedCase(QueryCondition, totalCase, append){
+    
+    console.log(`[ PROJECT ] Service updateAssinedCase START`, QueryCondition, totalCase); 
+    
+    const pro = await mongoDb.findOneByConditions(ProjectModel, QueryCondition)
+    if (!pro) return;
+    
+    const annoatorsNumber = pro.annotator.length;
+    const maxAnnotation = pro.maxAnnotation;
+    
+    const avgCase = Math.floor(totalCase * maxAnnotation / annoatorsNumber);
+    const perCase = totalCase * maxAnnotation % annoatorsNumber;
+    
+    if (append) {//append tickets
+        if (maxAnnotation >= annoatorsNumber) {
+            await pro.userCompleteCase.forEach(uc => uc.assignedCase += totalCase);
+        }else{
+            await pro.userCompleteCase.forEach(uc => uc.assignedCase += avgCase);
+            await pro.userCompleteCase.sort((a,b) => a.assignedCase - b.assignedCase).forEach((uc, index) => {
+                if (index < perCase) uc.assignedCase += 1;
+            });
+        }
+
+    }else{//delete tickets
+        if (maxAnnotation >= annoatorsNumber) {
+            await pro.userCompleteCase.forEach(uc => uc.assignedCase -= totalCase);
+        }else{
+            await pro.userCompleteCase.forEach(uc => uc.assignedCase -= avgCase);
+            await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach((uc, index) => {
+                if (index < perCase) uc.assignedCase -= 1;
+            });
+        }
+    }
+
+    const update = { $set: { userCompleteCase: pro.userCompleteCase } };
+    await mongoDb.findOneAndUpdate(ProjectModel, QueryCondition, update);
+    
+    console.log(`[ PROJECT ] Service updateAssinedCase END`); 
+
 }
 
 module.exports = {
@@ -400,5 +460,6 @@ module.exports = {
     getReviewList,
     getLogProjectFileList,
     fileterLogTicketsByFileName,
+    updateAssinedCase,
 
 }
