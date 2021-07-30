@@ -467,6 +467,8 @@ async function appendSrsDataByForms(req, originalHeaders){
     const update = { $set: { "appendSr": APPENDSR.DONE, updatedDate: Date.now() }, $inc: { "totalCase": caseNum } };
     await projectDB.findUpdateProject(conditions,update);
 
+    await projectService.updateAssinedCase(conditions, caseNum, true);
+
 }
 
 async function appendSrsDataByCSVFile(req, originalHeaders){
@@ -537,6 +539,8 @@ async function appendSrsDataByCSVFile(req, originalHeaders){
                 $push: { selectedDataset: req.body.selectedDataset }
             };
             await projectDB.findUpdateProject(conditions,update);
+
+            await projectService.updateAssinedCase(conditions, caseNum, true);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
         } catch (error) {
             console.log(`[ SRS ] [ERROR] insert sr done, but fail on update tatalcase or send email ${error}: `, Date.now());
@@ -547,7 +551,8 @@ async function appendSrsDataByCSVFile(req, originalHeaders){
 async function appendSrsData(req){
     //validate user and project
     await validator.checkAnnotator(req.auth.email);
-    const mp = await getModelProject({projectName: req.body.pname});
+    const queryProjectCondition = {projectName: req.body.pname};
+    const mp = await getModelProject(queryProjectCondition);
     
     const dataset = req.body.selectedDataset;
     const projectType = mp.project.projectType;
@@ -575,7 +580,11 @@ async function appendSrsData(req){
             await imgImporter.quickAppendImages(req, mp.project.selectedDataset[0]);
             update.$inc = { totalCase: req.body.images.length };
         }
-        await mongoDb.findOneAndUpdate(ProjectModel, {projectName: req.body.pname}, update);
+        
+        await mongoDb.findOneAndUpdate(ProjectModel, queryProjectCondition, update);
+        
+        const totalCase = update.$inc.totalCase;
+        await projectService.updateAssinedCase(queryProjectCondition, totalCase, true);
 
     } else if(projectType == PROJECTTYPE.TEXT || projectType == PROJECTTYPE.TABULAR || projectType == PROJECTTYPE.NER){  
         //validate pname and headers
@@ -614,6 +623,7 @@ async function sampleSr(req){
     console.log(`[ SRS ] Service sampleSr.aggregateSrsData`);
     const schema = [
         { $match: { projectName: mp.project.projectName}}, 
+        { $limit: 100 },
         { $sample: { size: 1 }}
     ];
     const sr = await mongoDb.aggregateBySchema(mp.model, schema);
@@ -753,6 +763,8 @@ async function deleteSrs(req){
     const srD = await mongoDb.deleteManyByConditions(mp.model, conditions);
     console.log(`[ SRS ] Service deleteSrs update project total case subtract:`, srD.deletedCount);
     
+    await projectService.updateAssinedCase(conditionsP, srD.deletedCount);
+
     //calculate userCompleteCase
     for (const uc of pro.userCompleteCase) {
         console.log('deleteSrs.userCompleteCase:', uc);
@@ -761,24 +773,6 @@ async function deleteSrs(req){
             console.log(uc.user, ucc[uc.user]);
             uc.completeCase -= ucc[uc.user];
         }
-        //update assignedCase
-        if (pro.maxAnnotation >= pro.annotator.length) {
-            uc.assignedCase -= srD.deletedCount;
-        }
-    }
-
-    //update assignedCase
-    if (pro.maxAnnotation < pro.annotator.length) {
-        const avgCase = Math.floor(srD.deletedCount * pro.maxAnnotation / pro.annotator.length);
-        const perCase = srD.deletedCount * pro.maxAnnotation % pro.annotator.length;
-        if (avgCase > 0) {
-            await pro.userCompleteCase.forEach(uc => uc.assignedCase -= avgCase);
-        }
-        await pro.userCompleteCase.sort((a,b) => a.assignedCase - b.assignedCase).forEach((uc, index) => {
-            if (index < perCase) {
-                uc.assignedCase -= 1;
-            }
-        })
     }
     
     const update = { 
