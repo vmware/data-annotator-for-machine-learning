@@ -97,22 +97,28 @@ async function updateProject(req) {
     }
     
     const projectInfo = mp.project;
-    let annotators = [], originalUser = [], completeCase = [];
-    await req.body.assignee.forEach(item => annotators.push(item.email));
+    let annotators = [], completeCase = [];    
     
-    //for original user case
-    for (const uCase of projectInfo.userCompleteCase) {
-        originalUser.push(uCase.user);
-        if (annotators.indexOf(uCase.user)  != -1) {
-            completeCase.push(uCase);
-        }else if (uCase.completeCase) {
-            completeCase.push(uCase);
+    //update userCompleteCase
+    for (const user of req.body.assignee) {
+        annotators.push(user.email);
+        const ucase = await projectInfo.userCompleteCase.find(uc => uc.user == user.email);
+        if (ucase) {
+            ucase.assignedCase = user.assignedCase;
+            completeCase.push(ucase);
+        }else{
+            completeCase.push({ 
+                user: user.email,
+                completeCase: 0,
+                skip: 0,
+                assignedCase: user.assignedCase
+            });
         }
     }
-    //for newly add user case
-    for (const user of req.body.assignee) {
-        if (originalUser.indexOf(user.email) == -1) {
-            completeCase.push({ user: user.email,  completeCase: 0, skip: 0, assignedCase: user.assignedCase });
+    //add record user to userCompleteCase
+    for (const uCase of projectInfo.userCompleteCase) {
+        if (annotators.indexOf(uCase.user) == -1 && uCase.completeCase) {
+            completeCase.push(uCase);
         }
     }
 
