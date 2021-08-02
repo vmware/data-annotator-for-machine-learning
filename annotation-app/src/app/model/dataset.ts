@@ -28,7 +28,7 @@ export class DatasetUtil {
       name: '',
       description: '',
       annotationQuestion: 'What label does this ticket belong to ?',
-      maxAnnotations: null,
+      maxAnnotations: 1,
       labels: [],
       assigmentLogic: 'random',
       assignee: [],

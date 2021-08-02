@@ -115,6 +115,7 @@ export class CreateNewComponent implements OnInit {
   encoder: any;
   isMultipleLabel: boolean;
   fileLocation: string;
+  assignTickets: object;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -426,11 +427,20 @@ export class CreateNewComponent implements OnInit {
     this.emailReg = this.toolService.toRegEmail(emails);
     if (this.emailReg && this.inputAssigneeValidation == false) {
       emails.forEach((element) => {
-        if (this.assigneeList.indexOf(element.trim()) == -1) {
-          this.assigneeList.push(element.trim());
+        // if (this.assigneeList.indexOf(element.trim()) == -1) {
+        console.log(133, _.filter(this.assigneeList, ['email', element.trim()]));
+        if (_.filter(this.assigneeList, ['email', element.trim()]).length === 0) {
+          // this.assigneeList.push(element.trim());
+          this.assigneeList.push({ email: element.trim(), assignedCase: 0 });
         }
       });
       this.dsDialogForm.get('assignee').setValue(this.assigneeList);
+      if (this.assigneeList.length > 0) {
+        this.evenlyDistributeTicket(
+          this.assigneeList,
+          this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+        );
+      }
       this.assignee.nativeElement.value = null;
     }
     if (this.assigneeList.length != 0) {
@@ -438,12 +448,62 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
+  evenlyDistributeTicket(assigneeList, totalTicket) {
+    // assigneeList = ['a', 'b', 'c'];
+    // let totalTicket = 26;
+    // let flag = [];
+    assigneeList.forEach((data) => {
+      data.assignedCase = 0;
+    });
+    if (this.dsDialogForm.get('maxAnnotations').value >= assigneeList.length) {
+      assigneeList.forEach((value) => {
+        value.assignedCase = this.dsDialogForm.get('totalRow').value;
+      });
+    } else {
+      if (totalTicket > 0) {
+        while (totalTicket > 0) {
+          console.log(13);
+          assigneeList.forEach((value) => {
+            if (totalTicket > 0) {
+              value.assignedCase++;
+              totalTicket--;
+            }
+          });
+        }
+      }
+    }
+    // console.log(assigneeList);
+    // assigneeList[1].default = true;
+  }
+
   deleteAssignee(index) {
+    // this.assigneeList.splice(index, 1);
+    // this.dsDialogForm.get('assignee').setValue(this.assigneeList);
+    // if (this.assigneeList.length > 0) {
+    //   this.evenlyDistributeTicket(this.assigneeList);
+    // }
+    // if (this.assigneeList.length != 0) {
+    //   this.emailReg = true;
+    // }
     this.assigneeList.splice(index, 1);
     this.dsDialogForm.get('assignee').setValue(this.assigneeList);
+    if (this.assigneeList.length > 0) {
+      this.evenlyDistributeTicket(
+        this.assigneeList,
+        this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+      );
+    }
     if (this.assigneeList.length != 0) {
       this.emailReg = true;
     }
+  }
+
+  editAssignedNumber(data) {
+    console.log(99, data);
+    this.evenlyDistributeTicket(
+      this.assigneeList,
+      this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+    );
   }
 
   onAddingDataset(event) {
@@ -537,7 +597,12 @@ export class CreateNewComponent implements OnInit {
         }
       }
     }
-
+    if (this.assigneeList.length > 0) {
+      this.evenlyDistributeTicket(
+        this.assigneeList,
+        this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+      );
+    }
     this.getMyDatasets();
     setTimeout(() => {
       this.infoMessage = '';
@@ -634,6 +699,12 @@ export class CreateNewComponent implements OnInit {
           this.chooseLabel = choosedDataset.topReview.header;
           this.loadingPreviewData = false;
         }
+        if (this.assigneeList.length > 0) {
+          this.evenlyDistributeTicket(
+            this.assigneeList,
+            this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+          );
+        }
         this.loadingSetData = false;
         return;
       }
@@ -693,6 +764,12 @@ export class CreateNewComponent implements OnInit {
       this.totalCase = 0;
       this.nonEnglish = 0;
       this.previewTotalData = [];
+      if (this.assigneeList.length > 0) {
+        this.evenlyDistributeTicket(
+          this.assigneeList,
+          this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+        );
+      }
     }
     if (this.projectType === 'ner') {
       this.selectDescription.forEach((element) => {
@@ -736,6 +813,12 @@ export class CreateNewComponent implements OnInit {
     this.previewTotalData = [];
     this.labelType = '';
     this.dsDialogForm.get('totalRow').setValue(0);
+    if (this.assigneeList.length > 0) {
+      this.evenlyDistributeTicket(
+        this.assigneeList,
+        this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+      );
+    }
     if (this.selectDescription.length > 0) {
       this.selectDescription.forEach((element) => {
         e.target.value == element.name
@@ -879,6 +962,12 @@ export class CreateNewComponent implements OnInit {
         this.setDataComplete = false;
         this.changeSetData = false;
         this.changePreview = false;
+        if (this.assigneeList.length > 0) {
+          this.evenlyDistributeTicket(
+            this.assigneeList,
+            this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+          );
+        }
       },
     });
   }
@@ -890,6 +979,12 @@ export class CreateNewComponent implements OnInit {
       this.totalCase = 0;
       this.previewTotalData = [];
       this.dsDialogForm.get('totalRow').setValue(0);
+      if (this.assigneeList.length > 0) {
+        this.evenlyDistributeTicket(
+          this.assigneeList,
+          this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+        );
+      }
       if (this.projectType !== 'ner') {
         this.dsDialogForm.get('labels').setValue([]);
         this.categoryList = [];
@@ -964,6 +1059,13 @@ export class CreateNewComponent implements OnInit {
             this.setDataComplete = false;
             this.changeSetData = false;
             this.changePreview = false;
+            if (this.assigneeList.length > 0) {
+              this.evenlyDistributeTicket(
+                this.assigneeList,
+                this.dsDialogForm.get('totalRow').value *
+                  this.dsDialogForm.get('maxAnnotations').value,
+              );
+            }
           },
           (error) => {
             console.log('Error:', error);
@@ -995,7 +1097,10 @@ export class CreateNewComponent implements OnInit {
   }
 
   onAssigneeKeydown(e) {
-    if (this.assigneeList.indexOf(e.target.value) !== -1) {
+    // if (this.assigneeList.indexOf(e.target.value) !== -1) {
+    let flag = _.filter(this.assigneeList, ['email', e.target.value]);
+    console.log(1, flag);
+    if (flag.length > 0) {
       this.inputAssigneeValidation = true;
     } else {
       this.inputAssigneeValidation = false;
@@ -1183,5 +1288,14 @@ export class CreateNewComponent implements OnInit {
   validImageSubmit() {
     this.validMultiple();
     this.dsDialogForm.get('maxAnnotations').setValue(1);
+  }
+
+  changeMaxAnnotation() {
+    if (this.assigneeList.length > 0) {
+      this.evenlyDistributeTicket(
+        this.assigneeList,
+        this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+      );
+    }
   }
 }

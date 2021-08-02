@@ -80,7 +80,6 @@ async function updateSrsUserInput(req) {
                         timestamp: Date.now()
                     });
                 }else if(pro.projectType == PROJECTTYPE.LOG){
-                    console.log('----------------->', ui);
                     userInputs.push({
                         logFreeText: ui.logFreeText,
                         problemCategory: ui.problemCategory,
@@ -123,7 +122,6 @@ async function updateSrsUserInput(req) {
                         timestamp: Date.now()
                     });
                 }else if(pro.projectType == PROJECTTYPE.LOG){
-                    console.log('----------------->', ui);
                     userInputs.push({
                         logFreeText: ui.logFreeText,
                         problemCategory: ui.problemCategory,

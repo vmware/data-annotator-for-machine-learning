@@ -382,31 +382,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <input
                       type="radio"
                       name="btn-group-demo-radios"
-                      value="html"
-                      id="btn-demo-radio-1"
-                      (change)="changeRenderFormat($event)"
-                      [(ngModel)]="renderFormat"
-                      [ngModelOptions]="{ standalone: true }"
-                      checked
-                    />
-                    <label for="btn-demo-radio-1"
-                      ><clr-icon
-                        aria-hidden="true"
-                        shape="clipboard"
-                        style="margin-right: 0.3rem"
-                      ></clr-icon
-                      >rendered file</label
-                    >
-                  </div>
-                  <div class="radio btn">
-                    <input
-                      type="radio"
-                      name="btn-group-demo-radios"
                       value="md"
                       id="btn-demo-radio-2"
                       (change)="changeRenderFormat($event)"
                       [(ngModel)]="renderFormat"
                       [ngModelOptions]="{ standalone: true }"
+                      checked
                     />
                     <label for="btn-demo-radio-2"
                       ><clr-icon
@@ -414,7 +395,26 @@ SPDX-License-Identifier: Apache-2.0 -->
                         shape="view-list"
                         style="margin-right: 0.3rem"
                       ></clr-icon
-                      >source</label
+                      >text</label
+                    >
+                  </div>
+                  <div class="radio btn">
+                    <input
+                      type="radio"
+                      name="btn-group-demo-radios"
+                      value="html"
+                      id="btn-demo-radio-1"
+                      (change)="changeRenderFormat($event)"
+                      [(ngModel)]="renderFormat"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                    <label for="btn-demo-radio-1"
+                      ><clr-icon
+                        aria-hidden="true"
+                        shape="clipboard"
+                        style="margin-right: 0.3rem"
+                      ></clr-icon
+                      >visual</label
                     >
                   </div>
                 </div>
@@ -501,7 +501,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *ngFor="let ticket of sr.originalData; let i = index"
                   id="c-{{ i }}"
                   class="clr-row txtRow{{ i }}"
-                  title="{{ ticket.freeText }}"
+                  title="{{
+                    ticket.freeText
+                      ? ticket.freeText
+                      : '( Optional ) you can click the ellipsis-vertical after the index to add freeText for this line after annotation.'
+                  }}"
                 >
                   <div class=" clr-col-1 logIndex{{ i }} rowIndex">
                     <div class="signpost-item">
@@ -554,7 +558,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *ngFor="let ticket of sr.originalData; let i = index"
                   id="c-{{ ticket.index }}"
                   class="clr-row txtRow{{ ticket.index }}"
-                  title="{{ ticket.freeText }}"
+                  title="{{
+                    ticket.freeText
+                      ? ticket.freeText
+                      : '( Optional ) you can click the ellipsis-vertical after the index to add freeText for this line after annotation.'
+                  }}"
                 >
                   <div *ngIf="ticket.filter" class=" clr-col-1 logIndex{{ ticket.index }} rowIndex">
                     <div class="signpost-item">
@@ -768,7 +776,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                 formControlName="logFreeText"
                 placeholder="( Optional ) Please provide more details about the log above."
                 rows="1"
-                (ngModelChange)="updateLogFreeText($event)"
               ></textarea>
             </div>
           </div>
