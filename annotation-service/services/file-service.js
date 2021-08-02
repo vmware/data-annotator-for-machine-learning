@@ -38,12 +38,13 @@ async function createProject(req) {
     await validator.checkProjectByconditions({projectName: req.body.pname}, false);
 
     console.log(`[ FILE ] Service createProject init parameters`);
-    let annotators = req.body.assignee;
-    annotators = (typeof annotators === 'string'? JSON.parse(annotators):annotators);
-    
-    let userCompleteCase = [];
-    await annotators.forEach(item => {
+    if (typeof req.body.assignee === 'string') {
+        req.body.assignee = JSON.parse(req.body.assignee);
+    }
+    let userCompleteCase = [], annotators = [];
+    await req.body.assignee.forEach(item => {
         const inintUser = { user: item.email, assignedCase: item.assignedCase };
+        annotators.push(item.email);
         userCompleteCase.push(inintUser);
     });
     

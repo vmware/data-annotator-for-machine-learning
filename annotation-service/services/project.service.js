@@ -114,10 +114,11 @@ async function updateProject(req) {
         await mongoDb.updateManyByConditions(mp.model, srsCondition, srsDoc);
     }
     
-    const annotators = req.body.assignee, projectInfo = mp.project;
-        
+    const projectInfo = mp.project;
+    let annotators = [], originalUser = [], completeCase = [];
+    await req.body.assignee.forEach(item => annotators.push(item.email));
+    
     //for original user case
-    let originalUser = [], completeCase = [];
     for (const uCase of projectInfo.userCompleteCase) {
         originalUser.push(uCase.user);
         if (annotators.indexOf(uCase.user)  != -1) {
@@ -127,9 +128,9 @@ async function updateProject(req) {
         }
     }
     //for newly add user case
-    for (const user of annotators) {
-        if (originalUser.indexOf(user) == -1) {
-            completeCase.push({ user: user,  completeCase: 0, skip: 0 });
+    for (const user of req.body.assignee) {
+        if (originalUser.indexOf(user.email) == -1) {
+            completeCase.push({ user: user.email,  completeCase: 0, skip: 0, assignedCase: user.assignedCase });
         }
     }
 
