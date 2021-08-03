@@ -2,56 +2,56 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 <div class="container mainArea">
-  <clr-datagrid #dataGird class="gridHeight">
-    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'id'" style="max-width: 300px">User ID</clr-dg-column>
-    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'name'" style="max-width: 300px">User Name</clr-dg-column>
-    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'age'" style="max-width: 300px">User age</clr-dg-column>
-    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'description'" style="max-width: 300px">User description</clr-dg-column>
+  <clr-datagrid #dataGird class="gridHeight" [clrDgLoading]="loading">
+    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'projectName'" style="max-width: 300px">Project Name
+    </clr-dg-column>
+    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'updatedDate'" style="max-width: 300px">Updated Date
+    </clr-dg-column>
+    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'updatedDate'" style="max-width: 300px">Generate Updated Date
+    </clr-dg-column>
+    <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'dataSource'" style="max-width: 300px">Data Source
+    </clr-dg-column>
     <clr-dg-column class="ellipsis-datagrid" style="max-width: 300px">actions</clr-dg-column>
     <clr-dg-row *clrDgItems="let user of users" [clrDgItem]="user">
-        <clr-dg-cell style="max-width: 300px" >{{user.id}}</clr-dg-cell>
-        <clr-dg-cell style="max-width: 300px" title="{{ user.name }}">{{user.name}}</clr-dg-cell>
-        <clr-dg-cell style="max-width: 300px">{{user.age}}</clr-dg-cell>
-        <clr-dg-cell style="max-width: 300px">{{user.description}}</clr-dg-cell>
-        <clr-dg-cell style="padding-right: 0.3rem">
-          <button
-            type="button"
-            class="btn btn-icon actionClass"
-            (click)="
+      <clr-dg-cell style="max-width: 300px" title="{{user.projectName}}">{{user.projectName}}</clr-dg-cell>
+      <clr-dg-cell style="max-width: 300px">{{user.updatedDate|date : 'yyyy-MM-dd HH:mm:ss'}}</clr-dg-cell>
+      <clr-dg-cell style="max-width: 300px">{{user.generateInfo.updateTime|date:'yyyy-MM-dd HH:mm:ss'}}</clr-dg-cell>
+      <clr-dg-cell style="max-width: 300px">{{user.dataSource}}</clr-dg-cell>
+      <clr-dg-cell style="padding-right: 0.3rem">
+        <button type="button" class="btn btn-icon actionClass" (click)="
               selectedDataset = user;
               editProjectDialog = true;
               deleteDatasetDialog = false;
               showProjectEdit(selectedDataset)
-            "
-            role="tooltip"
-            aria-haspopup="true"
-            title="Edit Project"
-          >
-            <clr-icon aria-hidden="true" shape="note"></clr-icon>
-          </button>
-        </clr-dg-cell>
+            " role="tooltip" aria-haspopup="true" title="Edit Project">
+          <clr-icon aria-hidden="true" shape="note"></clr-icon>
+        </button>
+      </clr-dg-cell>
     </clr-dg-row>
-  <clr-dg-footer>
-    <clr-dg-column-toggle [hidden]="true"></clr-dg-column-toggle>
+    <clr-dg-footer>
+      <clr-dg-column-toggle [hidden]="true"></clr-dg-column-toggle>
       {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
       {{ pagination.totalItems }}Users
-      <clr-dg-pagination
-        #pagination
-        [clrDgPageSize]="userPageSize"
-        [clrDgTotalItems]="totalUsers"
-        [(clrDgPage)]="userPage"
-      >
+      <clr-dg-pagination #pagination [clrDgPageSize]="userPageSize" [clrDgTotalItems]="totalUsers"
+        [(clrDgPage)]="userPage">
       </clr-dg-pagination>
-  </clr-dg-footer>
-</clr-datagrid>
+    </clr-dg-footer>
+  </clr-datagrid>
 
-<app-edit-project
-  *ngIf="editProjectDialog"
-  [msgInEdit]="msgEdit"
-  (onCloseEditDialog)="receiveCloseEdit($event)"
-  (onSubmitEdit)="receiveSubmitEdit($event)"
-  (onDeleteLabel)="receiveDeleteLabel($event)"
->
-</app-edit-project>
+  <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+    <input name="localFileFile" type="file" (change)="onLocalFileChange($event)" [accept]="
+      msg.page == 'datasets'
+        ? '.zip,.ZIP,.csv,.CSV,.tgz,.TGZ'
+        : msg.type == 'image'
+        ? '.zip,.ZIP'
+        : msg.type == 'log'
+        ? '.zip,.ZIP,.tgz,.TGZ'
+        : '.csv,.CSV'
+    " />
+  </div>
+
+  <app-edit-project *ngIf="editProjectDialog" [msgInEdit]="msgEdit" (onCloseEditDialog)="receiveCloseEdit($event)"
+    (onSubmitEdit)="receiveSubmitEdit($event)" (onDeleteLabel)="receiveDeleteLabel($event)">
+  </app-edit-project>
 
 </div>

@@ -878,7 +878,34 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-tooltip>
             </div>
           </div>
-
+           
+          <div class="form-group clr-row">
+           <div class="clr-col-12 clr-col-md-1"></div>
+            <label for="annotationDisplayName" class="label-tooltip clr-col-12 clr-col-md-2"
+              >Annotation Display Name
+              <clr-tooltip>
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="info-circle"
+                  size="20"
+                  aria-label="Uniq tooltip 5"
+                ></clr-icon>
+                <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+                  &nbsp;<span class="tooltip-content"
+                    >This information is to inform annotators what data they are labeling.
+                  </span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </label>
+            <div class="clr-textarea-wrapper clr-col-12 clr-col-md-8">
+              <textarea
+                id="annotationDisplayName"
+                formControlName="annotationDisplayName"
+                class="clr-textarea"
+                (keydown)="onKeydown($event)"
+              ></textarea>
+            </div>
+          </div>
           <div class="form-group clr-row">
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="annotationQuestion" class="label-tooltip clr-col-12 clr-col-md-2"

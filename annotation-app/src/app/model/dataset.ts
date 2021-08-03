@@ -28,6 +28,7 @@ export class DatasetUtil {
       name: '',
       description: '',
       annotationQuestion: 'What label does this ticket belong to ?',
+      annotationDisplayName: 'Passage',
       maxAnnotations: null,
       labels: [],
       assigmentLogic: 'random',
@@ -85,6 +86,7 @@ export interface DatasetData {
   selectLabels: string;
   totalRow: number;
   annotationQuestion: string;
+  annotationDisplayName: string;
   min: any;
   max: any;
   multipleLabel: boolean;

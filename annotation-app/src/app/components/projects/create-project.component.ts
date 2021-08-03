@@ -196,6 +196,7 @@ export class CreateNewComponent implements OnInit {
           : this.dataset.annotationQuestion,
         DatasetValidator.required(),
       ],
+      annotationDisplayName: [this.dataset.annotationDisplayName, DatasetValidator.required()],
       selectedDataset: ['', DatasetValidator.required()],
       min: [this.dataset.min, DatasetValidator.minNumber()],
       max: [this.dataset.max, DatasetValidator.minNumber()],
@@ -313,6 +314,7 @@ export class CreateNewComponent implements OnInit {
     formData.append('header', JSON.stringify(this.previewHeadDatas));
     formData.append('isHasHeader', this.isHasHeader);
     formData.append('annotationQuestion', this.dsDialogForm.value.annotationQuestion);
+    formData.append('ticketDescription', this.dsDialogForm.value.annotationDisplayName);
     formData.append('totalRows', this.dsDialogForm.value.totalRow);
     formData.append('fileName', this.fileName);
     formData.append('fileSize', this.fileSize);
