@@ -204,7 +204,7 @@ const projectSchema = new mongoose.Schema({
     isMultipleLabel: { type: Boolean, default: false },
     regression: {type: Boolean, default: false},
     isShowFilename: {type: Boolean, default: false},
-    ticketDescription: {type: String, default: 'Original Ticket'},
+    ticketDescription: {type: String, default: 'Passage'},
 
 }, { _id: true });
 projectSchema.index({ projectName: 1 });
