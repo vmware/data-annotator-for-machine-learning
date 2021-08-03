@@ -65,6 +65,7 @@ module.exports = {
             for (const item of selectedColumn) {
                 select[item] = oneData[item];
             }
+
             //check all selected data if is empty
             let selectedData = Object.values(select).toString().replace(new RegExp(',', 'g'),'').trim();
             if(selectedData){
@@ -79,10 +80,20 @@ module.exports = {
                     let sechema = {
                         projectName: req.body.pname,
                         userInputsLength: 0,
-                        originalData: select
+                        originalData: select,
                     };
+                    
+                    //support ner quesion anwser column display
+                    if (projectType == PROJECTTYPE.NER && req.body.ticketQuestions.length) {
+                        let ticketQuestions = {};
+                        for (const qst of req.body.ticketQuestions) {
+                            ticketQuestions[qst] = oneData[qst];
+                        }
+                        sechema.ticketQuestions = ticketQuestions;
+                    }
+                    
                     //support ner regression
-                    if ((req.body.regression == 'true' || req.body.regression == true)&& req.body.projectType == PROJECTTYPE.NER) {
+                    if ((req.body.regression == 'true' || req.body.regression == true)&& projectType == PROJECTTYPE.NER) {
                         let selectLabels = req.body.selectLabels;
                         selectLabels = (typeof selectLabels === 'string'? JSON.parse(selectLabels):selectLabels);
                         let problemCategory = [];
