@@ -203,7 +203,8 @@ const projectSchema = new mongoose.Schema({
     encoder: { type: String },
     isMultipleLabel: { type: Boolean, default: false },
     regression: {type: Boolean, default: false},
-    isShowFilename: {type: Boolean, default: false}
+    isShowFilename: {type: Boolean, default: false},
+    ticketDescription: {type: String, default: 'Original Ticket'},
 
 }, { _id: true });
 projectSchema.index({ projectName: 1 });
