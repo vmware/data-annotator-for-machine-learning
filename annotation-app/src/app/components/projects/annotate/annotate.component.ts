@@ -2804,8 +2804,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       const obj = {
         pId: this.projectId,
-        filter: set==='display'?'':value,
-        display:set==='display'?value:''
+        filter: set === 'display' ? '' : value,
+        display: set === 'display' ? value : ''
       };
       localStorage.setItem('annotate-setting', JSON.stringify([obj]));
     }
