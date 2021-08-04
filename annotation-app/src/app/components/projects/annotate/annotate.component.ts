@@ -189,6 +189,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         logFreeText: [null],
         answer: [null],
         selectProject: [this.selectParam],
+        renderFormat:[this.renderFormat],
         filterText: [null],
         reviewee: [null],
       }),
@@ -215,6 +216,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.projectType == 'regression'
           ) {
             this.sr = this.resetTabularSrData(this.sr);
+            this.toReadStorageSetting('display');
           }
           if (this.projectType == 'ner') {
             this.sr = this.resetNerSrData(this.sr);
@@ -293,21 +295,36 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               '.logCategories' + this.selectedEntityID,
             ).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
             // to read the filterList from localStorage
-            if (localStorage.getItem('log-filter')) {
-              const logFilter = JSON.parse(localStorage.getItem('log-filter'));
-              for (let i = 0; i < logFilter.length; i++) {
-                if (this.projectId == logFilter[i].pId) {
-                  this.filterList = logFilter[i].filter;
-                  this.toFilterLog(this.filterList);
-                  break;
-                }
-              }
-            }
+            this.toReadStorageSetting('logFilter')
+            
           }, 5);
         }
       },
     );
   }
+
+
+  toReadStorageSetting(set){
+    
+    if (localStorage.getItem('annotate-setting')) {
+      const settings = JSON.parse(localStorage.getItem('annotate-setting'));
+      for (let i = 0; i < settings.length; i++) {
+        if (this.projectId == settings[i].pId) {
+          if(set==='logFilter' && settings[i].filter!==''){
+            this.filterList = settings[i].filter;
+            this.toFilterLog(this.filterList);
+            break;
+          }
+          if(set==='display' && settings[i].display!==''){
+            this.renderFormat=settings[i].display;
+            this.questionForm.get('questionGroup.renderFormat').setValue(settings[i].display);
+            break;
+          }
+        }
+      }
+    }
+  }
+
 
   getOneReview(from?) {
     this.loading = true;
@@ -335,6 +352,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sortLabelForColor(this.categories);
             this.categoryBackFunc();
             this.getProgress();
+            this.toReadStorageSetting('logFilter')
           }
         },
         (error) => {
@@ -974,6 +992,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.maxLabel = null;
     this.selectParam = e.target.value;
     this.toStorageFilter();
+    if(this.projectType!=='image' && this.projectType!=='log' && this.projectType!=='ner' && this.renderFormat==='html'){
+      this.saveAnnotateSetting('display',this.renderFormat);
+    }
     for (let i = 0; i < this.projects.length; i++) {
       if (this.projects[i].projectName == e.target.value) {
         this.projectId = this.projects[i].id;
@@ -986,9 +1007,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.idName = '';
     this.clearUserInput();
     this.filterList = [];
+    this.renderFormat='md';
+    this.questionForm.get('questionGroup.renderFormat').setValue('md');
     this.selectedEntityID = 0;
     this.reviewOrder = 'random';
     this.questionForm.get('questionGroup.reviewee').reset();
+    if(this.projectType!=='image'&&this.projectType!=='ner'&&this.projectType!=='log'){
+      this.toReadStorageSetting('display')
+    }
   }
 
   toGetProjectInfo(pid, reviewee?) {
@@ -2076,19 +2102,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // resetTabularSrData(sr) {
-  //   if (!sr.MSG) {
-  //     const flag = [];
-  //     sr = sr[0];
-  //     _.forIn(sr.originalData, function (value, key) {
-  //       flag.push({ key, value });
-  //     });
-  //     sr.originalData = flag;
-  //     return sr;
-  //   } else {
-  //     return sr;
-  //   }
-  // }
+
 
   resetTabularSrData(sr) {
     const vv = [];
@@ -2610,40 +2624,18 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toStorageFilter() {
     if (this.filterList.length > 0) {
-      if (localStorage.getItem('log-filter')) {
-        const logFilter = JSON.parse(localStorage.getItem('log-filter'));
-        const pIds = [];
-        logFilter.forEach((element) => {
-          pIds.push(element.pId);
-        });
-        if (pIds.indexOf(this.projectId) > -1) {
-          logFilter[pIds.indexOf(this.projectId)].filter = this.filterList;
-          localStorage.setItem('log-filter', JSON.stringify(logFilter));
-        } else {
-          logFilter.push({
-            pId: this.projectId,
-            filter: this.filterList,
-          });
-          localStorage.setItem('log-filter', JSON.stringify(logFilter));
-        }
-      } else {
-        const obj = {
-          pId: this.projectId,
-          filter: this.filterList,
-        };
-        localStorage.setItem('log-filter', JSON.stringify([obj]));
-      }
+      this.saveAnnotateSetting('filter',this.filterList)
     } else {
-      if (localStorage.getItem('log-filter')) {
-        const logFilter = JSON.parse(localStorage.getItem('log-filter'));
+      if (localStorage.getItem('annotate-setting')) {
+        const logFilter = JSON.parse(localStorage.getItem('annotate-setting'));
         for (let i = 0; i < logFilter.length; i++) {
           if (this.projectId == logFilter[i].pId) {
             logFilter.splice(i, 1);
             if (logFilter.length > 0) {
-              localStorage.setItem('log-filter', JSON.stringify(logFilter));
+              localStorage.setItem('annotate-setting', JSON.stringify(logFilter));
               break;
             } else {
-              localStorage.removeItem('log-filter');
+              localStorage.removeItem('annotate-setting');
               break;
             }
           }
@@ -2784,8 +2776,39 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   toWrapText() {
     this.wrapText = !this.wrapText;
   }
+
   changeRenderFormat(e) {
     this.renderFormat = e.target.value;
+    this.saveAnnotateSetting('display',this.renderFormat)
+    
+  }
+
+  saveAnnotateSetting(set,value){
+    if (localStorage.getItem('annotate-setting')) {
+      const settings = JSON.parse(localStorage.getItem('annotate-setting'));
+      const pIds = [];
+      settings.forEach((element) => {
+        pIds.push(element.pId);
+      });
+      if (pIds.indexOf(this.projectId) > -1) {
+        settings[pIds.indexOf(this.projectId)][set] = value;
+        localStorage.setItem('annotate-setting', JSON.stringify(settings));
+      } else {
+        settings.push({
+          pId: this.projectId,
+          filter: set==='display'?'':value,
+          display: set==='display'?value:''
+        });
+        localStorage.setItem('annotate-setting', JSON.stringify(settings));
+      }
+    } else {
+      const obj = {
+        pId: this.projectId,
+        filter: set === 'display' ? '' : value,
+        display: set === 'display' ? value : ''
+      };
+      localStorage.setItem('annotate-setting', JSON.stringify([obj]));
+    }
   }
 
   updateOutput(mdText) {
@@ -2803,5 +2826,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.toStorageFilter();
+    if(this.projectType!=='image' && this.projectType!=='log' && this.projectType!=='ner' && this.renderFormat==='html'){
+      this.saveAnnotateSetting('display',this.renderFormat);
+    }
   }
 }
