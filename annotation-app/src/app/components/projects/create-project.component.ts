@@ -118,8 +118,9 @@ export class CreateNewComponent implements OnInit {
   encoder: any;
   isMultipleLabel: boolean;
   fileLocation: string;
-  
 
+
+  
   constructor(
     private formBuilder: FormBuilder,
     private avaService: AvaService,
