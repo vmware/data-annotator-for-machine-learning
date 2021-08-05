@@ -35,6 +35,7 @@ export class DatasetUtil {
       assignee: [],
       localFile: null,
       selectDescription: [],
+      selectColumn: [],
       selectLabels: null,
       totalRow: 0,
       selectedFile: {
@@ -83,6 +84,7 @@ export interface DatasetData {
   localFile: any;
   selectedFile?: DatasetFile;
   selectDescription: any[];
+  selectColumn: any[];
   selectLabels: string;
   totalRow: number;
   annotationQuestion: string;

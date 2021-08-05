@@ -29,12 +29,15 @@ export class RohanComponent implements OnInit {
   loading: boolean;
   totalItems: number;
   errorMessage: string;
+  msg;
+  editProjectDialog: boolean;
   constructor(
     private avaService: AvaService,
 
   ) {
     this.userPage = 1;
     this.userPageSize = 10;
+    this.msg={page:'datasets',type:'image'}
   }
   ngOnInit() {
     this.getUsers();
@@ -67,18 +70,18 @@ export class RohanComponent implements OnInit {
     this.msgEdit.src = 'projects';
   }
   
-  onLocalFileChange(event) {
-    if (event.target.files.length > 0) {
-      this.inputFile = event.target.files[0];
-      this.errorMessage = '';
-      this.previewHeadDatas = [];
-      this.previewContentDatas = [];
-      if (!this.env.config.enableAWSS3) {
-        this.checkLocalFileExist(this.inputFile.name, this.uploadSet.fileFormat);
-      }
-    }
-  }
   receiveDeleteLabel(e) {
-    this.getUsers();
+    this.editProjectDialog=false;
+  }
+
+  receiveSubmitEdit(){
+    this.editProjectDialog=false;
+  }
+  receiveCloseEdit(){
+    this.editProjectDialog=false;
+  }
+
+  onLocalFileChange(e){
+
   }
 }

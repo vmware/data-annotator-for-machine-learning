@@ -371,6 +371,31 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   </option>
                                 </select>
                               </div>
+                              <div class="clr-subtext-wrapper" *ngIf="isSelectErrorColumn">
+                                <clr-icon
+                                  shape="exclamation-circle"
+                                  style="margin-top: 0.2rem; margin-left: 0.2rem; color: red"
+                                ></clr-icon>
+                                <span class="clr-subtext" style="color: red"
+                                  >The text column and the display column should not be the same!</span
+                                >
+                              </div>
+                              <clr-datagrid
+                              [(clrDgSelected)]="selectColumn"
+                              (clrDgSelectedChange)="selectionChanged()"
+                            >
+                              <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
+                              <clr-dg-row
+                                *clrDgItems="let column of columnInfo; let i = index"
+                                [clrDgItem]="column"
+                              >
+                                <clr-dg-cell
+                                  class="ellipsis-datagrid labelColumn labelIndex{{ i }}"
+                                  style="color: #000; word-break: break-all"
+                                  >{{ column.name }}</clr-dg-cell
+                                >
+                              </clr-dg-row>
+                            </clr-datagrid>
                             </div>
                           </div>
                           <div class="clr-col-6" style="margin-top: 0.5rem">

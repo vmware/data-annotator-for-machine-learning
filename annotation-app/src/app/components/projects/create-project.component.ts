@@ -67,6 +67,8 @@ export class CreateNewComponent implements OnInit {
   descriptions = [];
   chooseLabel = [];
   selectDescription = [];
+  selectColumn = [];
+  selectNerColumn = [];
   selectColumns = [];
   pageSize: number;
   page: number;
@@ -98,6 +100,7 @@ export class CreateNewComponent implements OnInit {
   location = '';
   fileSize: any;
   isSelectWrongColumn: boolean;
+  isSelectErrorColumn: boolean;
   showQueryDatasetDialog: boolean;
   userQuestionUpdate = new Subject<string>();
   minLabel: number;
@@ -188,6 +191,7 @@ export class CreateNewComponent implements OnInit {
       assignmentLogic: [this.dataset.assigmentLogic, ''],
       assignee: [this.dataset.assignee, DatasetValidator.required()],
       selectDescription: [this.dataset.selectDescription, ''],
+      selectColumn: [this.dataset.selectColumn, ''],
       selectLabels: [this.dataset.selectLabels, ''],
       totalRow: [this.dataset.totalRow, DatasetValidator.validRow()],
       annotationQuestion: [
@@ -311,6 +315,7 @@ export class CreateNewComponent implements OnInit {
         ? JSON.stringify(this.dsDialogForm.value.selectDescription)
         : this.dsDialogForm.value.selectLabels,
     );
+    formData.append('ticketQuestions', JSON.stringify(this.dsDialogForm.value.selectColumn));
     formData.append('header', JSON.stringify(this.previewHeadDatas));
     formData.append('isHasHeader', this.isHasHeader);
     formData.append('annotationQuestion', this.dsDialogForm.value.annotationQuestion);
@@ -494,6 +499,7 @@ export class CreateNewComponent implements OnInit {
     this.selectDescription = [];
     this.setDataComplete = false;
     this.isSelectWrongColumn = false;
+    this.isSelectErrorColumn = false;
     this.selectColumns = [];
     this.columnInfo = [];
     this.isHasHeader = '';
@@ -564,6 +570,7 @@ export class CreateNewComponent implements OnInit {
     this.isShowNumeric = false;
     this.dsDialogForm.get('selectLabels').reset();
     this.selectDescription = [];
+    this.selectColumn = [];
     this.setDataComplete = false;
     this.isSelectWrongColumn = false;
     this.selectColumns = [];
@@ -679,11 +686,22 @@ export class CreateNewComponent implements OnInit {
   selectionChanged() {
     this.changePreview = true;
     this.isSelectWrongColumn = false;
+    this.isSelectErrorColumn = false
     this.selectColumns = [];
+    this.selectNerColumn = [];
     this.selectDescription.forEach((e) => {
       this.selectColumns.push(e.name);
     });
+    this.selectColumn.forEach((e) => {
+      this.selectNerColumn.push(e.name);
+    });
     this.dsDialogForm.get('selectDescription').setValue(this.selectColumns);
+    this.dsDialogForm.get('selectColumn').setValue(this.selectNerColumn);
+    this.turnColunmRed(
+      this.projectType == 'ner'
+        ? this.dsDialogForm.get('selectedText').value
+        : this.dsDialogForm.get('selectLabels').value,
+    );
     this.turnDuplicatedRed(
       this.projectType == 'ner'
         ? this.dsDialogForm.get('selectedText').value
@@ -709,6 +727,26 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
+  turnColunmRed(selectLabel) {
+    const dom = this.el.nativeElement.querySelectorAll('.labelColumn');
+    for (let i = 0; i < dom.length; i++) {
+      dom[i].style.color = 'rgb(0, 0, 0)';
+    }
+    if (this.selectColumn.length > 0) {
+      for (let i = 0; i < this.selectColumn.length; i++) {
+        if (this.selectColumn[i].name == selectLabel) {
+          const index = _.indexOf(this.previewHeadDatas, selectLabel);
+          this.isSelectErrorColumn = true;
+          this.renderer2.setStyle(
+            this.el.nativeElement.querySelector('.labelIndex' + index),
+            'color',
+            'red',
+          );
+          break;
+        }
+      }
+    }
+  }
   turnDuplicatedRed(selectLabel) {
     const dom = this.el.nativeElement.querySelectorAll('.labelOriginal');
     for (let i = 0; i < dom.length; i++) {

@@ -65,6 +65,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   spanEnd: any;
   selectedEntityID = 0;
   spansList = [];
+  ticketQuestions: any;
   onLabelStudioLoadInfo: any;
   imagePolyLabelTemplate: any;
   imageRectLabelTemplate: any;
@@ -114,7 +115,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#ffff00',
   ];
   startFrom: string;
+  originalTicket: string;
   annotationPrevious: any = [];
+  objectKeys:any;
   reviewOrder = 'random';
   selectedFile: number;
   currentLogFile: string;
@@ -155,6 +158,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.active = -1;
     this.labelChoose = null;
     this.idName = '';
+    this.objectKeys = Object.keys;
     this.route.queryParams.subscribe((data) => {
       this.selectParam = data.name;
       this.projectId = data.id;
@@ -203,7 +207,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loading = true;
     this.avaService.getRandomSr(paramSr).subscribe(
       (response) => {
+        debugger
         this.sr = response;
+        this.ticketQuestions = response[0].ticketQuestions;
         if (this.sr.MSG) {
           this.error = 'All cases have been completely annotated.';
           return;
@@ -1012,6 +1018,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isMultipleLabel = response.isMultipleLabel;
         this.projectType = response.projectType;
         this.labelType = response.labelType;
+        this.originalTicket = response.ticketDescription
         if (this.labelType === 'numericLabel') {
           this.minLabel = response.min;
           this.maxLabel = response.max;

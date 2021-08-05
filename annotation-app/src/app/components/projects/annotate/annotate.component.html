@@ -247,7 +247,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
 
           <h2 class="originalH2">
-            Original Ticket&nbsp;&nbsp;&nbsp;
+            {{originalTicket}}&nbsp;&nbsp;&nbsp;
             <a
               *ngIf="!silenceStatus"
               role="tooltip"
@@ -279,6 +279,11 @@ SPDX-License-Identifier: Apache-2.0 -->
               >Reviewed for accuracy</span
             >
           </h2>
+
+          <!-- <div *ngFor="let item of ticketQuestions">
+          </div> -->
+          <div *ngFor="let key of objectKeys(ticketQuestions)"><strong>{{key + ' : '}}</strong>{{ticketQuestions[key]}}</div>
+
           <!-- to show the filename -->
           <div
             *ngIf="projectType === 'log' && startFrom !== 'review' && projectInfo.isShowFilename"
