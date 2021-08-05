@@ -734,6 +734,11 @@ label .label-leftBoard {
   box-shadow: 0 7px 6px -9px #999;
 }
 
+.nerDisplayText{
+  box-shadow: 0 7px 6px -9px #999;
+  margin-bottom: 0.5rem;
+}
+
 .wrap {
   padding: 0.1rem 0.2rem;
   height: 1rem;
@@ -782,7 +787,3 @@ label .label-leftBoard {
   color: #dddddd;
 }
 
-.textActionBar {
-  box-shadow: 0 7px 6px -9px #999;
-  margin-bottom: 1rem;
-}
