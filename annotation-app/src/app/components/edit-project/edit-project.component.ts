@@ -91,7 +91,17 @@ export class EditProjectComponent implements OnInit {
     this.labelType = this.msg.labelType;
     this.inputProjectCreator = this.msg.creator;
     this.inputProjectAssignee = this.msg.annotator;
-    this.assigneeList = JSON.parse(JSON.stringify(this.msg.annotator));
+    let flag = [];
+    _.cloneDeep(this.msg.annotator).forEach(annotator => {
+      for (let i = 0; i < this.msg.userCompleteCase.length; i++) {
+        if (annotator === this.msg.userCompleteCase[i].user) {
+          flag.push({ email: annotator, assignedCase: this.msg.userCompleteCase[i].assignedCase, completeCase: this.msg.userCompleteCase[i].completeCase })
+          break;
+        }
+      }
+    });
+    this.assigneeList = flag;
+    console.log(3, this.assigneeList)
     this.ownerList = JSON.parse(JSON.stringify(this.msg.creator));
     this.assignmentLogicEdit = this.msg.assignmentLogic;
     this.isShowFilename = this.msg.isShowFilename ? 'yes' : 'no';
@@ -134,8 +144,20 @@ export class EditProjectComponent implements OnInit {
     }
   }
 
+  // onAssigneeKeydown(e) {
+  //   console.log(15,this.assigneeList)
+  //   if (this.assigneeList.indexOf(e.target.value) !== -1) {
+  //     this.inputAssigneeValidation = true;
+  //   } else {
+  //     this.inputAssigneeValidation = false;
+  //   }
+  // }
+
   onAssigneeKeydown(e) {
-    if (this.assigneeList.indexOf(e.target.value) !== -1) {
+    // if (this.assigneeList.indexOf(e.target.value) !== -1) {
+    let flag = _.filter(this.assigneeList, ['email', e.target.value]);
+    console.log(1, flag);
+    if (flag.length > 0) {
       this.inputAssigneeValidation = true;
     } else {
       this.inputAssigneeValidation = false;
@@ -169,16 +191,40 @@ export class EditProjectComponent implements OnInit {
     this.emailReg = this.toolService.toRegEmail(emails);
     if (this.emailReg && this.inputAssigneeValidation == false) {
       emails.forEach((element) => {
-        if (this.assigneeList.indexOf(element.trim()) == -1) {
-          this.assigneeList.push(element.trim());
+        // if (this.assigneeList.indexOf(element.trim()) == -1) {
+          if (_.filter(this.assigneeList, ['email', element.trim()]).length === 0) {
+
+          // this.assigneeList.push(element.trim());
+          this.assigneeList.push({ email: element.trim(), assignedCase: 0 });
+
         }
       });
+      if (this.assigneeList.length > 0) {
+        this.assigneeList.forEach(item=>{
+          item.isModify=false;
+        })
+        this.evenlyDistributeTicket(
+          this.assigneeList,
+          this.msg.totalCase,
+          this.msg.maxAnnotation
+        );
+      }
       e.target.value = '';
     }
   }
 
   deleteAssignee(index) {
     this.assigneeList.splice(index, 1);
+    if (this.assigneeList.length > 0) {
+      this.assigneeList.forEach(item=>{
+        item.isModify=false;
+      })
+      this.evenlyDistributeTicket(
+        this.assigneeList,
+        this.msg.totalCase,
+        this.msg.maxAnnotation
+      );
+    }
   }
 
   deleteOwner(index) {
@@ -296,7 +342,13 @@ export class EditProjectComponent implements OnInit {
               fileName: this.msg.dataSource,
             };
             const ownerDiff = _.difference(this.ownerList, this.msg.creator);
-            const annotatorDiff = _.difference(this.assigneeList, this.msg.annotator);
+            let aa=[];
+            this.assigneeList.forEach(element => {
+              aa.push(element.email);
+            });
+            // const annotatorDiff = _.difference(this.assigneeList, this.msg.annotator);
+            const annotatorDiff = _.difference(aa, this.msg.annotator);
+
             if (annotatorDiff.length > 0) {
               param['annotator'] = annotatorDiff;
               this.sendEmailToAnnotator(param);
@@ -514,4 +566,115 @@ export class EditProjectComponent implements OnInit {
       this.sizeError = true;
     }
   }
+
+  evenlyDistributeTicket(assigneeList, totalRow, maxAnnotations) {
+    // totalRow=55
+    if(totalRow===0){
+      assigneeList.forEach((value,index) => {
+        value.assignedCase = 1;//初始化的值最小为1;
+      });
+    }else{
+      console.log(assigneeList, totalRow, maxAnnotations)
+      if ( maxAnnotations>= assigneeList.length) {
+        assigneeList.forEach((value) => {
+          value.assignedCase = totalRow;
+          value.orginvalue=totalRow;
+          value.isModify=false;
+        });
+      } else {
+        let flag=false;
+        for(let i =0;i<assigneeList.length;i++){
+          if(assigneeList[i].isModify){
+            flag=true;
+            break;
+          }
+        }
+        if(flag){
+          let totalmodify=0;
+          let array=[];
+          let num =0;
+          assigneeList.forEach((value,index) => {
+            if(value.isModify){
+              totalmodify+=value.assignedCase;
+              array.push(index);
+              num++;
+            }
+          });
+          let totalNum =totalRow*maxAnnotations-totalmodify;
+          let personNum=assigneeList.length-num;
+          let c =Math.floor(totalNum/personNum);
+          let d =totalNum%personNum;
+          for(let i =0;i<assigneeList.length;i++){
+            if(array.indexOf(i)>-1){
+              continue;
+            }
+            if(d>0){
+              assigneeList[i].assignedCase = c+1;
+              assigneeList[i].orginvalue=c+1;
+              d--;
+            }else{
+              assigneeList[i].assignedCase = c;
+              assigneeList[i].orginvalue=c;
+              assigneeList[i].isModify=false;
+            }
+          }
+        }else{
+          //计算总条数
+          let totalNum = totalRow*maxAnnotations;
+          let personNum = assigneeList.length;
+          let a =Math.floor(totalNum/personNum);
+          let b =totalNum%personNum;
+          assigneeList.forEach((value,index) => {
+            value.assignedCase = a;
+            value.orginvalue=a;
+            value.isModify=false;
+          });
+          for(let i =0;i<=b-1;i++){
+            assigneeList[i].assignedCase=a+1;
+            assigneeList[i].orginvalue=a+1;
+          }
+        } 
+      }
+    }
+  }
+
+  editAssignedNumber(data,index) {
+    console.log(99, data);
+    if(data.assignedCase<=0){
+      alert("Assigned tickets number should be more than 1.");
+      data.assignedCase=data.orginvalue
+      return;
+    }
+    if(data.assignedCase!==data.orginvalue){
+      data.isModify=true;
+    }
+    let totalnum=0;
+    let size =0;
+    
+        
+    let row =this.msg.totalCase;
+    // row=55;
+    let max= this.msg.maxAnnotation;
+    let array=this.assigneeList;
+    array.forEach((value,index) => {
+      if(value.isModify){
+        totalnum+=value.assignedCase;
+        size++;
+      }
+    });
+    if(size===array.length){
+      //当数组中的值都修改过后，默认最后一个值可以被自动修改
+      array[array.length-1].isModify=false;
+    }
+    if(max< array.length){
+      if(totalnum+(array.length-size)>max*row){
+        alert("Fail to modify for the total assigned tickets is more than the total valid tickets.");
+        data.assignedCase=data.orginvalue;
+        return;
+      }
+    }
+
+    this.evenlyDistributeTicket(array,row,max);
+  }
+
 }

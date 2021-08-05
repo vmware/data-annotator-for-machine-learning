@@ -1105,7 +1105,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       [disabled]="item.default"
                       [ngModelOptions]="{ standalone: true }"
                       [(ngModel)]="item.assignedCase"
-                      (ngModelChange)="editAssignedNumber(item)"
+                      (blur)="editAssignedNumber(item,i)"
                     />
                     <clr-icon shape="times" size="12" (click)="deleteAssignee(i)"></clr-icon>
                   </li>

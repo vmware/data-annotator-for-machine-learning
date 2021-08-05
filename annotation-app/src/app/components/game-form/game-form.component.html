@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             class="ellipsis-datagrid"
             style="min-width: 300px"
           >
-            Reviewed/Complete/Total
+            Reviewed/Complete/Assigned
           </clr-dg-column>
           <clr-dg-column
             [clrDgField]="'categoryList'"
@@ -140,23 +140,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                       style="margin-bottom: 3px"
                     >
                       {{ assignee.user }}
-                      <span *ngIf="dataset.totalCase != assignee.completeCase" class="badge badge-1"
+                      <span *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0" class="badge badge-1"
                         >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          dataset.totalCase
+                          assignee.assignedCase
                         }}</span
                       >
                       <span
-                        *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase != 0"
+                        *ngIf="assignee.completeCase >= assignee.assignedCase && dataset.totalCase != 0"
                         class="badge badge-success"
                         >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          dataset.totalCase
+                          assignee.assignedCase
                         }}</span
                       >
                       <span
-                        *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase == 0"
+                        *ngIf="dataset.totalCase == 0"
                         class="badge badge-1"
                         >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          dataset.totalCase
+                          assignee.assignedCase
                         }}</span
                       >
                     </div>
@@ -170,23 +170,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                       style="margin-bottom: 3px"
                     >
                       {{ assignee.user }}
-                      <span *ngIf="dataset.totalCase != assignee.completeCase" class="badge badge-1"
+                      <span *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0" class="badge badge-1"
                         >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          dataset.totalCase
+                          assignee.assignedCase
                         }}</span
                       >
                       <span
-                        *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase != 0"
+                        *ngIf="assignee.completeCase >= assignee.assignedCase  && dataset.totalCase != 0"
                         class="badge badge-success"
                         >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          dataset.totalCase
+                          assignee.assignedCase
                         }}</span
                       >
                       <span
-                        *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase == 0"
+                        *ngIf="dataset.totalCase == 0"
                         class="badge badge-1"
                         >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          dataset.totalCase
+                          assignee.assignedCase
                         }}</span
                       >
                     </div>
@@ -197,23 +197,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                       style="margin-bottom: 3px"
                     >
                       {{ assignee.user }}
-                      <span *ngIf="dataset.totalCase != assignee.completeCase" class="badge badge-1"
+                      <span *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0" class="badge badge-1"
                         >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          dataset.totalCase
+                          assignee.assignedCase
                         }}</span
                       >
                       <span
-                        *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase != 0"
+                        *ngIf="assignee.completeCase >= assignee.assignedCase && dataset.totalCase != 0"
                         class="badge badge-success"
                         >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          dataset.totalCase
+                          assignee.assignedCase
                         }}</span
                       >
                       <span
-                        *ngIf="dataset.totalCase == assignee.completeCase && dataset.totalCase == 0"
+                        *ngIf="dataset.totalCase == 0"
                         class="badge badge-1"
                         >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          dataset.totalCase
+                          assignee.assignedCase
                         }}</span
                       >
                     </div>

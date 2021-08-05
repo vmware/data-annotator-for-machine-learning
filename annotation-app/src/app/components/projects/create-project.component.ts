@@ -436,9 +436,13 @@ export class CreateNewComponent implements OnInit {
       });
       this.dsDialogForm.get('assignee').setValue(this.assigneeList);
       if (this.assigneeList.length > 0) {
+        this.assigneeList.forEach(item=>{
+          item.isModify=false;
+        })
         this.evenlyDistributeTicket(
           this.assigneeList,
-          this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+          this.dsDialogForm.get('totalRow').value,
+          this.dsDialogForm.get('maxAnnotations').value
         );
       }
       this.assignee.nativeElement.value = null;
@@ -448,49 +452,90 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-  evenlyDistributeTicket(assigneeList, totalTicket) {
-    // assigneeList = ['a', 'b', 'c'];
-    // let totalTicket = 26;
-    // let flag = [];
-    assigneeList.forEach((data) => {
-      data.assignedCase = 0;
-    });
-    if (this.dsDialogForm.get('maxAnnotations').value >= assigneeList.length) {
-      assigneeList.forEach((value) => {
-        value.assignedCase = this.dsDialogForm.get('totalRow').value;
+  evenlyDistributeTicket(assigneeList, totalRow, maxAnnotations) {
+    // totalRow=55
+    if(totalRow===0){
+      assigneeList.forEach((value,index) => {
+        value.assignedCase = 1;//初始化的值最小为1;
       });
-    } else {
-      if (totalTicket > 0) {
-        while (totalTicket > 0) {
-          console.log(13);
-          assigneeList.forEach((value) => {
-            if (totalTicket > 0) {
-              value.assignedCase++;
-              totalTicket--;
+    }else{
+      console.log(assigneeList, totalRow, maxAnnotations)
+      if ( maxAnnotations>= assigneeList.length) {
+        assigneeList.forEach((value) => {
+          value.assignedCase = totalRow;
+          value.orginvalue=totalRow;
+          value.isModify=false;
+        });
+      } else {
+        let flag=false;
+        for(let i =0;i<assigneeList.length;i++){
+          if(assigneeList[i].isModify){
+            flag=true;
+            break;
+          }
+        }
+        if(flag){
+          let totalmodify=0;
+          let array=[];
+          let num =0;
+          assigneeList.forEach((value,index) => {
+            if(value.isModify){
+              totalmodify+=value.assignedCase;
+              array.push(index);
+              num++;
             }
           });
-        }
+          let totalNum =totalRow*maxAnnotations-totalmodify;
+          let personNum=assigneeList.length-num;
+          let c =Math.floor(totalNum/personNum);
+          let d =totalNum%personNum;
+          for(let i =0;i<assigneeList.length;i++){
+            if(array.indexOf(i)>-1){
+              continue;
+            }
+            if(d>0){
+              assigneeList[i].assignedCase = c+1;
+              assigneeList[i].orginvalue=c+1;
+              d--;
+            }else{
+              assigneeList[i].assignedCase = c;
+              assigneeList[i].orginvalue=c;
+              assigneeList[i].isModify=false;
+            }
+          }
+        }else{
+          //计算总条数
+          let totalNum = totalRow*maxAnnotations;
+          let personNum = assigneeList.length;
+          let a =Math.floor(totalNum/personNum);
+          let b =totalNum%personNum;
+          assigneeList.forEach((value,index) => {
+            value.assignedCase = a;
+            value.orginvalue=a;
+            value.isModify=false;
+          });
+          for(let i =0;i<=b-1;i++){
+            assigneeList[i].assignedCase=a+1;
+            assigneeList[i].orginvalue=a+1;
+          }
+        } 
       }
     }
-    // console.log(assigneeList);
-    // assigneeList[1].default = true;
   }
 
+
   deleteAssignee(index) {
-    // this.assigneeList.splice(index, 1);
-    // this.dsDialogForm.get('assignee').setValue(this.assigneeList);
-    // if (this.assigneeList.length > 0) {
-    //   this.evenlyDistributeTicket(this.assigneeList);
-    // }
-    // if (this.assigneeList.length != 0) {
-    //   this.emailReg = true;
-    // }
+    
     this.assigneeList.splice(index, 1);
     this.dsDialogForm.get('assignee').setValue(this.assigneeList);
     if (this.assigneeList.length > 0) {
+      this.assigneeList.forEach(item=>{
+        item.isModify=false;
+      })
       this.evenlyDistributeTicket(
         this.assigneeList,
-        this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+        this.dsDialogForm.get('totalRow').value ,
+        this.dsDialogForm.get('maxAnnotations').value
       );
     }
     if (this.assigneeList.length != 0) {
@@ -498,13 +543,43 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-  editAssignedNumber(data) {
+  editAssignedNumber(data,index) {
     console.log(99, data);
-    this.evenlyDistributeTicket(
-      this.assigneeList,
-      this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
-    );
+    if(data.assignedCase<=0){
+      alert("Assigned tickets number should be more than 1.");
+      data.assignedCase=data.orginvalue
+      return;
+    }
+    if(data.assignedCase!==data.orginvalue){
+      data.isModify=true;
+    }
+    let totalnum=0;
+    let size =0;
+    let row =this.dsDialogForm.get('totalRow').value;
+    // row=55;
+    let max= this.dsDialogForm.get('maxAnnotations').value;
+    let array=this.assigneeList;
+    array.forEach((value,index) => {
+      if(value.isModify){
+        totalnum+=value.assignedCase;
+        size++;
+      }
+    });
+    if(size===array.length){
+      //当数组中的值都修改过后，默认最后一个值可以被自动修改
+      array[array.length-1].isModify=false;
+    }
+    if(max< array.length){
+      if(totalnum+(array.length-size)>max*row){
+        alert("Fail to modify for the total assigned tickets is more than the total valid tickets.");
+        data.assignedCase=data.orginvalue;
+        return;
+      }
+    }
+
+    this.evenlyDistributeTicket(array,row,max);
   }
+
 
   onAddingDataset(event) {
     this.showAddNewDatasetDialog = true;
@@ -600,7 +675,8 @@ export class CreateNewComponent implements OnInit {
     if (this.assigneeList.length > 0) {
       this.evenlyDistributeTicket(
         this.assigneeList,
-        this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+        this.dsDialogForm.get('totalRow').value,
+        this.dsDialogForm.get('maxAnnotations').value
       );
     }
     this.getMyDatasets();
@@ -702,7 +778,8 @@ export class CreateNewComponent implements OnInit {
         if (this.assigneeList.length > 0) {
           this.evenlyDistributeTicket(
             this.assigneeList,
-            this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+            this.dsDialogForm.get('totalRow').value,
+            this.dsDialogForm.get('maxAnnotations').value
           );
         }
         this.loadingSetData = false;
@@ -767,7 +844,8 @@ export class CreateNewComponent implements OnInit {
       if (this.assigneeList.length > 0) {
         this.evenlyDistributeTicket(
           this.assigneeList,
-          this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+          this.dsDialogForm.get('totalRow').value,
+          this.dsDialogForm.get('maxAnnotations').value
         );
       }
     }
@@ -816,7 +894,8 @@ export class CreateNewComponent implements OnInit {
     if (this.assigneeList.length > 0) {
       this.evenlyDistributeTicket(
         this.assigneeList,
-        this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+        this.dsDialogForm.get('totalRow').value,
+        this.dsDialogForm.get('maxAnnotations').value
       );
     }
     if (this.selectDescription.length > 0) {
@@ -965,7 +1044,8 @@ export class CreateNewComponent implements OnInit {
         if (this.assigneeList.length > 0) {
           this.evenlyDistributeTicket(
             this.assigneeList,
-            this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+            this.dsDialogForm.get('totalRow').value,
+            this.dsDialogForm.get('maxAnnotations').value
           );
         }
       },
@@ -982,7 +1062,8 @@ export class CreateNewComponent implements OnInit {
       if (this.assigneeList.length > 0) {
         this.evenlyDistributeTicket(
           this.assigneeList,
-          this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+          this.dsDialogForm.get('totalRow').value,
+          this.dsDialogForm.get('maxAnnotations').value
         );
       }
       if (this.projectType !== 'ner') {
@@ -1062,8 +1143,8 @@ export class CreateNewComponent implements OnInit {
             if (this.assigneeList.length > 0) {
               this.evenlyDistributeTicket(
                 this.assigneeList,
-                this.dsDialogForm.get('totalRow').value *
-                  this.dsDialogForm.get('maxAnnotations').value,
+                this.dsDialogForm.get('totalRow').value ,
+                  this.dsDialogForm.get('maxAnnotations').value
               );
             }
           },
@@ -1294,7 +1375,8 @@ export class CreateNewComponent implements OnInit {
     if (this.assigneeList.length > 0) {
       this.evenlyDistributeTicket(
         this.assigneeList,
-        this.dsDialogForm.get('totalRow').value * this.dsDialogForm.get('maxAnnotations').value,
+        this.dsDialogForm.get('totalRow').value,
+        this.dsDialogForm.get('maxAnnotations').value
       );
     }
   }
