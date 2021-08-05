@@ -447,10 +447,8 @@ async function updateAssinedCase(QueryCondition, totalCase, append){
     }
 
     const update = { $set: { userCompleteCase: pro.userCompleteCase } };
-    await mongoDb.findOneAndUpdate(ProjectModel, QueryCondition, update);
-    
-    console.log(`[ PROJECT ] Service updateAssinedCase END`); 
-
+    const options = { new: true };
+    return mongoDb.findOneAndUpdate(ProjectModel, QueryCondition, update, options);
 }
 
 module.exports = {

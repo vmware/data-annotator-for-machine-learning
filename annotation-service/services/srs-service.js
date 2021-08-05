@@ -347,10 +347,11 @@ async function getProgress(req) {
             for (const uc of projectInfo.userCompleteCase) {
                 if (uc.user == u._id) {
                     userComReviewed.push({
+                        assignedCase: uc.assignedCase,
                         completeCase: uc.completeCase,
                         reviewed: uc.reviewed,
                         user: uc.user,
-                        fullName: u.fullName
+                        fullName: u.fullName,
                     });
                 }
             }
@@ -373,6 +374,7 @@ async function getProgress(req) {
         return {
             totalCase: projectInfo.totalCase,
             projectCompleteCase: projectInfo.projectCompleteCase,
+            assignedCase: userComp.assignedCase,
             completeCase: userComp.completeCase,
             user: user
         };
@@ -760,8 +762,6 @@ async function deleteSrs(req){
     let conditions = {_id:{ $in: srIds } };
     const srD = await mongoDb.deleteManyByConditions(mp.model, conditions);
     console.log(`[ SRS ] Service deleteSrs update project total case subtract:`, srD.deletedCount);
-    
-    await projectService.updateAssinedCase(conditionsP, srD.deletedCount);
 
     //calculate userCompleteCase
     for (const uc of pro.userCompleteCase) {
@@ -773,7 +773,7 @@ async function deleteSrs(req){
         }
     }
     
-    const update = { 
+    const update = {
         $set: { 
             "updatedDate": Date.now(),
             "userCompleteCase": pro.userCompleteCase
@@ -784,7 +784,9 @@ async function deleteSrs(req){
         }
     };
     const options = { new: true };
-    return mongoDb.findOneAndUpdate(ProjectModel, conditionsP, update, options);
+    await mongoDb.findOneAndUpdate(ProjectModel, conditionsP, update, options);
+
+    return projectService.updateAssinedCase(conditionsP, srD.deletedCount);
 }
 
 
