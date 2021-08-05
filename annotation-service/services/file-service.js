@@ -39,7 +39,12 @@ async function createProject(req) {
 
     console.log(`[ FILE ] Service createProject init parameters`);
     let annotators = req.body.assignee;
-    annotators = (typeof annotators === 'string'? JSON.parse(annotators):annotators);
+    if (typeof annotators === 'string') {
+        annotators = JSON.parse(annotators);
+    }
+    if (typeof req.body.ticketQuestions === 'string') {
+        req.body.ticketQuestions = JSON.parse(req.body.ticketQuestions);
+    }
     
     let userCompleteCase = [];
     annotators.forEach(item => {
@@ -107,6 +112,8 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         isMultipleLabel: req.body.isMultipleLabel === 'true'? true: false,
         regression: req.body.regression === 'true'? true: false,
         isShowFilename: req.body.isShowFilename === 'true'? true: false,
+        ticketDescription: req.body.ticketDescription,
+        ticketQuestion: req.body.ticketQuestions,
     };
     return await projectDB.saveProject(project);
 }
