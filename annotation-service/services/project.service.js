@@ -22,16 +22,14 @@ async function getProjects(req) {
     const email = req.auth.email;
     const user = await userDB.queryUserById({ _id: email });
 
-    let condition;
-    let project;
+    let condition, project=null;
     const options = { sort: { updatedDate: -1 } };
 
     if (src == SRCS.ANNOTATE) {
         console.log(`[ PROJECT ] Service query current annotator project list`);
-        condition = { annotator: { $regex: email } };
-        project = "projectName taskInstructions creator  createdDate updatedDate dataSource assignmentLogic totalCase projectCompleteCase userCompleteCase categoryList labelType min max projectType isMultipleLabel isShowFilename";
-        return projectDB.queryProjectByConditions(condition, project, options);
-        
+        const annotateConditions = { annotator: { $regex: email } };
+        const logReviewConditions = { creator: { $regex: email }, projectType: PROJECTTYPE.LOG };
+        condition = { $or: [ annotateConditions, logReviewConditions ] };        
     } else if (src == SRCS.PROJECTS && user.role != "Annotator") {
         condition = { creator: { $regex: email } };
     } else if (src == SRCS.ADMIN && user.role == "Admin") {
@@ -40,28 +38,12 @@ async function getProjects(req) {
         console.log(`[ PROJECT ] Service query current user datasets list`);
         condition = { shareStatus: true };
         project = "projectName shareDescription creator updatedDate totalCase projectCompleteCase userCompleteCase categoryList generateInfo downloadCount labelType min max projectType";
-        let projectInfo = await projectDB.queryProjectByConditions(condition, project, options);
-
-        if (projectInfo.length == 0) {
-            return projectInfo;
-        }
-        // shouldn't see others info
-        console.log(`[ PROJECT ] Service sort out current user datasets list data`);
-        projectInfo.forEach(pro => {
-            let completeArray = [];
-            pro.userCompleteCase.forEach(uCase => {
-                completeArray.push(uCase.completeCase)
-            });
-            pro._doc.completeCase = _.max(completeArray);
-            pro.userCompleteCase = null;
-        });
-        return projectInfo;
     } else {
         console.log(`[ PROJECT ] [ERROR] Service errors in ${email} or ${src}`);
         throw { CODE: 1001, MSG: "ERROR ID or src" };
     }
     console.log(`[ PROJECT ] Service query user: ${email} src:  ${src} project list`);
-    return projectDB.queryProjectByConditions(condition, null, options);
+    return projectDB.queryProjectByConditions(condition, project, options);
 }
 
 async function getProjectByAnnotator(req) {

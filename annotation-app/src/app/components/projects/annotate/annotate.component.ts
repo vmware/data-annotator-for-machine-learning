@@ -125,7 +125,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   wrapText: boolean;
   cloneSpanslist: any = [];
   convertedText: string;
-  renderFormat: string = 'html';
+  renderFormat: string = 'md';
 
   constructor(
     private renderer2: Renderer2,
@@ -161,12 +161,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.objectKeys = Object.keys;
     this.route.queryParams.subscribe((data) => {
       this.selectParam = data.name;
+      this.createForm();
       this.projectId = data.id;
       this.projectType = data.projectType;
       this.startFrom = data.from;
-      this.toGetProjectInfo(this.projectId);
+      this.toGetProjectInfo(this.projectId, data.reviewee);
     });
-    this.createForm();
     this.getProgress();
     this.getProjectsList();
   }
@@ -192,6 +192,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         logFreeText: [null],
         answer: [null],
         selectProject: [this.selectParam],
+        renderFormat:[this.renderFormat],
         filterText: [null],
         reviewee: [null],
       }),
@@ -220,13 +221,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.projectType == 'regression'
           ) {
             this.sr = this.resetTabularSrData(this.sr);
+            this.toReadStorageSetting('display');
           }
           if (this.projectType == 'ner') {
             this.sr = this.resetNerSrData(this.sr);
             this.toShowExistingLabel();
           }
           if (this.projectType == 'image') {
-            // console.log("fetchData.this.sr:::", this.sr);
             this.sr = this.resetImageSrData(this.sr);
             setTimeout(() => {
               this.sortLabelForColor(this.categories);
@@ -299,21 +300,36 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               '.logCategories' + this.selectedEntityID,
             ).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
             // to read the filterList from localStorage
-            if (localStorage.getItem('log-filter')) {
-              const logFilter = JSON.parse(localStorage.getItem('log-filter'));
-              for (let i = 0; i < logFilter.length; i++) {
-                if (this.projectId == logFilter[i].pId) {
-                  this.filterList = logFilter[i].filter;
-                  this.toFilterLog(this.filterList);
-                  break;
-                }
-              }
-            }
+            this.toReadStorageSetting('logFilter')
+            
           }, 5);
         }
       },
     );
   }
+
+
+  toReadStorageSetting(set){
+    
+    if (localStorage.getItem('annotate-setting')) {
+      const settings = JSON.parse(localStorage.getItem('annotate-setting'));
+      for (let i = 0; i < settings.length; i++) {
+        if (this.projectId == settings[i].pId) {
+          if(set==='logFilter' && settings[i].filter!==''){
+            this.filterList = settings[i].filter;
+            this.toFilterLog(this.filterList);
+            break;
+          }
+          if(set==='display' && settings[i].display!==''){
+            this.renderFormat=settings[i].display;
+            this.questionForm.get('questionGroup.renderFormat').setValue(settings[i].display);
+            break;
+          }
+        }
+      }
+    }
+  }
+
 
   getOneReview(from?) {
     this.loading = true;
@@ -330,7 +346,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.error = res.MSG;
             return;
           } else {
-            // this.submitAndHistory([this.sr], from);
             this.submitAndHistory(res, from);
             this.sr = res;
             this.sr = this.resetLogSrData(this.sr);
@@ -342,6 +357,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sortLabelForColor(this.categories);
             this.categoryBackFunc();
             this.getProgress();
+            this.toReadStorageSetting('logFilter')
           }
         },
         (error) => {
@@ -565,7 +581,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 });
               }
               const aa = this.annotationHistory[i].category.sort(
-                this.sortBy(
+                this.toolService.sortBy(
                   this.projectType === 'ner'
                     ? 'start'
                     : this.projectType === 'log'
@@ -575,7 +591,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 ),
               );
               const bb = isCategory.sort(
-                this.sortBy(
+                this.toolService.sortBy(
                   this.projectType === 'ner'
                     ? 'start'
                     : this.projectType === 'log'
@@ -965,25 +981,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getProjectsList() {
-    if (this.startFrom === 'review') {
-      this.avaService.getProjectsReviewList().subscribe(
-        (response) => {
-          this.projects = response;
-        },
-        (error) => {
-          console.log(error);
-        },
-      );
-    } else {
-      this.avaService.getProjectsList().subscribe(
-        (response) => {
-          this.projects = response;
-        },
-        (error) => {
-          console.log(error);
-        },
-      );
-    }
+    this.avaService.getProjectsList().subscribe(
+      (response) => {
+        this.projects = response;
+      },
+      (error) => {
+        console.log(error);
+      },
+    );
   }
 
   onSelectingProjects(e) {
@@ -992,6 +997,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.maxLabel = null;
     this.selectParam = e.target.value;
     this.toStorageFilter();
+    if(this.projectType!=='image' && this.projectType!=='log' && this.projectType!=='ner' && this.renderFormat==='html'){
+      this.saveAnnotateSetting('display',this.renderFormat);
+    }
     for (let i = 0; i < this.projects.length; i++) {
       if (this.projects[i].projectName == e.target.value) {
         this.projectId = this.projects[i].id;
@@ -1004,12 +1012,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.idName = '';
     this.clearUserInput();
     this.filterList = [];
+    this.renderFormat='md';
+    this.questionForm.get('questionGroup.renderFormat').setValue('md');
     this.selectedEntityID = 0;
     this.reviewOrder = 'random';
     this.questionForm.get('questionGroup.reviewee').reset();
+    if(this.projectType!=='image'&&this.projectType!=='ner'&&this.projectType!=='log'){
+      this.toReadStorageSetting('display')
+    }
   }
 
-  toGetProjectInfo(pid) {
+  toGetProjectInfo(pid, reviewee?) {
     this.avaService.getProjectInfo(pid).subscribe(
       (response) => {
         response.taskInstructions = response.taskInstructions.replace(/(\r\n|\n|\r)/gm, '<br/>');
@@ -1026,6 +1039,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.categories = response.categoryList.split(',');
         }
         if (this.startFrom === 'review') {
+          this.questionForm.get('questionGroup.reviewee').setValue(reviewee);
           this.getOneReview();
         } else {
           this.fetchData();
@@ -1046,15 +1060,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.avaService.getProgress(param).subscribe(
       (response) => {
         if (this.startFrom === 'review') {
-          if (response.userCompleteCase.length === 1) {
-            this.questionForm
-              .get('questionGroup.reviewee')
-              .setValue(response.userCompleteCase[0].user);
-          } else {
-            response.userCompleteCase = response.userCompleteCase.sort(
-              this.sortBy('completeCase', 'descending'),
-            );
-          }
+          response.userCompleteCase = response.userCompleteCase.sort(
+            this.toolService.sortBy('completeCase', 'descending'),
+          );
         }
         this.progressInfo = response;
         this.percentage =
@@ -1143,16 +1151,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  sortBy(field, order) {
-    return function (a, b) {
-      if (order == 'ascending') {
-        return a[field] - b[field];
-      } else {
-        return b[field] - a[field];
-      }
-    };
-  }
-
   isSkipOrBack(type, id?, index?) {
     const isCategory = this.categoryFunc();
     let flag1;
@@ -1199,17 +1197,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           });
         }
         const aa = isCategory.sort(
-          this.sortBy(
+          this.toolService.sortBy(
             this.projectType === 'ner' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
             'ascending',
           ),
         );
         let bb;
         if (this.projectType === 'image') {
-          bb = a.sort(this.sortBy('sort', 'ascending'));
+          bb = a.sort(this.toolService.sortBy('sort', 'ascending'));
         } else {
           bb = this.sr.userInputs[0].problemCategory.sort(
-            this.sortBy(this.projectType === 'ner' ? 'start' : 'line', 'ascending'),
+            this.toolService.sortBy(this.projectType === 'ner' ? 'start' : 'line', 'ascending'),
           );
         }
 
@@ -1306,7 +1304,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   });
                 }
                 const aa = this.annotationHistory[i].category.sort(
-                  this.sortBy(
+                  this.toolService.sortBy(
                     this.projectType === 'ner'
                       ? 'start'
                       : this.projectType === 'log'
@@ -1316,7 +1314,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   ),
                 );
                 const bb = isCategory.sort(
-                  this.sortBy(
+                  this.toolService.sortBy(
                     this.projectType === 'ner'
                       ? 'start'
                       : this.projectType === 'log'
@@ -2110,19 +2108,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // resetTabularSrData(sr) {
-  //   if (!sr.MSG) {
-  //     const flag = [];
-  //     sr = sr[0];
-  //     _.forIn(sr.originalData, function (value, key) {
-  //       flag.push({ key, value });
-  //     });
-  //     sr.originalData = flag;
-  //     return sr;
-  //   } else {
-  //     return sr;
-  //   }
-  // }
+
 
   resetTabularSrData(sr) {
     const vv = [];
@@ -2271,15 +2257,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.spansList.push({
           line: data.line,
           label: from == 'historyBack' ? data.label : this.categories[this.selectedEntityID],
-          freeText: from == 'historyBack' ? data.freeText : null,
+          freeText: from == 'historyBack' ? data.freeText : '',
           index: this.spanEnd,
         });
         this.sr.originalData[this.spanEnd].annotate = true;
-        this.sr.originalData[this.spanEnd].freeText = from == 'historyBack' ? data.freeText : null;
+        this.sr.originalData[this.spanEnd].freeText = from == 'historyBack' ? data.freeText : '';
       } else {
         if (from !== 'historyBack') {
           this.sr.originalData[this.spanEnd].annotate = false;
-          this.sr.originalData[this.spanEnd].freeText = null;
+          this.sr.originalData[this.spanEnd].freeText = '';
         }
       }
       const txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
@@ -2289,59 +2275,58 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.colorsRainbow[
             from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
           ];
-      }
-      this.getElementService.toFindDomAddText(
-        txtRowEntityDom,
-        from == 'historyBack' ? data.label : this.categories[this.selectedEntityID],
-        'txtEntityLabel',
-      );
-      this.getElementService
-        .toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt', this.spansList)
-        .then((data) => {
-          spanslistPromise = data;
-          this.spansList = spanslistPromise;
-
-          if (this.cloneSpanslist.length > this.spansList.length) {
-            let flag = _.difference(
-              _.map(this.cloneSpanslist, 'index'),
-              _.map(this.spansList, 'index'),
-            );
-            this.sr.originalData[flag[0]].annotate = false;
-            this.sr.originalData[flag[0]].freeText = null;
-          }
-          this.cloneSpanslist = _.cloneDeep(this.spansList);
-        });
-
-      this.getElementService.toListenMouseIn(
-        pDom,
-        this.el.nativeElement.querySelector('.clear-' + this.spanEnd),
-      );
-      this.getElementService.toListenMouseOut(
-        pDom,
-        this.el.nativeElement.querySelector('.clear-' + this.spanEnd),
-      );
-
-      this.getElementService
-        .toClearSelected(
+        this.getElementService.toFindDomAddText(
           txtRowEntityDom,
+          from == 'historyBack' ? data.label : this.categories[this.selectedEntityID],
+          'txtEntityLabel',
+        );
+        this.getElementService
+          .toCreateClear(txtRowEntityDom, pDom, 'clear-' + this.spanEnd, 'clearTxt', this.spansList)
+          .then((data) => {
+            spanslistPromise = data;
+            this.spansList = spanslistPromise;
+
+            if (this.cloneSpanslist.length > this.spansList.length) {
+              let flag = _.difference(
+                _.map(this.cloneSpanslist, 'index'),
+                _.map(this.spansList, 'index'),
+              );
+              this.sr.originalData[flag[0]].annotate = false;
+              this.sr.originalData[flag[0]].freeText = '';
+            }
+            this.cloneSpanslist = _.cloneDeep(this.spansList);
+          });
+        this.getElementService.toListenMouseIn(
           pDom,
           this.el.nativeElement.querySelector('.clear-' + this.spanEnd),
-          this.spansList,
-        )
-        .then((data) => {
-          spanslistPromise = data;
-          this.spansList = spanslistPromise;
+        );
+        this.getElementService.toListenMouseOut(
+          pDom,
+          this.el.nativeElement.querySelector('.clear-' + this.spanEnd),
+        );
 
-          if (this.cloneSpanslist.length > this.spansList.length) {
-            let flag = _.difference(
-              _.map(this.cloneSpanslist, 'index'),
-              _.map(this.spansList, 'index'),
-            );
-            this.sr.originalData[flag[0]].annotate = false;
-            this.sr.originalData[flag[0]].freeText = null;
-          }
-          this.cloneSpanslist = _.cloneDeep(this.spansList);
-        });
+        this.getElementService
+          .toClearSelected(
+            txtRowEntityDom,
+            pDom,
+            this.el.nativeElement.querySelector('.clear-' + this.spanEnd),
+            this.spansList,
+          )
+          .then((data) => {
+            spanslistPromise = data;
+            this.spansList = spanslistPromise;
+
+            if (this.cloneSpanslist.length > this.spansList.length) {
+              let flag = _.difference(
+                _.map(this.cloneSpanslist, 'index'),
+                _.map(this.spansList, 'index'),
+              );
+              this.sr.originalData[flag[0]].annotate = false;
+              this.sr.originalData[flag[0]].freeText = '';
+            }
+            this.cloneSpanslist = _.cloneDeep(this.spansList);
+          });
+      }
     } else if (this.spanEnd > this.spanStart) {
       for (let a = this.spanStart; a < this.spanEnd + 1; a++) {
         const pDom = this.el.nativeElement.querySelector('.txtRowContent' + a);
@@ -2359,7 +2344,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.spansList.push({
               line: pDom.classList[0].split('-').pop(),
               label: this.categories[this.selectedEntityID],
-              freeText: null,
+              freeText: '',
               index: a,
             });
             this.sr.originalData[a].annotate = true;
@@ -2379,47 +2364,47 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.colorsRainbow[
               from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
             ];
-        }
-        this.getElementService.toFindDomAddText(
-          txtRowEntityDom,
-          this.categories[this.selectedEntityID],
-          'txtEntityLabel',
-        );
-        this.getElementService
-          .toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList)
-          .then((data) => {
-            spanslistPromise = data;
-            this.spansList = spanslistPromise;
-
-            if (this.cloneSpanslist.length > this.spansList.length) {
-              let flag = _.difference(
-                _.map(this.cloneSpanslist, 'index'),
-                _.map(this.spansList, 'index'),
-              );
-              this.sr.originalData[flag[0]].annotate = false;
-              this.sr.originalData[flag[0]].freeText = null;
-            }
-            this.cloneSpanslist = _.cloneDeep(this.spansList);
-          });
-        this.getElementService.toListenMouseIn(
-          pDom,
-          this.el.nativeElement.querySelector('.clear-' + a),
-        );
-        this.getElementService.toListenMouseOut(
-          pDom,
-          this.el.nativeElement.querySelector('.clear-' + a),
-        );
-        this.getElementService
-          .toClearSelected(
+          this.getElementService.toFindDomAddText(
             txtRowEntityDom,
+            this.categories[this.selectedEntityID],
+            'txtEntityLabel',
+          );
+          this.getElementService
+            .toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList)
+            .then((data) => {
+              spanslistPromise = data;
+              this.spansList = spanslistPromise;
+
+              if (this.cloneSpanslist.length > this.spansList.length) {
+                let flag = _.difference(
+                  _.map(this.cloneSpanslist, 'index'),
+                  _.map(this.spansList, 'index'),
+                );
+                this.sr.originalData[flag[0]].annotate = false;
+                this.sr.originalData[flag[0]].freeText = '';
+              }
+              this.cloneSpanslist = _.cloneDeep(this.spansList);
+            });
+          this.getElementService.toListenMouseIn(
             pDom,
             this.el.nativeElement.querySelector('.clear-' + a),
-            this.spansList,
-          )
-          .then((data) => {
-            spanslistPromise = data;
-            this.spansList = spanslistPromise;
-          });
+          );
+          this.getElementService.toListenMouseOut(
+            pDom,
+            this.el.nativeElement.querySelector('.clear-' + a),
+          );
+          this.getElementService
+            .toClearSelected(
+              txtRowEntityDom,
+              pDom,
+              this.el.nativeElement.querySelector('.clear-' + a),
+              this.spansList,
+            )
+            .then((data) => {
+              spanslistPromise = data;
+              this.spansList = spanslistPromise;
+            });
+        }
       }
     } else {
       for (let a = this.spanEnd; a < this.spanStart + 1; a++) {
@@ -2437,7 +2422,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.spansList.push({
               line: pDom.classList[0].split('-').pop(),
               label: this.categories[this.selectedEntityID],
-              freeText: null,
+              freeText: '',
               index: a,
             });
             this.sr.originalData[a].annotate = true;
@@ -2458,47 +2443,47 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.colorsRainbow[
               from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
             ];
-        }
-        this.getElementService.toFindDomAddText(
-          txtRowEntityDom,
-          this.categories[this.selectedEntityID],
-          'txtEntityLabel',
-        );
-        this.getElementService
-          .toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList)
-          .then((data) => {
-            spanslistPromise = data;
-            this.spansList = spanslistPromise;
-
-            if (this.cloneSpanslist.length > this.spansList.length) {
-              let flag = _.difference(
-                _.map(this.cloneSpanslist, 'index'),
-                _.map(this.spansList, 'index'),
-              );
-              this.sr.originalData[flag[0]].annotate = false;
-              this.sr.originalData[flag[0]].freeText = null;
-            }
-            this.cloneSpanslist = _.cloneDeep(this.spansList);
-          });
-        this.getElementService.toListenMouseIn(
-          pDom,
-          this.el.nativeElement.querySelector('.clear-' + a),
-        );
-        this.getElementService.toListenMouseOut(
-          pDom,
-          this.el.nativeElement.querySelector('.clear-' + a),
-        );
-        this.getElementService
-          .toClearSelected(
+          this.getElementService.toFindDomAddText(
             txtRowEntityDom,
+            this.categories[this.selectedEntityID],
+            'txtEntityLabel',
+          );
+          this.getElementService
+            .toCreateClear(txtRowEntityDom, pDom, 'clear-' + a, 'clearTxt', this.spansList)
+            .then((data) => {
+              spanslistPromise = data;
+              this.spansList = spanslistPromise;
+
+              if (this.cloneSpanslist.length > this.spansList.length) {
+                let flag = _.difference(
+                  _.map(this.cloneSpanslist, 'index'),
+                  _.map(this.spansList, 'index'),
+                );
+                this.sr.originalData[flag[0]].annotate = false;
+                this.sr.originalData[flag[0]].freeText = '';
+              }
+              this.cloneSpanslist = _.cloneDeep(this.spansList);
+            });
+          this.getElementService.toListenMouseIn(
             pDom,
             this.el.nativeElement.querySelector('.clear-' + a),
-            this.spansList,
-          )
-          .then((data) => {
-            spanslistPromise = data;
-            this.spansList = spanslistPromise;
-          });
+          );
+          this.getElementService.toListenMouseOut(
+            pDom,
+            this.el.nativeElement.querySelector('.clear-' + a),
+          );
+          this.getElementService
+            .toClearSelected(
+              txtRowEntityDom,
+              pDom,
+              this.el.nativeElement.querySelector('.clear-' + a),
+              this.spansList,
+            )
+            .then((data) => {
+              spanslistPromise = data;
+              this.spansList = spanslistPromise;
+            });
+        }
       }
     }
     // console.log('this.spansList:::', this.spansList);
@@ -2515,7 +2500,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateFreeText(e, index) {
-    if (this.spansList.length > 0) {
+    if (this.spansList.length > 0 && e.trim() !== '') {
       for (let i = 0; i < this.spansList.length; i++) {
         if (this.spansList[i].index === index) {
           this.spansList[i].freeText = e;
@@ -2523,10 +2508,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }
-  }
-
-  updateLogFreeText(e) {
-    // this.questionForm.get('questionGroup.logFreeText').setValue(e);
   }
 
   toFilterLog(e) {
@@ -2649,40 +2630,18 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toStorageFilter() {
     if (this.filterList.length > 0) {
-      if (localStorage.getItem('log-filter')) {
-        const logFilter = JSON.parse(localStorage.getItem('log-filter'));
-        const pIds = [];
-        logFilter.forEach((element) => {
-          pIds.push(element.pId);
-        });
-        if (pIds.indexOf(this.projectId) > -1) {
-          logFilter[pIds.indexOf(this.projectId)].filter = this.filterList;
-          localStorage.setItem('log-filter', JSON.stringify(logFilter));
-        } else {
-          logFilter.push({
-            pId: this.projectId,
-            filter: this.filterList,
-          });
-          localStorage.setItem('log-filter', JSON.stringify(logFilter));
-        }
-      } else {
-        const obj = {
-          pId: this.projectId,
-          filter: this.filterList,
-        };
-        localStorage.setItem('log-filter', JSON.stringify([obj]));
-      }
+      this.saveAnnotateSetting('filter',this.filterList)
     } else {
-      if (localStorage.getItem('log-filter')) {
-        const logFilter = JSON.parse(localStorage.getItem('log-filter'));
+      if (localStorage.getItem('annotate-setting')) {
+        const logFilter = JSON.parse(localStorage.getItem('annotate-setting'));
         for (let i = 0; i < logFilter.length; i++) {
           if (this.projectId == logFilter[i].pId) {
             logFilter.splice(i, 1);
             if (logFilter.length > 0) {
-              localStorage.setItem('log-filter', JSON.stringify(logFilter));
+              localStorage.setItem('annotate-setting', JSON.stringify(logFilter));
               break;
             } else {
-              localStorage.removeItem('log-filter');
+              localStorage.removeItem('annotate-setting');
               break;
             }
           }
@@ -2783,6 +2742,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               this.categoryBackFunc();
               this.sortLabelForColor(this.categories);
               this.getProgress();
+              this.questionForm.get('questionGroup.reviewee').setValue(this.sr.userInputs[0].user);
             }
 
             if (this.sr && this.sr.flag && this.sr.flag.silence) {
@@ -2822,8 +2782,39 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   toWrapText() {
     this.wrapText = !this.wrapText;
   }
+
   changeRenderFormat(e) {
     this.renderFormat = e.target.value;
+    this.saveAnnotateSetting('display',this.renderFormat)
+    
+  }
+
+  saveAnnotateSetting(set,value){
+    if (localStorage.getItem('annotate-setting')) {
+      const settings = JSON.parse(localStorage.getItem('annotate-setting'));
+      const pIds = [];
+      settings.forEach((element) => {
+        pIds.push(element.pId);
+      });
+      if (pIds.indexOf(this.projectId) > -1) {
+        settings[pIds.indexOf(this.projectId)][set] = value;
+        localStorage.setItem('annotate-setting', JSON.stringify(settings));
+      } else {
+        settings.push({
+          pId: this.projectId,
+          filter: set==='display'?'':value,
+          display: set==='display'?value:''
+        });
+        localStorage.setItem('annotate-setting', JSON.stringify(settings));
+      }
+    } else {
+      const obj = {
+        pId: this.projectId,
+        filter: set === 'display' ? '' : value,
+        display: set === 'display' ? value : ''
+      };
+      localStorage.setItem('annotate-setting', JSON.stringify([obj]));
+    }
   }
 
   updateOutput(mdText) {
@@ -2841,5 +2832,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.toStorageFilter();
+    if(this.projectType!=='image' && this.projectType!=='log' && this.projectType!=='ner' && this.renderFormat==='html'){
+      this.saveAnnotateSetting('display',this.renderFormat);
+    }
   }
 }

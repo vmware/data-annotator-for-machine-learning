@@ -36,19 +36,31 @@ SPDX-License-Identifier: Apache-2.0 -->
         <div class="leftBoard" [ngClass]="{ 'clr-col-3': !isDrawer, isDrawer: isDrawer }">
           <h2>{{ startFrom === 'review' ? 'Review Details' : 'Annotate Details' }}</h2>
 
-          <div class="clr-form-group form-group clr-row">
-            <label for="selectProject" class="label-leftBoard">Projects </label>&nbsp;&nbsp;
-            <div class="clr-select-wrapper" style="max-width: 70%">
-              <select
-                style="width: 100%"
-                (change)="onSelectingProjects($event)"
-                formControlName="selectProject"
-              >
-                <option *ngFor="let selectProject of projects" [value]="selectProject.projectName">
-                  {{ selectProject.projectName }}
-                </option>
-              </select>
+          <div>
+            <div class="clr-form-group form-group clr-row">
+              <label for="selectProject" class="label-leftBoard">Projects </label>&nbsp;&nbsp;
+              <div class="clr-select-wrapper" style="max-width: 70%">
+                <select
+                  style="width: 100%"
+                  (change)="onSelectingProjects($event)"
+                  formControlName="selectProject"
+                >
+                  <option *ngFor="let selectProject of projects" [value]="selectProject.projectName">
+                    {{ selectProject.projectName }}
+                  </option>
+                </select>
+              </div>
             </div>
+            <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'" class="clr-form-group form-group clr-row" style="margin-top: -0.5rem;">
+              <label class="label-leftBoard">Display </label>&nbsp;&nbsp;&nbsp;
+              <div class="clr-select-wrapper" style="max-width: 70%">
+                <select style="width: 100%" formControlName="renderFormat" (change)="changeRenderFormat($event)">
+                  <option value="md">Text</option>
+                  <option value="html">Render Markdown</option>
+                </select>
+              </div>
+            </div>
+            
             <div class="line"></div>
           </div>
 
@@ -381,49 +393,6 @@ SPDX-License-Identifier: Apache-2.0 -->
 
           <div class="questionContainer">
             <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'">
-              <div class="textActionBar">
-                <div class="btn-group" style="margin-bottom: 0.5rem">
-                  <div class="radio btn">
-                    <input
-                      type="radio"
-                      name="btn-group-demo-radios"
-                      value="html"
-                      id="btn-demo-radio-1"
-                      (change)="changeRenderFormat($event)"
-                      [(ngModel)]="renderFormat"
-                      [ngModelOptions]="{ standalone: true }"
-                      checked
-                    />
-                    <label for="btn-demo-radio-1"
-                      ><clr-icon
-                        aria-hidden="true"
-                        shape="clipboard"
-                        style="margin-right: 0.3rem"
-                      ></clr-icon
-                      >rendered file</label
-                    >
-                  </div>
-                  <div class="radio btn">
-                    <input
-                      type="radio"
-                      name="btn-group-demo-radios"
-                      value="md"
-                      id="btn-demo-radio-2"
-                      (change)="changeRenderFormat($event)"
-                      [(ngModel)]="renderFormat"
-                      [ngModelOptions]="{ standalone: true }"
-                    />
-                    <label for="btn-demo-radio-2"
-                      ><clr-icon
-                        aria-hidden="true"
-                        shape="view-list"
-                        style="margin-right: 0.3rem"
-                      ></clr-icon
-                      >source</label
-                    >
-                  </div>
-                </div>
-              </div>
               <div class="textBox">
                 <div *ngFor="let ticket of sr.originalData">
                   <p class="question-paragraph" style="word-break: break-word; white-space: pre">
@@ -506,7 +475,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *ngFor="let ticket of sr.originalData; let i = index"
                   id="c-{{ i }}"
                   class="clr-row txtRow{{ i }}"
-                  title="{{ ticket.freeText }}"
+                  title="{{
+                    ticket.freeText
+                      ? ticket.freeText
+                      : '( Optional ) you can click the ellipsis-vertical after the index to add freeText for this line after annotation.'
+                  }}"
                 >
                   <div class=" clr-col-1 logIndex{{ i }} rowIndex">
                     <div class="signpost-item">
@@ -559,7 +532,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *ngFor="let ticket of sr.originalData; let i = index"
                   id="c-{{ ticket.index }}"
                   class="clr-row txtRow{{ ticket.index }}"
-                  title="{{ ticket.freeText }}"
+                  title="{{
+                    ticket.freeText
+                      ? ticket.freeText
+                      : '( Optional ) you can click the ellipsis-vertical after the index to add freeText for this line after annotation.'
+                  }}"
                 >
                   <div *ngIf="ticket.filter" class=" clr-col-1 logIndex{{ ticket.index }} rowIndex">
                     <div class="signpost-item">
@@ -773,7 +750,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                 formControlName="logFreeText"
                 placeholder="( Optional ) Please provide more details about the log above."
                 rows="1"
-                (ngModelChange)="updateLogFreeText($event)"
               ></textarea>
             </div>
           </div>

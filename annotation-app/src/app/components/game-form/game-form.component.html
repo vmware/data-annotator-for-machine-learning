@@ -258,10 +258,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     dataset.totalCase != 0 &&
                     (dataset.projectCompleteCase
                       ? dataset.totalCase > dataset.projectCompleteCase
-                      : dataset.totalCase != dataset.userCompleteCase)
+                      : dataset.totalCase != dataset.userCompleteCase) &&
+                    dataset.allowStart
                   "
-                  class="btn btn-sm btn-primary"
-                  style="margin: 0"
+                  class="btn btn-sm btn-primary startBtn"
                   title="Start Annotate"
                   (click)="
                     startAnnotate(
@@ -278,41 +278,30 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *ngIf="
                     dataset.totalCase != 0 &&
                     (dataset.totalCase == dataset.userCompleteCase ||
-                      dataset.projectCompleteCase >= dataset.totalCase)
+                      dataset.projectCompleteCase >= dataset.totalCase) &&
+                    dataset.allowStart
                   "
-                  class="btn btn-sm btn-primary"
-                  style="margin: 0"
+                  class="btn btn-sm btn-primary startBtn"
                   title="Annotation Finished"
                   disabled
                 >
                   Done
                 </button>
                 <button
-                  *ngIf="dataset.totalCase == 0"
-                  class="btn btn-sm btn-primary"
+                  *ngIf="dataset.totalCase == 0 && dataset.allowStart"
+                  class="btn btn-sm btn-primary startBtn"
                   title="Data is Inserting"
-                  style="margin: 0"
                   disabled
                 >
                   Wait
                 </button>
                 <button
-                  *ngIf="
-                    dataset.projectType == 'log' &&
-                    (user.role == 'Admin' ||
-                      (user.role == 'Project Owner' && dataset.allowOwnerReview))
-                  "
+                  *ngIf="dataset.projectType == 'log' && dataset.allowOwnerReview"
                   [disabled]="dataset.totalCase == 0 || !dataset.disableReview"
                   class="btn btn-sm btn-primary"
-                  style="margin: 0; margin-left: 0.3rem"
+                  style="margin: 0"
                   title="Start Review"
-                  [routerLink]="['/annotate']"
-                  [queryParams]="{
-                    name: dataset.projectName,
-                    projectType: dataset.projectType,
-                    id: dataset.id,
-                    from: 'review'
-                  }"
+                  (click)="clickReview(dataset)"
                 >
                   Review
                 </button>

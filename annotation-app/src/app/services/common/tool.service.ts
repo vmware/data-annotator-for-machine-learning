@@ -50,4 +50,14 @@ export class ToolService {
       return true;
     }
   }
+
+  sortBy(field, order) {
+    return function (a, b) {
+      if (order == 'ascending') {
+        return a[field] - b[field];
+      } else {
+        return b[field] - a[field];
+      }
+    };
+  }
 }
