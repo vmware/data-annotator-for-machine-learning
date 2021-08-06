@@ -115,9 +115,10 @@ async function updateProject(req) {
             });
         }
     }
-    //add record user to userCompleteCase
+    //add have annotation record user
     for (const uCase of projectInfo.userCompleteCase) {
         if (annotators.indexOf(uCase.user) == -1 && uCase.completeCase) {
+            uCase.assignedCase = 0;
             completeCase.push(uCase);
         }
     }
