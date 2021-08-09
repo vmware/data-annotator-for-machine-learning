@@ -38,12 +38,6 @@ SPDX-License-Identifier: Apache-2.0 -->
             style="max-width: 250px"
             >Project Name
           </clr-dg-column>
-          <clr-dg-column
-            [clrDgField]="'taskInstructions'"
-            class="ellipsis-datagrid"
-            style="max-width: 250px"
-            >Task Instructions
-          </clr-dg-column>
           <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid" style="max-width: 300px"
             >Creator
           </clr-dg-column>
@@ -68,8 +62,15 @@ SPDX-License-Identifier: Apache-2.0 -->
             class="ellipsis-datagrid"
             style="min-width: 300px"
           >
-            Reviewed/Complete/Assigned
+            Complete/Assigned
           </clr-dg-column>
+
+          <clr-dg-column
+            [clrDgField]="'userCompleteCase'"
+            class="ellipsis-datagrid"
+            style="min-width: 300px"
+            >Reviewed/Complete</clr-dg-column
+          >
           <clr-dg-column
             [clrDgField]="'categoryList'"
             class="ellipsis-datagrid labels"
@@ -85,13 +86,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                 title="{{ dataset.projectName }}"
                 style="max-width: 250px"
                 >{{ dataset.projectName }}
-              </clr-dg-cell>
-              <clr-dg-cell
-                class="cellWordBreak"
-                title="{{ dataset.taskInstructions }}"
-                style="max-width: 250px"
-              >
-                {{ dataset.taskInstructions }}
               </clr-dg-cell>
               <clr-dg-cell
                 class="cellWordBreak"
@@ -140,24 +134,22 @@ SPDX-License-Identifier: Apache-2.0 -->
                       style="margin-bottom: 3px"
                     >
                       {{ assignee.user }}
-                      <span *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0" class="badge badge-1"
-                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          assignee.assignedCase
-                        }}</span
-                      >
                       <span
-                        *ngIf="assignee.completeCase >= assignee.assignedCase && dataset.totalCase != 0"
-                        class="badge badge-success"
-                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          assignee.assignedCase
-                        }}</span
-                      >
-                      <span
-                        *ngIf="dataset.totalCase == 0"
+                        *ngIf="
+                          assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0
+                        "
                         class="badge badge-1"
-                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          assignee.assignedCase
-                        }}</span
+                        >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
+                      >
+                      <span
+                        *ngIf="
+                          assignee.completeCase >= assignee.assignedCase && dataset.totalCase != 0
+                        "
+                        class="badge badge-success"
+                        >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
+                      >
+                      <span *ngIf="dataset.totalCase == 0" class="badge badge-1"
+                        >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
                       >
                     </div>
                   </div>
@@ -170,24 +162,22 @@ SPDX-License-Identifier: Apache-2.0 -->
                       style="margin-bottom: 3px"
                     >
                       {{ assignee.user }}
-                      <span *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0" class="badge badge-1"
-                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          assignee.assignedCase
-                        }}</span
-                      >
                       <span
-                        *ngIf="assignee.completeCase >= assignee.assignedCase  && dataset.totalCase != 0"
-                        class="badge badge-success"
-                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          assignee.assignedCase
-                        }}</span
-                      >
-                      <span
-                        *ngIf="dataset.totalCase == 0"
+                        *ngIf="
+                          assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0
+                        "
                         class="badge badge-1"
-                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          assignee.assignedCase
-                        }}</span
+                        >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
+                      >
+                      <span
+                        *ngIf="
+                          assignee.completeCase >= assignee.assignedCase && dataset.totalCase != 0
+                        "
+                        class="badge badge-success"
+                        >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
+                      >
+                      <span *ngIf="dataset.totalCase == 0" class="badge badge-1"
+                        >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
                       >
                     </div>
                   </div>
@@ -197,24 +187,22 @@ SPDX-License-Identifier: Apache-2.0 -->
                       style="margin-bottom: 3px"
                     >
                       {{ assignee.user }}
-                      <span *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0" class="badge badge-1"
-                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          assignee.assignedCase
-                        }}</span
-                      >
                       <span
-                        *ngIf="assignee.completeCase >= assignee.assignedCase && dataset.totalCase != 0"
-                        class="badge badge-success"
-                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          assignee.assignedCase
-                        }}</span
-                      >
-                      <span
-                        *ngIf="dataset.totalCase == 0"
+                        *ngIf="
+                          assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0
+                        "
                         class="badge badge-1"
-                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}/{{
-                          assignee.assignedCase
-                        }}</span
+                        >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
+                      >
+                      <span
+                        *ngIf="
+                          assignee.completeCase >= assignee.assignedCase && dataset.totalCase != 0
+                        "
+                        class="badge badge-success"
+                        >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
+                      >
+                      <span *ngIf="dataset.totalCase == 0" class="badge badge-1"
+                        >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
                       >
                     </div>
                   </div>
@@ -236,6 +224,98 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                 </div>
               </clr-dg-cell>
+              <clr-dg-cell *ngIf="dataset.projectType == 'log'">
+                <div>
+                  <div *ngIf="dataset.userCompleteCase.length < 6">
+                    <div
+                      *ngFor="let assignee of dataset.userCompleteCase"
+                      style="margin-bottom: 3px"
+                    >
+                      {{ assignee.user }}
+                      <span *ngIf="assignee.completeCase > assignee.reviewed" class="badge badge-1"
+                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}</span
+                      >
+                      <span
+                        *ngIf="
+                          assignee.reviewed >= assignee.completeCase && assignee.completeCase !== 0
+                        "
+                        class="badge badge-success"
+                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}</span
+                      >
+                      <span *ngIf="assignee.completeCase == 0" class="badge badge-1"
+                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}</span
+                      >
+                    </div>
+                  </div>
+                  <div
+                    *ngIf="dataset.userCompleteCase.length >= 6 && dataset.isExtend"
+                    class="annotatorCellWordBreak"
+                  >
+                    <div
+                      *ngFor="let assignee of dataset.userCompleteCase"
+                      style="margin-bottom: 3px"
+                    >
+                      {{ assignee.user }}
+                      <span *ngIf="assignee.completeCase > assignee.reviewed" class="badge badge-1"
+                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}</span
+                      >
+                      <span
+                        *ngIf="
+                          assignee.reviewed >= assignee.completeCase && assignee.completeCase !== 0
+                        "
+                        class="badge badge-success"
+                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}</span
+                      >
+                      <span *ngIf="assignee.completeCase == 0" class="badge badge-1"
+                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}</span
+                      >
+                    </div>
+                  </div>
+                  <div *ngIf="dataset.userCompleteCase.length >= 6 && !dataset.isExtend">
+                    <div
+                      *ngFor="let assignee of dataset.userCompleteCase"
+                      style="margin-bottom: 3px"
+                    >
+                      {{ assignee.user }}
+                      <span *ngIf="assignee.completeCase > assignee.reviewed" class="badge badge-1"
+                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}</span
+                      >
+                      <span
+                        *ngIf="
+                          assignee.reviewed >= assignee.completeCase && assignee.completeCase !== 0
+                        "
+                        class="badge badge-success"
+                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}</span
+                      >
+                      <span *ngIf="assignee.completeCase == 0" class="badge badge-1"
+                        >{{ assignee.reviewed }}/{{ assignee.completeCase }}</span
+                      >
+                    </div>
+                  </div>
+                  <div
+                    *ngIf="dataset.userCompleteCase.length >= 6 && dataset.isExtend"
+                    (click)="more(dataset.id)"
+                    class="isShowHide"
+                  >
+                    show
+                    <clr-icon class="showIcon" shape="angle"></clr-icon>
+                  </div>
+                  <div
+                    *ngIf="dataset.userCompleteCase.length >= 6 && !dataset.isExtend"
+                    (click)="more(dataset.id)"
+                    class="isShowHide"
+                  >
+                    hide
+                    <clr-icon shape="angle"></clr-icon>
+                  </div>
+                </div>
+              </clr-dg-cell>
+              <clr-dg-cell
+                *ngIf="dataset.projectType !== 'log'"
+                class="cellWordBreak"
+                style="max-width: 300px"
+                >--</clr-dg-cell
+              >
               <clr-dg-cell
                 class="cellWordBreak"
                 title="{{

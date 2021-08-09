@@ -93,7 +93,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         <clr-dg-cell style="max-width: 200px">{{
           dataset.updatedDate | date: 'yyyy-MM-dd HH:mm:ss'
         }}</clr-dg-cell>
-        
+
         <clr-dg-cell class="cellWordBreak" title="{{ dataset.dataSource }}" style="max-width: 300px"
           >{{ dataset.dataSource }}
         </clr-dg-cell>
@@ -101,17 +101,17 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div *ngIf="dataset.annotator.length < 6">
             <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
               {{ assignee.user }}
-              <span *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0" class="badge badge-1"
+              <span
+                *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0"
+                class="badge badge-1"
                 >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
               >
               <span
-                *ngIf="assignee.completeCase  >= assignee.assignedCase && dataset.totalCase != 0"
+                *ngIf="assignee.completeCase >= assignee.assignedCase && dataset.totalCase != 0"
                 class="badge badge-success"
                 >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
               >
-              <span
-                *ngIf="dataset.totalCase == 0"
-                class="badge badge-1"
+              <span *ngIf="dataset.totalCase == 0" class="badge badge-1"
                 >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
               >
             </div>
@@ -122,25 +122,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           >
             <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
               {{ assignee.user }}
-              <span *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0" class="badge badge-1"
-                >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
-              >
               <span
-                *ngIf="assignee.completeCase  >= assignee.assignedCase && dataset.totalCase != 0"
-                class="badge badge-success"
-                >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
-              >
-              <span
-                *ngIf="dataset.totalCase == 0"
+                *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0"
                 class="badge badge-1"
-                >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
-              >
-            </div>
-          </div>
-          <div *ngIf="dataset.annotator.length >= 6 && !dataset.isExtend">
-            <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
-              {{ assignee.user }}
-              <span *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0" class="badge badge-1"
                 >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
               >
               <span
@@ -148,9 +132,25 @@ SPDX-License-Identifier: Apache-2.0 -->
                 class="badge badge-success"
                 >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
               >
+              <span *ngIf="dataset.totalCase == 0" class="badge badge-1"
+                >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
+              >
+            </div>
+          </div>
+          <div *ngIf="dataset.annotator.length >= 6 && !dataset.isExtend">
+            <div *ngFor="let assignee of dataset.userCompleteCase" style="margin-bottom: 3px">
+              {{ assignee.user }}
               <span
-                *ngIf="dataset.totalCase == 0"
+                *ngIf="assignee.assignedCase > assignee.completeCase && dataset.totalCase != 0"
                 class="badge badge-1"
+                >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
+              >
+              <span
+                *ngIf="assignee.completeCase >= assignee.assignedCase && dataset.totalCase != 0"
+                class="badge badge-success"
+                >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
+              >
+              <span *ngIf="dataset.totalCase == 0" class="badge badge-1"
                 >{{ assignee.completeCase }}/{{ assignee.assignedCase }}</span
               >
             </div>
@@ -172,9 +172,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <clr-icon shape="angle"></clr-icon>
           </div>
         </clr-dg-cell>
-        <clr-dg-cell style="max-width: 200px">
-          {{ dataset.totalCase}}</clr-dg-cell
-        >
+        <clr-dg-cell style="max-width: 200px"> {{ dataset.totalCase }}</clr-dg-cell>
         <clr-dg-cell
           class="cellWordBreak"
           title="{{

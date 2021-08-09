@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </h3>
           <div class="clr-form-group left-project-info clr-row">
             <label for="name" class="label-leftBoard">This session:</label>&nbsp;&nbsp;
-            <div>{{ progressInfo?.totalCase }}</div>
+            <div>{{ projectType === 'log' && startFrom === 'review' ? (progressInfo?.totalCase) : (progressInfo?.assignedCase)}}</div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
             <label for="owner" class="label-leftBoard"
@@ -173,17 +173,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                 }}</label>
                 <div class="clr-col">
                   <clr-progress-bar
-                    title="Annotation progress: (annotated tickets / total tickets)%"
-                    clrValue="{{ (item.completeCase / progressInfo.totalCase) * 100 }}"
+                    title="Annotation progress: (annotated tickets / assigned tickets)%"
+                    clrValue="{{ (item.completeCase / item.assignedCase) * 100 }}"
                     clrLabeled
                     clrDisplayval="{{
-                      (item.completeCase / progressInfo.totalCase) * 100 | mathRoundPipe
+                      (item.completeCase / item.assignedCase) * 100 | mathRoundPipe
                     }}%"
                   >
                   </clr-progress-bar>
                   <clr-progress-bar
                     title="Review progress: reviewed tickets / annotated tickets"
-                    clrValue="{{ (item.reviewed / progressInfo.totalCase) * 100 }}"
+                    clrValue="{{ (item.reviewed / item.assignedCase) * 100 }}"
                     clrSuccess
                     clrLabeled
                     clrDisplayval="{{ item.reviewed }}/{{ item.completeCase }}"

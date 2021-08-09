@@ -52,6 +52,7 @@ import { MathRoundPipe } from './pipes/math-round.pipe';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MyFilter } from './shared/clr-filter/datagridFilter.component';
 import { MarkdownParserService } from './services/common/markdown-parser.service';
+import { CommonService } from './services/common/common.service';
 
 @NgModule({
   declarations: [
@@ -109,6 +110,7 @@ import { MarkdownParserService } from './services/common/markdown-parser.service
     DownloadService,
     ToolService,
     MarkdownParserService,
+    CommonService
   ],
   bootstrap: [AppComponent],
 })

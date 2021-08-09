@@ -27,6 +27,7 @@ import * as _ from 'lodash';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
+import { CommonService } from 'app/services/common/common.service';
 
 @Component({
   selector: 'app-create',
@@ -128,6 +129,7 @@ export class CreateNewComponent implements OnInit {
     private renderer2: Renderer2,
     private env: EnvironmentsService,
     private toolService: ToolService,
+    private commonService: CommonService
   ) {
     this.user = this.userAuthService.loggedUser().email;
     this.page = 1;
@@ -427,10 +429,7 @@ export class CreateNewComponent implements OnInit {
     this.emailReg = this.toolService.toRegEmail(emails);
     if (this.emailReg && this.inputAssigneeValidation == false) {
       emails.forEach((element) => {
-        // if (this.assigneeList.indexOf(element.trim()) == -1) {
-        console.log(133, _.filter(this.assigneeList, ['email', element.trim()]));
         if (_.filter(this.assigneeList, ['email', element.trim()]).length === 0) {
-          // this.assigneeList.push(element.trim());
           this.assigneeList.push({ email: element.trim(), assignedCase: 0 });
         }
       });
@@ -439,7 +438,7 @@ export class CreateNewComponent implements OnInit {
         this.assigneeList.forEach(item=>{
           item.isModify=false;
         })
-        this.evenlyDistributeTicket(
+        this.commonService.evenlyDistributeTicket(
           this.assigneeList,
           this.dsDialogForm.get('totalRow').value,
           this.dsDialogForm.get('maxAnnotations').value
@@ -452,77 +451,6 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-  evenlyDistributeTicket(assigneeList, totalRow, maxAnnotations) {
-    // totalRow=55
-    if(totalRow===0){
-      assigneeList.forEach((value,index) => {
-        value.assignedCase = 1;//初始化的值最小为1;
-      });
-    }else{
-      console.log(assigneeList, totalRow, maxAnnotations)
-      if ( maxAnnotations>= assigneeList.length) {
-        assigneeList.forEach((value) => {
-          value.assignedCase = totalRow;
-          value.orginvalue=totalRow;
-          value.isModify=false;
-        });
-      } else {
-        let flag=false;
-        for(let i =0;i<assigneeList.length;i++){
-          if(assigneeList[i].isModify){
-            flag=true;
-            break;
-          }
-        }
-        if(flag){
-          let totalmodify=0;
-          let array=[];
-          let num =0;
-          assigneeList.forEach((value,index) => {
-            if(value.isModify){
-              totalmodify+=value.assignedCase;
-              array.push(index);
-              num++;
-            }
-          });
-          let totalNum =totalRow*maxAnnotations-totalmodify;
-          let personNum=assigneeList.length-num;
-          let c =Math.floor(totalNum/personNum);
-          let d =totalNum%personNum;
-          for(let i =0;i<assigneeList.length;i++){
-            if(array.indexOf(i)>-1){
-              continue;
-            }
-            if(d>0){
-              assigneeList[i].assignedCase = c+1;
-              assigneeList[i].orginvalue=c+1;
-              d--;
-            }else{
-              assigneeList[i].assignedCase = c;
-              assigneeList[i].orginvalue=c;
-              assigneeList[i].isModify=false;
-            }
-          }
-        }else{
-          //计算总条数
-          let totalNum = totalRow*maxAnnotations;
-          let personNum = assigneeList.length;
-          let a =Math.floor(totalNum/personNum);
-          let b =totalNum%personNum;
-          assigneeList.forEach((value,index) => {
-            value.assignedCase = a;
-            value.orginvalue=a;
-            value.isModify=false;
-          });
-          for(let i =0;i<=b-1;i++){
-            assigneeList[i].assignedCase=a+1;
-            assigneeList[i].orginvalue=a+1;
-          }
-        } 
-      }
-    }
-  }
-
 
   deleteAssignee(index) {
     
@@ -532,7 +460,7 @@ export class CreateNewComponent implements OnInit {
       this.assigneeList.forEach(item=>{
         item.isModify=false;
       })
-      this.evenlyDistributeTicket(
+      this.commonService.evenlyDistributeTicket(
         this.assigneeList,
         this.dsDialogForm.get('totalRow').value ,
         this.dsDialogForm.get('maxAnnotations').value
@@ -543,41 +471,8 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-  editAssignedNumber(data,index) {
-    console.log(99, data);
-    if(data.assignedCase<=0){
-      alert("Assigned tickets number should be more than 1.");
-      data.assignedCase=data.orginvalue
-      return;
-    }
-    if(data.assignedCase!==data.orginvalue){
-      data.isModify=true;
-    }
-    let totalnum=0;
-    let size =0;
-    let row =this.dsDialogForm.get('totalRow').value;
-    // row=55;
-    let max= this.dsDialogForm.get('maxAnnotations').value;
-    let array=this.assigneeList;
-    array.forEach((value,index) => {
-      if(value.isModify){
-        totalnum+=value.assignedCase;
-        size++;
-      }
-    });
-    if(size===array.length){
-      //当数组中的值都修改过后，默认最后一个值可以被自动修改
-      array[array.length-1].isModify=false;
-    }
-    if(max< array.length){
-      if(totalnum+(array.length-size)>max*row){
-        alert("Fail to modify for the total assigned tickets is more than the total valid tickets.");
-        data.assignedCase=data.orginvalue;
-        return;
-      }
-    }
-
-    this.evenlyDistributeTicket(array,row,max);
+  editAssignedTickets(data){
+    this.commonService.editAssignedNumber(data,this.dsDialogForm.get('totalRow').value,this.dsDialogForm.get('maxAnnotations').value,this.assigneeList);
   }
 
 
@@ -673,7 +568,10 @@ export class CreateNewComponent implements OnInit {
       }
     }
     if (this.assigneeList.length > 0) {
-      this.evenlyDistributeTicket(
+      this.assigneeList.forEach(item=>{
+        item.isModify=false;
+      })
+      this.commonService.evenlyDistributeTicket(
         this.assigneeList,
         this.dsDialogForm.get('totalRow').value,
         this.dsDialogForm.get('maxAnnotations').value
@@ -776,7 +674,10 @@ export class CreateNewComponent implements OnInit {
           this.loadingPreviewData = false;
         }
         if (this.assigneeList.length > 0) {
-          this.evenlyDistributeTicket(
+          this.assigneeList.forEach(item=>{
+            item.isModify=false;
+          })
+          this.commonService.evenlyDistributeTicket(
             this.assigneeList,
             this.dsDialogForm.get('totalRow').value,
             this.dsDialogForm.get('maxAnnotations').value
@@ -842,7 +743,10 @@ export class CreateNewComponent implements OnInit {
       this.nonEnglish = 0;
       this.previewTotalData = [];
       if (this.assigneeList.length > 0) {
-        this.evenlyDistributeTicket(
+        this.assigneeList.forEach(item=>{
+          item.isModify=false;
+        })
+        this.commonService.evenlyDistributeTicket(
           this.assigneeList,
           this.dsDialogForm.get('totalRow').value,
           this.dsDialogForm.get('maxAnnotations').value
@@ -892,7 +796,10 @@ export class CreateNewComponent implements OnInit {
     this.labelType = '';
     this.dsDialogForm.get('totalRow').setValue(0);
     if (this.assigneeList.length > 0) {
-      this.evenlyDistributeTicket(
+      this.assigneeList.forEach(item=>{
+        item.isModify=false;
+      })
+      this.commonService.evenlyDistributeTicket(
         this.assigneeList,
         this.dsDialogForm.get('totalRow').value,
         this.dsDialogForm.get('maxAnnotations').value
@@ -1042,7 +949,10 @@ export class CreateNewComponent implements OnInit {
         this.changeSetData = false;
         this.changePreview = false;
         if (this.assigneeList.length > 0) {
-          this.evenlyDistributeTicket(
+          this.assigneeList.forEach(item=>{
+            item.isModify=false;
+          })
+          this.commonService.evenlyDistributeTicket(
             this.assigneeList,
             this.dsDialogForm.get('totalRow').value,
             this.dsDialogForm.get('maxAnnotations').value
@@ -1060,7 +970,10 @@ export class CreateNewComponent implements OnInit {
       this.previewTotalData = [];
       this.dsDialogForm.get('totalRow').setValue(0);
       if (this.assigneeList.length > 0) {
-        this.evenlyDistributeTicket(
+        this.assigneeList.forEach(item=>{
+          item.isModify=false;
+        })
+        this.commonService.evenlyDistributeTicket(
           this.assigneeList,
           this.dsDialogForm.get('totalRow').value,
           this.dsDialogForm.get('maxAnnotations').value
@@ -1141,7 +1054,10 @@ export class CreateNewComponent implements OnInit {
             this.changeSetData = false;
             this.changePreview = false;
             if (this.assigneeList.length > 0) {
-              this.evenlyDistributeTicket(
+              this.assigneeList.forEach(item=>{
+                item.isModify=false;
+              })
+              this.commonService.evenlyDistributeTicket(
                 this.assigneeList,
                 this.dsDialogForm.get('totalRow').value ,
                   this.dsDialogForm.get('maxAnnotations').value
@@ -1178,9 +1094,7 @@ export class CreateNewComponent implements OnInit {
   }
 
   onAssigneeKeydown(e) {
-    // if (this.assigneeList.indexOf(e.target.value) !== -1) {
     let flag = _.filter(this.assigneeList, ['email', e.target.value]);
-    console.log(1, flag);
     if (flag.length > 0) {
       this.inputAssigneeValidation = true;
     } else {
@@ -1373,7 +1287,10 @@ export class CreateNewComponent implements OnInit {
 
   changeMaxAnnotation() {
     if (this.assigneeList.length > 0) {
-      this.evenlyDistributeTicket(
+      this.assigneeList.forEach(item=>{
+        item.isModify=false;
+      })
+      this.commonService.evenlyDistributeTicket(
         this.assigneeList,
         this.dsDialogForm.get('totalRow').value,
         this.dsDialogForm.get('maxAnnotations').value

@@ -1060,7 +1060,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.progressInfo = response;
         this.percentage =
-          Math.round((this.progressInfo.completeCase / this.progressInfo.totalCase) * 10000) / 100;
+          Math.round((this.progressInfo.completeCase / (this.startFrom==='review'?this.progressInfo.totalCase:this.progressInfo.assignedCase)) * 10000) / 100;
       },
       (error) => {
         console.log(error);
