@@ -463,25 +463,35 @@ async function updateAssinedCase(QueryCondition, totalCase, append){
                     if (avgCase > uc.assignedCase) {
                         uc.assignedCase = 0;
                         //seperate remained case to other annotators
-                        const remained = avgCase - uc.assignedCase;
-                        await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(u => {
-                            if (remained > 0 && pro.annotator.indexOf(u.user) != -1 && u.assignedCase > 0){
-                                u.assignedCase -= 1;
-                                remained--;
+                        let remained = avgCase - uc.assignedCase;
+                        while(true){
+                            if (remained == 0) {
+                                break;
                             }
-                        });
+                            await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(u => {
+                                if (remained > 0 && pro.annotator.indexOf(u.user) != -1 && u.assignedCase > 0){
+                                    u.assignedCase -= 1;
+                                    remained--;
+                                }
+                            });
+                        }
                     }else{
                         uc.assignedCase -= avgCase;
                     }
                 }
             });
             let index = 0;
-            await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(uc => {
-                if (index < perCase && pro.annotator.indexOf(uc.user) != -1 && uc.assignedCase > 0){
-                    uc.assignedCase -= 1;
-                    index++;
-                } 
-            });
+            while(true){
+                if (perCase == 0 || index >= perCase) {
+                    break;
+                }
+                await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(uc => {
+                    if (index < perCase && pro.annotator.indexOf(uc.user) != -1 && uc.assignedCase > 0){
+                        uc.assignedCase -= 1;
+                        index++;
+                    } 
+                });
+            }
         }
     }
 
