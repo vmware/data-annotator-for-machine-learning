@@ -426,23 +426,61 @@ async function updateAssinedCase(QueryCondition, totalCase, append){
     const avgCase = Math.floor(totalCase * maxAnnotation / annoatorsNumber);
     const perCase = totalCase * maxAnnotation % annoatorsNumber;
     
+    //pro.annotator save annotor list
+    //pro.userCompleteCase.user has the users that he has annotation info but removed from annotor
     if (append) {//append tickets
         if (maxAnnotation >= annoatorsNumber) {
-            await pro.userCompleteCase.forEach(uc => uc.assignedCase += totalCase);
+            await pro.userCompleteCase.forEach(uc => {
+                if (pro.annotator.indexOf(uc.user) != -1) {
+                    uc.assignedCase += totalCase;
+                }
+            });
         }else{
-            await pro.userCompleteCase.forEach(uc => uc.assignedCase += avgCase);
-            await pro.userCompleteCase.sort((a,b) => a.assignedCase - b.assignedCase).forEach((uc, index) => {
-                if (index < perCase) uc.assignedCase += 1;
+            await pro.userCompleteCase.forEach(uc => {
+                if (pro.annotator.indexOf(uc.user) != -1) {
+                    uc.assignedCase += avgCase;
+                }
+            });
+            let index = 0;
+            await pro.userCompleteCase.sort((a,b) => a.assignedCase - b.assignedCase).forEach(uc => {
+                if (index < perCase && pro.annotator.indexOf(uc.user) != -1){
+                    uc.assignedCase += 1;
+                    index++;
+                }
             });
         }
 
     }else{//delete tickets
         if (maxAnnotation >= annoatorsNumber) {
-            await pro.userCompleteCase.forEach(uc => uc.assignedCase -= totalCase);
+            await pro.userCompleteCase.forEach(uc => {
+                if (pro.annotator.indexOf(uc.user) != -1) {
+                    uc.assignedCase -= totalCase;
+                }
+            });
         }else{
-            await pro.userCompleteCase.forEach(uc => uc.assignedCase -= avgCase);
-            await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach((uc, index) => {
-                if (index < perCase) uc.assignedCase -= 1;
+            await pro.userCompleteCase.forEach(async uc => {
+                if (pro.annotator.indexOf(uc.user) != -1) {
+                    if (avgCase > uc.assignedCase) {
+                        uc.assignedCase = 0;
+                        //seperate remained case to other annotators
+                        const remained = avgCase - uc.assignedCase;
+                        await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(u => {
+                            if (remained > 0 && pro.annotator.indexOf(u.user) != -1 && u.assignedCase > 0){
+                                u.assignedCase -= 1;
+                                remained--;
+                            }
+                        });
+                    }else{
+                        uc.assignedCase -= avgCase;
+                    }
+                }
+            });
+            let index = 0;
+            await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(uc => {
+                if (index < perCase && pro.annotator.indexOf(uc.user) != -1 && uc.assignedCase > 0){
+                    uc.assignedCase -= 1;
+                    index++;
+                } 
             });
         }
     }
