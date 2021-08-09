@@ -45,7 +45,8 @@ const srSchema = new mongoose.Schema({
         review: { type: Boolean, default: false },
         reviewedTime: { type: String },
         modified: { type: Boolean, default: false }
-    }
+    },
+    ticketQuestions: { type: Object },
 }, { _id: true });
 srSchema.set("toJSON", { virtuals: true });
 srSchema.index({ projectName: 1 });
@@ -204,8 +205,9 @@ const projectSchema = new mongoose.Schema({
     encoder: { type: String },
     isMultipleLabel: { type: Boolean, default: false },
     regression: {type: Boolean, default: false},
-    isShowFilename: {type: Boolean, default: false}
-
+    isShowFilename: {type: Boolean, default: false},
+    ticketDescription: {type: String, default: 'Passage'},
+    ticketQuestions: { type: Array },
 }, { _id: true });
 projectSchema.index({ projectName: 1 });
 projectSchema.set("toJSON", { virtuals: true });

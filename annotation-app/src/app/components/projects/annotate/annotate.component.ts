@@ -189,7 +189,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         logFreeText: [null],
         answer: [null],
         selectProject: [this.selectParam],
-        renderFormat:[this.renderFormat],
+        renderFormat: [this.renderFormat],
         filterText: [null],
         reviewee: [null],
       }),
@@ -295,28 +295,25 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               '.logCategories' + this.selectedEntityID,
             ).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
             // to read the filterList from localStorage
-            this.toReadStorageSetting('logFilter')
-            
+            this.toReadStorageSetting('logFilter');
           }, 5);
         }
       },
     );
   }
 
-
-  toReadStorageSetting(set){
-    
+  toReadStorageSetting(set) {
     if (localStorage.getItem('annotate-setting')) {
       const settings = JSON.parse(localStorage.getItem('annotate-setting'));
       for (let i = 0; i < settings.length; i++) {
         if (this.projectId == settings[i].pId) {
-          if(set==='logFilter' && settings[i].filter!==''){
+          if (set === 'logFilter' && settings[i].filter !== '') {
             this.filterList = settings[i].filter;
             this.toFilterLog(this.filterList);
             break;
           }
-          if(set==='display' && settings[i].display!==''){
-            this.renderFormat=settings[i].display;
+          if (set === 'display' && settings[i].display !== '') {
+            this.renderFormat = settings[i].display;
             this.questionForm.get('questionGroup.renderFormat').setValue(settings[i].display);
             break;
           }
@@ -324,7 +321,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
   }
-
 
   getOneReview(from?) {
     this.loading = true;
@@ -352,7 +348,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sortLabelForColor(this.categories);
             this.categoryBackFunc();
             this.getProgress();
-            this.toReadStorageSetting('logFilter')
+            this.toReadStorageSetting('logFilter');
           }
         },
         (error) => {
@@ -992,8 +988,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.maxLabel = null;
     this.selectParam = e.target.value;
     this.toStorageFilter();
-    if(this.projectType!=='image' && this.projectType!=='log' && this.projectType!=='ner' && this.renderFormat==='html'){
-      this.saveAnnotateSetting('display',this.renderFormat);
+    if (
+      this.projectType !== 'image' &&
+      this.projectType !== 'log' &&
+      this.projectType !== 'ner' &&
+      this.renderFormat === 'html'
+    ) {
+      this.saveAnnotateSetting('display', this.renderFormat);
     }
     for (let i = 0; i < this.projects.length; i++) {
       if (this.projects[i].projectName == e.target.value) {
@@ -1007,13 +1008,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.idName = '';
     this.clearUserInput();
     this.filterList = [];
-    this.renderFormat='md';
+    this.renderFormat = 'md';
     this.questionForm.get('questionGroup.renderFormat').setValue('md');
     this.selectedEntityID = 0;
     this.reviewOrder = 'random';
     this.questionForm.get('questionGroup.reviewee').reset();
-    if(this.projectType!=='image'&&this.projectType!=='ner'&&this.projectType!=='log'){
-      this.toReadStorageSetting('display')
+    if (this.projectType !== 'image' && this.projectType !== 'ner' && this.projectType !== 'log') {
+      this.toReadStorageSetting('display');
     }
   }
 
@@ -1060,7 +1061,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.progressInfo = response;
         this.percentage =
-          Math.round((this.progressInfo.completeCase / (this.startFrom==='review'?this.progressInfo.totalCase:this.progressInfo.assignedCase)) * 10000) / 100;
+          Math.round(
+            (this.progressInfo.completeCase /
+              (this.startFrom === 'review'
+                ? this.progressInfo.totalCase
+                : this.progressInfo.assignedCase == 0
+                ? 1
+                : this.progressInfo.assignedCase)) *
+              10000,
+          ) / 100;
       },
       (error) => {
         console.log(error);
@@ -2039,6 +2048,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.sr.originalData = responseSr.originalData;
           this.sr.flag = responseSr.flag;
           this.sr.userInputs = responseSr.userInputs;
+          this.sr.ticketQuestions = responseSr.ticketQuestions;
           this.currentLogFile =
             this.projectInfo.isShowFilename || this.startFrom === 'review'
               ? responseSr.fileInfo.fileName
@@ -2065,6 +2075,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   resetNerSrData(sr) {
     if (!sr.MSG) {
+      if (sr[0].ticketQuestions) {
+        let vv = [];
+        _.forIn(sr[0].ticketQuestions, function (value, key) {
+          value = JSON.stringify(value);
+          vv.push({ key, value });
+        });
+        sr[0].ticketQuestions = vv;
+      }
       if (
         sr[0].userInputs &&
         sr[0].userInputs.length > 0 &&
@@ -2101,8 +2119,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       return sr;
     }
   }
-
-
 
   resetTabularSrData(sr) {
     const vv = [];
@@ -2624,7 +2640,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toStorageFilter() {
     if (this.filterList.length > 0) {
-      this.saveAnnotateSetting('filter',this.filterList)
+      this.saveAnnotateSetting('filter', this.filterList);
     } else {
       if (localStorage.getItem('annotate-setting')) {
         const logFilter = JSON.parse(localStorage.getItem('annotate-setting'));
@@ -2779,11 +2795,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   changeRenderFormat(e) {
     this.renderFormat = e.target.value;
-    this.saveAnnotateSetting('display',this.renderFormat)
-    
+    this.saveAnnotateSetting('display', this.renderFormat);
   }
 
-  saveAnnotateSetting(set,value){
+  saveAnnotateSetting(set, value) {
     if (localStorage.getItem('annotate-setting')) {
       const settings = JSON.parse(localStorage.getItem('annotate-setting'));
       const pIds = [];
@@ -2796,8 +2811,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         settings.push({
           pId: this.projectId,
-          filter: set==='display'?'':value,
-          display: set==='display'?value:''
+          filter: set === 'display' ? '' : value,
+          display: set === 'display' ? value : '',
         });
         localStorage.setItem('annotate-setting', JSON.stringify(settings));
       }
@@ -2805,7 +2820,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       const obj = {
         pId: this.projectId,
         filter: set === 'display' ? '' : value,
-        display: set === 'display' ? value : ''
+        display: set === 'display' ? value : '',
       };
       localStorage.setItem('annotate-setting', JSON.stringify([obj]));
     }
@@ -2826,8 +2841,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.toStorageFilter();
-    if(this.projectType!=='image' && this.projectType!=='log' && this.projectType!=='ner' && this.renderFormat==='html'){
-      this.saveAnnotateSetting('display',this.renderFormat);
+    if (
+      this.projectType !== 'image' &&
+      this.projectType !== 'log' &&
+      this.projectType !== 'ner' &&
+      this.renderFormat === 'html'
+    ) {
+      this.saveAnnotateSetting('display', this.renderFormat);
     }
   }
 }

@@ -45,26 +45,37 @@ SPDX-License-Identifier: Apache-2.0 -->
                   (change)="onSelectingProjects($event)"
                   formControlName="selectProject"
                 >
-                  <option *ngFor="let selectProject of projects" [value]="selectProject.projectName">
+                  <option
+                    *ngFor="let selectProject of projects"
+                    [value]="selectProject.projectName"
+                  >
                     {{ selectProject.projectName }}
                   </option>
                 </select>
               </div>
             </div>
-            <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'" class="clr-form-group form-group clr-row" style="margin-top: -0.5rem;">
+            <div
+              *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'"
+              class="clr-form-group form-group clr-row"
+              style="margin-top: -0.5rem"
+            >
               <label class="label-leftBoard">Display </label>&nbsp;&nbsp;&nbsp;
               <div class="clr-select-wrapper" style="max-width: 70%">
-                <select style="width: 100%" formControlName="renderFormat" (change)="changeRenderFormat($event)">
+                <select
+                  style="width: 100%"
+                  formControlName="renderFormat"
+                  (change)="changeRenderFormat($event)"
+                >
                   <option value="md">Text</option>
                   <option value="html">Render Markdown</option>
                 </select>
               </div>
             </div>
-            
+
             <div class="line"></div>
           </div>
 
-          <h3 style="margin-top: -0.6rem">Project Info</h3>
+          <h3 style="margin-top: 0.2rem">Project Info</h3>
           <div class="clr-form-group left-project-info clr-row">
             <label for="name" class="label-leftBoard">Name: </label>&nbsp;&nbsp;
             <div style="word-break: break-all">{{ selectParam }}</div>
@@ -88,7 +99,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           </h3>
           <div class="clr-form-group left-project-info clr-row">
             <label for="name" class="label-leftBoard">This session:</label>&nbsp;&nbsp;
-            <div>{{ projectType === 'log' && startFrom === 'review' ? (progressInfo?.totalCase) : (progressInfo?.assignedCase)}}</div>
+            <div>
+              {{
+                projectType === 'log' && startFrom === 'review'
+                  ? progressInfo?.totalCase
+                  : progressInfo?.assignedCase
+              }}
+            </div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
             <label for="owner" class="label-leftBoard"
@@ -259,7 +276,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
 
           <h2 class="originalH2">
-            Original Ticket&nbsp;&nbsp;&nbsp;
+            {{ projectInfo?.ticketDescription }}&nbsp;&nbsp;&nbsp;
             <a
               *ngIf="!silenceStatus"
               role="tooltip"
@@ -381,7 +398,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *ngIf="active == i"
                   (click)="deleteFilter(i)"
                   style="margin-left: 0.5rem"
-                ></clr-icon>
+                >
+                </clr-icon>
               </span>
             </div>
           </div>
@@ -436,6 +454,16 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
             <!-- here is ner annotation content -->
             <div *ngIf="projectType === 'ner'" class="nerBox">
+              <div class="nerDisplayText">
+                <div *ngFor="let ticket of sr.ticketQuestions">
+                  <p class="question-paragraph" style="word-break: break-word">
+                    <span class="ticketColumn">{{ ticket.key }}</span>
+                    <span>:&nbsp;&nbsp;</span>
+                    <span>{{ ticket.value }}</span>
+                  </p>
+                  <br />
+                </div>
+              </div>
               <span
                 *ngFor="let ticket of sr.originalData.tokens"
                 (mousedown)="onMouseDown($event, ticket)"

@@ -41,12 +41,15 @@ async function createProject(req) {
     if (typeof req.body.assignee === 'string') {
         req.body.assignee = JSON.parse(req.body.assignee);
     }
+    if (typeof req.body.ticketQuestions === 'string') {
+        req.body.ticketQuestions = JSON.parse(req.body.ticketQuestions);
+    }
     let userCompleteCase = [], annotators = [];
     await req.body.assignee.forEach(item => {
         const inintUser = { user: item.email, assignedCase: item.assignedCase };
         annotators.push(item.email);
         userCompleteCase.push(inintUser);
-    });
+    })
     
     console.log(`[ FILE ] Service ticktes to db`);
     await srsImporter.execute(req, annotators);
@@ -108,6 +111,8 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         isMultipleLabel: req.body.isMultipleLabel === 'true'? true: false,
         regression: req.body.regression === 'true'? true: false,
         isShowFilename: req.body.isShowFilename === 'true'? true: false,
+        ticketDescription: req.body.ticketDescription,
+        ticketQuestion: req.body.ticketQuestions,
     };
     return projectDB.saveProject(project);
 }

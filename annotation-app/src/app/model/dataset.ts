@@ -29,6 +29,7 @@ export class DatasetUtil {
       description: '',
       annotationQuestion: 'What label does this ticket belong to ?',
       maxAnnotations: 1,
+      annotationDisplayName: 'Passage',
       labels: [],
       assigmentLogic: 'random',
       assignee: [],
@@ -46,6 +47,7 @@ export class DatasetUtil {
       multipleLabel: null,
       selectedText: null,
       isShowFilename: false,
+      selectedDisplayColumn: [],
     };
   }
 
@@ -85,11 +87,13 @@ export interface DatasetData {
   selectLabels: string;
   totalRow: number;
   annotationQuestion: string;
+  annotationDisplayName: string;
   min: any;
   max: any;
   multipleLabel: boolean;
   selectedText: string;
   isShowFilename: boolean;
+  selectedDisplayColumn: any[];
 }
 
 export interface DatasetFile {

@@ -50,6 +50,7 @@ label span {
 .form-group label {
   font-size: 0.54167rem;
 }
+
 .labelsList {
   border: 1px solid #999;
   border-radius: 4px;
@@ -174,4 +175,10 @@ table thead th:first-child {
 .assignTicketNumber {
   margin-left: 1rem;
   margin-right: 1rem;
+}
+
+::ng-deep input.disabled-checkbox+label::before {
+  background-color: #eee;
+  cursor: not-allowed;
+  opacity: 0.3;
 }

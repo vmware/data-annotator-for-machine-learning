@@ -18,6 +18,7 @@ export interface SR {
   images?: any;
   userInputsLength?: number;
   fileInfo?: any;
+  ticketQuestions?:any;
 }
 export interface UserInput {
   problemCategory: any;

@@ -227,8 +227,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           (click)="sureSet()"
                           [disabled]="
                             msg.type == 'ner'
-                              ? !this.dsDialogForm.get('selectedText').value ||
-                                isSelectWrongColumn == true
+                              ? !this.dsDialogForm.get('selectedText').value
                               : selectDescription.length == 0 ||
                                 !this.dsDialogForm.get('selectLabels').value ||
                                 isSelectWrongColumn == true
@@ -305,21 +304,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 the same!</span
                               >
                             </div>
-                            <!-- <div class="clr-subtext-wrapper" *ngIf="isChangeVariable">
-                              <clr-icon shape="exclamation-triangle"
-                                style="margin-top: 0.2rem; margin-left: 0.2rem;color:#0077b8;">
-                              </clr-icon>
-                              <span class="clr-subtext" style="color:#0077b8;">Please know that the variable type
-                                changing may affect the active learing!</span>
-                            </div> -->
 
                             <clr-datagrid
                               [(clrDgSelected)]="selectDescription"
                               (clrDgSelectedChange)="selectionChanged()"
                             >
                               <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
-                              <!-- <clr-dg-column class="ellipsis-datagrid" *ngIf="projectType=='tabular'">Variable Type
-                              </clr-dg-column> -->
+
                               <clr-dg-row
                                 *clrDgItems="let column of columnInfo; let i = index"
                                 [clrDgItem]="column"
@@ -329,15 +320,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   style="color: #000; word-break: break-all"
                                   >{{ column.name }}</clr-dg-cell
                                 >
-                                <!-- <clr-dg-cell *ngIf="projectType=='tabular'">
-                                  <div class="clr-select-wrapper">
-                                    <select (change)="updateColumnFormat(column, $event)">
-                                      <option [selected]="column.type == 'Numeric'" value="Numeric">Numeric</option>
-                                      <option [selected]="column.type == 'Categorical'" value="Categorical">Categorical
-                                      </option>
-                                    </select>
-                                  </div>
-                                </clr-dg-cell> -->
                               </clr-dg-row>
                             </clr-datagrid>
                           </div>
@@ -347,7 +329,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <div class="clr-col-5" style="margin-top: 0.5rem">
                             <div class="sureSetString">
                               First:Please select a single text column which you intend to present
-                              to annotators
+                              to annotators to annotate (required)
                             </div>
 
                             <div
@@ -375,23 +357,19 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </div>
                           <div class="clr-col-6" style="margin-top: 0.5rem">
                             <div class="sureSetString">
-                              Second: Select the columns to present the existing labels to
-                              annotators (optional)
+                              Second: Select the columns to present to annotators about the existing
+                              labels or helpful text (optional)
                             </div>
-                            <div class="clr-subtext-wrapper" *ngIf="isSelectWrongColumn">
-                              <clr-icon
-                                shape="exclamation-circle"
-                                style="margin-top: 0.2rem; margin-left: 0.2rem; color: red"
-                              ></clr-icon>
-                              <span class="clr-subtext" style="color: red"
-                                >The text column and the label column should not be the same!</span
-                              >
-                            </div>
-                            <clr-datagrid
+                            <!-- <clr-datagrid
                               [(clrDgSelected)]="selectDescription"
                               (clrDgSelectedChange)="selectionChanged()"
-                            >
+                            > -->
+                            <clr-datagrid>
                               <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
+                              <clr-dg-column class="ellipsis-datagrid"
+                                >Existing Labels</clr-dg-column
+                              >
+                              <clr-dg-column class="ellipsis-datagrid">Helpful Text</clr-dg-column>
                               <clr-dg-row
                                 *clrDgItems="let column of columnInfo; let i = index"
                                 [clrDgItem]="column"
@@ -401,6 +379,34 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   style="color: #000; word-break: break-all"
                                   >{{ column.name }}</clr-dg-cell
                                 >
+                                <clr-dg-cell class="ellipsis-datagrid labelOriginal label{{ i }}">
+                                  <input
+                                    type="checkbox"
+                                    clrCheckbox
+                                    name="options"
+                                    [ngClass]="{
+                                      'disabled-checkbox': column.labelSelectedDisable
+                                    }"
+                                    [disabled]="column.labelSelectedDisable"
+                                    [(ngModel)]="column.labelSelected"
+                                    (ngModelChange)="changeLabelSelect($event, column.name)"
+                                    [ngModelOptions]="{ standalone: true }"
+                                  />
+                                </clr-dg-cell>
+                                <clr-dg-cell class="ellipsis-datagrid labelOriginal label{{ i }}">
+                                  <input
+                                    type="checkbox"
+                                    clrCheckbox
+                                    name="options"
+                                    [ngClass]="{
+                                      'disabled-checkbox': column.textSelectedDisable
+                                    }"
+                                    [disabled]="column.textSelectedDisable"
+                                    [(ngModel)]="column.textSelected"
+                                    (ngModelChange)="changeTextSelect($event, column.name)"
+                                    [ngModelOptions]="{ standalone: true }"
+                                  />
+                                </clr-dg-cell>
                               </clr-dg-row>
                             </clr-datagrid>
                           </div>
@@ -876,6 +882,58 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *clrIfOpen
                 >
                   <span>The Min should less than the Max!</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+          </div>
+          <div class="form-group clr-row">
+            <div class="clr-col-12 clr-col-md-1"></div>
+            <label for="annotationDisplayName" class="label-tooltip clr-col-12 clr-col-md-2"
+              >Annotation Display Name
+              <clr-tooltip>
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="info-circle"
+                  size="20"
+                  aria-label="Uniq tooltip 5"
+                ></clr-icon>
+                <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+                  &nbsp;<span class="tooltip-content"
+                    >This information is to inform annotators what data they are labeling.
+                  </span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </label>
+            <div class="clr-textarea-wrapper clr-col-12 clr-col-md-8">
+              <textarea
+                id="annotationDisplayName"
+                formControlName="annotationDisplayName"
+                class="clr-textarea"
+                (keydown)="onKeydown($event)"
+              ></textarea>
+            </div>
+            <div>
+              <clr-tooltip
+                *ngIf="
+                  dsDialogForm.get('annotationDisplayName').errors &&
+                  dsDialogForm.get('annotationDisplayName').touched
+                "
+              >
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>{{ dsDialogForm.get('annotationDisplayName').errors.msg.value }}</span>
                 </clr-tooltip-content>
               </clr-tooltip>
             </div>

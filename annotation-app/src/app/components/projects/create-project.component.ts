@@ -117,6 +117,8 @@ export class CreateNewComponent implements OnInit {
   isMultipleLabel: boolean;
   fileLocation: string;
   assignTickets: object;
+  selectedExistingLabelColumn: any = [];
+  selectedDisplayColumn: any = [];
 
   constructor(
     private formBuilder: FormBuilder,
@@ -129,7 +131,7 @@ export class CreateNewComponent implements OnInit {
     private renderer2: Renderer2,
     private env: EnvironmentsService,
     private toolService: ToolService,
-    private commonService: CommonService
+    private commonService: CommonService,
   ) {
     this.user = this.userAuthService.loggedUser().email;
     this.page = 1;
@@ -193,6 +195,7 @@ export class CreateNewComponent implements OnInit {
       selectDescription: [this.dataset.selectDescription, ''],
       selectLabels: [this.dataset.selectLabels, ''],
       totalRow: [this.dataset.totalRow, DatasetValidator.validRow()],
+      annotationDisplayName: [this.dataset.annotationDisplayName, DatasetValidator.required()],
       annotationQuestion: [
         this.msg.type == 'ner'
           ? 'Label all entity types in the given text corpus.'
@@ -206,6 +209,7 @@ export class CreateNewComponent implements OnInit {
       selectedEncoder: ['', DatasetValidator.required()],
       multipleLabel: [this.dataset.multipleLabel, null],
       selectedText: [this.dataset.selectedText, ''],
+      selectedDisplayColumn: [this.dataset.selectedDisplayColumn, ''],
       isShowFilename: [this.dataset.isShowFilename, ''],
     });
   }
@@ -313,8 +317,14 @@ export class CreateNewComponent implements OnInit {
         ? JSON.stringify(this.dsDialogForm.value.selectDescription)
         : this.dsDialogForm.value.selectLabels,
     );
+
+    formData.append(
+      'ticketQuestions',
+      JSON.stringify(this.dsDialogForm.value.selectedDisplayColumn),
+    );
     formData.append('header', JSON.stringify(this.previewHeadDatas));
     formData.append('isHasHeader', this.isHasHeader);
+    formData.append('ticketDescription', this.dsDialogForm.value.annotationDisplayName);
     formData.append('annotationQuestion', this.dsDialogForm.value.annotationQuestion);
     formData.append('totalRows', this.dsDialogForm.value.totalRow);
     formData.append('fileName', this.fileName);
@@ -435,13 +445,13 @@ export class CreateNewComponent implements OnInit {
       });
       this.dsDialogForm.get('assignee').setValue(this.assigneeList);
       if (this.assigneeList.length > 0) {
-        this.assigneeList.forEach(item=>{
-          item.isModify=false;
-        })
+        this.assigneeList.forEach((item) => {
+          item.isModify = false;
+        });
         this.commonService.evenlyDistributeTicket(
           this.assigneeList,
           this.dsDialogForm.get('totalRow').value,
-          this.dsDialogForm.get('maxAnnotations').value
+          this.dsDialogForm.get('maxAnnotations').value,
         );
       }
       this.assignee.nativeElement.value = null;
@@ -451,19 +461,17 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-
   deleteAssignee(index) {
-    
     this.assigneeList.splice(index, 1);
     this.dsDialogForm.get('assignee').setValue(this.assigneeList);
     if (this.assigneeList.length > 0) {
-      this.assigneeList.forEach(item=>{
-        item.isModify=false;
-      })
+      this.assigneeList.forEach((item) => {
+        item.isModify = false;
+      });
       this.commonService.evenlyDistributeTicket(
         this.assigneeList,
-        this.dsDialogForm.get('totalRow').value ,
-        this.dsDialogForm.get('maxAnnotations').value
+        this.dsDialogForm.get('totalRow').value,
+        this.dsDialogForm.get('maxAnnotations').value,
       );
     }
     if (this.assigneeList.length != 0) {
@@ -471,10 +479,14 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-  editAssignedTickets(data){
-    this.commonService.editAssignedNumber(data,this.dsDialogForm.get('totalRow').value,this.dsDialogForm.get('maxAnnotations').value,this.assigneeList);
+  editAssignedTickets(data) {
+    this.commonService.editAssignedNumber(
+      data,
+      this.dsDialogForm.get('totalRow').value,
+      this.dsDialogForm.get('maxAnnotations').value,
+      this.assigneeList,
+    );
   }
-
 
   onAddingDataset(event) {
     this.showAddNewDatasetDialog = true;
@@ -520,6 +532,8 @@ export class CreateNewComponent implements OnInit {
     this.isShowNumeric = false;
     this.dsDialogForm.get('selectLabels').reset();
     this.selectDescription = [];
+    this.selectedExistingLabelColumn = [];
+    this.selectedDisplayColumn = [];
     this.setDataComplete = false;
     this.isSelectWrongColumn = false;
     this.selectColumns = [];
@@ -563,18 +577,22 @@ export class CreateNewComponent implements OnInit {
             type: 'Numeric',
             uniqueLength: 51,
             isOriginal: true,
+            labelSelected: false,
+            labelSelectedDisable: false,
+            textSelected: false,
+            textSelectedDisable: false,
           });
         }
       }
     }
     if (this.assigneeList.length > 0) {
-      this.assigneeList.forEach(item=>{
-        item.isModify=false;
-      })
+      this.assigneeList.forEach((item) => {
+        item.isModify = false;
+      });
       this.commonService.evenlyDistributeTicket(
         this.assigneeList,
         this.dsDialogForm.get('totalRow').value,
-        this.dsDialogForm.get('maxAnnotations').value
+        this.dsDialogForm.get('maxAnnotations').value,
       );
     }
     this.getMyDatasets();
@@ -601,6 +619,8 @@ export class CreateNewComponent implements OnInit {
     this.isShowNumeric = false;
     this.dsDialogForm.get('selectLabels').reset();
     this.selectDescription = [];
+    this.selectedExistingLabelColumn = [];
+    this.selectedDisplayColumn = [];
     this.setDataComplete = false;
     this.isSelectWrongColumn = false;
     this.selectColumns = [];
@@ -667,6 +687,10 @@ export class CreateNewComponent implements OnInit {
                 type: 'Numeric',
                 uniqueLength: 51,
                 isOriginal: true,
+                labelSelected: false,
+                labelSelectedDisable: false,
+                textSelected: false,
+                textSelectedDisable: false,
               });
             }
           }
@@ -674,13 +698,13 @@ export class CreateNewComponent implements OnInit {
           this.loadingPreviewData = false;
         }
         if (this.assigneeList.length > 0) {
-          this.assigneeList.forEach(item=>{
-            item.isModify=false;
-          })
+          this.assigneeList.forEach((item) => {
+            item.isModify = false;
+          });
           this.commonService.evenlyDistributeTicket(
             this.assigneeList,
             this.dsDialogForm.get('totalRow').value,
-            this.dsDialogForm.get('maxAnnotations').value
+            this.dsDialogForm.get('maxAnnotations').value,
           );
         }
         this.loadingSetData = false;
@@ -720,7 +744,46 @@ export class CreateNewComponent implements OnInit {
           : (this.isSelectWrongColumn = false);
       });
     }
-    this.turnDuplicatedRed(e.target.value);
+    this.duplicatedColumnValidation(e.target.value);
+  }
+
+  changeLabelSelect(e, data) {
+    if (e && this.selectedExistingLabelColumn.indexOf(data) == -1) {
+      this.selectedExistingLabelColumn.push(data);
+    }
+    if (
+      !e &&
+      this.selectedExistingLabelColumn.length > 0 &&
+      this.selectedExistingLabelColumn.indexOf(data) > -1
+    ) {
+      for (let i = 0; i < this.categoryList.length; i++) {
+        if (data == this.categoryList[i].name) {
+          this.categoryList.splice(i, 1);
+          break;
+        }
+      }
+      this.selectedExistingLabelColumn.splice(this.selectedExistingLabelColumn.indexOf(data), 1);
+    }
+    this.dsDialogForm.get('selectDescription').setValue(this.selectedExistingLabelColumn);
+    this.selectDescription = [];
+    this.selectedExistingLabelColumn.forEach((element) => {
+      this.selectDescription.push({ name: element });
+    });
+    this.dsDialogForm.get('labels').setValue([...this.categoryList, ...this.selectDescription]);
+  }
+
+  changeTextSelect(e, data) {
+    if (e) {
+      this.selectedDisplayColumn.push(data);
+    }
+    if (
+      !e &&
+      this.selectedDisplayColumn.length > 0 &&
+      this.selectedDisplayColumn.indexOf(data) > -1
+    ) {
+      this.selectedDisplayColumn.splice(this.selectedDisplayColumn.indexOf(data), 1);
+    }
+    this.dsDialogForm.get('selectedDisplayColumn').setValue(this.selectedDisplayColumn);
   }
 
   selectionChanged() {
@@ -731,57 +794,70 @@ export class CreateNewComponent implements OnInit {
       this.selectColumns.push(e.name);
     });
     this.dsDialogForm.get('selectDescription').setValue(this.selectColumns);
-    this.turnDuplicatedRed(
-      this.projectType == 'ner'
-        ? this.dsDialogForm.get('selectedText').value
-        : this.dsDialogForm.get('selectLabels').value,
-    );
-
+    this.duplicatedColumnValidation(this.dsDialogForm.get('selectLabels').value);
     if (this.projectType !== 'ner') {
       this.dsDialogForm.get('totalRow').setValue(0);
       this.totalCase = 0;
       this.nonEnglish = 0;
       this.previewTotalData = [];
       if (this.assigneeList.length > 0) {
-        this.assigneeList.forEach(item=>{
-          item.isModify=false;
-        })
+        this.assigneeList.forEach((item) => {
+          item.isModify = false;
+        });
         this.commonService.evenlyDistributeTicket(
           this.assigneeList,
           this.dsDialogForm.get('totalRow').value,
-          this.dsDialogForm.get('maxAnnotations').value
+          this.dsDialogForm.get('maxAnnotations').value,
         );
       }
     }
-    if (this.projectType === 'ner') {
-      this.selectDescription.forEach((element) => {
-        for (let i = 0; i < this.categoryList.length; i++) {
-          if (element.name == this.categoryList[i].name) {
-            this.categoryList.splice(i, 1);
-            break;
-          }
-        }
-      });
-      this.dsDialogForm.get('labels').setValue([...this.categoryList, ...this.selectDescription]);
-    }
   }
 
-  turnDuplicatedRed(selectLabel) {
-    const dom = this.el.nativeElement.querySelectorAll('.labelOriginal');
-    for (let i = 0; i < dom.length; i++) {
-      dom[i].style.color = 'rgb(0, 0, 0)';
-    }
-    if (this.selectDescription.length > 0) {
-      for (let i = 0; i < this.selectDescription.length; i++) {
-        if (this.selectDescription[i].name == selectLabel) {
-          const index = _.indexOf(this.previewHeadDatas, selectLabel);
-          this.isSelectWrongColumn = true;
-          this.renderer2.setStyle(
-            this.el.nativeElement.querySelector('.label' + index),
-            'color',
-            'red',
-          );
+  duplicatedColumnValidation(selectLabel) {
+    if (this.projectType === 'ner') {
+      let flag = [];
+      let duplicateName = '';
+      flag = _.filter(this.columnInfo, { labelSelectedDisable: true });
+      flag.forEach((item) => {
+        item.labelSelectedDisable = false;
+      });
+      for (let i = 0; i < this.columnInfo.length; i++) {
+        if (this.columnInfo[i].name === selectLabel) {
+          duplicateName = selectLabel;
+          this.columnInfo[i].labelSelected = false;
+          this.columnInfo[i].labelSelectedDisable = true;
           break;
+        }
+      }
+      // if labelSelected is false then should linkage clear the this.selectDescription
+      if (this.selectedExistingLabelColumn.indexOf(duplicateName) > -1) {
+        this.selectedExistingLabelColumn.splice(
+          this.selectedExistingLabelColumn.indexOf(duplicateName),
+          1,
+        );
+      }
+      for (let j = 0; j < this.selectDescription.length; j++) {
+        if (this.selectDescription[j].name === duplicateName) {
+          this.selectDescription.splice(j, 1);
+        }
+      }
+    } else {
+      const dom = this.el.nativeElement.querySelectorAll('.labelOriginal');
+      for (let i = 0; i < dom.length; i++) {
+        dom[i].style.color = 'rgb(0, 0, 0)';
+      }
+      if (this.selectDescription.length > 0) {
+        for (let i = 0; i < this.selectDescription.length; i++) {
+          if (this.selectDescription[i].name == selectLabel) {
+            const index = _.indexOf(this.previewHeadDatas, selectLabel);
+            this.isSelectWrongColumn = true;
+            this.renderer2.setStyle(
+              this.el.nativeElement.querySelector('.label' + index),
+              'color',
+              'red',
+            );
+            break;
+          }
         }
       }
     }
@@ -796,13 +872,13 @@ export class CreateNewComponent implements OnInit {
     this.labelType = '';
     this.dsDialogForm.get('totalRow').setValue(0);
     if (this.assigneeList.length > 0) {
-      this.assigneeList.forEach(item=>{
-        item.isModify=false;
-      })
+      this.assigneeList.forEach((item) => {
+        item.isModify = false;
+      });
       this.commonService.evenlyDistributeTicket(
         this.assigneeList,
         this.dsDialogForm.get('totalRow').value,
-        this.dsDialogForm.get('maxAnnotations').value
+        this.dsDialogForm.get('maxAnnotations').value,
       );
     }
     if (this.selectDescription.length > 0) {
@@ -812,7 +888,7 @@ export class CreateNewComponent implements OnInit {
           : (this.isSelectWrongColumn = false);
       });
     }
-    this.turnDuplicatedRed(e.target.value);
+    this.duplicatedColumnValidation(e.target.value);
   }
 
   toCaculateInvalid(newArray) {
@@ -949,13 +1025,13 @@ export class CreateNewComponent implements OnInit {
         this.changeSetData = false;
         this.changePreview = false;
         if (this.assigneeList.length > 0) {
-          this.assigneeList.forEach(item=>{
-            item.isModify=false;
-          })
+          this.assigneeList.forEach((item) => {
+            item.isModify = false;
+          });
           this.commonService.evenlyDistributeTicket(
             this.assigneeList,
             this.dsDialogForm.get('totalRow').value,
-            this.dsDialogForm.get('maxAnnotations').value
+            this.dsDialogForm.get('maxAnnotations').value,
           );
         }
       },
@@ -970,13 +1046,13 @@ export class CreateNewComponent implements OnInit {
       this.previewTotalData = [];
       this.dsDialogForm.get('totalRow').setValue(0);
       if (this.assigneeList.length > 0) {
-        this.assigneeList.forEach(item=>{
-          item.isModify=false;
-        })
+        this.assigneeList.forEach((item) => {
+          item.isModify = false;
+        });
         this.commonService.evenlyDistributeTicket(
           this.assigneeList,
           this.dsDialogForm.get('totalRow').value,
-          this.dsDialogForm.get('maxAnnotations').value
+          this.dsDialogForm.get('maxAnnotations').value,
         );
       }
       if (this.projectType !== 'ner') {
@@ -1054,13 +1130,13 @@ export class CreateNewComponent implements OnInit {
             this.changeSetData = false;
             this.changePreview = false;
             if (this.assigneeList.length > 0) {
-              this.assigneeList.forEach(item=>{
-                item.isModify=false;
-              })
+              this.assigneeList.forEach((item) => {
+                item.isModify = false;
+              });
               this.commonService.evenlyDistributeTicket(
                 this.assigneeList,
-                this.dsDialogForm.get('totalRow').value ,
-                  this.dsDialogForm.get('maxAnnotations').value
+                this.dsDialogForm.get('totalRow').value,
+                this.dsDialogForm.get('maxAnnotations').value,
               );
             }
           },
@@ -1287,13 +1363,13 @@ export class CreateNewComponent implements OnInit {
 
   changeMaxAnnotation() {
     if (this.assigneeList.length > 0) {
-      this.assigneeList.forEach(item=>{
-        item.isModify=false;
-      })
+      this.assigneeList.forEach((item) => {
+        item.isModify = false;
+      });
       this.commonService.evenlyDistributeTicket(
         this.assigneeList,
         this.dsDialogForm.get('totalRow').value,
-        this.dsDialogForm.get('maxAnnotations').value
+        this.dsDialogForm.get('maxAnnotations').value,
       );
     }
   }
