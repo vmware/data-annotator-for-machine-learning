@@ -5,20 +5,19 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { EnvironmentsService } from 'app/services/environments.service';
 
 @Injectable()
 export class CommonService {
-  constructor(public env: EnvironmentsService) {}
+  constructor() {}
 
   editAssignedNumber(data, totalRow, maxAnnotations, assigneeList) {
     if (data.assignedCase <= 0) {
       alert('Assigned tickets number should be more than 1.');
-      data.assignedCase = data.orginvalue;
+      data.assignedCase = data.originValue;
       return;
     }
     let orginisModify = data.isModify;
-    if (data.assignedCase !== data.orginvalue) {
+    if (data.assignedCase !== data.originValue) {
       data.isModify = true;
     }
     let totalnum = 0;
@@ -41,13 +40,15 @@ export class CommonService {
         alert(
           'Fail to modify for the assigned tickets number is larger than the max value can be set.',
         );
-        data.assignedCase = data.orginvalue;
+        data.assignedCase = data.originValue;
         data.isModify = orginisModify;
         return;
       }
     }
 
-    this.evenlyDistributeTicket(array, row, max);
+    if (_.filter(assigneeList, { isModify: true }).length > 0) {
+      this.evenlyDistributeTicket(array, row, max);
+    }
   }
 
   evenlyDistributeTicket(assigneeList, totalRow, maxAnnotations) {
@@ -60,7 +61,7 @@ export class CommonService {
       if (maxAnnotations >= assigneeList.length) {
         assigneeList.forEach((value) => {
           value.assignedCase = totalRow;
-          value.orginvalue = totalRow;
+          value.originValue = totalRow;
           value.isModify = false;
         });
       } else {
@@ -88,16 +89,16 @@ export class CommonService {
           let d = totalNum % personNum;
           for (let i = 0; i < assigneeList.length; i++) {
             if (array.indexOf(i) > -1) {
-              assigneeList[i].orginvalue = assigneeList[i].assignedCase;
+              assigneeList[i].originValue = assigneeList[i].assignedCase;
               continue;
             }
             if (d > 0) {
               assigneeList[i].assignedCase = c + 1;
-              assigneeList[i].orginvalue = c + 1;
+              assigneeList[i].originValue = c + 1;
               d--;
             } else {
               assigneeList[i].assignedCase = c;
-              assigneeList[i].orginvalue = c;
+              assigneeList[i].originValue = c;
               assigneeList[i].isModify = false;
             }
           }
@@ -109,12 +110,12 @@ export class CommonService {
           let b = totalNum % personNum;
           assigneeList.forEach((value) => {
             value.assignedCase = a;
-            value.orginvalue = a;
+            value.originValue = a;
             value.isModify = false;
           });
           for (let i = 0; i <= b - 1; i++) {
             assigneeList[i].assignedCase = a + 1;
-            assigneeList[i].orginvalue = a + 1;
+            assigneeList[i].originValue = a + 1;
           }
         }
       }

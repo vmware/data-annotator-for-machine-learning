@@ -58,21 +58,11 @@ export class GameFormComponent implements OnInit {
     if (!this.isShowReviewTab) {
       this.getProjects();
     }
-    if (
-      (this.user.role === 'Project Owner' || this.user.role === 'Admin') &&
-      this.isShowReviewTab == true
-    ) {
-      // this.getReviewProjects();
-    }
   }
 
   clickAnnotate() {
     this.getProjects();
   }
-
-  // clickReview() {
-  //   this.getReviewProjects();
-  // }
 
   valueChange(value: number) {
     this.pageSize = value;
@@ -129,13 +119,20 @@ export class GameFormComponent implements OnInit {
 
   clickReview(data) {
     let flag = data.userCompleteCase.sort(this.toolService.sortBy('completeCase', 'descending'));
+    let reviewee = '';
+    for (let i = 0; i < flag.length; i++) {
+      if (flag[i].completeCase > flag[i].reviewed) {
+        reviewee = flag[i].user;
+        break;
+      }
+    }
     this.router.navigate(['annotate'], {
       queryParams: {
         name: data.projectName,
         projectType: data.projectType,
         id: data.id,
         from: 'review',
-        reviewee: flag[0].user,
+        reviewee: reviewee === '' ? flag[0].user : reviewee,
       },
     });
   }
