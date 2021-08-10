@@ -17,6 +17,7 @@ export class CommonService {
       data.assignedCase = data.orginvalue;
       return;
     }
+    let orginisModify = data.isModify;
     if (data.assignedCase !== data.orginvalue) {
       data.isModify = true;
     }
@@ -38,9 +39,10 @@ export class CommonService {
     if (max < array.length) {
       if (totalnum + (array.length - size) > max * row) {
         alert(
-          'Fail to modify for the total assigned tickets is more than the total valid tickets.',
+          'Fail to modify for the assigned tickets number is larger than the max value can be set.',
         );
         data.assignedCase = data.orginvalue;
+        data.isModify = orginisModify;
         return;
       }
     }
