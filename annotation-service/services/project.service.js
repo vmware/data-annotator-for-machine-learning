@@ -461,9 +461,9 @@ async function updateAssinedCase(QueryCondition, totalCase, append){
             await pro.userCompleteCase.forEach(async uc => {
                 if (pro.annotator.indexOf(uc.user) != -1) {
                     if (avgCase > uc.assignedCase) {
+                        let remained = avgCase - uc.assignedCase;
                         uc.assignedCase = 0;
                         //seperate remained case to other annotators
-                        let remained = avgCase - uc.assignedCase;
                         while(true){
                             if (remained == 0) {
                                 break;
