@@ -640,14 +640,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     if (type === 'single') {
       param.tid = [data._id];
     } else {
-      // let aa = [];
-
-      // this.selectedLogsToModify.forEach(element => {
-      //     if (!element.reviewInfo.review && element.userInputsLength > 0) {
-      //         aa.push(element._id)
-      //     }
-
-      // });
       param.tid = this.selectedLogsToModify;
     }
     if (param.tid.length > 0) {

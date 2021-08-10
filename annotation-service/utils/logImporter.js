@@ -15,7 +15,7 @@ const compressing = require('compressing');
 const readline = require('readline');
 const unzip = require('unzip-stream');
 const fileSystemUtils = require('./fileSystem.utils');
-
+const projectService = require('../services/project.service');
 
 async function execute(req, sendEmail, annotators, append) {
       
@@ -115,8 +115,11 @@ async function execute(req, sendEmail, annotators, append) {
     console.log(`[ LOG ] Utils update totalCase:`, totalCase);
   
     if (append) {
+      
       update.$set = { appendSr: APPENDSR.DONE };
       update.$push = { selectedDataset: selectedDataset };
+
+      await projectService.updateAssinedCase(condition, totalCase, true);
     }
   
     await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
@@ -175,6 +178,8 @@ async function quickAppendLogs(req){
     const update = { $inc: { totalCase: totalCase }, $set:{ appendSr: APPENDSR.DONE } };
     console.log(`[ SRS ] Utils quick append update totalCase:`, totalCase);
     await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
+
+    await projectService.updateAssinedCase(condition, totalCase, true);
   }
 }
 

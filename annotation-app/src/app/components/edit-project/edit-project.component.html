@@ -135,7 +135,30 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div *ngIf="showAnnotatorList">
               <ul>
                 <li *ngFor="let item of assigneeList; let i = index">
-                  {{ item }}
+                  <span title="Annotator's email address">{{ item.email }}</span>
+                  <input
+                    type="number"
+                    id="basic"
+                    class="clr-input completeTicketNumber"
+                    title="The number of the annotations this annotator has been completed"
+                    style="width: 20% !important"
+                    autocomplete="off"
+                    disabled
+                    [ngModelOptions]="{ standalone: true }"
+                    [(ngModel)]="item.completeCase"
+                  />
+                  <input
+                    type="number"
+                    id="basic"
+                    class="clr-input assignTicketNumber"
+                    title="The number of the annotations assigned to this annotator to complete"
+                    style="width: 20% !important"
+                    autocomplete="off"
+                    [disabled]="item.default"
+                    [ngModelOptions]="{ standalone: true }"
+                    [(ngModel)]="item.assignedCase"
+                    (blur)="editAssignedNumber(item)"
+                  />
                   <clr-icon shape="times" size="12" (click)="deleteAssignee(i)"></clr-icon>
                 </li>
               </ul>

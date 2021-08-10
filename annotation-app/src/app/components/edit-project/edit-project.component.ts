@@ -10,7 +10,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
-
+import { CommonService } from 'app/services/common/common.service';
 @Component({
   selector: 'app-edit-project',
   templateUrl: './edit-project.component.html',
@@ -71,6 +71,7 @@ export class EditProjectComponent implements OnInit {
     private avaService: AvaService,
     private env: EnvironmentsService,
     private toolService: ToolService,
+    private commonService: CommonService,
   ) {
     this.inputPnameUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       if (value != '') {
@@ -91,7 +92,20 @@ export class EditProjectComponent implements OnInit {
     this.labelType = this.msg.labelType;
     this.inputProjectCreator = this.msg.creator;
     this.inputProjectAssignee = this.msg.annotator;
-    this.assigneeList = JSON.parse(JSON.stringify(this.msg.annotator));
+    let flag = [];
+    _.cloneDeep(this.msg.annotator).forEach((annotator) => {
+      for (let i = 0; i < this.msg.userCompleteCase.length; i++) {
+        if (annotator === this.msg.userCompleteCase[i].user) {
+          flag.push({
+            email: annotator,
+            assignedCase: this.msg.userCompleteCase[i].assignedCase,
+            completeCase: this.msg.userCompleteCase[i].completeCase,
+          });
+          break;
+        }
+      }
+    });
+    this.assigneeList = flag;
     this.ownerList = JSON.parse(JSON.stringify(this.msg.creator));
     this.assignmentLogicEdit = this.msg.assignmentLogic;
     this.isShowFilename = this.msg.isShowFilename ? 'yes' : 'no';
@@ -135,7 +149,8 @@ export class EditProjectComponent implements OnInit {
   }
 
   onAssigneeKeydown(e) {
-    if (this.assigneeList.indexOf(e.target.value) !== -1) {
+    let flag = _.filter(this.assigneeList, ['email', e.target.value]);
+    if (flag.length > 0) {
       this.inputAssigneeValidation = true;
     } else {
       this.inputAssigneeValidation = false;
@@ -155,6 +170,9 @@ export class EditProjectComponent implements OnInit {
     e.target.value = '';
     this.inputAssigneeValidation = false;
     this.emailReg = true;
+    this.assigneeList.forEach((element) => {
+      element.orginvalue = element.assignedCase;
+    });
   }
 
   reOwner(e) {
@@ -169,16 +187,36 @@ export class EditProjectComponent implements OnInit {
     this.emailReg = this.toolService.toRegEmail(emails);
     if (this.emailReg && this.inputAssigneeValidation == false) {
       emails.forEach((element) => {
-        if (this.assigneeList.indexOf(element.trim()) == -1) {
-          this.assigneeList.push(element.trim());
+        if (_.filter(this.assigneeList, ['email', element.trim()]).length === 0) {
+          this.assigneeList.push({ email: element.trim(), assignedCase: 0 });
         }
       });
+      if (this.assigneeList.length > 0) {
+        this.assigneeList.forEach((item) => {
+          item.isModify = false;
+        });
+        this.commonService.evenlyDistributeTicket(
+          this.assigneeList,
+          this.msg.totalCase,
+          this.msg.maxAnnotation,
+        );
+      }
       e.target.value = '';
     }
   }
 
   deleteAssignee(index) {
     this.assigneeList.splice(index, 1);
+    if (this.assigneeList.length > 0) {
+      this.assigneeList.forEach((item) => {
+        item.isModify = false;
+      });
+      this.commonService.evenlyDistributeTicket(
+        this.assigneeList,
+        this.msg.totalCase,
+        this.msg.maxAnnotation,
+      );
+    }
   }
 
   deleteOwner(index) {
@@ -296,7 +334,13 @@ export class EditProjectComponent implements OnInit {
               fileName: this.msg.dataSource,
             };
             const ownerDiff = _.difference(this.ownerList, this.msg.creator);
-            const annotatorDiff = _.difference(this.assigneeList, this.msg.annotator);
+            let aa = [];
+            this.assigneeList.forEach((element) => {
+              aa.push(element.email);
+            });
+            // const annotatorDiff = _.difference(this.assigneeList, this.msg.annotator);
+            const annotatorDiff = _.difference(aa, this.msg.annotator);
+
             if (annotatorDiff.length > 0) {
               param['annotator'] = annotatorDiff;
               this.sendEmailToAnnotator(param);
@@ -513,5 +557,14 @@ export class EditProjectComponent implements OnInit {
     } else {
       this.sizeError = true;
     }
+  }
+
+  editAssignedNumber(data) {
+    this.commonService.editAssignedNumber(
+      data,
+      this.msg.totalCase,
+      this.msg.maxAnnotation,
+      this.assigneeList,
+    );
   }
 }

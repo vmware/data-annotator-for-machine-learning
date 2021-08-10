@@ -96,22 +96,30 @@ async function updateProject(req) {
         await mongoDb.updateManyByConditions(mp.model, srsCondition, srsDoc);
     }
     
-    const annotators = req.body.assignee, projectInfo = mp.project;
-        
-    //for original user case
-    let originalUser = [], completeCase = [];
-    for (const uCase of projectInfo.userCompleteCase) {
-        originalUser.push(uCase.user);
-        if (annotators.indexOf(uCase.user)  != -1) {
-            completeCase.push(uCase);
-        }else if (uCase.completeCase) {
-            completeCase.push(uCase);
+    const projectInfo = mp.project;
+    let annotators = [], completeCase = [];    
+    
+    //update userCompleteCase
+    for (const user of req.body.assignee) {
+        annotators.push(user.email);
+        const ucase = await projectInfo.userCompleteCase.find(uc => uc.user == user.email);
+        if (ucase) {
+            ucase.assignedCase = user.assignedCase;
+            completeCase.push(ucase);
+        }else{
+            completeCase.push({ 
+                user: user.email,
+                completeCase: 0,
+                skip: 0,
+                assignedCase: user.assignedCase
+            });
         }
     }
-    //for newly add user case
-    for (const user of annotators) {
-        if (originalUser.indexOf(user) == -1) {
-            completeCase.push({ user: user,  completeCase: 0, skip: 0 });
+    //add have annotation record user
+    for (const uCase of projectInfo.userCompleteCase) {
+        if (annotators.indexOf(uCase.user) == -1 && uCase.completeCase) {
+            uCase.assignedCase = 0;
+            completeCase.push(uCase);
         }
     }
 
@@ -235,7 +243,7 @@ async function updateProject(req) {
     console.log(`[ PROJECT ] Service update project info`,completeCase);
     const condition = {projectName: req.body.previousPname};
     const options = { new: true };
-    return await mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
+    return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
 }
 
 async function updateProjectShare(req) {
@@ -249,7 +257,7 @@ async function updateProjectShare(req) {
     };
     const optional = { new: true };
     console.log(`[ PROJECT ] Service updateProjectShare.findUpdateProject`);
-    return await projectDB.findUpdateProject(condition, update, optional);
+    return projectDB.findUpdateProject(condition, update, optional);
 }
 
 async function projectLeaderBoard(req) {
@@ -347,7 +355,7 @@ async function removeSkippedCase(id, user, review) {
 
     const options = { new: true };
     
-    return await projectDB.findUpdateProject(conditions, update, options);
+    return projectDB.findUpdateProject(conditions, update, options);
 }
 
 async function getReviewList(req) {
@@ -358,7 +366,7 @@ async function getReviewList(req) {
     
     const conditions = { creator: { $regex: user }, projectType: PROJECTTYPE.LOG };
     const options = { sort: { updatedDate: -1 } };
-    return await mongoDb.findByConditions(ProjectModel, conditions, null, options);
+    return mongoDb.findByConditions(ProjectModel, conditions, null, options);
 }
 
 async function getLogProjectFileList(req) {
@@ -370,7 +378,7 @@ async function getLogProjectFileList(req) {
         { $match: { projectName: pro[0].projectName, userInputsLength:1 } },
         { $project: {_id: 0, fileName: "$fileInfo.fileName"}},
     ]
-    return await mongoDb.aggregateBySchema(LogModel, schema);
+    return mongoDb.aggregateBySchema(LogModel, schema);
 }
 
 async function fileterLogTicketsByFileName(req) {
@@ -383,7 +391,113 @@ async function fileterLogTicketsByFileName(req) {
     const schema = [
         { $match: { projectName: pro[0].projectName, "fileInfo.fileName": { $regex: req.query.fname } } },
     ]
-    return await mongoDb.aggregateBySchema(LogModel, schema);
+    return mongoDb.aggregateBySchema(LogModel, schema);
+}
+
+
+/**
+ * 
+ * update assignedcase, support append and delete tickets
+ * 
+ * assignedcase calculate according to this method
+ * annoatorsNumber: A
+ * totalCase: T
+ * maxAnnotation: M
+ * 
+ * assignedCase:
+ *      M >= A
+ *          assignedCase=T
+ *      M < A
+ *          assignedCase= M*T/A
+ * 
+ * 
+ * 
+ */
+async function updateAssinedCase(QueryCondition, totalCase, append){
+    
+    console.log(`[ PROJECT ] Service updateAssinedCase START`, QueryCondition, totalCase); 
+    
+    const pro = await mongoDb.findOneByConditions(ProjectModel, QueryCondition)
+    if (!pro) return;
+    
+    const annoatorsNumber = pro.annotator.length;
+    const maxAnnotation = pro.maxAnnotation;
+    
+    const avgCase = Math.floor(totalCase * maxAnnotation / annoatorsNumber);
+    const perCase = totalCase * maxAnnotation % annoatorsNumber;
+    
+    //pro.annotator save annotor list
+    //pro.userCompleteCase.user has the users that he has annotation info but removed from annotor
+    if (append) {//append tickets
+        if (maxAnnotation >= annoatorsNumber) {
+            await pro.userCompleteCase.forEach(uc => {
+                if (pro.annotator.indexOf(uc.user) != -1) {
+                    uc.assignedCase += totalCase;
+                }
+            });
+        }else{
+            await pro.userCompleteCase.forEach(uc => {
+                if (pro.annotator.indexOf(uc.user) != -1) {
+                    uc.assignedCase += avgCase;
+                }
+            });
+            let index = 0;
+            await pro.userCompleteCase.sort((a,b) => a.assignedCase - b.assignedCase).forEach(uc => {
+                if (index < perCase && pro.annotator.indexOf(uc.user) != -1){
+                    uc.assignedCase += 1;
+                    index++;
+                }
+            });
+        }
+
+    }else{//delete tickets
+        if (maxAnnotation >= annoatorsNumber) {
+            await pro.userCompleteCase.forEach(uc => {
+                if (pro.annotator.indexOf(uc.user) != -1) {
+                    uc.assignedCase -= totalCase;
+                }
+            });
+        }else{
+            await pro.userCompleteCase.forEach(async uc => {
+                if (pro.annotator.indexOf(uc.user) != -1) {
+                    if (avgCase > uc.assignedCase) {
+                        let remained = avgCase - uc.assignedCase;
+                        uc.assignedCase = 0;
+                        //seperate remained case to other annotators
+                        while(true){
+                            if (remained == 0) {
+                                break;
+                            }
+                            await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(u => {
+                                if (remained > 0 && pro.annotator.indexOf(u.user) != -1 && u.assignedCase > 0){
+                                    u.assignedCase -= 1;
+                                    remained--;
+                                }
+                            });
+                        }
+                    }else{
+                        uc.assignedCase -= avgCase;
+                    }
+                }
+            });
+            let index = 0;
+            while(true){
+                if (perCase == 0 || index >= perCase) {
+                    break;
+                }
+                await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(uc => {
+                    if (index < perCase && pro.annotator.indexOf(uc.user) != -1 && uc.assignedCase > 0){
+                        uc.assignedCase -= 1;
+                        index++;
+                    } 
+                });
+            }
+        }
+    }
+
+    const update = { $set: { userCompleteCase: pro.userCompleteCase } };
+    const options = { new: true };
+    return mongoDb.findOneAndUpdate(ProjectModel, QueryCondition, update, options);
 }
 
 module.exports = {
@@ -400,5 +514,6 @@ module.exports = {
     getReviewList,
     getLogProjectFileList,
     fileterLogTicketsByFileName,
+    updateAssinedCase,
 
 }

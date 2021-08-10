@@ -38,19 +38,18 @@ async function createProject(req) {
     await validator.checkProjectByconditions({projectName: req.body.pname}, false);
 
     console.log(`[ FILE ] Service createProject init parameters`);
-    let annotators = req.body.assignee;
-    if (typeof annotators === 'string') {
-        annotators = JSON.parse(annotators);
+    if (typeof req.body.assignee === 'string') {
+        req.body.assignee = JSON.parse(req.body.assignee);
     }
     if (typeof req.body.ticketQuestions === 'string') {
         req.body.ticketQuestions = JSON.parse(req.body.ticketQuestions);
     }
-    
-    let userCompleteCase = [];
-    annotators.forEach(item => {
-        const inintUser = { user: item };
+    let userCompleteCase = [], annotators = [];
+    await req.body.assignee.forEach(item => {
+        const inintUser = { user: item.email, assignedCase: item.assignedCase };
+        annotators.push(item.email);
         userCompleteCase.push(inintUser);
-    });
+    })
     
     console.log(`[ FILE ] Service ticktes to db`);
     await srsImporter.execute(req, annotators);
@@ -115,7 +114,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         ticketDescription: req.body.ticketDescription,
         ticketQuestion: req.body.ticketQuestions,
     };
-    return await projectDB.saveProject(project);
+    return projectDB.saveProject(project);
 }
 
 async function generateFileFromDB(id, format, onlyLabelled, user) {

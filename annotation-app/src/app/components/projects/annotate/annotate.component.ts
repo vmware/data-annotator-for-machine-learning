@@ -141,7 +141,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.user = this.userAuthService.loggedUser();
   }
 
-  ngAfterViewInit() { }
+  ngAfterViewInit() {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -232,10 +232,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 imagePolyLabelTemplate: this.imagePolyLabelTemplate,
                 url: this.env.config.enableAWSS3
                   ? this.sr.originalData.location
-                  : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${this.sr.originalData.location
-                  }&token=${JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token
-                    .access_token
-                  }`,
+                  : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
+                      this.sr.originalData.location
+                    }&token=${
+                      JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token
+                        .access_token
+                    }`,
                 historyCompletions: this.historyTask,
                 annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
                 from: 'annotate',
@@ -293,17 +295,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               '.logCategories' + this.selectedEntityID,
             ).style.backgroundColor = this.colorsRainbow[this.selectedEntityID];
             // to read the filterList from localStorage
-            this.toReadStorageSetting('logFilter')
-
+            this.toReadStorageSetting('logFilter');
           }, 5);
         }
       },
     );
   }
 
-
   toReadStorageSetting(set) {
-
     if (localStorage.getItem('annotate-setting')) {
       const settings = JSON.parse(localStorage.getItem('annotate-setting'));
       for (let i = 0; i < settings.length; i++) {
@@ -322,7 +321,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
   }
-
 
   getOneReview(from?) {
     this.loading = true;
@@ -350,7 +348,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sortLabelForColor(this.categories);
             this.categoryBackFunc();
             this.getProgress();
-            this.toReadStorageSetting('logFilter')
+            this.toReadStorageSetting('logFilter');
           }
         },
         (error) => {
@@ -578,8 +576,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   this.projectType === 'ner'
                     ? 'start'
                     : this.projectType === 'log'
-                      ? 'line'
-                      : 'sort',
+                    ? 'line'
+                    : 'sort',
                   'ascending',
                 ),
               );
@@ -588,8 +586,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   this.projectType === 'ner'
                     ? 'start'
                     : this.projectType === 'log'
-                      ? 'line'
-                      : 'sort',
+                    ? 'line'
+                    : 'sort',
                   'ascending',
                 ),
               );
@@ -675,9 +673,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       };
       if (this.projectType == 'ner' || this.projectType == 'image') {
         if (!this.env.config.enableAWSS3 && this.projectType === 'image') {
-          OldSr.originalData.location = `${this.env.config.annotationService
-            }/api/v1.0/datasets/set-data?file=${OldSr.originalData.location}&token=${JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
-            }`;
+          OldSr.originalData.location = `${
+            this.env.config.annotationService
+          }/api/v1.0/datasets/set-data?file=${OldSr.originalData.location}&token=${
+            JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
+          }`;
         }
         addSubmit['historyDescription'] = [OldSr.originalData];
       } else if (this.projectType == 'log') {
@@ -729,9 +729,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           imagePolyLabelTemplate: this.imagePolyLabelTemplate,
           url: this.env.config.enableAWSS3
             ? this.sr.originalData.location
-            : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${this.sr.originalData.location
-            }&token=${JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
-            }`,
+            : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
+                this.sr.originalData.location
+              }&token=${
+                JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
+              }`,
           historyCompletions: this.historyTask,
           annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
           from: 'annotate',
@@ -845,9 +847,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         // skip to the history
         const OldSr = JSON.parse(JSON.stringify(this.sr));
         if (!this.env.config.enableAWSS3 && this.projectType === 'image') {
-          OldSr.originalData.location = `${this.env.config.annotationService
-            }/api/v1.0/datasets/set-data?file=${OldSr.originalData.location}&token=${JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
-            }`;
+          OldSr.originalData.location = `${
+            this.env.config.annotationService
+          }/api/v1.0/datasets/set-data?file=${OldSr.originalData.location}&token=${
+            JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
+          }`;
         }
         const addSkip = {
           srId: OldSr._id,
@@ -889,10 +893,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               imagePolyLabelTemplate: this.imagePolyLabelTemplate,
               url: this.env.config.enableAWSS3
                 ? this.sr.originalData.location
-                : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${this.sr.originalData.location
-                }&token=${JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token
-                  .access_token
-                }`,
+                : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
+                    this.sr.originalData.location
+                  }&token=${
+                    JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token
+                      .access_token
+                  }`,
               historyCompletions: this.historyTask,
               annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
               from: 'annotate',
@@ -982,7 +988,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.maxLabel = null;
     this.selectParam = e.target.value;
     this.toStorageFilter();
-    if (this.projectType !== 'image' && this.projectType !== 'log' && this.projectType !== 'ner' && this.renderFormat === 'html') {
+    if (
+      this.projectType !== 'image' &&
+      this.projectType !== 'log' &&
+      this.projectType !== 'ner' &&
+      this.renderFormat === 'html'
+    ) {
       this.saveAnnotateSetting('display', this.renderFormat);
     }
     for (let i = 0; i < this.projects.length; i++) {
@@ -1003,7 +1014,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.reviewOrder = 'random';
     this.questionForm.get('questionGroup.reviewee').reset();
     if (this.projectType !== 'image' && this.projectType !== 'ner' && this.projectType !== 'log') {
-      this.toReadStorageSetting('display')
+      this.toReadStorageSetting('display');
     }
   }
 
@@ -1050,7 +1061,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.progressInfo = response;
         this.percentage =
-          Math.round((this.progressInfo.completeCase / this.progressInfo.totalCase) * 10000) / 100;
+          Math.round(
+            (this.progressInfo.completeCase /
+              (this.startFrom === 'review'
+                ? this.progressInfo.totalCase
+                : this.progressInfo.assignedCase == 0
+                ? 1
+                : this.progressInfo.assignedCase)) *
+              10000,
+          ) / 100;
       },
       (error) => {
         console.log(error);
@@ -1292,8 +1311,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.projectType === 'ner'
                       ? 'start'
                       : this.projectType === 'log'
-                        ? 'line'
-                        : 'sort',
+                      ? 'line'
+                      : 'sort',
                     'ascending',
                   ),
                 );
@@ -1302,8 +1321,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.projectType === 'ner'
                       ? 'start'
                       : this.projectType === 'log'
-                        ? 'line'
-                        : 'sort',
+                      ? 'line'
+                      : 'sort',
                     'ascending',
                   ),
                 );
@@ -1412,10 +1431,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               imagePolyLabelTemplate: this.imagePolyLabelTemplate,
               url: this.env.config.enableAWSS3
                 ? this.sr.originalData.location
-                : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${this.sr.originalData.location
-                }&token=${JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token
-                  .access_token
-                }`,
+                : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
+                    this.sr.originalData.location
+                  }&token=${
+                    JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token
+                      .access_token
+                  }`,
               historyCompletions: this.historyTask,
               annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
               from: 'annotate',
@@ -2058,7 +2079,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         let vv = [];
         _.forIn(sr[0].ticketQuestions, function (value, key) {
           value = JSON.stringify(value);
-          vv.push({ key, value});
+          vv.push({ key, value });
         });
         sr[0].ticketQuestions = vv;
       }
@@ -2067,7 +2088,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         sr[0].userInputs.length > 0 &&
         sr[0].userInputs[0].problemCategory.length > 0
       ) {
-
         const aa = sr[0].userInputs[0].problemCategory;
         const bb = sr[0].originalData.tokens;
         for (let j = 0; j < aa.length; j++) {
@@ -2093,15 +2113,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           }
         }
-
       }
       return sr[0];
     } else {
       return sr;
     }
   }
-
-
 
   resetTabularSrData(sr) {
     const vv = [];
@@ -2241,7 +2258,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       if (pDom) {
         pDom.style.backgroundColor = this.toolService.hexToRgb(
           this.colorsRainbow[
-          from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
+            from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
           ],
         );
       }
@@ -2266,7 +2283,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       if (txtRowEntityDom) {
         txtRowEntityDom.style.backgroundColor =
           this.colorsRainbow[
-          from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
+            from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
           ];
         this.getElementService.toFindDomAddText(
           txtRowEntityDom,
@@ -2328,7 +2345,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (pDom) {
           pDom.style.backgroundColor = this.toolService.hexToRgb(
             this.colorsRainbow[
-            from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
+              from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
             ],
           );
           if (
@@ -2355,7 +2372,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (txtRowEntityDom) {
           txtRowEntityDom.style.backgroundColor =
             this.colorsRainbow[
-            from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
+              from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
             ];
           this.getElementService.toFindDomAddText(
             txtRowEntityDom,
@@ -2406,7 +2423,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (pDom) {
           pDom.style.backgroundColor = this.toolService.hexToRgb(
             this.colorsRainbow[
-            from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
+              from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
             ],
           );
           if (
@@ -2434,7 +2451,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (txtRowEntityDom) {
           txtRowEntityDom.style.backgroundColor =
             this.colorsRainbow[
-            from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
+              from == 'historyBack' ? this.categories.indexOf(data.label) : this.selectedEntityID
             ];
           this.getElementService.toFindDomAddText(
             txtRowEntityDom,
@@ -2623,7 +2640,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toStorageFilter() {
     if (this.filterList.length > 0) {
-      this.saveAnnotateSetting('filter', this.filterList)
+      this.saveAnnotateSetting('filter', this.filterList);
     } else {
       if (localStorage.getItem('annotate-setting')) {
         const logFilter = JSON.parse(localStorage.getItem('annotate-setting'));
@@ -2778,8 +2795,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   changeRenderFormat(e) {
     this.renderFormat = e.target.value;
-    this.saveAnnotateSetting('display', this.renderFormat)
-
+    this.saveAnnotateSetting('display', this.renderFormat);
   }
 
   saveAnnotateSetting(set, value) {
@@ -2796,7 +2812,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         settings.push({
           pId: this.projectId,
           filter: set === 'display' ? '' : value,
-          display: set === 'display' ? value : ''
+          display: set === 'display' ? value : '',
         });
         localStorage.setItem('annotate-setting', JSON.stringify(settings));
       }
@@ -2804,7 +2820,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       const obj = {
         pId: this.projectId,
         filter: set === 'display' ? '' : value,
-        display: set === 'display' ? value : ''
+        display: set === 'display' ? value : '',
       };
       localStorage.setItem('annotate-setting', JSON.stringify([obj]));
     }
@@ -2825,7 +2841,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.toStorageFilter();
-    if (this.projectType !== 'image' && this.projectType !== 'log' && this.projectType !== 'ner' && this.renderFormat === 'html') {
+    if (
+      this.projectType !== 'image' &&
+      this.projectType !== 'log' &&
+      this.projectType !== 'ner' &&
+      this.renderFormat === 'html'
+    ) {
       this.saveAnnotateSetting('display', this.renderFormat);
     }
   }

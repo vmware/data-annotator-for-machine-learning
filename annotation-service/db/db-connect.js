@@ -149,6 +149,7 @@ const projectSchema = new mongoose.Schema({
         completeCase: { type: Number, default: 0 },
         skip: { type: Number, default: 0 },
         reviewed: { type: Number, default: 0 },
+        assignedCase: { type: Number },
     }],
     reviewInfo:[{
         user: { type: String },
