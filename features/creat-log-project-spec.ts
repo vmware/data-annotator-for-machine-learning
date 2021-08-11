@@ -65,7 +65,7 @@ describe("Create new project ", () => {
         .expect(projectsPage.getCellText(0))
         .toBe(New_Project_Name);
       since("the data source should same as the user uploaded file")
-        .expect(projectsPage.getCellText(3))
+        .expect(projectsPage.getCellText(2))
         .toBe(projectCreateData.LogProject.Source);
       since("the annotar should be the logged user")
         .expect(projectsPage.getAnnotatorCellText())

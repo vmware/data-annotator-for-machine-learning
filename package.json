@@ -4,7 +4,7 @@
   "description": "data-annotation-for-machine-learning end to end test",
   "main": "protractor.config.js",
   "scripts": {
-    "webdriver": "webdriver-manager update --gecko=false --versions.chrome 92.0.4515.107",
+    "webdriver": "webdriver-manager update --gecko=false --versions.chrome 92.0.4515.131",
     "e2e": "protractor protractor.config.js",
     "e2e-serve": "lite-server -c bs-config.json",
     "instrument": "gulp instrument",
@@ -43,7 +43,7 @@
     "ts-node": "4.1.0",
     "tslint": "5.20.1",
     "typescript": "3.5.3",
-    "webdriver-manager": "12.1.7"
+    "webdriver-manager": "12.1.8"
   },
   "dependencies": {
     "gulp": "4.0.2",

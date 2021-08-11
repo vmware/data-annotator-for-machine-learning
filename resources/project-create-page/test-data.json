@@ -24,7 +24,7 @@
   "NerLabelsExistingProject": {
     "Instruction": "this is e2e test ner labels existing project task instruction",
     "Annotator": "poc-os@poc-os.com",
-    "existingLabels": "label1,label2,label3",
+    "existingLabels": "label1",
     "Labels": "test1",
     "Source": "ner-test-data.csv",
     "ticketSessions": 29
