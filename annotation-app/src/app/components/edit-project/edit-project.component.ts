@@ -171,7 +171,8 @@ export class EditProjectComponent implements OnInit {
     this.inputAssigneeValidation = false;
     this.emailReg = true;
     this.assigneeList.forEach((element) => {
-      element.orginvalue = element.assignedCase;
+      element.originValue = element.assignedCase;
+      element.isModify = false;
     });
   }
 
