@@ -663,6 +663,7 @@ export class CreateNewComponent implements OnInit {
               }/api/v1.0/datasets/set-data?file=${element.location}&token=${
                 JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
               }`;
+              this.loadingPreviewData = false;
             }
           });
           this.previewContentDatas = flag;
