@@ -63,6 +63,7 @@ jobs:
           echo Curl End login
           
           access_token=${resp:26:163}
+          echo access_token ${access_token}
           
           echo container Start connect-active-learning-service 
           curl -X POST -H "Content-Type: application/json" -H "Authorization: ${access_token}" -d '{"data": [{"text": "NERS PROJECT TEST-CONNECT."}]}' http://localhost:8000/api/ner/user-tokens
