@@ -7,10 +7,7 @@ name: smoke_test
 
 #only trigger in master branch
 on:
-  push:
-    branches: [master]
   pull_request:
-    branches: [master]
 
 jobs:
   smoke_test:
