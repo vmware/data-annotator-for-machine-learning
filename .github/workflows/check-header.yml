@@ -7,9 +7,8 @@ name: check-header
 
 on:
   push:
-    branches: ['**']
+    branches: ['!master']
   pull_request:
-    branches: ['**']
 
 jobs:
   check-header:
