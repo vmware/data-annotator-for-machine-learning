@@ -33,19 +33,19 @@ jobs:
         uses: supercharge/mongodb-github-action@1.6.0
         with:
           mongodb-version: '4.4'
-            
-      - name: build-and-run-service
-        working-directory: ./annotation-service
-        run: |
-          npm install
-          npm run start &
-            
+      
       - name: build-and-run-al
         working-directory: ./active-learning-service
         run: |
           pip install -r requirements.txt
           python -m spacy download en_core_web_md
           python manage.py runserver localhost:8000 &
+
+      - name: build-and-run-service
+        working-directory: ./annotation-service
+        run: |
+          npm install
+          npm run start &
 
       - name: Test Connection
         run: |
@@ -93,7 +93,7 @@ jobs:
         with:
           name: coverage-output
           path: ./e2e-test/coverage-output/
-          retention-days: 1
+          retention-days: 7
 
       - name: keep the allure results folder
         if: ${{ always() }}
@@ -101,7 +101,7 @@ jobs:
         with:
           name: allure-results
           path: ./e2e-test/allure-results/
-          retention-days: 1
+          retention-days: 7
 
   scan_annotation_app:
     runs-on: ubuntu-latest 
