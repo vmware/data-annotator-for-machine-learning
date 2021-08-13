@@ -6,12 +6,7 @@
 name: smoke_test
 
 #only trigger in master branch
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
-
+on: [pull_request]
 jobs:
   smoke_test:
     runs-on: ubuntu-latest 
