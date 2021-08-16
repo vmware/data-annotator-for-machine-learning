@@ -7,7 +7,7 @@ name: check-header
 
 on:
   push:
-    branches: ['!master']
+    branches: ['!master', "**"]
   pull_request:
     branches: ['**']
 
