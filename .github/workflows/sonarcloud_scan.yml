@@ -7,7 +7,7 @@ name: sonarcloud_scan
 
 on:
   push:
-    branches: ['!master', "**"]
+    branches: ["**"]
   pull_request:
     branches: ['**']
 
@@ -97,47 +97,5 @@ jobs:
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
-      
-  #sonar cloud scan job for annotation app
-  scan_annotation_app:
-    runs-on: ubuntu-latest 
 
-    #define variables to be used for SonarCloud scan
-    env:
-      SONAR_ORG:  ${{ secrets.SONAR_ORG }}
-
-    steps:
-      - name: Checkout 
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Checkout devops branch
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-          ref: 'devops'
-          path: 'devops'
-
-      - name: SonarCloud setup for annotation-app
-        working-directory: ./devops/sonar
-        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-DAML-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-DAML-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
-
-      - name: SonarCloud Scan annotation-app
-        uses: sonarsource/sonarcloud-github-action@master  
-        with:
-          projectBaseDir: ./annotation-app
-          args: >
-            -Dsonar.organization=${{ env.SONAR_ORG }}
-            -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-annotation-app
-            -Dsonar.test.exclusions=**/node_modules/**/*,**/models/**/*,**/downloadProject/**/*,**/logs/**/*,**/venv/**/*,**/__pycache__/**/*,*.md,*.txt,*.yml 
-            -Dsonar.coverage.exclusions=**
-            -Dsonar.verbose=true 
-            -Dsonar.c.file.suffixes=- 
-            -Dsonar.cpp.file.suffixes=- 
-            -Dsonar.objc.file.suffixes=-
-        #Set below secrets in your Github Actions secrets
-        env: 
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
           
