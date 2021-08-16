@@ -7,7 +7,7 @@ name: sonarcloud_scan_app
 
 on:
   push:
-    branches: ['!master', "**"]
+    branches: ["**", '!master']
   pull_request:
     branches: ['**']
 
