@@ -44,6 +44,10 @@ export class CommonService {
         data.isModify = orginisModify;
         return;
       }
+    } else {
+      data.assignedCase = data.originValue;
+      data.isModify = orginisModify;
+      return;
     }
 
     if (_.filter(assigneeList, { isModify: true }).length > 0) {
@@ -66,8 +70,8 @@ export class CommonService {
         });
       } else {
         let flag = false;
-        for (let i = 0; i < assigneeList.length; i++) {
-          if (assigneeList[i].isModify) {
+        for (let a of assigneeList) {
+          if (a.isModify) {
             flag = true;
             break;
           }
