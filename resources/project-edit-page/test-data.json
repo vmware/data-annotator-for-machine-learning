@@ -1,9 +1,19 @@
 {
   "TextProject": {
+    "Email_Validation": "test2@@@@qq.com",
     "Owner": "test2@vmware.com",
     "Annotator": "test2@vmware.com",
     "Labels": "test3,test4,test5,test6,test7",
     "Threshold": 55,
     "Frequency": 15
+  },
+
+  "LogProject": {
+    "ErrorMessage_Used": "Failed to delete the label because that label has been used.",
+    "ErrorMessage_Atleast": "Failed to delete the label because this project at least keep 2 submitted labels.",
+    "Labels": "test3",
+    "InfoMessage_Success": "Label has been deleted successfully.",
+    "Annotator": "test2@vmware.com",
+    "OverMax": 50
   }
 }

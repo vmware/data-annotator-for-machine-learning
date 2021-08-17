@@ -18,7 +18,7 @@ describe("upload new dataset on myDatasets page..", () => {
   beforeAll(() => {
     myDatasetsPage = new MyDatasetsPage();
     SerialNum = new Date().getTime().toString().substring(0, 9);
-    New_CSV_Name = "e2e Test CSV " + SerialNum;
+    New_CSV_Name = "e2e Test Data " + SerialNum;
     console.log("start to create new CSV : " + New_CSV_Name);
   });
 

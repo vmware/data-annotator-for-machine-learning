@@ -7,7 +7,6 @@ import { NewProjectPage } from "../page-object/new-project-page";
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
-import { constants } from "buffer";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("Create new project ", () => {
@@ -28,18 +27,19 @@ describe("Create new project ", () => {
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
-    New_Project_Name = "e2e Test Project" + Serial_Num;
-    New_CSV_Name = "e2e Test CSV " + Serial_Num;
+    New_Project_Name = "e2e Test Project Text Al " + Serial_Num;
+    New_CSV_Name = "e2e Test Data Text" + Serial_Num;
     LoginBussiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();
     console.log("start to create new project : " + New_Project_Name);
-    Constant.dataset_name = New_CSV_Name;
+    Constant.dataset_name_text = New_CSV_Name;
+    Constant.project_name_text_al = New_Project_Name;
   });
 
   afterAll(() => {
-    Constant.project_name = New_Project_Name;
-    console.log("project name after update: " + Constant.project_name);
+    Constant.project_name_text_al = New_Project_Name;
+    console.log("project name after update: " + Constant.project_name_text_al);
   });
 
   it("Should create new project successfully.", async (done) => {

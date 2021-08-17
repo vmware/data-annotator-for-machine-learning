@@ -19,7 +19,7 @@ describe("annotate project ...", () => {
   let WRAP_BTN = element(by.css('div.editBar button[title="Wrap Text"]'));
 
   beforeAll(() => {
-    project_name = Constant.project_name;
+    project_name = Constant.project_name_log;
     LoginBussiness.verifyLogin();
     annotatePage = new AnnotatePage();
     projectsPage = new ProjecstPage();

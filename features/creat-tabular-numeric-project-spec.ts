@@ -27,7 +27,7 @@ describe("Create new project ", () => {
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
-    New_Project_Name = "e2e Test Project" + Serial_Num;
+    New_Project_Name = "e2e Test Project Tabular Numeric" + Serial_Num;
     LoginBussiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();
@@ -37,8 +37,10 @@ describe("Create new project ", () => {
   });
 
   afterAll(() => {
-    Constant.project_name = New_Project_Name;
-    console.log("project name after update: " + Constant.project_name);
+    Constant.project_name_tabular_numeric = New_Project_Name;
+    console.log(
+      "project name after update: " + Constant.project_name_tabular_numeric
+    );
   });
 
   it("Should create new tabular numeric labels project successfully.", async (done) => {
@@ -47,7 +49,7 @@ describe("Create new project ", () => {
     await newProjectPage.clickNewProjectBtn(PROJECT_TABULAR_CLASSIFICATION);
     await newProjectPage.setProjectName(New_Project_Name);
     await newProjectPage.setTaskInstruction(Task_Instruction);
-    await newProjectPage.selectExistingFile(Constant.dataset_name);
+    await newProjectPage.selectExistingFile(Constant.dataset_name_text);
     await browser.wait(
       ExpectedConditions.visibilityOf(SET_DATA_SECTION),
       Constant.DEFAULT_TIME_OUT

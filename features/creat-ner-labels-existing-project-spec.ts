@@ -27,8 +27,8 @@ describe("Create new project ", () => {
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
-    New_Project_Name = "e2e Test Project" + Serial_Num;
-    New_CSV_Name = "e2e Test CSV " + Serial_Num;
+    New_Project_Name = "e2e Test Project Ner " + Serial_Num;
+    New_CSV_Name = "e2e Test Data Ner " + Serial_Num;
     LoginBussiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();
@@ -38,8 +38,10 @@ describe("Create new project ", () => {
   });
 
   afterAll(() => {
-    Constant.project_name = New_Project_Name;
-    console.log("project name after update: " + Constant.project_name);
+    Constant.project_name_ner = New_Project_Name;
+    Constant.dataset_name_ner = New_CSV_Name;
+
+    console.log("project name after update: " + Constant.project_name_ner);
   });
 
   it("Should create ner labels existing project successfully.", async (done) => {

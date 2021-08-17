@@ -91,6 +91,7 @@ export class AnnotatePage extends CommonPage {
       infos.owner = await list[1].getText();
       infos.source = await list[2].getText();
       infos.instruction = await list[3].getText();
+      console.log("getProjectInfo:", infos);
       return infos;
     });
   }
