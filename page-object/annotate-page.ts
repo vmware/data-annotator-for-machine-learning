@@ -212,8 +212,17 @@ export class AnnotatePage extends CommonPage {
   async annotateLog() {
     return await this.LOG_LINES_P.then(async (p) => {
       await p[0].click();
+      await p[1].click();
       await FunctionUtil.elementVisibilityOf(this.ANNOTATE_SUBMIT_BTN);
       console.log("succeed to annotateLog");
+    });
+  }
+
+  async deleteLog() {
+    return await this.LOG_LINES_P.then(async (p) => {
+      await p[1].click();
+      await FunctionUtil.elementVisibilityOf(this.ANNOTATE_SUBMIT_BTN);
+      console.log("succeed to deleteLog");
     });
   }
 

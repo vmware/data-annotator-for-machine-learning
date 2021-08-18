@@ -28,6 +28,7 @@ export class EditPage {
   );
   ASSIGN_TICKET_DELETE_ICON = element(by.css("ul li:last-child clr-icon"));
   DELETE_OK_BTN = element.all(by.css(".modal-footer .btn.btn-primary")).last();
+  NUMERIC_LABEL_INPUT = element(by.css("input[id=min]"));
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.ADMIN_TAB);
@@ -100,6 +101,16 @@ export class EditPage {
     await browser.sleep(1000);
     await browser.waitForAngularEnabled(false);
     console.log("succeed to editAssignedTickets...");
+  }
+
+  async editNumericScope(min) {
+    console.log("start to editNumericScope...");
+    await FunctionUtil.elementVisibilityOf(this.NUMERIC_LABEL_INPUT);
+    await this.NUMERIC_LABEL_INPUT.click();
+    await this.NUMERIC_LABEL_INPUT.clear();
+    await this.NUMERIC_LABEL_INPUT.sendKeys(min);
+    await browser.waitForAngularEnabled(false);
+    console.log("succeed to editNumericScope...");
   }
 
   async deleteAnnotator() {

@@ -22,6 +22,12 @@ export class CommonPage {
   PROJECT_NAME_FILTER_BTN = element(
     by.css("clr-dg-column:nth-child(1) clr-dg-filter:nth-child(1) button")
   );
+  LOG_FILE_NAME_FILTER_BTN = element(
+    by.css("clr-dg-column:nth-child(4) clr-icon[shape=filter-grid]")
+  );
+  LOG_FILE_NAME_FILTER_INPUT = element(
+    by.css("input.filenameFilter[placeholder='Enter value here']")
+  );
   PROJECT_NAME_FILTER_INPUT = $('.datagrid-filter input[name="search"]');
   CLOSE_FILTER_BTN = $(
     '.datagrid-filter.clr-popover-content clr-icon[shape="close"]'
@@ -67,6 +73,16 @@ export class CommonPage {
     await FunctionUtil.elementVisibilityOf(this.PROJECT_NAME_FILTER_INPUT);
     await FunctionUtil.sendText(this.PROJECT_NAME_FILTER_INPUT, name);
     await FunctionUtil.click(this.CLOSE_FILTER_BTN);
+  }
+
+  async filterLogFileName(name) {
+    console.log("start to filterLogFileName...");
+    await FunctionUtil.elementVisibilityOf(this.LOG_FILE_NAME_FILTER_BTN);
+    await FunctionUtil.click(this.LOG_FILE_NAME_FILTER_BTN);
+    await FunctionUtil.elementVisibilityOf(this.LOG_FILE_NAME_FILTER_INPUT);
+    await this.LOG_FILE_NAME_FILTER_INPUT.click();
+    await this.LOG_FILE_NAME_FILTER_INPUT.sendKeys(name);
+    console.log("succeed to filterLogFileName...");
   }
 
   getCellText(index: number) {

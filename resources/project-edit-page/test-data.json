@@ -14,6 +14,12 @@
     "Labels": "test3",
     "InfoMessage_Success": "Label has been deleted successfully.",
     "Annotator": "test2@vmware.com",
-    "OverMax": 50
+    "OverMax": 50,
+    "Filter_File_Name": 0
+  },
+
+  "TabularNumericProject": {
+    "Min": 0,
+    "Labels": "0--100"
   }
 }

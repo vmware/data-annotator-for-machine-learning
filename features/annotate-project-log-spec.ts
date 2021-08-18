@@ -98,6 +98,12 @@ describe("annotate project ...", () => {
     done();
   });
 
+  it("Should delete one row of log project successfully.", async (done) => {
+    await annotatePage.deleteLog();
+    await browser.sleep(1000);
+    done();
+  });
+
   it("Should add row freeText successfully.", async (done) => {
     await annotatePage.addRowFreeText(projectCreateData.LogProject.rowFreeText);
     await browser.sleep(1000);
