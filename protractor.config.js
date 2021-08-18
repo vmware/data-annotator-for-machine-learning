@@ -19,6 +19,7 @@ var conf = {
     "./features/delete-datasets-spec.ts",
     "./features/creat-log-project-spec.ts",
     "./features/annotate-project-log-spec.ts",
+    "./features/append-project-log-spec.ts",
     "./features/creat-text-project-spec.ts",
     "./features/annotate-project-buttons-spec.ts",
     "./features/creat-tabular-numeric-project-spec.ts",
@@ -27,14 +28,15 @@ var conf = {
     "./features/annotate-project-dropdown-spec.ts",
     "./features/creat-text-multiple-project-spec.ts",
     "./features/annotate-project-multiple-spec.ts",
-    "./features/append-project-spec.ts",
     "./features/download-share-projects-spec.ts",
+    "./features/append-project-spec.ts",
     "./features/creat-ner-labels-existing-project-spec.ts",
     "./features/annotate-project-ner-labels-existing-spec.ts",
     "./features/creat-image-project-spec.ts",
     "./features/annotate-project-image-spec.ts",
     "./features/project-preview-detail-spec.ts",
     "./features/datasets-preview-detail-spec.ts",
+    "./features/append-project-image-spec.ts",
     "./features/delete-projects-spec.ts",
     // "./features/delete-datasets-spec.ts",
   ],
@@ -43,12 +45,16 @@ var conf = {
     "./general/sign-up-external-spec.ts",
     "./general/login-external-spec.ts",
   ],
-
+  poc_specs: [
+    "./general/login-external-spec.ts",
+    // "./features/delete-datasets-spec.ts",
+  ],
   specsAll: [],
 };
 
 exports.config = {
   allScriptsTimeout: 20000, //first page loading time
+  // specs: conf.poc_specs,
   specs: conf.specsConst.concat(conf.ci_specs),
   capabilities: {
     browserName: "chrome",
