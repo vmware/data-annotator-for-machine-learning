@@ -20,6 +20,7 @@ export class DownloadSharePage extends CommonPage {
 
     async clickdownloadProject() {
         await FunctionUtil.click(this.DOWNLOAD_BTN);
+        await browser.sleep(2000);
     }
 
     async clickGenerateNewDataset() {
@@ -44,6 +45,7 @@ export class DownloadSharePage extends CommonPage {
     }
 
     async verifyDownloadFileExisted(filename: string, path: string) {
+        await browser.sleep(3000);
         const dir = this.fs.readdirSync(path)
         console.log('filename:::', filename)
         console.log('path:::', path)

@@ -27,17 +27,17 @@ var conf = {
     "./features/project-preview-detail-spec.ts",
     "./features/creat-text-multiple-project-spec.ts",
     "./features/annotate-project-multiple-spec.ts",
+    "./features/download-share-projects-spec.ts",
     "./features/creat-tabular-numeric-project-spec.ts",
     "./features/annotate-project-tabular-numeric-spec.ts",
     "./features/append-project-spec.ts",
-    "./features/download-share-projects-spec.ts",
     "./features/creat-ner-labels-existing-project-spec.ts",
     "./features/annotate-project-ner-labels-existing-spec.ts",
     "./features/creat-image-project-spec.ts",
     "./features/annotate-project-image-spec.ts",
     "./features/append-project-image-spec.ts",
     "./features/delete-projects-spec.ts",
-    // "./features/delete-datasets-spec.ts",
+    "./features/delete-datasets-spec.ts",
   ],
 
   specsConst: [
@@ -45,16 +45,15 @@ var conf = {
     "./general/login-external-spec.ts",
   ],
   poc_specs: [
-    // "./features/append-project-spec.ts",
-    // "./features/append-project-log-spec.ts",
-    // "./features/append-project-image-spec.ts",
+    "./general/login-external-spec.ts",
+    // "./features/delete-datasets-spec.ts",
   ],
   specsAll: [],
 };
 
 exports.config = {
   allScriptsTimeout: 20000, //first page loading time
-  // specs: conf.specsConst.concat(conf.poc_specs),
+  // specs: conf.poc_specs,
   specs: conf.specsConst.concat(conf.ci_specs),
   capabilities: {
     browserName: "chrome",
