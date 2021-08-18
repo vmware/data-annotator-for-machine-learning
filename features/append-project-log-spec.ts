@@ -7,7 +7,7 @@ import { browser, $, $$, ExpectedConditions, element, by } from 'protractor'
 import { Constant } from '../general/constant'
 import { CommonAppend } from '../general/common-append';
 
-describe('verify basic project append funtion', () => {
+describe('verify log project append funtion', () => {
   const project_name: string = Constant.project_name;
   const commonAppend: CommonAppend = new CommonAppend;
 
@@ -20,11 +20,14 @@ describe('verify basic project append funtion', () => {
     expect(await commonAppend.deleteNewLine(deleteBTN)).toBeTruthy;
   })
 
-  it('Qick append verify publish', async () => {
-    expect(await commonAppend.quickAppendCsv()).toBeTruthy;
+  it('Qick append verify upload sigle log file and publish', async () => {
+
+    const FILE_PATH = "/doc/upload-resource/APPEND_ERROR LOG.txt";
+    const LOG_INPUT = $('#uploadTxt0');
+    expect(await commonAppend.quickAppendSingleFileUpload(FILE_PATH, LOG_INPUT)).toBeTruthy;
   })
 
-  it('File append verify selete existing file', async () => {
+  it('File append verify selete existing log file', async () => {
     expect(await commonAppend.fileAppendSelectExistingFile(project_name)).toBeTruthy;
   })
 
