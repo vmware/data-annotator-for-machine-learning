@@ -376,7 +376,6 @@ export class UploadComponent implements OnInit {
         this.uploadComplete = true;
         this.inputFile.size < 10485760 ? (this.waitingTip = false) : (this.waitingTip = true);
         if (this.uploadGroup.get('fileFormat').value == 'csv') {
-          // this.parseCSV();
           this.papaParse().then((e) => {
             if (this.env.config.enableAWSS3) {
               this.uploadToS3(this.inputFile);
@@ -385,7 +384,6 @@ export class UploadComponent implements OnInit {
             }
           });
         } else if (this.uploadGroup.get('fileFormat').value == 'tabular') {
-          // this.parseTabular();
           this.papaParse().then((e) => {
             if (this.env.config.enableAWSS3) {
               this.uploadToS3(this.inputFile);

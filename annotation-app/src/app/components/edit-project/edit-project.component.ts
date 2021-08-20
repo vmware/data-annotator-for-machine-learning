@@ -441,12 +441,12 @@ export class EditProjectComponent implements OnInit {
             this.onDeleteLabelEmitter.emit();
             setTimeout(() => {
               this.infoMessage = '';
-            }, 1000);
+            }, 5000);
           } else {
             this.errorMessage = 'Failed to delete the label because that label has been used.';
             setTimeout(() => {
               this.errorMessage = '';
-            }, 1000);
+            }, 5000);
           }
         },
         (error: any) => {
@@ -456,7 +456,7 @@ export class EditProjectComponent implements OnInit {
           this.errorMessage = 'Failed to delete the label because that label has been used.';
           setTimeout(() => {
             this.errorMessage = '';
-          }, 1000);
+          }, 5000);
         },
       );
     } else {
@@ -470,7 +470,7 @@ export class EditProjectComponent implements OnInit {
       this.isShowDeleteModal = false;
       setTimeout(() => {
         this.errorMessage = '';
-      }, 1000);
+      }, 5000);
     }
   }
 
