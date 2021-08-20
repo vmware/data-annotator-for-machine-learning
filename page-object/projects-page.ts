@@ -83,7 +83,6 @@ export class ProjecstPage extends CommonPage {
   }
 
   async getTableTotalItems() {
-    console.log("getTableTotalItems:", this.TABLE_TOTAL_ITEMS.getText());
     return this.TABLE_TOTAL_ITEMS.getText();
   }
 
@@ -114,14 +113,12 @@ export class ProjecstPage extends CommonPage {
     this.PROJECT_TABLE.scrollLeft = this.PROJECT_TABLE.scrollWidth;
     await FunctionUtil.elementVisibilityOf(this.RETURN_TO_ANNOTATOR_BTN);
     await this.RETURN_TO_ANNOTATOR_BTN.click();
-    await this.RETURN_TO_ANNOTATOR_BTN.click();
     console.log("succeed to returnToAnnotatorBtn...");
   }
 
   async toExpandCell() {
     console.log("start to toExpandCell...");
     await FunctionUtil.elementVisibilityOf(this.EXPAND_CELL);
-    await this.EXPAND_CELL.click();
     await this.EXPAND_CELL.click();
     console.log("succeed to toExpandCell...");
   }

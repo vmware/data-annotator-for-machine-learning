@@ -32,14 +32,18 @@ describe("verify generate-download-share funtion", () => {
       await commonPage.filterProjectName(project_name);
       await downloadSharePage.clickdownloadProject();
       await downloadSharePage.clickGenerateNewDataset();
-      expect(await downloadSharePage.verifyDownloadFileExisted(filename, dirPath)).toBe(true);
+      expect(
+        await downloadSharePage.verifyDownloadFileExisted(filename, dirPath)
+      ).toBe(true);
       done();
     });
 
     it("Download project.", async (done) => {
       await downloadSharePage.clickdownloadProject();
       await downloadSharePage.downloadPrject();
-      expect(await downloadSharePage.verifyDownloadFileExisted(filename, dirPath)).toBe(true);
+      expect(
+        await downloadSharePage.verifyDownloadFileExisted(filename, dirPath)
+      ).toBe(true);
       done();
     });
 
@@ -48,6 +52,7 @@ describe("verify generate-download-share funtion", () => {
         await downloadSharePage.clickShareBtn();
         await downloadSharePage.inputShareInfo("e2e test share project");
         await downloadSharePage.shareProject();
+
         expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
         done();
       } else {
@@ -70,14 +75,18 @@ describe("verify generate-download-share funtion", () => {
       await commonPage.filterProjectName(project_name);
       await downloadSharePage.clickdownloadProject();
       await downloadSharePage.clickGenerateNewDataset();
-      expect(await downloadSharePage.verifyDownloadFileExisted(filename, dirPath)).toBe(true);
+      expect(
+        await downloadSharePage.verifyDownloadFileExisted(filename, dirPath)
+      ).toBe(true);
       done();
     });
 
     it("Download project", async (done) => {
       await downloadSharePage.clickdownloadProject();
       await downloadSharePage.downloadPrject();
-      expect(await downloadSharePage.verifyDownloadFileExisted(filename, dirPath)).toBe(true);
+      expect(
+        await downloadSharePage.verifyDownloadFileExisted(filename, dirPath)
+      ).toBe(true);
       done();
     });
   });

@@ -38,7 +38,7 @@ var conf = {
     "./features/datasets-preview-detail-spec.ts",
     "./features/append-project-image-spec.ts",
     "./features/delete-projects-spec.ts",
-    // "./features/delete-datasets-spec.ts",
+    "./features/delete-datasets-spec.ts",
   ],
 
   specsConst: [
@@ -65,7 +65,7 @@ exports.config = {
         "ignore-certificate-errors",
         "ignore-ssl-errors",
         "no-sandbox",
-        // "headless",
+        "headless",
       ],
       prefs: {
         download: {
