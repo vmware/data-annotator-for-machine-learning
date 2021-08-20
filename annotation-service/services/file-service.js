@@ -52,9 +52,9 @@ async function createProject(req) {
     })
     
     console.log(`[ FILE ] Service ticktes to db`);
-    await srsImporter.execute(req, annotators);
-    await imgImporter.execute(req, true, annotators);
-    await logImporter.execute(req, true, annotators);
+    srsImporter.execute(req, annotators);
+    imgImporter.execute(req, true, annotators);
+    logImporter.execute(req, true, annotators);
 
     console.log(`[ FILE ] Service save project info to db`);
     return saveProjectInfo(req, userCompleteCase, annotators);

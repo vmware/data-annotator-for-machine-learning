@@ -18,17 +18,20 @@ const {ROLES} = require('../config/constant');
 async function saveFileToLocalSys(filePath, file){
 
   console.log(`[ LOCAL-FILE-SYSTEM ] SERVICE saveFileToLocalSys ${filePath}`);
+  filePath = path.resolve(filePath);
   fs.writeFile(filePath, file, (err) => {
     if (err) throw {CODE: 5001, MSG: `SAVE FILE ERROR ${err}`};
   });
 
 }
 async function readFileFromLocalSys(filePath, options){
+  filePath = path.resolve(filePath);
   await checkFileExistInLocalSys(filePath, false, true, true);
   return fs.createReadStream(filePath, options);
 }
 
 async function deleteFileFromLocalSys(filePath){
+  filePath = path.resolve(filePath);
   await checkFileExistInLocalSys(filePath, false, true, true);
   
   console.log(`[ LOCAL-FILE-SYSTEM ] SERVICE deleteFileFromLocalSys ${filePath}`);
@@ -36,6 +39,7 @@ async function deleteFileFromLocalSys(filePath){
 }
 
 async function deleteFileFolderFromLocalSys(filePath){
+  filePath = path.resolve(filePath);
   await checkFileExistInLocalSys(filePath, false, true);
   
   console.log(`[ LOCAL-FILE-SYSTEM ] SERVICE deleteFileFolderFromLocalSys ${filePath}`);
@@ -43,6 +47,7 @@ async function deleteFileFolderFromLocalSys(filePath){
 }
 
 async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFile){
+  filePath = path.resolve(filePath);
   const exist = fs.existsSync(filePath);
   if (!exist && createDir) {
     fs.mkdirSync(filePath, {recursive: true});
