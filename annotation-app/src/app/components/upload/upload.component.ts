@@ -66,7 +66,7 @@ export class UploadComponent implements OnInit {
     private userAuthService: UserAuthService,
     private papa: Papa,
     public env: EnvironmentsService,
-    private unZipService: UnZipService, // private sanitizer: DomSanitizer,
+    private unZipService: UnZipService,
   ) {
     this.userQuestionUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       if (value != '') {
@@ -152,17 +152,6 @@ export class UploadComponent implements OnInit {
       }
       this.uploadGroup.get('localFile').updateValueAndValidity();
     });
-  }
-
-  parseCSV() {
-    // this.uploadGroup.get('localFile').setValue(this.inputFile);
-    // this.papaParse();
-    // this.columnInfo = [];
-  }
-
-  parseTabular() {
-    // this.papaParse();
-    // this.uploadGroup.get('localFile').setValue(this.inputFile);
   }
 
   papaParse() {
@@ -327,16 +316,8 @@ export class UploadComponent implements OnInit {
         console.log('Error:', error);
         this.errorMessageTop = JSON.stringify(error);
         this.errorMessageEmitter.emit(this.errorMessageTop);
-        // setTimeout(() => {
-        //   this.errorMessageTop = '';
-        //   this.errorMessageEmitter.emit(this.errorMessageTop);
-        // }, 10000);
         this.uploadComplete = false;
         this.inputFile = null;
-        // let params = {
-        //   isShowSetHeader: '',
-        // }
-        // this.uploadSuccessEmitter.emit(params);
       },
     );
   }

@@ -17,7 +17,6 @@ import { DatasetValidator } from '../../shared/form-validators/dataset-validator
 import { FormValidatorUtil } from '../../shared/form-validators/form-validator-util';
 import AWS from 'aws-sdk/lib/aws';
 import { Buffer } from 'buffer';
-import { DomSanitizer } from '@angular/platform-browser';
 import { UnZipService } from 'app/services/common/up-zip.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
@@ -67,7 +66,6 @@ export class AppendNewEntriesComponent implements OnInit {
     private router: Router,
     private el: ElementRef,
     private renderer2: Renderer2,
-    private sanitizer: DomSanitizer,
     private UnZipService: UnZipService,
     public env: EnvironmentsService,
     private toolService: ToolService,
@@ -435,6 +433,7 @@ export class AppendNewEntriesComponent implements OnInit {
               }/api/v1.0/datasets/set-data?file=${element.location}&token=${
                 JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
               }`;
+              this.loadPreviewTable = false;
             }
           });
           this.previewContentDatas = flag;
@@ -506,14 +505,15 @@ export class AppendNewEntriesComponent implements OnInit {
             }
             for (let j = 0; j < cc.length; j++) {
               entries.files[cc[j]].async('blob').then(function (blob) {
+                let file = new File([blob], 'name', { type: 'image/jpeg' });
                 const reader = new FileReader();
-                reader.readAsDataURL(blob);
+                reader.readAsDataURL(file);
                 reader.onloadend = (r) => {
                   that.previewContentDatas.push({
                     _id: a++,
                     fileName: cc[j],
                     fileSize: (blob.size / 1024).toFixed(2),
-                    location: that.sanitizer.bypassSecurityTrustUrl(reader.result.toString()),
+                    location: reader.result,
                   });
                   that.loadPreviewTable = false;
                   that.uploadGroup.get('totalRow').setValue(flag.realEntryLength);
