@@ -8,7 +8,7 @@
 
 async function findByConditions(MODEL, conditions, columns, options) {
     console.log(`[ DB ] begin findByConditions`);
-    return await MODEL.find(conditions, columns, options, function(error, result) {
+    return MODEL.find(conditions, columns, options, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findByConditions fail with: `, error);
             throw error;
@@ -20,7 +20,7 @@ async function findByConditions(MODEL, conditions, columns, options) {
 
 async function findAndCountByConditions(MODEL, conditions, columns, options, flag) {
     console.log(`[ DB ] begin findAndCountByConditions`);
-    return await MODEL.find(conditions, columns, options, function(error, result) {
+    return MODEL.find(conditions, columns, options, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findAndCountByConditions fail with: `, error);
             throw error;
@@ -32,7 +32,7 @@ async function findAndCountByConditions(MODEL, conditions, columns, options, fla
 
 async function findOneByConditions(MODEL, conditions, columns, options) {
     console.log(`[ DB ] begin findOneByConditions`);
-    return await MODEL.findOne(conditions, columns, options, function(error, result) {
+    return MODEL.findOne(conditions, columns, options, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findOneByConditions fail with: `, error);
             throw error;
@@ -44,7 +44,7 @@ async function findOneByConditions(MODEL, conditions, columns, options) {
 
 async function findOneAndUpdate(MODEL, conditions, update, options) {
     console.log(`[ DB ] begin findOneAndUpdate`);
-    return await MODEL.findOneAndUpdate(conditions, update, options).then(function(result, error) {
+    return MODEL.findOneAndUpdate(conditions, update, options).then(function(result, error) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findOneAndUpdate fail with: `, error);
             throw error;
@@ -57,7 +57,7 @@ async function findOneAndUpdate(MODEL, conditions, update, options) {
 }
 async function findById(MODEL, conditions, columns) {
     console.log(`[ DB ] begin findById`);
-    return await MODEL.findById(conditions, columns, function(error, result) {
+    return MODEL.findById(conditions, columns, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findById fail with: `, error);
             throw error;
@@ -69,7 +69,7 @@ async function findById(MODEL, conditions, columns) {
 
 async function updateByConditions(MODEL, conditions, doc) {
     console.log(`[ DB ] begin updateByConditions`);
-    return await MODEL.update(conditions, doc, function(error, result) {
+    return MODEL.update(conditions, doc, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB updateByConditions fail with: `, error);
             throw error;
@@ -81,7 +81,7 @@ async function updateByConditions(MODEL, conditions, doc) {
 
 async function updateManyByConditions(MODEL, conditions, doc, options) {
     console.log(`[ DB ] begin updateManyByConditions`);
-    return await MODEL.updateMany(conditions, doc, options, function(error, result) {
+    return MODEL.updateMany(conditions, doc, options, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB updateManyByConditions fail with: `, error);
             throw error;
@@ -107,7 +107,7 @@ async function insertMany(MODEL, docs, options) {
 
 async function aggregateBySchema(MODEL, schema) {
     console.log(`[ DB ] begin aggregateBySchema`);
-    return await MODEL.aggregate(schema, function(error, result) {
+    return MODEL.aggregate(schema, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB aggregateBySchema fail with: `, error);
             throw error;
@@ -118,7 +118,7 @@ async function aggregateBySchema(MODEL, schema) {
 }
 
 async function paginateQuery(MODEL, query, options) {
-    return await MODEL.paginate(query, options).then(function(result, error) {
+    return MODEL.paginate(query, options).then(function(result, error) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB paginateQuery fail with: `, error);
             throw error;
@@ -129,12 +129,12 @@ async function paginateQuery(MODEL, query, options) {
 
 async function deleteManyByConditions(MODEL, conditions) {
     console.log(`[ DB ] begin deleteManyByConditions`);
-    return await MODEL.deleteMany(conditions);
+    return MODEL.deleteMany(conditions);
 }
 
 async function deleteOneByConditions(MODEL, conditions) {
     console.log('[ DB ] begin deleteItem ');
-    return await MODEL.deleteOne(conditions, function(error, result) {
+    return MODEL.deleteOne(conditions, function(error, result) {
         if (error) {
             console.error('[ DB ] [ ERROR ] DB deleteItem fail with: ', error);
             throw error;

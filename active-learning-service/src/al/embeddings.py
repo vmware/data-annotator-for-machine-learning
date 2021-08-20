@@ -32,9 +32,6 @@ def get_cat_emb_list(learn):
     for k, v in learn.data.train_ds.x.classes.items():
         emb_weights = list(learn.model.named_parameters())[idx][1]
         emb_np = to_np(emb_weights.data)
-        # lm2vec = pd.DataFrame(emb_np)
-        # lm2vec.index = [str(i).replace(" ", "") for i in v]
-        # cat_emb_list[k] = lm2vec
         vec = {}
         for i, sr_lb in enumerate(v):
             vec[sr_lb] = emb_np[i]
