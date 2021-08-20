@@ -154,17 +154,6 @@ export class UploadComponent implements OnInit {
     });
   }
 
-  parseCSV() {
-    // this.uploadGroup.get('localFile').setValue(this.inputFile);
-    // this.papaParse();
-    // this.columnInfo = [];
-  }
-
-  parseTabular() {
-    // this.papaParse();
-    // this.uploadGroup.get('localFile').setValue(this.inputFile);
-  }
-
   papaParse() {
     const previewData = [];
     const hasHeader = this.uploadGroup.get('hasHeader').value;
@@ -327,16 +316,8 @@ export class UploadComponent implements OnInit {
         console.log('Error:', error);
         this.errorMessageTop = JSON.stringify(error);
         this.errorMessageEmitter.emit(this.errorMessageTop);
-        // setTimeout(() => {
-        //   this.errorMessageTop = '';
-        //   this.errorMessageEmitter.emit(this.errorMessageTop);
-        // }, 10000);
         this.uploadComplete = false;
         this.inputFile = null;
-        // let params = {
-        //   isShowSetHeader: '',
-        // }
-        // this.uploadSuccessEmitter.emit(params);
       },
     );
   }
@@ -395,7 +376,6 @@ export class UploadComponent implements OnInit {
         this.uploadComplete = true;
         this.inputFile.size < 10485760 ? (this.waitingTip = false) : (this.waitingTip = true);
         if (this.uploadGroup.get('fileFormat').value == 'csv') {
-          // this.parseCSV();
           this.papaParse().then((e) => {
             if (this.env.config.enableAWSS3) {
               this.uploadToS3(this.inputFile);
@@ -404,7 +384,6 @@ export class UploadComponent implements OnInit {
             }
           });
         } else if (this.uploadGroup.get('fileFormat').value == 'tabular') {
-          // this.parseTabular();
           this.papaParse().then((e) => {
             if (this.env.config.enableAWSS3) {
               this.uploadToS3(this.inputFile);
