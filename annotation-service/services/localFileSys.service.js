@@ -39,7 +39,7 @@ async function deleteFileFolderFromLocalSys(filePath){
   await checkFileExistInLocalSys(filePath, false, true);
   
   console.log(`[ LOCAL-FILE-SYSTEM ] SERVICE deleteFileFolderFromLocalSys ${filePath}`);
-  fs.rmdirSync(filePath, {recursive: true});
+  fs.rmSync(filePath, {recursive: true, force: true});
 }
 
 async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFile){
