@@ -25,7 +25,6 @@ def query_instance(df_pool, model_name, n_query):
     # load the model from disk
     with open(model_name, 'rb') as model_al:
         learner = pickle.load(model_al)
-    # x_pool = np.array(df_pool['sr_vectors'])
     x_pool = np.array(df_pool['sr_text'])
     y_pool = np.array(df_pool['ids'])
 

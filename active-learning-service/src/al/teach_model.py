@@ -30,11 +30,6 @@ def teach_model(model_name, data, test_sr):
     with open(model_name, 'rb') as model_al:
         learner = pickle.load(model_al)
 
-    # for index in range(sr_len):
-    #     x_row = data['x_teach'][index].reshape(1, -1)
-    #     y_row = data['y_teach'][index].reshape(1, )
-    #     learner.teach(X=x_row, y=y_row)
-
     # we can tech several records once
     x_row = data['x_teach']
     y_row = data['y_teach']

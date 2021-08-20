@@ -100,7 +100,6 @@ def active_learning_query(request):
 
     # random query sr text from db
     project_type = pro[0]['projectType']
-    # unl_srs = sr_unlabeled(req['projectName'], project_type)
     unl_srs = random_find_sr_unlabeled(req['projectName'], project_type)
     # check al stop condition
     if update_end_condition(unl_srs['ids'], req['projectName']): return
