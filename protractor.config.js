@@ -34,9 +34,9 @@ var conf = {
     "./features/annotate-project-ner-labels-existing-spec.ts",
     "./features/creat-image-project-spec.ts",
     "./features/annotate-project-image-spec.ts",
+    "./features/append-project-image-spec.ts",
     "./features/project-preview-detail-spec.ts",
     "./features/datasets-preview-detail-spec.ts",
-    "./features/append-project-image-spec.ts",
     "./features/delete-projects-spec.ts",
     "./features/delete-datasets-spec.ts",
   ],
@@ -46,15 +46,14 @@ var conf = {
     "./general/login-external-spec.ts",
   ],
   poc_specs: [
-    "./general/login-external-spec.ts",
-    // "./features/delete-datasets-spec.ts",
+    
   ],
   specsAll: [],
 };
 
 exports.config = {
   allScriptsTimeout: 20000, //first page loading time
-  // specs: conf.poc_specs,
+  // specs: conf.specsConst.concat(poc_specs),
   specs: conf.specsConst.concat(conf.ci_specs),
   capabilities: {
     browserName: "chrome",
