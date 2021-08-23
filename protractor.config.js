@@ -46,14 +46,15 @@ var conf = {
     "./general/login-external-spec.ts",
   ],
   poc_specs: [
-    
+    "./general/login-external-spec.ts",
+    "./features/edit-project-spec.ts",
   ],
   specsAll: [],
 };
 
 exports.config = {
   allScriptsTimeout: 20000, //first page loading time
-  // specs: conf.specsConst.concat(poc_specs),
+  // specs: conf.poc_specs,
   specs: conf.specsConst.concat(conf.ci_specs),
   capabilities: {
     browserName: "chrome",

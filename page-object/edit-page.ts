@@ -157,7 +157,6 @@ export class EditPage {
     console.log("start to editLabel...");
     await FunctionUtil.elementVisibilityOf(label);
     await label.click();
-    await label.sendKeys(Key.COMMAND, "a");
     await label.sendKeys(Key.CONTROL, "a");
     await label.sendKeys(value);
     await browser.waitForAngularEnabled(false);
