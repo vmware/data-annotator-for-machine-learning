@@ -402,16 +402,18 @@ export class EditProjectComponent implements OnInit {
         (this.msg.projectTyp != 'ner' && this.categoryList.length > 2)
       ) {
         this.categoryList.splice(index, 1);
-      } else {
-        this.errorMessage =
-          'Failed to delete the label because this project at least keep ' +
-          this.categoryList.length +
-          ' label.';
-        this.isShowDeleteModal = false;
-        setTimeout(() => {
-          this.errorMessage = '';
-        }, 1000);
       }
+      // else {
+      //   console.log('useless code?');
+      //   this.errorMessage =
+      //     'Failed to delete the label because this project at least keep ' +
+      //     this.categoryList.length +
+      //     ' label.';
+      //   this.isShowDeleteModal = false;
+      //   setTimeout(() => {
+      //     this.errorMessage = '';
+      //   }, 5000);
+      // }
     }
   }
 
