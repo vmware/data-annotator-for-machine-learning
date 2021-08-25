@@ -2,6 +2,7 @@
 Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
+
 import { CommonPage } from '../general/commom-page';
 import { Constant } from '../general/constant';
 import { browser, $, ExpectedConditions, element, by } from 'protractor';
@@ -15,7 +16,9 @@ export class DownloadSharePage extends CommonPage {
     GENERATE_BTN = element(by.partialButtonText('GENERATE NEW DATASET'));
     DOWNLOAD_PROJECT_BTN = element(by.buttonText('DOWNLOAD'));
     LOADING_BTN = element(by.css('div.modal-footer button.uploadLoading'));
-
+    CLOSE_BTN = $('button[class="close"]');
+    
+    
     fs = require('fs');
 
     async clickdownloadProject() {
@@ -47,11 +50,11 @@ export class DownloadSharePage extends CommonPage {
     async verifyDownloadFileExisted(filename: string, path: string) {
         await browser.sleep(3000);
         const dir = this.fs.readdirSync(path)
-        console.log('filename:::', filename)
-        console.log('path:::', path)
-        console.log('dir:::', dir)
+        console.log(`path: ${path} dir: ${dir}`);
+        
         for await (const dirent of dir) {
-            if (!dirent.indexOf(filename)) {
+            console.log(`dirent: ${dirent} dirent.indexOf(filename): ${dirent.indexOf(filename)}`);
+            if (dirent.indexOf(filename) != -1) {
                 return true
             }
         }
@@ -59,21 +62,26 @@ export class DownloadSharePage extends CommonPage {
 
     SHARE_BTN = $('button[title="Share Datasets"]');
     async clickShareBtn() {
-        return await FunctionUtil.click(this.SHARE_BTN);
+        return FunctionUtil.click(this.SHARE_BTN);
     }
 
     SHARE_INFO = element(by.id('description'))
     async inputShareInfo(info: string) {
-        return await FunctionUtil.sendText(this.SHARE_INFO, info);
+        return FunctionUtil.sendText(this.SHARE_INFO, info);
     }
 
     SHARE_OK = element(by.buttonText("OK"));
-    async shareProject() {
-        return await await FunctionUtil.click(this.SHARE_OK);
+    async shareProject(projectName) {
+        await this.filterProjectName(projectName);
+        if ((await this.verifySharedStatus()) == "folder") {
+            await this.clickShareBtn();
+            await this.inputShareInfo("e2e test share project");
+            await FunctionUtil.click(this.SHARE_OK);
+        }
     }
 
     async verifySharedStatus() {
-        return await FunctionUtil.getAttribute(this.SHARE_BTN.$('clr-icon:nth-child(1)'), 'shape');
+        return FunctionUtil.getAttribute(this.SHARE_BTN.$('clr-icon:nth-child(1)'), 'shape');
     }
 
     getDownloadFileName(filename: string) {
@@ -97,4 +105,13 @@ export class DownloadSharePage extends CommonPage {
             }
         this.fs.rmdirSync(dirPath);
     }
+
+    LOG_ORIGINAL_DATASET = element(by.partialLinkText("download this project's original datasets"));
+    
+    async downloadLogOriginalDataAndClose(){
+        await FunctionUtil.click(this.LOG_ORIGINAL_DATASET);
+        await FunctionUtil.click(this.CLOSE_BTN);
+        await browser.sleep(3000);
+    }
+    
 }
