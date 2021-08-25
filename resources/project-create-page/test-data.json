@@ -1,17 +1,26 @@
 {
   "TextProject": {
-    "Instruction": "this is e2e test project task instruction",
+    "Instruction": "this is e2e test text project task instruction",
     "Annotator": "poc-os@poc-os.com",
+    "Annotator2": "test2@vmware.com",
     "Labels": "test1,test2",
     "Source": "text-test-data.csv",
-    "ticketSessions": 27
+    "ticketSessions": 27,
+    "assignedTickets": 10,
+    "duplicateLabelColumn": "Description",
+    "categoryLabelColumn": "GSS_Problem_Category__c",
+    "labelColumn": "No Labels",
+    "duplicateLabel": "test1",
+    "deleteLabel": "test3",
+    "maxAnnotation": 3
   },
   "TextMultipleLabelsProject": {
     "Instruction": "this is e2e test multiple labels project task instruction",
     "Annotator": "poc-os@poc-os.com",
     "Labels": "test1,test2",
     "Source": "text-test-data.csv",
-    "ticketSessions": 27
+    "ticketSessions": 27,
+    "maxAnnotation": 1
   },
   "TabularNumericLabelsProject": {
     "Instruction": "this is e2e test tabular numeric labels project task instruction",
@@ -19,15 +28,28 @@
     "MinLabel": 1,
     "MaxLabel": 100,
     "Source": "text-test-data.csv",
-    "ticketSessions": 27
+    "ticketSessions": 27,
+    "maxAnnotation": 1
   },
+
+  "TabularProject": {
+    "Instruction": "this is e2e test tabular project task instruction",
+    "Annotator": "poc-os@poc-os.com",
+    "Labels": "test1,test2",
+    "Source": "text-test-data.csv",
+    "ticketSessions": 27,
+    "labelColumn": "No Labels",
+    "maxAnnotation": 1
+  },
+
   "NerLabelsExistingProject": {
     "Instruction": "this is e2e test ner labels existing project task instruction",
     "Annotator": "poc-os@poc-os.com",
     "existingLabels": "label1",
     "Labels": "test1",
     "Source": "ner-test-data.csv",
-    "ticketSessions": 29
+    "ticketSessions": 29,
+    "duplicateLabel": "test1"
   },
   "LogProject": {
     "Instruction": "this is e2e test log project task instruction",

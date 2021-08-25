@@ -1,11 +1,14 @@
 {
   "TextProject": {
     "Email_Validation": "test2@@@@qq.com",
-    "Owner": "test2@vmware.com",
-    "Annotator": "test2@vmware.com",
+    "Owner2": "test2@vmware.com",
+    "Owner3": "test3@vmware.com",
+    "Annotator": "test2@vmware.com,test3@vmware.com,test4@vmware.com,test5@vmware.com,test6@vmware.com",
     "Labels": "test3,test4,test5,test6,test7",
     "Threshold": 55,
-    "Frequency": 15
+    "Threshold_Err": 40,
+    "Frequency": 15,
+    "Frequency_Err": 5
   },
 
   "LogProject": {
@@ -20,6 +23,9 @@
 
   "TabularNumericProject": {
     "Min": 0,
-    "Labels": "0--100"
+    "Max": 200,
+    "Min_Validation": 2,
+    "Max_Validation": 99,
+    "Labels": "0--200"
   }
 }

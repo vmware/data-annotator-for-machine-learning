@@ -55,7 +55,9 @@ describe("Create new project ", () => {
       Constant.DEFAULT_TIME_OUT
     );
     await newProjectPage.setData("tabular", 0, 3);
-    await newProjectPage.setMaxAnnotation();
+    await newProjectPage.setMaxAnnotation(
+      projectCreateData.TabularNumericLabelsProject.maxAnnotation
+    );
     await newProjectPage.setNumericLabel(Min_Lable, Max_Lable);
     await newProjectPage.setAssignee(Constant.username);
     await newProjectPage.clickCreateBtn();

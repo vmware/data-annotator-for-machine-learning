@@ -59,6 +59,9 @@ describe("Create new project ", () => {
     await newProjectPage.setNewLable([
       projectCreateData.NerLabelsExistingProject.Labels,
     ]);
+    await newProjectPage.setDuplicateLable(
+      projectCreateData.NerLabelsExistingProject.duplicateLabel
+    );
     await newProjectPage.setAssignee(Constant.username);
     await newProjectPage.clickCreateBtn();
     await projectsPage.waitForPageLoading();

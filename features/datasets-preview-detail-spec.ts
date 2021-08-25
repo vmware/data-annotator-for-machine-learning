@@ -8,7 +8,7 @@ import { Constant } from "../general/constant";
 import { CommonPage } from "../general/commom-page";
 import { browser, by, element } from "protractor";
 
-describe("delete function", () => {
+describe("start to preview my dataset page", () => {
   let myDatasetsName: string;
   let myDatasetsPage: MyDatasetsPage;
   let since = require("jasmine2-custom-message");
@@ -21,6 +21,36 @@ describe("delete function", () => {
     LoginBussiness.verifyLogin();
     myDatasetsPage = new MyDatasetsPage();
     commonPage = new CommonPage();
+  });
+
+  it("Should change the page value successfully.", async (done) => {
+    await myDatasetsPage.navigateTo();
+    await myDatasetsPage.waitForPageLoading();
+    await commonPage.changePageValue(20);
+    done();
+  });
+
+  it("Should not delete image dataset successfully without delete the related image project.", async (done) => {
+    myDatasetsName = Constant.dataset_name_image;
+    await myDatasetsPage.filterDatasetstName(myDatasetsName);
+    let Datasets_Count_After_Filter = await myDatasetsPage.getTableLength();
+    if (Datasets_Count_After_Filter > 0) {
+      console.log("----------start to delete image dataset----------");
+      await commonPage.DELETE_PROJECT_BTN.click();
+      await browser.sleep(1000);
+      await commonPage.DELETE_PROJECT_CANCEL_BTN.click();
+      await commonPage.DELETE_PROJECT_BTN.click();
+      await browser.sleep(1000);
+      await commonPage.DELETE_PROJECT_OK_BTN.click();
+      await browser.sleep(1000);
+      since("prompt should show up and content correct")
+        .expect((await commonPage.getPromptText()).split("."))
+        .toContain("Delete dataset failed");
+      await browser.sleep(1000);
+    } else {
+      console.log("can not filter out the consitent datasets....");
+    }
+    done();
   });
 
   it("Should preview text dataset successfully.", async (done) => {

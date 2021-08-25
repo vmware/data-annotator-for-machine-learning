@@ -9,6 +9,7 @@ export let Constant = {
   project_name_text_al: "",
   project_name_text_multiple: "",
   project_name_tabular_numeric: "",
+  project_name_tabular_al: "",
   project_name_ner: "",
   project_name_log: "",
   project_name_image: "",

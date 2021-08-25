@@ -53,6 +53,7 @@ export class CommonPage {
   UPLOAD_CSV_BTN = $(".btn-primary.add-doc.float-right");
   CHOOSE_FILE_BTN = $('input[name="localFileFile"]');
   UPLOAD_CSV_OK_BTN = $(".modal-footer .btn.btn-primary");
+  UPLOAD_CSV_CANCEL_BTN = $(".modal-footer .btn.btn-outline");
   CSV_UPLOAD = $("#select-basic");
   CSV_UPLOAD_OPTIONS = $$("#select-basic option");
   CSV_NAME = $(".modal-content #datasetsName");
@@ -60,9 +61,16 @@ export class CommonPage {
     '.datagrid-row.ng-star-inserted:last-of-type button[title="Delete Project"]'
   );
   DELETE_PROJECT_OK_BTN = $(".modal-footer .btn.btn-primary");
+  DELETE_PROJECT_CANCEL_BTN = $(".modal-footer .btn.btn-outline");
   ACTIONS = $$(
     '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"] .actionClass'
   );
+  PAGE_SIZE_SELECT = element(by.css("app-dropdown-pagesize select"));
+  PAGE_SIZE_SELECT_OPTION = element.all(
+    by.css("app-dropdown-pagesize select option")
+  );
+  SHOW_ICON = element(by.css("clr-icon.showIcon"));
+  HIDE_ICON = element(by.css("div.isShowHide"));
 
   getTableLength() {
     return this.Table_LISTS.count();
@@ -229,6 +237,8 @@ export class CommonPage {
   async uploadCSV(csvName: string, localCsvPath: string) {
     await FunctionUtil.elementVisibilityOf(this.UPLOAD_CSV_BTN);
     await this.UPLOAD_CSV_BTN.click();
+    await this.UPLOAD_CSV_CANCEL_BTN.click();
+    await this.UPLOAD_CSV_BTN.click();
     await this.CSV_NAME.clear();
     await this.CSV_NAME.sendKeys(csvName);
     await this.setLocalCSVPath(localCsvPath);
@@ -243,5 +253,29 @@ export class CommonPage {
       ExpectedConditions.invisibilityOf($(".btn.uploadLoading")),
       Constant.DEFAULT_TIME_OUT
     );
+  }
+
+  async changePageValue(size) {
+    await FunctionUtil.elementVisibilityOf(this.PAGE_SIZE_SELECT);
+    await browser.waitForAngularEnabled(false);
+    await this.PAGE_SIZE_SELECT.click();
+    await FunctionUtil.elementVisibilityOf(this.PAGE_SIZE_SELECT_OPTION.get(0));
+    await this.PAGE_SIZE_SELECT_OPTION.then(async (options) => {
+      options.forEach(async (value, index) => {
+        await this.PAGE_SIZE_SELECT_OPTION.get(index)
+          .getText()
+          .then(async (e) => {
+            if (e === size) {
+              await this.PAGE_SIZE_SELECT_OPTION.get(index).click();
+            }
+          });
+      });
+    });
+  }
+
+  async toShowMoreAnnotators() {
+    await FunctionUtil.elementVisibilityOf(this.SHOW_ICON);
+    await browser.waitForAngularEnabled(false);
+    await this.SHOW_ICON.click();
   }
 }

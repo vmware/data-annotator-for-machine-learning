@@ -17,11 +17,13 @@ var conf = {
   ci_specs: [
     "./features/upload-new-dataset-spec.ts",
     "./features/delete-datasets-spec.ts",
+    "./features/delete-projects-spec.ts",
     "./features/creat-log-project-spec.ts",
     "./features/annotate-project-log-spec.ts",
     "./features/append-project-log-spec.ts",
     "./features/creat-text-project-spec.ts",
     "./features/annotate-project-buttons-spec.ts",
+    "./features/creat-tabular-project-spec.ts",
     "./features/creat-tabular-numeric-project-spec.ts",
     "./features/annotate-project-tabular-numeric-spec.ts",
     "./features/edit-project-spec.ts",
@@ -34,9 +36,9 @@ var conf = {
     "./features/annotate-project-ner-labels-existing-spec.ts",
     "./features/creat-image-project-spec.ts",
     "./features/annotate-project-image-spec.ts",
+    "./features/append-project-image-spec.ts",
     "./features/project-preview-detail-spec.ts",
     "./features/datasets-preview-detail-spec.ts",
-    "./features/append-project-image-spec.ts",
     "./features/delete-projects-spec.ts",
     "./features/delete-datasets-spec.ts",
   ],
@@ -65,7 +67,7 @@ exports.config = {
         "ignore-certificate-errors",
         "ignore-ssl-errors",
         "no-sandbox",
-        "headless",
+        // "headless",
       ],
       prefs: {
         download: {

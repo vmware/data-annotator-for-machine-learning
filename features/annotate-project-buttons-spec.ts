@@ -7,11 +7,13 @@ import { Constant } from "../general/constant";
 import { AnnotatePage } from "../page-object/annotate-page";
 import { browser } from "protractor";
 import { ProjecstPage } from "../page-object/projects-page";
+import { CommonPage } from "../general/commom-page";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("annotate project ...", () => {
   let annotatePage: AnnotatePage;
   let projectsPage: ProjecstPage;
+  let commonPage: CommonPage;
   let since = require("jasmine2-custom-message");
   let project_name: string;
 
@@ -20,18 +22,24 @@ describe("annotate project ...", () => {
     LoginBussiness.verifyLogin();
     annotatePage = new AnnotatePage();
     projectsPage = new ProjecstPage();
+    commonPage = new CommonPage();
     console.log("start to annotate project: " + project_name);
   });
 
   it("Should annotate project with less than 6 labels successfully.", async (done) => {
     await annotatePage.navigateTo();
     await annotatePage.waitForGridLoading();
+    await commonPage.changePageValue(20);
     await annotatePage.filterProjectName(project_name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
     let Project_Name_Text = await projectsPage.getCellText(0);
     console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
     console.log("Project_Name_Text:::", Project_Name_Text);
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
+      await commonPage.toShowMoreAnnotators();
+      since("hidden annotators should show up with hide icon")
+        .expect(commonPage.HIDE_ICON.getText())
+        .toEqual("hide");
       await annotatePage.clickAnnotateStartBtn(project_name);
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);

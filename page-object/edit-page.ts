@@ -12,6 +12,7 @@ export class EditPage {
   PROJECT_TABLE = $(".datagrid-host .datagrid");
   ADMIN_TAB = element(by.css('.header-nav a[href="/admin"]'));
   EDIT_PROJECT_OK_BTN = $(".modal-footer .btn.btn-primary");
+  EDIT_PROJECT_CANCEL_BTN = $(".modal-footer .btn.btn-outline");
   NEW_LABEL_INPUT = element(by.css('input[name="addNewLabel"]'));
   PROJECT_NAME_INPUT = element(by.css("input[id=projectName]"));
   PROJECT_OWNER_INPUT = element(by.css("input[id=projectOwner]"));
@@ -28,7 +29,12 @@ export class EditPage {
   );
   ASSIGN_TICKET_DELETE_ICON = element(by.css("ul li:last-child clr-icon"));
   DELETE_OK_BTN = element.all(by.css(".modal-footer .btn.btn-primary")).last();
-  NUMERIC_LABEL_INPUT = element(by.css("input[id=min]"));
+  DELETE_CANCEL_BTN = element
+    .all(by.css(".modal-footer .btn.btn-outline"))
+    .last();
+  NUMERIC_MIN_LABEL_INPUT = element(by.css("input[id=min]"));
+  NUMERIC_MAX_LABEL_INPUT = element(by.css("input[id=max]"));
+  OWNER_DELETE_ICON = element(by.css("ul li:last-child clr-icon"));
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.ADMIN_TAB);
@@ -49,6 +55,11 @@ export class EditPage {
     console.log("editProjectName_name:::", name);
     Constant.project_name_text_al = name + "edit";
     await this.PROJECT_NAME_INPUT.clear();
+    await this.PROJECT_NAME_INPUT.sendKeys(protractor.Key.TAB);
+    await this.PROJECT_NAME_INPUT.click();
+    await this.PROJECT_NAME_INPUT.sendKeys(Constant.project_name_log);
+    await this.PROJECT_NAME_INPUT.sendKeys(protractor.Key.TAB);
+    await this.PROJECT_NAME_INPUT.clear();
     await this.PROJECT_NAME_INPUT.sendKeys(Constant.project_name_text_al);
     await browser.waitForAngularEnabled(false);
   }
@@ -62,15 +73,29 @@ export class EditPage {
     await browser.waitForAngularEnabled(false);
   }
 
-  async editProjectOwner(email_validation, owner) {
+  async editProjectOwner(email_validation, owner2, owner3) {
     await FunctionUtil.elementVisibilityOf(this.PROJECT_OWNER_INPUT);
     await this.PROJECT_OWNER_INPUT.click();
     await this.PROJECT_OWNER_INPUT.sendKeys(email_validation);
     await browser.sleep(1000);
     await FunctionUtil.pressEnter();
     await this.PROJECT_OWNER_INPUT.clear();
-    await this.PROJECT_OWNER_INPUT.sendKeys(owner);
+    await this.PROJECT_OWNER_INPUT.sendKeys(Constant.username);
+    await browser.sleep(1000);
+    await this.PROJECT_OWNER_INPUT.clear();
+    await this.PROJECT_OWNER_INPUT.sendKeys(owner2);
+    await FunctionUtil.pressEnter();
+    await this.PROJECT_OWNER_INPUT.sendKeys(owner3);
+    await FunctionUtil.pressEnter();
     await browser.waitForAngularEnabled(false);
+  }
+
+  async deleteProjectOwner(owner) {
+    console.log("start to delete project owner...");
+    await FunctionUtil.elementVisibilityOf(this.OWNER_DELETE_ICON);
+    await this.OWNER_DELETE_ICON.click();
+    await browser.waitForAngularEnabled(false);
+    console.log("succeed to delete project owner...");
   }
 
   async editProjectAnnotator(email_validation, annotator) {
@@ -80,7 +105,15 @@ export class EditPage {
     await browser.sleep(1000);
     await FunctionUtil.pressEnter();
     await this.PROJECT_ANNOTATOR_INPUT.clear();
-    await this.PROJECT_ANNOTATOR_INPUT.sendKeys(annotator);
+    await this.PROJECT_ANNOTATOR_INPUT.sendKeys(Constant.username);
+    await browser.sleep(1000);
+    await this.PROJECT_ANNOTATOR_INPUT.clear();
+    let flag = annotator.split(",");
+    console.log("annotators:", flag);
+    flag.forEach(async (element) => {
+      await this.PROJECT_ANNOTATOR_INPUT.sendKeys(element);
+      await FunctionUtil.pressEnter();
+    });
     await browser.waitForAngularEnabled(false);
   }
 
@@ -103,12 +136,21 @@ export class EditPage {
     console.log("succeed to editAssignedTickets...");
   }
 
-  async editNumericScope(min) {
+  async editNumericScope(min, min_err, max, max_err) {
     console.log("start to editNumericScope...");
-    await FunctionUtil.elementVisibilityOf(this.NUMERIC_LABEL_INPUT);
-    await this.NUMERIC_LABEL_INPUT.click();
-    await this.NUMERIC_LABEL_INPUT.clear();
-    await this.NUMERIC_LABEL_INPUT.sendKeys(min);
+    await FunctionUtil.elementVisibilityOf(this.NUMERIC_MIN_LABEL_INPUT);
+    await this.NUMERIC_MIN_LABEL_INPUT.click();
+    await this.NUMERIC_MIN_LABEL_INPUT.clear();
+    await this.NUMERIC_MIN_LABEL_INPUT.sendKeys(min_err);
+    await browser.sleep(1000);
+    await this.NUMERIC_MIN_LABEL_INPUT.clear();
+    await this.NUMERIC_MIN_LABEL_INPUT.sendKeys(min);
+    await this.NUMERIC_MAX_LABEL_INPUT.click();
+    await this.NUMERIC_MAX_LABEL_INPUT.clear();
+    await this.NUMERIC_MAX_LABEL_INPUT.sendKeys(max_err);
+    await browser.sleep(1000);
+    await this.NUMERIC_MAX_LABEL_INPUT.clear();
+    await this.NUMERIC_MAX_LABEL_INPUT.sendKeys(max);
     await browser.waitForAngularEnabled(false);
     console.log("succeed to editNumericScope...");
   }
@@ -119,15 +161,21 @@ export class EditPage {
     await browser.waitForAngularEnabled(false);
   }
 
-  async editALProjectThreshold(threshold) {
+  async editALProjectThreshold(threshold, threshold_err) {
     await FunctionUtil.elementVisibilityOf(this.AL_THRESHOLD_INPUT);
+    await this.AL_THRESHOLD_INPUT.clear();
+    await this.AL_THRESHOLD_INPUT.sendKeys(threshold_err);
+    await this.AL_THRESHOLD_INPUT.sendKeys(protractor.Key.TAB);
     await this.AL_THRESHOLD_INPUT.clear();
     await this.AL_THRESHOLD_INPUT.sendKeys(threshold);
     await browser.waitForAngularEnabled(false);
   }
 
-  async editALProjectFrequency(frequency) {
+  async editALProjectFrequency(frequency, frequency_err) {
     await FunctionUtil.elementVisibilityOf(this.AL_FREQUENCY_INPUT);
+    await this.AL_FREQUENCY_INPUT.clear();
+    await this.AL_FREQUENCY_INPUT.sendKeys(frequency_err);
+    await this.AL_FREQUENCY_INPUT.sendKeys(protractor.Key.TAB);
     await this.AL_FREQUENCY_INPUT.clear();
     await this.AL_FREQUENCY_INPUT.sendKeys(frequency);
     await browser.waitForAngularEnabled(false);
@@ -141,6 +189,19 @@ export class EditPage {
       await this.NEW_LABEL_INPUT.sendKeys(element);
       await FunctionUtil.pressEnter();
     });
+  }
+
+  async cancelEdit(label1) {
+    await FunctionUtil.elementVisibilityOf(this.NEW_LABEL_INPUT);
+    await FunctionUtil.operationSuspensionElements(
+      label1,
+      this.DELETE_LABEL_ICON
+    );
+    await this.DELETE_CANCEL_BTN.click();
+    await this.NEW_LABEL_INPUT.clear();
+    await this.NEW_LABEL_INPUT.sendKeys("test1");
+    await FunctionUtil.pressEnter();
+    await this.EDIT_PROJECT_CANCEL_BTN.click();
   }
 
   async deleteLabel(label: any) {

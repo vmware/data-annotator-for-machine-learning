@@ -7,6 +7,7 @@ import { NewProjectPage } from "../page-object/new-project-page";
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
+import { EditPage } from "../page-object/edit-page";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("Create new project ", () => {
@@ -23,6 +24,7 @@ describe("Create new project ", () => {
   let Serial_Num: string;
   let newProjectPage: NewProjectPage;
   let projectsPage: ProjecstPage;
+  let editPage: EditPage;
   let since = require("jasmine2-custom-message");
 
   beforeAll(() => {
@@ -46,7 +48,10 @@ describe("Create new project ", () => {
     await newProjectPage.navigateTo();
     await browser.waitForAngular();
     await newProjectPage.clickNewProjectBtn(PROJECT_TEXT_CLASSIFICATION);
-    await newProjectPage.setProjectName(New_Project_Name);
+    await newProjectPage.setProjectName(
+      New_Project_Name,
+      Constant.project_name_log
+    );
     await newProjectPage.setTaskInstruction(Task_Instruction);
     await newProjectPage.uploadCSV(New_CSV_Name, CSV_Path);
     await browser.wait(
@@ -54,10 +59,40 @@ describe("Create new project ", () => {
       Constant.DEFAULT_TIME_OUT
     );
     await newProjectPage.setData("text");
-    await newProjectPage.setMaxAnnotation();
+    await newProjectPage.setLabelValidation(
+      projectCreateData.TextProject.duplicateLabelColumn
+    );
+    await newProjectPage.setLabelValidation(
+      projectCreateData.TextProject.categoryLabelColumn
+    );
+    await newProjectPage.setDataSubmit();
+    await newProjectPage.setLabelValidation(
+      projectCreateData.TextProject.labelColumn
+    );
+    await newProjectPage.setDataSubmit();
+    await newProjectPage.setMaxAnnotation(
+      projectCreateData.TextProject.maxAnnotation
+    );
     await newProjectPage.setNewLable(New_Lable);
+    await newProjectPage.setDuplicateLable(
+      projectCreateData.TextProject.duplicateLabel
+    );
+    await newProjectPage.deleteLable(projectCreateData.TextProject.deleteLabel);
     await newProjectPage.selectActiveLearningModel(0);
-    await newProjectPage.setAssignee(Constant.username);
+    await newProjectPage.setAssignee(
+      Constant.username,
+      projectCreateData.TextProject.Annotator2
+    );
+    await newProjectPage.setDuplicateAnnotator(
+      projectCreateData.TextProject.Annotator
+    );
+    await newProjectPage.setMaxAnnotation(
+      projectCreateData.TextProject.maxAnnotation - 1
+    );
+    await newProjectPage.setAssignedTicket(
+      projectCreateData.TextProject.assignedTickets
+    );
+    await editPage.deleteAnnotator();
     await newProjectPage.clickCreateBtn();
     await projectsPage.waitForPageLoading();
     await browser.wait(

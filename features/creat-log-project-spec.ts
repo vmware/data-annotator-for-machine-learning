@@ -43,9 +43,13 @@ describe("Create new project ", () => {
     await newProjectPage.navigateTo();
     await browser.waitForAngular();
     await newProjectPage.clickNewProjectBtn(PROJECT_NER_CLASSIFICATION);
+    await newProjectPage.uploadCSV(New_CSV_Name, CSV_Path);
+    await newProjectPage.navigateTo();
+    await browser.waitForAngular();
+    await newProjectPage.clickNewProjectBtn(PROJECT_NER_CLASSIFICATION);
     await newProjectPage.setProjectName(New_Project_Name);
     await newProjectPage.setTaskInstruction(Task_Instruction);
-    await newProjectPage.uploadCSV(New_CSV_Name, CSV_Path);
+    await newProjectPage.selectExistingFile(Constant.dataset_name_log);
     await newProjectPage.isShowFilename();
     await newProjectPage.setNewLable(
       projectCreateData.LogProject.Labels.split(",")

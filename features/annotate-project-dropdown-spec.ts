@@ -46,7 +46,7 @@ describe("annotate project ...", () => {
         .expect(annotatePage.getProjectInfo())
         .toEqual({
           name: project_name,
-          owner: Constant.username + "," + projectEditData.TextProject.Owner,
+          owner: Constant.username + "," + projectEditData.TextProject.Owner2,
           source: projectCreateData.TextProject.Source,
           instruction: projectCreateData.TextProject.Instruction,
         });

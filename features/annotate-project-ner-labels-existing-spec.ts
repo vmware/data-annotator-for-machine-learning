@@ -91,6 +91,8 @@ describe("annotate project ...", () => {
       since("the content should not be empty")
         .expect(annotatePage.currentNerTicketContent())
         .not.toEqual("");
+      console.log("current_historylist:", await annotatePage.getHistoryLists());
+      console.log("old_historylist_plus_skip:", historyLists + 1);
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toEqual(historyLists + 1);

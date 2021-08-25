@@ -10,12 +10,11 @@ import { ProjecstPage } from "../page-object/projects-page";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("Create new project ", () => {
-  const Task_Instruction =
-    projectCreateData.TextMultipleLabelsProject.Instruction;
-  const New_Lable = projectCreateData.TextProject.Labels.split(",");
+  const Task_Instruction = projectCreateData.TabularProject.Instruction;
+  const New_Lable = projectCreateData.TabularProject.Labels.split(",");
   const SET_DATA_SECTION = $('ul[role="tablist"] .nav-item:last-child');
-  const PROJECT_TEXT_CLASSIFICATION = element(
-    by.css('clr-dropdown-menu a[href="/projects/create/text"]')
+  const PROJECT_TABULAR_CLASSIFICATION = element(
+    by.css('clr-dropdown-menu a[href="/projects/create/tabular"]')
   );
 
   let New_Project_Name: string;
@@ -26,26 +25,24 @@ describe("Create new project ", () => {
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
-    New_Project_Name = "e2e Test Project Text Multiple " + Serial_Num;
+    New_Project_Name = "e2e Test Project Tabular " + Serial_Num;
     LoginBussiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();
-    console.log(
-      "start to create new text multiple labels project : " + New_Project_Name
-    );
+    console.log("start to create new tabular project : " + New_Project_Name);
   });
 
   afterAll(() => {
-    Constant.project_name_text_multiple = New_Project_Name;
+    Constant.project_name_tabular_al = New_Project_Name;
     console.log(
-      "project name after update: " + Constant.project_name_text_multiple
+      "project name after update: " + Constant.project_name_tabular_al
     );
   });
 
-  it("Should create new text multiple labels project successfully.", async (done) => {
+  it("Should create new tabular project successfully.", async (done) => {
     await newProjectPage.navigateTo();
     await browser.waitForAngular();
-    await newProjectPage.clickNewProjectBtn(PROJECT_TEXT_CLASSIFICATION);
+    await newProjectPage.clickNewProjectBtn(PROJECT_TABULAR_CLASSIFICATION);
     await newProjectPage.setProjectName(New_Project_Name);
     await newProjectPage.setTaskInstruction(Task_Instruction);
     await newProjectPage.selectExistingFile(Constant.dataset_name_text);
@@ -53,12 +50,15 @@ describe("Create new project ", () => {
       ExpectedConditions.visibilityOf(SET_DATA_SECTION),
       Constant.DEFAULT_TIME_OUT
     );
-    await newProjectPage.setData("text");
+    await newProjectPage.setData("tabular", 0, 3);
     await newProjectPage.setMaxAnnotation(
-      projectCreateData.TextMultipleLabelsProject.maxAnnotation
+      projectCreateData.TabularProject.maxAnnotation
     );
+    await newProjectPage.shiftLabelType();
     await newProjectPage.setNewLable(New_Lable);
-    await newProjectPage.allowMultiple();
+    await newProjectPage.selectActiveLearningModel(1);
+    await newProjectPage.selectActiveLearningEncoder(0);
+    await newProjectPage.selectActiveLearningEncoder(1);
     await newProjectPage.setAssignee(Constant.username);
     await newProjectPage.clickCreateBtn();
     await projectsPage.waitForPageLoading();
@@ -76,7 +76,7 @@ describe("Create new project ", () => {
         .toBe(New_Project_Name);
       since("the data source should same as the user uploaded file")
         .expect(projectsPage.getCellText(2))
-        .toBe(projectCreateData.TextMultipleLabelsProject.Source);
+        .toBe(projectCreateData.TabularProject.Source);
       since("the annotar should be the logged user")
         .expect(projectsPage.getAnnotatorCellText())
         .toContain(Constant.username);

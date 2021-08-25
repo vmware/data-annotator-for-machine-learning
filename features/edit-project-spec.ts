@@ -43,18 +43,22 @@ describe("edit project info on projects page..", () => {
       await editPage.editProjectName(Project_Name_Text);
       await editPage.editProjectOwner(
         projectEditData.TextProject.Email_Validation,
-        projectEditData.TextProject.Owner
+        projectEditData.TextProject.Owner2,
+        projectEditData.TextProject.Owner3
       );
+      await editPage.deleteProjectOwner(projectEditData.TextProject.Owner3);
       await editPage.editProjectAnnotator(
         projectEditData.TextProject.Email_Validation,
         projectEditData.TextProject.Annotator
       );
       await editPage.addLabel(New_Lable);
       await editPage.editALProjectThreshold(
-        projectEditData.TextProject.Threshold
+        projectEditData.TextProject.Threshold,
+        projectEditData.TextProject.Threshold_Err
       );
       await editPage.editALProjectFrequency(
-        projectEditData.TextProject.Frequency
+        projectEditData.TextProject.Frequency,
+        projectEditData.TextProject.Frequency_Err
       );
       await editPage.clickEditSubmitButton();
       await browser.wait(
@@ -93,10 +97,10 @@ describe("edit project info on projects page..", () => {
         .toEqual(Constant.project_name_text_al);
       since("project owner should be 2 and content correct")
         .expect(New_Project_Owner)
-        .toEqual(Constant.username + "," + projectEditData.TextProject.Owner);
-      since("project annotator should be 2 and content correct")
+        .toEqual(Constant.username + "," + projectEditData.TextProject.Owner2);
+      since("project annotator should be 6 and content correct")
         .expect(New_Project_Annotator.split("\n").length)
-        .toEqual(4);
+        .toEqual(11);
       since("project labels should be 7 and content correct")
         .expect(New_Project_Labels)
         .toEqual(
@@ -110,10 +114,9 @@ describe("edit project info on projects page..", () => {
     done();
   });
 
-  it("Should edit log project successfully.", async (done) => {
-    await editPage.navigateTo();
-    await projectsPage.waitForGridLoading();
-    await projectsPage.filterProjectName(Constant.project_name_log);
+  it("Should cancel edit text al project successfully.", async (done) => {
+    project_name = Constant.project_name_text_al;
+    await projectsPage.filterProjectName(project_name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
     let Project_Name_Text = await projectsPage.getCellText(0);
     console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
@@ -121,109 +124,131 @@ describe("edit project info on projects page..", () => {
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
       console.log("----------start to edit projects----------");
       await editPage.clickEditButton();
-      await editPage.editAssignedTickets(
-        projectEditData.LogProject.Annotator,
-        projectEditData.LogProject.OverMax
-      );
-      await editPage.deleteAnnotator();
-      await editPage.deleteLabel(LABEL1_INPUT);
-      since("prompt should show up and content correct")
-        .expect(commonPage.getPromptText())
-        .toEqual(projectEditData.LogProject.ErrorMessage_Atleast);
-      await editPage.addLabel([projectEditData.LogProject.Labels]);
-      await editPage.clickEditSubmitButton();
-      await browser.wait(
-        ExpectedConditions.visibilityOf(PROMPT),
-        Constant.DEFAULT_TIME_OUT
-      );
+      await editPage.cancelEdit(LABEL1_INPUT);
       await projectsPage.waitForGridLoading();
-
-      //enter edit modal again to delete label and to catch another err message
-      await projectsPage.filterProjectName(Constant.project_name_log);
-      await browser.sleep(1000);
-      await editPage.clickEditButton();
-      await editPage.deleteLabel(LABEL1_INPUT);
-      since("prompt should show up and content correct")
-        .expect(commonPage.getPromptText())
-        .toEqual(projectEditData.LogProject.ErrorMessage_Used);
-      await browser.sleep(1000);
-
-      await editPage.deleteLabel(LABEL2_INPUT);
-      await editPage.editLabel(LABEL3_INPUT, "test2");
-      await editPage.showFileName();
-      await editPage.assignmentLogic();
-      await editPage.clickEditSubmitButton();
-      await browser.wait(
-        ExpectedConditions.visibilityOf(PROMPT),
-        Constant.DEFAULT_TIME_OUT
-      );
-      await projectsPage.waitForGridLoading();
-
-      console.log("----------start to verify the edit----------");
-      await projectsPage.filterProjectName(Constant.project_name_log);
-      let New_Project_Count_After_Filter = await projectsPage.getTableLength();
-      let New_Project_Name_Text = await projectsPage.getCellText(0);
-      let New_Project_Annotator;
-      let New_Project_Labels;
-      if (New_Project_Name_Text !== "" || New_Project_Count_After_Filter > 0) {
-        New_Project_Annotator = await projectsPage.getCellText(4);
-        New_Project_Labels = await projectsPage.getCellText(6);
-        console.log("annotator:", New_Project_Annotator);
-        console.log("labels:", New_Project_Labels);
-      } else {
-        console.log("can not filter out the projects....");
-      }
-      since("project annotator should be 1 and content correct")
-        .expect(New_Project_Annotator.split("\n").length)
-        .toEqual(2);
-      since("project labels' number should be 2 and content correct")
-        .expect(New_Project_Labels)
-        .toEqual(projectCreateData.LogProject.Labels);
     } else {
       console.log("can not filter out the projects....");
     }
     done();
   });
 
-  it("Should edit tabular numeric project successfully.", async (done) => {
-    await editPage.navigateTo();
-    await projectsPage.waitForGridLoading();
-    await projectsPage.filterProjectName(Constant.project_name_tabular_numeric);
-    let Project_Count_After_Filter = await projectsPage.getTableLength();
-    let Project_Name_Text = await projectsPage.getCellText(0);
-    console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
-    console.log("Project_Name_Text:::", Project_Name_Text);
-    if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
-      console.log("----------start to edit projects----------");
-      await editPage.clickEditButton();
-      await editPage.editNumericScope(
-        projectEditData.TabularNumericProject.Min
-      );
-      await editPage.clickEditSubmitButton();
-      await browser.wait(
-        ExpectedConditions.visibilityOf(PROMPT),
-        Constant.DEFAULT_TIME_OUT
-      );
-      await projectsPage.waitForGridLoading();
-      console.log("----------start to verify the edit----------");
-      await projectsPage.filterProjectName(
-        Constant.project_name_tabular_numeric
-      );
-      let New_Project_Count_After_Filter = await projectsPage.getTableLength();
-      let New_Project_Name_Text = await projectsPage.getCellText(0);
-      let New_Project_Labels;
-      if (New_Project_Name_Text !== "" || New_Project_Count_After_Filter > 0) {
-        New_Project_Labels = await projectsPage.getCellText(6);
-        console.log("labels:", New_Project_Labels);
-      } else {
-        console.log("can not filter out the projects....");
-      }
-      since("project labels' number should be 0--100 and content correct")
-        .expect(New_Project_Labels)
-        .toEqual(projectEditData.TabularNumericProject.Labels);
-    } else {
-      console.log("can not filter out the projects....");
-    }
-    done();
-  });
+  // it("Should edit log project successfully.", async (done) => {
+  //   await editPage.navigateTo();
+  //   await projectsPage.waitForGridLoading();
+  //   await projectsPage.filterProjectName(Constant.project_name_log);
+  //   let Project_Count_After_Filter = await projectsPage.getTableLength();
+  //   let Project_Name_Text = await projectsPage.getCellText(0);
+  //   console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
+  //   console.log("Project_Name_Text:::", Project_Name_Text);
+  //   if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
+  //     console.log("----------start to edit projects----------");
+  //     await editPage.clickEditButton();
+  //     await editPage.editAssignedTickets(
+  //       projectEditData.LogProject.Annotator,
+  //       projectEditData.LogProject.OverMax
+  //     );
+  //     await editPage.deleteAnnotator();
+  //     await editPage.deleteLabel(LABEL1_INPUT);
+  //     since("prompt should show up and content correct")
+  //       .expect(commonPage.getPromptText())
+  //       .toEqual(projectEditData.LogProject.ErrorMessage_Atleast);
+  //     await editPage.addLabel([projectEditData.LogProject.Labels]);
+  //     await editPage.clickEditSubmitButton();
+  //     await browser.wait(
+  //       ExpectedConditions.visibilityOf(PROMPT),
+  //       Constant.DEFAULT_TIME_OUT
+  //     );
+  //     await projectsPage.waitForGridLoading();
+
+  //     //enter edit modal again to delete label and to catch another err message
+  //     await projectsPage.filterProjectName(Constant.project_name_log);
+  //     await browser.sleep(1000);
+  //     await editPage.clickEditButton();
+  //     await editPage.deleteLabel(LABEL1_INPUT);
+  //     since("prompt should show up and content correct")
+  //       .expect(commonPage.getPromptText())
+  //       .toEqual(projectEditData.LogProject.ErrorMessage_Used);
+  //     await browser.sleep(1000);
+
+  //     await editPage.deleteLabel(LABEL2_INPUT);
+  //     await editPage.editLabel(LABEL3_INPUT, "test2");
+  //     await editPage.showFileName();
+  //     await editPage.assignmentLogic();
+  //     await editPage.clickEditSubmitButton();
+  //     await browser.wait(
+  //       ExpectedConditions.visibilityOf(PROMPT),
+  //       Constant.DEFAULT_TIME_OUT
+  //     );
+  //     await projectsPage.waitForGridLoading();
+
+  //     console.log("----------start to verify the edit----------");
+  //     await projectsPage.filterProjectName(Constant.project_name_log);
+  //     let New_Project_Count_After_Filter = await projectsPage.getTableLength();
+  //     let New_Project_Name_Text = await projectsPage.getCellText(0);
+  //     let New_Project_Annotator;
+  //     let New_Project_Labels;
+  //     if (New_Project_Name_Text !== "" || New_Project_Count_After_Filter > 0) {
+  //       New_Project_Annotator = await projectsPage.getCellText(4);
+  //       New_Project_Labels = await projectsPage.getCellText(6);
+  //       console.log("annotator:", New_Project_Annotator);
+  //       console.log("labels:", New_Project_Labels);
+  //     } else {
+  //       console.log("can not filter out the projects....");
+  //     }
+  //     since("project annotator should be 1 and content correct")
+  //       .expect(New_Project_Annotator.split("\n").length)
+  //       .toEqual(2);
+  //     since("project labels' number should be 2 and content correct")
+  //       .expect(New_Project_Labels)
+  //       .toEqual(projectCreateData.LogProject.Labels);
+  //   } else {
+  //     console.log("can not filter out the projects....");
+  //   }
+  //   done();
+  // });
+
+  // it("Should edit tabular numeric project successfully.", async (done) => {
+  //   await editPage.navigateTo();
+  //   await projectsPage.waitForGridLoading();
+  //   await projectsPage.filterProjectName(Constant.project_name_tabular_numeric);
+  //   let Project_Count_After_Filter = await projectsPage.getTableLength();
+  //   let Project_Name_Text = await projectsPage.getCellText(0);
+  //   console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
+  //   console.log("Project_Name_Text:::", Project_Name_Text);
+  //   if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
+  //     console.log("----------start to edit projects----------");
+  //     await editPage.clickEditButton();
+  //     await editPage.editNumericScope(
+  //       projectEditData.TabularNumericProject.Min,
+  //       projectEditData.TabularNumericProject.Min_Validation,
+  //       projectEditData.TabularNumericProject.Max,
+  //       projectEditData.TabularNumericProject.Max_Validation
+  //     );
+  //     await editPage.clickEditSubmitButton();
+  //     await browser.wait(
+  //       ExpectedConditions.visibilityOf(PROMPT),
+  //       Constant.DEFAULT_TIME_OUT
+  //     );
+  //     await projectsPage.waitForGridLoading();
+  //     console.log("----------start to verify the edit----------");
+  //     await projectsPage.filterProjectName(
+  //       Constant.project_name_tabular_numeric
+  //     );
+  //     let New_Project_Count_After_Filter = await projectsPage.getTableLength();
+  //     let New_Project_Name_Text = await projectsPage.getCellText(0);
+  //     let New_Project_Labels;
+  //     if (New_Project_Name_Text !== "" || New_Project_Count_After_Filter > 0) {
+  //       New_Project_Labels = await projectsPage.getCellText(6);
+  //       console.log("labels:", New_Project_Labels);
+  //     } else {
+  //       console.log("can not filter out the projects....");
+  //     }
+  //     since("project labels' number should be 0--100 and content correct")
+  //       .expect(New_Project_Labels)
+  //       .toEqual(projectEditData.TabularNumericProject.Labels);
+  //   } else {
+  //     console.log("can not filter out the projects....");
+  //   }
+  //   done();
+  // });
 });
