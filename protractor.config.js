@@ -49,7 +49,7 @@ var conf = {
   ],
   poc_specs: [
     "./general/login-external-spec.ts",
-    // "./features/delete-datasets-spec.ts",
+    "./features/edit-project-spec.ts",
   ],
   specsAll: [],
 };
