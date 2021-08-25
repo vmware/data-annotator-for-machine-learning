@@ -156,9 +156,11 @@ export class EditPage {
   }
 
   async deleteAnnotator() {
-    await FunctionUtil.elementVisibilityOf(this.ASSIGN_TICKET_DELETE_ICON);
+    console.log("start to deleteAnnotator...");
+    // await FunctionUtil.elementVisibilityOf(this.ASSIGN_TICKET_DELETE_ICON);
     await this.ASSIGN_TICKET_DELETE_ICON.click();
     await browser.waitForAngularEnabled(false);
+    console.log("succeed to deleteAnnotator...");
   }
 
   async editALProjectThreshold(threshold, threshold_err) {
@@ -218,6 +220,7 @@ export class EditPage {
     console.log("start to editLabel...");
     await FunctionUtil.elementVisibilityOf(label);
     await label.click();
+    await label.sendKeys(Key.COMMAND, "a");
     await label.sendKeys(Key.CONTROL, "a");
     await label.sendKeys(value);
     await browser.waitForAngularEnabled(false);

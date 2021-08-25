@@ -255,22 +255,16 @@ export class CommonPage {
     );
   }
 
-  async changePageValue(size) {
+  async changePageValue(index) {
+    console.log("start to changePageValue...");
     await FunctionUtil.elementVisibilityOf(this.PAGE_SIZE_SELECT);
     await browser.waitForAngularEnabled(false);
     await this.PAGE_SIZE_SELECT.click();
-    await FunctionUtil.elementVisibilityOf(this.PAGE_SIZE_SELECT_OPTION.get(0));
-    await this.PAGE_SIZE_SELECT_OPTION.then(async (options) => {
-      options.forEach(async (value, index) => {
-        await this.PAGE_SIZE_SELECT_OPTION.get(index)
-          .getText()
-          .then(async (e) => {
-            if (e === size) {
-              await this.PAGE_SIZE_SELECT_OPTION.get(index).click();
-            }
-          });
-      });
-    });
+    await element
+      .all(by.css("app-dropdown-pagesize select option"))
+      .get(index)
+      .click();
+    console.log("succeed to changePageValue...");
   }
 
   async toShowMoreAnnotators() {

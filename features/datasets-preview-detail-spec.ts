@@ -26,7 +26,7 @@ describe("start to preview my dataset page", () => {
   it("Should change the page value successfully.", async (done) => {
     await myDatasetsPage.navigateTo();
     await myDatasetsPage.waitForPageLoading();
-    await commonPage.changePageValue(20);
+    await commonPage.changePageValue(2);
     done();
   });
 

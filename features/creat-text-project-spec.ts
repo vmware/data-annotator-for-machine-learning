@@ -30,7 +30,7 @@ describe("Create new project ", () => {
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
     New_Project_Name = "e2e Test Project Text Al " + Serial_Num;
-    New_CSV_Name = "e2e Test Data Text" + Serial_Num;
+    New_CSV_Name = "e2e Test Data Text " + Serial_Num;
     LoginBussiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();
@@ -41,6 +41,7 @@ describe("Create new project ", () => {
 
   afterAll(() => {
     Constant.project_name_text_al = New_Project_Name;
+    Constant.dataset_name_text = New_CSV_Name;
     console.log("project name after update: " + Constant.project_name_text_al);
   });
 
@@ -71,7 +72,7 @@ describe("Create new project ", () => {
     );
     await newProjectPage.setDataSubmit();
     await newProjectPage.setMaxAnnotation(
-      projectCreateData.TextProject.maxAnnotation
+      projectCreateData.TextProject.maxAnnotation - 2
     );
     await newProjectPage.setNewLable(New_Lable);
     await newProjectPage.setDuplicateLable(
@@ -86,13 +87,13 @@ describe("Create new project ", () => {
     await newProjectPage.setDuplicateAnnotator(
       projectCreateData.TextProject.Annotator
     );
-    await newProjectPage.setMaxAnnotation(
-      projectCreateData.TextProject.maxAnnotation - 1
-    );
     await newProjectPage.setAssignedTicket(
       projectCreateData.TextProject.assignedTickets
     );
-    await editPage.deleteAnnotator();
+    await newProjectPage.deleteAnnotator();
+    await newProjectPage.setMaxAnnotation(
+      projectCreateData.TextProject.maxAnnotation
+    );
     await newProjectPage.clickCreateBtn();
     await projectsPage.waitForPageLoading();
     await browser.wait(

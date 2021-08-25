@@ -61,6 +61,7 @@ export class LoginBussiness {
   }
 
   async signUp(firstname, lastname, username, password) {
+    await browser.waitForAngularEnabled(false);
     await this.page.clickSignUpLink();
     await this.page.setFirstname(firstname);
     await this.page.clickSignInLink();
@@ -69,6 +70,19 @@ export class LoginBussiness {
     await this.page.setLastname(lastname);
     await this.page.setUsername(username);
     await this.page.setPassword(password);
+    await browser.waitForAngularEnabled(false);
     await this.page.clickSignUpBtn();
+    await browser.sleep(5000);
+    await this.page.clickSignUpBtn();
+  }
+
+  async logValidation(username, password) {
+    await browser.waitForAngularEnabled(false);
+    await this.page.setUsername(username);
+    await this.page.setPassword(password);
+    await browser.waitForAngularEnabled(false);
+    await this.page.clickLogInBtn();
+    await browser.waitForAngularEnabled(false);
+    await browser.sleep(5000);
   }
 }

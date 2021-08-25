@@ -5,28 +5,28 @@ SPDX-License-Identifier: Apache-2.0
 import { LoginPage } from "../page-object/login-page";
 import { LoginBussiness } from "../general/login-bussiness";
 import { browser } from "protractor";
-import { Constant } from '../general/constant';
+import { Constant } from "../general/constant";
 
+describe("Service", () => {
+  let loginPage: LoginPage;
+  let loginBusiness: LoginBussiness;
 
-describe('Service', () => {
-    let loginPage: LoginPage
-    let loginBusiness: LoginBussiness;
-
-    beforeAll((done) => {
-        loginPage = new LoginPage();
-        loginBusiness = new LoginBussiness();
-        browser.sleep(1000)
-            .then(() => {
-                loginPage.navigateTo()
-            })
-            .then(() => {
-                browser.sleep(1000)
-                done();
-            })
-    })
-
-    it('Should login with normal user successfully', async (done) => {
-        await loginBusiness.login(Constant.username, Constant.password);
+  beforeAll((done) => {
+    loginPage = new LoginPage();
+    loginBusiness = new LoginBussiness();
+    browser
+      .sleep(1000)
+      .then(() => {
+        loginPage.navigateTo();
+      })
+      .then(() => {
+        browser.sleep(1000);
         done();
-    })
-})
+      });
+  });
+
+  it("Should login with normal user successfully", async (done) => {
+    await loginBusiness.login(Constant.username, Constant.password);
+    done();
+  });
+});

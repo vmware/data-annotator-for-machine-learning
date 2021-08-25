@@ -70,10 +70,11 @@ export class NewProjectPage extends CommonPage {
   ASSIGN_TICKET_INPUT = element(
     by.css("ul li:first-child input.assignTicketNumber")
   );
-  DELETE_LABEL = element(by.css("div.labelsList span:last-child"));
-  DELETE_LABEL_ICON = element(
-    by.css("div.labelsList span:last-child clr-icon")
-  );
+  DELETE_LABEL = element
+    .all(by.css("div.labelsList div:last-child span"))
+    .last();
+  DELETE_LABEL_ICON = element(by.css("clr-icon[shape=times]"));
+  ASSIGN_TICKET_DELETE_ICON = element(by.css("ul li:last-child clr-icon"));
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.MY_PROJECTS_TAB);
@@ -244,11 +245,11 @@ export class NewProjectPage extends CommonPage {
   }
 
   async deleteLable(deleteLabel) {
-    await FunctionUtil.elementVisibilityOf(this.ADD_NEW_LABLE),
-      await this.ADD_NEW_LABLE.clear();
+    await FunctionUtil.elementVisibilityOf(this.ADD_NEW_LABLE);
+    await this.ADD_NEW_LABLE.clear();
     await this.ADD_NEW_LABLE.sendKeys(deleteLabel);
     await FunctionUtil.pressEnter();
-    await browser.sleep(1000);
+    await browser.sleep(3000);
     await FunctionUtil.operationSuspensionElements(
       this.DELETE_LABEL,
       this.DELETE_LABEL_ICON
@@ -304,8 +305,10 @@ export class NewProjectPage extends CommonPage {
         await this.ASSIGNEE.clear();
         await this.ASSIGNEE.sendKeys(Constant.username);
         await FunctionUtil.pressEnter();
-        await this.ASSIGNEE.sendKeys(annotator2);
-        await FunctionUtil.pressEnter();
+        if (annotator2) {
+          await this.ASSIGNEE.sendKeys(annotator2);
+          await FunctionUtil.pressEnter();
+        }
       });
   }
 
@@ -319,8 +322,11 @@ export class NewProjectPage extends CommonPage {
   }
 
   async setAssignedTicket(value) {
+    console.log("start to setAssignedTicket...");
     await this.ASSIGN_TICKET_INPUT.click();
-    await this.ASSIGN_TICKET_INPUT.sendKeys(value);
+    await await this.ASSIGN_TICKET_INPUT.sendKeys(protractor.Key.DOWN);
+    await this.ASSIGN_TICKET_INPUT.sendKeys(protractor.Key.TAB);
+    console.log("succeed to setAssignedTicket...");
   }
 
   clickCreateBtn() {
@@ -365,5 +371,13 @@ export class NewProjectPage extends CommonPage {
       ExpectedConditions.invisibilityOf(this.IMAGE_LOADING),
       Constant.DEFAULT_TIME_OUT
     );
+  }
+
+  async deleteAnnotator() {
+    console.log("start to deleteAnnotator...");
+    await FunctionUtil.elementVisibilityOf(this.ASSIGN_TICKET_DELETE_ICON);
+    await this.ASSIGN_TICKET_DELETE_ICON.click();
+    await browser.waitForAngularEnabled(false);
+    console.log("succeed to deleteAnnotator...");
   }
 }

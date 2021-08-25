@@ -15,9 +15,10 @@ const nycOutput = ".nyc_output";
 
 var conf = {
   ci_specs: [
+    // "./features/delete-projects-spec.ts",
+    // "./features/delete-datasets-spec.ts",
     "./features/upload-new-dataset-spec.ts",
     "./features/delete-datasets-spec.ts",
-    "./features/delete-projects-spec.ts",
     "./features/creat-log-project-spec.ts",
     "./features/annotate-project-log-spec.ts",
     "./features/append-project-log-spec.ts",
@@ -44,8 +45,8 @@ var conf = {
   ],
 
   specsConst: [
-    "./general/sign-up-external-spec.ts",
     "./general/login-external-spec.ts",
+    // "./general/sign-up-external-spec.ts",
   ],
   poc_specs: [
     "./general/login-external-spec.ts",

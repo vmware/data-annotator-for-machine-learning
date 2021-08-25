@@ -27,12 +27,13 @@ describe("Enter projects tab...", () => {
   beforeAll(() => {
     LoginBussiness.verifyLogin();
     projectsPage = new ProjecstPage();
+    commonPage = new CommonPage();
   });
 
   it("Should change the page value successfully.", async (done) => {
     await projectsPage.navigateTo();
     await projectsPage.waitForPageLoading();
-    await commonPage.changePageValue(20);
+    await commonPage.changePageValue(1);
     done();
   });
 
@@ -53,7 +54,7 @@ describe("Enter projects tab...", () => {
       await projectsPage.clickGridFirstCell();
       await projectsPage.waitForUserChartLoading();
       await projectsPage.waitForCategoryChartLoading();
-      await browser.sleep(1000);
+      await browser.sleep(10000);
       console.log("finish chart loading and sleeping");
       since("user chart rect should show up and have height")
         .expect(projectsPage.getChartRectHeight(USER_CHART_FIRST_RECT))
@@ -129,6 +130,8 @@ describe("Enter projects tab...", () => {
       );
       let tableLengthBeforeReturn = await projectsPage.getTableLength();
       console.log(9, tableLengthBeforeReturn);
+      let aa = (await projectsPage.getTableTotalItems()).trim().split(" ")[4];
+      console.log(10, aa);
       // since("table total items should to be 3 after filter")
       //   .expect(
       //     Number((await projectsPage.getTableTotalItems()).trim().split(" ")[4])
@@ -140,6 +143,8 @@ describe("Enter projects tab...", () => {
       // since("should return to annotator successful")
       //   .expect(projectsPage.RETURN_TO_ANNOTATOR_BTN.isEnabled())
       //   .toBe(true);
+      let bb = projectsPage.RETURN_TO_ANNOTATOR_BTN.isEnabled();
+      console.log(11, bb);
       await projectsPage.toExpandCell();
     } else {
       done.fail("can not filter out the consitent project....");

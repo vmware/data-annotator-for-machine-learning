@@ -29,17 +29,13 @@ describe("annotate project ...", () => {
   it("Should annotate project with less than 6 labels successfully.", async (done) => {
     await annotatePage.navigateTo();
     await annotatePage.waitForGridLoading();
-    await commonPage.changePageValue(20);
+    await commonPage.changePageValue(2);
     await annotatePage.filterProjectName(project_name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
     let Project_Name_Text = await projectsPage.getCellText(0);
     console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
     console.log("Project_Name_Text:::", Project_Name_Text);
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
-      await commonPage.toShowMoreAnnotators();
-      since("hidden annotators should show up with hide icon")
-        .expect(commonPage.HIDE_ICON.getText())
-        .toEqual("hide");
       await annotatePage.clickAnnotateStartBtn(project_name);
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);

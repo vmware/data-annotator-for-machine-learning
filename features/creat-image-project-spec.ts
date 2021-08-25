@@ -28,6 +28,8 @@ describe("Create new project ", () => {
     Serial_Num = new Date().getTime().toString();
     New_Project_Name = "e2e Test Project Image " + Serial_Num;
     New_CSV_Name = "e2e Test Data Image" + Serial_Num;
+    Constant.project_name_image = New_Project_Name;
+    Constant.dataset_name_image = New_CSV_Name;
     LoginBussiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();

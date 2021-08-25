@@ -29,8 +29,10 @@ export class LoginPage extends CommonPage {
   LAST_NAME = element(by.css('input[formcontrolname="lastname"]'));
   SIGN_UP_BTN = element(by.css('button[type="submit"]'));
   HOME_LINK = element(by.css('a[href="/home"]'));
+  ERR_ALERT = element(by.css("div.login-group div.error"));
 
-  navigateTo() {
+  async navigateTo() {
+    await browser.waitForAngularEnabled(false);
     browser.driver
       .get(browser.baseUrl)
       .then(() => {
@@ -46,6 +48,7 @@ export class LoginPage extends CommonPage {
   }
 
   async backToHomePage() {
+    await browser.waitForAngularEnabled(false);
     await browser.getCurrentUrl();
     await FunctionUtil.elementVisibilityOf(this.HOME_LINK);
     await this.HOME_LINK.click();
@@ -123,5 +126,10 @@ export class LoginPage extends CommonPage {
       .then((text) => {
         return text.trim();
       });
+  }
+
+  async getDivText() {
+    await FunctionUtil.elementVisibilityOf(this.ERR_ALERT);
+    return this.ERR_ALERT.getText();
   }
 }
