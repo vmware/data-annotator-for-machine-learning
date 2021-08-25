@@ -69,5 +69,12 @@ export class CommonUtils extends CommonPage {
         }
     }
 
+    static async deleteDataGrid(DELETE_BTN, DELETE_DATASET_OK_BTN){
+        return browser.wait(ExpectedConditions.visibilityOf(DELETE_BTN), Constant.DEFAULT_TIME_OUT)
+            .then(() => {DELETE_BTN.click()})
+            .then(() => {return browser.wait(ExpectedConditions.visibilityOf(DELETE_DATASET_OK_BTN), Constant.DEFAULT_TIME_OUT)})
+            .then(() => {DELETE_DATASET_OK_BTN.click()})
+            .then(() => {browser.sleep(2000)});
+    }
 
 }

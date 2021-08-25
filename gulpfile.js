@@ -41,7 +41,7 @@ gulp.task(
     // 'build',
     "copy",
     run(
-      "node --max-old-space-size=8192 node_modules/nyc/bin/nyc.js instrument dist coverage-output/annotation-app --exclude-after-remap=false --exclude=dist/libs/** --exclude=dist/vendor.js --exclude=dist/styles.js --exclude=dist/polyfills.*.js"
+      "node --max-old-space-size=4096 node_modules/nyc/bin/nyc.js instrument dist coverage-output/annotation-app --exclude-after-remap=false --exclude=dist/libs/** --exclude=dist/vendor.js --exclude=dist/styles.js --exclude=dist/polyfills.*.js"
     ),
     async () => {
       gulp.src("coverage-output/annotation-app/*").pipe(gulp.dest("dist/"));

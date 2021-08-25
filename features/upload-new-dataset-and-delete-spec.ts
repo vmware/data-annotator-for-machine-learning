@@ -2,27 +2,24 @@
 Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
+
 import { MyDatasetsPage } from "../page-object/my-datasets-page";
 import { Constant } from "../general/constant";
-import { browser, $, ExpectedConditions } from "protractor";
+import { browser, $, $$, ExpectedConditions } from "protractor";
+import { FunctionUtil } from "../utils/function-util";
 
 describe("upload new dataset on myDatasets page..", () => {
-  let myDatasetsPage: MyDatasetsPage;
-  let New_CSV_Name: string;
-  let SerialNum: string;
+  
+  let myDatasetsPage: MyDatasetsPage = new MyDatasetsPage();
+  let SerialNum: string = new Date().getTime().toString().substring(0, 9);
+  let New_CSV_Name: string = "e2e Test Data " + SerialNum;
 
   const PROMPT = $('span[class="alert-text"]');
   const CSV_Path = "/doc/upload-resource/text-test-data.csv";
   let since = require("jasmine2-custom-message");
 
-  beforeAll(() => {
-    myDatasetsPage = new MyDatasetsPage();
-    SerialNum = new Date().getTime().toString().substring(0, 9);
-    New_CSV_Name = "e2e Test Data " + SerialNum;
-    console.log("start to create new CSV : " + New_CSV_Name);
-  });
-
   it("Should upload new dataset successfully.", async (done) => {
+    console.log("start to create new CSV : " + New_CSV_Name);
     await myDatasetsPage.navigateTo();
     await myDatasetsPage.uploadCSV(New_CSV_Name, CSV_Path);
     await myDatasetsPage.waitForPageLoading();
@@ -57,4 +54,16 @@ describe("upload new dataset on myDatasets page..", () => {
       done.fail("can not filter out the consitent datasets....");
     }
   });
+
+  it('delete the new upload dataset', async () => {
+    console.log("datasetName : " + New_CSV_Name);
+    await browser.sleep(2000);
+    await myDatasetsPage.filterDatasetstName(New_CSV_Name);
+    await myDatasetsPage.deleteDatasets();
+    await myDatasetsPage.filterDatasetstName(New_CSV_Name);
+    const TABLE_LIST = $$('clr-dg-row');
+    expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
+  });
+
+
 });

@@ -15,10 +15,8 @@ const nycOutput = ".nyc_output";
 
 var conf = {
   ci_specs: [
-    // "./features/delete-projects-spec.ts",
-    // "./features/delete-datasets-spec.ts",
-    "./features/upload-new-dataset-spec.ts",
-    "./features/delete-datasets-spec.ts",
+    "./features/clear-old-e2e-projects-datasets-spec.ts",
+    "./features/upload-new-dataset-and-delete-spec.ts",
     "./features/creat-log-project-spec.ts",
     "./features/annotate-project-log-spec.ts",
     "./features/append-project-log-spec.ts",
@@ -31,8 +29,8 @@ var conf = {
     "./features/annotate-project-dropdown-spec.ts",
     "./features/creat-text-multiple-project-spec.ts",
     "./features/annotate-project-multiple-spec.ts",
-    "./features/download-share-projects-spec.ts",
     "./features/append-project-spec.ts",
+    "./features/download-share-projects-spec.ts",
     "./features/creat-ner-labels-existing-project-spec.ts",
     "./features/annotate-project-ner-labels-existing-spec.ts",
     "./features/creat-image-project-spec.ts",
@@ -49,8 +47,14 @@ var conf = {
     // "./general/sign-up-external-spec.ts",
   ],
   poc_specs: [
+    "./general/sign-up-external-spec.ts",
     "./general/login-external-spec.ts",
-    "./features/edit-project-spec.ts",
+    // "./features/creat-log-project-spec.ts",
+    // "./features/creat-text-project-spec.ts",
+    // "./features/creat-tabular-numeric-project-spec.ts",
+    // "./features/creat-text-multiple-project-spec.ts",
+    // "./features/creat-image-project-spec.ts",
+    // "./features/clear-old-e2e-projects-datasets-spec.ts",
   ],
   specsAll: [],
 };
