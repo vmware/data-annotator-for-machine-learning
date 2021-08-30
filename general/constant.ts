@@ -23,4 +23,5 @@ export let Constant = {
   username: "poc-os@poc-os.com",
   fullname: "Test Hub",
   password: "Abcd1234@",
+  passwordErr: "Abcd1234$#",
 };

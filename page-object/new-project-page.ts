@@ -148,6 +148,8 @@ export class NewProjectPage extends CommonPage {
   }
 
   async selectMultipleTicketColumn(startIndex, endIndex) {
+    await FunctionUtil.elementVisibilityOf(this.SET_DATA_TAB);
+    await this.SET_DATA_TAB.click();
     await FunctionUtil.elementVisibilityOf(
       this.TICKET_COLUMN_CHECKBOX_FOR_TEXT
     );
@@ -184,6 +186,12 @@ export class NewProjectPage extends CommonPage {
       });
   }
 
+  async selectLabels(labelIndex) {
+    await FunctionUtil.elementVisibilityOf(this.LABELS_BTN);
+    await this.LABELS_BTN.click();
+    await this.LABELS_LIST.get(labelIndex).click();
+  }
+
   async setLabelValidation(labelColumn) {
     console.log("start to setLabelValidation...");
     await FunctionUtil.elementVisibilityOf(this.LABELS_BTN);
@@ -206,6 +214,11 @@ export class NewProjectPage extends CommonPage {
 
   async setDataSubmit() {
     await this.SET_DATA_BTN.click();
+  }
+
+  async clickOkBtn() {
+    await FunctionUtil.elementVisibilityOf(this.UPLOAD_CSV_OK_BTN);
+    await this.UPLOAD_CSV_OK_BTN.click();
   }
 
   setMaxAnnotation(maxAnnotation) {

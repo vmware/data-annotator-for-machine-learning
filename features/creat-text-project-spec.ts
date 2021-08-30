@@ -59,6 +59,16 @@ describe("Create new project ", () => {
       ExpectedConditions.visibilityOf(SET_DATA_SECTION),
       Constant.DEFAULT_TIME_OUT
     );
+    console.log("start to set label charactor that more than 50...");
+    await newProjectPage.selectMultipleTicketColumn(0, 2);
+    await newProjectPage.selectLabels(4);
+    await newProjectPage.setDataSubmit();
+    await newProjectPage.clickOkBtn();
+    console.log("succeed to set label charactor that more than 50...");
+
+    await newProjectPage.selectLabels(10);
+    await newProjectPage.setDataSubmit();
+
     await newProjectPage.setData("text");
     await newProjectPage.setLabelValidation(
       projectCreateData.TextProject.duplicateLabelColumn

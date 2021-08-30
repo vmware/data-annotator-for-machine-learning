@@ -38,14 +38,13 @@ var conf = {
     "./features/append-project-image-spec.ts",
     "./features/project-preview-detail-spec.ts",
     "./features/datasets-preview-detail-spec.ts",
+    "./features/faq-spec.ts",
     "./features/delete-projects-spec.ts",
     "./features/delete-datasets-spec.ts",
   ],
 
-  specsConst: [
-    "./general/login-external-spec.ts",
-    // "./general/sign-up-external-spec.ts",
-  ],
+  specsConst: ["./general/login-external-spec.ts"],
+
   poc_specs: [
     "./general/sign-up-external-spec.ts",
     "./general/login-external-spec.ts",
@@ -72,7 +71,7 @@ exports.config = {
         "ignore-certificate-errors",
         "ignore-ssl-errors",
         "no-sandbox",
-        // "headless",
+        "headless",
       ],
       prefs: {
         download: {

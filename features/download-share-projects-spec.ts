@@ -49,28 +49,24 @@ describe("verify generate-download-share funtion", () => {
     });
 
     it("Share project.", async (done) => {
-      await downloadSharePage.shareProject(project_name)
+      await downloadSharePage.shareProject(project_name);
       expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
       done();
     });
 
     it("Share numeric project.", async (done) => {
-      
-      await downloadSharePage.shareProject(Constant.project_name_tabular_numeric)
+      await downloadSharePage.shareProject(
+        Constant.project_name_tabular_numeric
+      );
       expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
       done();
-
     });
 
     it("Share log project.", async (done) => {
-      
-      await downloadSharePage.shareProject(Constant.project_name_log)
+      await downloadSharePage.shareProject(Constant.project_name_log);
       expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
       done();
-
     });
-
-
   });
 
   describe("verify community-dataset tab", () => {
@@ -80,9 +76,9 @@ describe("verify generate-download-share funtion", () => {
     });
 
     it("Generate-new-dataset", async (done) => {
-
       await FunctionUtil.click(COMMUNITY_DATASETS_TAB);
       await commonPage.waitForGridLoading();
+      await commonPage.changePageValue(2);
       await commonPage.filterProjectName(project_name);
       await downloadSharePage.clickdownloadProject();
       await downloadSharePage.clickGenerateNewDataset();
@@ -114,7 +110,9 @@ describe("verify generate-download-share funtion", () => {
       await commonPage.filterProjectName(Constant.project_name_log);
       await downloadSharePage.clickdownloadProject();
       await downloadSharePage.clickGenerateNewDataset();
-      expect(await downloadSharePage.verifyDownloadFileExisted(logFileName, dirPath)).toBe(true);
+      expect(
+        await downloadSharePage.verifyDownloadFileExisted(logFileName, dirPath)
+      ).toBe(true);
       done();
     });
 
@@ -123,9 +121,21 @@ describe("verify generate-download-share funtion", () => {
       await downloadSharePage.clickdownloadProject();
       await downloadSharePage.downloadLogOriginalDataAndClose();
       const log_dataset = "log-test-data.tgz";
-      expect(await downloadSharePage.verifyDownloadFileExisted(log_dataset, dirPath)).toBe(true);
+      expect(
+        await downloadSharePage.verifyDownloadFileExisted(log_dataset, dirPath)
+      ).toBe(true);
       done();
     });
 
+    it("Unshare log project", async (done) => {
+      await FunctionUtil.click(PROJECT_TAB);
+      await commonPage.waitForGridLoading();
+      await commonPage.filterProjectName(Constant.project_name_log);
+      await downloadSharePage.unshareProject();
+      await commonPage.waitForGridLoading();
+      await commonPage.filterProjectName(Constant.project_name_log);
+      expect(downloadSharePage.verifySharedStatus()).toEqual("folder");
+      done();
+    });
   });
 });

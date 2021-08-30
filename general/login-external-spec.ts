@@ -30,7 +30,7 @@ describe("Service", () => {
   });
 
   it("Should login with non-existing user failed", async (done) => {
-    await loginBusiness.logValidation(Constant.username, Constant.password);
+    await loginBusiness.logValidation(Constant.username, Constant.passwordErr);
     since("Err alert show up")
       .expect(await loginPage.getDivText())
       .toEqual("Invalid user name or password");

@@ -39,21 +39,21 @@ Comme si un canal ou une liaison morte avait ??t?? conserv??e en m??moire sur l'
 Cordialement",Storage,VMware vSphere ESXi 6.0,,,Vendor supported,16887431402
 6,2014-12-03T12:20:51.000Z,"when i recompose a pool it failed with the message
 View Composer Fault: Virtual Machine with input specifications already exists",OS,VMware Horizon View 5.x,Connectivity,Solution Provided,na,14567954212
-7,2015-11-11T10:09:42.000Z,"Active Directory?????????????????????????????????????????????????????????????????????????€?????????????????€????????????????????€?GSSAPI?€????????????????????????????????????????????€??????????????????????????€?
+7,2015-11-11T10:09:42.000Z,"Active Directory???????????????????????????????????????????????????????????????????????????????????????????????????????????????GSSAPI????????????????????????????????????????????????????????????????????????
 
-???????€????
+???????????
 ?????????mdf.intra
 ????????????????????????URL:ldap://prn071205.mdf.intra:389
-???????????€????????????URL:
+???????????????????????URL:
 ????????????????????????DN:DC=mdf,DC=intra
 ???????????????:mdf.intra
 ???????????????????????????:MDF
 ????????????????????????DN:DC=mdf,DC=intra
-???????????????:???????????????????????????",Installation,VMware vCenter Server 5.1,Configuration,???????????????,"????????????????????????????????????????????????????????????????????????????€?
-??????????????????????????????????€??????????
+???????????????:???????????????????????????",Installation,VMware vCenter Server 5.1,Configuration,???????????????,"?????????????????????????????????????????????????????????????????????????????
+????????????????????????????????????????????
 ???????????????????????????????????????????????????????????????
-??????????????????????????????????????????????€?????????? SR ??????????????????
-??????????????????????????????????€?",15800581611
+???????????????????????????????????????????????????????? SR ??????????????????
+???????????????????????????????????",15800581611
 8,2016-02-10T18:48:52.000Z,"We are planning to upgrade vcenter from 5.5 to 6 as we want to use vsphere replication 6 and currently are on 5.8. according to the inteopability guide it says 5.8 is NOT interoperable with 6, does this mean we lose what we have until we update replication to 6?",System Management,VMware vSphere Replication 6.x,,,Provided compatibility information,16885416402
 9,2016-02-10T18:50:01.000Z,"importing the vCenter navigator pack fails on one of the cluster nodes. it's does not add the default dashboards or ever complete data collection. this is a fresh build of 6.1 and the first import attempt
 
@@ -74,8 +74,8 @@ I've configured the new vCenter on the cloud server locally on that server and d
 Please note this is for a Federation Enterprise Hybrid Cloud jointly supported by EMC and VMWare. An EMC SR#77307232, has been logged with us already.
 
  
-?€?End User Company Name: EHEALTH SASKATCHEWAN
-?€?Location: WHITE CITY, Canada
+??End User Company Name: EHEALTH SASKATCHEWAN
+??Location: WHITE CITY, Canada
 
  
 
@@ -103,7 +103,7 @@ Which prevents user from select recovery site from the pull down menu (read from
 SSO was installed in the DR location instead of multisite",16885500102
 17,2016-02-10T20:39:13.000Z,"When Trying to launch a console to virtual machines i get ""Unable to connect to the MKS: Internal error""
 
-If i vmotion to another host i can then try and open the console.   I believe this is the same as article id:  ""?€?Unable to open MKS: Internal Error?€? when opening virtual machine console (2116542)""
+If i vmotion to another host i can then try and open the console.   I believe this is the same as article id:  ""??Unable to open MKS: Internal Error?? when opening virtual machine console (2116542)""
 
 Can you tell me if there is any fix for this other than VMotioning?  As well as when it will be resolved.",System Management,VMware vCenter Server 6.0,,,No fix available as per KB 2116542,16885500602
 18,2016-02-10T20:40:07.000Z,We are unable to provision any new linked clones and we are also not able to recompose any machines I cannot look at the errors and evens as the page does not load,Fault/Crash,VMware View 6.x,,,"Cluster hosts have been upgraded to ESXi5.5U3B which disables SSLv3 - View 6.0.1 still requires SSLv3. Set to 72hr monitor, customer has decided to downrev hosts rather than open security risk on new version. More information here: http://blogs.vmware.com/vsphere/2015/12/sslv3-protocol-disabled-by-default-in-vsphere-5-5-update-3b.html
@@ -199,3 +199,237 @@ VMware vCenter Server 5.5.0, 2001466 version.
 Database is on Oracle.",System Management,VMware vCenter Server 5.5,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
 
 Reinstall VC should solve this issue",14567989112
+31,2014-12-03T13:13:30.001Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001467 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.6,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989113
+32,2014-12-03T13:13:30.002Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001468 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.7,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989114
+33,2014-12-03T13:13:30.003Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001469 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.8,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989115
+34,2014-12-03T13:13:30.004Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001470 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.9,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989116
+35,2014-12-03T13:13:30.005Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001471 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.10,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989117
+36,2014-12-03T13:13:30.006Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001472 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.11,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989118
+37,2014-12-03T13:13:30.007Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001473 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.12,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989119
+38,2014-12-03T13:13:30.008Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001474 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.13,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989120
+39,2014-12-03T13:13:30.009Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001475 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.14,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989121
+40,2014-12-03T13:13:30.010Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001476 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.15,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989122
+41,2014-12-03T13:13:30.011Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001477 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.16,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989123
+42,2014-12-03T13:13:30.012Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001478 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.17,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989124
+43,2014-12-03T13:13:30.013Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001479 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.18,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989125
+44,2014-12-03T13:13:30.014Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001480 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.19,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989126
+45,2014-12-03T13:13:30.015Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001481 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.20,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989127
+46,2014-12-03T13:13:30.016Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001482 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.21,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989128
+47,2014-12-03T13:13:30.017Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001483 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.22,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989129
+48,2014-12-03T13:13:30.018Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001484 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.23,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989130
+49,2014-12-03T13:13:30.019Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001485 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.24,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989131
+50,2014-12-03T13:13:30.020Z,ÖÐÎÄ,System Management,VMware vCenter Server 5.25,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989132
+51,2014-12-03T13:13:30.019Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001485 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.24,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989131
+52,2014-12-03T13:13:30.019Z,"We received alert in vSphare Client:
+Home -> Administration -> vCenter service status -> License Services -> License Usage History service - Cannot store license usage in the vCenter Server database.
+
+We found VMware KB related directly to this kind of alert.
+-> http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029495 
+We applied this without any result. Alert is still there.
+
+VMware vCenter Server 5.5.0, 2001485 version.
+Database is on Oracle.",System Management,VMware vCenter Server 5.24,Crash,Solution Provided,"Restore DB and fresh install of VC worked in a Lab.
+
+Reinstall VC should solve this issue",14567989131
