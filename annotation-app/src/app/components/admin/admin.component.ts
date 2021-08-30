@@ -16,6 +16,7 @@ import { Buffer } from 'buffer';
 import { DatasetValidator } from '../../shared/form-validators/dataset-validator';
 import { DownloadService } from 'app/services/common/download.service';
 import { ToolService } from 'app/services/common/tool.service';
+import { CommonService } from 'app/services/common/common.service';
 
 @Component({
   selector: 'app-admin',
@@ -93,6 +94,7 @@ export class AdminComponent implements OnInit {
     private formBuilder: FormBuilder,
     private downloadService: DownloadService,
     private toolService: ToolService,
+    private commonService: CommonService,
   ) {
     this.page = 1;
     this.pageSize = 10;
@@ -302,63 +304,38 @@ export class AdminComponent implements OnInit {
   }
 
   generateProject(e) {
-    if (e.labelType == 'numericLabel') {
-      for (let i = 0; i < this.projectData.length; i++) {
-        if (this.projectData[i].id == e.id) {
-          this.projectData[i].generateInfo.status = 'generating';
-        }
-      }
-      this.avaService.generate(e.id, this.user.email, 'standard', 'admin').subscribe(
-        (res) => {
-          if (res && res.Info != 'undefined') {
-            if (res.Info == 'prepare') {
-              this.infoMessage =
-                'Dataset with annotations is being generated. You will receive an email when download is ready.';
-            } else if (res.Info == 'done') {
-              for (let i = 0; i < this.projectData.length; i++) {
-                if (this.projectData[i].id == e.id) {
-                  this.projectData[i].generateInfo.status = 'done';
-                }
-              }
+    this.commonService
+      .generateProject(e, this.projectData, this.user.email, 'admin')
+      .then((response) => {
+        this.projectData = response.datasets;
+        if (e.labelType == 'numericLabel') {
+          if (response.err) {
+            this.loading = false;
+          } else {
+            if (response.res.Info == 'prepare') {
+              this.infoMessage = response.infoMessage;
+            } else if (response.res.Info == 'done') {
               this.downloadUrl = this.env.config.enableAWSS3
-                ? new Buffer(res.Body.file, 'base64').toString()
-                : res.Body.file;
+                ? new Buffer(response.res.Body.file, 'base64').toString()
+                : response.res.Body.file;
               this.downloadProject();
-            } else if (res.Info == 'generating') {
-              this.infoMessage =
-                'Dataset with annotations is already being generated. Please refresh the page.';
+            } else if (response.res.Info == 'generating') {
+              this.infoMessage = response.infoMessage;
               this.getProjects();
             }
             setTimeout(() => {
               this.infoMessage = '';
             }, 5000);
           }
-        },
-        (error: any) => {
-          console.log(error);
-          this.loading = false;
-        },
-      );
-    } else {
-      this.showGenerateDatasets = true;
-      e.src = 'admin';
-      if (e.projectType == 'log') {
-        this.avaService.downloadProject(e.id).subscribe(
-          (res) => {
-            if (res) {
-              e.originalDataSets = res.originalDataSets;
-              this.msgGenerate = e;
-            }
-          },
-          (error: any) => {
-            console.log(error);
+        } else {
+          this.showGenerateDatasets = true;
+          if (response.err) {
             this.showGenerateDatasets = false;
-          },
-        );
-      } else {
-        this.msgGenerate = e;
-      }
-    }
+          } else {
+            this.msgGenerate = response.e;
+          }
+        }
+      });
   }
 
   clickDownload(e) {

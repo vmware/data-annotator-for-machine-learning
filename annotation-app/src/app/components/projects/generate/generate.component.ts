@@ -39,9 +39,6 @@ export class GenerateComponent implements OnInit {
 
   ngOnInit() {
     this.format = 'standard';
-    // setTimeout(() => {
-    //   console.log("GenerateComponent:::", this.msg)
-    // }, 1000);
   }
 
   onCloseGenerateDialog() {
