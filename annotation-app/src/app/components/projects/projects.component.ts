@@ -13,6 +13,7 @@ import { AvaService } from '../../services/ava.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { Buffer } from 'buffer';
 import { DownloadService } from 'app/services/common/download.service';
+import { CommonService } from 'app/services/common/common.service';
 
 @Component({
   selector: 'app-projects',
@@ -70,6 +71,7 @@ export class ProjectsComponent implements OnInit {
     private userAuthService: UserAuthService,
     public env: EnvironmentsService,
     private downloadService: DownloadService,
+    private commonService: CommonService,
   ) {
     this.download = `${this.env.config.annotationService}/api`;
     this.user = this.userAuthService.loggedUser().email;
@@ -146,63 +148,36 @@ export class ProjectsComponent implements OnInit {
   }
 
   generateProject(e) {
-    if (e.labelType == 'numericLabel') {
-      for (let i = 0; i < this.datasets.length; i++) {
-        if (this.datasets[i].id == e.id) {
-          this.datasets[i].generateInfo.status = 'generating';
+    this.commonService.generateProject(e, this.datasets, this.user, 'projects').then((response) => {
+      this.datasets = response.datasets;
+      if (e.labelType == 'numericLabel') {
+        if (response.err) {
+          this.loading = false;
+        } else {
+          if (response.res.Info == 'prepare') {
+            this.infoMessage = response.infoMessage;
+          } else if (response.res.Info == 'done') {
+            this.downloadUrl = this.env.config.enableAWSS3
+              ? new Buffer(response.res.Body.file, 'base64').toString()
+              : response.res.Body.file;
+            this.downloadProject();
+          } else if (response.res.Info == 'generating') {
+            this.infoMessage = response.infoMessage;
+            this.getProjects();
+          }
+          setTimeout(() => {
+            this.infoMessage = '';
+          }, 5000);
+        }
+      } else {
+        this.showGenerateDatasets = true;
+        if (response.err) {
+          this.showGenerateDatasets = false;
+        } else {
+          this.msgGenerate = response.e;
         }
       }
-      this.avaService.generate(e.id, this.user, 'standard', 'projects').subscribe(
-        (res) => {
-          if (res && res.Info != 'undefined') {
-            if (res.Info == 'prepare') {
-              this.infoMessage =
-                'Dataset with annotations is being generated. You will receive an email when download is ready.';
-            } else if (res.Info == 'done') {
-              for (let i = 0; i < this.datasets.length; i++) {
-                if (this.datasets[i].id == e.id) {
-                  this.datasets[i].generateInfo.status = 'done';
-                }
-              }
-              this.downloadUrl = this.env.config.enableAWSS3
-                ? new Buffer(res.Body.file, 'base64').toString()
-                : res.Body.file;
-              this.downloadProject();
-            } else if (res.Info == 'generating') {
-              this.infoMessage =
-                'Dataset with annotations is already being generated. Please refresh the page.';
-              this.getProjects();
-            }
-            setTimeout(() => {
-              this.infoMessage = '';
-            }, 5000);
-          }
-        },
-        (error: any) => {
-          console.log(error);
-          this.loading = false;
-        },
-      );
-    } else {
-      this.showGenerateDatasets = true;
-      e.src = 'projects';
-      if (e.projectType == 'log') {
-        this.avaService.downloadProject(e.id).subscribe(
-          (res) => {
-            if (res) {
-              e.originalDataSets = res.originalDataSets;
-              this.msgGenerate = e;
-            }
-          },
-          (error: any) => {
-            console.log(error);
-            this.showGenerateDatasets = false;
-          },
-        );
-      } else {
-        this.msgGenerate = e;
-      }
-    }
+    });
   }
 
   clickDownload(e) {

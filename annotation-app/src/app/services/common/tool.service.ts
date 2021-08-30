@@ -22,7 +22,6 @@ export class ToolService {
   regexExec(reg, text) {
     const a = [...text.matchAll(RegExp(eval(reg), 'g'))];
     return a;
-    // return eval(reg).exec(text);
   }
 
   isASCII(str) {

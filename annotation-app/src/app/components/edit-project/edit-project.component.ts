@@ -11,6 +11,7 @@ import * as _ from 'lodash';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
 import { CommonService } from 'app/services/common/common.service';
+import { EmailService } from 'app/services/common/email.service';
 @Component({
   selector: 'app-edit-project',
   templateUrl: './edit-project.component.html',
@@ -72,6 +73,7 @@ export class EditProjectComponent implements OnInit {
     private env: EnvironmentsService,
     private toolService: ToolService,
     private commonService: CommonService,
+    private emailService: EmailService,
   ) {
     this.inputPnameUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       if (value != '') {
@@ -330,26 +332,12 @@ export class EditProjectComponent implements OnInit {
       this.avaService.saveProjectEdit(param).subscribe(
         (res) => {
           if (this.env.config.enableSendEmail) {
-            const param: object = {
-              pname: this.inputProjectName,
-              fileName: this.msg.dataSource,
-            };
-            const ownerDiff = _.difference(this.ownerList, this.msg.creator);
-            let aa = [];
-            this.assigneeList.forEach((element) => {
-              aa.push(element.email);
-            });
-            // const annotatorDiff = _.difference(this.assigneeList, this.msg.annotator);
-            const annotatorDiff = _.difference(aa, this.msg.annotator);
-
-            if (annotatorDiff.length > 0) {
-              param['annotator'] = annotatorDiff;
-              this.sendEmailToAnnotator(param);
-            }
-            if (ownerDiff.length > 0) {
-              param['projectOwner'] = ownerDiff;
-              this.sendEmailToOwner(param);
-            }
+            this.emailService.sendEmail(
+              this.inputProjectName,
+              this.msg,
+              this.ownerList,
+              this.assigneeList,
+            );
           }
           this.onSubmitEditEmitter.emit(true);
         },
@@ -359,28 +347,6 @@ export class EditProjectComponent implements OnInit {
         },
       );
     }
-  }
-
-  sendEmailToAnnotator(param) {
-    this.avaService.sendEmailToAnnotator(param).subscribe(
-      (res) => {
-        console.log('sendEmailToAnnotator:::', res);
-      },
-      (error: any) => {
-        console.log(error);
-      },
-    );
-  }
-
-  sendEmailToOwner(param) {
-    this.avaService.sendEmailToOwner(param).subscribe(
-      (res) => {
-        console.log('sendEmailToOwner:::', res);
-      },
-      (error: any) => {
-        console.log(error);
-      },
-    );
   }
 
   overLabels(index) {
@@ -403,17 +369,6 @@ export class EditProjectComponent implements OnInit {
       ) {
         this.categoryList.splice(index, 1);
       }
-      // else {
-      //   console.log('useless code?');
-      //   this.errorMessage =
-      //     'Failed to delete the label because this project at least keep ' +
-      //     this.categoryList.length +
-      //     ' label.';
-      //   this.isShowDeleteModal = false;
-      //   setTimeout(() => {
-      //     this.errorMessage = '';
-      //   }, 5000);
-      // }
     }
   }
 

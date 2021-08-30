@@ -14,7 +14,6 @@ import { EnvironmentsService } from 'app/services/environments.service';
 })
 export class HomeComponent implements OnInit {
   constructor(
-    private router: Router,
     private route: ActivatedRoute,
     private userAuthService: UserAuthService,
     public env: EnvironmentsService,
@@ -25,9 +24,6 @@ export class HomeComponent implements OnInit {
       const isUserLandingFromOutside = !params['hash'] || String(params['hash']).length == 0;
       if (isUserLandingFromOutside) {
         const user = this.userAuthService.loggedUser();
-        if (user && user.points > 0) {
-          this.router.navigate(['game']);
-        }
       }
     });
   }
