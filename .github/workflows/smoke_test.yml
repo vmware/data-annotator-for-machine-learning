@@ -133,12 +133,12 @@ jobs:
           name: coverage-output
           path: ./coverage-output
 
-      - name: copy e2e coverage report to the app
-        working-directory: ./annotation-app
-        run: |
-          pwd
-          cp ../coverage-output/lcov.info ./
-          ls -l
+#       - name: copy e2e coverage report to the app
+#         working-directory: ./annotation-app
+#         run: |
+#           pwd
+#           cp ../coverage-output/lcov.info ./
+#           ls -l
 
       - name: SonarCloud setup for annotation-app
         working-directory: ./devops/sonar
@@ -153,9 +153,10 @@ jobs:
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-annotation-app
             -Dsonar.projectName=${{ env.SONAR_ORG }}-DAML-annotation-app
             -Dsonar.sources=.
+            -Dsonar.projectBaseDir=../
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.language=javascript
-            -Dsonar.javascript.lcov.reportPaths=lcov.info
+            -Dsonar.javascript.lcov.reportPaths=coverage-output/lcov.info
             -Dsonar.coverage.exclusions=**/node_modules/**/*,*.md,*.txt,*.yml,**/src/app/services/environments.service.ts,**/src/app/services/feedback.service.ts,**/src/app/services/user-auth.service.ts,**/src/app/core.module.ts,**/src/app/components/footer/**/*,**/src/libs/modelChart.js,**/src/libs/feedback.js,**/src/app/components/projects/supercollider.component.ts,**/src/app/components/admin,**/src/app/components/login,**/src/app/components/authentication/**/*,**/src/main.ts,**/src/app/guards/sso.guard.ts,**/src/app/components/login/login.component.ts,**/src/environments/*.ts,**/src/app/guards/auth.guard.ts,**/src/app/components/admin/admin.component.ts
         env: 
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
