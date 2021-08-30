@@ -13,6 +13,7 @@ annotation-app/src/environments/environment.stg.ts
 annotation-app/src/environments/environment.test.ts
 annotation-app/package-lock.json
 annotation-app/tsconfig.spec.json
+annotation-app/dist
 
 
 # annotation-service
