@@ -13,12 +13,10 @@ import { FormValidatorUtil } from '../../shared/form-validators/form-validator-u
 import { DatasetValidator } from '../../shared/form-validators/dataset-validator';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Papa } from 'ngx-papaparse';
-import AWS from 'aws-sdk/lib/aws';
-import { Buffer } from 'buffer';
 import * as _ from 'lodash';
-import * as JSZip from 'jszip';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { UnZipService } from 'app/services/common/up-zip.service';
+import { S3Service } from 'app/services/common/s3.service';
 
 @Component({
   selector: 'app-upload',
@@ -67,6 +65,7 @@ export class UploadComponent implements OnInit {
     private papa: Papa,
     public env: EnvironmentsService,
     private unZipService: UnZipService,
+    private s3Service: S3Service,
   ) {
     this.userQuestionUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       if (value != '') {
@@ -215,8 +214,8 @@ export class UploadComponent implements OnInit {
             fileName: this.inputFile.name,
             fileSize: this.inputFile.size,
             format: uploadFormat,
-            fileKey: data.Key,
-            location: data.Key,
+            fileKey: data.key,
+            location: data.key,
           };
         } else {
           formData.append('dsname', this.uploadGroup.get('datasetsName').value);
@@ -323,44 +322,13 @@ export class UploadComponent implements OnInit {
   }
 
   uploadToS3(file) {
-    this.avaService.getS3UploadConfig().subscribe(
-      async (res) => {
-        if (res) {
-          let outNo = '';
-          for (let i = 0; i < 6; i++) {
-            outNo += Math.floor(Math.random() * 10);
-          }
-          outNo = new Date().getTime() + outNo;
-          const s3 = new AWS.S3({
-            region: new Buffer(res.region, 'base64').toString(),
-            apiVersion: new Buffer(res.apiVersion, 'base64').toString(),
-            accessKeyId: new Buffer(res.credentials.accessKeyId, 'base64').toString(),
-            secretAccessKey: new Buffer(res.credentials.secretAccessKey, 'base64').toString(),
-            sessionToken: new Buffer(res.credentials.sessionToken, 'base64').toString(),
-          });
-          const uploadParams = {
-            Bucket: new Buffer(res.bucket, 'base64').toString(),
-            Key: new Buffer(res.key, 'base64').toString() + '/' + outNo + '_' + file.name,
-            Body: file,
-          };
-          const data = await s3.upload(uploadParams).promise();
-          this.updateDatasets(data);
-        }
-      },
-      (error) => {
-        this.errorMessageTop = error.message;
-        this.errorMessageEmitter.emit(this.errorMessageTop);
-        this.uploadComplete = true;
-        this.showAddNewDatasetDialog = false;
-        this.waitingTip = false;
-        this.nameExist = false;
-
-        setTimeout(() => {
-          this.errorMessageTop = '';
-          this.errorMessageEmitter.emit(this.errorMessageTop);
-        }, 5000);
-      },
-    );
+    this.s3Service.uploadToS3(file, this.uploadSet.fileFormat, 'zip').then((e) => {
+      if (e.err) {
+        this.uploadErr(e);
+      } else {
+        this.updateDatasets(e.data);
+      }
+    });
   }
 
   saveUpload() {
@@ -443,95 +411,13 @@ export class UploadComponent implements OnInit {
   }
 
   unzipImagesToS3() {
-    this.avaService.getS3UploadConfig().subscribe(
-      async (res) => {
-        if (res) {
-          const s3 = new AWS.S3({
-            region: new Buffer(res.region, 'base64').toString(),
-            apiVersion: new Buffer(res.apiVersion, 'base64').toString(),
-            accessKeyId: new Buffer(res.credentials.accessKeyId, 'base64').toString(),
-            secretAccessKey: new Buffer(res.credentials.secretAccessKey, 'base64').toString(),
-            sessionToken: new Buffer(res.credentials.sessionToken, 'base64').toString(),
-          });
-
-          const jsZip = new JSZip();
-          const that = this;
-          const uploadEntries = [];
-          const imagesLocation = [];
-          let realEntryLength = 0;
-          let realEntryIndex = 0;
-
-          jsZip.loadAsync(that.inputFile).then(function (entries) {
-            let outNo = '';
-            for (let i = 0; i < 6; i++) {
-              outNo += Math.floor(Math.random() * 10);
-            }
-            outNo = new Date().getTime() + outNo;
-            entries.forEach((path, file) => {
-              if (!file.dir && that.unZipService.validImageType(path)) {
-                realEntryLength++;
-              }
-            });
-
-            _.forIn(entries.files, function (value1, key1) {
-              if (!value1.dir && that.unZipService.validImageType(value1.name)) {
-                value1.async('blob').then(async function (blob) {
-                  realEntryIndex++;
-                  const uploadParams = {
-                    Bucket: new Buffer(res.bucket, 'base64').toString(),
-                    Key: new Buffer(res.key, 'base64').toString() + '/' + outNo + '/' + value1.name,
-                    Body: blob,
-                  };
-                  uploadEntries.push({
-                    uploadParams,
-                    fileName: value1.name,
-                    fileSize: blob.size,
-                  });
-
-                  // control the upload req concurrent
-                  if (realEntryIndex == realEntryLength) {
-                    while (uploadEntries.length) {
-                      await Promise.all(
-                        uploadEntries.splice(0, 500).map(async (e) => {
-                          await s3
-                            .upload(e.uploadParams)
-                            .promise()
-                            .then(function (data, err) {
-                              if (err) {
-                                console.log('uploadImageErr:::', err);
-                              }
-                              if (data) {
-                                imagesLocation.push({
-                                  fileName: e.fileName,
-                                  location: data.Key,
-                                  fileSize: e.fileSize,
-                                });
-                              }
-                            });
-                        }),
-                      );
-                    }
-                    that.updateDatasets(imagesLocation);
-                  }
-                });
-              }
-            });
-          });
-        }
-      },
-      (error) => {
-        this.errorMessageTop = error.message;
-        this.errorMessageEmitter.emit(this.errorMessageTop);
-        this.uploadComplete = true;
-        this.showAddNewDatasetDialog = false;
-        this.waitingTip = false;
-        this.nameExist = false;
-        setTimeout(() => {
-          this.errorMessageTop = '';
-          this.errorMessageEmitter.emit(this.errorMessageTop);
-        }, 5000);
-      },
-    );
+    this.s3Service.uploadToS3(this.inputFile, 'image', 'zip').then((e) => {
+      if (e.err) {
+        this.uploadErr(e);
+      } else {
+        this.updateDatasets(e.data);
+      }
+    });
   }
 
   changeFileFormat(e) {
@@ -544,5 +430,18 @@ export class UploadComponent implements OnInit {
         .setValidators(DatasetValidator.localFile(e, this.env.config.enableAWSS3, false));
       this.uploadGroup.get('localFile').updateValueAndValidity();
     }
+  }
+
+  uploadErr(e) {
+    this.errorMessageTop = e.err;
+    this.errorMessageEmitter.emit(this.errorMessageTop);
+    this.uploadComplete = true;
+    this.showAddNewDatasetDialog = false;
+    this.waitingTip = false;
+    this.nameExist = false;
+    setTimeout(() => {
+      this.errorMessageTop = '';
+      this.errorMessageEmitter.emit(this.errorMessageTop);
+    }, 5000);
   }
 }

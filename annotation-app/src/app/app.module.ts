@@ -53,6 +53,8 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { MyFilter } from './shared/clr-filter/datagridFilter.component';
 import { MarkdownParserService } from './services/common/markdown-parser.service';
 import { CommonService } from './services/common/common.service';
+import { S3Service } from './services/common/s3.service';
+import { EmailService } from './services/common/email.service';
 
 @NgModule({
   declarations: [
@@ -110,7 +112,9 @@ import { CommonService } from './services/common/common.service';
     DownloadService,
     ToolService,
     MarkdownParserService,
-    CommonService
+    CommonService,
+    S3Service,
+    EmailService,
   ],
   bootstrap: [AppComponent],
 })

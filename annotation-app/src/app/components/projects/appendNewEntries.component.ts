@@ -20,6 +20,7 @@ import { Buffer } from 'buffer';
 import { UnZipService } from 'app/services/common/up-zip.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
+import { S3Service } from 'app/services/common/s3.service';
 
 @Component({
   selector: 'app-append',
@@ -69,6 +70,7 @@ export class AppendNewEntriesComponent implements OnInit {
     private UnZipService: UnZipService,
     public env: EnvironmentsService,
     private toolService: ToolService,
+    private s3Service: S3Service,
   ) {
     this.user = this.userAuthService.loggedUser().email;
     this.route.queryParams.subscribe((params) => {
@@ -205,28 +207,9 @@ export class AppendNewEntriesComponent implements OnInit {
   }
 
   uploadSingleImageToS3() {
-    const flag = function (param) {
-      return new Promise(function (resolve, reject) {
-        let aa = true;
-        param.forEach((element) => {
-          if (element.format == false) {
-            aa = false;
-          }
-        });
-        resolve(aa);
-      });
-    };
-    flag(this.newAddedData).then((e) => {
-      if (e) {
-        for (let i = 0; i < this.newAddedData.length; i++) {
-          if (this.newAddedData[i].src == '/' && this.newAddedData[i].size == '/') {
-            this.newAddedData.splice(i, 1);
-          }
-        }
-        if (this.newAddedData.length > 0) {
-          this.uploadToS3(null, 'single');
-        }
-      }
+    this.s3Service.uploadSingleImageToS3(this.newAddedData).then((e) => {
+      this.newAddedData = e.newAddedData;
+      this.uploadToS3(e.param1, e.param2);
     });
   }
 
@@ -339,33 +322,16 @@ export class AppendNewEntriesComponent implements OnInit {
   }
 
   toCaculateTotalRow(choosedDataset, originalHead) {
-    let flag;
     let count;
     if (this.env.config.enableAWSS3) {
-      this.avaService.getCloudUrl(choosedDataset.id).subscribe(
-        (res) => {
-          this.UnZipService.parseCSVChunk(
-            res,
-            false,
-            true,
-            choosedDataset.topReview.header,
-            originalHead,
-            this.previewContentDatas,
-          ).then((e) => {
-            flag = e;
-            if (choosedDataset.hasHeader == 'yes') {
-              count = flag.count - 1;
-            }
-            this.totalCase = count;
-            this.nonEnglish = flag.invalidCount;
-            this.uploadGroup.get('totalRow').setValue(this.totalCase - this.nonEnglish);
-            this.loadPreviewTable = false;
-          });
-        },
-        (error) => {
-          console.log('Error:', error);
-        },
-      );
+      this.s3Service
+        .toCaculateTotalRow(choosedDataset, originalHead, this.previewContentDatas)
+        .then((e) => {
+          this.totalCase = e.count;
+          this.nonEnglish = e.nonEnglish;
+          this.uploadGroup.get('totalRow').setValue(this.totalCase - this.nonEnglish);
+          this.loadPreviewTable = false;
+        });
     } else {
       const params = {
         columns: choosedDataset.topReview.header,
@@ -599,58 +565,34 @@ export class AppendNewEntriesComponent implements OnInit {
 
   uploadToS3(file, addMethod) {
     this.addLoading = true;
-    this.avaService.getS3UploadConfig().subscribe(
-      async (res) => {
-        if (res) {
-          let outNo = '';
-          for (let i = 0; i < 6; i++) {
-            outNo += Math.floor(Math.random() * 10);
-          }
-          outNo = new Date().getTime() + outNo;
-          const s3 = new AWS.S3({
-            region: new Buffer(res.region, 'base64').toString(),
-            apiVersion: new Buffer(res.apiVersion, 'base64').toString(),
-            accessKeyId: new Buffer(res.credentials.accessKeyId, 'base64').toString(),
-            secretAccessKey: new Buffer(res.credentials.secretAccessKey, 'base64').toString(),
-            sessionToken: new Buffer(res.credentials.sessionToken, 'base64').toString(),
-          });
-          if (this.projectType == 'image') {
-            if (addMethod == 'zip') {
-              this.uploadImages(file, s3, res);
-            } else {
-              const aa = [];
-              this.newAddedData.forEach((element) => {
-                if (element.format !== false && element.src !== '/' && element.size !== '/') {
-                  aa.push(element);
-                }
-              });
-              this.newAddedData = aa;
-              if (this.newAddedData.length > 0) {
-                this.uploadSingleImage(outNo, s3, res, this.newAddedData);
-              }
-            }
-          } else {
-            const uploadParams = {
-              Bucket: new Buffer(res.bucket, 'base64').toString(),
-              Key: new Buffer(res.key, 'base64').toString() + '/' + outNo + '_' + file.name,
-              Body: file,
-            };
-            const data = await s3.upload(uploadParams).promise();
-            this.updateDatasets(data, uploadParams.Key, '');
-          }
-        }
-      },
-      (error) => {
-        // this.errorMessage = 'Upload file to S3 failed, please try again later.';
-        this.errorMessage = JSON.stringify(error);
+    this.s3Service.uploadToS3(file, this.projectType, addMethod, this.newAddedData).then((e) => {
+      if (e.err) {
+        this.errorMessage = JSON.stringify(e.err);
         setTimeout(() => {
           this.errorMessage = '';
         }, 10000);
-        console.log(error);
+        console.log(e.err);
         this.addLoading = false;
         this.nameExist = false;
-      },
-    );
+      } else {
+        if (this.projectType == 'image') {
+          if (addMethod == 'zip') {
+            this.updateDatasets(e.data, 'image', 'fromZip');
+          } else {
+            this.newAddedData = e.newAddedData;
+            const appendParams = {
+              pname: this.projectName,
+              isFile: false,
+              projectType: this.projectType,
+              images: e.imagesLocation,
+            };
+            this.appendSrs(appendParams);
+          }
+        } else {
+          this.updateDatasets(e.data, e.key, e.from);
+        }
+      }
+    });
   }
 
   updateDatasets(data, key, from) {
@@ -681,7 +623,8 @@ export class AppendNewEntriesComponent implements OnInit {
       if (data) {
         params.hasHeader = 'yes';
         params.fileKey = key;
-        params.location = data.Key;
+        // params.location = data.Key;
+        params.location = data.key;
         params.topReview = { header: this.previewHeadDatas, topRows: this.previewContentDatas };
         params.columnInfo = this.columnInfo;
         params.format =
@@ -847,102 +790,6 @@ export class AppendNewEntriesComponent implements OnInit {
       this.renderer2.setStyle(dom, 'display', 'none');
       const imageDom = this.el.nativeElement.querySelector('.' + 'image' + index);
       this.renderer2.setStyle(imageDom, 'opacity', '1');
-    }
-  }
-
-  uploadImages(file, s3, s3Config) {
-    let flag;
-    this.UnZipService.unzipImages(file).then((e) => {
-      flag = e;
-      const entry = flag.entry;
-      const realEntryLength = flag.realEntryLength;
-      if (entry) {
-        let outNo = '';
-        for (let i = 0; i < 6; i++) {
-          outNo += Math.floor(Math.random() * 10);
-        }
-        outNo = new Date().getTime() + outNo;
-        let realEntryIndex = 0;
-        const imagesLocation = [];
-        const uploadEntries = [];
-        const that = this;
-        entry.forEach((path, file) => {
-          if (!file.dir && that.UnZipService.validImageType(path)) {
-            file.async('blob').then(async function (blob) {
-              realEntryIndex++;
-              const uploadParams = {
-                Bucket: new Buffer(s3Config.bucket, 'base64').toString(),
-                Key: new Buffer(s3Config.key, 'base64').toString() + '/' + outNo + '/' + path,
-                Body: blob,
-              };
-              uploadEntries.push({
-                uploadParams,
-                fileName: path,
-                fileSize: blob.size,
-              });
-              if (realEntryIndex == realEntryLength) {
-                while (uploadEntries.length) {
-                  await Promise.all(
-                    uploadEntries.splice(0, 500).map(async (e) => {
-                      await s3
-                        .upload(e.uploadParams)
-                        .promise()
-                        .then(function (data, err) {
-                          if (err) {
-                            console.log('uploadImageErr:::', err);
-                          }
-                          if (data) {
-                            imagesLocation.push({
-                              fileName: e.fileName,
-                              location: data.Key,
-                              fileSize: e.fileSize,
-                            });
-                          }
-                        });
-                    }),
-                  );
-                }
-                that.updateDatasets(imagesLocation, 'image', 'fromZip');
-              }
-            });
-          }
-        });
-      }
-    });
-  }
-
-  uploadSingleImage(outNo, s3, s3Config, entry) {
-    const imagesLocation = [];
-    const that = this;
-    let realEntryIndex = 0;
-    for (let i = 0; i < entry.length; i++) {
-      const uploadParams = {
-        Bucket: new Buffer(s3Config.bucket, 'base64').toString(),
-        Key: new Buffer(s3Config.key, 'base64').toString() + '/' + outNo + '/' + entry[i].name,
-        Body: entry[i].file,
-      };
-      s3.upload(uploadParams, async function (err, data) {
-        if (err) {
-          console.log('s3UploadError:::', err);
-        }
-        if (data) {
-          await imagesLocation.push({
-            fileName: entry[i].name,
-            location: data.Key,
-            fileSize: entry[i].size,
-          });
-          realEntryIndex++;
-          if (realEntryIndex === entry.length) {
-            const appendParams = {
-              pname: that.projectName,
-              isFile: false,
-              projectType: that.projectType,
-              images: imagesLocation,
-            };
-            that.appendSrs(appendParams);
-          }
-        }
-      });
     }
   }
 
