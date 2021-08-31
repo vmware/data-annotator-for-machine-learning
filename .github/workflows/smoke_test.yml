@@ -153,7 +153,7 @@ jobs:
             -Dsonar.projectKey=${{ env.SONAR_ORG }}-DAML-annotation-app
             -Dsonar.projectName=${{ env.SONAR_ORG }}-DAML-annotation-app
             -Dsonar.sources=.
-            -Dsonar.projectBaseDir=.
+            -Dsonar.projectBaseDir=./
             -Dsonar.sourceEncoding=UTF-8
             -Dsonar.language=javascript
             -Dsonar.javascript.lcov.reportPaths=../coverage-output/lcov.info
