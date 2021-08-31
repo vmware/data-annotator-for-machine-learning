@@ -129,9 +129,9 @@ describe("Enter projects tab...", () => {
         projectEditData.LogProject.Filter_File_Name
       );
       let tableLengthBeforeReturn = await projectsPage.getTableLength();
-      console.log(9, tableLengthBeforeReturn);
+      console.log("tableLengthBeforeReturn", tableLengthBeforeReturn);
       let aa = (await projectsPage.getTableTotalItems()).trim().split(" ")[4];
-      console.log(10, aa);
+      console.log("table total items", aa);
       // since("table total items should to be 3 after filter")
       //   .expect(
       //     Number((await projectsPage.getTableTotalItems()).trim().split(" ")[4])
@@ -143,8 +143,6 @@ describe("Enter projects tab...", () => {
       // since("should return to annotator successful")
       //   .expect(projectsPage.RETURN_TO_ANNOTATOR_BTN.isEnabled())
       //   .toBe(true);
-      let bb = projectsPage.RETURN_TO_ANNOTATOR_BTN.isEnabled();
-      console.log(11, bb);
       await projectsPage.toExpandCell();
     } else {
       done.fail("can not filter out the consitent project....");

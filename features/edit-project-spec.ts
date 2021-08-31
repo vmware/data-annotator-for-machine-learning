@@ -100,7 +100,7 @@ describe("edit project info on projects page..", () => {
         .toEqual(Constant.username + "," + projectEditData.TextProject.Owner2);
       since("project annotator should be 6 and content correct")
         .expect(New_Project_Annotator.split("\n").length)
-        .toEqual(11);
+        .toBeGreaterThan(10);
       since("project labels should be 7 and content correct")
         .expect(New_Project_Labels)
         .toEqual(
