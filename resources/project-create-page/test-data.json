@@ -12,7 +12,8 @@
     "labelColumn": "No Labels",
     "duplicateLabel": "test1",
     "deleteLabel": "test3",
-    "maxAnnotation": 3
+    "maxAnnotation": 3,
+    "defaultEvenlyDistributedTickets": 26
   },
   "TextMultipleLabelsProject": {
     "Instruction": "this is e2e test multiple labels project task instruction",
@@ -49,7 +50,8 @@
     "Labels": "test1",
     "Source": "ner-test-data.csv",
     "ticketSessions": 29,
-    "duplicateLabel": "test1"
+    "duplicateLabel": "test1",
+    "deleteLabel": "test2"
   },
   "LogProject": {
     "Instruction": "this is e2e test log project task instruction",
@@ -58,6 +60,7 @@
     "Source": "log-test-data.tgz",
     "ticketSessions": 10,
     "keywordFilter": "option",
+    "regexFilter": "/[A-Z]/",
     "rowFreeText": "row freeText",
     "logFreeText": "log freeText",
     "reviewRowFreetext": "e2e test from review of rowFreeText",

@@ -66,9 +66,12 @@ describe("annotate project ...", () => {
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(1);
-
-      console.log("start to skip this ticket....");
+      console.log("start to skip this ticket and then historyback....");
       await annotatePage.skipTicket();
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
+      await annotatePage.clickHistoryBack();
+      await annotatePage.selectMultipleLable();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
       since("the content should not be empty")
@@ -77,7 +80,7 @@ describe("annotate project ...", () => {
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(2);
-      console.log("skip success....");
+      console.log("skip and then historyback success....");
 
       console.log("start to flag this ticket....");
       await annotatePage.flagTicket();

@@ -6,6 +6,7 @@ import { Constant } from "../general/constant";
 import { browser, $$, $, ExpectedConditions, by, element } from "protractor";
 import { CommonPage } from "../general/commom-page";
 import { FunctionUtil } from "../utils/function-util";
+import { protractor } from "protractor/built/ptor";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
 export class AnnotatePage extends CommonPage {
@@ -36,6 +37,7 @@ export class AnnotatePage extends CommonPage {
   BACK_BTN = element(by.css("button.btn.btn-outline clr-icon[shape=undo]"));
   NER_TICKET_AREA = element(by.css(".questionContainer .nerBox"));
   LOG_FILTER_SELECT = element(by.css("select.filterSelect"));
+  LOG_FILTER_SELECT_OPTIONS = element.all(by.css("select.filterSelect option"));
   LOG_FILTER_INPUT = element(by.css("input.filterText"));
   LOG_TICKET_AREA = element(by.css(".questionContainer .txtBox"));
   ROW_LOG_FREETEXT_INPUT = element(by.css("input.singleFreetext"));
@@ -69,6 +71,19 @@ export class AnnotatePage extends CommonPage {
   IMAGE_LABEL = element.all(by.css("span.ant-tag")).get(0);
   IMAGE_TRASH_BTN = element.all(by.css("div.panel button")).get(2);
   WRAP_BTN = element(by.css('div.editBar button[title="Wrap Text"]'));
+  DISPLAY_SELECT = element(by.css("select[formcontrolname='renderFormat']"));
+  DISPLAY_SELECT_OPTIONS = element.all(
+    by.css("select[formcontrolname='renderFormat'] option")
+  );
+  PROJECT_SELECT = element(by.css("select[formcontrolname='selectProject']"));
+  PROJECT_SELECT_OPTIONS = element.all(
+    by.css("select[formcontrolname='selectProject'] option")
+  );
+  EXIT_BTN = element(by.css("button.btn.btn-primary.btn-danger"));
+  ASSIGNMENT_LOGIC_RADIO = element(
+    by.css("clr-radio-wrapper label[for='sequential']")
+  );
+  LOG_SECOND_LABEL = element(by.buttonText("test2"));
 
   async navigateTo() {
     await browser.sleep(5000);
@@ -107,6 +122,30 @@ export class AnnotatePage extends CommonPage {
 
   getHistoryLists() {
     return this.HISTORY_LISTS.count();
+  }
+
+  async selectDisplay(index) {
+    await FunctionUtil.elementVisibilityOf(this.DISPLAY_SELECT);
+    await browser.waitForAngularEnabled(false);
+    await this.DISPLAY_SELECT.click();
+    await this.DISPLAY_SELECT_OPTIONS.get(index).click();
+  }
+
+  async selectProjects(pname) {
+    await FunctionUtil.elementVisibilityOf(this.PROJECT_SELECT);
+    await browser.waitForAngularEnabled(false);
+    await this.PROJECT_SELECT.click();
+    await this.PROJECT_SELECT_OPTIONS.then(async (options) => {
+      options.forEach(async (value, index) => {
+        await this.PROJECT_SELECT_OPTIONS.get(index)
+          .getText()
+          .then(async (e) => {
+            if (e === pname) {
+              await this.PROJECT_SELECT_OPTIONS.get(index).click();
+            }
+          });
+      });
+    });
   }
 
   async selectAnnoteLable() {
@@ -181,6 +220,22 @@ export class AnnotatePage extends CommonPage {
     await this.LOG_FILTER_INPUT.sendKeys(filter);
     await FunctionUtil.pressEnter();
     console.log("succeed to logFilterByKeyword");
+  }
+
+  async logFilterByRegex(filter1, filter2) {
+    console.log("start to logFilterByRegex....");
+    await FunctionUtil.elementVisibilityOf(this.LOG_FILTER_SELECT);
+    await FunctionUtil.elementVisibilityOf(this.LOG_FILTER_INPUT);
+    await browser.waitForAngularEnabled(false);
+    await this.LOG_FILTER_SELECT.click();
+    await this.LOG_FILTER_SELECT_OPTIONS.get(1).click();
+    await this.LOG_FILTER_INPUT.sendKeys(filter1);
+    await FunctionUtil.pressEnter();
+    await this.LOG_FILTER_INPUT.clear();
+    await this.LOG_FILTER_INPUT.sendKeys(filter2);
+    await this.LOG_FILTER_INPUT.sendKeys(protractor.Key.TAB);
+    await browser.waitForAngularEnabled(false);
+    console.log("succeed to logFilterByRegex");
   }
 
   async getFilterWords() {
@@ -371,5 +426,37 @@ export class AnnotatePage extends CommonPage {
   async wrapLogRow() {
     await FunctionUtil.elementVisibilityOf(this.WRAP_BTN);
     await this.WRAP_BTN.click();
+  }
+
+  async exitAnnotatePage() {
+    await FunctionUtil.elementVisibilityOf(this.EXIT_BTN);
+    await browser.waitForAngularEnabled(false);
+    await this.EXIT_BTN.click();
+  }
+
+  async shiftReviewAssignmentLogic() {
+    await FunctionUtil.elementVisibilityOf(this.ASSIGNMENT_LOGIC_RADIO);
+    await browser.waitForAngularEnabled(false);
+    await this.ASSIGNMENT_LOGIC_RADIO.click();
+  }
+
+  async findLogLine(index) {
+    return element(by.css(`span.logLine-${index}`));
+  }
+
+  async dragAnnotateLog(el1, el2) {
+    await FunctionUtil.mouseDragAnnotate(el1, el2);
+  }
+
+  async changeLogLabel() {
+    await FunctionUtil.elementVisibilityOf(this.LOG_SECOND_LABEL);
+    await this.LOG_SECOND_LABEL.click();
+    await browser.waitForAngularEnabled(false);
+  }
+
+  async clickHistoryBack() {
+    await FunctionUtil.elementVisibilityOf(this.HISTORY_LISTS.first());
+    await this.HISTORY_LISTS.first().click();
+    await browser.waitForAngularEnabled(false);
   }
 }

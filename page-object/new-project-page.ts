@@ -214,6 +214,7 @@ export class NewProjectPage extends CommonPage {
 
   async setDataSubmit() {
     await this.SET_DATA_BTN.click();
+    await ExpectedConditions.invisibilityOf($(".btn.uploadLoading"));
   }
 
   async clickOkBtn() {

@@ -59,6 +59,7 @@ export class EditPage {
     await this.PROJECT_NAME_INPUT.click();
     await this.PROJECT_NAME_INPUT.sendKeys(Constant.project_name_log);
     await this.PROJECT_NAME_INPUT.sendKeys(protractor.Key.TAB);
+    await browser.sleep(5000);
     await this.PROJECT_NAME_INPUT.clear();
     await this.PROJECT_NAME_INPUT.sendKeys(Constant.project_name_text_al);
     await browser.waitForAngularEnabled(false);
@@ -163,20 +164,26 @@ export class EditPage {
     console.log("succeed to deleteAnnotator...");
   }
 
-  async editALProjectThreshold(threshold, threshold_err) {
+  async editALProjectThreshold(threshold, threshold_err, validation_string) {
     await FunctionUtil.elementVisibilityOf(this.AL_THRESHOLD_INPUT);
     await this.AL_THRESHOLD_INPUT.clear();
     await this.AL_THRESHOLD_INPUT.sendKeys(threshold_err);
+    await this.AL_THRESHOLD_INPUT.sendKeys(protractor.Key.TAB);
+    await this.AL_THRESHOLD_INPUT.clear();
+    await this.AL_THRESHOLD_INPUT.sendKeys(validation_string);
     await this.AL_THRESHOLD_INPUT.sendKeys(protractor.Key.TAB);
     await this.AL_THRESHOLD_INPUT.clear();
     await this.AL_THRESHOLD_INPUT.sendKeys(threshold);
     await browser.waitForAngularEnabled(false);
   }
 
-  async editALProjectFrequency(frequency, frequency_err) {
+  async editALProjectFrequency(frequency, frequency_err, validation_string) {
     await FunctionUtil.elementVisibilityOf(this.AL_FREQUENCY_INPUT);
     await this.AL_FREQUENCY_INPUT.clear();
     await this.AL_FREQUENCY_INPUT.sendKeys(frequency_err);
+    await this.AL_FREQUENCY_INPUT.sendKeys(protractor.Key.TAB);
+    await this.AL_FREQUENCY_INPUT.clear();
+    await this.AL_FREQUENCY_INPUT.sendKeys(validation_string);
     await this.AL_FREQUENCY_INPUT.sendKeys(protractor.Key.TAB);
     await this.AL_FREQUENCY_INPUT.clear();
     await this.AL_FREQUENCY_INPUT.sendKeys(frequency);

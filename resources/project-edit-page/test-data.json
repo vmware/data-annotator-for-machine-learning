@@ -8,7 +8,8 @@
     "Threshold": 55,
     "Threshold_Err": 40,
     "Frequency": 15,
-    "Frequency_Err": 5
+    "Frequency_Err": 5,
+    "Validation_String": "err"
   },
 
   "LogProject": {
@@ -18,7 +19,8 @@
     "InfoMessage_Success": "Label has been deleted successfully.",
     "Annotator": "test2@vmware.com",
     "OverMax": 50,
-    "Filter_File_Name": 0
+    "Filter_File_Name": 0,
+    "editLabels": "test1,test3"
   },
 
   "TabularNumericProject": {

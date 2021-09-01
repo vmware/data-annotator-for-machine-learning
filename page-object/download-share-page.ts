@@ -92,7 +92,9 @@ export class DownloadSharePage extends CommonPage {
       await this.MODAL_CANCEL_BTN.click();
       await this.clickShareBtn();
       await this.inputShareInfo("e2e test share project");
+      await browser.sleep(5000);
       await FunctionUtil.click(this.SHARE_OK);
+      await ExpectedConditions.invisibilityOf(this.MODAL_CANCEL_BTN);
     }
   }
 

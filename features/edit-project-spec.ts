@@ -7,6 +7,8 @@ import { browser, $, ExpectedConditions, by, element } from "protractor";
 import { ProjecstPage } from "../page-object/projects-page";
 import { EditPage } from "../page-object/edit-page";
 import { CommonPage } from "../general/commom-page";
+import { FunctionUtil } from "../utils/function-util";
+import { protractor } from "protractor/built/ptor";
 const projectEditData = require("../resources/project-edit-page/test-data");
 const projectCreateData = require("../resources/project-create-page/test-data");
 
@@ -21,6 +23,7 @@ describe("edit project info on projects page..", () => {
   let LABEL1_INPUT = element(by.css("input[placeholder='test1']"));
   let LABEL2_INPUT = element(by.css("input[placeholder='test2']"));
   let LABEL3_INPUT = element(by.css("input[placeholder='test3']"));
+  let PROJECT_TAB = $('.header-nav a[href="/projects"]');
 
   beforeAll(() => {
     projectsPage = new ProjecstPage();
@@ -28,7 +31,38 @@ describe("edit project info on projects page..", () => {
     commonPage = new CommonPage();
   });
 
-  it("Should edit text al project successfully.", async (done) => {
+  it("Should edit text al project successfully in project tab.", async (done) => {
+    project_name = Constant.project_name_text_al;
+    await FunctionUtil.click(PROJECT_TAB);
+    await projectsPage.waitForGridLoading();
+    await projectsPage.filterProjectName(project_name);
+    let Project_Count_After_Filter = await projectsPage.getTableLength();
+    let Project_Name_Text = await projectsPage.getCellText(0);
+    console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
+    console.log("Project_Name_Text:::", Project_Name_Text);
+    if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
+      console.log("----------start to edit projects----------");
+      await editPage.clickEditButton();
+      await editPage.DELETE_CANCEL_BTN.click();
+      await editPage.clickEditButton();
+      await editPage.PROJECT_NAME_INPUT.clear();
+      await editPage.PROJECT_NAME_INPUT.sendKeys("");
+      await editPage.PROJECT_NAME_INPUT.sendKeys(protractor.Key.TAB);
+      await editPage.PROJECT_NAME_INPUT.clear();
+      await editPage.PROJECT_NAME_INPUT.sendKeys(project_name);
+      await editPage.clickEditSubmitButton();
+      await browser.wait(
+        ExpectedConditions.visibilityOf(PROMPT),
+        Constant.DEFAULT_TIME_OUT
+      );
+      await projectsPage.waitForGridLoading();
+    } else {
+      console.log("can not filter out the projects....");
+    }
+    done();
+  });
+
+  it("Should edit text al project successfully in admin tab.", async (done) => {
     project_name = Constant.project_name_text_al;
     await editPage.navigateTo();
     await projectsPage.waitForGridLoading();
@@ -54,11 +88,13 @@ describe("edit project info on projects page..", () => {
       await editPage.addLabel(New_Lable);
       await editPage.editALProjectThreshold(
         projectEditData.TextProject.Threshold,
-        projectEditData.TextProject.Threshold_Err
+        projectEditData.TextProject.Threshold_Err,
+        projectEditData.TextProject.Validation_String
       );
       await editPage.editALProjectFrequency(
         projectEditData.TextProject.Frequency,
-        projectEditData.TextProject.Frequency_Err
+        projectEditData.TextProject.Frequency_Err,
+        projectEditData.TextProject.Validation_String
       );
       await editPage.clickEditSubmitButton();
       await browser.wait(
@@ -170,8 +206,8 @@ describe("edit project info on projects page..", () => {
         .toEqual(projectEditData.LogProject.ErrorMessage_Used);
       await browser.sleep(1000);
 
-      await editPage.deleteLabel(LABEL2_INPUT);
-      await editPage.editLabel(LABEL3_INPUT, "test2");
+      await editPage.deleteLabel(LABEL3_INPUT);
+      await editPage.editLabel(LABEL2_INPUT, "test3");
       await editPage.showFileName();
       await editPage.assignmentLogic();
       await editPage.clickEditSubmitButton();
@@ -200,7 +236,7 @@ describe("edit project info on projects page..", () => {
         .toEqual(2);
       since("project labels' number should be 2 and content correct")
         .expect(New_Project_Labels)
-        .toEqual(projectCreateData.LogProject.Labels);
+        .toEqual(projectEditData.LogProject.editLabels);
     } else {
       console.log("can not filter out the projects....");
     }

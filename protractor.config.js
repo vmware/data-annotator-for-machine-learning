@@ -43,7 +43,11 @@ var conf = {
     "./features/delete-datasets-spec.ts",
   ],
 
-  specsConst: ["./general/login-external-spec.ts"],
+  specsConst: [
+    "./general/sign-up-external-spec.ts",
+    "./general/logout-spec.ts",
+    "./general/login-external-spec.ts",
+  ],
 
   poc_specs: [
     "./general/sign-up-external-spec.ts",

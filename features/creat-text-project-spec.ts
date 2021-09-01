@@ -59,7 +59,16 @@ describe("Create new project ", () => {
       ExpectedConditions.visibilityOf(SET_DATA_SECTION),
       Constant.DEFAULT_TIME_OUT
     );
+    console.log("start to set label that more than 50 labels...");
+    await newProjectPage.selectMultipleTicketColumn(0, 1);
+    await newProjectPage.selectLabels(3);
+    await newProjectPage.setDataSubmit();
+    await newProjectPage.clickOkBtn();
+    console.log("succeed to set label that more than 50 labels...");
+
     console.log("start to set label charactor that more than 50...");
+    await newProjectPage.selectMultipleTicketColumn(0, 1);
+    await browser.sleep(2000);
     await newProjectPage.selectMultipleTicketColumn(0, 2);
     await newProjectPage.selectLabels(4);
     await newProjectPage.setDataSubmit();

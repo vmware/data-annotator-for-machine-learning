@@ -237,4 +237,49 @@ describe("annotate project ...", () => {
       done.fail("can not filter out the consitent project....");
     }
   });
+
+  it("Should shift review assignment logic successfully.", async (done) => {
+    await annotatePage.shiftReviewAssignmentLogic();
+    await annotatePage.waitForPageLoading();
+    await browser.sleep(2000);
+    done();
+  });
+
+  it("Should storage filter and regex successfully.", async (done) => {
+    await annotatePage.logFilterByKeyword(
+      projectCreateData.LogProject.keywordFilter
+    );
+    await annotatePage.logFilterByRegex(
+      projectCreateData.LogProject.keywordFilter,
+      projectCreateData.LogProject.regexFilter
+    );
+    await browser.sleep(2000);
+    done();
+  });
+
+  it("Should front to end multiple label successfully.", async (done) => {
+    await browser.sleep(2000);
+    await annotatePage.dragAnnotateLog(
+      await annotatePage.findLogLine(1),
+      await annotatePage.findLogLine(5)
+    );
+    await browser.sleep(2000);
+    done();
+  });
+
+  it("Should end to front multiple label successfully.", async (done) => {
+    await annotatePage.changeLogLabel();
+    await browser.sleep(2000);
+    await annotatePage.dragAnnotateLog(
+      await annotatePage.findLogLine(6),
+      await annotatePage.findLogLine(1)
+    );
+    await browser.sleep(2000);
+    await annotatePage.backToPrevious();
+    await browser.sleep(2000);
+    await annotatePage.submitLogAnnotate();
+    await annotatePage.waitForPageLoading();
+    await annotatePage.ANNOTATE_OK_BTN.click();
+    done();
+  });
 });

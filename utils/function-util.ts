@@ -219,4 +219,11 @@ export class FunctionUtil {
       await browser.switchTo().alert().accept();
     }
   }
+
+  public static async mouseDragAnnotate(el1, el2) {
+    await browser.actions().mouseMove(el1).mouseDown().mouseMove(el2).perform();
+    await browser.sleep(1000);
+    await browser.actions().mouseUp().perform();
+    await browser.sleep(1000);
+  }
 }

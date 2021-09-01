@@ -7,6 +7,8 @@ import { NewProjectPage } from "../page-object/new-project-page";
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
+import { FunctionUtil } from "../utils/function-util";
+
 const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("Create new project ", () => {
@@ -55,10 +57,16 @@ describe("Create new project ", () => {
       ExpectedConditions.visibilityOf(SET_DATA_SECTION),
       Constant.DEFAULT_TIME_OUT
     );
-    await newProjectPage.setData("ner", 1, 4);
+    await newProjectPage.setData("ner", 1, 7);
+    await newProjectPage.selectMultipleTicketColumn(5, 6);
+    await FunctionUtil.operationSuspensionElements(
+      newProjectPage.DELETE_LABEL,
+      newProjectPage.DELETE_LABEL_ICON
+    );
     await newProjectPage.setNewLable([
       projectCreateData.NerLabelsExistingProject.Labels,
     ]);
+
     await newProjectPage.setDuplicateLable(
       projectCreateData.NerLabelsExistingProject.duplicateLabel
     );

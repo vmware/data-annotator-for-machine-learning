@@ -47,28 +47,33 @@ describe("annotate project ...", () => {
           source: projectCreateData.TextProject.Source,
           instruction: projectCreateData.TextProject.Instruction,
         });
-      since("progress shoud show up and content correct")
-        .expect(annotatePage.getProgress())
-        .toEqual({
-          sessions: String(projectCreateData.TextProject.ticketSessions),
-          annotations: "0",
-        });
+      // since("progress shoud show up and content correct")
+      //   .expect(annotatePage.getProgress())
+      //   .toEqual({
+      //     sessions: String(projectCreateData.TextProject.ticketSessions),
+      //     annotations: "0",
+      //   });
 
+      await annotatePage.selectDisplay(1);
       await annotatePage.selectAnnoteLable();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-      since("the progress annotations should increas 1")
-        .expect(annotatePage.getProgress())
-        .toEqual({
-          sessions: String(projectCreateData.TextProject.ticketSessions),
-          annotations: "1",
-        });
+      // since("the progress annotations should increas 1")
+      //   .expect(annotatePage.getProgress())
+      //   .toEqual({
+      //     sessions: String(projectCreateData.TextProject.ticketSessions),
+      //     annotations: "1",
+      //   });
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(1);
 
       console.log("start to skip this ticket....");
       await annotatePage.skipTicket();
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
+      await annotatePage.clickHistoryBack();
+      await annotatePage.selectAnnoteLable();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
       since("the content should not be empty")
@@ -86,7 +91,10 @@ describe("annotate project ...", () => {
         .expect(annotatePage.currentTicketContent())
         .not.toEqual("");
       console.log("flag success....");
-
+      await annotatePage.selectProjects(Constant.project_name_log);
+      await annotatePage.waitForPageLoading();
+      await annotatePage.exitAnnotatePage();
+      await commonPage.waitForGridLoading();
       done();
     } else {
       done.fail("can not filter out the consitent project....");
