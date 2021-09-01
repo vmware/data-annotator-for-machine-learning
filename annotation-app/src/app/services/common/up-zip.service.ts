@@ -92,7 +92,7 @@ export class UnZipService {
 
   unzipImages(inputFile) {
     const that = this;
-    return new Promise((resolve) => {
+    return new Promise<any>((resolve) => {
       const jsZip = new JSZip();
       jsZip.loadAsync(inputFile).then((entries) => {
         let realEntryLength = 0;
@@ -151,10 +151,10 @@ export class UnZipService {
     let count = 0;
     let invalidCount = 0;
     const indexArray = [];
-    for (let item of originalHead) {
-      indexArray.push(previewHeadDatas.indexOf(item));
-    }
-    return new Promise((resolve, reject) => {
+    // for (let item of originalHead) {
+    //   indexArray.push(previewHeadDatas.indexOf(item));
+    // }
+    return new Promise<any>((resolve, reject) => {
       this.papa.parse(file, {
         header,
         download,
@@ -172,6 +172,7 @@ export class UnZipService {
           count += chunkData.length;
           previewData = chunkData;
           previewHeadDatas = _.keys(previewData[0]);
+
           if (previewContentDatas.length < 5) {
             for (let i = 0; i < previewData.length; i++) {
               if (
@@ -191,7 +192,7 @@ export class UnZipService {
           for (let a = 0; a < chunkData.length; a++) {
             let newArray2 = [];
             for (let c = 0; c < indexArray.length; c++) {
-              let key = indexArray[c];
+              let key = previewHeadDatas[indexArray[c]];
               newArray2.push(chunkData[a][key]);
             }
             newArray.push(newArray2);

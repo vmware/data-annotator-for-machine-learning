@@ -4,11 +4,13 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 import { Injectable } from '@angular/core';
+import { resolve } from 'core-js/fn/promise';
 import * as _ from 'lodash';
+import { AvaService } from '../ava.service';
 
 @Injectable()
 export class CommonService {
-  constructor() {}
+  constructor(private avaService: AvaService) {}
 
   editAssignedNumber(data, totalRow, maxAnnotations, assigneeList) {
     if (data.assignedCase <= 0) {
@@ -124,5 +126,92 @@ export class CommonService {
         }
       }
     }
+  }
+
+  generateProject(e, datasets, email, from) {
+    let response;
+    return new Promise<any>((resolve) => {
+      if (e.labelType == 'numericLabel') {
+        for (let items of datasets) {
+          if (items.id === e.id) {
+            items.generateInfo.status = 'generating';
+            break;
+          }
+        }
+
+        this.avaService.generate(e.id, email, 'standard', from).subscribe(
+          (res) => {
+            if (res && res.Info != 'undefined') {
+              if (res.Info == 'prepare') {
+                response = {
+                  res: res,
+                  datasets: datasets,
+                  infoMessage:
+                    'Dataset with annotations is being generated. You will receive an email when download is ready.',
+                };
+                resolve(response);
+              } else if (res.Info == 'done') {
+                for (let items of datasets) {
+                  if (items.id === e.id) {
+                    items.generateInfo.status = 'done';
+                  }
+                }
+                response = {
+                  res: res,
+                  datasets: datasets,
+                };
+                resolve(response);
+              } else if (res.Info == 'generating') {
+                response = {
+                  res: res,
+                  datasets: datasets,
+                  infoMessage:
+                    'Dataset with annotations is already being generated. Please refresh the page.',
+                };
+                resolve(response);
+              }
+            }
+          },
+          (error: any) => {
+            console.log(error);
+            response = {
+              err: error,
+              datasets: datasets,
+            };
+            resolve(response);
+          },
+        );
+      } else {
+        e.src = from;
+        if (e.projectType == 'log') {
+          this.avaService.downloadProject(e.id).subscribe(
+            (res) => {
+              if (res) {
+                e.originalDataSets = res.originalDataSets;
+                response = {
+                  datasets: datasets,
+                  e: e,
+                };
+                resolve(response);
+              }
+            },
+            (error: any) => {
+              console.log(error);
+              response = {
+                err: error,
+                datasets: datasets,
+              };
+              resolve(response);
+            },
+          );
+        } else {
+          response = {
+            datasets: datasets,
+            e: e,
+          };
+          resolve(response);
+        }
+      }
+    });
   }
 }
