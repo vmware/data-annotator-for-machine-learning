@@ -36,8 +36,6 @@ import { EmailService } from 'app/services/common/email.service';
   styleUrls: ['./create-project.component.scss'],
 })
 export class CreateNewComponent implements OnInit {
-  // @Output('onAddedDataset')
-  // onAddedDsEmitter: EventEmitter<Dataset> = new EventEmitter<Dataset>();
   @Input()
   format = 'cvs';
   @ViewChild('labels', { static: false })
@@ -101,7 +99,6 @@ export class CreateNewComponent implements OnInit {
   fileSize: any;
   isSelectWrongColumn: boolean;
   showQueryDatasetDialog: boolean;
-  // userQuestionUpdate = new Subject<string>();
   minLabel: number;
   maxLabel: number;
   sizeError = false;
@@ -145,14 +142,6 @@ export class CreateNewComponent implements OnInit {
         page: 'create',
       };
     });
-
-    // this.userQuestionUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
-    //   if (value != '') {
-    //     this.checkDatasetName(value);
-    //   } else {
-    //     this.nameExist = false;
-    //   }
-    // });
   }
 
   ngOnInit(): void {
@@ -861,6 +850,9 @@ export class CreateNewComponent implements OnInit {
         this.setDataDialog = true;
         this.setDataComplete = false;
         this.overMaxLabelLimit = true;
+        this.totalCase = 0;
+        this.nonEnglish = 0;
+        this.dsDialogForm.get('totalRow').setValue(0);
         return;
       }
       for (let d = 0; d < flag.length; d++) {
@@ -948,10 +940,10 @@ export class CreateNewComponent implements OnInit {
 
         // to check this is a totally numeric flag or not
         const isNumeric = this.toCheckNumeric(flag) == 'no' ? false : true;
-        this.identifyCategory(selectedLabelIndex, isNumeric, flag);
         this.totalCase = count;
         this.nonEnglish = invalidCount;
         this.dsDialogForm.get('totalRow').setValue(this.totalCase - this.nonEnglish);
+        this.identifyCategory(selectedLabelIndex, isNumeric, flag);
         this.setDataComplete = false;
         this.changeSetData = false;
         this.changePreview = false;

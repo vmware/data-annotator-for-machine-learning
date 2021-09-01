@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import * as _ from 'lodash';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { UserAuthService } from '../../services/user-auth.service';
 import { AvaService } from '../../services/ava.service';
 import { ToolService } from 'app/services/common/tool.service';
@@ -31,10 +31,6 @@ export class GameFormComponent implements OnInit {
   pageSize: number;
   page: number;
   totalItems: number;
-  // pageSizeReview: number;
-  // pageReview: number;
-  // totalItemsReview: number;
-  // isShowReviewTab = false;
 
   constructor(
     private avaService: AvaService,
@@ -45,11 +41,6 @@ export class GameFormComponent implements OnInit {
     this.user = this.userAuthService.loggedUser();
     this.page = 1;
     this.pageSize = 10;
-    // this.pageReview = 1;
-    // this.pageSizeReview = 10;
-    // this.route.queryParams.subscribe((data) => {
-    //   data.outfrom == 'review' ? (this.isShowReviewTab = true) : (this.isShowReviewTab = false);
-    // });
   }
 
   ngOnInit() {
@@ -57,17 +48,9 @@ export class GameFormComponent implements OnInit {
     this.getProjects();
   }
 
-  // clickAnnotate() {
-  //   this.getProjects();
-  // }
-
   valueChange(value: number) {
     this.pageSize = value;
   }
-
-  // reviewValueChange(value: number) {
-  //   this.pageSizeReview = value;
-  // }
 
   private getProjects(params?: any) {
     this.loading = true;

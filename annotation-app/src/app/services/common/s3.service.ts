@@ -246,14 +246,7 @@ export class S3Service {
       this.avaService.getCloudUrl(choosedDataset.id).subscribe(
         (res) => {
           this.unZipService
-            .parseCSVChunk(
-              res,
-              false,
-              true,
-              choosedDataset.topReview.header,
-              originalHead,
-              previewContentDatas,
-            )
+            .parseCSVChunk(res, false, true, choosedDataset.topReview.header, previewContentDatas)
             .then((e) => {
               if (choosedDataset.hasHeader == 'yes') {
                 response = {

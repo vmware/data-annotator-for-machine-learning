@@ -76,9 +76,11 @@ export class EditProjectComponent implements OnInit {
     private emailService: EmailService,
   ) {
     this.inputPnameUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
-      if (value != '') {
-        this.pnameCheck(value);
+      let pname = value.trim();
+      if (pname != '') {
+        this.pnameCheck(pname);
       } else {
+        this.inputProjectName = pname;
         this.nameExist = false;
       }
     });
@@ -131,9 +133,6 @@ export class EditProjectComponent implements OnInit {
           this.nameExist = false;
         }
       });
-    }
-    if (name == '') {
-      this.nameExist = false;
     }
   }
 
@@ -365,7 +364,7 @@ export class EditProjectComponent implements OnInit {
     } else {
       if (
         (this.msg.projectType == 'ner' && this.categoryList.length > 1) ||
-        (this.msg.projectTyp != 'ner' && this.categoryList.length > 2)
+        (this.msg.projectType != 'ner' && this.categoryList.length > 2)
       ) {
         this.categoryList.splice(index, 1);
       }
@@ -381,7 +380,7 @@ export class EditProjectComponent implements OnInit {
     });
     if (
       (this.msg.projectType == 'ner' && this.categoryList.length > 1 && oldLabelList.length > 1) ||
-      (this.msg.projectTyp != 'ner' && this.categoryList.length > 2 && oldLabelList.length > 2)
+      (this.msg.projectType != 'ner' && this.categoryList.length > 2 && oldLabelList.length > 2)
     ) {
       const param = {
         pname: this.msgInEdit.projectName,
@@ -462,7 +461,7 @@ export class EditProjectComponent implements OnInit {
     this.activeClickInput = i;
   }
 
-  enterEditLabel(e, i) {
+  enterEditLabel(e) {
     if (e.editLabel != '' && this.inputLabelValidation == false) {
       for (let i = 0; i < this.categoryList.length; i++) {
         if (this.categoryList[i].originalLabel == e.originalLabel) {
@@ -479,8 +478,8 @@ export class EditProjectComponent implements OnInit {
     }
   }
 
-  blurEditLabel(e, i) {
-    this.enterEditLabel(e, i);
+  blurEditLabel(e) {
+    this.enterEditLabel(e);
   }
 
   editLabelChange(e) {

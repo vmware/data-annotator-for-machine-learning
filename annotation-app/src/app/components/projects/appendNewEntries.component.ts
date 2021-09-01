@@ -523,7 +523,6 @@ export class AppendNewEntriesComponent implements OnInit {
       true,
       false,
       this.originalHead,
-      this.previewHeadDatas,
       this.previewContentDatas,
     ).then((e) => {
       res = e;
