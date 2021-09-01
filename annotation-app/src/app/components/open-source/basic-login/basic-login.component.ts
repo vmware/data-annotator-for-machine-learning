@@ -86,11 +86,11 @@ export class BasicLoginComponent implements OnInit {
       };
       this.avaService.login(param).subscribe(
         (res) => {
-          if (res.MSG) {
-            this.error = true;
-            this.loading = false;
-            return;
-          }
+          // if (res.MSG) {
+          //   this.error = true;
+          //   this.loading = false;
+          //   return;
+          // }
           const user = {
             email: res.email,
             name: res.fullName,
@@ -133,11 +133,12 @@ export class BasicLoginComponent implements OnInit {
       };
       this.avaService.register(param).subscribe(
         (res) => {
-          if (!res.MSG) {
-            this.registerSuccess = 'Sign Up Complete!';
-          } else if (res.MSG) {
-            this.registerFailed = res.MSG;
-          }
+          // if (!res.MSG) {
+          //   this.registerSuccess = 'Sign Up Complete!';
+          // } else if (res.MSG) {
+          //   this.registerFailed = res.MSG;
+          // }
+          this.registerSuccess = 'Sign Up Complete!';
           this.loading = false;
         },
         (err) => {
