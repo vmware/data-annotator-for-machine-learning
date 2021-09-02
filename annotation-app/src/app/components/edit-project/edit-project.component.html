@@ -214,7 +214,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   [(ngModel)]="label.editLabel"
                   (ngModelChange)="editLabelChange($event, i)"
                   (keyup.enter)="enterEditLabel(label)"
-                  (blur)="blurEditLabel(label, i)"
+                  (blur)="blurEditLabel(label)"
                   (click)="editLabel(label, i)"
                   [readonly]="activeClickInput == i ? false : true"
                   autocomplete="off"

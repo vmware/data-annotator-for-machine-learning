@@ -147,10 +147,11 @@ export class UnZipService {
     }
   }
 
-  parseCSVChunk(file, header, download, originalHead, previewHeadDatas, previewContentDatas) {
+  parseCSVChunk(file, header, download, originalHead, previewContentDatas) {
     let count = 0;
     let invalidCount = 0;
     const indexArray = [];
+    let previewHeadDatas;
     // for (let item of originalHead) {
     //   indexArray.push(previewHeadDatas.indexOf(item));
     // }
