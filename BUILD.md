@@ -9,9 +9,9 @@ The project includes three components:
 ## Tools used
 
 Building requires:
-- [Node 14+](https://nodejs.org/en/)
-- [mongodb 3.5+](https://www.mongodb.com/download-center/community)
-- [Python 3.6+](https://www.python.org/downloads/)
+- [Node.js](https://nodejs.org/en/)
+- [Mongodb](https://www.mongodb.com/download-center/community)
+- [Python](https://www.python.org/downloads/)
 
 ## Installation
 
