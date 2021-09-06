@@ -23,13 +23,11 @@ export class CommonAppend {
   DROPDOWN_SELECT = $('#select-basic');
   APPEND_DONE_CLASS = 'btn btn-icon actionClass btn-success greenBtn ng-star-inserted';
 
-  async appenNewLine(project_name){
-    await FunctionUtil.click(this.COMMUNITY_DATASETS_TAB);
-    await this.commonPage.waitForPageLoading();
-    await this.commonPage.filterProjectName(project_name);
+  UPLOAD_INPUT_ELEMENT = $('#upfiles');
+  DATASET_NAME_ELEMENT = $('#datasetsName');
 
-    await FunctionUtil.click(this.APPEND_BTN);
-    await browser.sleep(1000);
+  async appenNewLine(project_name){
+    await this.locateProjectAppend(project_name);
     await FunctionUtil.click(this.APP_NEW_LINE_BTN);
     await browser.sleep(1000);
     if (await FunctionUtil.getElementsNum(this.TABLE_LIST) === 3) {
@@ -77,13 +75,8 @@ export class CommonAppend {
     return false;
   }
 
-  async fileAppendSelectExistingFile(projectName){
-    await FunctionUtil.click(this.COMMUNITY_DATASETS_TAB);
-    await this.commonPage.waitForPageLoading();
-    await this.commonPage.filterProjectName(projectName);
-
-    await FunctionUtil.click(this.APPEND_BTN);
-    await browser.sleep(1000);
+  async fileAppendSelectExistingFile(project_name){
+    await this.locateProjectAppend(project_name);
     await FunctionUtil.click(this.APPEND_BY_FILE_TAB);
     await browser.sleep(2000);
     await FunctionUtil.click(this.DROPDOWN_SELECT);
@@ -94,6 +87,42 @@ export class CommonAppend {
     if (await FunctionUtil.getAttribute(this.APPEND_BTN, 'class') == this.APPEND_DONE_CLASS) {
       return true;
     }
+    return false;
+  }
+
+
+  async locateProjectAppend(project_name){
+    await FunctionUtil.click(this.COMMUNITY_DATASETS_TAB);
+    await this.commonPage.waitForPageLoading();
+    await this.commonPage.filterProjectName(project_name);
+
+    await FunctionUtil.click(this.APPEND_BTN);
+    await browser.sleep(1000);
+  }
+  
+
+
+  async localFileChangeAndUpload(project_name, dataset_name, UPLOAD_FILE_1, UPLOAD_FILE_2){
+
+    await this.locateProjectAppend(project_name);
+    await FunctionUtil.click(this.APPEND_BY_FILE_TAB);
+    await browser.sleep(2000);
+    let file1 = process.cwd().replace("\\", "/") + UPLOAD_FILE_1;
+    await this.UPLOAD_INPUT_ELEMENT.sendKeys(file1);
+    await browser.sleep(2000);
+    
+    let file2 = process.cwd().replace("\\", "/") + UPLOAD_FILE_2;
+    await this.UPLOAD_INPUT_ELEMENT.sendKeys(file2);
+    await browser.sleep(2000);
+
+    await this.DATASET_NAME_ELEMENT.sendKeys(dataset_name);
+    await FunctionUtil.click(this.APPEND_PUBLISH_BTN);
+    
+    await browser.sleep(2000);
+    if (await FunctionUtil.getAttribute(this.APPEND_BTN, 'class') == this.APPEND_DONE_CLASS) {
+      return true;
+    }
+
     return false;
   }
 
