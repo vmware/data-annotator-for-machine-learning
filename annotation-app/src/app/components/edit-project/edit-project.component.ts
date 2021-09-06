@@ -299,7 +299,8 @@ export class EditProjectComponent implements OnInit {
         this.emailRegForOwner &&
         !this.sizeError &&
         this.msg.min <= this.oldMin &&
-        this.msg.max >= this.oldMax;
+        this.msg.max >= this.oldMax &&
+        this.msg.min !== this.msg.max;
     }
     if (condition) {
       this.editProjectComplete = true;
@@ -345,6 +346,8 @@ export class EditProjectComponent implements OnInit {
           this.onSubmitEditEmitter.emit(false);
         },
       );
+    } else {
+      this.sizeError = true;
     }
   }
 
@@ -501,7 +504,7 @@ export class EditProjectComponent implements OnInit {
   }
 
   minUpdate(e) {
-    if (e != null && Number(this.msg.max) >= Number(e)) {
+    if (e != null && Number(this.msg.max) >= Number(e) && Number(this.msg.max) !== Number(this.msg.min)) {
       this.sizeError = false;
     } else {
       this.sizeError = true;
@@ -509,7 +512,7 @@ export class EditProjectComponent implements OnInit {
   }
 
   maxUpdate(e) {
-    if (e != null && Number(e) >= Number(this.msg.min)) {
+    if (e != null && Number(e) >= Number(this.msg.min) && Number(this.msg.max) !== Number(this.msg.min)) {
       this.sizeError = false;
     } else {
       this.sizeError = true;
