@@ -1,3 +1,9 @@
+[![check-header](https://github.com/vmware/data-annotator-for-machine-learning/actions/workflows/check-header.yml/badge.svg?branch=master&event=push)](https://github.com/vmware/data-annotator-for-machine-learning/actions/workflows/check-header.yml)
+[![smoke_test](https://github.com/vmware/data-annotator-for-machine-learning/actions/workflows/smoke_test.yml/badge.svg?branch=master)](https://github.com/vmware/data-annotator-for-machine-learning/actions/workflows/smoke_test.yml)
+[![sonarcloud_scan_app](https://github.com/vmware/data-annotator-for-machine-learning/actions/workflows/sonarcloud_scan_app.yml/badge.svg)](https://sonarcloud.io/organizations/vmware-daml/projects?search=annotation-app&sort=-analysis_date)
+[![sonarcloud_scan_service](https://github.com/vmware/data-annotator-for-machine-learning/actions/workflows/sonarcloud_scan_service.yml/badge.svg)](https://sonarcloud.io/organizations/vmware-daml/projects?search=service&sort=-analysis_date)
+[![coverage report](https://avatars.githubusercontent.com/in/12526?s=20&v=4 "You can find the coverage report here")](https://sonarcloud.io/dashboard?id=vmware-daml-annotation-app)
+
 <div align='center'> <h1>Data Annotator for Machine Learning</h1> </div>
 
 Data Annotator for Machine Learning (DAML) is an application that helps machine learning teams facilitating the creation and management of annotations.
