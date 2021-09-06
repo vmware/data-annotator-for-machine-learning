@@ -36,10 +36,10 @@ describe("start to preview my dataset page", () => {
     let Datasets_Count_After_Filter = await myDatasetsPage.getTableLength();
     if (Datasets_Count_After_Filter > 0) {
       console.log("----------start to delete image dataset----------");
-      await commonPage.DELETE_PROJECT_BTN.click();
+      await commonPage.DELETE_DATASET_BTN.click();
       await browser.sleep(1000);
       await commonPage.DELETE_PROJECT_CANCEL_BTN.click();
-      await commonPage.DELETE_PROJECT_BTN.click();
+      await commonPage.DELETE_DATASET_BTN.click();
       await browser.sleep(1000);
       await commonPage.DELETE_PROJECT_OK_BTN.click();
       await browser.sleep(1000);
