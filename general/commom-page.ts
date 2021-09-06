@@ -65,6 +65,7 @@ export class CommonPage {
   ACTIONS = $$(
     '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"] .actionClass'
   );
+  DELETE_DATASET_BTN = $$('button[title="Delete Dataset"]');
   PAGE_SIZE_SELECT = element(by.css("app-dropdown-pagesize select"));
   PAGE_SIZE_SELECT_OPTION = element.all(
     by.css("app-dropdown-pagesize select option")

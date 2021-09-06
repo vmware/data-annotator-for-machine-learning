@@ -4,12 +4,12 @@ SPDX-License-Identifier: Apache-2.0
 */
 import { LoginBussiness } from "../general/login-bussiness";
 import { MyDatasetsPage } from "../page-object/my-datasets-page";
-import { CommonUtils } from "../general/common-utils";
+import { browser, $$ } from "protractor";
+import { FunctionUtil } from "../utils/function-util";
 
 describe("delete function", () => {
   let myDatasetsName: string;
   let myDatasetsPage: MyDatasetsPage;
-  let since = require("jasmine2-custom-message");
 
   beforeAll(() => {
     myDatasetsName = "e2e Test Data";
@@ -17,22 +17,16 @@ describe("delete function", () => {
     myDatasetsPage = new MyDatasetsPage();
   });
 
-  it("Delete the added datasets.", async (done) => {
+  it("Delete the added datasets.", async () => {
+
     await myDatasetsPage.navigateTo();
     await myDatasetsPage.waitForPageLoading();
+    await browser.sleep(2000);
     await myDatasetsPage.filterDatasetstName(myDatasetsName);
-    let Datasets_Count_After_Filter = await myDatasetsPage.getTableLength();
-    if (Datasets_Count_After_Filter > 0) {
-      console.log("----------start to delete datasets----------");
-      await CommonUtils.deleteMyDatasetsLoop(myDatasetsName);
-      await myDatasetsPage.filterDatasetstName(myDatasetsName);
-      let Datasets_Count_After_Delete = await myDatasetsPage.getTableLength();
-      since("the count should be zero after delete")
-        .expect(Datasets_Count_After_Delete)
-        .toBe(0);
-    } else {
-      console.log("can not filter out the consitent datasets....");
-    }
-    done();
+    await myDatasetsPage.deleteDatasets();
+    await myDatasetsPage.filterDatasetstName(myDatasetsName);
+    const TABLE_LIST = $$('clr-dg-row');
+    expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
+
   });
 });

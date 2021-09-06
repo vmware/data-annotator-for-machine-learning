@@ -30,7 +30,6 @@ var conf = {
     "./features/annotate-project-dropdown-spec.ts",
     "./features/creat-text-multiple-project-spec.ts",
     "./features/annotate-project-multiple-spec.ts",
-    // "./features/append-project-spec.ts",
     "./features/download-share-projects-spec.ts",
     "./features/creat-ner-labels-existing-project-spec.ts",
     "./features/annotate-project-ner-labels-existing-spec.ts",

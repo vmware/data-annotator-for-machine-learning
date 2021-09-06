@@ -42,11 +42,11 @@ export class MyDatasetsPage extends CommonPage {
   deleteDatasets() {
     return browser
       .wait(
-        ExpectedConditions.visibilityOf(this.DELETE_BTN),
+        ExpectedConditions.visibilityOf(this.DELETE_DATASET_BTN.first()),
         Constant.DEFAULT_TIME_OUT
       )
       .then(() => {
-        this.DELETE_BTN.click();
+        this.DELETE_DATASET_BTN.first().click();
       })
       .then(() => {
         return browser.wait(

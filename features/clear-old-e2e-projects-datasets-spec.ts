@@ -19,6 +19,7 @@ describe("upload new dataset on myDatasets page..", () => {
   const MYDATASETS_TAB = $('.header-nav a[href="/myDatasets"]');
   
   const DELETE_BTN = $$('button[title="Delete Project"]');
+  const DELETE_DATASET_BTN = $$('button[title="Delete Dataset"]');
   const DELETE_DATASET_OK_BTN = $('.modal-footer .btn.btn-primary')
   
   it("clear old e2e projects", async () => {
@@ -41,7 +42,7 @@ describe("upload new dataset on myDatasets page..", () => {
     await myDatasetsPage.filterDatasetstName(datasetsName);
     let dataLength = await FunctionUtil.getElementsNum(TABLE_LIST);
     for (var i=0; i<dataLength; i++){
-      await CommonUtils.deleteDataGrid(DELETE_BTN.first(), DELETE_DATASET_OK_BTN);;
+      await CommonUtils.deleteDataGrid(DELETE_DATASET_BTN.first(), DELETE_DATASET_OK_BTN);;
     }
     await browser.sleep(5000);
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
