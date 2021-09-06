@@ -47,23 +47,10 @@ describe("annotate project ...", () => {
           source: projectCreateData.TextProject.Source,
           instruction: projectCreateData.TextProject.Instruction,
         });
-      // since("progress shoud show up and content correct")
-      //   .expect(annotatePage.getProgress())
-      //   .toEqual({
-      //     sessions: String(projectCreateData.TextProject.ticketSessions),
-      //     annotations: "0",
-      //   });
-
       await annotatePage.selectDisplay(1);
       await annotatePage.selectAnnoteLable();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-      // since("the progress annotations should increas 1")
-      //   .expect(annotatePage.getProgress())
-      //   .toEqual({
-      //     sessions: String(projectCreateData.TextProject.ticketSessions),
-      //     annotations: "1",
-      //   });
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(1);

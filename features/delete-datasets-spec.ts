@@ -30,7 +30,7 @@ describe("delete function", () => {
     for (var i=0; i<dataLength; i++){
       await CommonUtils.deleteDataGrid(myDatasetsPage.DELETE_DATASET_BTN.first(), myDatasetsPage.DELETE_DATASET_OK_BTN);;
     }
-    await browser.sleep(5000);
+    await browser.sleep(2000);
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
 
   });

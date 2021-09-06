@@ -23,7 +23,7 @@ describe("upload new dataset on myDatasets page..", () => {
   const DELETE_DATASET_OK_BTN = $('.modal-footer .btn.btn-primary')
   
   it("clear old e2e projects", async () => {
-    await browser.sleep(5000);
+    await browser.sleep(2000);
     await FunctionUtil.click(PROJECT_TAB);
     await myDatasetsPage.waitForGridLoading();
     await myDatasetsPage.filterDatasetstName(projectName);
@@ -31,12 +31,12 @@ describe("upload new dataset on myDatasets page..", () => {
     for (var i=0; i<dataLength; i++){
       await CommonUtils.deleteDataGrid(DELETE_BTN.first(), DELETE_DATASET_OK_BTN);
     }
-    await browser.sleep(5000);
+    await browser.sleep(2000);
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
   });
 
   it('clear old e2e dataset', async () => {
-    await browser.sleep(5000);
+    await browser.sleep(2000);
     await FunctionUtil.click(MYDATASETS_TAB);
     await myDatasetsPage.waitForGridLoading();
     await myDatasetsPage.filterDatasetstName(datasetsName);
@@ -44,7 +44,7 @@ describe("upload new dataset on myDatasets page..", () => {
     for (var i=0; i<dataLength; i++){
       await CommonUtils.deleteDataGrid(DELETE_DATASET_BTN.first(), DELETE_DATASET_OK_BTN);;
     }
-    await browser.sleep(5000);
+    await browser.sleep(2000);
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
   });
 

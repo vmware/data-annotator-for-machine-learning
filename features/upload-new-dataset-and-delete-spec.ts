@@ -62,6 +62,7 @@ describe("upload new dataset on myDatasets page..", () => {
     await myDatasetsPage.deleteDatasets();
     await myDatasetsPage.filterDatasetstName(New_CSV_Name);
     const TABLE_LIST = $$('clr-dg-row');
+    await browser.sleep(2000);
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
   });
 

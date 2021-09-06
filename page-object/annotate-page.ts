@@ -132,20 +132,24 @@ export class AnnotatePage extends CommonPage {
   }
 
   async selectProjects(pname) {
-    await FunctionUtil.elementVisibilityOf(this.PROJECT_SELECT);
-    await browser.waitForAngularEnabled(false);
-    await this.PROJECT_SELECT.click();
-    await this.PROJECT_SELECT_OPTIONS.then(async (options) => {
-      options.forEach(async (value, index) => {
-        await this.PROJECT_SELECT_OPTIONS.get(index)
-          .getText()
-          .then(async (e) => {
-            if (e === pname) {
-              await this.PROJECT_SELECT_OPTIONS.get(index).click();
-            }
-          });
-      });
-    });
+
+    await FunctionUtil.click(this.PROJECT_SELECT);
+    await (await this.PROJECT_SELECT.$$("option")).forEach(async(value, index) =>{
+      if (await FunctionUtil.getValue(value) == pname) {
+        await FunctionUtil.click(value);
+      }
+    })
+    // await this.PROJECT_SELECT_OPTIONS.then(async (options) => {
+    //   options.forEach(async (value, index) => {
+    //     await this.PROJECT_SELECT_OPTIONS.get(index)
+    //       .getText()
+    //       .then(async (e) => {
+    //         if (e === pname) {
+    //           await this.PROJECT_SELECT_OPTIONS.get(index).click();
+    //         }
+    //       });
+    //   });
+    // });
   }
 
   async selectAnnoteLable() {
