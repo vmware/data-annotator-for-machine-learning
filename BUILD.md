@@ -2,17 +2,16 @@
 
 The project includes three components:
 
-- [**_annotation-app_**](./annotation-app): Angular application built with **Angular** 8.x, **NPM** 6+
-- [**_annotation-service_**](./annotation-service): Backend services built with [**Node**](https://nodejs.org/en/) 10+, [**mongodb**](https://www.mongodb.com/download-center/community) 3.5+, [**express**](https://www.npmjs.com/package/express) 4.17.1
-- [**_active-learning-service_**](./active-learning-service): Django application providing active learning api built with Python 3.6+ and Django 3.2 and modAL library for pool-based uncertainty sampling to rank the unlabelled data
+- [**_annotation-app_**](./annotation-app): Angular application built with [Angular 8.x](https://angular.io/guide/router-tutorial)
+- [**_annotation-service_**](./annotation-service): Backend services built with [Node 14+](https://nodejs.org/en/), [mongodb 3.5+](https://www.mongodb.com/download-center/community), [express 4.17.1](https://www.npmjs.com/package/express)
+- [**_active-learning-service_**](./active-learning-service): Django application providing active learning api built with [Python 3.6+](https://www.python.org/downloads/) and [Django 3.2](https://www.djangoproject.com/) and [modAL](https://modal-python.readthedocs.io/en/latest/#) library for pool-based uncertainty sampling to rank the unlabelled data
 
 ## Tools used
 
 Building requires:
-
-- Node 10+
-- NPM 6+
-- Python 3.6+
+- [Node 14+](https://nodejs.org/en/)
+- [mongodb 3.5+](https://www.mongodb.com/download-center/community)
+- [Python 3.6+](https://www.python.org/downloads/)
 
 ## Installation
 
