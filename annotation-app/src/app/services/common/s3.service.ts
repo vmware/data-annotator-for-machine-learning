@@ -5,34 +5,22 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { Papa } from 'ngx-papaparse';
-import { ToolService } from 'app/services/common/tool.service';
 import AWS from 'aws-sdk/lib/aws';
 import { AvaService } from '../ava.service';
 import { Buffer } from 'buffer';
 import * as JSZip from 'jszip';
 import { UnZipService } from 'app/services/common/up-zip.service';
-import { resolve } from 'core-js/fn/promise';
 
 @Injectable()
 export class S3Service {
-  constructor(
-    private papa: Papa,
-    private toolService: ToolService,
-    private avaService: AvaService,
-    private unZipService: UnZipService,
-  ) {}
+  constructor(private avaService: AvaService, private unZipService: UnZipService) {}
   public getS3UploadConfig() {
     let response;
     return new Promise<any>((resolve) => {
       this.avaService.getS3UploadConfig().subscribe(
         async (res) => {
           if (res) {
-            let outNo = '';
-            for (let i = 0; i < 6; i++) {
-              outNo += Math.floor(Math.random() * 10);
-            }
-            outNo = new Date().getTime() + outNo;
+            let outNo = new Date().getTime();
             const s3 = new AWS.S3({
               region: new Buffer(res.region, 'base64').toString(),
               apiVersion: new Buffer(res.apiVersion, 'base64').toString(),
