@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { EnvironmentsService } from 'app/services/environments.service';
+import { Console } from 'console';
 
 @Injectable()
 export class ToolService {
@@ -20,7 +21,8 @@ export class ToolService {
   }
 
   regexExec(reg, text) {
-    const a = [...text.matchAll(RegExp(eval(reg), 'g'))];
+    let regex = new RegExp('/', 'g');
+    const a = [...text.matchAll(RegExp(reg.replace(regex, ''), 'g'))];
     return a;
   }
 
