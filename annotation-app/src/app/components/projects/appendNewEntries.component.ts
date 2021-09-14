@@ -189,21 +189,12 @@ export class AppendNewEntriesComponent implements OnInit {
   }
 
   inputDescription(e, row, column) {
-    if (!this.toolService.isASCII(e.target.value)) {
-      e.target.style.color = 'red';
-      this.newAddedData[row].map((element) => {
-        if (element.key == column) {
-          element.format = false;
-        }
-      });
-    } else {
-      e.target.style.color = '#575757';
-      this.newAddedData[row].map((element) => {
-        if (element.key == column) {
-          element.format = true;
-        }
-      });
-    }
+    e.target.style.color = '#575757';
+    this.newAddedData[row].map((element) => {
+      if (element.key == column) {
+        element.format = true;
+      }
+    });  
   }
 
   uploadSingleImageToS3() {
