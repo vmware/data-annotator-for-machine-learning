@@ -69,49 +69,40 @@ module.exports = {
             //check all selected data if is empty
             let selectedData = Object.values(select).toString().replace(new RegExp(',', 'g'),'').trim();
             if(selectedData){
-                selectedData = Object.values(select);
-                for (let i = 0; i < selectedData.length; i++) {
-                    if (!validator.isASCII(selectedData[i])){
-                        selectedData = null;
-                        break;
+                let sechema = {
+                    projectName: req.body.pname,
+                    userInputsLength: 0,
+                    originalData: select,
+                };
+                
+                //support ner quesion anwser column display
+                if (projectType == PROJECTTYPE.NER && req.body.ticketQuestions.length) {
+                    let ticketQuestions = {};
+                    for (const qst of req.body.ticketQuestions) {
+                        ticketQuestions[qst] = oneData[qst];
                     }
+                    sechema.ticketQuestions = ticketQuestions;
                 }
-                if (selectedData) {
-                    let sechema = {
-                        projectName: req.body.pname,
-                        userInputsLength: 0,
-                        originalData: select,
-                    };
-                    
-                    //support ner quesion anwser column display
-                    if (projectType == PROJECTTYPE.NER && req.body.ticketQuestions.length) {
-                        let ticketQuestions = {};
-                        for (const qst of req.body.ticketQuestions) {
-                            ticketQuestions[qst] = oneData[qst];
+                
+                //support ner regression
+                if ((req.body.regression == 'true' || req.body.regression == true)&& projectType == PROJECTTYPE.NER) {
+                    let selectLabels = req.body.selectLabels;
+                    selectLabels = (typeof selectLabels === 'string'? JSON.parse(selectLabels):selectLabels);
+                    let problemCategory = [];
+                    for (const lb of selectLabels) {
+                        for (const dataLb of oneData[lb]) {
+                            problemCategory.push({
+                                text : Object.keys(dataLb)[0],
+                                start: Object.values(dataLb)[0][0],
+                                end: Object.values(dataLb)[0][1],
+                                label: lb
+                            });
                         }
-                        sechema.ticketQuestions = ticketQuestions;
                     }
-                    
-                    //support ner regression
-                    if ((req.body.regression == 'true' || req.body.regression == true)&& projectType == PROJECTTYPE.NER) {
-                        let selectLabels = req.body.selectLabels;
-                        selectLabels = (typeof selectLabels === 'string'? JSON.parse(selectLabels):selectLabels);
-                        let problemCategory = [];
-                        for (const lb of selectLabels) {
-                            for (const dataLb of oneData[lb]) {
-                                problemCategory.push({
-                                    text : Object.keys(dataLb)[0],
-                                    start: Object.values(dataLb)[0][0],
-                                    end: Object.values(dataLb)[0][1],
-                                    label: lb
-                                });
-                            }
-                        }
-                        sechema.userInputs=[ { problemCategory: problemCategory } ];
-                    }
-                    docs.push(sechema);
-                    totalCase += 1;
+                    sechema.userInputs=[ { problemCategory: problemCategory } ];
                 }
+                docs.push(sechema);
+                totalCase += 1;
             }
             //batch write data to db 
             if(docs.length && docs.length % PAGINATELIMIT == 0){
@@ -149,7 +140,7 @@ module.exports = {
                     },
                     auth:{ email: user }
                 }
-                emailService.sendEmailToAnnotator(param).catch(err => log.error(`[ SRS ][ ERROR ] send email:`, err));
+                emailService.sendEmailToAnnotator(param).catch(err => console.error(`[ SRS ][ ERROR ] send email:`, err));
                 
                 //trigger tabular one-hot-encoding project generate the vector model
                 if (req.body.encoder == ENCODE.ONEHOT) {

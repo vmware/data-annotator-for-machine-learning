@@ -25,7 +25,7 @@ const logImporter = require("../utils/logImporter");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const mongoDb = require("../db/mongo.db");
 const S3Utils = require('../utils/s3');
-const { DataSetModel } = require("../db/db-connect");
+const { DataSetModel,ProjectModel } = require("../db/db-connect");
 const compressing = require('compressing');
 const streamifier = require('streamifier');
 const readline = require('readline');
@@ -34,8 +34,8 @@ const _ = require("lodash");
 const config = require('../config/config');
 
 async function createProject(req) {
-
-    await validator.checkProjectByconditions({projectName: req.body.pname}, false);
+    const findProjectName = {projectName: req.body.pname};
+    await validator.checkProjectByconditions(findProjectName, false);
 
     console.log(`[ FILE ] Service createProject init parameters`);
     if (typeof req.body.assignee === 'string') {
@@ -114,7 +114,12 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         ticketDescription: req.body.ticketDescription,
         ticketQuestion: req.body.ticketQuestions,
     };
-    return projectDB.saveProject(project);
+
+    const conditions = {projectName: req.body.pname};
+    const update = { $set: project };
+    const options = { new: true, upsert: true };
+    
+    return mongoDb.findOneAndUpdate(ProjectModel, conditions, update, options)
 }
 
 async function generateFileFromDB(id, format, onlyLabelled, user) {
@@ -561,7 +566,7 @@ async function uploadFile(req) {
                         if (index >= 5) {
                             readInterface.emit('close');
                         }else{
-                            if (line && line.trim() && validator.isASCII(line)) {
+                            if (line && line.trim()) {
                                 index ++;
                                 textLines += line.trim() + "\n";
                             }
@@ -640,7 +645,7 @@ async function setData(req) {
         let select="";
         await columns.forEach( item =>{ select += oneData[item]});
         let selectedData = select.replace(new RegExp(',', 'g'),'').trim();
-        if(selectedData && validator.isASCII(selectedData)){
+        if(selectedData){
             totalCase += 1;
         }else{
             removedCase += 1;

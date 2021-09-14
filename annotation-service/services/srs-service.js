@@ -446,20 +446,13 @@ async function appendSrsDataByForms(req, originalHeaders){
         //check all input sr data if is empty
         let selectedData = Object.values(srJson).toString().replace(new RegExp(',', 'g'),'').trim();
         if(selectedData){
-            Object.values(srJson).forEach(sr =>{
-                if(!validator.isASCII(sr)){
-                    srJson = null;
-                }
-            });
-            if(srJson){
-                let sechema = {
-                    projectName: req.body.pname,
-                    userInputsLength: 0,
-                    originalData: srJson
-                };
-                docs.push(sechema);
-                caseNum++;
-            }
+            let sechema = {
+                projectName: req.body.pname,
+                userInputsLength: 0,
+                originalData: srJson
+            };
+            docs.push(sechema);
+            caseNum++;
         }        
     });
     console.log(`[ SRS ] Service appendSrsDataByForms.insertManySrsData caseNum:`, caseNum);
@@ -504,22 +497,13 @@ async function appendSrsDataByCSVFile(req, originalHeaders){
         //check all selected data if is empty
         let selectedData = Object.values(select).toString().replace(new RegExp(',', 'g'),'').trim();
         if(selectedData){
-            selectedData = Object.values(select);
-            for (let i = 0; i < selectedData.length; i++) {
-                if (!validator.isASCII(selectedData[i])){
-                    selectedData = null;
-                    break;
-                }
-            }
-            if(selectedData){
-                let sechema = {
-                    projectName: req.body.pname,
-                    userInputsLength: 0,
-                    originalData: select
-                };
-                docs.push(sechema);
-                caseNum++;
+            let sechema = {
+                projectName: req.body.pname,
+                userInputsLength: 0,
+                originalData: select
             };
+            docs.push(sechema);
+            caseNum++;
         }
         //batch write data to db 
         if(docs.length && docs.length % PAGINATELIMIT == 0){

@@ -32,7 +32,7 @@ async function sendEmailToOwner(req) {
     const htmlTemplate = OwnerTemp.replace("${hostname}", config.WebClientUrl).replace("${projectName}", req.body.pname).replace("${fileName}", req.body.fileName);
 
     console.log(`[ EMAIL ] Service sendEmailToOwner`);
-    return await sendEmail(subject, htmlTemplate, req.body.projectOwner);
+    return sendEmail(subject, htmlTemplate, req.body.projectOwner);
 };
 
 async function sendEmailToAnnotator(req) {
@@ -40,7 +40,7 @@ async function sendEmailToAnnotator(req) {
     const htmlTemplate = annotatorTemp.replace("${hostname}", config.WebClientUrl).replace("${projectOwner}", req.auth.email).replace("${projectName}", req.body.pname);
 
     console.log(`[ EMAIL ] Service sendEmailToAnnotator`);
-    return await sendEmail(subject, htmlTemplate, req.body.annotator);
+    return sendEmail(subject, htmlTemplate, req.body.annotator);
 };
 
 async function sendGenerationEmailToOwner(user, fileName) {
@@ -48,7 +48,7 @@ async function sendGenerationEmailToOwner(user, fileName) {
     const htmlTemplate = generaterTemp.replace("${hostname}", config.WebClientUrl).replace("${fileName}", fileName);
     
     console.log(`[ EMAIL ] Service sendGenerationEmailToOwner`);
-    return await sendEmail(subject, htmlTemplate, [user]);
+    return sendEmail(subject, htmlTemplate, [user]);
 };
 
 
@@ -64,7 +64,7 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
         console.log(`[ EMAIL ] Service sendEmailToOwner.getEsp2NoeToken`);
         const emailToken = await authForNoe.getEsp2NoeToken();
         
-        return await axios.post(`${config.noeServiceUrl}/noe/send/message`, {
+        return axios.post(`${config.noeServiceUrl}/noe/send/message`, {
             subject: subject,
             content: { html: htmlTemplate },
             from: { address: config.sender },
@@ -98,7 +98,7 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
                 }
             };
             
-            return await new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(sendParams).promise();  
+            return new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(sendParams).promise();  
         }else{
             const transporter = nodemailer.createTransport({
                 host: config.emailServerHost,
@@ -110,7 +110,7 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
                 }
             });
             
-            return await transporter.sendMail({
+            return transporter.sendMail({
                 from: config.sender,            // sender address
                 to: toAddresses.toString(),     // list of receivers
                 subject: subject,               // Subject line

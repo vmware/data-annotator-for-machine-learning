@@ -93,24 +93,15 @@ async function importLabelledDataset(req, lables, selectedColumn){
 
       //check all selected data if is empty
       let selectedData = Object.values(select).toString().replace(new RegExp(',', 'g'),'').trim();
-      if(selectedData){
-          selectedData = Object.values(select);
-          for (let i = 0; i < selectedData.length; i++) {
-              if (!validator.isASCII(selectedData[i])){
-                  selectedData = null;
-                  break;
-              }
-          }
-          if (selectedData) {
-              let sechema = {
-                  projectName: req.body.pname,
-                  userInputsLength: req.body.maxAnnotations,
-                  originalData: select,
-                  userInputs: userInputs
-              };
-              docs.push(sechema);
-              totalCase += 1;
-          }
+      if (selectedData) {
+        let sechema = {
+            projectName: req.body.pname,
+            userInputsLength: req.body.maxAnnotations,
+            originalData: select,
+            userInputs: userInputs
+        };
+        docs.push(sechema);
+        totalCase += 1;
       }
       //batch write data to db 
       if(docs.length && docs.length % PAGINATELIMIT == 0){

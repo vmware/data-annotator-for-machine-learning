@@ -72,7 +72,7 @@ async function execute(req, sendEmail, annotators, append) {
       readInterface.on('line', (line) => {
         index += 1;
         
-        if (line && line.trim() && validator.isASCII(line)) {
+        if (line && line.trim()) {
           textLines[index] = line.trim();
         }
       }).on('close', () => {
@@ -133,7 +133,7 @@ async function execute(req, sendEmail, annotators, append) {
         },
         auth:{ email: email }
       }
-      emailService.sendEmailToAnnotator(param).catch(err => log.error(`[ LOG ][ ERROR ] send email:`, err));
+      emailService.sendEmailToAnnotator(param).catch(err => console.error(`[ LOG ][ ERROR ] send email:`, err));
     } 
   }
 }
@@ -149,7 +149,7 @@ async function quickAppendLogs(req){
 
     let index = 0, textLines = {};
     for (const line of file.buffer.toString().split("\n")) {
-      if (line && line.trim() && validator.isASCII(line)) {
+      if (line && line.trim()) {
         textLines[++index] = line.trim();
       }
     }
