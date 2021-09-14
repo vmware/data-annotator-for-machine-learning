@@ -201,13 +201,6 @@ export class UnZipService {
           for (let b = 0; b < newArray.length; b++) {
             if (_.sortedUniq(newArray[b]).length == 1 && _.sortedUniq(newArray[b])[0] == null) {
               invalidCount += 1;
-            } else {
-              for (let j = 0; j < newArray[b].length; j++) {
-                if (!this.toolService.isASCII(String(newArray[b][j]).trim())) {
-                  invalidCount += 1;
-                  break;
-                }
-              }
             }
           }
         },

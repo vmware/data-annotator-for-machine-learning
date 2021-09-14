@@ -816,13 +816,6 @@ export class CreateNewComponent implements OnInit {
     for (let b = 0; b < newArray.length; b++) {
       if (_.sortedUniq(newArray[b]).length == 1 && _.sortedUniq(newArray[b])[0] == null) {
         invalidCount += 1;
-      } else {
-        for (let j = 0; j < newArray[b].length; j++) {
-          if (!this.toolService.isASCII(String(newArray[b][j]).trim())) {
-            invalidCount += 1;
-            break;
-          }
-        }
       }
     }
     return invalidCount;
@@ -860,10 +853,6 @@ export class CreateNewComponent implements OnInit {
           this.overPerLabelLimit = true;
           const sliceStr = flag[d].slice(0, 50);
           flag.splice(d, 1, sliceStr);
-        }
-
-        if (!this.toolService.isASCII(flag[d])) {
-          flag.splice(d, 1);
         }
       }
 
@@ -932,11 +921,6 @@ export class CreateNewComponent implements OnInit {
         }
 
         flag = _.uniq(flag);
-        flag.forEach((element, index) => {
-          if (!this.toolService.isASCII(element)) {
-            flag.splice(index, 1);
-          }
-        });
 
         // to check this is a totally numeric flag or not
         const isNumeric = this.toCheckNumeric(flag) == 'no' ? false : true;
