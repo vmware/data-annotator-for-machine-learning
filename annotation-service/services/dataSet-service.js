@@ -75,19 +75,7 @@ async function saveDataSetInfo(req) {
     }else if (req.body.format == DATASETTYPE.CSV || req.body.format == DATASETTYPE.TABULAR) {
         
         console.log(`[ DATASET ] Service fileter no-Eglish data`);
-        const reviews = { 'header': req.body.topReview.header, 'topRows': [] };
-
-        req.body.topReview.topRows.forEach(row => {
-            for (let i = 0; i < row.length; i++) {
-                if (!validator.isASCII(row[i])) {
-                    row = null;
-                    break;
-                }
-            }
-            if (row) {
-                reviews.topRows.push(row);
-            }
-        });
+        const reviews = { 'header': req.body.topReview.header, 'topRows': req.body.topReview.topRows };
 
         dataSet.fileKey = fileKey;
         dataSet.hasHeader = req.body.hasHeader;
@@ -108,7 +96,7 @@ async function saveDataSetInfo(req) {
     console.log(`[ DATASET ] Service save dataset info to db`);
     const datasets =  await DataSetDB.findAndUpdateDataSet(conditions, update, options);
 
-    return await imageTopPreview(datasets, true);
+    return imageTopPreview(datasets, true);
 
 }
 
