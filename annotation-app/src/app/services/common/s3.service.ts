@@ -190,6 +190,12 @@ export class S3Service {
             });
           }
         });
+        if (realEntryIndex === 0) {
+          response = {
+            err: 'Upload datasets failed, please make sure there has at least one image type file in the zip.',
+          };
+          resolve(response);
+        }
       });
     });
   }

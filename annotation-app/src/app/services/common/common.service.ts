@@ -33,11 +33,11 @@ export class CommonService {
         size++;
       }
     });
-    if (size === array.length) {
+    if (size === array.length && array.length !== 1) {
       //the last one only can be linkage changed
       array[array.length - 1].isModify = false;
     }
-    if (max < array.length) {
+    if (max < array.length || array.length === 1) {
       if (totalnum + (array.length - size) > max * row) {
         alert(
           'Fail to modify for the assigned tickets number is larger than the max value can be set.',
