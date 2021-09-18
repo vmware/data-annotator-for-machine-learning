@@ -28,7 +28,8 @@ describe('verify log project append funtion', () => {
   })
 
   it('File append verify selete existing log file', async () => {
-    expect(await commonAppend.fileAppendSelectExistingFile(project_name)).toBeTruthy;
+    console.log('Constant.dataset_name_log', Constant.dataset_name_log);
+    expect(await commonAppend.fileAppendSelectExistingFile(project_name, Constant.dataset_name_log)).toBeTruthy;
   })
 
   it('LOCAL file change and upload to append', async () => {

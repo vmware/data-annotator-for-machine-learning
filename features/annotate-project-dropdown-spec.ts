@@ -39,7 +39,7 @@ describe("annotate project ...", () => {
     await annotatePage.filterProjectName(project_name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
     let Project_Name_Text = await projectsPage.getCellText(0);
-    let Project_Labels = await projectsPage.getCellText(8);
+    let Project_Labels = await projectsPage.getCellText(4);
     if (
       (Project_Name_Text !== "" && Project_Labels.split(",").length > 6) ||
       Project_Count_After_Filter > 0

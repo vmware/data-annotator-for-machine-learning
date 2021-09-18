@@ -10,6 +10,7 @@ import { Constant } from "./constant";
 describe("Service", () => {
   let loginPage: LoginPage;
   let loginBusiness: LoginBussiness;
+  let since = require("jasmine2-custom-message");
 
   beforeAll((done) => {
     loginPage = new LoginPage();

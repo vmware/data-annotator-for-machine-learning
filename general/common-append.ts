@@ -75,18 +75,24 @@ export class CommonAppend {
     return false;
   }
 
-  async fileAppendSelectExistingFile(project_name){
+  async fileAppendSelectExistingFile(project_name, dataset_name){
+    console.log('start to fileAppendSelectExistingFile');
     await this.locateProjectAppend(project_name);
     await FunctionUtil.click(this.APPEND_BY_FILE_TAB);
     await browser.sleep(2000);
     await FunctionUtil.click(this.DROPDOWN_SELECT);
     await browser.sleep(2000);
-    await FunctionUtil.click($$("option").get(0))
+    $$("option").each(async function(element) {
+      if (await element.getText() == dataset_name) {
+        await FunctionUtil.click(element);
+      }
+    });
     await browser.sleep(2000);
     await FunctionUtil.click(this.APPEND_PUBLISH_BTN);
     if (await FunctionUtil.getAttribute(this.APPEND_BTN, 'class') == this.APPEND_DONE_CLASS) {
       return true;
     }
+    console.log('succeed to fileAppendSelectExistingFile');
     return false;
   }
 

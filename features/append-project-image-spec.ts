@@ -32,7 +32,7 @@ describe("verify image project append funtion", () => {
   });
 
   it("File append verify selete existing file", async () => {
-    expect(await commonAppend.fileAppendSelectExistingFile(project_name))
+    expect(await commonAppend.fileAppendSelectExistingFile(project_name, Constant.dataset_name_image))
       .toBeTruthy;
   });
 

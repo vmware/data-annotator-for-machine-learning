@@ -25,7 +25,7 @@ describe('verify basic project append funtion', () => {
   })
 
   it('File append verify selete existing file', async () => {
-    expect(await commonAppend.fileAppendSelectExistingFile(project_name)).toBeTruthy;
+    expect(await commonAppend.fileAppendSelectExistingFile(project_name, Constant.dataset_name_text)).toBeTruthy;
   })
 
   it('LOCAL file change and upload to append', async () => {
