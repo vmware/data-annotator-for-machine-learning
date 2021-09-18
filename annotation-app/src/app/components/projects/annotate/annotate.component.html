@@ -88,6 +88,19 @@ SPDX-License-Identifier: Apache-2.0 -->
             <label for="source" class="label-leftBoard">Source: </label>&nbsp;&nbsp;
             <div style="word-break: break-all">{{ projectInfo?.dataSource }}</div>
           </div>
+          <div class="clr-form-group left-project-info clr-row">
+            <label for="Created Date" class="label-leftBoard">Created Date: </label>&nbsp;&nbsp;
+            <div style="word-break: break-all">{{ projectInfo?.createdDate | date: 'yyyy-MM-dd HH:mm:ss' }}</div>
+          </div>
+          <div class="clr-form-group left-project-info clr-row">
+            <label for="Created Date" class="label-leftBoard">Assignment Logic: </label>&nbsp;&nbsp;
+            <div style="word-break: break-all">{{ (projectInfo?.labelType == 'numericLabel' ||
+              projectInfo.projectType == 'ner' ||
+              projectInfo.isMultipleLabel ||
+              projectInfo.projectType == 'image' ||
+              projectInfo.projectType == 'log') ? (projectInfo?.assignmentLogic | toUpperCase) : 'Active learning' }}
+            </div>
+          </div>
           <div class="clr-form-group left-project-info">
             <label for="source" class="label-leftBoard">Instruction : </label>&nbsp;&nbsp;
             <div class="instructionBox" [innerHTML]="projectInfo?.taskInstructions"></div>
