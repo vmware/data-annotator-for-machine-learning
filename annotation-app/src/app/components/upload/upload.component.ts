@@ -368,6 +368,12 @@ export class UploadComponent implements OnInit {
         } else if (this.uploadGroup.get('fileFormat').value == 'txt') {
           if (this.inputFile.name.split('.').pop().toLowerCase() == 'zip') {
             this.unZipService.unZipTxt(this.inputFile).then((e) => {
+              if (e.exampleEntries === 0) {
+                this.uploadErr({
+                  err: 'Upload datasets failed, please make sure there has at least one txt type file in the zip/tgz.',
+                });
+                return;
+              }
               this.previewContentDatas = e;
               if (this.env.config.enableAWSS3) {
                 this.uploadToS3(this.inputFile);
@@ -377,6 +383,13 @@ export class UploadComponent implements OnInit {
             });
           } else {
             this.unZipService.unTgz(this.inputFile).then((e) => {
+              if (e.exampleEntries === 0) {
+                this.uploadErr({
+                  err: 'Upload datasets failed, please make sure there has at least one txt type file in the zip/tgz.',
+                });
+
+                return;
+              }
               this.previewContentDatas = e;
               if (this.env.config.enableAWSS3) {
                 this.uploadToS3(this.inputFile);
