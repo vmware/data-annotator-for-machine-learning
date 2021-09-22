@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 : dataset.categoryList
                 }}</clr-dg-cell>
               <clr-dg-cell>
-                <button type="button" class="btn btn-icon actionClass" (click)="
+                <button type="button" class="btn btn-icon actionClass" [disabled]="dataset.totalCase == 0" (click)="
                     selectedProjectDataset = dataset;
                     editProjectDialog = true;
                     deleteDatasetDialog = false;
