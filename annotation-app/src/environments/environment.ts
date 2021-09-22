@@ -21,4 +21,7 @@ export const environment: Env = {
   googleTrackId: null, // google track ID
   enableSendEmail: false, // Set to true to enable email notification for project creation, annotator assignment or edit project owner
   enableAWSS3: false, // Set to true to upload and download files with AWS S3 that requires some related AWS CONFIG IAM to be configured in annotation-service
+
+  // This value is default file size limit for upload
+  fileSize: 1024 * 1024 * 1024,
 };

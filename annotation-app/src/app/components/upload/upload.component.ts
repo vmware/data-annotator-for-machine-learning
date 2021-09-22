@@ -340,6 +340,14 @@ export class UploadComponent implements OnInit {
           'File exceeds 100MB. Please use the My Datasets tab for larger dataset upload. Once completed, data will be available in this menu.';
         this.inputFile = null;
         return;
+      } else if (this.inputFile.size > this.env.config.fileSize && this.msg.page == 'datasets') {
+        const limitFileSize = this.env.config.fileSize >= (1024 * 1024 * 1024)
+          ? this.env.config.fileSize / (1024 * 1024 * 1024) + 'GB'
+          : this.env.config.fileSize / (1024 * 1024) + 'MB';
+        this.errorMessage =
+          `File size exceeds the maximum ${limitFileSize}. Please select a new file to upload. `;
+        this.inputFile = null;
+        return;
       } else {
         this.uploadComplete = true;
         this.inputFile.size < 10485760 ? (this.waitingTip = false) : (this.waitingTip = true);
