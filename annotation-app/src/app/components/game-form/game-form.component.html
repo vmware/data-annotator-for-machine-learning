@@ -37,98 +37,39 @@ SPDX-License-Identifier: Apache-2.0 -->
           <clr-dg-column
             [clrDgField]="'projectName'"
             class="ellipsis-datagrid"
-            style="max-width: 250px"
+            style="max-width: 300px"
             >Project Name
           </clr-dg-column>
-          <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid" style="max-width: 300px"
-            >Creator
-          </clr-dg-column>
-          <clr-dg-column [clrDgField]="'createdDate'" class="ellipsis-datagrid"
-            >Created Date</clr-dg-column
-          >
-          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid"
-            >Updated Date</clr-dg-column
-          >
           <clr-dg-column
-            [clrDgField]="'dataSource'"
+            [clrDgField]="'updatedDate'"
             class="ellipsis-datagrid"
-            style="max-width: 300px"
-            >Data Source
+            >Updated Date
           </clr-dg-column>
-          <clr-dg-column [clrDgField]="'assignmentLogic'" class="ellipsis-datagrid"
-            >Assignment Logic</clr-dg-column
-          >
-
-          <clr-dg-column
-            [clrDgField]="'userCompleteCase'"
-            class="ellipsis-datagrid"
-            style="min-width: 300px"
-          >
+          <clr-dg-column [clrDgField]="'userCompleteCase'" class="ellipsis-datagrid" style="max-width: 300px">
             Complete/Assigned
           </clr-dg-column>
-
-          <clr-dg-column
-            [clrDgField]="'userCompleteCase'"
-            class="ellipsis-datagrid"
-            style="min-width: 300px"
+          <clr-dg-column [clrDgField]="'userCompleteCase'" class="ellipsis-datagrid" style="max-width: 300px"
             >Reviewed/Complete</clr-dg-column
           >
           <clr-dg-column
             [clrDgField]="'categoryList'"
             class="ellipsis-datagrid labels"
-            style="max-width: 300px"
             >Labels
           </clr-dg-column>
-          <clr-dg-column class="column-action" style="min-width: 120px">Action</clr-dg-column>
+          <clr-dg-column class="column-action" style="min-width: 180px">Action</clr-dg-column>
 
           <ng-container>
             <clr-dg-row *clrDgItems="let dataset of datasets" [clrDgItem]="dataset">
               <clr-dg-cell
                 class="ellipsis-datagrid cellWordBreak"
                 title="{{ dataset.projectName }}"
-                style="max-width: 250px"
+                style="max-width: 300px"
                 >{{ dataset.projectName }}
               </clr-dg-cell>
-              <clr-dg-cell
-                class="cellWordBreak"
-                title="{{ dataset.creator }}"
-                style="max-width: 300px"
-                >{{ dataset.creator }}
-              </clr-dg-cell>
-              <clr-dg-cell>{{ dataset.createdDate | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
-              <clr-dg-cell>{{ dataset.updatedDate | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
-              <clr-dg-cell
-                class="cellWordBreak"
-                title="{{ dataset.dataSource }}"
-                style="max-width: 300px"
-              >
-                {{ dataset.dataSource }}
-              </clr-dg-cell>
-              <clr-dg-cell
-                *ngIf="
-                  dataset.labelType == 'numericLabel' ||
-                  dataset.projectType == 'ner' ||
-                  dataset.isMultipleLabel ||
-                  dataset.projectType == 'image' ||
-                  dataset.projectType == 'log'
-                "
-              >
-                {{ dataset.assignmentLogic | toUpperCase }}</clr-dg-cell
-              >
-              <clr-dg-cell
-                *ngIf="
-                  !(
-                    dataset.labelType == 'numericLabel' ||
-                    dataset.projectType == 'ner' ||
-                    dataset.projectType == 'image' ||
-                    dataset.isMultipleLabel ||
-                    dataset.projectType == 'log'
-                  )
-                "
-              >
-                Active learning</clr-dg-cell
-              >
-              <clr-dg-cell>
+              <clr-dg-cell>{{
+                dataset.updatedDate | date: 'yyyy-MM-dd HH:mm:ss'
+              }}</clr-dg-cell>
+              <clr-dg-cell style="max-width: 300px">
                 <div>
                   <div *ngIf="dataset.userCompleteCase.length < 6">
                     <div
@@ -226,7 +167,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                 </div>
               </clr-dg-cell>
-              <clr-dg-cell *ngIf="dataset.projectType == 'log'">
+              <clr-dg-cell *ngIf="dataset.projectType == 'log'" style="max-width: 300px">
                 <div>
                   <div *ngIf="dataset.userCompleteCase.length < 6">
                     <div
@@ -312,10 +253,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                 </div>
               </clr-dg-cell>
-              <clr-dg-cell
-                *ngIf="dataset.projectType !== 'log'"
-                class="cellWordBreak"
-                style="max-width: 300px"
+              <clr-dg-cell *ngIf="dataset.projectType !== 'log'" class="cellWordBreak" style="max-width: 300px;"
                 >--</clr-dg-cell
               >
               <clr-dg-cell
@@ -325,7 +263,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     ? dataset.min + '--' + dataset.max
                     : dataset.categoryList
                 }}"
-                style="max-width: 300px"
               >
                 {{
                   dataset.labelType == 'numericLabel'
@@ -334,7 +271,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 }}</clr-dg-cell
               >
 
-              <clr-dg-cell style="min-width: 200px">
+              <clr-dg-cell style="min-width: 180px">
                 <button
                   *ngIf="
                     dataset.totalCase != 0 &&

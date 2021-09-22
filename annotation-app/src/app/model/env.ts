@@ -22,4 +22,5 @@ export interface Env {
   enableAWSS3?: boolean;
   contactEmail?: string;
   contactSlack?: string;
+  fileSize?: number;
 }

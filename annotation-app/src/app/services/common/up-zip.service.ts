@@ -17,7 +17,7 @@ export class UnZipService {
 
   unZipTxt(inputFile) {
     const that = this;
-    return new Promise((resolve) => {
+    return new Promise<any>((resolve) => {
       const jsZip = new JSZip();
       let example = 0;
       const txtList = [];
@@ -53,7 +53,7 @@ export class UnZipService {
 
   unTgz(inputFile) {
     const that = this;
-    return new Promise((resolve) => {
+    return new Promise<any>((resolve) => {
       const reader = new FileReader();
       reader.readAsArrayBuffer(inputFile);
       reader.onload = (event) => {
