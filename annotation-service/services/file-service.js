@@ -69,12 +69,12 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     let labels = req.body.labels;
     labels = (typeof labels === 'object'? labels.toString(): labels);
 
-    let totalCase = 0, alFailed = req.body.isMultipleLabel === 'true'? true: false;
+    let totalCase = 0;
+    let alFailed = (req.body.isMultipleLabel === 'true' || req.body.isMultipleLabel === true)? true: false;
     if (req.body.projectType == PROJECTTYPE.IMGAGE) {
         totalCase = req.body.totalRows;
         alFailed = true;
     }
-
 
     const project = {
         creator: [req.auth.email],
@@ -108,9 +108,9 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         },
         projectType: req.body.projectType,
         encoder: req.body.encoder,
-        isMultipleLabel: req.body.isMultipleLabel === 'true'? true: false,
-        regression: req.body.regression === 'true'? true: false,
-        isShowFilename: req.body.isShowFilename === 'true'? true: false,
+        isMultipleLabel: (req.body.isMultipleLabel === 'true' || req.body.isMultipleLabel === true)? true: false,
+        regression: (req.body.regression === 'true' || req.body.regression === true)? true: false,
+        isShowFilename: (req.body.isShowFilename === 'true' || req.body.isShowFilename === true)? true: false,
         ticketDescription: req.body.ticketDescription,
         ticketQuestion: req.body.ticketQuestions,
     };
