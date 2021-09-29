@@ -46,3 +46,16 @@ SPDX-License-Identifier: Apache-2.0
   margin: 0;
   margin-right: 0.3rem;
 }
+
+@media (max-width: 1440px) {
+  .colwidth {
+    max-width: 220px;
+  }
+}
+  
+
+@media (min-width: 1441px) {
+  .colwidth {
+    max-width: 300px;
+  }
+}

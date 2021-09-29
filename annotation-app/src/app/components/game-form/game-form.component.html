@@ -36,8 +36,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <clr-dg-placeholder>We couldn't find any project for you!</clr-dg-placeholder>
           <clr-dg-column
             [clrDgField]="'projectName'"
-            class="ellipsis-datagrid"
-            style="max-width: 300px"
+            class="ellipsis-datagrid colwidth"
             >Project Name
           </clr-dg-column>
           <clr-dg-column
@@ -53,7 +52,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           >
           <clr-dg-column
             [clrDgField]="'categoryList'"
-            class="ellipsis-datagrid labels"
+            class="ellipsis-datagrid labels colwidth"
             >Labels
           </clr-dg-column>
           <clr-dg-column class="column-action" style="min-width: 180px">Action</clr-dg-column>
@@ -61,9 +60,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           <ng-container>
             <clr-dg-row *clrDgItems="let dataset of datasets" [clrDgItem]="dataset">
               <clr-dg-cell
-                class="ellipsis-datagrid cellWordBreak"
+                class="ellipsis-datagrid cellWordBreak colwidth"
                 title="{{ dataset.projectName }}"
-                style="max-width: 300px"
                 >{{ dataset.projectName }}
               </clr-dg-cell>
               <clr-dg-cell>{{
@@ -257,7 +255,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 >--</clr-dg-cell
               >
               <clr-dg-cell
-                class="cellWordBreak"
+                class="cellWordBreak colwidth"
                 title="{{
                   dataset.labelType == 'numericLabel'
                     ? dataset.min + '--' + dataset.max
