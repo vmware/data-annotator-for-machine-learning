@@ -81,7 +81,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         createdDate: Date.now(),
         updatedDate: Date.now(),
         projectName: req.body.pname,
-        taskInstructions: req.body.taskInstruction,
+        taskInstructions: req.body.taskInstruction? req.body.taskInstruction: "",
         totalCase: totalCase,
         userCompleteCase: userCompleteCase,
         maxAnnotation: req.body.maxAnnotations,
@@ -335,7 +335,9 @@ async function prepareCsv(mp, format, onlyLabelled, user) {
 
     let options = { page: 1, limit: mp.project.projectType==PROJECTTYPE.LOG? PAGINATETEXTLIMIT : PAGINATELIMIT };
     let query = { projectName: mp.project.projectName };
-    onlyLabelled == 'Yes' ? query.userInputsLength = { $gt: 0 }: query;
+    if (onlyLabelled == 'Yes') {
+        query.userInputsLength = { $gt: 0 }
+    }
 
     while (true) {
         
@@ -522,7 +524,9 @@ async function uploadFile(req) {
     if (FILETYPE.CSV == fileType) {
         let header = [], topRows = [];
         let headerRule = { noheader: true };
-        req.body.hasHeader == 'no' ? null: headerRule.noheader=false;
+        if (req.body.hasHeader == 'no') {
+            headerRule.noheader=false;
+        }
 
         await csv(headerRule).fromString(filestream.toString()).subscribe((row,i) => {
             if (i < 5) {
@@ -621,7 +625,6 @@ async function setData(req) {
     }
 
     const headerRule = {
-        noheader: false,
         fork: true,
         flatKeys: true,
         checkType:true,
