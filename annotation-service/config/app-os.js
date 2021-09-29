@@ -19,6 +19,8 @@ module.exports  = {
   //-------------------- optional configs --------------------//
   //server port [optional configs]
   serverPort: process.env.SERVER_PORT || 3000,
+  //auto update mongodb index, in production recommend use false, to manually update
+  mongoDBAutoIndex: process.env.SERVER_PORT || true,
   //Google Analytics tracking id [optional configs]
   trackingId: process.env.TRACKING_ID || null,
   
