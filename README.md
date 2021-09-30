@@ -35,8 +35,8 @@ DAML project includes three components: 
 
 
 ## Quick start
-
-For development environment and build configuration see [build documentation](BUILD.md)
+- For the docker version usage to see [run with docker documentation](RUN-WITH-DOCKER.md)
+- For development environment and build configuration see [build documentation](BUILD.md)
 
 ## Contributing
 

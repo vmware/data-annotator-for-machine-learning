@@ -1,0 +1,59 @@
+version: '2'
+services:
+  annotation-app:
+    container_name: app
+    image: 1107899648/vmware-daml-annotation-app:latest
+    depends_on:
+      - annotation-service
+    ports:
+      - "4200:5000"
+    networks:
+      - bridge
+    restart: always
+  
+  annotation-service:
+    container_name: as
+    image: 1107899648/vmware-daml-annotation-service:latest
+    environment:
+      - MONGODB_URL=mongodb://db:27017/daml
+      - LOOP_AL_URL=http://als:8000/api
+    depends_on:
+      - mongo
+      - active-learning-service
+    ports:
+      - "3000:3000"
+    networks:
+      - bridge
+    volumes:
+      - "./data/as:/app/FILE_SYS"
+    restart: always
+   
+  active-learning-service:
+    container_name: als
+    image: 1107899648/vmware-daml-active-learning-service:latest
+    environment:
+      - MONGODB_URL=mongodb://db:27017/daml
+    depends_on:
+      - mongo
+    ports:
+       - "8000:8000"
+    networks:
+       - bridge
+    volumes:
+      - "./data/als:/app/models"
+    restart: always
+  
+  mongo:
+    image: mongo:latest
+    container_name: db
+    ports:
+      - "27017:27017"
+    networks:
+      - bridge
+    volumes:
+      - "./data/db:/data/db"
+    restart: always
+  
+networks:
+  bridge:
+    driver: bridge

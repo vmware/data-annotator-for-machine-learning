@@ -2,12 +2,7 @@
 
 # annotation-app
 annotation-app/node_modules
-annotation-app/.gitlab-ci.yml
 annotation-app/.npmrc
-annotation-app/docker-entrypoint.sh
-annotation-app/Dockerfile
-annotation-app/protractor.config.js
-annotation-app/e2e
 annotation-app/chart
 annotation-app/src/environments/environment.stg.ts
 annotation-app/src/environments/environment.test.ts
