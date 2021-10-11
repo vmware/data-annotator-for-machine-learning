@@ -46,11 +46,12 @@ def active_learning_train(request):
             # embeddings use sr vector to replace sr text
             srs['sr_text'] = train_embedding_model_gain_vector(project_id, req['projectName'], srs['sr_text'], token)
 
-        else:
-            # one-hot-encoding download latest vectorModel from s3
-            vector_local = './' + modelDir + project_id + vec_mod
-            fileSystem.download_file(pro[0]['al']['vectorModel'], pro[0]['al']['vectorModel'], vector_local, token)
 
+        elif pro[0]['encoder'] == 'oneHot':
+            vector_local = './' + modelDir + project_id + vec_mod
+            if pro[0]['al']["objectColumn"]:
+                # one-hot-encoding download latest vectorModel from s3
+                fileSystem.download_file(pro[0]['al']['vectorModel'], pro[0]['al']['vectorModel'], vector_local, token)
             # use sr vector to replace sr text
             srs['sr_text'] = vector_sr(srs['sr_text'], vector_local, project_type, pro[0]['al']['objectColumn'], pro[0]['al']['numberColumn'])
     else:
@@ -108,10 +109,11 @@ def active_learning_query(request):
         if 'encoder' in pro[0] and pro[0]['encoder'] == 'embeddings':
             # use embeding vector replace sr_text
             unl_srs['sr_text'] = gain_srs_embedding_vector(unl_srs['sr_text'], pro[0]['al']['vectorModel'], project_id, pro[0]['al']['numberColumn'], token)
-        else:
-            # one-hot-encoding download latest vectorModel from s3 if not exist
+        elif pro[0]['encoder'] == 'oneHot':
             vector_local = './' + modelDir + project_id + vec_mod
-            fileSystem.download_file(pro[0]['al']['vectorModel'], pro[0]['al']['vectorModel'], vector_local, token)
+            if pro[0]['al']["objectColumn"]:
+                # one-hot-encoding download latest vectorModel from s3 if not exist
+                fileSystem.download_file(pro[0]['al']['vectorModel'], pro[0]['al']['vectorModel'], vector_local, token)
 
             # use one-hot-encoding vector replace sr_text
             unl_srs['sr_text'] = vector_sr(unl_srs['sr_text'], vector_local, project_type, pro[0]['al']['objectColumn'], pro[0]['al']['numberColumn'])
@@ -168,10 +170,11 @@ def active_learning_teach(request):
             # query all test sr
             all_test_sr['sr_text'] = gain_srs_embedding_vector(all_test_sr['sr_text'], pro[0]['al']['vectorModel'], project_id, pro[0]['al']['numberColumn'], token)
         # one-hot-encoding
-        else:
-            # download latest vector Model from s3
+        elif pro[0]['encoder'] == 'oneHot':
             vector_local = './' + modelDir + project_id + vec_mod
-            fileSystem.download_file(pro[0]['al']['vectorModel'], pro[0]['al']['vectorModel'], vector_local, token)
+            if pro[0]['al']["objectColumn"]:
+                # download latest vector Model from s3
+                fileSystem.download_file(pro[0]['al']['vectorModel'], pro[0]['al']['vectorModel'], vector_local, token)
 
             # use sr vector replace sr_text
             new_labeled_sr['sr_text'] = vector_sr(new_labeled_sr['sr_text'], vector_local, project_type, pro[0]['al']['objectColumn'], pro[0]['al']['numberColumn'])

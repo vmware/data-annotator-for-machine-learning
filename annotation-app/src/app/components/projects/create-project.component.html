@@ -756,6 +756,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         placeholder="Enter value here"
                         class="clr-input"
                         (keyup)="minUpdate($event)"
+                        (change)="minUpdate($event)"
                       />
                     </div>
                     <span class="clr-subtext" style="margin-top: 0.5rem"
@@ -774,6 +775,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         placeholder="Enter value here"
                         class="clr-input"
                         (keyup)="maxUpdate($event)"
+                        (change)="maxUpdate($event)"
                       />
                     </div>
                     <span class="clr-subtext" style="margin-top: 0.5rem"
