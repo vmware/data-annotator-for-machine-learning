@@ -24,6 +24,8 @@ import { ToolService } from 'app/services/common/tool.service';
 import { UserAuthService } from 'app/services/user-auth.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { MarkdownParserService } from 'app/services/common/markdown-parser.service';
+import { Options } from 'ng5-slider';
+
 @Component({
   selector: 'app-annotate',
   templateUrl: './annotate.component.html',
@@ -123,6 +125,18 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   cloneSpanslist: any = [];
   convertedText: string;
   renderFormat: string = 'md';
+  numericValue: number;
+  numericOptions: Options = {
+    floor: 0,
+    step: 1,
+    ceil: 100,
+  };
+
+  sliderEvent() {
+    if (parseInt(this.labelChoose) !== this.numericValue) {
+      this.labelChoose = this.numericValue;
+    }
+  }
 
   constructor(
     private renderer2: Renderer2,
@@ -378,7 +392,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.questionForm.get('questionGroup.category').reset();
   }
 
+  isInValidateNumber() {
+    if (!this.labelChoose || this.clrErrorTip) {
+      return true;
+    }
+    return false;
+  }
   onSubmit(from?): void {
+    if (this.isNumeric && this.isInValidateNumber()) {
+      this.clrErrorTip = true;
+      return;
+    }
     this.clearCheckbox();
     this.silenceStatus = false;
     this.error = null;
@@ -1030,6 +1054,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.labelType === 'numericLabel') {
           this.minLabel = response.min;
           this.maxLabel = response.max;
+          this.numericValue = this.minLabel;
+          this.labelChoose = this.minLabel;
+          this.numericOptions.floor = response.min;
+          this.numericOptions.ceil = response.max;
         } else {
           this.categories = response.categoryList.split(',');
         }
@@ -1499,6 +1527,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   enterNumericUp(e) {
     if (this.validNumeric(e.target.value)) {
+      this.labelChoose = e.target.value;
+      this.numericValue = parseInt(this.labelChoose);
       this.clrErrorTip = false;
     } else {
       this.clrErrorTip = true;
@@ -1663,6 +1693,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else if (this.isNumeric) {
       this.labelChoose = this.getProblemCategory();
+      this.numericValue = parseInt(this.labelChoose);
     } else if (
       !this.isNumeric &&
       this.isMultipleLabel &&
@@ -1766,6 +1797,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isShowDropDown
       ? this.questionForm.get('questionGroup.category').reset()
       : (this.labelChoose = null);
+    if (this.isNumeric) {
+      this.labelChoose = this.minLabel;
+      this.numericValue = this.minLabel;
+    }
     this.active = -1;
     this.questionForm.get('questionGroup.logFreeText').reset();
     this.questionForm.get('questionGroup.answer').reset();
@@ -2058,6 +2093,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.categoryBackFunc(index, from);
           }
           if (this.isNumeric) {
+            if (isNaN(this.numericValue)) {
+              this.numericValue = this.minLabel;
+              this.labelChoose = this.minLabel;
+            }
             setTimeout(() => {
               this.numericInput.nativeElement.focus();
             }, 500);

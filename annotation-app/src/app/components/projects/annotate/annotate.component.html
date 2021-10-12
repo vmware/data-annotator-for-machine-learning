@@ -695,29 +695,29 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <!-- numeric labels input -->
           <div *ngIf="isNumeric" class="clr-row">
-            <div
-              class="clr-control-container clr-col-6"
-              style="margin-top: 1rem"
-              [ngClass]="{ 'clr-error': clrErrorTip }"
-            >
-              <div class="clr-input-wrapper">
-                <input
-                  #numericInput
-                  autocomplete="off"
-                  type="text"
-                  id="example"
-                  placeholder="Input value here and press enter"
-                  class="clr-input"
-                  style="width: 90%"
-                  (keyup.enter)="enterNumeric($event)"
-                  (keyup)="enterNumericUp($event)"
-                  [(ngModel)]="labelChoose"
-                  [ngModelOptions]="{ standalone: true }"
-                />
-                <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+              <div class="clr-control-container clr-col-5" style="margin-top: 0.5rem">
+                <ngx-slider [(value)]="numericValue" [options]="numericOptions" (valueChange)="sliderEvent()"></ngx-slider>
               </div>
-              <span class="clr-subtext">{{ numericMessage }}</span>
-            </div>
+              <div class="clr-control-container clr-col-3" style="margin-top: 1rem"
+                [ngClass]="{ 'clr-error': clrErrorTip }">
+                <div class="clr-input-wrapper">
+                  <input
+                    #numericInput
+                    autocomplete="off"
+                    type="text"
+                    id="example"
+                    placeholder="Input value here and press enter"
+                    class="clr-input"
+                    style="width: 90%"
+                    (keyup.enter)="enterNumeric($event)"
+                    (keyup)="enterNumericUp($event)"
+                    [(ngModel)]="labelChoose"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                  <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+                </div>
+                <span class="clr-subtext">{{ numericMessage }}</span>
+              </div>
           </div>
           <!-- ner entity label -->
           <div class="questionContainer" *ngIf="projectType == 'ner'">
@@ -842,7 +842,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               Submit
             </button>
             <button
-              *ngIf="projectType == 'ner' || (projectType == 'log' && startFrom == 'review')"
+              *ngIf="projectType == 'ner' || (projectType == 'log' && startFrom == 'review') || isNumeric"
               class="btn btn-success submit"
               type="submit"
             >

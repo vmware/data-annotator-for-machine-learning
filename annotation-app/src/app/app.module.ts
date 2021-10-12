@@ -55,6 +55,7 @@ import { MarkdownParserService } from './services/common/markdown-parser.service
 import { CommonService } from './services/common/common.service';
 import { S3Service } from './services/common/s3.service';
 import { EmailService } from './services/common/email.service';
+import { NgxSliderModule } from "@angular-slider/ngx-slider";
 
 @NgModule({
   declarations: [
@@ -99,6 +100,7 @@ import { EmailService } from './services/common/email.service';
     CoreModule,
     SharedModule,
     NgSelectModule,
+    NgxSliderModule,
   ],
   providers: [
     AvaService,
