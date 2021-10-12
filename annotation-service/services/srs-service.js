@@ -468,7 +468,7 @@ async function appendSrsDataByForms(req, originalHeaders){
 
 }
 
-async function appendSrsDataByCSVFile(req, originalHeaders){
+async function appendSrsDataByCSVFile(req, originalHeaders, project){
 
     console.log(`[ SRS ] Service appendSrsDataByCSVFile update appen sr status to adding: `, Date.now());
     //update append status
@@ -481,7 +481,8 @@ async function appendSrsDataByCSVFile(req, originalHeaders){
     const headerRule = {
         noheader: false,
         fork: true,
-        flatKeys: true
+        flatKeys: true,
+        checkType:true
     };
     let caseNum = 0;
     let docs = [];
@@ -502,6 +503,42 @@ async function appendSrsDataByCSVFile(req, originalHeaders){
                 userInputsLength: 0,
                 originalData: select
             };
+
+            //support ner helpful text and existing lable append
+            if (project.projectType == PROJECTTYPE.NER) {
+                //helpful text
+                const ticketQuestions = req.body.ticketQuestions;
+                if (ticketQuestions && ticketQuestions.length) {
+                    let questions = {};
+                    for (const qst of ticketQuestions) {
+                        questionData = oneData[qst]
+                        if (typeof oneData[qst] === 'object') {
+                            questionData = JSON.stringify(questionData);
+                        }
+                        questions[qst] = questionData;
+                    }
+                    sechema.ticketQuestions = questions;
+                }
+                //existing lables
+                const selectLabels = req.body.selectLabels;
+                if (selectLabels && selectLabels.length) {
+                    let problemCategory = [];
+                    for (const lb of selectLabels) {
+                        for (const dataLb of oneData[lb]) {
+                            if (typeof dataLb === 'object') {
+                                problemCategory.push({
+                                    text : Object.keys(dataLb)[0],
+                                    start: Object.values(dataLb)[0][0],
+                                    end: Object.values(dataLb)[0][1],
+                                    label: lb
+                                });
+                            }
+                        }
+                    }
+                    sechema.userInputs=[ { problemCategory: problemCategory } ];
+                }
+            }
+
             docs.push(sechema);
             caseNum++;
         }
@@ -543,6 +580,7 @@ async function appendSrsData(req){
     const mp = await getModelProject(queryProjectCondition);
     
     const dataset = req.body.selectedDataset;
+    const project = mp.project;
     const projectType = mp.project.projectType;
     req.body.projectType = projectType;
 
@@ -579,7 +617,7 @@ async function appendSrsData(req){
         const originalHeaders = mp.project.selectedColumn;
         if(req.body.isFile){
             //file append            
-            await appendSrsDataByCSVFile(req, originalHeaders);
+            await appendSrsDataByCSVFile(req, originalHeaders, project);
             console.log(`[ SRS ] Service append tickets by CSV file done`);
         }else{
             await appendSrsDataByForms(req, originalHeaders);
