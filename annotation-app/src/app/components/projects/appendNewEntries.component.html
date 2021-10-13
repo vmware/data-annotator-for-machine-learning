@@ -491,6 +491,58 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
+          <div class="form-group clr-row" *ngIf="showPreviewTable && projectType == 'ner'">
+            <div class="clr-col-12 clr-col-md-1">
+            </div>
+            <div class="clr-col-12 clr-col-md-5">
+              Select the columns to present to annotators about the existing labels or helpful text (optional)
+              <clr-datagrid>
+                <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
+                <clr-dg-column class="ellipsis-datagrid"
+                  >Existing Labels</clr-dg-column
+                >
+                <clr-dg-column class="ellipsis-datagrid">Helpful Text</clr-dg-column>
+                <clr-dg-row
+                  *clrDgItems="let column of columnInfo; let i = index"
+                  [clrDgItem]="column"
+                >
+                  <clr-dg-cell
+                    class="ellipsis-datagrid labelOriginal label{{ i }}"
+                    style="color: #000; word-break: break-all"
+                    >{{ column.name }}</clr-dg-cell
+                  >
+                  <clr-dg-cell class="ellipsis-datagrid labelOriginal label{{ i }}">
+                    <input
+                      type="checkbox"
+                      clrCheckbox
+                      name="options"
+                      [ngClass]="{
+                        'disabled-checkbox': column.labelSelectedDisable
+                      }"
+                      [disabled]="column.labelSelectedDisable"
+                      [(ngModel)]="column.labelSelected"
+                      (ngModelChange)="changeLabelSelect($event, column.name)"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                  </clr-dg-cell>
+                  <clr-dg-cell class="ellipsis-datagrid labelOriginal label{{ i }}">
+                    <input
+                      type="checkbox"
+                      clrCheckbox
+                      name="options"
+                      [ngClass]="{
+                        'disabled-checkbox': column.textSelectedDisable
+                      }"
+                      [disabled]="column.textSelectedDisable"
+                      [(ngModel)]="column.textSelected"
+                      (ngModelChange)="changeTextSelect($event, column.name)"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                  </clr-dg-cell>
+                </clr-dg-row>
+              </clr-datagrid>
+            </div>
+          </div>
           <div class="form-group clr-row">
             <div class="clr-col-12 clr-col-md-1">
               <button class="btn btn-primary btn-md" (click)="createNewCsv()">Publish</button>

@@ -58,6 +58,8 @@ export class AppendNewEntriesComponent implements OnInit {
   isLabelBoxShow = true;
   datasetsList: any = [];
   appendErrMessage: string;
+  selectLabels: any = [];
+  ticketQuestions: any = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -112,6 +114,8 @@ export class AppendNewEntriesComponent implements OnInit {
       ],
       selectedDataset: ['', DatasetValidator.required()],
       totalRow: [0, DatasetValidator.validRow()],
+      selectLabels: [''],
+      ticketQuestions: [''],
     });
   }
 
@@ -408,6 +412,20 @@ export class AppendNewEntriesComponent implements OnInit {
           this.previewHeadDatas = choosedDataset.topReview.header;
           this.previewContentDatas = choosedDataset.topReview.topRows;
           this.fixHeader = _.difference(this.originalHead, this.previewHeadDatas);
+          const disabedLabels = [];
+          this.sampleData.forEach(elem => {
+            disabedLabels.push(elem.key);
+          });
+          for (let i = 0; i < this.previewHeadDatas.length; i++) {
+            this.columnInfo.push({
+              name: this.previewHeadDatas[i],
+              isOriginal: true,
+              labelSelected: false,
+              labelSelectedDisable: disabedLabels.includes(this.previewHeadDatas[i]),
+              textSelected: false,
+              textSelectedDisable: false,
+            });
+          }
           if (this.fixHeader.length == 0) {
             this.toCaculateTotalRow(choosedDataset, this.originalHead);
           } else {
@@ -542,6 +560,10 @@ export class AppendNewEntriesComponent implements OnInit {
           isFile: true,
           selectedDataset: this.uploadGroup.get('selectedDataset').value,
         };
+        if (this.projectType === 'ner') {
+          appendParams['ticketQuestions'] = this.uploadGroup.get('ticketQuestions').value;
+          appendParams['selectLabels'] = this.uploadGroup.get('selectLabels').value;
+        }
         this.appendSrs(appendParams);
       } else {
         if (this.env.config.enableAWSS3) {
@@ -871,5 +893,25 @@ export class AppendNewEntriesComponent implements OnInit {
         this.newAddedData[index].fileContent = '/';
       }
     }
+  }
+
+  changeLabelSelect(isSelected, data) {
+    if (isSelected && (!this.selectLabels.includes(data))) {
+      this.selectLabels.push(data);
+    }
+    if (!isSelected && this.selectLabels.length > 0 && this.selectLabels.includes(data)) {
+      this.selectLabels.splice(this.selectLabels.indexOf(data), 1);
+    }
+    this.uploadGroup.get('selectLabels').setValue(this.selectLabels);
+  }
+
+  changeTextSelect(isSelected, data) {
+    if (isSelected && (!this.ticketQuestions.includes(data))) {
+      this.ticketQuestions.push(data);
+    }
+    if (!isSelected && this.ticketQuestions.length > 0 && this.ticketQuestions.includes(data)) {
+      this.ticketQuestions.splice(this.ticketQuestions.indexOf(data), 1);
+    }
+    this.uploadGroup.get('ticketQuestions').setValue(this.ticketQuestions);
   }
 }
