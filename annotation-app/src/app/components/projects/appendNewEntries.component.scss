@@ -170,3 +170,9 @@ label span {
 .labelUpload span {
   color: currentColor;
 }
+
+::ng-deep input.disabled-checkbox+label::before {
+  background-color: #eee;
+  cursor: not-allowed;
+  opacity: 0.3;
+}
