@@ -121,6 +121,20 @@ async function checkDataSetInUse(dataSetName, throwError) {
     return pro;
 }
 
+async function checkJsonFormat(data){
+    if (!data) {
+        return false;
+    }
+    if (typeof data === 'string') {
+        try {
+            JSON.parse(data);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+}
+
 module.exports = {
     isASCII,
     isNumeric,
@@ -132,5 +146,6 @@ module.exports = {
     checkRequired,
     validateRequired,
     checkDataSetInUse,
+    checkJsonFormat,
 
 };

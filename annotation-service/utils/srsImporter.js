@@ -79,7 +79,11 @@ module.exports = {
                 if (projectType == PROJECTTYPE.NER && req.body.ticketQuestions.length) {
                     let ticketQuestions = {};
                     for (const qst of req.body.ticketQuestions) {
-                        ticketQuestions[qst] = oneData[qst];
+                        questionData = oneData[qst]
+                        if (typeof oneData[qst] === 'object') {
+                            questionData = JSON.stringify(questionData);
+                        }
+                        ticketQuestions[qst] = questionData;
                     }
                     sechema.ticketQuestions = ticketQuestions;
                 }
@@ -91,12 +95,14 @@ module.exports = {
                     let problemCategory = [];
                     for (const lb of selectLabels) {
                         for (const dataLb of oneData[lb]) {
-                            problemCategory.push({
-                                text : Object.keys(dataLb)[0],
-                                start: Object.values(dataLb)[0][0],
-                                end: Object.values(dataLb)[0][1],
-                                label: lb
-                            });
+                            if (typeof dataLb === 'object') {
+                                problemCategory.push({
+                                    text : Object.keys(dataLb)[0],
+                                    start: Object.values(dataLb)[0][0],
+                                    end: Object.values(dataLb)[0][1],
+                                    label: lb
+                                });
+                            }
                         }
                     }
                     sechema.userInputs=[ { problemCategory: problemCategory } ];
@@ -155,7 +161,6 @@ module.exports = {
                 console.log(`[ SRS ] [ERROR] Utils importe srs done, but fail on update tatalcase or send email ${error}: `, Date.now());
             }
         }
-
-
     }
+
 }
