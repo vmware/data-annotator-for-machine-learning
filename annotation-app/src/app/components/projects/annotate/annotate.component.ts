@@ -131,10 +131,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     step: 1,
     ceil: 100,
   };
+  stepLen: number = 0;
 
   sliderEvent() {
-    if (parseInt(this.labelChoose) !== this.numericValue) {
-      this.labelChoose = this.numericValue;
+    if (this.numericOptions.step === 1) {
+      if (parseInt(this.labelChoose) !== this.numericValue) {
+        this.labelChoose = this.numericValue;
+      }
+    } else {
+      if (Number(this.formatDecimal(this.labelChoose, this.stepLen)) !== this.numericValue) {
+        this.labelChoose = this.numericValue;
+      }
     }
   }
 
@@ -1056,6 +1063,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.maxLabel = response.max;
           this.numericValue = this.minLabel;
           this.labelChoose = this.minLabel;
+          let minStep = 0;
+          if (response.min.toString().includes('.')) {
+            minStep = response.min.toString().split('.')[1].length;
+          }
+          let maxStep = 0;
+          if (response.max.toString().includes('.')) {
+            maxStep = response.max.toString().split('.')[1].length;
+          }
+          let step = '1';
+          this.stepLen =  Number(maxStep) > Number(minStep) ? maxStep : minStep;
+          if (this.stepLen > 0) {
+            for (let i = 0 ; i < this.stepLen; i++) {
+              step += '0';
+            }
+          }
+          this.numericOptions.step = Number(1 / Number(step));
           this.numericOptions.floor = response.min;
           this.numericOptions.ceil = response.max;
         } else {
@@ -1528,7 +1551,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   enterNumericUp(e) {
     if (this.validNumeric(e.target.value)) {
       this.labelChoose = e.target.value;
-      this.numericValue = parseInt(this.labelChoose);
+      this.numericValue = this.numericOptions.step === 1 ? parseInt(this.labelChoose) : Number(this.formatDecimal(this.labelChoose, this.stepLen));
       this.clrErrorTip = false;
     } else {
       this.clrErrorTip = true;
@@ -1693,7 +1716,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else if (this.isNumeric) {
       this.labelChoose = this.getProblemCategory();
-      this.numericValue = parseInt(this.labelChoose);
+      this.numericValue = this.numericOptions.step === 1 ? parseInt(this.labelChoose) : Number(this.formatDecimal(this.labelChoose, this.stepLen));
     } else if (
       !this.isNumeric &&
       this.isMultipleLabel &&
@@ -2888,5 +2911,16 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
       this.saveAnnotateSetting('display', this.renderFormat);
     }
+  }
+
+  formatDecimal(num, decimal) {
+    num = num.toString();
+    let index = num.indexOf('.');
+    if (index !== '-1') {
+      num = num.substring(0, decimal + index + 1);
+    } else {
+      num = num.substring(0);
+    }
+    return parseFloat(num).toFixed(decimal);
   }
 }
