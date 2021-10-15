@@ -67,10 +67,20 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     selectedColumn = (typeof selectedColumn === 'string'? JSON.parse(selectedColumn):selectedColumn);
     
     let labels = req.body.labels;
+    let isMultipleLabel = req.body.isMultipleLabel;
+    let alFailed = false; 
+    let totalCase = 0;
+    if(isMultipleLabel === 'true' || isMultipleLabel === true){
+        alFailed = true;
+        isMultipleLabel = true;
+        if (req.body.labelType == LABELTYPE.NUMERIC) {
+            labels = JSON.stringify(labels);
+        }
+    }else{
+        isMultipleLabel = false;
+    }
     labels = (typeof labels === 'object'? labels.toString(): labels);
 
-    let totalCase = 0;
-    let alFailed = (req.body.isMultipleLabel === 'true' || req.body.isMultipleLabel === true)? true: false;
     if (req.body.projectType == PROJECTTYPE.IMGAGE) {
         totalCase = req.body.totalRows;
         alFailed = true;
@@ -108,7 +118,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         },
         projectType: req.body.projectType,
         encoder: req.body.encoder,
-        isMultipleLabel: (req.body.isMultipleLabel === 'true' || req.body.isMultipleLabel === true)? true: false,
+        isMultipleLabel: isMultipleLabel,
         regression: (req.body.regression === 'true' || req.body.regression === true)? true: false,
         isShowFilename: (req.body.isShowFilename === 'true' || req.body.isShowFilename === true)? true: false,
         ticketDescription: req.body.ticketDescription,

@@ -163,7 +163,7 @@ const projectSchema = new mongoose.Schema({
     dataSource: { type: String },
     selectedDataset: { type: Array },
     selectedColumn: { type: Array },
-    annotationQuestion: { type: String },
+    annotationQuestion: { type: String, default: 'What label does this ticket belong to ?' },
     shareStatus: { type: Boolean },
     shareDescription: { type: String },
     generateInfo: {
