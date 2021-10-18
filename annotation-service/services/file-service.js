@@ -73,7 +73,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     if(isMultipleLabel === 'true' || isMultipleLabel === true){
         alFailed = true;
         isMultipleLabel = true;
-        if (req.body.labelType == LABELTYPE.NUMERIC) {
+        if (req.body.labelType == LABELTYPE.NUMERIC && typeof labels === 'object') {
             labels = JSON.stringify(labels);
         }
     }else{
