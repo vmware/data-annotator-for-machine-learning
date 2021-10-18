@@ -665,11 +665,24 @@ SPDX-License-Identifier: Apache-2.0 -->
                     />
                     <label for="numericLabel">&nbsp;Numeric Label</label>
                   </clr-radio-wrapper>
+                  &nbsp; &nbsp;
+                  <clr-radio-wrapper>
+                    <input
+                      type="radio"
+                      clrRadio
+                      class="clr-radio"
+                      value="mutilNumericLabel"
+                      id="mutilNumericLabel"
+                      name="labelType"
+                      (change)="changeLabelType($event)"
+                    />
+                    <label for="mutilNumericLabel">&nbsp;Multiple Numerical Label</label>
+                  </clr-radio-wrapper>
                 </label>
               </div>
 
               <!-- string label -->
-              <div *ngIf="!isShowNumeric">
+              <div *ngIf="!isShowNumeric && !isMutilNumericLabel">
                 <div *ngIf="projectType === 'ner'">
                   <span
                     *ngFor="let label of selectDescription; let i = index"
@@ -784,10 +797,73 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                 </div>
               </div>
+              <!-- both label -->
+              <div
+                class="clr-row"
+                *ngIf="isMutilNumericLabel"
+                style="margin-top: 1rem; margin-left: 1rem"
+                formArrayName="mutilLabelArray"
+              >
+              <div *ngFor="let mutilLabelEle of mutilLabelArray.controls; let i=index" [formGroupName]="i" class="clr-row clr-col-12">
+                <div class="clr-row clr-col-12 clr-col-md-3 mutilLabel-row" >
+                  <div class="clr-control-container" style="width: 100%">
+                    <div class="clr-input-wrapper">
+                      <input
+                        #multiLabels
+                        id="multiLabels"
+                        maxlength="50"
+                        class="clr-input mutilLabel-input"
+                        placeholder="New Label Here"
+                        name="multiLabel"
+                        formControlName="label"
+                        (keyup)="onMutilLabelKeydown($event)"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="clr-row clr-col-12 clr-col-md-3 mutilLabel-row">
+                  <div class="clr-control-container" style="width: 100%">
+                    <div class="clr-input-wrapper">
+                      <input
+                        type="number"
+                        id="minMutilVal"
+                        formControlName="minMutilVal"
+                        placeholder="Enter minimum value"
+                        class="clr-input"
+                        (keyup)="minUpdate($event)"
+                        (change)="minUpdate($event)"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="clr-col-12 clr-col-md-1 mutilLabel-row" style="text-align: center">——</div>
+                <div class="clr-col-12 clr-col-md-3 mutilLabel-row">
+                  <div class="clr-control-container" style="width: 100%">
+                    <div class="clr-input-wrapper">
+                      <input
+                        type="number"
+                        id="maxMutilVal"
+                        formControlName="maxMutilVal"
+                        placeholder="Enter maximum value"
+                        class="clr-input"
+                        (keyup)="maxUpdate($event)"
+                        (change)="maxUpdate($event)"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="mutilLabelArray.length > 2" class="clr-col-12 clr-col-md-1" style="align-self: center;">
+                    <clr-icon shape="times" size="14" (click)="deleteMutilLabel(i)" style="cursor: pointer;"></clr-icon>
+                </div>
+              </div>
+              <button class="btn btn-icon add-btn" (click)="addMutilLabel()" [disabled]="mutilLabelArray.length > 49">
+                <clr-icon shape="plus"></clr-icon>
+              </button>
+              </div>
             </div>
 
             <!-- error tip -->
-            <div *ngIf="!isShowNumeric">
+            <div *ngIf="!isShowNumeric && !isMutilNumericLabel">
               <clr-tooltip
                 *ngIf="dsDialogForm.get('labels').errors && dsDialogForm.get('labels').touched"
               >
@@ -866,6 +942,80 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *clrIfOpen
                 >
                   <span>{{ dsDialogForm.get('max').errors.msg.value }}</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+              <clr-tooltip *ngIf="sizeError">
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>The Min should less than the Max!</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+            <div *ngIf="isMutilNumericLabel">
+              <clr-tooltip *ngIf="inputLabelValidation">
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>This label has already exist!</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+              <clr-tooltip *ngIf="inputIsNull">
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>The field is required</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+              <clr-tooltip *ngIf="inputIsNotInterger">
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>The Min or Max should be interger!</span>
                 </clr-tooltip-content>
               </clr-tooltip>
               <clr-tooltip *ngIf="sizeError">

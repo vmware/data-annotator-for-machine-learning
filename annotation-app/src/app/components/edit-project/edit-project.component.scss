@@ -85,4 +85,18 @@ ul li {
   margin-right: 1rem;
 }
 
+.form input{
+  width: 120px;
+}
 
+.add-btn {
+  padding: 0.1rem 0.2rem;
+  height: 1rem;
+  line-height: 0.7rem;
+  min-width: 1.5rem;
+}
+
+.scoreErr {
+  float: left;
+  margin-top: -0.7rem;
+}

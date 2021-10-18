@@ -787,3 +787,21 @@ label .label-leftBoard {
   color: #dddddd;
 }
 
+.scoreSlider {
+  display: inline-block;
+  width: 200px;
+  margin-left: 1rem;
+}
+
+.multiple-label {
+  display: inline-block !important;
+  width: 200px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.multiple-checkbox{
+  display: inline-block;
+  height: 15px;
+  vertical-align: middle;
+}

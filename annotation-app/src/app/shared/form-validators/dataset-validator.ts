@@ -411,4 +411,23 @@ export class DatasetValidator {
     }
     return true;
   }
+
+  static isInvalidNumber(input) {
+    return (input === null || input === '');
+  }
+
+  static isNotIntegerNum(input) {
+    return Math.round(input) !== input;
+  }
+
+  static isRepeatArr(arr) { 
+    let hasArr = {}; 
+    for (var i in arr) { 
+      if (arr[i] && hasArr[arr[i]]) {
+        return true; 
+      }
+      hasArr[arr[i]] = true; 
+    } 
+    return false; 
+  }
 }
