@@ -364,19 +364,34 @@ async function projectLeaderBoard(req) {
 
     console.log(`[ PROJECT ] Service sort out labels info`);
     if (labelType == LABELTYPE.NUMERIC) {
-        let mid = _.floor((proInfo.max - proInfo.min) / 6);
-        let start = _.floor(proInfo.min);
-        for (let i = 0; i < 6; i++) {
-            let lb = { 'label': start + '--' + _.floor(start + mid), annotated: 0 };
-            srsUI.forEach(UIS => {
-                UIS.userInputs.forEach(ui => {
-                    if (_.round(Number(ui.problemCategory)) >= start && _.round(Number(ui.problemCategory)) <= _.floor(start + mid)) {
-                        lb.annotated += 1;
-                    };
+        if (proInfo.isMultipleLabel) {
+            JSON.parse(proInfo.categoryList).forEach(labels => {
+                const label = Object.keys(labels)[0];
+                let lb = { 'label': label, annotated: 0 };
+                srsUI.forEach(UIS => {
+                    UIS.userInputs.forEach(ui => {
+                        if (ui.problemCategory.label == label) {
+                            lb.annotated += 1;
+                        }
+                    });
                 });
+                result.labels.push(lb);
             });
-            result.labels.push(lb);
-            start = _.floor(start + mid + 1);
+        }else{
+            let mid = _.floor((proInfo.max - proInfo.min) / 6);
+            let start = _.floor(proInfo.min);
+            for (let i = 0; i < 6; i++) {
+                let lb = { 'label': start + '--' + _.floor(start + mid), annotated: 0 };
+                srsUI.forEach(UIS => {
+                    UIS.userInputs.forEach(ui => {
+                        if (_.round(Number(ui.problemCategory)) >= start && _.round(Number(ui.problemCategory)) <= _.floor(start + mid)) {
+                            lb.annotated += 1;
+                        };
+                    });
+                });
+                result.labels.push(lb);
+                start = _.floor(start + mid + 1);
+            }
         }
     } else {
         proInfo.categoryList.split(",").forEach(label => {
