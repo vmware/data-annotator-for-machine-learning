@@ -312,8 +312,8 @@ export class EditProjectComponent implements OnInit {
       this.mutilLabelArray.value.forEach(element => {
         if (element.status == 'old') {
           editLabels.push({
-            'edit': true,
-            'originLB': {[element.originalLabel]: [element.minMutilVal, element.maxMutilVal]},
+            'edit': element.oldMinMutilVal !== element.minMutilVal || element.oldMaxMutilVal !== element.maxMutilVal,
+            'originLB': {[element.originalLabel]: [element.oldMinMutilVal, element.oldMaxMutilVal]},
             'editLB': {[element.editLabel]: [element.minMutilVal, element.maxMutilVal]}
           });
         }
