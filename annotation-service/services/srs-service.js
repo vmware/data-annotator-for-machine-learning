@@ -58,10 +58,24 @@ async function updateSrsUserInput(req) {
     }
     //validate regression project
     if(pro.labelType == LABELTYPE.NUMERIC){
-        lableInput = req.body.userInput[0].problemCategory[0];
-        console.log(`[ SRS ] Service validate numeric lable problemCategory=${lableInput}`);
-        if(!validator.isNumeric(lableInput) || lableInput < pro.min || lableInput > pro.max ){
-            throw { CODE: 3001, MSG: `[ ERROR ] userInput[0].problemCategory[0]:${lableInput}` };
+        if (pro.isMultipleLabel){
+            const labels = JSON.parse(pro.categoryList);
+            const lableInput = req.body.userInput[0].problemCategory;
+            for (const lbI of lableInput){
+                const inputkey = Object.keys(lbI)[0];
+                const inputValue = Object.values(lbI)[0]; 
+                const label = await labels.find(a => Object.keys(a)[0]==inputkey);
+                if(!label || !validator.isNumeric(inputValue) || inputValue < label[inputkey][0] || inputValue > label[inputkey][1] ){
+                    console.log(lbI, label, labels);
+                    throw { CODE: 3001, MSG: `[ ERROR ] userInput[0].problemCategory` };
+                }
+            }
+        }else {
+            const lableInput = req.body.userInput[0].problemCategory[0];
+            console.log(`[ SRS ] Service validate numeric lable problemCategory=${lableInput}`);
+            if(!validator.isNumeric(lableInput) || lableInput < pro.min || lableInput > pro.max ){
+                throw { CODE: 3001, MSG: `[ ERROR ] userInput[0].problemCategory` };
+            }
         }
     }
     
@@ -85,6 +99,17 @@ async function updateSrsUserInput(req) {
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
+                    });
+                }else if(pro.labelType == LABELTYPE.NUMERIC && pro.isMultipleLabel){
+                    ui.problemCategory.forEach(lb =>{
+                        userInputs.push({
+                            problemCategory: {
+                                label: Object.keys(lb)[0],
+                                value: Object.values(lb)[0]
+                            },
+                            user: user,
+                            timestamp: Date.now()
+                        });
                     });
                 }else{
                     ui.problemCategory.forEach(lb =>{
@@ -127,6 +152,17 @@ async function updateSrsUserInput(req) {
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
+                    });
+                }else if(pro.labelType == LABELTYPE.NUMERIC && pro.isMultipleLabel){
+                    ui.problemCategory.forEach(lb =>{
+                        userInputs.push({
+                            problemCategory: {
+                                label: Object.keys(lb)[0],
+                                value: Object.values(lb)[0]
+                            },
+                            user: user,
+                            timestamp: Date.now()
+                        });
                     });
                 }else {
                     ui.problemCategory.forEach(lb =>{
@@ -823,6 +859,11 @@ async function deleteLabel(req){
     const mp = await getModelProject(conditions);
 
     let labelArray = mp.project.categoryList.split(",");
+    const multiTextNumberica = mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC;
+    if (multiTextNumberica) {
+        const categoryList = JSON.parse(mp.project.categoryList);
+        labelArray = categoryList.map(a=> Object.keys(a)[0]);
+    }
     if (!labelArray.includes(label)) {
         throw {CODE: 4004, MSG: "LABEL NOT EXIST"};
     }
@@ -838,6 +879,8 @@ async function deleteLabel(req){
             ]  
         };
 
+    }else if(mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC){
+        conditions["userInputs.problemCategory.label"] = label;
     }else{
         conditions["userInputs.problemCategory"] = label;
     }
@@ -847,10 +890,18 @@ async function deleteLabel(req){
         throw {CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED"};
     }
     
-    _.pull(labelArray, label);
     const query = {projectName: req.body.pname}
-    const update = {$set: {"categoryList": labelArray.toString()}};
     const options = { new: true };
+    _.pull(labelArray, label);
+    labelArray = labelArray.toString();
+    if (multiTextNumberica) {
+        const categoryList = JSON.parse(mp.project.categoryList);
+        labelArray = categoryList.filter(a => Object.keys(a)[0] != label);
+        labelArray = JSON.stringify(labelArray);
+    }
+    const update = {$set: {"categoryList": labelArray}};
+
+    
     await projectDB.findUpdateProject(query, update, options);
     
     return {CODE: 200, MSG: "OK", LABELS: labelArray};

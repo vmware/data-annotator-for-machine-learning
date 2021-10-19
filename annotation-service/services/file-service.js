@@ -67,10 +67,20 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     selectedColumn = (typeof selectedColumn === 'string'? JSON.parse(selectedColumn):selectedColumn);
     
     let labels = req.body.labels;
+    let isMultipleLabel = req.body.isMultipleLabel;
+    let alFailed = false; 
+    let totalCase = 0;
+    if(isMultipleLabel === 'true' || isMultipleLabel === true){
+        alFailed = true;
+        isMultipleLabel = true;
+        if (req.body.labelType == LABELTYPE.NUMERIC && typeof labels === 'object') {
+            labels = JSON.stringify(labels);
+        }
+    }else{
+        isMultipleLabel = false;
+    }
     labels = (typeof labels === 'object'? labels.toString(): labels);
 
-    let totalCase = 0;
-    let alFailed = (req.body.isMultipleLabel === 'true' || req.body.isMultipleLabel === true)? true: false;
     if (req.body.projectType == PROJECTTYPE.IMGAGE) {
         totalCase = req.body.totalRows;
         alFailed = true;
@@ -108,7 +118,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         },
         projectType: req.body.projectType,
         encoder: req.body.encoder,
-        isMultipleLabel: (req.body.isMultipleLabel === 'true' || req.body.isMultipleLabel === true)? true: false,
+        isMultipleLabel: isMultipleLabel,
         regression: (req.body.regression === 'true' || req.body.regression === true)? true: false,
         isShowFilename: (req.body.isShowFilename === 'true' || req.body.isShowFilename === true)? true: false,
         ticketDescription: req.body.ticketDescription,
@@ -164,8 +174,17 @@ async function prepareHeaders(project, format) {
 
     //regression project
     if (project.labelType == LABELTYPE.NUMERIC) {
-        for (let index = 0; index < project.maxAnnotation; index++) {
-            headerArray.push({ id: `annotation_${index + 1}`, title: `annotation_${index + 1}` });
+
+        if (project.isMultipleLabel) {
+            const labels = JSON.parse(project.categoryList);
+            for (const label of labels) {
+                const lb = Object.keys(label)[0];
+                headerArray.push({id: lb, title: lb});
+            }
+        }else{
+            for (let index = 0; index < project.maxAnnotation; index++) {
+                headerArray.push({ id: `annotation_${index + 1}`, title: `annotation_${index + 1}` });
+            }
         }
     }
 
@@ -280,6 +299,24 @@ async function prepareContents(srData, project, format) {
                         }
                     });
                 });
+            }else{
+                //multi-numberica lables
+                if (project.isMultipleLabel) {
+                    // init label headers
+                    const labelsList = JSON.parse(project.categoryList);
+                    await labelsList.forEach(async labels => {
+                        const label = Object.keys(labels)[0];
+                        newCase[label] = [];
+                        // put labeld case 
+                        await srs.userInputs.forEach(async item => {
+                            if (item.problemCategory.label == label) {
+                                const value = item.problemCategory.value;
+                                newCase[label].push(value);
+                            }
+                        });
+                        newCase[label] = newCase[label][0]? JSON.stringify(newCase[label]):[];
+                    });
+                }
             }
         }
 
@@ -298,7 +335,7 @@ async function prepareContents(srData, project, format) {
             newCase.probabilistic = `(${probablistic})`;
         }
         //4. regression project
-        if (project.labelType == LABELTYPE.NUMERIC) {
+        if (project.labelType == LABELTYPE.NUMERIC && !project.isMultipleLabel) {
             for (let index = 0; index < project.maxAnnotation; index++) {
                 if (srs.userInputs[index]) {
                     newCase[`annotation_${index + 1}`] = srs.userInputs[index].problemCategory;

@@ -37,7 +37,7 @@ async function getProjects(req) {
     } else if (src == SRCS.COMMUNITY) {
         console.log(`[ PROJECT ] Service query current user datasets list`);
         condition = { shareStatus: true };
-        project = "projectName shareDescription creator updatedDate totalCase projectCompleteCase userCompleteCase categoryList generateInfo downloadCount labelType min max projectType";
+        project = "projectName shareDescription creator updatedDate totalCase projectCompleteCase userCompleteCase categoryList generateInfo downloadCount labelType min max projectType isMultipleLabel";
     } else {
         console.log(`[ PROJECT ] [ERROR] Service errors in ${email} or ${src}`);
         throw { CODE: 1001, MSG: "ERROR ID or src" };
@@ -158,15 +158,89 @@ async function updateProject(req) {
 
     //edit lables
     if (projectInfo.labelType == LABELTYPE.NUMERIC) {
-        const min = req.body.min;
-        const max = req.body.max;
-        
-        if (min >= max || typeof min != "number" || typeof max != "number" || min > projectInfo.min || max < projectInfo.max) {
-            throw {CODE: 4006, MSG: "INPUT MIN/MAX ERROR"};
+        if(projectInfo.isMultipleLabel){
+            let originalLabels = JSON.parse(projectInfo.categoryList);
+            const editLabels = req.body.editLabels;
+            const addLabels = req.body.addLabels;
+            
+            let editLBList = [];
+            //validate edit label data
+            for (const elabel of editLabels) {
+                if (elabel.edit) {
+                    const orgLB = Object.keys(elabel.originLB)[0];
+                    const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == orgLB);
+
+                    if (!originLBDB) {
+                        throw {CODE: 4006, MSG: "INPUT originLB ERROR"};
+                    }
+                    const dbMin = originLBDB[orgLB][0];
+                    const dbMax = originLBDB[orgLB][1];
+
+                    const orgMin = elabel.originLB[orgLB][0];
+                    const orgMax = elabel.originLB[orgLB][1];
+
+                    const editLB = Object.keys(elabel.editLB)[0];
+                    const editMin = elabel.editLB[editLB][0];
+                    const editMax = elabel.editLB[editLB][1];
+                    
+                    if (editLB == orgLB && editMin == dbMin && editMax == dbMax) {
+                        continue;
+                    }
+                    if (dbMin != orgMin || dbMax != orgMax) {
+                        throw {CODE: 4006, MSG: "INPUT originLB min/max ERROR"};
+                    }
+                    if (editMin >= editMax || editMin > dbMin || editMax < dbMax) {
+                        throw {CODE: 4006, MSG: "INPUT editLB min/max ERROR"};
+                    }
+                    //add to edit list
+                    editLBList.push([orgLB, editLB]);
+                    originalLabels = await originalLabels.filter(ol => Object.keys(ol)[0] != orgLB);
+                    originalLabels.push(elabel.editLB);
+                }
+            }
+            //validate add label data
+            let addLabel = false;
+            for (const aLabel of addLabels) {
+               const addLB = Object.keys(aLabel)[0];
+               const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == addLB);
+               if (originLBDB) {
+                   continue;
+               }
+               if (aLabel[addLB][0] > aLabel[addLB][1]){
+                throw {CODE: 4006, MSG: "INPUT addLabels min/max ERROR"};
+               }
+               originalLabels.push(aLabel);
+               addLabel = true;
+            }
+            //update label
+            if (editLBList.length || addLabel) {
+                update.$set['categoryList'] = JSON.stringify(originalLabels);
+            }
+            //edit existing labels
+            for (const label of editLBList) {
+                const query = { 
+                    projectName: req.body.pname,  
+                    [`userInputs.problemCategory.label`]: label[0]
+                };
+                const updateTickets = { $set: { "userInputs.$[elem].problemCategory.label" : label[1] } };
+                const options = {arrayFilters: [ { "elem.problemCategory.label": label[0] } ]};
+                await mongoDb.updateManyByConditions(mp.model, query, updateTickets, options);
+                
+            }
+
+
+        }else{
+            const min = req.body.min;
+            const max = req.body.max;
+            
+            if (min >= max || typeof min != "number" || typeof max != "number" || min > projectInfo.min || max < projectInfo.max) {
+                throw {CODE: 4006, MSG: "INPUT MIN/MAX ERROR"};
+            }
+            
+            update.$set['min'] = min;
+            update.$set['max'] = max;
         }
         
-        update.$set['min'] = min;
-        update.$set['max'] = max;
     }else{
         const originalLabels = projectInfo.categoryList.split(",");
         const editLabels = req.body.editLabels;
@@ -290,19 +364,34 @@ async function projectLeaderBoard(req) {
 
     console.log(`[ PROJECT ] Service sort out labels info`);
     if (labelType == LABELTYPE.NUMERIC) {
-        let mid = _.floor((proInfo.max - proInfo.min) / 6);
-        let start = _.floor(proInfo.min);
-        for (let i = 0; i < 6; i++) {
-            let lb = { 'label': start + '--' + _.floor(start + mid), annotated: 0 };
-            srsUI.forEach(UIS => {
-                UIS.userInputs.forEach(ui => {
-                    if (_.round(Number(ui.problemCategory)) >= start && _.round(Number(ui.problemCategory)) <= _.floor(start + mid)) {
-                        lb.annotated += 1;
-                    };
+        if (proInfo.isMultipleLabel) {
+            JSON.parse(proInfo.categoryList).forEach(labels => {
+                const label = Object.keys(labels)[0];
+                let lb = { 'label': label, annotated: 0 };
+                srsUI.forEach(UIS => {
+                    UIS.userInputs.forEach(ui => {
+                        if (ui.problemCategory.label == label) {
+                            lb.annotated += 1;
+                        }
+                    });
                 });
+                result.labels.push(lb);
             });
-            result.labels.push(lb);
-            start = _.floor(start + mid + 1);
+        }else{
+            let mid = _.floor((proInfo.max - proInfo.min) / 6);
+            let start = _.floor(proInfo.min);
+            for (let i = 0; i < 6; i++) {
+                let lb = { 'label': start + '--' + _.floor(start + mid), annotated: 0 };
+                srsUI.forEach(UIS => {
+                    UIS.userInputs.forEach(ui => {
+                        if (_.round(Number(ui.problemCategory)) >= start && _.round(Number(ui.problemCategory)) <= _.floor(start + mid)) {
+                            lb.annotated += 1;
+                        };
+                    });
+                });
+                result.labels.push(lb);
+                start = _.floor(start + mid + 1);
+            }
         }
     } else {
         proInfo.categoryList.split(",").forEach(label => {
