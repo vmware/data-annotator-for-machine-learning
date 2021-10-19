@@ -570,16 +570,30 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       ) {
         // case multiple
         for (let i = 0; i < this.annotationHistory.length; i++) {
-          let difference = [];
-          if (originalLabel.length - this.multipleLabelList.length >= 0) {
-            difference = _.difference(originalLabel, this.multipleLabelList);
+          if (this.isMultipleNumericLabel) {
+            if (this.annotationHistory[i].srId === this.sr._id) {
+              let labelScore = [];
+              this.scores.forEach(item => {
+                if (item.checked) {
+                  labelScore.push({ [item.label]: item.scoreValue });
+                }
+              });
+              this.annotationHistory[i].category = labelScore;
+              this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+              break;
+            }
           } else {
-            difference = _.difference(this.multipleLabelList, originalLabel);
-          }
-          if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
-            this.annotationHistory.splice(i, 1);
-            this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
-            break;
+            let difference = [];
+            if (originalLabel.length - this.multipleLabelList.length >= 0) {
+              difference = _.difference(originalLabel, this.multipleLabelList);
+            } else {
+              difference = _.difference(this.multipleLabelList, originalLabel);
+            }
+            if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
+              this.annotationHistory.splice(i, 1);
+              this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+              break;
+            }
           }
         }
       } else if (
@@ -829,7 +843,21 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             if (this.annotationHistory[i].srId === this.sr._id) {
               let difference = [];
               if (this.isMultipleNumericLabel) {
-                //待开发
+                if (this.annotationHistory[i].category.length !== this.scores.filter(item => item.checked).length) {
+                  this.actionError =
+                  'The current label is diiferent from the original existing label, please do submit first.';
+                  return;
+                } 
+                for (const item of this.scores) {
+                  for (const ele of this.annotationHistory[i].category) {
+                    const key = Object.keys(ele)[0];
+                    if (item.label === key && item.scoreValue !== ele[key]) {
+                      this.actionError =
+                      'The current label is diiferent from the original existing label, please do submit first.';
+                      return;
+                    }
+                  }
+                }
               } else {
                 if (this.annotationHistory[i].category.length - this.multipleLabelList.length >= 0) {
                   difference = _.difference(
@@ -1107,7 +1135,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.scores.push({  
               label: itemKey,
               checked: false,
-              scoreValue: 0,
+              scoreValue: minVal,
               scoreOptions: {
                 floor: minVal,
                 step: 1,
@@ -1169,8 +1197,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     } else {
       for (let i = 0; i < this.annotationHistory.length; i++) {
-        if (this.isMultipleNumericLabel) {
-          //待开发
+        if (this.isMultipleNumericLabel && this.annotationHistory[i].srId === this.sr._id ) {
+          if (this.annotationHistory[i].category.length !== this.scores.filter(item => item.checked).length) {
+            this.actionError =
+            'The current label is diiferent from the original existing label, please do submit first.';
+            return;
+          } 
+          for (const item of this.scores) {
+            for (const ele of this.annotationHistory[i].category) {
+              const key = Object.keys(ele)[0];
+              if (item.label === key && item.scoreValue !== ele[key]) {
+                this.actionError =
+                'The current label is diiferent from the original existing label, please do submit first.';
+                return;
+              }
+            }
+          }
         } else {
           let difference = [];
           if (this.annotationHistory[i].category.length - isCategory.length >= 0) {
