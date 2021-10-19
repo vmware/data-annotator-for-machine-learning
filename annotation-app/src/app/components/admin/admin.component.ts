@@ -150,7 +150,18 @@ export class AdminComponent implements OnInit {
           res[i].isExtend = true;
         }
         this.projectData = res;
-        this.totalItems = res.length;
+        this.projectData.forEach(item => {
+          if (item.labelType == 'numericLabel' && item.isMultipleLabel) {
+            const categoryList = JSON.parse(item.categoryList);
+            const itemKeys = [];
+            categoryList.forEach(element => {
+              const labels = Object.keys(element);
+              itemKeys.push(labels[0]);
+            });
+            item.mutilNumbericLabels = itemKeys.toString();
+          }
+        });
+        this.totalItems = res.length;   
       },
       (error: any) => {
         console.log(error);

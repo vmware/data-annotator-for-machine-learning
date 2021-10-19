@@ -257,14 +257,18 @@ SPDX-License-Identifier: Apache-2.0 -->
               <clr-dg-cell
                 class="cellWordBreak colwidth"
                 title="{{
-                  dataset.labelType == 'numericLabel'
+                  dataset.labelType == 'numericLabel' && (!dataset.isMultipleLabel)
                     ? dataset.min + '--' + dataset.max
+                    : (dataset.labelType == 'numericLabel' && dataset.isMultipleLabel)
+                    ? dataset.mutilNumbericLabels
                     : dataset.categoryList
                 }}"
               >
                 {{
-                  dataset.labelType == 'numericLabel'
+                  dataset.labelType == 'numericLabel' && (!dataset.isMultipleLabel)
                     ? dataset.min + '--' + dataset.max
+                    : (dataset.labelType == 'numericLabel' && dataset.isMultipleLabel)
+                    ? dataset.mutilNumbericLabels
                     : dataset.categoryList
                 }}</clr-dg-cell
               >

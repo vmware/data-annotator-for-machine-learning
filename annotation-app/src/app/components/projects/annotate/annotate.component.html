@@ -638,6 +638,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               !isShowDropDown &&
               !isNumeric &&
               !isMultipleLabel &&
+              !isMultipleNumericLabel &&
               (projectType == 'text' || projectType == 'tabular')
             "
           >
@@ -694,7 +695,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <span class="required">required</span>
           </div>
           <!-- numeric labels input -->
-          <div *ngIf="isNumeric" class="clr-row">
+          <div *ngIf="isNumeric && !isMultipleLabel" class="clr-row">
               <div class="clr-control-container clr-col-3" style="margin-top: 0.5rem">
                 <ngx-slider [(value)]="numericValue" [options]="numericOptions" (valueChange)="sliderEvent()"></ngx-slider>
               </div>
@@ -739,7 +740,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <!-- multiple checkbox labels -->
           <div
             class="questionContainer"
-            *ngIf="isMultipleLabel && (projectType == 'text' || projectType == 'tabular')"
+            *ngIf="isMultipleLabel && !isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular')"
           >
             <div class="clr-form-control" style="margin-top: 0">
               <div class="clr-control-container" style="width: 100%">
@@ -760,6 +761,34 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
           </div>
+          <!-- multiple numeric checkbox labels -->
+          <div class="questionContainer"
+            *ngIf="isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular')"
+          >
+          <div class="clr-form-control" style="margin-top: 0">
+            <div class="clr-control-container" style="width: 100%">
+              <div
+                class="clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
+                *ngFor="let score of scores; let i = index"
+              >
+                <div class="multiple-checkbox">
+                  <input
+                    type="checkbox"
+                    id="{{ score.label }}"
+                    name="checkbox"
+                    value="{{ score.label }}"
+                    class="clr-checkbox"
+                    (click)="selectLabel($event, i)"
+                  />
+                  <label for="{{ score.label }}" class="clr-control-label multiple-label">{{ score.label }}</label>
+                </div>
+                <div class="scoreSlider">
+                  <ngx-slider [(value)]="scores[i].scoreValue" [options]="scores[i].scoreOptions"></ngx-slider>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
           <!-- txt log labels -->
           <div class="questionContainer" *ngIf="projectType == 'log'">
             <div>
@@ -819,7 +848,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
             <button
               *ngIf="
-                ((isMultipleLabel && projectType !== 'log') ||
+                (((isMultipleLabel || isMultipleNumericLabel) && projectType !== 'log') ||
                   projectType == 'image' ||
                   (projectType == 'log' && startFrom !== 'review')) &&
                 projectType !== 'ner'
@@ -842,7 +871,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               Submit
             </button>
             <button
-              *ngIf="projectType == 'ner' || (projectType == 'log' && startFrom == 'review') || isNumeric"
+              *ngIf="projectType == 'ner' || (projectType == 'log' && startFrom == 'review') || (isNumeric && !isMultipleLabel)"
               class="btn btn-success submit"
               type="submit"
             >

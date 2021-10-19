@@ -72,6 +72,17 @@ export class GameFormComponent implements OnInit {
           }
         });
         this.datasets = res;
+        this.datasets.forEach(item => {
+          if (item.labelType == 'numericLabel' && item.isMultipleLabel) {
+            const categoryList = JSON.parse(item.categoryList);
+            const itemKeys = [];
+            categoryList.forEach(element => {
+              const labels = Object.keys(element);
+              itemKeys.push(labels[0]);
+            });
+            item.mutilNumbericLabels = itemKeys.toString();
+          }
+        });
         this.totalItems = res.length;
         this.loading = false;
       },

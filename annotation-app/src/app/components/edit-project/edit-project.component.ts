@@ -12,6 +12,10 @@ import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
 import { CommonService } from 'app/services/common/common.service';
 import { EmailService } from 'app/services/common/email.service';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { DatasetValidator } from 'app/shared/form-validators/dataset-validator';
+import { max } from 'lodash';
+
 @Component({
   selector: 'app-edit-project',
   templateUrl: './edit-project.component.html',
@@ -67,6 +71,10 @@ export class EditProjectComponent implements OnInit {
   deleteLabelInfo: any;
   deleteLabelComplete = false;
   isShowFilename: any;
+  mutilNumericForm: FormGroup;
+  inputIsNull: boolean;
+  inputIsNotInterger: boolean;
+  isMultipleLabel: boolean;
 
   constructor(
     private avaService: AvaService,
@@ -74,6 +82,7 @@ export class EditProjectComponent implements OnInit {
     private toolService: ToolService,
     private commonService: CommonService,
     private emailService: EmailService,
+    private formBuilder: FormBuilder,
   ) {
     this.inputPnameUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       let pname = value.trim();
@@ -94,6 +103,7 @@ export class EditProjectComponent implements OnInit {
     this.inputfrequency = al.frequency ? al.frequency : null;
     this.inputTrigger = al.trigger ? al.trigger : null;
     this.labelType = this.msg.labelType;
+    this.isMultipleLabel = this.msg.isMultipleLabel;
     this.inputProjectCreator = this.msg.creator;
     this.inputProjectAssignee = this.msg.annotator;
     let flag = [];
@@ -115,10 +125,38 @@ export class EditProjectComponent implements OnInit {
     this.isShowFilename = this.msg.isShowFilename ? 'yes' : 'no';
     this.oldMax = this.msg.max;
     this.oldMin = this.msg.min;
-    this.msg.categoryList.split(',').forEach((element) => {
-      const flag = { status: 'old', originalLabel: element, editLabel: element };
-      this.categoryList.push(flag);
-    });
+    if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
+      let mutilNumerics = [];
+      let categoryList = JSON.parse(this.msg.categoryList);
+      categoryList.forEach(element => {
+        const labels = Object.keys(element);
+        const label = labels[0];
+        const values = element[label];
+        const minVal = values[0];
+        const maxVal = values[1];
+        mutilNumerics.push(this.formBuilder.group({
+          status: 'old', 
+          originalLabel: label,
+          editLabel: label,
+          oldMinMutilVal:  this.formBuilder.control(minVal),
+          minMutilVal:  this.formBuilder.control(minVal),
+          oldMaxMutilVal:  this.formBuilder.control(maxVal),
+          maxMutilVal: this.formBuilder.control(maxVal),
+        }));
+      });
+      this.mutilNumericForm = this.formBuilder.group({
+        mutilLabelArray: this.formBuilder.array(mutilNumerics)
+      });
+    } else {
+      this.msg.categoryList.split(',').forEach((element) => {
+        const flag = { status: 'old', originalLabel: element, editLabel: element };
+        this.categoryList.push(flag);
+      });
+    }
+  }
+
+  get mutilLabelArray() {
+    return this.mutilNumericForm.get('mutilLabelArray') as FormArray;
   }
 
   pnameCheck(name) {
@@ -262,16 +300,40 @@ export class EditProjectComponent implements OnInit {
   }
 
   saveProjectEdit(id) {
-    const editLabels = {};
+    let editLabels;
     const addLabels = [];
-    this.categoryList.forEach((element) => {
-      if (element.status == 'old') {
-        editLabels[element.originalLabel] = element.editLabel;
+    if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
+      if (this.mutilLabelArray.value.some(item => (item.oldMinMutilVal && item.oldMinMutilVal < item.minMutilVal)
+        || (item.oldMaxMutilVal && item.oldMaxMutilVal > item.maxMutilVal) 
+        || (item.maxMutilVal <= item.minMutilVal))) {
+          return false;
+      } else {
+      editLabels = [];
+      this.mutilLabelArray.value.forEach(element => {
+        if (element.status == 'old') {
+          editLabels.push({
+            'edit': element.oldMinMutilVal !== element.minMutilVal || element.oldMaxMutilVal !== element.maxMutilVal,
+            'originLB': {[element.originalLabel]: [element.oldMinMutilVal, element.oldMaxMutilVal]},
+            'editLB': {[element.editLabel]: [element.minMutilVal, element.maxMutilVal]}
+          });
+        }
+        if (element.status == 'new') {
+          addLabels.push({[element.editLabel]: [element.minMutilVal, element.maxMutilVal]});
+        }
+      });
       }
-      if (element.status == 'new') {
-        addLabels.push(element.editLabel);
-      }
-    });
+    } else {
+      editLabels = {};
+      this.categoryList.forEach((element) => {
+        if (element.status == 'old') {
+          editLabels[element.originalLabel] = element.editLabel;
+        }
+        if (element.status == 'new') {
+          addLabels.push(element.editLabel);
+        }
+      });
+    }
+
     let condition =
       this.inputProjectName !== '' &&
       this.inputProjectCreator !== '' &&
@@ -286,8 +348,10 @@ export class EditProjectComponent implements OnInit {
       !this.minThreshold &&
       !this.minFrequency &&
       this.inputfrequency > 9 &&
-      this.inputTrigger > 49;
-    if (this.labelType == 'numericLabel') {
+      this.inputTrigger > 49 &&
+      !this.inputIsNotInterger &&
+      !this.inputIsNull;
+    if (this.labelType == 'numericLabel' && !this.isMultipleLabel) {
       condition =
         this.inputProjectName !== '' &&
         this.inputProjectCreator !== '' &&
@@ -318,7 +382,7 @@ export class EditProjectComponent implements OnInit {
         min: null,
         max: null,
       };
-      if (this.labelType == 'numericLabel') {
+      if (this.labelType == 'numericLabel' && !this.isMultipleLabel) {
         param.frequency = null;
         param.trigger = null;
         param.min = this.msg.min;
@@ -504,18 +568,26 @@ export class EditProjectComponent implements OnInit {
   }
 
   minUpdate(e) {
-    if (e != null && Number(this.msg.max) >= Number(e) && Number(this.msg.max) !== Number(this.msg.min)) {
-      this.sizeError = false;
+    if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
+      this.checkBoth();
     } else {
-      this.sizeError = true;
+      if (e != null && Number(this.msg.max) >= Number(e) && Number(this.msg.max) !== Number(this.msg.min)) {
+        this.sizeError = false;
+      } else {
+        this.sizeError = true;
+      }
     }
   }
 
   maxUpdate(e) {
-    if (e != null && Number(e) >= Number(this.msg.min) && Number(this.msg.max) !== Number(this.msg.min)) {
-      this.sizeError = false;
+    if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
+      this.checkBoth();
     } else {
-      this.sizeError = true;
+      if (e != null && Number(e) >= Number(this.msg.min) && Number(this.msg.max) !== Number(this.msg.min)) {
+        this.sizeError = false;
+      } else {
+        this.sizeError = true;
+      }
     }
   }
 
@@ -525,6 +597,96 @@ export class EditProjectComponent implements OnInit {
       this.msg.totalCase,
       this.msg.maxAnnotation,
       this.assigneeList,
+    );
+  }
+
+  checkBoth() {
+    if (this.mutilLabelArray.value.length) {
+      this.sizeError = this.mutilLabelArray.value.some(item => !DatasetValidator.isInvalidNumber(item.minMutilVal)
+        && !DatasetValidator.isInvalidNumber(item.maxMutilVal)
+        && Number(item.minMutilVal) >= Number(item.maxMutilVal));
+      this.inputIsNull = this.mutilLabelArray.value.some(item => DatasetValidator.isInvalidNumber(item.minMutilVal)
+        || DatasetValidator.isInvalidNumber(item.maxMutilVal) || !item.editLabel);
+      this.inputIsNotInterger = this.mutilLabelArray.value.some(item => (!DatasetValidator.isInvalidNumber(item.minMutilVal)
+        && DatasetValidator.isNotIntegerNum(item.minMutilVal))
+        || (!DatasetValidator.isInvalidNumber(item.maxMutilVal)
+        && DatasetValidator.isNotIntegerNum(item.maxMutilVal)));
+    }
+  }
+
+  onMutilLabelKeydown() {
+    let labelValues = [];
+    if (this.mutilLabelArray.value.length) {
+      this.mutilLabelArray.value.forEach(ele => {
+        labelValues.push(ele.editLabel);
+      });
+    }
+    this.inputIsNull = labelValues.filter(item => item).length !== this.mutilLabelArray.length;
+    this.inputLabelValidation = DatasetValidator.isRepeatArr(labelValues);
+  }
+
+  addMutilLabel() {
+    this.mutilLabelArray.push(this.newMutliLabel());
+  }
+
+  newMutliLabel(): FormGroup {
+    return this.formBuilder.group({
+      status: 'new', 
+      originalLabel: this.formBuilder.control(''),
+      editLabel: this.formBuilder.control(''),
+      oldMinMutilVal: this.formBuilder.control(''),
+      minMutilVal: this.formBuilder.control(''),
+      oldMaxMutilVal: this.formBuilder.control(''),
+      maxMutilVal: this.formBuilder.control(''),
+    });
+  }
+
+  deleteMutilLabel(delIndex) {
+    if (this.mutilLabelArray.value[delIndex].status === 'old') {
+      this.delOldMutilLabel(delIndex);
+    } else {
+      this.mutilLabelArray.removeAt(delIndex);
+      if (this.mutilLabelArray.value.length) {
+        this.checkBoth();
+      }
+    }
+  }
+
+  delOldMutilLabel(delIndex) {
+    const param = {
+      pname: this.msgInEdit.projectName,
+      label: this.mutilLabelArray.value[delIndex].originalLabel,
+    };
+    this.deleteLabelComplete = true;
+    this.avaService.deleteLabel(param).subscribe(
+      (res) => {
+        this.isShowDeleteModal = false;
+        this.deleteLabelComplete = false;
+        if (res.CODE == 200) {
+          this.infoMessage = 'Label has been deleted successfully.';
+          this.mutilLabelArray.removeAt(delIndex);
+          if (this.mutilLabelArray.value.length) {
+            this.checkBoth();
+          }
+          this.onDeleteLabelEmitter.emit();
+          setTimeout(() => {
+            this.infoMessage = '';
+          }, 5000);
+        } else {
+          this.errorMessage = 'Failed to delete the label because that label has been used.';
+          setTimeout(() => {
+            this.errorMessage = '';
+          }, 5000);
+        }
+      },
+      () => {
+        this.isShowDeleteModal = false;
+        this.deleteLabelComplete = false;
+        this.errorMessage = 'Failed to delete the label because that label has been used.';
+        setTimeout(() => {
+          this.errorMessage = '';
+        }, 5000);
+      },
     );
   }
 }

@@ -13,7 +13,7 @@ import {
   ViewChild,
   ElementRef,
 } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup, FormBuilder, FormArray, FormControl } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { AvaService } from '../../services/ava.service';
 import { FormValidatorUtil } from '../../shared/form-validators/form-validator-util';
@@ -117,6 +117,9 @@ export class CreateNewComponent implements OnInit {
   assignTickets: object;
   selectedExistingLabelColumn: any = [];
   selectedDisplayColumn: any = [];
+  isMutilNumericLabel: boolean;
+  inputIsNull: boolean;
+  inputIsNotInterger: boolean;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -202,7 +205,20 @@ export class CreateNewComponent implements OnInit {
       selectedText: [this.dataset.selectedText, ''],
       selectedDisplayColumn: [this.dataset.selectedDisplayColumn, ''],
       isShowFilename: [this.dataset.isShowFilename, ''],
+      mutilLabelArray: this.formBuilder.array([this.formBuilder.group({
+        label: this.formBuilder.control(''),
+        maxMutilVal: this.formBuilder.control(''),
+        minMutilVal: this.formBuilder.control(''),
+      }), this.formBuilder.group({
+        label: this.formBuilder.control(''),
+        maxMutilVal: this.formBuilder.control(''),
+        minMutilVal: this.formBuilder.control(''),
+      })]),
     });
+  }
+
+  get mutilLabelArray() {
+    return this.dsDialogForm.get('mutilLabelArray') as FormArray;
   }
 
   buildFormModel(): any {
@@ -216,6 +232,14 @@ export class CreateNewComponent implements OnInit {
         this.labelType = 'numericLabel';
         this.validNumeirc();
         condition = !this.dsDialogForm.invalid && !this.nameExist && !this.sizeError;
+      } else if (this.isMutilNumericLabel) {
+        this.validBoth();
+        condition = !this.dsDialogForm.invalid
+          && !this.nameExist
+          && !this.sizeError
+          && !this.inputLabelValidation
+          && !this.inputIsNull
+          && !this.inputIsNotInterger;
       } else {
         this.labelType = 'textLabel';
         this.dsDialogForm.get('min').setValidators(null);
@@ -327,26 +351,40 @@ export class CreateNewComponent implements OnInit {
     formData.append('location', this.location);
     formData.append('selectedDataset', this.dsDialogForm.value.selectedDataset);
     formData.append('min', this.dsDialogForm.value.min);
-    formData.append('max', this.dsDialogForm.value.max);
-    formData.append('labelType', this.labelType);
+    formData.append('max', this.dsDialogForm.value.max);  
     formData.append('estimator', this.dsDialogForm.value.selectedClassifier);
     formData.append('projectType', this.projectType);
     formData.append('encoder', this.dsDialogForm.value.selectedEncoder);
-    formData.append(
-      'isMultipleLabel',
-      this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log'
-        ? true
-        : this.dsDialogForm.value.multipleLabel,
-    );
+    if (this.isMutilNumericLabel) {
+      formData.append('isMultipleLabel', 'true');
+      formData.append('labelType', 'numericLabel');
+      const labels = [];
+      this.mutilLabelArray.value.forEach(element => {
+        labels.push({
+          [element.label]: [element.minMutilVal, element.maxMutilVal]
+        })
+      });
+      formData.append('labels', JSON.stringify(labels));
+    } else {
+      formData.append('labelType', this.labelType);
+      formData.append(
+        'isMultipleLabel',
+        this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log'
+          ? true
+          : this.dsDialogForm.value.multipleLabel,
+      );
+      if (this.projectType === 'ner') {
+        const aa = [];
+        this.dsDialogForm.value.labels.forEach((element) => {
+          aa.push(element.name);
+        });
+        formData.append('labels', aa.join(','));
+      } else {
+        formData.append('labels', this.dsDialogForm.value.labels);
+      }
+    }
     if (this.projectType === 'ner') {
       formData.append('regression', this.selectDescription.length > 0 ? 'true' : 'false');
-      const aa = [];
-      this.dsDialogForm.value.labels.forEach((element) => {
-        aa.push(element.name);
-      });
-      formData.append('labels', aa.join(','));
-    } else {
-      formData.append('labels', this.dsDialogForm.value.labels);
     }
     if (this.projectType === 'log') {
       formData.append(
@@ -575,6 +613,16 @@ export class CreateNewComponent implements OnInit {
     this.isMultipleLabel = null;
     this.dsDialogForm.get('selectedText').setValue(null);
     this.dsDialogForm.get('isShowFilename').setValue(false);
+    this.isMutilNumericLabel = false;
+    if (e.target.value == 'No Labels') {
+      this.isShowLabelRadio = true;
+    } else {
+      this.isShowLabelRadio = false;
+    }
+    this.dsDialogForm.get('mutilLabelArray').reset();
+    while (this.mutilLabelArray.length > 2) {
+      this.mutilLabelArray.removeAt(2);
+    }
 
     this.datasetsList.forEach((dataset) => {
       if (dataset.dataSetName === e.target.value) {
@@ -670,6 +718,11 @@ export class CreateNewComponent implements OnInit {
     this.isNumeric = null;
     this.labelType = '';
     this.isShowNumeric = false;
+    this.isMutilNumericLabel = false;
+    this.dsDialogForm.get('mutilLabelArray').reset();
+    while (this.mutilLabelArray.length > 2) {
+      this.mutilLabelArray.removeAt(2);
+    }
     if (e.target.value == 'No Labels') {
       this.isShowLabelRadio = true;
     } else {
@@ -1182,29 +1235,59 @@ export class CreateNewComponent implements OnInit {
   //   this.showQueryDatasetDialog = false;
   // }
 
-  minUpdate(e) {
-    this.minLabel = e.target.value;
-    Number(this.minLabel) >= Number(this.maxLabel)
-      ? (this.sizeError = true)
-      : (this.sizeError = false);
+  checkBoth() {
+    if (this.mutilLabelArray.value.length) {
+      this.sizeError = this.mutilLabelArray.value.some(item => !DatasetValidator.isInvalidNumber(item.minMutilVal)
+        && !DatasetValidator.isInvalidNumber(item.maxMutilVal)
+        && Number(item.minMutilVal) >= Number(item.maxMutilVal));
+      this.inputIsNull = this.mutilLabelArray.value.some(item => DatasetValidator.isInvalidNumber(item.minMutilVal)
+        || DatasetValidator.isInvalidNumber(item.maxMutilVal) || !item.label);
+      this.inputIsNotInterger = this.mutilLabelArray.value.some(item => (!DatasetValidator.isInvalidNumber(item.minMutilVal)
+        && DatasetValidator.isNotIntegerNum(item.minMutilVal))
+        || (!DatasetValidator.isInvalidNumber(item.maxMutilVal)
+        && DatasetValidator.isNotIntegerNum(item.maxMutilVal)));
+    }
   }
 
-  maxUpdate(e) {
-    this.maxLabel = e.target.value;
-    Number(this.minLabel) >= Number(this.maxLabel)
+  minUpdate(e) {
+    if (this.isMutilNumericLabel) {
+       this.checkBoth();
+    } else {
+      this.minLabel = e.target.value;
+      Number(this.minLabel) >= Number(this.maxLabel)
       ? (this.sizeError = true)
       : (this.sizeError = false);
+    }
+  }
+
+  maxUpdate(e) {  
+    if (this.isMutilNumericLabel) {
+      this.checkBoth();
+    } else {
+      this.maxLabel = e.target.value;
+      Number(this.minLabel) >= Number(this.maxLabel)
+      ? (this.sizeError = true)
+      : (this.sizeError = false);
+    }
   }
 
   changeLabelType(e) {
     if (e.target.value == 'numericLabel') {
       this.isShowNumeric = true;
       this.isNumeric = true;
+      this.isMutilNumericLabel = false;
+    } else if (e.target.value == 'mutilNumericLabel') {
+      this.isMutilNumericLabel = true;
+      this.isShowNumeric = false;
+      this.isNumeric = false;
+      this.dsDialogForm.get('labels').setValidators(null);
+      this.dsDialogForm.get('labels').updateValueAndValidity();
     } else {
       this.dsDialogForm.get('multipleLabel').setValue(null);
       this.isMultipleLabel = null;
       this.isShowNumeric = false;
       this.isNumeric = false;
+      this.isMutilNumericLabel = false;
     }
   }
 
@@ -1228,6 +1311,22 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogForm.get('max').updateValueAndValidity();
   }
 
+  validBoth() {
+    this.dsDialogForm.get('selectedClassifier').setValue(null);
+    this.dsDialogForm.get('selectedClassifier').setValidators(null);
+    this.dsDialogForm.get('selectedClassifier').updateValueAndValidity();
+    this.dsDialogForm.get('selectedEncoder').setValue(null);
+    this.dsDialogForm.get('selectedEncoder').setValidators(null);
+    this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
+    this.dsDialogForm.get('min').setValidators(null);
+    this.dsDialogForm.get('min').updateValueAndValidity();
+    this.dsDialogForm.get('max').setValidators(null);
+    this.dsDialogForm.get('max').updateValueAndValidity();
+    this.dsDialogForm.get('labels').setValidators(null);
+    this.dsDialogForm.get('labels').updateValueAndValidity();
+    this.checkBoth();
+  }
+ 
   validMultiple() {
     this.dsDialogForm.get('selectedClassifier').setValue(null);
     this.dsDialogForm.get('selectedClassifier').setValidators(null);
@@ -1257,6 +1356,36 @@ export class CreateNewComponent implements OnInit {
         this.dsDialogForm.get('totalRow').value,
         this.dsDialogForm.get('maxAnnotations').value,
       );
+    }
+  }
+
+  onMutilLabelKeydown() {
+    let labelValues = [];
+    if (this.mutilLabelArray.value.length) {
+      this.mutilLabelArray.value.forEach(ele => {
+        labelValues.push(ele.label);
+      });
+    }
+    this.inputIsNull = labelValues.filter(item => item).length !== this.mutilLabelArray.length;
+    this.inputLabelValidation = DatasetValidator.isRepeatArr(labelValues);
+  }
+
+  addMutilLabel() {
+    this.mutilLabelArray.push(this.newMutliLabel());
+  }
+
+  newMutliLabel(): FormGroup {
+    return this.formBuilder.group({
+      label: this.formBuilder.control(''),
+      maxMutilVal: this.formBuilder.control(''),
+      minMutilVal: this.formBuilder.control(''),
+    });
+  }
+
+  deleteMutilLabel(delIndex) {
+    this.mutilLabelArray.removeAt(delIndex);
+    if (this.mutilLabelArray.value.length) {
+      this.checkBoth();
     }
   }
 }

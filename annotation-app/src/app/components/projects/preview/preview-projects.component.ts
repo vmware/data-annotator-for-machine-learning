@@ -712,7 +712,12 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
         };
         for (let j = 0; j < this.previewSrs[k].userInputs.length; j++) {
           if (userList[i] == this.previewSrs[k].userInputs[j].user) {
-            param.problemCategory.push(this.previewSrs[k].userInputs[j].problemCategory);
+            if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
+              param.problemCategory.push(this.previewSrs[k].userInputs[j].problemCategory.label
+                + '[' + this.previewSrs[k].userInputs[j].problemCategory.value + ']');
+            } else {
+              param.problemCategory.push(this.previewSrs[k].userInputs[j].problemCategory);
+            }
             param.timestamp = this.previewSrs[k].userInputs[j].timestamp;
           }
         }

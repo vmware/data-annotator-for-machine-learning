@@ -62,6 +62,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   minLabel: number;
   maxLabel: number;
   isMultipleLabel: boolean;
+  isMultipleNumericLabel: boolean;
   multipleLabelList = [];
   spanStart: any;
   spanEnd: any;
@@ -132,6 +133,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     ceil: 100,
   };
   stepLen: number = 0;
+  scoreValue: number = 0;
+  scoreOptions: Options = {
+    floor: 0,
+    step: 1,
+    ceil: 5,
+  };
+
+  scores: any = [];
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -277,7 +286,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.silenceStatus = true;
           }
 
-          if (this.labelType == 'numericLabel') {
+          if (this.labelType == 'numericLabel' && !this.isMultipleLabel) {
             this.isNumeric = true;
             this.numericMessage =
               'Allowed values are between ' + this.minLabel + ' and ' + this.maxLabel + ' .';
@@ -289,7 +298,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               this.sortLabelForColor(this.categories);
             }
             this.isShowDropDown = false;
-            if (
+            if ( this.categories &&
               this.categories.length > 6 &&
               this.projectType != 'ner' &&
               this.projectType != 'image' &&
@@ -561,16 +570,30 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       ) {
         // case multiple
         for (let i = 0; i < this.annotationHistory.length; i++) {
-          let difference = [];
-          if (originalLabel.length - this.multipleLabelList.length >= 0) {
-            difference = _.difference(originalLabel, this.multipleLabelList);
+          if (this.isMultipleNumericLabel) {
+            if (this.annotationHistory[i].srId === this.sr._id) {
+              let labelScore = [];
+              this.scores.forEach(item => {
+                if (item.checked) {
+                  labelScore.push({ [item.label]: item.scoreValue });
+                }
+              });
+              this.annotationHistory[i].category = labelScore;
+              this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+              break;
+            }
           } else {
-            difference = _.difference(this.multipleLabelList, originalLabel);
-          }
-          if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
-            this.annotationHistory.splice(i, 1);
-            this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
-            break;
+            let difference = [];
+            if (originalLabel.length - this.multipleLabelList.length >= 0) {
+              difference = _.difference(originalLabel, this.multipleLabelList);
+            } else {
+              difference = _.difference(this.multipleLabelList, originalLabel);
+            }
+            if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
+              this.annotationHistory.splice(i, 1);
+              this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+              break;
+            }
           }
         }
       } else if (
@@ -734,7 +757,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
       }
-
+      this.clearScores(false);
       // console.log('getOne.annotationHistory:::', this.annotationHistory, this.annotationPrevious);
     }
     this.sr = newSr;
@@ -819,16 +842,34 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           for (let i = 0; i < this.annotationHistory.length; i++) {
             if (this.annotationHistory[i].srId === this.sr._id) {
               let difference = [];
-              if (this.annotationHistory[i].category.length - this.multipleLabelList.length >= 0) {
-                difference = _.difference(
-                  this.annotationHistory[i].category,
-                  this.multipleLabelList,
-                );
+              if (this.isMultipleNumericLabel) {
+                if (this.annotationHistory[i].category.length !== this.scores.filter(item => item.checked).length) {
+                  this.actionError =
+                  'The current label is diiferent from the original existing label, please do submit first.';
+                  return;
+                } 
+                for (const item of this.scores) {
+                  for (const ele of this.annotationHistory[i].category) {
+                    const key = Object.keys(ele)[0];
+                    if (item.label === key && item.scoreValue !== ele[key]) {
+                      this.actionError =
+                      'The current label is diiferent from the original existing label, please do submit first.';
+                      return;
+                    }
+                  }
+                }
               } else {
-                difference = _.difference(
-                  this.multipleLabelList,
-                  this.annotationHistory[i].category,
-                );
+                if (this.annotationHistory[i].category.length - this.multipleLabelList.length >= 0) {
+                  difference = _.difference(
+                    this.annotationHistory[i].category,
+                    this.multipleLabelList,
+                  );
+                } else {
+                  difference = _.difference(
+                    this.multipleLabelList,
+                    this.annotationHistory[i].category,
+                  );
+                }
               }
               if (difference.length > 0) {
                 this.actionError =
@@ -855,6 +896,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   skipAndFetchNewQuestion(): void {
     this.clearCheckbox();
+    this.clearScores(false);
     this.silenceStatus = false;
     this.clrErrorTip = false;
     this.loading = true;
@@ -1058,7 +1100,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isMultipleLabel = response.isMultipleLabel;
         this.projectType = response.projectType;
         this.labelType = response.labelType;
-        if (this.labelType === 'numericLabel') {
+        this.isMultipleNumericLabel = (this.isMultipleLabel && this.labelType === 'numericLabel');
+        if (this.labelType === 'numericLabel' && !this.isMultipleLabel) {
           this.minLabel = response.min;
           this.maxLabel = response.max;
           this.numericValue = this.minLabel;
@@ -1081,6 +1124,25 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.numericOptions.step = Number(1 / Number(step));
           this.numericOptions.floor = response.min;
           this.numericOptions.ceil = response.max;
+        } else if (this.isMultipleNumericLabel) {
+          let categoryList = JSON.parse(response.categoryList);
+          categoryList.forEach(element => {
+            const labels = Object.keys(element);
+            const itemKey = labels[0];
+            const values = element[itemKey];
+            const minVal = values[0];
+            const maxVal = values[1];
+            this.scores.push({  
+              label: itemKey,
+              checked: false,
+              scoreValue: minVal,
+              scoreOptions: {
+                floor: minVal,
+                step: 1,
+                ceil: maxVal,
+              },
+            })
+          });
         } else {
           this.categories = response.categoryList.split(',');
         }
@@ -1135,16 +1197,34 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     } else {
       for (let i = 0; i < this.annotationHistory.length; i++) {
-        let difference = [];
-        if (this.annotationHistory[i].category.length - isCategory.length >= 0) {
-          difference = _.difference(this.annotationHistory[i].category, isCategory);
-        } else {
-          difference = _.difference(isCategory, this.annotationHistory[i].category);
-        }
-        if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
-          this.actionError =
+        if (this.isMultipleNumericLabel && this.annotationHistory[i].srId === this.sr._id ) {
+          if (this.annotationHistory[i].category.length !== this.scores.filter(item => item.checked).length) {
+            this.actionError =
             'The current label is diiferent from the original existing label, please do submit first.';
-          return;
+            return;
+          } 
+          for (const item of this.scores) {
+            for (const ele of this.annotationHistory[i].category) {
+              const key = Object.keys(ele)[0];
+              if (item.label === key && item.scoreValue !== ele[key]) {
+                this.actionError =
+                'The current label is diiferent from the original existing label, please do submit first.';
+                return;
+              }
+            }
+          }
+        } else {
+          let difference = [];
+          if (this.annotationHistory[i].category.length - isCategory.length >= 0) {
+            difference = _.difference(this.annotationHistory[i].category, isCategory);
+          } else {
+            difference = _.difference(isCategory, this.annotationHistory[i].category);
+          }
+          if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
+            this.actionError =
+              'The current label is diiferent from the original existing label, please do submit first.';
+            return;
+          }
         }
       }
       if (from == 'skip') {
@@ -1563,20 +1643,39 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     const isChecked = e.target.checked;
     const checkedValue = e.target.value;
     if (isChecked) {
-      e.target.parentElement.style.backgroundColor = '#fafafa';
-      e.target.parentElement.style.borderColor = '#ccc';
-      e.target.parentElement.style.borderBottomWidth = 'medium';
+      if (this.isMultipleNumericLabel) {
+        e.target.parentElement.parentElement.style.backgroundColor = '#fafafa';
+        e.target.parentElement.parentElement.style.borderColor = '#ccc';
+        e.target.parentElement.parentElement.style.borderBottomWidth = 'medium';
+      } else {
+        e.target.parentElement.style.backgroundColor = '#fafafa';
+        e.target.parentElement.style.borderColor = '#ccc';
+        e.target.parentElement.style.borderBottomWidth = 'medium';
+      }
       e.target.nextElementSibling.style.fontWeight = 'bold';
       this.multipleLabelList.push(checkedValue);
     } else {
-      e.target.parentElement.style.backgroundColor = '';
-      e.target.parentElement.style.borderBottomWidth = '';
-      e.target.parentElement.style.borderColor = '#eee';
+      if (this.isMultipleNumericLabel) {
+        e.target.parentElement.parentElement.style.backgroundColor = '#fafafa';
+        e.target.parentElement.parentElement.style.borderColor = '#ccc';
+        e.target.parentElement.parentElement.style.borderBottomWidth = 'medium';
+      } else {
+        e.target.parentElement.style.backgroundColor = '';
+        e.target.parentElement.style.borderBottomWidth = '';
+        e.target.parentElement.style.borderColor = '#eee';
+      }
       e.target.nextElementSibling.style.fontWeight = '';
       this.multipleLabelList.splice(
         this.multipleLabelList.findIndex((item) => item == checkedValue),
         1,
       );
+    }
+    if (this.isMultipleNumericLabel) {
+      this.scores.forEach((item, index) => {
+        if (index === i) {
+          item.checked = isChecked;
+        }
+      });
     }
   }
 
@@ -1614,6 +1713,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.labelChoose) {
         category.push(this.labelChoose);
       }
+      return category;
+    } else if (this.isMultipleNumericLabel) {
+      const labelScore = [];
+      this.scores.forEach(item => {
+        if (item.checked) {
+          labelScore.push({ [item.label]: item.scoreValue });
+        }
+      });
+      category = labelScore;
       return category;
     } else if (
       !this.isNumeric &&
@@ -1743,9 +1851,25 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.multipleLabelList = originalLabel;
       }
+      this.clearScores(true);
       this.multipleLabelList.forEach((e) => {
-        const multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
-        this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].checked = true;
+        let multiLabelClass = '';
+        if (this.isMultipleNumericLabel) { 
+          const checkedIndex = this.scores.findIndex(item => item.label === e.label);
+          if (checkedIndex !== -1) {
+            multiLabelClass = 'multiLabel' + checkedIndex;
+            this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].children[0].checked = true;
+            this.scores.forEach(item => {
+              if (item.label === e.label) {
+                item.checked = true;
+                item.scoreValue = e.value;
+              }
+            });
+          }
+        } else {
+          multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
+          this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].checked = true;
+        }    
         this.renderer2.setStyle(
           this.el.nativeElement.querySelector('.' + multiLabelClass),
           'background-color',
@@ -1836,9 +1960,25 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clearCheckbox() {
-    this.multipleLabelList.forEach((e) => {
-      const multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
-      this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].checked = false;
+    if (!this.isMultipleNumericLabel) {
+      this.multipleLabelList.forEach((e) => {
+        const multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
+        console.log(this.el.nativeElement);
+        this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].checked = false;
+      });
+    }
+  }
+
+  clearScores(isClearChecked) {
+    this.scores.forEach((item, index) => {
+      item.scoreValue = item.scoreOptions.floor;
+      item.checked = false;
+      if (isClearChecked) {
+        const multiLabelClass = 'multiLabel' + index;
+        console.log(this.el.nativeElement);
+        this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].children[0].checked = false;
+        this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].children[0].nextElementSibling.style.fontWeight = '';
+      }
     });
   }
 
