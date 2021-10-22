@@ -55,7 +55,9 @@ module.exports = {
         }, async (error) => {
             console.log(`[ SRS ] [ERROR] Utils import data have ${error}: `, Date.now());
         }, async () => {
-            await finishSaveData();
+            setTimeout(async () => {
+                await finishSaveData();
+            }, 1000*5);
         });
         
         // handle and save data to db

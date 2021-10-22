@@ -367,11 +367,14 @@ async function projectLeaderBoard(req) {
         if (proInfo.isMultipleLabel) {
             JSON.parse(proInfo.categoryList).forEach(labels => {
                 const label = Object.keys(labels)[0];
-                let lb = { 'label': label, annotated: 0 };
+                let lb = { 'label': JSON.stringify(labels), annotated: 0 };
+                let currentLabelVaules = [];
                 srsUI.forEach(UIS => {
                     UIS.userInputs.forEach(ui => {
                         if (ui.problemCategory.label == label) {
-                            lb.annotated += 1;
+                            let value = ui.problemCategory.value;
+                            currentLabelVaules.push(value);
+                            lb.annotated = _.mean(currentLabelVaules);
                         }
                     });
                 });
