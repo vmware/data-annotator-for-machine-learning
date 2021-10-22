@@ -374,7 +374,7 @@ async function projectLeaderBoard(req) {
                         if (ui.problemCategory.label == label) {
                             let value = ui.problemCategory.value;
                             currentLabelVaules.push(value);
-                            lb.annotated = _.mean(currentLabelVaules);
+                            lb.annotated = _.floor(_.mean(currentLabelVaules),2);
                         }
                     });
                 });
