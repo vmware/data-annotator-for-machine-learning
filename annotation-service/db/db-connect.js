@@ -12,8 +12,12 @@ const mongoose = require("mongoose"),
 const mongoosePaginate = require('mongoose-paginate-v2');
 
 // MongoDB database name
-mongoose.connect(config.mongoDBUrl, { autoIndex: config.mongoDBAutoIndex, useNewUrlParser: true, useUnifiedTopology: true }).catch(error => console.error(error));
+connectOptions = { autoIndex: config.mongoDBAutoIndex, useNewUrlParser: true, useUnifiedTopology: true };
+if(config.ESP){
+    connectOptions = { autoIndex: config.mongoDBAutoIndex };
+}
 
+mongoose.connect(config.mongoDBUrl, connectOptions).catch(error => console.error(error));
 // Get Mongoose to use the global promise library
 mongoose.Promise = global.Promise;
 
