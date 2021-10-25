@@ -1239,13 +1239,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             id,
             pid: this.projectId,
           };
-          this.getSrById(param, 0, 'previous');
+          this.getSrById(param, 0, from === 'history' ? from: 'previous');
         }
       }
     }
   }
 
   historyBack(index, id) {
+    this.actionError = null;
     this.silenceStatus = false;
     const isCategory = this.categoryFunc();
 
@@ -1261,7 +1262,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.projectType !== 'image' &&
         this.projectType !== 'log'
       ) {
-        this.isActionErr(isCategory, id);
+        this.isActionErr(isCategory, id, 'history');
       } else if (this.projectType == 'ner') {
         this.isSkipOrBack('history', id);
       } else if (this.projectType == 'image') {
