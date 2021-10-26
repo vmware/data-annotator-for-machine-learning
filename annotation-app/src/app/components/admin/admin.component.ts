@@ -319,32 +319,11 @@ export class AdminComponent implements OnInit {
       .generateProject(e, this.projectData, this.user.email, 'admin')
       .then((response) => {
         this.projectData = response.datasets;
-        if (e.labelType == 'numericLabel') {
-          if (response.err) {
-            this.loading = false;
-          } else {
-            if (response.res.Info == 'prepare') {
-              this.infoMessage = response.infoMessage;
-            } else if (response.res.Info == 'done') {
-              this.downloadUrl = this.env.config.enableAWSS3
-                ? new Buffer(response.res.Body.file, 'base64').toString()
-                : response.res.Body.file;
-              this.downloadProject();
-            } else if (response.res.Info == 'generating') {
-              this.infoMessage = response.infoMessage;
-              this.getProjects();
-            }
-            setTimeout(() => {
-              this.infoMessage = '';
-            }, 5000);
-          }
+        this.showGenerateDatasets = true;
+        if (response.err) {
+          this.showGenerateDatasets = false;
         } else {
-          this.showGenerateDatasets = true;
-          if (response.err) {
-            this.showGenerateDatasets = false;
-          } else {
-            this.msgGenerate = response.e;
-          }
+          this.msgGenerate = response.e;
         }
       });
   }
