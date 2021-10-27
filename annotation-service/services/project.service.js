@@ -186,6 +186,12 @@ async function updateProject(req) {
                     if (editLB == orgLB && editMin == dbMin && editMax == dbMax) {
                         continue;
                     }
+                    //find if edit label already exist
+                    const editLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == editLB);
+                    if (editLBDB) {
+                        throw {CODE: 4006, MSG: "INPUT editLB already exist"};
+                    }
+
                     if (dbMin != orgMin || dbMax != orgMax) {
                         throw {CODE: 4006, MSG: "INPUT originLB min/max ERROR"};
                     }
