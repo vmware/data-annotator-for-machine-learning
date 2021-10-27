@@ -350,7 +350,8 @@ export class EditProjectComponent implements OnInit {
       this.inputfrequency > 9 &&
       this.inputTrigger > 49 &&
       !this.inputIsNotInterger &&
-      !this.inputIsNull;
+      !this.inputIsNull &&
+      !this.inputLabelValidation;
     if (this.labelType == 'numericLabel' && !this.isMultipleLabel) {
       condition =
         this.inputProjectName !== '' &&
