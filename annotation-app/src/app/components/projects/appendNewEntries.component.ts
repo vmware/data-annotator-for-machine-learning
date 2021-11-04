@@ -412,20 +412,7 @@ export class AppendNewEntriesComponent implements OnInit {
           this.previewHeadDatas = choosedDataset.topReview.header;
           this.previewContentDatas = choosedDataset.topReview.topRows;
           this.fixHeader = _.difference(this.originalHead, this.previewHeadDatas);
-          const disabedLabels = [];
-          this.sampleData.forEach(elem => {
-            disabedLabels.push(elem.key);
-          });
-          for (let i = 0; i < this.previewHeadDatas.length; i++) {
-            this.columnInfo.push({
-              name: this.previewHeadDatas[i],
-              isOriginal: true,
-              labelSelected: false,
-              labelSelectedDisable: disabedLabels.includes(this.previewHeadDatas[i]),
-              textSelected: false,
-              textSelectedDisable: false,
-            });
-          }
+          this.setExistingLabelsforNer();
           if (this.fixHeader.length == 0) {
             this.toCaculateTotalRow(choosedDataset, this.originalHead);
           } else {
@@ -545,8 +532,28 @@ export class AppendNewEntriesComponent implements OnInit {
         this.uploadGroup.get('totalRow').setValue(this.totalCase - this.nonEnglish);
       }
       this.columnInfo = [];
+      this.setExistingLabelsforNer();
       this.loadPreviewTable = false;
     });
+  }
+
+  setExistingLabelsforNer() {
+    if (this.projectType == 'ner') {
+      const disabedLabels = [];
+      this.sampleData.forEach(elem => {
+        disabedLabels.push(elem.key);
+      });
+      for (let i = 0; i < this.previewHeadDatas.length; i++) {
+        this.columnInfo.push({
+          name: this.previewHeadDatas[i],
+          isOriginal: true,
+          labelSelected: false,
+          labelSelectedDisable: disabedLabels.includes(this.previewHeadDatas[i]),
+          textSelected: false,
+          textSelectedDisable: false,
+        });
+      }
+    }
   }
 
   createNewCsv() {
@@ -680,6 +687,10 @@ export class AppendNewEntriesComponent implements OnInit {
         }
         if (this.projectType == 'image' && from == 'fromSingle') {
           appendParams['images'] = data;
+        }
+        if (this.projectType === 'ner') {
+          appendParams['ticketQuestions'] = this.uploadGroup.get('ticketQuestions').value;
+          appendParams['selectLabels'] = this.uploadGroup.get('selectLabels').value;
         }
         this.appendSrs(appendParams);
       },
