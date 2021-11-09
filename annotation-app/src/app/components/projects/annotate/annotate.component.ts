@@ -409,7 +409,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isInValidateNumber() {
-    if (!this.labelChoose || this.clrErrorTip) {
+    if (this.labelChoose === '' || this.labelChoose === null || this.clrErrorTip) {
       return true;
     }
     return false;
