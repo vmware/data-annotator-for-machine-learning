@@ -3061,6 +3061,5 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       num = num.substring(0, decimal + index + 1);
     }
     return parseFloat(num).toFixed(decimal);
-    return parseFloat(num).toFixed(decimal);
   }
 }
