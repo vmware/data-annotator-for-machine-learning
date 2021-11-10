@@ -1711,7 +1711,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.projectType !== 'log') ||
       this.isNumeric
     ) {
-      if (this.labelChoose) {
+      if (this.labelChoose !== '' || this.labelChoose !== null ) {
         category.push(this.labelChoose);
       }
       return category;
@@ -1756,6 +1756,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           return this.sr.userInputs[i].problemCategory;
         }
       }
+    } else if (this.sr.userInputs.length == 0 && this.isNumeric) {
+      return 0;
     } else if (this.sr.userInputs.length == 0) {
       return;
     }
