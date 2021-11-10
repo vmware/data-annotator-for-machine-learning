@@ -6,18 +6,29 @@ Please go to [https://docs.docker.com/get-docker/](https://docs.docker.com/get-d
 - If your machine is **Windows / Mac** you can only use docker desktop, to run the application.
 - If your machine is **Linux** you also need to download docker-compose. [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)
 
-## Start application
-Before run the application you need to download the [docker-compose.yml](docker-compose.yml) file, and save it to your local machine folder.
+## Start/End application
 
-You can use below command to create and start the containers.
-```bash
-docker compose up
-```
+- If your machine already installed MongoDB, and you want to use that as the database. you need to download the [docker-compose-host-db.yml](docker-compose-host-db.yml) file and use it to run the DAML application.
 
-## End application
-You can use below command to stop and remove the containers.
-```bash
-docker compose down
-```
+  Start the containers:
+    ```bash
+    docker compose -f docker-compose-host-db.yml up
+    ```
+  End the containers:
+  ```bash
+  docker compose -f docker-compose.yml down
+  ```
 
+- Else you need to download the [docker-compose.yml](docker-compose.yml) file and use it to run the DAML application.
+
+  Start the containers:
+  ```bash
+  docker compose -f docker-compose.yml up
+  ```
+  End the containers:
+  ```bash
+  docker compose -f docker-compose.yml down
+  ```
+
+## More commands
 For more commands you can reference here [docker compose commands](https://docs.docker.com/engine/reference/commandline/compose/#child-commands).
