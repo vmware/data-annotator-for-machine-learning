@@ -422,24 +422,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <span>This field is required!</span>
               </clr-tooltip-content>
             </clr-tooltip>
-            <clr-tooltip *ngIf="labelType === 'numericLabel' && isMultipleLabel && inputIsNotInterger">
-              <clr-icon
-                clrTooltipTrigger
-                shape="error-standard"
-                size="18"
-                style="color: red"
-                class="valid-tooltip"
-              >
-              </clr-icon>
-              <clr-tooltip-content
-                class="error-tooltip"
-                clrPosition="bottom-right"
-                clrSize="md"
-                *clrIfOpen
-              >
-                <span>The Min or Max should be interger!</span>
-              </clr-tooltip-content>
-            </clr-tooltip>
             <clr-tooltip *ngIf="labelType === 'numericLabel' && isMultipleLabel && inputLabelValidation">
               <clr-icon
                 clrTooltipTrigger

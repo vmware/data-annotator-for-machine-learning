@@ -766,12 +766,12 @@ SPDX-License-Identifier: Apache-2.0 -->
             *ngIf="isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular')"
           >
           <div class="clr-form-control" style="margin-top: 0">
-            <div class="clr-control-container" style="width: 100%">
+            <div class="clr-control-container clr-row" style="width: 100%">
               <div
                 class="clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
                 *ngFor="let score of scores; let i = index"
               >
-                <div class="multiple-checkbox">
+                <div class="multiple-checkbox clr-control-container">
                   <input
                     type="checkbox"
                     id="{{ score.label }}"
@@ -782,8 +782,26 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                   <label for="{{ score.label }}" class="clr-control-label multiple-label">{{ score.label }}</label>
                 </div>
-                <div class="scoreSlider">
-                  <ngx-slider [(value)]="scores[i].scoreValue" [options]="scores[i].scoreOptions"></ngx-slider>
+                <div class="scoreSlider clr-control-container">
+                  <ngx-slider [(value)]="scores[i].scoreValue" [options]="scores[i].scoreOptions" (valueChange)="scoreSliderEvent(i)"></ngx-slider>
+                </div>
+                <div class="scoreInput clr-control-container" [ngClass]="{ 'clr-error': scores[i].clrErrorTip }">
+                  <div class="clr-input-wrapper">
+                    <input
+                      #scoreInput
+                      autocomplete="off"
+                      type="text"
+                      id="scoreInput"
+                      placeholder="Input value here and press enter"
+                      class="clr-input"
+                      style="width: 90%"
+                      (keyup)="enterScoreUp($event, i)"
+                      [(ngModel)]="scores[i].scoreInputValue"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                    <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+                  </div>
+                  <span class="clr-subtext">{{ scoreMessage[i] }}</span>
                 </div>
               </div>
             </div>

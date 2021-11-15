@@ -133,14 +133,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     ceil: 100,
   };
   stepLen: number = 0;
-  scoreValue: number = 0;
-  scoreOptions: Options = {
-    floor: 0,
-    step: 1,
-    ceil: 5,
-  };
 
   scores: any = [];
+  scoreMessage: any = [];
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -152,6 +147,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.labelChoose = this.numericValue;
       }
     }
+  }
+
+  scoreSliderEvent(i) {
+    this.scores.forEach((item, index) => {
+      if (index === i) {
+        if (Number(this.formatDecimal(item.scoreInputValue, item.stepLen)) !== item.scoreValue) {
+          item.clrErrorTip = false;
+          item.scoreInputValue = item.scoreValue;
+        }
+      }
+    }); 
   }
 
   constructor(
@@ -419,6 +425,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.clrErrorTip = true;
       return;
     }
+    if (this.isMultipleNumericLabel) {
+      if (this.scores.some(item => item.clrErrorTip)) {
+        return;
+      }
+    }
     this.clearCheckbox();
     this.silenceStatus = false;
     this.error = null;
@@ -575,7 +586,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               let labelScore = [];
               this.scores.forEach(item => {
                 if (item.checked) {
-                  labelScore.push({ [item.label]: item.scoreValue });
+                  labelScore.push({ [item.label]: item.scoreInputValue });
                 }
               });
               this.annotationHistory[i].category = labelScore;
@@ -851,7 +862,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 for (const item of this.scores) {
                   for (const ele of this.annotationHistory[i].category) {
                     const key = Object.keys(ele)[0];
-                    if (item.label === key && item.scoreValue !== ele[key]) {
+                    if (item.label === key && item.scoreInputValue !== ele[key]) {
                       this.actionError =
                       'The current label is diiferent from the original existing label, please do submit first.';
                       return;
@@ -1132,16 +1143,36 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             const values = element[itemKey];
             const minVal = values[0];
             const maxVal = values[1];
+            let minStep = 0;
+            if (minVal.toString().includes('.')) {
+              minStep = minVal.toString().split('.')[1].length;
+            }
+            let maxStep = 0;
+            if (maxVal.toString().includes('.')) {
+              maxStep = maxVal.toString().split('.')[1].length;
+            }
+            let step = '1';
+            const stepLen =  Number(maxStep) > Number(minStep) ? maxStep : minStep;
+            if (stepLen > 0) {
+              for (let i = 0 ; i < stepLen; i++) {
+                step += '0';
+              }
+            }
+            this.numericOptions.step = Number(1 / Number(step));
             this.scores.push({  
               label: itemKey,
               checked: false,
               scoreValue: minVal,
+              scoreInputValue: minVal,
+              stepLen,
+              clrErrorTip: false,
               scoreOptions: {
                 floor: minVal,
-                step: 1,
+                step:  Number(1 / Number(step)),
                 ceil: maxVal,
               },
-            })
+            });
+            this.scoreMessage.push('Allowed values are between ' + minVal + ' and ' + maxVal + ' .');
           });
         } else {
           this.categories = response.categoryList.split(',');
@@ -1206,7 +1237,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           for (const item of this.scores) {
             for (const ele of this.annotationHistory[i].category) {
               const key = Object.keys(ele)[0];
-              if (item.label === key && item.scoreValue !== ele[key]) {
+              if (item.label === key && item.scoreInputValue !== ele[key]) {
                 this.actionError =
                 'The current label is diiferent from the original existing label, please do submit first.';
                 return;
@@ -1639,6 +1670,21 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  enterScoreUp(e, i) {
+    this.scores.forEach((item, index) => {
+      if (index === i) {
+        const isNumScope = e.target.value >= item.scoreOptions.floor && e.target.value <= item.scoreOptions.ceil;
+        if (this.isNumber(e.target.value) && isNumScope) {
+          item.clrErrorTip = false;
+          item.scoreInputValue = e.target.value;
+          item.scoreValue = item.scoreOptions.step === 1 ? parseInt(item.scoreInputValue) : Number(this.formatDecimal(item.scoreInputValue, item.stepLen));
+        } else {
+          item.clrErrorTip = true;
+        }
+      }
+    }); 
+  }
+
   selectLabel(e, i) {
     this.actionError = null;
     const isChecked = e.target.checked;
@@ -1690,6 +1736,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  isNumber(data) {
+    return /^(\-|\+)?\d+(\.\d+)?$/.test(data);
+  }
+
   categoryFunc() {
     let category = [];
     if (
@@ -1719,7 +1769,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       const labelScore = [];
       this.scores.forEach(item => {
         if (item.checked) {
-          labelScore.push({ [item.label]: item.scoreValue });
+          labelScore.push({ [item.label]: item.scoreInputValue });
         }
       });
       category = labelScore;
@@ -1865,7 +1915,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.scores.forEach(item => {
               if (item.label === e.label) {
                 item.checked = true;
-                item.scoreValue = e.value;
+                item.scoreInputValue = e.value;
+                item.scoreValue = Number(this.formatDecimal(item.scoreInputValue, item.stepLen));
               }
             });
           }
@@ -1975,6 +2026,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   clearScores(isClearChecked) {
     this.scores.forEach((item, index) => {
       item.scoreValue = item.scoreOptions.floor;
+      item.scoreInputValue = item.scoreOptions.floor;
       item.checked = false;
       if (isClearChecked) {
         const multiLabelClass = 'multiLabel' + index;
