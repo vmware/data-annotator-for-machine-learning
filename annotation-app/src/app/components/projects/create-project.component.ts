@@ -119,7 +119,6 @@ export class CreateNewComponent implements OnInit {
   selectedDisplayColumn: any = [];
   isMutilNumericLabel: boolean;
   inputIsNull: boolean;
-  inputIsNotInterger: boolean;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -238,8 +237,7 @@ export class CreateNewComponent implements OnInit {
           && !this.nameExist
           && !this.sizeError
           && !this.inputLabelValidation
-          && !this.inputIsNull
-          && !this.inputIsNotInterger;
+          && !this.inputIsNull;
       } else {
         this.labelType = 'textLabel';
         this.dsDialogForm.get('min').setValidators(null);
@@ -1242,10 +1240,6 @@ export class CreateNewComponent implements OnInit {
         && Number(item.minMutilVal) >= Number(item.maxMutilVal));
       this.inputIsNull = this.mutilLabelArray.value.some(item => DatasetValidator.isInvalidNumber(item.minMutilVal)
         || DatasetValidator.isInvalidNumber(item.maxMutilVal) || !item.label);
-      this.inputIsNotInterger = this.mutilLabelArray.value.some(item => (!DatasetValidator.isInvalidNumber(item.minMutilVal)
-        && DatasetValidator.isNotIntegerNum(item.minMutilVal))
-        || (!DatasetValidator.isInvalidNumber(item.maxMutilVal)
-        && DatasetValidator.isNotIntegerNum(item.maxMutilVal)));
     }
   }
 

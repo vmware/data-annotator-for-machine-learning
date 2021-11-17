@@ -73,7 +73,6 @@ export class EditProjectComponent implements OnInit {
   isShowFilename: any;
   mutilNumericForm: FormGroup;
   inputIsNull: boolean;
-  inputIsNotInterger: boolean;
   isMultipleLabel: boolean;
 
   constructor(
@@ -349,7 +348,6 @@ export class EditProjectComponent implements OnInit {
       !this.minFrequency &&
       this.inputfrequency > 9 &&
       this.inputTrigger > 49 &&
-      !this.inputIsNotInterger &&
       !this.inputIsNull &&
       !this.inputLabelValidation;
     if (this.labelType == 'numericLabel' && !this.isMultipleLabel) {
@@ -608,10 +606,6 @@ export class EditProjectComponent implements OnInit {
         && Number(item.minMutilVal) >= Number(item.maxMutilVal));
       this.inputIsNull = this.mutilLabelArray.value.some(item => DatasetValidator.isInvalidNumber(item.minMutilVal)
         || DatasetValidator.isInvalidNumber(item.maxMutilVal) || !item.editLabel);
-      this.inputIsNotInterger = this.mutilLabelArray.value.some(item => (!DatasetValidator.isInvalidNumber(item.minMutilVal)
-        && DatasetValidator.isNotIntegerNum(item.minMutilVal))
-        || (!DatasetValidator.isInvalidNumber(item.maxMutilVal)
-        && DatasetValidator.isNotIntegerNum(item.maxMutilVal)));
     }
   }
 
