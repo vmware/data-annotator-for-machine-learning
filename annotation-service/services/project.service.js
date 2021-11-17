@@ -188,7 +188,7 @@ async function updateProject(req) {
                     }
                     //find if edit label already exist
                     const editLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == editLB);
-                    if (editLBDB) {
+                    if (editLBDB && editLB != orgLB) {
                         throw {CODE: 4006, MSG: "INPUT editLB already exist"};
                     }
 
