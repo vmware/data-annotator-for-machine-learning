@@ -25,6 +25,8 @@ import { UserAuthService } from 'app/services/user-auth.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { MarkdownParserService } from 'app/services/common/markdown-parser.service';
 import { Options } from 'ng5-slider';
+import { getDocument } from '../../../shared/utils/get-document';
+import { highlightRange, removeSpans, splitBoundaries, toGlobalOffset, findClosestTextNode } from 'app/shared/utils/html';
 
 @Component({
   selector: 'app-annotate',
@@ -91,7 +93,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#ff6347',
     '#9B0D54',
     '#00bfff',
-    '#ffa500',
+    '#FF0000',
     '#ff69b4',
     '#7fffd4',
     '#ffd700',
@@ -99,8 +101,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#4D007A',
     '#ffdab9',
     '#adff2f',
-    '#d2b48c',
-    '#dcdcdc',
+    '#FFA500',
+    '#FFFF00',
     '#583fcf',
     '#A32100',
     '#0F1E82',
@@ -113,9 +115,32 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#D0ACE4',
     '#798893',
     '#ED186F',
-    '#9DA3DB',
-    '#ffff00',
+    '#D87093',
+    '#DAA520',
+    '#20B2AA',
+    '#cb6360',
+    '#c98886',
+    '#703d3b',
+    '#4c0b09',
+    '#1890ff',
+    '#189044',
+    '#36c9d9',
+    '#40a9ff',
+    '#ff40a8',
+    '#673ab7',
+    '#faad14',
+    '#03a9f4',
+    '#9b4f4a',
+    '#FF1493',
+    '#228B22',
+    '#0077b8',
+    '#ff7875',
+    '#97d778',
+    '#2F4F4F',
   ];
+  totalLen: number = 0;
+  labelColor: any = {};
+  selectedEntityColor: any = '';
   startFrom: string;
   annotationPrevious: any = [];
   reviewOrder = 'random';
@@ -302,6 +327,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           } else {
             if (this.projectType == 'log') {
               this.sortLabelForColor(this.categories);
+            }
+            if (this.projectType == 'ner') {
+              this.nerLabelForColor(this.categories);
             }
             this.isShowDropDown = false;
             if ( this.categories &&
@@ -661,8 +689,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 let aaString;
                 let bbString;
                 if (this.projectType === 'ner') {
-                  aaString = aa[n].text + aa[n].ids + aa[n].label;
-                  bbString = bb[n].text + bb[n].ids + bb[n].label;
+                  aaString = aa[n].text + aa[n].start + aa[n].end + aa[n].label;
+                  bbString = bb[n].text + bb[n].start + bb[n].end + bb[n].label;
                 } else if (this.projectType === 'log') {
                   aaString = aa[n].line + aa[n].label + aa[n].freeText;
                   bbString = bb[n].line + bb[n].label + bb[n].freeText;
@@ -1381,8 +1409,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           let aaString;
           let bbString;
           if (this.projectType === 'ner') {
-            aaString = aa[i].text + aa[i].ids + aa[i].label;
-            bbString = bb[i].text + bb[i].ids + bb[i].label;
+            aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label;
+            bbString = bb[i].text + aa[i].start + aa[i].end + bb[i].label;
           } else if (this.projectType === 'log') {
             aaString = aa[i].line + aa[i].label + aa[i].freeText;
             bbString = bb[i].line + bb[i].label + bb[i].freeText;
@@ -1493,8 +1521,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   let aaString;
                   let bbString;
                   if (this.projectType === 'ner') {
-                    aaString = aa[i].text + aa[i].ids + aa[i].label;
-                    bbString = bb[i].text + bb[i].ids + bb[i].label;
+                    aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label;
+                    bbString = bb[i].text + aa[i].start + aa[i].end + bb[i].label;
                   } else if (this.projectType === 'log') {
                     aaString = aa[i].line + aa[i].label + aa[i].freeText;
                     bbString = bb[i].line + bb[i].label + bb[i].freeText;
@@ -1953,15 +1981,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
       this.spansList = [];
       const annotations = this.sr.userInputs;
-      let annotatedIDs = [];
       setTimeout(() => {
         annotations.forEach((element) => {
           element.problemCategory.forEach((element2) => {
-            annotatedIDs = element2.ids.split('-');
-            this.onMouseDown(annotatedIDs[0], 'historyBack');
-            this.onMouseUp(
-              annotatedIDs[annotatedIDs.length - 1],
-              'historyBack',
+            this.initNerPassage(
+              element2,
               this.categories.indexOf(element2.label),
             );
           });
@@ -2037,150 +2061,288 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  onMouseDown(e, data) {
-    this.spanStart = null;
-    if (data == 'historyBack') {
-      this.spanStart = this.sr.originalData.tokens[e];
-    } else {
-      this.spanStart = this.sr.originalData.tokens[e.target.id];
+  colorToRgb(color) {
+    const div = document.createElement('setColorDiv');
+    div.style.backgroundColor = color;
+    document.body.append(div);
+    const rgbColor = window.getComputedStyle(div).backgroundColor;
+    document.body.removeChild(div);
+    return rgbColor;
+  }
+
+  fromRange(range, root) {
+    let sc = range.startContainer
+    let so = range.startOffset
+    let ec = range.endContainer
+    let eo = range.endOffset
+  
+    let start = this.fromNode(sc, root)
+    let end = this.fromNode(ec, root)
+  
+    return {
+      start: start,
+      end: end,
+      startOffset: so,
+      endOffset: eo,
+      _range: range,
+      text: '',
     }
   }
 
-  onMouseUp(e, data, selectedEntityID0) {
-    this.spanEnd = null;
-
-    if (data == 'historyBack') {
-      this.spanEnd = this.sr.originalData.tokens[e];
-    } else {
-      this.spanEnd = this.sr.originalData.tokens[e.target.id];
+  fromNode(node, root = null) {
+    if (node === undefined) {
+      throw new Error('missing required parameter "node"')
     }
+  
+    root = root || getDocument(node)
+  
+    let path = '/'
+    while (node !== root) {
+      if (!node) {
+        let message = 'The supplied node is not contained by the root node.'
+        let name = 'InvalidNodeTypeError'
+        throw new DOMException(message, name)
+      }
+      path = `/${this.nodeName(node)}[${this.nodePosition(node)}]${path}`
+      node = node.parentNode
+    }
+    return path.replace(/\/$/, '')
+  }
 
-    const IDs = this.sortStartEndID();
+  nodeName(node) {
+    switch (node.nodeName) {
+    case '#text': return 'text()'
+    case '#comment': return 'comment()'
+    case '#cdata-section': return 'cdata-section()'
+    default: return node.nodeName.toLowerCase()
+    }
+  }
+  
+  nodePosition(node) {
+    let name = node.nodeName
+    let position = 1
+    while ((node = node.previousSibling)) {
+      if (node.nodeName === name) position += 1
+    }
+    return position
+  }
 
-    if (IDs) {
-      // to check whether has mark in the selected scope
-      for (let j = 0; j < IDs.length; j++) {
-        if (this.el.nativeElement.querySelector('.spanIndex' + IDs[j]) == null) {
-          return;
+  captureDocSelection() {
+    let i,
+      ranges = [],
+      rangesToIgnore = [],
+      selection = window.getSelection();
+
+    if (selection.isCollapsed) return [];
+    const mySelf = document.getElementsByClassName('nerPassage')[0];
+
+    for (i = 0; i < selection.rangeCount; i++) {
+      let r = selection.getRangeAt(0);
+
+      if (r.startContainer.nodeName !== '#text') {
+        const start = r.startContainer.childNodes[r.startOffset];
+        const node = findClosestTextNode(start);
+        if (!node) continue;
+        r.setStart(node, 0);
+      }
+
+      if (r.endContainer.nodeName !== '#text') {
+        const end = r.endContainer.childNodes[r.endOffset];
+        const node = findClosestTextNode(end.previousSibling, true);
+        if (!node) continue;
+        r.setEnd(node, node.length);
+      }
+
+      if (r.collapsed || /^\s*$/.test(r.toString())) continue;
+
+      try {
+        let normedRange = this.fromRange(r, mySelf);
+
+        splitBoundaries(r);
+
+        normedRange._range = r;
+
+        const tags = Array.from(r.cloneContents().childNodes);
+
+        const text = tags.reduce((str, node) => (str += node.textContent), "");
+        normedRange.text = text;
+
+        const ss = toGlobalOffset(mySelf, r.startContainer, r.startOffset);
+        const ee = toGlobalOffset(mySelf, r.endContainer, r.endOffset);
+
+        normedRange.startOffset = ss;
+        normedRange.endOffset = ee;
+
+        if (normedRange === null) {
+          rangesToIgnore.push(r);
+        } else {
+          ranges.push(normedRange);
         }
-      }
-
-      // to create mark and style
-      const parentDom = this.el.nativeElement.querySelector('.nerBox');
-      const markDom = this.renderer2.createElement('mark');
-      this.renderer2.addClass(markDom, 'markSelected');
-      this.renderer2.addClass(markDom, 'c-' + IDs.join('-'));
-      this.renderer2.insertBefore(
-        parentDom,
-        markDom,
-        this.el.nativeElement.querySelector('.spanIndex' + IDs[0]),
-      );
-      const part = { text: '', start: 0, end: 0, label: '', ids: '' };
-      for (let i = 0; i < IDs.length; i++) {
-        const spanDom = this.renderer2.createElement('span');
-        this.renderer2.appendChild(
-          spanDom,
-          this.renderer2.createText(this.sr.originalData.tokens[IDs[i]].text),
-        );
-        this.renderer2.addClass(spanDom, 'nerSpan');
-        this.renderer2.appendChild(markDom, spanDom);
-        this.renderer2.removeChild(
-          parentDom,
-          this.el.nativeElement.querySelector('.spanIndex' + IDs[i]),
-        );
-        part.text = (part.text + ' ' + this.sr.originalData.tokens[IDs[i]].text).trim();
-        part.start = this.sr.originalData.tokens[IDs[0]].start;
-        part.end = this.sr.originalData.tokens[IDs[i]].end;
-      }
-      const entityDom = this.renderer2.createElement('span');
-      this.renderer2.appendChild(
-        entityDom,
-        this.renderer2.createText(
-          this.categories[data == 'historyBack' ? selectedEntityID0 : this.selectedEntityID],
-        ),
-      );
-      this.renderer2.addClass(entityDom, 'entity');
-      const clearDom = this.renderer2.createElement('span');
-      this.renderer2.appendChild(clearDom, this.renderer2.createText('×'));
-      this.renderer2.addClass(clearDom, 'clear');
-      this.renderer2.appendChild(markDom, entityDom);
-      this.renderer2.appendChild(markDom, clearDom);
-      this.el.nativeElement
-        .querySelector('.c-' + IDs.join('-'))
-        .addEventListener('mouseenter', this.mouseenterMark.bind(this));
-      this.el.nativeElement
-        .querySelector('.c-' + IDs.join('-'))
-        .addEventListener('mouseleave', this.mouseleaveMark.bind(this));
-      this.el.nativeElement
-        .querySelector('.c-' + IDs.join('-'))
-        .addEventListener('click', this.clickMark.bind(this));
-      part.label =
-        this.categories[data == 'historyBack' ? selectedEntityID0 : this.selectedEntityID];
-      part.ids = IDs.join('-');
-      this.spansList.push(part);
-      this.actionError = null;
-      // console.log('spansList:::', this.spansList)
+      } catch (err) {}
     }
+
+    selection.removeAllRanges();
+
+    return ranges;
   }
 
-  mouseenterMark(e) {
-    e.target.lastChild.style.backgroundColor = '#444';
-    e.target.lastChild.style.color = '#fff';
+  initNerPassage(element, selectedEntityID0) {
+    if (element.start === element.end) return;
+    this.createNewRange(element, selectedEntityID0);
+    this.actionError = null;
   }
 
-  mouseleaveMark(e) {
-    e.target.lastChild.style.backgroundColor = 'transparent';
-    e.target.lastChild.style.color = 'transparent';
-  }
-
-  clickMark(e) {
-    let markClasses = [];
-    let ids = [];
-
-    if (
-      e.target.parentNode.className.split(' ').indexOf('markSelected') > -1 ||
-      e.target.className.split(' ').indexOf('markSelected') > -1
-    ) {
-      if (e.target.parentNode.className.split(' ').indexOf('markSelected') > -1) {
-        markClasses = e.target.parentNode.className.split(' ');
-      }
-      if (e.target.className.split(' ').indexOf('markSelected') > -1) {
-        markClasses = e.target.className.split(' ');
-      }
-
-      markClasses.forEach((element) => {
-        if (element.startsWith('c-')) {
-          ids = element.split('-').splice(1);
-          const parentDom = this.el.nativeElement.querySelector('.nerBox');
-          const targetMark = this.el.nativeElement.querySelector('.' + element);
-          for (let i = 0; i < ids.length; i++) {
-            const spanDom = this.renderer2.createElement('span');
-            this.renderer2.appendChild(
-              spanDom,
-              this.renderer2.createText(this.sr.originalData.tokens[ids[i]].text),
-            );
-            this.renderer2.addClass(spanDom, 'nerSpan');
-            this.renderer2.addClass(spanDom, 'spanIndex' + ids[i]);
-            this.renderer2.setAttribute(spanDom, 'id', ids[i]);
-            this.renderer2.insertBefore(parentDom, spanDom, targetMark);
-            this.el.nativeElement
-              .querySelector('.spanIndex' + ids[i])
-              .addEventListener('mousedown', this.onMouseDown.bind(this));
-            this.el.nativeElement
-              .querySelector('.spanIndex' + ids[i])
-              .addEventListener('mouseup', this.onMouseUp.bind(this));
+  findNode(mySelf, start) {
+    const childs = mySelf.childNodes;
+    for (let i = 0; i < childs.length; i++) {
+      if (childs[i].childNodes && childs[i].childNodes.length > 1) {
+        const result = this.findNode(childs[i], start);
+        if (result) {
+          return result;
+        }
+      } else {
+        const node = childs[i].nodeName !== '#text' ? findClosestTextNode(childs[i]) : childs[i];
+        const offset = start - this.totalLen;
+        if (node) {
+          this.totalLen += node.length;
+          if (start <= this.totalLen) {
+            return {node, offset};
           }
-          this.renderer2.removeChild(parentDom, targetMark);
-          // to update the spansList
-          this.spansList.forEach((e, i) => {
-            if (e.ids == element.slice(2)) {
-              this.spansList.splice(i, 1);
-            }
-          });
-          this.actionError = null;
         }
+      }
+    }
+  }
+
+  setRangStart(mySelf, r, element) {
+    this.totalLen= 0;
+    const { node, offset } = this.findNode(mySelf, element.start);
+    r.setStart(node, offset);
+  };
+
+  setRangEnd(mySelf, r, element) {
+    this.totalLen= 0;
+    const { node, offset } = this.findNode(mySelf, element.end);
+    r.setEnd(node, offset);
+  };
+
+  createNewRange(element, selectedEntityID) {
+    let r = document.createRange();
+    const mySelf = document.getElementById('mainText');
+    if (mySelf.childNodes.length == 1) {
+      r.setStart(mySelf.firstChild, element.start);
+      r.setEnd(mySelf.firstChild, element.end);
+    } else {
+      this.setRangStart(mySelf, r, element);
+      this.setRangEnd(mySelf, r, element);
+    }
+
+    let normedRange = this.fromRange(r, mySelf);
+
+    splitBoundaries(r);
+
+    normedRange._range = r;
+
+    const tags = Array.from(r.cloneContents().childNodes);
+
+    const text = tags.reduce((str, node) => (str += node.textContent), "");
+    normedRange.text = text;
+
+    const ss = toGlobalOffset(mySelf, r.startContainer, r.startOffset);
+    const ee = toGlobalOffset(mySelf, r.endContainer, r.endOffset);
+
+    normedRange.startOffset = ss;
+    normedRange.endOffset = ee;
+    this.createSpans(normedRange, selectedEntityID);
+  }
+
+  onMouseUp() {
+    var selectedRanges = this.captureDocSelection();
+    if (selectedRanges.length === 0) return;
+    const range = selectedRanges[0];
+    this.createSpans(range, this.selectedEntityID);
+  }
+  
+  createSpans(self, selectedEntityID) {
+    const spans = highlightRange(self, 'spanMarked', { backgroundColor: this.toolService.hexToRgb(this.labelColor.get(this.categories[selectedEntityID])) });
+    
+    const lastSpan = spans[spans.length - 1];
+    lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
+
+    const part = { text: '', start: 0, end: 0, label: '', spans: [] };
+    part.text = self.text;
+    part.start = self.startOffset;
+    part.end = self.endOffset;
+    part.label = this.categories[selectedEntityID];
+    part.spans = spans;
+    this.spansList.push(part);
+    this.actionError = null;
+  }
+
+  clickShowMark(e, data) {
+    const alllabeledDom = this.el.nativeElement.querySelectorAll('.annotateLabel .spanSelected');
+    alllabeledDom.forEach(ele => {
+      this.renderer2.removeStyle(ele, 'backgroundColor');
+    });
+    e.target.parentNode.style.backgroundColor = '#b4d2e3';
+    
+    if (data && data.spans) {
+      const allSpanDom = this.el.nativeElement.querySelectorAll('.nerPassage span');
+      allSpanDom.forEach(element => {
+        this.renderer2.removeStyle(element, 'font-weight');
+      });
+      data.spans.forEach((element, index) => {
+        if (index === 0) {
+          element.scrollIntoView({block: 'center'});
+        }
+        this.renderer2.setStyle(element, 'font-weight', 'bold');
       });
     }
+  }
+
+  mouseenterMark(e, data) {
+    e.target.lastChild.style.backgroundColor = '#444';
+    e.target.lastChild.style.color = '#fff'; 
+    if (data && data.spans) {
+      data.spans.forEach((element, index) => {
+        this.renderer2.setStyle(element, 'border-top', '2px dashed blue');
+        this.renderer2.setStyle(element, 'border-bottom', '2px dashed blue');
+        if (index == 0) {
+            this.renderer2.setStyle(element, 'border-left', '2px dashed blue');
+        }
+
+        if (index == data.spans.length - 1) {
+          this.renderer2.setStyle(element, 'border-right', '2px dashed blue');
+        }
+      });
+      if (e.target.style.backgroundColor !== this.colorToRgb('#b4d2e3')) {
+        e.target.style.backgroundColor = 'aliceblue';
+      }
+    }
+  }
+
+  mouseleaveMark(e, data) {
+    e.target.lastChild.style.backgroundColor = 'transparent';
+    e.target.lastChild.style.color = 'transparent';
+    if (e.target.style.backgroundColor === 'aliceblue') {
+      e.target.style.backgroundColor = '';
+    }
+    if (data && data.spans) {
+      data.spans.forEach(element => {
+        this.renderer2.removeStyle(element, 'border');
+      });
+    }
+  }
+
+  clickClearMark(event, data) {
+    this.spansList.forEach((ele, index) => {
+      if (ele.spans == data.spans) {
+        this.spansList.splice(index, 1);
+      }
+    });
+    if (data && data.spans) {
+      removeSpans(data.spans);
+    }
+    this.actionError = null;
   }
 
   onSelectingEntity(e, data, index) {
@@ -2199,6 +2361,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     }
+    if (this.projectType == 'ner') {
+      this.selectedEntityColor = e.target.style.color;
+    }
+  }
+
+  getLabelColor(lable) {
+    return this.labelColor.get(lable);
   }
 
   sortStartEndID() {
@@ -2479,6 +2648,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.imageRectLabelTemplate += `<Label value="${element}" background="${this.colorsRainbow[index]}" selectedColor="white"/>`;
         this.imagePolyLabelTemplate += `<Label value="${element}" background="${this.colorsRainbow[index]}" selectedColor="white"/>`;
       }
+    });
+  }
+
+  nerLabelForColor(categories) {
+    this.labelColor = new Map();
+    categories.forEach((ele, index) => {
+      this.labelColor.set(ele, this.colorsRainbow[index]);
     });
   }
 
@@ -2928,17 +3104,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   toShowExistingLabel() {
     if (this.sr.userInputs) {
       const annotations = this.sr.userInputs;
-      let annotatedIDs = [];
       let errLabel = [];
       setTimeout(() => {
         annotations.forEach((element) => {
           element.problemCategory.forEach((element2) => {
-            if (element2.ids) {
-              annotatedIDs = element2.ids.split('-');
-              this.onMouseDown(annotatedIDs[0], 'historyBack');
-              this.onMouseUp(
-                annotatedIDs[annotatedIDs.length - 1],
-                'historyBack',
+            if (element2.start !== element2.end) {
+              this.initNerPassage(
+                element2,
                 this.categories.indexOf(element2.label),
               );
             } else {
