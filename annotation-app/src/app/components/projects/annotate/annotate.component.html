@@ -480,14 +480,29 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <br />
                 </div>
               </div>
-              <span
-                *ngFor="let ticket of sr.originalData.tokens"
-                (mousedown)="onMouseDown($event, ticket)"
-                (mouseup)="onMouseUp($event, ticket)"
-                id="{{ ticket.id }}"
-                class="nerSpan spanIndex{{ ticket.id }}"
-                >{{ ticket.text }}</span
-              >
+              <div class="nerContent">
+              <div class="nerPassage">  
+                <span (mouseup)="onMouseUp($event)" id='mainText'>{{ sr.originalData.text }}</span>
+              </div>
+              <div class="annotateLabel">
+                <div class="resultTip">
+                  Tips:  When mouse over or click the selected text will highlight the labeled text on the passage.</div>
+                <div class="result">--------------------<span>Results</span>-------------------</div>
+                <div *ngIf="spansList.length === 0">Nothing selected</div>  
+                <div style="max-height: 20rem; overflow-y: auto;">
+                  <div
+                  *ngFor="let spanText of spansList"
+                  class="spanSelected"
+                  (mouseenter)="mouseenterMark($event, spanText)"
+                  (mouseleave)="mouseleaveMark($event, spanText)"
+                  >
+                  <span (click)="clickShowMark($event, spanText)" class="selectText">{{ spanText.text }}</span>
+                  <span class="entity" [style.color]="getLabelColor(spanText.label)" title="{{ spanText.label | uppercase }}">{{ spanText.label }}</span>
+                  <span class="clear" (click)="clickClearMark($event, spanText)">×</span>
+                  </div>
+                </div>
+              </div>
+              </div>
             </div>
             <!-- here is log annotation content -->
             <div *ngIf="projectType === 'log'">
@@ -726,6 +741,9 @@ SPDX-License-Identifier: Apache-2.0 -->
               <button
                 *ngFor="let label of categories; let i = index"
                 class="btn labels label entityLabel"
+                [style.color]=" i == selectedEntityID ? 'white' : getLabelColor(label) "
+                [style.border-color]="getLabelColor(label)"
+                [style.background-color]=" i == selectedEntityID ? getLabelColor(label) : '' "
                 [ngClass]="{
                   entitySelected: i == selectedEntityID,
                   entityLabel: i !== selectedEntityID
