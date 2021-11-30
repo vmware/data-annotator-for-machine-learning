@@ -2509,37 +2509,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         sr[0].ticketQuestions = vv;
       }
-      if (
-        sr[0].userInputs &&
-        sr[0].userInputs.length > 0 &&
-        sr[0].userInputs[0].problemCategory.length > 0
-      ) {
-        const aa = sr[0].userInputs[0].problemCategory;
-        const bb = sr[0].originalData.tokens;
-        for (let j = 0; j < aa.length; j++) {
-          const ids = [];
-          for (let i = 0; i < bb.length; i++) {
-            if (aa[j].start == bb[i].start && ids.length == 0) {
-              ids.push(bb[i].id);
-            }
-            if (aa[j].end == bb[i].end) {
-              ids.push(bb[i].id);
-              if (ids.length == 2) {
-                if (ids[0] == ids[1]) {
-                  aa[j].ids = String(ids[0]);
-                } else {
-                  const flag = [];
-                  for (let k = ids[0]; k < ids[1] + 1; k++) {
-                    flag.push(k);
-                  }
-                  aa[j].ids = flag.join('-');
-                }
-                break;
-              }
-            }
-          }
-        }
-      }
       return sr[0];
     } else {
       return sr;
