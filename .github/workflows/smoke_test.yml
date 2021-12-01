@@ -64,7 +64,7 @@ jobs:
           access_token=${resp:26:163}
           
           echo container Start connect-active-learning-service 
-          curl -X POST -H "Content-Type: application/json" -H "Authorization: ${access_token}" -d '{"data": [{"text": "NERS PROJECT TEST-CONNECT."}]}' http://localhost:8000/api/ner/user-tokens
+          curl -X GET -H "Content-Type: application/json" -H "Authorization: ${access_token}" localhost:8000/health
           echo container End connect-active-learning-service 
 
       - name: Checkout e2e-test branch
