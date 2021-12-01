@@ -860,15 +860,6 @@ label .label-leftBoard {
   vertical-align: middle;
 }
 
-.result {
-  color: #e5dede; 
-  span {
-    padding: 0 10px;
-    color: #1890ff;
-    font-weight: 500;
-  }
-}
-
 .resultTip {
   color: #6e7781;
   padding: 0.5rem 0;
@@ -892,4 +883,18 @@ label .label-leftBoard {
 .selectedSection {
   max-height: 20rem;
   overflow-y: auto;
+}
+
+.result {
+  display: flex;
+  flex-direction: row;
+  color: #1890ff;
+  font-weight: 500;
+}
+.result::before,
+.result::after {
+  content: '';
+  flex: 1 1;
+  border-bottom: 1px dashed #e5dede;
+  margin: auto 0.3rem;
 }
