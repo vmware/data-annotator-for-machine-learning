@@ -489,7 +489,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   Tips:  When mouse over or click the selected text will highlight the labeled text on the passage.</div>
                 <div class="result">--------------------<span>Results</span>-------------------</div>
                 <div *ngIf="spansList.length === 0">Nothing selected</div>  
-                <div style="max-height: 20rem; overflow-y: auto;">
+                <div class="selectedSection">
                   <div
                   *ngFor="let spanText of spansList"
                   class="spanSelected"
