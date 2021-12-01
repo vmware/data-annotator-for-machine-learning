@@ -2509,6 +2509,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         sr[0].ticketQuestions = vv;
       }
+      sr[0].originalData.text = Object.values(sr[0].originalData)[0];
       return sr[0];
     } else {
       return sr;
