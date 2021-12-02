@@ -25,7 +25,6 @@ import { UserAuthService } from 'app/services/user-auth.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { MarkdownParserService } from 'app/services/common/markdown-parser.service';
 import { Options } from 'ng5-slider';
-import { getDocument } from '../../../shared/utils/get-document';
 import { highlightRange, removeSpans, splitBoundaries, toGlobalOffset, findClosestTextNode } from 'app/shared/utils/html';
 
 @Component({
@@ -2089,12 +2088,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  fromNode(node, root = null) {
+  fromNode(node, root) {
     if (node === undefined) {
       throw new Error('missing required parameter "node"')
     }
-  
-    root = root || getDocument(node)
   
     let path = '/'
     while (node !== root) {
