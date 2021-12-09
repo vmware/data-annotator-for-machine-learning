@@ -115,8 +115,8 @@ async function checkDataSetInUse(dataSetName, throwError) {
     const pro = await mongoDb.findByConditions(ProjectModel, conditions, "projectName");
     console.log(pro)
     if (pro[0] && throwError) {
-        const pnames = await pro.reduce((pnameString, curr) => `${pnameString} / ${curr.projectName}`, "");
-        throw {CODE: 4001, MSG: `DATA-SET USING BY: ${pnames}`};
+        const pnames = await pro.reduce((pnameString, curr) => pnameString?`${pnameString},${curr.projectName}`: curr.projectName, "");
+        throw {CODE: 4001, MSG: `DATA-SET USING BY: [${pnames}], PLEASE REMOVE THE PROJECTS FIRST.`};
     }
     return pro;
 }
