@@ -10,15 +10,8 @@ from django.views.decorators.http import require_GET, require_POST
 from .al.activelearning import active_learning_query, active_learning_train, active_learning_teach
 
 from .al.vector_sr import srs_vector
-from .ner.named_entity_recognition import get_user_tokens
 from .utils.common import request_handle
 import src.tests as poc
-
-
-# ner tokens
-@require_POST
-def ner_user_tokens(request):
-    return request_handle(request, get_user_tokens)
 
 
 # vector all sr data

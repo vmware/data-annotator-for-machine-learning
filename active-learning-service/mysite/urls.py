@@ -22,7 +22,6 @@ from src import views
 
 urlpatterns = [
     path('api/poc', views.api_poc),
-    path('api/ner/user-tokens', views.ner_user_tokens),
     path('api/al/sr/vector', views.al_srs_vector),
     path('api/al/model/train', views.al_train_model),
     path('api/al/model/query', views.al_query_instance),

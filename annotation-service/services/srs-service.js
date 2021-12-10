@@ -14,7 +14,6 @@ const validator = require('../utils/validator');
 const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDER } = require("../config/constant");
 const csv = require('csvtojson');
 const alService = require('./activelearning.service');
-const ENRService = require('./ner.service');
 const _ = require("lodash");
 const { ProjectModel, UserModel, LogModel } = require("../db/db-connect");
 const mongoDb = require("../db/mongo.db");
@@ -304,8 +303,7 @@ async function getOneSrs(req) {
         }
 
         srs = alQueriedSr? srs.concat(alQueriedSr):srs;
-        const token = req.headers.authorization.split("Bearer ")[1];
-        return await ENRService.gainNERtokens(srs, project.projectType, token);
+        return srs;
 
     } else {
         if(usc.skip == 0){
@@ -366,9 +364,7 @@ async function getSelectedSrsById(req) {
     if (config.useAWS && mp.project.projectType == PROJECTTYPE.IMGAGE) {
         srs.originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, srs.originalData.location);
     }
-    const token = req.headers.authorization.split("Bearer ")[1];
-    srs = await ENRService.gainNERtokens([srs], mp.project.projectType, token);
-    return srs[0];
+    return srs;
 }
 
 async function getProgress(req) {
