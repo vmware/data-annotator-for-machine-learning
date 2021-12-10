@@ -93,18 +93,16 @@ export class MyDatasetsComponent implements OnInit {
     this.loading = true;
     const param = {
       fileKey: e.location,
-      dsname: e.dataSetName,
+      dsId: e.id,
     };
     this.avaService.deleteMyDataset(param).subscribe(
-      (res) => {
-        if (res && res.MSG) {
-          this.infoMessage = 'Dataset was deleted successfully.';
-          this.getMyDatasets();
-          this.loading = false;
-          setTimeout(() => {
-            this.infoMessage = '';
-          }, 1000);
-        }
+      () => {
+        this.infoMessage = 'Dataset was deleted successfully.';
+        this.getMyDatasets();
+        this.loading = false;
+        setTimeout(() => {
+          this.infoMessage = '';
+        }, 1000);
       },
       (error: any) => {
         console.log(error);

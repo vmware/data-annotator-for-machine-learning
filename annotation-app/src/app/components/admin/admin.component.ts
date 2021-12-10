@@ -194,13 +194,12 @@ export class AdminComponent implements OnInit {
   deleteDataset(data) {
     const param = {
       pid: data._id,
-      pname: data.projectName,
     };
     this.avaService.deleteProject(param).subscribe(
-      (res) => {
-        this.loading = false;
+      () => {
         this.infoMessage = 'Success to delete the project';
         this.getProjects();
+        this.loading = false;
         setTimeout(() => {
           this.infoMessage = '';
         }, 1000);

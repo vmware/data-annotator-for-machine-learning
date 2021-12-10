@@ -63,9 +63,8 @@ export class AvaService {
   public deleteProject(payload: any): Observable<any> {
     const options = {
       headers: new HttpHeaders(),
-      body: payload,
-    };
-    return this.http.delete(`${this.baseUrl}/projects`, options);
+    }
+    return this.http.delete(`${this.baseUrl}/projects/${payload.pid}`, options);
   }
 
   public getProjects(router: any): Observable<any> {
@@ -208,9 +207,8 @@ export class AvaService {
   public deleteMyDataset(payload: any): Observable<any> {
     const options = {
       headers: new HttpHeaders(),
-      body: payload,
     };
-    return this.http.delete(`${this.baseUrl}/datasets`, options);
+    return this.http.delete(`${this.baseUrl}/datasets/${payload.dsId}`, options);
   }
 
   public findDatasetName(dataSetName?: any): Observable<any> {
