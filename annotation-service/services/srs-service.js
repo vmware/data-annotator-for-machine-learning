@@ -234,11 +234,11 @@ async function getOneSrs(req) {
     
     if (project.projectType == PROJECTTYPE.NER) {
         filterFileds.ticketQuestions = 1;
-        filterFileds.userInputs = project.regression? 1 : 0;
+        filterFileds.userInputs = project.regression? 1 : null;
     }
     if (project.projectType == PROJECTTYPE.LOG) {
-        filterFileds.fileInfo = project.isShowFilename? 1 : 0;
-        filterFileds.userInputs = project.regression? 1 : 0;
+        filterFileds.fileInfo = project.isShowFilename? 1 : null;
+        filterFileds.userInputs = project.regression? 1 : null;
     }
 
     let srs, conditions, alQueriedSr;
