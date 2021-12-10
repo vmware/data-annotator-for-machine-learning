@@ -176,9 +176,9 @@ async function updateSrsUserInput(req) {
         });
 
         let conditions = { _id: ObjectId(id) };
-        if (pro.regression && pro.projectType == PROJECTTYPE.NER) {
+        if (pro.regression && (pro.projectType == PROJECTTYPE.LOG || pro.projectType == PROJECTTYPE.NER)) {
             const updateSR = { $set: { userInputs: [] } };
-            await mongoDb.findOneAndUpdate(mp.model, conditions, updateSR)
+            await mongoDb.findOneAndUpdate(mp.model, conditions, updateSR);
         }
         let update = { $push: { userInputs: {$each: userInputs} }, $inc: { userInputsLength: 1 } };
         const options = { new: true };
