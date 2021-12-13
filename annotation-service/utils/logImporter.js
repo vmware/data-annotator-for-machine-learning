@@ -30,6 +30,7 @@ async function execute(req, sendEmail, annotators, append) {
   const projectName = req.body.pname;
   const urlsplit = req.body.location.split(".");
   const fileType = urlsplit[urlsplit.length-1].toLowerCase();
+  const preLabels = req.body.preLabels;
   
   let fileStream = await fileSystemUtils.handleFileStream(req.body.location);
 
@@ -86,6 +87,18 @@ async function execute(req, sendEmail, annotators, append) {
               fileName: filePath
             }
           };
+          //save pre-labels to userInputs
+          if (preLabels && preLabels[filePath] ) {
+            const lebelsList = preLabels[filePath];
+            let problemCategory = [];
+            for (const line in lebelsList) {
+              problemCategory.push({
+                line: line,
+                label: lebelsList[line]
+              })
+            }
+            sechema.userInputs=[{problemCategory: problemCategory}];
+          }
 
           docs.push(sechema);
           totalCase += 1;

@@ -62,7 +62,7 @@ async function createProject(req) {
 
 async function saveProjectInfo(req, userCompleteCase, annotators){
 
-    
+    const projectType = req.body.projectType;
     let selectedColumn = req.body.selectDescription;
     selectedColumn = (typeof selectedColumn === 'string'? JSON.parse(selectedColumn):selectedColumn);
     
@@ -81,9 +81,15 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     }
     labels = (typeof labels === 'object'? labels.toString(): labels);
 
-    if (req.body.projectType == PROJECTTYPE.IMGAGE) {
+    if (projectType == PROJECTTYPE.IMGAGE) {
         totalCase = req.body.totalRows;
         alFailed = true;
+    }
+    
+    let regression = (req.body.regression === 'true' || req.body.regression === true)? true: false;
+    const preLabels = req.body.preLabels;
+    if (projectType == PROJECTTYPE.LOG && preLabels && Object.keys(preLabels).length) {
+        regression = true;
     }
 
     const project = {
@@ -116,10 +122,10 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
             estimator: req.body.estimator,
             alFailed: alFailed,
         },
-        projectType: req.body.projectType,
+        projectType: projectType,
         encoder: req.body.encoder,
         isMultipleLabel: isMultipleLabel,
-        regression: (req.body.regression === 'true' || req.body.regression === true)? true: false,
+        regression: regression,
         isShowFilename: (req.body.isShowFilename === 'true' || req.body.isShowFilename === true)? true: false,
         ticketDescription: req.body.ticketDescription,
         ticketQuestion: req.body.ticketQuestions,

@@ -166,26 +166,26 @@ async function queryDataSetByDataSetName(req) {
 
 async function deleteDataSet(req) {
     
-    const ds = await validator.checkDataSet({ dataSetName: req.body.dsname }, true);
+    const ds = await validator.checkDataSet({ _id: ObjectId(req.params.dsid) }, true);
     const user = req.auth.email;
 
     if (ds[0].format == DATASETTYPE.CSV || ds[0].format == DATASETTYPE.TABULAR || ds[0].format == DATASETTYPE.LOG) {
         
         if (ds[0].format == DATASETTYPE.LOG) {
-            await validator.checkDataSetInUse(req.body.dsname, true);
+            await validator.checkDataSetInUse(ds[0].dataSetName, true);
         }
         
         if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
             console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteAnObject`);
-            await S3Utils.deleteAnObject(req.body.fileKey);
+            await S3Utils.deleteAnObject(ds[0].location);
         }else if (config.useLocalFileSys) {
             console.log(`[ DATASET ] Service localFileSysService.deleteFileFromLocalSys`);
-            await localFileSysService.deleteFileFromLocalSys(req.body.fileKey)
+            await localFileSysService.deleteFileFromLocalSys(ds[0].location)
         }
         
     }else if (ds[0].format == DATASETTYPE.IMGAGE) {
 
-        await validator.checkDataSetInUse(req.body.dsname, true);
+        await validator.checkDataSetInUse(ds[0].dataSetName, true);
         
         if (config.ESP || config.useAWS &&  config.bucketName && config.s3RoleArn) {
             console.log(`[ DATASET ] Service deleteDataSet.S3Utils.deleteMultiObjects`);
@@ -221,9 +221,8 @@ async function deleteDataSet(req) {
     }
 
     console.log(`[ DATASET ] Service deleteDataSet.removeDataSet`);
-    await DataSetDB.removeDataSet({ dataSetName: req.body.dsname });
+    await DataSetDB.removeDataSet({ dataSetName: ds[0].dataSetName });
     
-    return { CODE: 0000, MSG: "delete success" };
 }
 
 
