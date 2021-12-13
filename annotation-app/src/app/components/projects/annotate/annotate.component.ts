@@ -307,6 +307,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           if (this.projectType == 'log') {
             this.sr = this.resetLogSrData(this.sr);
+            this.showPreLogLable();
             this.currentLogFile =
               this.projectInfo.isShowFilename || this.startFrom === 'review'
                 ? this.sr.fileInfo.fileName
@@ -365,6 +366,28 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  showPreLogLable() {
+    this.spansList = [];
+    setTimeout(() => {
+      if (this.sr.userInputs && this.sr.userInputs.length > 0) {
+        this.sr.userInputs[0].problemCategory.forEach((element) => {
+          for (let i = 0; i < this.sr.originalData.length; i++) {
+            if (element.line == this.sr.originalData[i].line) {
+              this.onMouseDownTxt(element, this.sr.originalData[i].index);
+              this.onMouseUpTxt(element, this.sr.originalData[i].index, 'historyBack');
+              break;
+            }
+          }
+        });
+        this.questionForm
+          .get('questionGroup.logFreeText')
+          .setValue(
+            this.sr.userInputs[0].logFreeText !== '' ? this.sr.userInputs[0].logFreeText : null,
+          );
+      }
+    }, 10);
+  }
+
   toReadStorageSetting(set) {
     if (localStorage.getItem('annotate-setting')) {
       const settings = JSON.parse(localStorage.getItem('annotate-setting'));
@@ -403,6 +426,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.submitAndHistory(res, from);
             this.sr = res;
             this.sr = this.resetLogSrData(this.sr);
+            this.showPreLogLable();
             this.currentLogFile = this.sr.fileInfo.fileName;
             if (this.sr && this.sr.flag && this.sr.flag.silence) {
               this.silenceStatus = true;
@@ -835,6 +859,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     if (this.projectType == 'log') {
       this.sr = this.resetLogSrData(this.sr);
+      this.showPreLogLable();
       this.currentLogFile =
         this.projectInfo.isShowFilename || this.startFrom === 'review'
           ? this.sr.fileInfo.fileName
@@ -1019,6 +1044,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (this.projectType == 'log') {
           this.sr = this.resetLogSrData(this.sr);
+          this.showPreLogLable();
           this.currentLogFile =
             this.projectInfo.isShowFilename || this.startFrom === 'review'
               ? this.sr.fileInfo.fileName
@@ -1637,6 +1663,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (this.projectType == 'log') {
           this.sr = this.resetLogSrData(this.sr);
+          this.showPreLogLable();
           this.currentLogFile =
             this.projectInfo.isShowFilename || this.startFrom === 'review'
               ? this.sr.fileInfo.fileName
@@ -2453,6 +2480,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           if (this.projectType == 'log') {
             responseSr.originalData = this.resetLogSrData([responseSr]).originalData;
+            this.showPreLogLable();
             setTimeout(() => {
               this.toFilterLog(this.filterList);
             }, 10);
@@ -3142,6 +3170,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               return;
             }
             this.sr = this.resetLogSrData(response);
+            this.showPreLogLable();
             this.currentLogFile = this.sr.fileInfo.fileName;
             this.toFilterLog(this.filterList);
             if (this.sr.userInputsLength > 0) {
