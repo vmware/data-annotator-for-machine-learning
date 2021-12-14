@@ -166,7 +166,7 @@ async function queryDataSetByDataSetName(req) {
 
 async function deleteDataSet(req) {
     
-    const ds = await validator.checkDataSet({ _id: ObjectId(req.params.dsid) }, true);
+    const ds = await validator.checkDataSet({ _id: ObjectId(req.query.dsid) }, true);
     const user = req.auth.email;
 
     if (ds[0].format == DATASETTYPE.CSV || ds[0].format == DATASETTYPE.TABULAR || ds[0].format == DATASETTYPE.LOG) {
