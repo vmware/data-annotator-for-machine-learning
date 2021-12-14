@@ -100,14 +100,13 @@ export class ProjectsComponent implements OnInit {
   deleteProject(project): void {
     const payload = {
       pid: project._id,
-      pname: project.projectName,
     };
     this.loading = true;
     this.avaService.deleteProject(payload).subscribe(
-      (res) => {
+      () => {
         this.infoMessage = 'Project was deleted successfully.';
-        this.loading = false;
         this.getProjects();
+        this.loading = false;
         setTimeout(() => {
           this.infoMessage = '';
         }, 1000);
