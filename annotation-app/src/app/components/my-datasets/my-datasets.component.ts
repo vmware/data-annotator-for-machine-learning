@@ -92,7 +92,6 @@ export class MyDatasetsComponent implements OnInit {
   deleteDataset(e) {
     this.loading = true;
     const param = {
-      fileKey: e.location,
       dsId: e.id,
     };
     this.avaService.deleteMyDataset(param).subscribe(
