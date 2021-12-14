@@ -70,8 +70,8 @@ async function getProjectInfo(req) {
 async function deleteProject(req) {
 
     await validator.checkAnnotator(req.auth.email);
-console.log(req.params.pid);
-    const mp = await getModelProject({_id: ObjectId(req.params.pid)});
+
+    const mp = await getModelProject({_id: ObjectId(req.query.pid)});
     const conditions = {projectName: mp.project.projectName};
     
     console.log(`[ PROJECT ] Service delete project`, conditions);

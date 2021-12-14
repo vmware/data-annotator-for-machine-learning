@@ -26,7 +26,7 @@ module.exports = {
     //projects
     FILE_PROJECT_CREATE: "/projects",//swagger
     PROJECT_SAVE: "/projects", // no
-    PROJECT_DELETE: "/projects/:pid", // swagger
+    PROJECT_DELETE: "/projects", // swagger
     PROJECT_LIST: "/projects", // swagger
     PROJECT_INFO: "/projects/details", // swagger
     PROJECT_NAME: "/projects/names", // no
@@ -65,7 +65,7 @@ module.exports = {
     FILE_UPLOAD: "/datasets/s3/upload", //swagger
     FILE_SIGN_URL: "/datasets/s3/signed-url",//no
     FILE_DATASET_SAVE: "/datasets", //swagger--
-    FILE_DATASET_DELETE: "/datasets/:dsid",//swagger
+    FILE_DATASET_DELETE: "/datasets",//swagger
     FILE_DATASET_NAME_UNIQUE: "/datasets/names",//no
     FILE_SUPER_COLLIDER_QUERY: "/query-from-superCollider",// swagger
     FILE_SET_DATA: "/datasets/set-data",
