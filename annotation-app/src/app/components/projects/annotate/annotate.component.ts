@@ -37,6 +37,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   user: any;
   questionForm: FormGroup;
   sr: SR;
+  originLogData: any;
+  logTotalSize: number;
+  filterLogData = [];
+  isFilterLog: boolean = false;
   categories: string[];
   loading: boolean;
   error: string;
@@ -366,7 +370,33 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  addLogScrollListener() {
+    setTimeout(() => {
+      let dom = this.el.nativeElement.querySelector('.txtBox');
+      let $this = this;
+      dom.addEventListener('scroll', function() {
+        const scrollDistance =dom.scrollHeight - dom.scrollTop - dom.clientHeight;
+        if (scrollDistance <= 0) {
+          let a = $this.sr.originalData.length;
+          if (a < $this.logTotalSize) {  
+            let b = a + 400 < $this.logTotalSize ?  a + 400 : $this.logTotalSize;
+            let i = 0;
+            _.forIn($this.originLogData, function (value, key) {
+              i++;
+              if (a < b && a <= i) {
+               $this.sr.originalData.push({ index: a, line: key, text: value, freeText: '' });
+               a++;
+              } 
+           });
+          }
+          $this.showPreLogLable();
+        }
+      });
+    }, 5);
+  }
+
   showPreLogLable() {
+    this.addLogScrollListener();
     this.spansList = [];
     setTimeout(() => {
       if (this.sr.userInputs && this.sr.userInputs.length > 0) {
@@ -2573,19 +2603,29 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  resetLogSrData(sr) {
-    if (!sr.MSG) {
-      const flag = [];
-      sr = sr[0];
-      if (Object.prototype.toString.call(sr.originalData) !== '[object Array]') {
-        let a = 0;
-        _.forIn(sr.originalData, function (value, key) {
+
+  getInitLogData(originalLogData, sr) {
+    const flag = [];
+    if (Object.prototype.toString.call(originalLogData) !== '[object Array]') {
+      let a = 0;
+       _.forIn(originalLogData, function (value, key) {
+        if (a < 400) {
           flag.push({ index: a, line: key, text: value, freeText: '' });
           a++;
-        });
+        }
+      });
+      sr.originalData = flag;
+    }
+  }
 
-        sr.originalData = flag;
+  resetLogSrData(sr) {
+    if (!sr.MSG) {     
+      sr = sr[0];
+      if (this.originLogData === undefined) {
+        this.originLogData = sr.originalData;
+        this.logTotalSize = Object.keys(this.originLogData).length;
       }
+      this.getInitLogData(sr.originalData, sr);
       return sr;
     } else {
       return sr;
@@ -2698,12 +2738,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           freeText: from == 'historyBack' ? data.freeText : '',
           index: this.spanEnd,
         });
-        this.sr.originalData[this.spanEnd].annotate = true;
-        this.sr.originalData[this.spanEnd].freeText = from == 'historyBack' ? data.freeText : '';
+        if (this.isFilterLog) {
+          this.sr.originalData.filter(item => item.index === this.spanEnd).annotate = true;
+          this.sr.originalData.filter(item => item.index === this.spanEnd).freeText = from == 'historyBack' ? data.freeText : '';
+        } else {
+          this.sr.originalData[this.spanEnd].annotate = true;
+          this.sr.originalData[this.spanEnd].freeText = from == 'historyBack' ? data.freeText : '';
+        }
       } else {
         if (from !== 'historyBack') {
-          this.sr.originalData[this.spanEnd].annotate = false;
-          this.sr.originalData[this.spanEnd].freeText = '';
+          if (this.isFilterLog) {
+            this.sr.originalData.filter(item => item.index === this.spanEnd).annotate = false;
+            this.sr.originalData.filter(item => item.index === this.spanEnd).freeText = '';
+          } else {
+            this.sr.originalData[this.spanEnd].annotate = false;
+            this.sr.originalData[this.spanEnd].freeText = '';
+          }
         }
       }
       const txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
@@ -2729,8 +2779,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 _.map(this.cloneSpanslist, 'index'),
                 _.map(this.spansList, 'index'),
               );
-              this.sr.originalData[flag[0]].annotate = false;
-              this.sr.originalData[flag[0]].freeText = '';
+              if (this.isFilterLog) {
+                this.sr.originalData.filter(item => item.index === flag[0]).annotate = false;
+                this.sr.originalData.filter(item => item.index === flag[0]).freeText = '';
+              } else {
+                this.sr.originalData[flag[0]].annotate = false;
+                this.sr.originalData[flag[0]].freeText = '';
+              }
             }
             this.cloneSpanslist = _.cloneDeep(this.spansList);
           });
@@ -2759,8 +2814,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 _.map(this.cloneSpanslist, 'index'),
                 _.map(this.spansList, 'index'),
               );
-              this.sr.originalData[flag[0]].annotate = false;
-              this.sr.originalData[flag[0]].freeText = '';
+              if (this.isFilterLog) {
+                this.sr.originalData.filter(item => item.index === flag[0]).annotate = false;
+                this.sr.originalData.filter(item => item.index === flag[0]).freeText = '';
+              } else {
+                this.sr.originalData[flag[0]].annotate = false;
+                this.sr.originalData[flag[0]].freeText = '';
+              }
             }
             this.cloneSpanslist = _.cloneDeep(this.spansList);
           });
@@ -2818,8 +2878,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   _.map(this.cloneSpanslist, 'index'),
                   _.map(this.spansList, 'index'),
                 );
-                this.sr.originalData[flag[0]].annotate = false;
-                this.sr.originalData[flag[0]].freeText = '';
+                if (this.isFilterLog) {
+                  this.sr.originalData.filter(item => item.index === flag[0]).annotate = false;
+                  this.sr.originalData.filter(item => item.index === flag[0]).freeText = '';
+                } else {
+                  this.sr.originalData[flag[0]].annotate = false;
+                  this.sr.originalData[flag[0]].freeText = '';
+                }
               }
               this.cloneSpanslist = _.cloneDeep(this.spansList);
             });
@@ -2897,8 +2962,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   _.map(this.cloneSpanslist, 'index'),
                   _.map(this.spansList, 'index'),
                 );
-                this.sr.originalData[flag[0]].annotate = false;
-                this.sr.originalData[flag[0]].freeText = '';
+                if (this.isFilterLog) {
+                  this.sr.originalData.filter(item => item.index === flag[0]).annotate = false;
+                  this.sr.originalData.filter(item => item.index === flag[0]).freeText = '';
+                } else {
+                  this.sr.originalData[flag[0]].annotate = false;
+                  this.sr.originalData[flag[0]].freeText = '';
+                }
               }
               this.cloneSpanslist = _.cloneDeep(this.spansList);
             });
@@ -2948,39 +3018,101 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  toFilterLog(e) {
-    const filterRowsIndex = [];
-    this.sr.originalData.forEach((element) => {
-      element.filter = true;
-    });
+  logFilterScrollListener(filterRowsIndex) {
+    setTimeout(() => {
+      let dom = this.el.nativeElement.querySelector('.txtBox');
+      let $this = this;
+      dom.addEventListener('scroll', function() {
+        const scrollDistance =dom.scrollHeight - dom.scrollTop - dom.clientHeight;
+        if (scrollDistance <= 0) {
+          let filterLogDataSize = $this.filterLogData.length;
+          let start = $this.sr.originalData.length;
+          if (start < filterLogDataSize) {
+            let end = start + 100 < filterLogDataSize ?  start + 100 : filterLogDataSize;
+            $this.filterLogData.forEach((elem, index) => {
+              if (start < end && start <= index) {
+                  $this.sr.originalData.push(elem);
+                  $this.getElementService.setFilterHighLight('txtRowContent' + elem.index, elem.text, elem.matchResult);     
+                  start++;
+                }
+            });
+          }
+        }
+      });
+    }, 5);
+    setTimeout(() => {
+      if (this.spansList.length > 0) {
+        this.spansList.forEach((data) => {
+          if (filterRowsIndex.length > 0 && filterRowsIndex.indexOf(data.index) > -1) {
+            this.onMouseDownTxt(
+              { line: data.line, label: data.label, freeText: data.freeText },
+              data.index,
+            );
+            this.onMouseUpTxt(
+              { line: data.line, label: data.label, freeText: data.freeText },
+              data.index,
+              'historyBack',
+            );
+          }
+        });
+      }
+    }, 20);
+  }
+
+  filterAllLogTxt(e, filterRowsIndex) {
+    const len = Object.keys(this.originLogData).length < 400 ?  Object.keys(this.originLogData).length : 400;
+    let $this = this;
+    let i = 0;
+    $this.filterLogData = [];
     if (e.length > 0) {
-      this.sr.originalData.forEach((element, index) => {
+      this.isFilterLog = true;
+      _.forIn(this.originLogData, function (value, key) {
         let arr = [];
         e.forEach((filter) => {
           if (filter.filterType == 'keyword') {
-            const a = [...element.text.matchAll(RegExp(filter.filterText, 'gi'))];
-            if (a.length > 0) {
-              arr = [...arr, ...a];
+            const matchResult = [...value.matchAll(RegExp(filter.filterText, 'gi'))];     
+            if (matchResult.length && matchResult[0].index ) {
+              arr = [...arr, ...matchResult];
+              if ($this.filterLogData.some(item => item.index === i)) { 
+                const filterItem = $this.filterLogData.find(item => item.index === i);
+                filterItem.matchResult = arr;   
+              } else {
+                $this.filterLogData.push({ index: i, line: key, text: value, freeText: '', filter: true, matchResult: arr });
+                filterRowsIndex.push(i); 
+              }
             }
           } else {
-            const a = this.toolService.regexExec(filter.filterText, element.text);
-            if (a.length > 0) {
-              arr = [...arr, ...a];
+            const matchResult = $this.toolService.regexExec(filter.filterText, value);           
+            if (matchResult.length > 0 && matchResult[0].index ) {
+              arr = [...arr, ...matchResult];
+              if ($this.filterLogData.some(item => item.index === i)) {
+                const filterItem = $this.filterLogData.find(item => item.index === i);
+                filterItem.matchResult = arr;
+              } else {
+                $this.filterLogData.push({ index: i, line: key, text: value, freeText: '', filter: true, matchResult: arr });
+                filterRowsIndex.push(i);  
+              }
             }
-          }
-          if (arr.length > 0) {
-            element.filter = true;
-            this.getElementService.setFilterHighLight(
-              'txtRowContent' + element.index,
-              element.text,
-              arr,
-            );
-            filterRowsIndex.push(element.index);
-          } else {
-            element.filter = false;
           }
         });
+        i++;
       });
+    } else {
+      this.isFilterLog = false;
+    }
+    if (e.length > 0) {
+      this.sr.originalData = [];
+      $this.filterLogData.forEach((elem, index) => {
+        if (index < len) {
+          this.sr.originalData.push(elem);
+          $this.getElementService.setFilterHighLight('txtRowContent' + elem.index, elem.text, elem.matchResult);
+        }
+      })
+      // this.sr.originalData = filterData;
+      this.logFilterScrollListener(filterRowsIndex);
+    } else {
+      this.getInitLogData(this.originLogData, this.sr);
+      this.addLogScrollListener();
     }
     setTimeout(() => {
       if (this.spansList.length > 0) {
@@ -3002,6 +3134,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       }
     }, 20);
+  }
+
+  toFilterLog(e) {
+    const filterRowsIndex = [];
+    this.filterAllLogTxt(e, filterRowsIndex);
   }
 
   updateFilterSelect(e) {
