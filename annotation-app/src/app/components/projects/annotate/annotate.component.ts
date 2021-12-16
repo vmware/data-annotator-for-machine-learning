@@ -2327,15 +2327,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     e.target.lastChild.style.backgroundColor = '#444';
     e.target.lastChild.style.color = '#fff'; 
     if (data && data.spans) {
+      const labelColor = this.getLabelColor(data.label);
       data.spans.forEach((element, index) => {
-        this.renderer2.setStyle(element, 'border-top', '2px dashed blue');
-        this.renderer2.setStyle(element, 'border-bottom', '2px dashed blue');
+        this.renderer2.setStyle(element, 'border-top', '2px solid' + labelColor);
+        this.renderer2.setStyle(element, 'border-bottom', '2px solid' + labelColor);
+        this.renderer2.setStyle(element, 'background-color', this.toolService.highToRgb(labelColor));
+        this.renderer2.setStyle(element, 'padding', '0.25em');
         if (index == 0) {
-            this.renderer2.setStyle(element, 'border-left', '2px dashed blue');
+            this.renderer2.setStyle(element, 'border-left', '2px solid' + labelColor);
+            this.renderer2.setStyle(element, 'border-top-left-radius', '0.5em');
+            this.renderer2.setStyle(element, 'border-bottom-left-radius', '0.5em');
         }
 
         if (index == data.spans.length - 1) {
-          this.renderer2.setStyle(element, 'border-right', '2px dashed blue');
+          this.renderer2.setStyle(element, 'border-right', '2px solid' + labelColor);
+          this.renderer2.setStyle(element, 'border-top-right-radius', '0.5em');
+          this.renderer2.setStyle(element, 'border-bottom-right-radius', '0.5em');
         }
       });
       if (e.target.style.backgroundColor !== this.colorToRgb('#b4d2e3')) {
@@ -2351,8 +2358,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       e.target.style.backgroundColor = '';
     }
     if (data && data.spans) {
+      const labelColor = this.toolService.hexToRgb(this.getLabelColor(data.label));
       data.spans.forEach(element => {
         this.renderer2.removeStyle(element, 'border');
+        this.renderer2.removeStyle(element, 'padding');
+        this.renderer2.removeStyle(element, 'border-radius');
+        this.renderer2.setStyle(element, 'background-color', labelColor);
       });
     }
   }
