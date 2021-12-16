@@ -171,7 +171,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 
                 <button *ngIf="dataset.appendSr == 'pending'" type="button" class="btn btn-icon actionClass"
                   role="tooltip" aria-haspopup="true" title="Click to Append New Entries"
-                  (click)="checkAddStatus(dataset.id, dataset.projectName, dataset.projectType)">
+                  (click)="checkAddStatus(dataset.id, dataset.projectName, dataset.projectType, dataset.categoryList, dataset.regression)">
                   <clr-icon shape="add-text"></clr-icon>
                 </button>
                 <button *ngIf="dataset.appendSr == 'adding'" type="button" class="btn btn-icon actionClass"
@@ -181,7 +181,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <button *ngIf="dataset.appendSr == 'done'" type="button"
                   class="btn btn-icon actionClass btn-success greenBtn" role="tooltip" aria-haspopup="true"
                   title="Click to Append New Entries"
-                  (click)="availableNewEntry(dataset.id, dataset.projectName, dataset.projectType)">
+                  (click)="availableNewEntry(dataset.id, dataset.projectName, dataset.projectType, dataset.categoryList, dataset.regression)">
                   <clr-icon shape="add-text"></clr-icon>
                 </button>
 

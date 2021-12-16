@@ -60,6 +60,8 @@ export class AppendNewEntriesComponent implements OnInit {
   appendErrMessage: string;
   selectLabels: any = [];
   ticketQuestions: any = [];
+  categoryList: any;
+  regression: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -80,6 +82,8 @@ export class AppendNewEntriesComponent implements OnInit {
       this.projectName = params['name'];
       this.routeFrom = params['from'];
       this.projectType = params['projectType'];
+      this.categoryList = params['categoryList'];
+      this.regression = params['regression'];
     });
 
     this.userQuestionUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
@@ -539,16 +543,13 @@ export class AppendNewEntriesComponent implements OnInit {
 
   setExistingLabelsforNer() {
     if (this.projectType == 'ner') {
-      const disabedLabels = [];
-      this.sampleData.forEach(elem => {
-        disabedLabels.push(elem.key);
-      });
+      const enableLabels = this.categoryList.split(',');
       for (let i = 0; i < this.previewHeadDatas.length; i++) {
         this.columnInfo.push({
           name: this.previewHeadDatas[i],
           isOriginal: true,
           labelSelected: false,
-          labelSelectedDisable: disabedLabels.includes(this.previewHeadDatas[i]),
+          labelSelectedDisable: this.regression=== "true" ? !enableLabels.includes(this.previewHeadDatas[i]) : true,
           textSelected: false,
           textSelectedDisable: false,
         });
