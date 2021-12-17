@@ -467,9 +467,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
           } else {
             this.submitAndHistory(res, from);
-            this.sr = res;
-            this.sr = this.resetLogSrData(this.sr);
-            this.showPreLogLable();
+          //  this.sr = res;
+            // this.sr = this.resetLogSrData(this.sr);
+            // this.showPreLogLable();
             this.currentLogFile = this.sr.fileInfo.fileName;
             if (this.sr && this.sr.flag && this.sr.flag.silence) {
               this.silenceStatus = true;
