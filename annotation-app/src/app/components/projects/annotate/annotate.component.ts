@@ -38,6 +38,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   questionForm: FormGroup;
   sr: SR;
   originLogData: any;
+  originLogList: any = [];
   logTotalSize: number;
   filterLogData = [];
   isFilterLog: boolean = false;
@@ -379,17 +380,29 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (scrollDistance <= 0) {
           let a = $this.sr.originalData.length;
           if (a < $this.logTotalSize) {  
-            let b = a + 400 < $this.logTotalSize ?  a + 400 : $this.logTotalSize;
-            let i = 0;
-            _.forIn($this.originLogData, function (value, key) {
-              i++;
-              if (a < b && a <= i) {
-               $this.sr.originalData.push({ index: a, line: key, text: value, freeText: '' });
+            let b = a + 400 < $this.logTotalSize ?  a + 400 : $this.logTotalSize; 
+            $this.originLogList.forEach((element, index) => {    
+              if (a < b && a <= index) {
+               $this.sr.originalData.push(element);
                a++;
-              } 
+              }
            });
-          }
-          $this.showPreLogLable();
+          }        
+          setTimeout(() => {
+            if ($this.spansList.length > 0) {
+              $this.spansList.forEach((data) => {
+                $this.onMouseDownTxt(
+                    { line: data.line, label: data.label, freeText: data.freeText },
+                    data.index,
+                  );
+                  $this.onMouseUpTxt(
+                    { line: data.line, label: data.label, freeText: data.freeText },
+                    data.index,
+                    'historyBack',
+                  );
+              });
+            }
+          }, 5);
         }
       });
     }, 5);
@@ -401,10 +414,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     setTimeout(() => {
       if (this.sr.userInputs && this.sr.userInputs.length > 0) {
         this.sr.userInputs[0].problemCategory.forEach((element) => {
-          for (let i = 0; i < this.sr.originalData.length; i++) {
-            if (element.line == this.sr.originalData[i].line) {
-              this.onMouseDownTxt(element, this.sr.originalData[i].index);
-              this.onMouseUpTxt(element, this.sr.originalData[i].index, 'historyBack');
+          for (let i = 0; i < this.originLogList.length; i++) {
+            if (element.line == this.originLogList[i].line) {
+              this.onMouseDownTxt(element, this.originLogList[i].index);
+              this.onMouseUpTxt(element, this.originLogList[i].index, 'historyBack');
               break;
             }
           }
@@ -415,7 +428,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sr.userInputs[0].logFreeText !== '' ? this.sr.userInputs[0].logFreeText : null,
           );
       }
-    }, 10);
+    }, 10); 
   }
 
   toReadStorageSetting(set) {
@@ -2603,29 +2616,25 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-
-  getInitLogData(originalLogData, sr) {
-    const flag = [];
-    if (Object.prototype.toString.call(originalLogData) !== '[object Array]') {
-      let a = 0;
-       _.forIn(originalLogData, function (value, key) {
-        if (a < 400) {
-          flag.push({ index: a, line: key, text: value, freeText: '' });
-          a++;
-        }
-      });
-      sr.originalData = flag;
-    }
-  }
-
   resetLogSrData(sr) {
     if (!sr.MSG) {     
       sr = sr[0];
-      if (this.originLogData === undefined) {
-        this.originLogData = sr.originalData;
-        this.logTotalSize = Object.keys(this.originLogData).length;
+      const flag = [];
+      const $this = this;
+      if (Object.prototype.toString.call(sr.originalData) !== '[object Array]') {
+        let a = 0;
+         _.forIn(sr.originalData, function (value, key) {
+          if ($this.logTotalSize === undefined) {
+            $this.originLogList.push({ index: a, line: key, text: value, freeText: '' });
+          }
+          if (a < 400) {
+            flag.push({ index: a, line: key, text: value, freeText: '' });
+          }
+          a++;
+        });
+        $this.logTotalSize = $this.originLogList.length;
+        sr.originalData = flag;
       }
-      this.getInitLogData(sr.originalData, sr);
       return sr;
     } else {
       return sr;
@@ -2742,8 +2751,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.sr.originalData.filter(item => item.index === this.spanEnd).annotate = true;
           this.sr.originalData.filter(item => item.index === this.spanEnd).freeText = from == 'historyBack' ? data.freeText : '';
         } else {
-          this.sr.originalData[this.spanEnd].annotate = true;
-          this.sr.originalData[this.spanEnd].freeText = from == 'historyBack' ? data.freeText : '';
+          if (this.sr.originalData[this.spanEnd]) {
+            this.sr.originalData[this.spanEnd].annotate = true;
+            this.sr.originalData[this.spanEnd].freeText = from == 'historyBack' ? data.freeText : '';
+          }
         }
       } else {
         if (from !== 'historyBack') {
@@ -2751,8 +2762,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sr.originalData.filter(item => item.index === this.spanEnd).annotate = false;
             this.sr.originalData.filter(item => item.index === this.spanEnd).freeText = '';
           } else {
-            this.sr.originalData[this.spanEnd].annotate = false;
-            this.sr.originalData[this.spanEnd].freeText = '';
+            if (this.sr.originalData[this.spanEnd]) {
+              this.sr.originalData[this.spanEnd].annotate = false;
+              this.sr.originalData[this.spanEnd].freeText = '';
+            }
           }
         }
       }
@@ -3059,43 +3072,54 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 20);
   }
 
+  getFilters(e) {
+    const keyWordFilters = [];
+    const regexFilters = [];
+    e.forEach(filter => {
+      if (filter.filterType == 'keyword') {
+        keyWordFilters.push(RegExp(filter.filterText, 'gi'));
+      } else {
+        regexFilters.push(filter.filterText);
+      }
+    });
+  }
+
   filterAllLogTxt(e, filterRowsIndex) {
-    const len = Object.keys(this.originLogData).length < 400 ?  Object.keys(this.originLogData).length : 400;
+    const len = this.originLogList.length < 400 ?  this.originLogList.length : 400;
     let $this = this;
     let i = 0;
     $this.filterLogData = [];
     if (e.length > 0) {
       this.isFilterLog = true;
-      _.forIn(this.originLogData, function (value, key) {
+      this.originLogList.forEach((element, index) => {
         let arr = [];
-        e.forEach((filter) => {
+        e.forEach(filter => {
           if (filter.filterType == 'keyword') {
-            const matchResult = [...value.matchAll(RegExp(filter.filterText, 'gi'))];     
+            const matchResult = [...element.text.matchAll(RegExp(filter.filterText, 'gi'))];     
             if (matchResult.length && matchResult[0].index ) {
               arr = [...arr, ...matchResult];
-              if ($this.filterLogData.some(item => item.index === i)) { 
-                const filterItem = $this.filterLogData.find(item => item.index === i);
+              if ($this.filterLogData.some(item => item.index === index)) { 
+                const filterItem = $this.filterLogData.find(item => item.index === index);
                 filterItem.matchResult = arr;   
               } else {
-                $this.filterLogData.push({ index: i, line: key, text: value, freeText: '', filter: true, matchResult: arr });
-                filterRowsIndex.push(i); 
+                $this.filterLogData.push({ index: index, line: element.line, text: element.text, freeText: '', filter: true, matchResult: arr });
+                filterRowsIndex.push(index); 
               }
             }
           } else {
-            const matchResult = $this.toolService.regexExec(filter.filterText, value);           
+            const matchResult = $this.toolService.regexExec(filter.filterText, element.text);           
             if (matchResult.length > 0 && matchResult[0].index ) {
               arr = [...arr, ...matchResult];
-              if ($this.filterLogData.some(item => item.index === i)) {
-                const filterItem = $this.filterLogData.find(item => item.index === i);
+              if ($this.filterLogData.some(item => item.index === index)) {
+                const filterItem = $this.filterLogData.find(item => item.index === index);
                 filterItem.matchResult = arr;
               } else {
-                $this.filterLogData.push({ index: i, line: key, text: value, freeText: '', filter: true, matchResult: arr });
-                filterRowsIndex.push(i);  
+                $this.filterLogData.push({ index: index, line: element.line, text: element.text, freeText: '', filter: true, matchResult: arr });
+                filterRowsIndex.push(index);  
               }
             }
           }
         });
-        i++;
       });
     } else {
       this.isFilterLog = false;
@@ -3111,7 +3135,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       // this.sr.originalData = filterData;
       this.logFilterScrollListener(filterRowsIndex);
     } else {
-      this.getInitLogData(this.originLogData, this.sr);
+      const flag = [];
+      this.originLogList.forEach((element, index) => {
+        if (index < 400) {
+          flag.push(element);
+        }
+      });
+      this.sr.originalData = flag;
       this.addLogScrollListener();
     }
     setTimeout(() => {
