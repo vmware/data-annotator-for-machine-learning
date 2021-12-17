@@ -3087,39 +3087,29 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   filterAllLogTxt(e, filterRowsIndex) {
     const len = this.originLogList.length < 400 ?  this.originLogList.length : 400;
     let $this = this;
-    let i = 0;
     $this.filterLogData = [];
     if (e.length > 0) {
       this.isFilterLog = true;
       this.originLogList.forEach((element, index) => {
         let arr = [];
+        let existLine = true;
         e.forEach(filter => {
+          let matchResult =[];
           if (filter.filterType == 'keyword') {
-            const matchResult = [...element.text.matchAll(RegExp(filter.filterText, 'gi'))];     
-            if (matchResult.length && matchResult[0].index ) {
-              arr = [...arr, ...matchResult];
-              if ($this.filterLogData.some(item => item.index === index)) { 
-                const filterItem = $this.filterLogData.find(item => item.index === index);
-                filterItem.matchResult = arr;   
-              } else {
-                $this.filterLogData.push({ index: index, line: element.line, text: element.text, freeText: '', filter: true, matchResult: arr });
-                filterRowsIndex.push(index); 
-              }
-            }
+            matchResult = [...element.text.matchAll(RegExp(filter.filterText, 'gi'))]; 
           } else {
-            const matchResult = $this.toolService.regexExec(filter.filterText, element.text);           
-            if (matchResult.length > 0 && matchResult[0].index ) {
-              arr = [...arr, ...matchResult];
-              if ($this.filterLogData.some(item => item.index === index)) {
-                const filterItem = $this.filterLogData.find(item => item.index === index);
-                filterItem.matchResult = arr;
-              } else {
-                $this.filterLogData.push({ index: index, line: element.line, text: element.text, freeText: '', filter: true, matchResult: arr });
-                filterRowsIndex.push(index);  
-              }
-            }
+            matchResult = $this.toolService.regexExec(filter.filterText, element.text);  
+          }
+          if (matchResult.length) {
+            arr = [...arr, ...matchResult];
+          } else {
+            existLine = false;
           }
         });
+        if (existLine) {
+          $this.filterLogData.push({ index: index, line: element.line, text: element.text, freeText: '', filter: true, matchResult: arr });
+          filterRowsIndex.push(index); 
+        }
       });
     } else {
       this.isFilterLog = false;
@@ -3132,7 +3122,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           $this.getElementService.setFilterHighLight('txtRowContent' + elem.index, elem.text, elem.matchResult);
         }
       })
-      // this.sr.originalData = filterData;
       this.logFilterScrollListener(filterRowsIndex);
     } else {
       const flag = [];
