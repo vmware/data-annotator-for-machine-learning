@@ -467,9 +467,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
           } else {
             this.submitAndHistory(res, from);
-          //  this.sr = res;
-            // this.sr = this.resetLogSrData(this.sr);
-            // this.showPreLogLable();
             this.currentLogFile = this.sr.fileInfo.fileName;
             if (this.sr && this.sr.flag && this.sr.flag.silence) {
               this.silenceStatus = true;
@@ -2723,6 +2720,30 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.spanStart = row;
   }
 
+  setFreeText(index, data, from, annotate) {
+    if (this.isFilterLog) {
+      const filterTxt = this.sr.originalData.filter(item => item.index === index);
+      if (filterTxt.length) {
+        filterTxt[0].annotate = annotate;
+        if (annotate) {
+          filterTxt[0].freeText = from == 'historyBack' ? data.freeText : '';
+        } else {
+          filterTxt[0].freeText = '';
+        }
+      }
+    } else {
+      if (this.sr.originalData[index]) {
+        this.sr.originalData[index].annotate = annotate;
+        this.sr.originalData[index].freeText = from == 'historyBack' ? data.freeText : '';
+        if (annotate) {
+          this.sr.originalData[index].freeText = from == 'historyBack' ? data.freeText : '';
+        } else {
+          this.sr.originalData[index].freeText = '';
+        }
+      }
+    }
+  }
+
   onMouseUpTxt(data, row, from) {
     this.spanEnd = row;
     let spanslistPromise;
@@ -2746,26 +2767,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           freeText: from == 'historyBack' ? data.freeText : '',
           index: this.spanEnd,
         });
-        if (this.isFilterLog) {
-          this.sr.originalData.filter(item => item.index === this.spanEnd).annotate = true;
-          this.sr.originalData.filter(item => item.index === this.spanEnd).freeText = from == 'historyBack' ? data.freeText : '';
-        } else {
-          if (this.sr.originalData[this.spanEnd]) {
-            this.sr.originalData[this.spanEnd].annotate = true;
-            this.sr.originalData[this.spanEnd].freeText = from == 'historyBack' ? data.freeText : '';
-          }
-        }
+        this.setFreeText(this.spanEnd, data, from, true);
       } else {
         if (from !== 'historyBack') {
-          if (this.isFilterLog) {
-            this.sr.originalData.filter(item => item.index === this.spanEnd).annotate = false;
-            this.sr.originalData.filter(item => item.index === this.spanEnd).freeText = '';
-          } else {
-            if (this.sr.originalData[this.spanEnd]) {
-              this.sr.originalData[this.spanEnd].annotate = false;
-              this.sr.originalData[this.spanEnd].freeText = '';
-            }
-          }
+          this.setFreeText(this.spanEnd, data, from, false);
+        } else {
+          this.setFreeText(this.spanEnd, data, from, true);
         }
       }
       const txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
@@ -2791,13 +2798,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 _.map(this.cloneSpanslist, 'index'),
                 _.map(this.spansList, 'index'),
               );
-              if (this.isFilterLog) {
-                this.sr.originalData.filter(item => item.index === flag[0]).annotate = false;
-                this.sr.originalData.filter(item => item.index === flag[0]).freeText = '';
-              } else {
-                this.sr.originalData[flag[0]].annotate = false;
-                this.sr.originalData[flag[0]].freeText = '';
-              }
+              this.setFreeText(flag[0], data, from, false);
             }
             this.cloneSpanslist = _.cloneDeep(this.spansList);
           });
@@ -2826,13 +2827,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 _.map(this.cloneSpanslist, 'index'),
                 _.map(this.spansList, 'index'),
               );
-              if (this.isFilterLog) {
-                this.sr.originalData.filter(item => item.index === flag[0]).annotate = false;
-                this.sr.originalData.filter(item => item.index === flag[0]).freeText = '';
-              } else {
-                this.sr.originalData[flag[0]].annotate = false;
-                this.sr.originalData[flag[0]].freeText = '';
-              }
+              this.setFreeText(flag[0], data, from, false);
             }
             this.cloneSpanslist = _.cloneDeep(this.spansList);
           });
@@ -2890,13 +2885,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   _.map(this.cloneSpanslist, 'index'),
                   _.map(this.spansList, 'index'),
                 );
-                if (this.isFilterLog) {
-                  this.sr.originalData.filter(item => item.index === flag[0]).annotate = false;
-                  this.sr.originalData.filter(item => item.index === flag[0]).freeText = '';
-                } else {
-                  this.sr.originalData[flag[0]].annotate = false;
-                  this.sr.originalData[flag[0]].freeText = '';
-                }
+                this.setFreeText(flag[0], data, from, false);
               }
               this.cloneSpanslist = _.cloneDeep(this.spansList);
             });
@@ -2974,13 +2963,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   _.map(this.cloneSpanslist, 'index'),
                   _.map(this.spansList, 'index'),
                 );
-                if (this.isFilterLog) {
-                  this.sr.originalData.filter(item => item.index === flag[0]).annotate = false;
-                  this.sr.originalData.filter(item => item.index === flag[0]).freeText = '';
-                } else {
-                  this.sr.originalData[flag[0]].annotate = false;
-                  this.sr.originalData[flag[0]].freeText = '';
-                }
+                this.setFreeText(flag[0], data, from, false);
               }
               this.cloneSpanslist = _.cloneDeep(this.spansList);
             });
