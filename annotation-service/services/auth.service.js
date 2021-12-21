@@ -10,7 +10,7 @@ const axios = require('axios');
 const config = require('../config/config');
 const { generateBasicToken } = require('../middlewares/jwt.middleware');
 const userService = require('./user-service');
-
+const https = require('https');
 
 let publicKey;
 
@@ -40,7 +40,7 @@ async function getPublicKey(){
 
 async function authentication() {
     if (config.ESP) {
-        return await getPublicKey()
+        return getPublicKey()
     }
     return "open source";
 }
@@ -50,13 +50,13 @@ async function login(req){
     if (!req.body.email || !req.body.password) {
         throw {CODE: 401, MSG: "USERNAME OR PASSWORD IS EMPTY"};
     }
-    const user = await userService.queryUserById(req.body.email);
-    if (!user) {
-        throw {CODE: 401, MSG: "USERNAME OR PASSWORD IS INVALID"};
+    let user;
+    if (req.body.ldap) {
+        user = await authenticateWithLDAP(req);
+    }else{
+        user = await basicLogin(req);
     }
-    if (user.password != Buffer.from(req.body.password).toString("base64")) {
-        throw {CODE: 401, MSG: "USERNAME OR PASSWORD IS INVALID"};
-    }
+    
     const token = await generateBasicToken(user.email);
     return {
         token: token,
@@ -67,10 +67,45 @@ async function login(req){
 }
 
 async function refreshToken(req) {
-    return await generateBasicToken(req.auth.email);
+    return generateBasicToken(req.auth.email);
 }
 
+async function basicLogin(req){
+    const user = await userService.queryUserById(req.body.email);
+    if (!user) {
+        throw {CODE: 401, MSG: "USERNAME OR PASSWORD IS INVALID"};
+    }
+    if (user.password != Buffer.from(req.body.password).toString("base64")) {
+        throw {CODE: 401, MSG: "USERNAME OR PASSWORD IS INVALID"};
+    }
+    return user;
+}
 
+async function authenticateWithLDAP(req) {
+    if (!config.loginWithLDAP) {
+        throw {CODE: 4002, MSG: "MISSING THE LDAP AUTHORIZATION LINK"};
+    }
+    const userBtoa = Buffer.from(`${req.body.email}:${req.body.password}`).toString('base64');
+    const requestOptions = {
+        method: 'post',
+        url: config.loginWithLDAP,
+        headers: {"Authorization": "Basic " + userBtoa },
+        httpsAgent: new https.Agent({rejectUnauthorized: false})
+    };
+    try {
+        resp =  await axios.request(requestOptions);
+        if (resp.status != 200) {
+            throw {CODE: 401, MSG: "USERNAME OR PASSWORD IS INVALID"};
+        }
+        const email = resp.data.emailAddress? resp.data.emailAddress: resp.data.email;
+        const userName = resp.data.userName? resp.data.userName: resp.data.fullName;
+        return userService.queryAndUpdateUser(email, userName);
+
+    } catch (error) {
+        console.log(error);
+        throw {CODE: error.code, MSG: error.message};
+    }
+}
 
 module.exports = {
     authentication,

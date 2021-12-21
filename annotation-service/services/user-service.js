@@ -54,7 +54,7 @@ async function saveUser(req) {
         schema.role = 'Admin';
     }
     console.log(`[ USER ] service saveUser ${req.body.email} info when first time login`);
-    return await userDB.saveUser(schema);
+    return userDB.saveUser(schema);
 }
 
 async function deleteUser(req) {
@@ -71,7 +71,7 @@ async function updateUserRole(req) {
     let conditions = { _id: req.body.user };
     let update = { $set: { role: req.body.role, createdDate: Date.now() } };
     let options = { new: true };
-    return await userDB.findUpdateUser(conditions, update, options);
+    return userDB.findUpdateUser(conditions, update, options);
 
 }
 
@@ -133,7 +133,7 @@ async function getUserRoleById(req) {
             const conditions = { _id: req.auth.email };
             const options = { new: true };
             const update = { $set: { fullName: req.auth.name } };
-            return await userDB.findUpdateUser(conditions, update, options);
+            return userDB.findUpdateUser(conditions, update, options);
         }
         return user;
         
@@ -149,7 +149,7 @@ async function getUserRoleById(req) {
         if (flag != -1) {
             schema.role = 'Admin';
         }
-        return await userDB.saveUser(schema);
+        return userDB.saveUser(schema);
     }
 }
 
@@ -157,6 +157,34 @@ async function queryUserById(uid){
     console.log('[ USER ] service queryUserById: ', uid);
     return userDB.queryUserById({ _id: uid });
 }
+
+async function queryAndUpdateUser(email, userName){
+    if (!email) {
+        throw{CODE: 4001, MSG: "email must not be empty"};
+    }
+    const user = await userDB.queryUserById(email);
+    if (user) {
+        return user;
+    }else{
+        let schema = {
+            _id: email,
+            email: email,
+            fullName: userName,
+            createdDate: Date.now()
+        };
+        if (!userName) {
+            schema.fullName = email.split("@")[0];
+        }
+        const flag = config.adminDefault.indexOf(email);
+        if (flag != -1) {
+            schema.role = 'Admin';
+        }
+        await userDB.saveUser(schema);
+
+        return userDB.queryUserById(email);
+    }
+}
+
 
 module.exports = {
     getAllusers,
@@ -168,4 +196,5 @@ module.exports = {
     getUserPoint,
     getUserRoleById,
     queryUserById,
+    queryAndUpdateUser,
 }
