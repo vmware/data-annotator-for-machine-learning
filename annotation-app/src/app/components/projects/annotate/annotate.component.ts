@@ -37,7 +37,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   user: any;
   questionForm: FormGroup;
   sr: SR;
-  originLogData: any;
   originLogList: any = [];
   logTotalSize: number;
   filterLogData = [];
