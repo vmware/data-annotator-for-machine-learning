@@ -3017,8 +3017,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       let dom = this.el.nativeElement.querySelector('.txtBox');
       let $this = this;
       dom.addEventListener('scroll', function() {
-        const scrollDistance =dom.scrollHeight - dom.scrollTop - dom.clientHeight;
-        if (scrollDistance <= 0) {
+        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight;
+        if (scrollDistance <= 10) {
           let filterLogDataSize = $this.filterLogData.length;
           let start = $this.sr.originalData.length;
           if (start < filterLogDataSize) {
