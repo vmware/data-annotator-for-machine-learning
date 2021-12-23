@@ -102,7 +102,6 @@ async function authenticateWithLDAP(req) {
         return userService.queryAndUpdateUser(email, userName);
 
     } catch (error) {
-        console.log(error);
         throw {CODE: error.code, MSG: error.message};
     }
 }
