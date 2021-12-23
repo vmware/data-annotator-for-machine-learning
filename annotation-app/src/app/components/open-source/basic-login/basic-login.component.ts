@@ -47,7 +47,7 @@ export class BasicLoginComponent implements OnInit {
       firstname: new FormControl('', null),
       lastname: new FormControl('', null),
       username: new FormControl('', DatasetValidator.validNormalEmail()),
-      password: new FormControl('', null),
+      password: new FormControl('', DatasetValidator.validPassword()),
     });
   }
 

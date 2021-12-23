@@ -70,6 +70,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           placeholder="Password"
           formControlName="password"
         />
+        <clr-control-error *ngIf="dsForm.get('password').errors && dsForm.get('password').touched">
+          {{ dsForm.get('password').errors.msg.value }}</clr-control-error
+        >
       </clr-password-container>
 
       <div *ngIf="error" class="error active">Invalid user name or password</div>
