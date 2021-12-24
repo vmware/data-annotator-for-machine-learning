@@ -144,6 +144,10 @@ export class BasicLoginComponent implements OnInit {
         (res) => {
           this.registerSuccess = 'Sign Up Complete!';
           this.loading = false;
+          setTimeout(() => {
+            this.isClickSignup = false;
+            this.registerSuccess = '';
+          }, 500);
         },
         (err) => {
           this.registerFailed = err.error.MSG;
