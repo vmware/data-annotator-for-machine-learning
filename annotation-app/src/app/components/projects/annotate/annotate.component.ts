@@ -3022,7 +3022,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           let filterLogDataSize = $this.filterLogData.length;
           let start = $this.sr.originalData.length;
           if (start < filterLogDataSize) {
-            let end = start + 100 < filterLogDataSize ?  start + 100 : filterLogDataSize;
+            let end = start + 400 < filterLogDataSize ?  start + 400 : filterLogDataSize;
             $this.filterLogData.forEach((elem, index) => {
               if (start < end && start <= index) {
                   $this.sr.originalData.push(elem);
