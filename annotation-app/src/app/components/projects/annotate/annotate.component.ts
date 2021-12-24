@@ -37,6 +37,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   user: any;
   questionForm: FormGroup;
   sr: SR;
+  originLogList: any = [];
+  logTotalSize: number;
+  filterLogData = [];
+  isFilterLog: boolean = false;
   categories: string[];
   loading: boolean;
   error: string;
@@ -366,15 +370,53 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  addLogScrollListener() {
+    setTimeout(() => {
+      let dom = this.el.nativeElement.querySelector('.txtBox');
+      let $this = this;
+      dom.addEventListener('scroll', function() {
+        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight;
+        if (scrollDistance <= 10) {
+          let a = $this.sr.originalData.length;
+          if (a < $this.logTotalSize) {  
+            let b = a + 400 < $this.logTotalSize ?  a + 400 : $this.logTotalSize; 
+            $this.originLogList.forEach((element, index) => {    
+              if (a < b && a <= index) {
+               $this.sr.originalData.push(element);
+               a++;
+              }
+           });
+          }        
+          setTimeout(() => {
+            if ($this.spansList.length > 0) {
+              $this.spansList.forEach((data) => {
+                $this.onMouseDownTxt(
+                    { line: data.line, label: data.label, freeText: data.freeText },
+                    data.index,
+                  );
+                  $this.onMouseUpTxt(
+                    { line: data.line, label: data.label, freeText: data.freeText },
+                    data.index,
+                    'historyBack',
+                  );
+              });
+            }
+          }, 5);
+        }
+      });
+    }, 5);
+  }
+
   showPreLogLable() {
+    this.addLogScrollListener();
     this.spansList = [];
     setTimeout(() => {
       if (this.sr.userInputs && this.sr.userInputs.length > 0) {
         this.sr.userInputs[0].problemCategory.forEach((element) => {
-          for (let i = 0; i < this.sr.originalData.length; i++) {
-            if (element.line == this.sr.originalData[i].line) {
-              this.onMouseDownTxt(element, this.sr.originalData[i].index);
-              this.onMouseUpTxt(element, this.sr.originalData[i].index, 'historyBack');
+          for (let i = 0; i < this.originLogList.length; i++) {
+            if (element.line == this.originLogList[i].line) {
+              this.onMouseDownTxt(element, this.originLogList[i].index);
+              this.onMouseUpTxt(element, this.originLogList[i].index, 'historyBack');
               break;
             }
           }
@@ -385,7 +427,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sr.userInputs[0].logFreeText !== '' ? this.sr.userInputs[0].logFreeText : null,
           );
       }
-    }, 10);
+    }, 10); 
   }
 
   toReadStorageSetting(set) {
@@ -424,9 +466,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
           } else {
             this.submitAndHistory(res, from);
-            this.sr = res;
-            this.sr = this.resetLogSrData(this.sr);
-            this.showPreLogLable();
             this.currentLogFile = this.sr.fileInfo.fileName;
             if (this.sr && this.sr.flag && this.sr.flag.silence) {
               this.silenceStatus = true;
@@ -2585,16 +2624,21 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   resetLogSrData(sr) {
-    if (!sr.MSG) {
-      const flag = [];
+    if (!sr.MSG) {     
       sr = sr[0];
+      const flag = [];
+      const $this = this;
+      $this.originLogList = [];
       if (Object.prototype.toString.call(sr.originalData) !== '[object Array]') {
         let a = 0;
-        _.forIn(sr.originalData, function (value, key) {
-          flag.push({ index: a, line: key, text: value, freeText: '' });
+         _.forIn(sr.originalData, function (value, key) {
+          $this.originLogList.push({ index: a, line: key, text: value, freeText: '' });
+          if (a < 400) {
+            flag.push({ index: a, line: key, text: value, freeText: '' });
+          }
           a++;
         });
-
+        $this.logTotalSize = $this.originLogList.length;
         sr.originalData = flag;
       }
       return sr;
@@ -2686,6 +2730,30 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.spanStart = row;
   }
 
+  setFreeText(index, data, from, annotate) {
+    if (this.isFilterLog) {
+      const filterTxt = this.sr.originalData.filter(item => item.index === index);
+      if (filterTxt.length) {
+        filterTxt[0].annotate = annotate;
+        if (annotate) {
+          filterTxt[0].freeText = from == 'historyBack' ? data.freeText : '';
+        } else {
+          filterTxt[0].freeText = '';
+        }
+      }
+    } else {
+      if (this.sr.originalData[index]) {
+        this.sr.originalData[index].annotate = annotate;
+        this.sr.originalData[index].freeText = from == 'historyBack' ? data.freeText : '';
+        if (annotate) {
+          this.sr.originalData[index].freeText = from == 'historyBack' ? data.freeText : '';
+        } else {
+          this.sr.originalData[index].freeText = '';
+        }
+      }
+    }
+  }
+
   onMouseUpTxt(data, row, from) {
     this.spanEnd = row;
     let spanslistPromise;
@@ -2709,12 +2777,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           freeText: from == 'historyBack' ? data.freeText : '',
           index: this.spanEnd,
         });
-        this.sr.originalData[this.spanEnd].annotate = true;
-        this.sr.originalData[this.spanEnd].freeText = from == 'historyBack' ? data.freeText : '';
+        this.setFreeText(this.spanEnd, data, from, true);
       } else {
         if (from !== 'historyBack') {
-          this.sr.originalData[this.spanEnd].annotate = false;
-          this.sr.originalData[this.spanEnd].freeText = '';
+          this.setFreeText(this.spanEnd, data, from, false);
+        } else {
+          this.setFreeText(this.spanEnd, data, from, true);
         }
       }
       const txtRowEntityDom = this.el.nativeElement.querySelector('.txtRowEntity' + this.spanEnd);
@@ -2740,8 +2808,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 _.map(this.cloneSpanslist, 'index'),
                 _.map(this.spansList, 'index'),
               );
-              this.sr.originalData[flag[0]].annotate = false;
-              this.sr.originalData[flag[0]].freeText = '';
+              this.setFreeText(flag[0], data, from, false);
             }
             this.cloneSpanslist = _.cloneDeep(this.spansList);
           });
@@ -2770,8 +2837,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 _.map(this.cloneSpanslist, 'index'),
                 _.map(this.spansList, 'index'),
               );
-              this.sr.originalData[flag[0]].annotate = false;
-              this.sr.originalData[flag[0]].freeText = '';
+              this.setFreeText(flag[0], data, from, false);
             }
             this.cloneSpanslist = _.cloneDeep(this.spansList);
           });
@@ -2829,8 +2895,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   _.map(this.cloneSpanslist, 'index'),
                   _.map(this.spansList, 'index'),
                 );
-                this.sr.originalData[flag[0]].annotate = false;
-                this.sr.originalData[flag[0]].freeText = '';
+                this.setFreeText(flag[0], data, from, false);
               }
               this.cloneSpanslist = _.cloneDeep(this.spansList);
             });
@@ -2908,8 +2973,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   _.map(this.cloneSpanslist, 'index'),
                   _.map(this.spansList, 'index'),
                 );
-                this.sr.originalData[flag[0]].annotate = false;
-                this.sr.originalData[flag[0]].freeText = '';
+                this.setFreeText(flag[0], data, from, false);
               }
               this.cloneSpanslist = _.cloneDeep(this.spansList);
             });
@@ -2959,47 +3023,40 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  toFilterLog(e) {
-    const filterRowsIndex = [];
-    this.sr.originalData.forEach((element) => {
-      element.filter = true;
-    });
-    if (e.length > 0) {
-      this.sr.originalData.forEach((element, index) => {
-        let arr = [];
-        e.forEach((filter) => {
-          if (filter.filterType == 'keyword') {
-            const a = [...element.text.matchAll(RegExp(filter.filterText, 'gi'))];
-            if (a.length > 0) {
-              arr = [...arr, ...a];
-            }
-          } else {
-            const a = this.toolService.regexExec(filter.filterText, element.text);
-            if (a.length > 0) {
-              arr = [...arr, ...a];
-            }
+  logFilterScrollListener(filterRowsIndex) {
+    setTimeout(() => {
+      let dom = this.el.nativeElement.querySelector('.txtBox');
+      let $this = this;
+      dom.addEventListener('scroll', function() {
+        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight;
+        if (scrollDistance <= 10) {
+          let filterLogDataSize = $this.filterLogData.length;
+          let start = $this.sr.originalData.length;
+          if (start < filterLogDataSize) {
+            let end = start + 400 < filterLogDataSize ?  start + 400 : filterLogDataSize;
+            $this.filterLogData.forEach((elem, index) => {
+              if (start < end && start <= index) {
+                  $this.sr.originalData.push(elem);
+                  $this.getElementService.setFilterHighLight('txtRowContent' + elem.index, elem.text, elem.matchResult);     
+                  start++;
+                }
+            });
           }
-          if (arr.length > 0) {
-            element.filter = true;
-            this.getElementService.setFilterHighLight(
-              'txtRowContent' + element.index,
-              element.text,
-              arr,
-            );
-            filterRowsIndex.push(element.index);
-          } else {
-            element.filter = false;
-          }
-        });
+        }
       });
+    }, 5);
+    this.showSpanListLog(filterRowsIndex, '');
+  }
+
+  showSpanListLog(filterRowsIndex, e) {
+    let condition = false;
+    if (e && e.length == 0) {
+      condition = true;
     }
     setTimeout(() => {
       if (this.spansList.length > 0) {
         this.spansList.forEach((data) => {
-          if (
-            e.length == 0 ||
-            (filterRowsIndex.length > 0 && filterRowsIndex.indexOf(data.index) > -1)
-          ) {
+          if (condition || filterRowsIndex.length > 0 && filterRowsIndex.indexOf(data.index) > -1) {
             this.onMouseDownTxt(
               { line: data.line, label: data.label, freeText: data.freeText },
               data.index,
@@ -3013,6 +3070,63 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       }
     }, 20);
+  }
+
+  setFilterLogData(e, filterRowsIndex) {
+    this.originLogList.forEach((element, index) => {
+      let arr = [];
+      let existLine = true;
+      e.forEach(filter => {
+        let matchResult =[];
+        if (filter.filterType == 'keyword') {
+          matchResult = [...element.text.matchAll(RegExp(filter.filterText, 'gi'))]; 
+        } else {
+          matchResult = this.toolService.regexExec(filter.filterText, element.text);  
+        }
+        if (matchResult.length) {
+          arr = [...arr, ...matchResult];
+        } else {
+          existLine = false;
+        }
+      });
+      if (existLine) {
+        this.filterLogData.push({ index: index, line: element.line, text: element.text, freeText: '', filter: true, matchResult: arr });
+        filterRowsIndex.push(index); 
+      }
+    });
+  }
+
+  filterAllLogTxt(e, filterRowsIndex) {
+    const len = this.originLogList.length < 400 ?  this.originLogList.length : 400;
+    this.filterLogData = [];
+    if (e.length > 0) {
+      this.isFilterLog = true;
+      this.setFilterLogData(e, filterRowsIndex);
+      this.sr.originalData = [];
+      this.filterLogData.forEach((elem, index) => {
+        if (index < len) {
+          this.sr.originalData.push(elem);
+          this.getElementService.setFilterHighLight('txtRowContent' + elem.index, elem.text, elem.matchResult);
+        }
+      })
+      this.logFilterScrollListener(filterRowsIndex);
+    } else {
+      this.isFilterLog = false;
+      const flag = [];
+      this.originLogList.forEach((element, index) => {
+        if (index < 400) {
+          flag.push(element);
+        }
+      });
+      this.sr.originalData = flag;
+      this.addLogScrollListener();
+    }
+    this.showSpanListLog(filterRowsIndex, e);
+  }
+
+  toFilterLog(e) {
+    const filterRowsIndex = [];
+    this.filterAllLogTxt(e, filterRowsIndex);
   }
 
   updateFilterSelect(e) {
