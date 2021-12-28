@@ -37,7 +37,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   user: any;
   questionForm: FormGroup;
   sr: SR;
-  originLogData: any;
   originLogList: any = [];
   logTotalSize: number;
   filterLogData = [];
@@ -3029,12 +3028,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       let dom = this.el.nativeElement.querySelector('.txtBox');
       let $this = this;
       dom.addEventListener('scroll', function() {
-        const scrollDistance =dom.scrollHeight - dom.scrollTop - dom.clientHeight;
-        if (scrollDistance <= 0) {
+        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight;
+        if (scrollDistance <= 10) {
           let filterLogDataSize = $this.filterLogData.length;
           let start = $this.sr.originalData.length;
           if (start < filterLogDataSize) {
-            let end = start + 100 < filterLogDataSize ?  start + 100 : filterLogDataSize;
+            let end = start + 400 < filterLogDataSize ?  start + 400 : filterLogDataSize;
             $this.filterLogData.forEach((elem, index) => {
               if (start < end && start <= index) {
                   $this.sr.originalData.push(elem);

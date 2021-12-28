@@ -115,15 +115,15 @@ export class DatasetValidator {
         return { msg: { value: DatasetValidator.REQUIRED_FIELD } };
       }
 
-      const argRegEx = new RegExp('(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[^a-zA-Z0-9]).{8,20}');
-      if (!control.value.match(argRegEx)) {
-        return {
-          msg: {
-            value:
-              'Use at least 8 and at most 20 characters, including at least one of each of the following: special character (@%+/’!#$^?:,()[]~-_.), lowercase, uppercase and number.',
-          },
-        };
-      }
+      // const argRegEx = new RegExp('(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[^a-zA-Z0-9]).{8,20}');
+      // if (!control.value.match(argRegEx)) {
+      //   return {
+      //     msg: {
+      //       value:
+      //         'Use at least 8 and at most 20 characters, including at least one of each of the following: special character (@%+/’!#$^?:,()[]~-_.), lowercase, uppercase and number.',
+      //     },
+      //   };
+      // }
       return null;
     };
   }

@@ -25,6 +25,8 @@ export class BasicLoginComponent implements OnInit {
   isClickSignup: boolean;
   registerSuccess: string;
   registerFailed: string;
+  loginType: string;
+  isLadp: boolean;
 
   constructor(
     private avaService: AvaService,
@@ -36,6 +38,7 @@ export class BasicLoginComponent implements OnInit {
   ngOnInit() {
     this.error = false;
     this.isClickSignup = false;
+    this.isLadp = false;
     this.createForm();
   }
 
@@ -76,6 +79,14 @@ export class BasicLoginComponent implements OnInit {
     this.registerSuccess = '';
   }
 
+  selectedUserType(event) {
+    if (event.target.value === 'ldap') {
+      this.isLadp = true;
+    } else {
+      this.isLadp = false;
+    }
+  }
+
   clickLog() {
     FormValidatorUtil.markControlsAsTouched(this.dsForm);
     if (!this.dsForm.invalid) {
@@ -84,13 +95,11 @@ export class BasicLoginComponent implements OnInit {
         email: this.dsForm.get('username').value,
         password: this.dsForm.get('password').value,
       };
+      if (this.isLadp) {
+        param['ldap'] = true;
+      }
       this.avaService.login(param).subscribe(
         (res) => {
-          // if (res.MSG) {
-          //   this.error = true;
-          //   this.loading = false;
-          //   return;
-          // }
           const user = {
             email: res.email,
             name: res.fullName,
@@ -133,13 +142,12 @@ export class BasicLoginComponent implements OnInit {
       };
       this.avaService.register(param).subscribe(
         (res) => {
-          // if (!res.MSG) {
-          //   this.registerSuccess = 'Sign Up Complete!';
-          // } else if (res.MSG) {
-          //   this.registerFailed = res.MSG;
-          // }
           this.registerSuccess = 'Sign Up Complete!';
           this.loading = false;
+          setTimeout(() => {
+            this.isClickSignup = false;
+            this.registerSuccess = '';
+          }, 500);
         },
         (err) => {
           this.registerFailed = err.error.MSG;
