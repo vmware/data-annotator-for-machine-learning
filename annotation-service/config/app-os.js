@@ -23,6 +23,8 @@ module.exports  = {
   mongoDBAutoIndex: process.env.SERVER_PORT || true,
   //Google Analytics tracking id [optional configs]
   trackingId: process.env.TRACKING_ID || null,
+  //Login with LDAP, need to provide the LDAP authorization service link, the response schema must have 'emailAddress' or 'email' field
+  loginWithLDAP: process.env.LOGIN_WITH_LDAP || null,
   
   //IF USE DEFAULT value true will use local file system to save files
   useLocalFileSys: process.env.USE_LOCAL_FILE_SYS || true,
