@@ -9,6 +9,13 @@ SPDX-License-Identifier: Apache-2.0 -->
       <h5 class="hint">Use your account to sign in or create one now</h5>
     </section>
     <div class="login-group">
+      <clr-select-container *ngIf="!this.isClickSignup">
+        <label class="clr-sr-only">User Role</label>
+        <select clrSelect name="loginType" (change)="selectedUserType($event)">
+            <option value="normal">Registered user login</option>
+            <option value="ldap">Login with LDAP</option>
+        </select>
+      </clr-select-container>
       <clr-input-container *ngIf="isClickSignup">
         <label class="clr-sr-only">Firstname</label>
         <input
@@ -63,11 +70,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           placeholder="Password"
           formControlName="password"
         />
-        <clr-control-helper *ngIf="isClickSignup" class="helperText"
-          >Use at least 8 and at most 20 characters, including at least one of each of the
-          following: special character (@%+\/’!#$^?:,()[]~-_.), lowercase, uppercase and
-          number.</clr-control-helper
-        >
         <clr-control-error *ngIf="dsForm.get('password').errors && dsForm.get('password').touched">
           {{ dsForm.get('password').errors.msg.value }}</clr-control-error
         >
@@ -129,7 +131,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         >
       </button>
 
-      <a *ngIf="!isClickSignup" href="javascript://" class="signup" (click)="clickSignup()"
+      <a *ngIf="!isClickSignup && !isLadp" href="javascript://" class="signup" (click)="clickSignup()"
         >Sign up for a new account</a
       >
       <a *ngIf="isClickSignup" href="javascript://" class="signup" (click)="clickSignin()"
