@@ -6,7 +6,7 @@ annotation-app/.npmrc
 annotation-app/chart
 annotation-app/src/environments/environment.stg.ts
 annotation-app/src/environments/environment.test.ts
-annotation-app/package-lock.json
+# annotation-app/package-lock.json
 annotation-app/tsconfig.spec.json
 annotation-app/dist
 
@@ -16,7 +16,7 @@ annotation-service/node_modules
 annotation-service/FILE_SYS
 annotation-service/config/app-local.js
 annotation-service/config/app-poc.js
-annotation-service/package-lock.json
+
 
 # active-learning-service
 *__pycache__*
