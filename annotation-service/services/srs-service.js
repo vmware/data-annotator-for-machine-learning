@@ -231,14 +231,14 @@ async function getOneSrs(req) {
     let limitation = req.query.limit? Number.parseInt(req.query.limit): 1;
     
     const filterFileds = { _id:1, originalData:1, flag: 1, ticketDescription: 1 };
-    
+    //aws documentdb don't support exa. ilterFileds.userInputs = null;
     if (project.projectType == PROJECTTYPE.NER) {
         filterFileds.ticketQuestions = 1;
-        filterFileds.userInputs = project.regression? 1 : null;
+        if(project.regression){filterFileds.userInputs = 1 }
     }
     if (project.projectType == PROJECTTYPE.LOG) {
-        filterFileds.fileInfo = project.isShowFilename? 1 : null;
-        filterFileds.userInputs = project.regression? 1 : null;
+        if(project.isShowFilename){filterFileds.fileInfo = 1}
+        if(project.regression){filterFileds.userInputs = 1}
     }
 
     let srs, conditions, alQueriedSr;
