@@ -13,23 +13,24 @@ module.exports  = {
   //mongodb url
   mongoDBUrl: process.env.MONGODB_URL || 'mongodb://localhost:27017/daml',
   //default admin users can see admin tab at ui
-  adminDefault: ['poc-os@poc-os.com'],
-  
+  adminDefault: ['poc-os@poc-os.com', 'poc@poc.com'],
   
   //-------------------- optional configs --------------------//
+  //Login with LDAP, need to provide the LDAP authorization service link, the response schema must have 'emailAddress' or 'email' field
+  loginWithLDAP: process.env.LOGIN_WITH_LDAP || null,
   //server port [optional configs]
   serverPort: process.env.SERVER_PORT || 3000,
   //auto update mongodb index, in production recommend use false, to manually update
   mongoDBAutoIndex: process.env.SERVER_PORT || true,
   //Google Analytics tracking id [optional configs]
   trackingId: process.env.TRACKING_ID || null,
-  //Login with LDAP, need to provide the LDAP authorization service link, the response schema must have 'emailAddress' or 'email' field
-  loginWithLDAP: process.env.LOGIN_WITH_LDAP || null,
-  
-  //IF USE DEFAULT value true will use local file system to save files
+
+
+  //IF true will save file to local, If set useAWS=true set it to false
   useLocalFileSys: process.env.USE_LOCAL_FILE_SYS || true,
   //-------------------- aws config --------------------//
-  // IF USE DEFAULT value false below aws config can be skip will not save files to aws-s3
+  //IF false below aws config can be skip, will not save files to aws-s3
+  //IF true will save datasets to S3, should set useLocalFileSys=false
   useAWS: process.env.USE_AWS || false,
   //if useAWS=true, AWS CONFIG IAM must be set
   region: process.env.REGION || null,
