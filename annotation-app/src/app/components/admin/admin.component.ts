@@ -413,7 +413,7 @@ export class AdminComponent implements OnInit {
     this.inputDescription = '';
   }
 
-  checkAddStatus(id, projectName, projectType) {
+  checkAddStatus(id, projectName, projectType, categoryList, regression) {
     for (let i = 0; i < this.projectData.length; i++) {
       if (this.projectData[i].id == id) {
         this.projectData[i].appendSr = 'adding';
@@ -445,7 +445,7 @@ export class AdminComponent implements OnInit {
             }, 10000);
           } else if (res.appendSr == 'pending') {
             this.router.navigate(['appendNewEntries'], {
-              queryParams: { id, name: projectName, from: 'admin', projectType },
+              queryParams: { id, name: projectName, from: 'admin', projectType, categoryList, regression },
             });
           }
         },
@@ -456,7 +456,7 @@ export class AdminComponent implements OnInit {
     }
   }
 
-  availableNewEntry(id, projectName, projectType) {
+  availableNewEntry(id, projectName, projectType, categoryList, regression) {
     for (let i = 0; i < this.projectData.length; i++) {
       if (this.projectData[i].id == id) {
         this.projectData[i].appendSr = 'adding';
@@ -482,7 +482,7 @@ export class AdminComponent implements OnInit {
             }, 10000);
           } else if (res.appendSr == 'pending' || res.appendSr == 'done') {
             this.router.navigate(['appendNewEntries'], {
-              queryParams: { id, name: projectName, from: 'admin', projectType },
+              queryParams: { id, name: projectName, from: 'admin', projectType, categoryList, regression },
             });
           }
         },

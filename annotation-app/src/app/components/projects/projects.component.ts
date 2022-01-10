@@ -257,7 +257,7 @@ export class ProjectsComponent implements OnInit {
     this.inputDescription = '';
   }
 
-  availableNewEntry(id, projectName, projectType) {
+  availableNewEntry(id, projectName, projectType, categoryList, regression) {
     for (let i = 0; i < this.datasets.length; i++) {
       if (this.datasets[i].id == id) {
         this.datasets[i].appendSr = 'adding';
@@ -288,6 +288,8 @@ export class ProjectsComponent implements OnInit {
                 name: projectName,
                 from: 'projects',
                 projectType,
+                categoryList,
+                regression,
               },
             });
           }
@@ -299,7 +301,7 @@ export class ProjectsComponent implements OnInit {
     }
   }
 
-  checkAddStatus(id, projectName, projectType) {
+  checkAddStatus(id, projectName, projectType, categoryList, regression) {
     for (let i = 0; i < this.datasets.length; i++) {
       if (this.datasets[i].id == id) {
         this.datasets[i].appendSr = 'adding';
@@ -336,6 +338,8 @@ export class ProjectsComponent implements OnInit {
                 name: projectName,
                 from: 'projects',
                 projectType,
+                categoryList,
+                regression,
               },
             });
           }
