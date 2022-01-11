@@ -24,7 +24,7 @@ import { ToolService } from 'app/services/common/tool.service';
 import { UserAuthService } from 'app/services/user-auth.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { MarkdownParserService } from 'app/services/common/markdown-parser.service';
-import { Options } from 'ng5-slider';
+import { Options } from '@angular-slider/ngx-slider';
 import { highlightRange, removeSpans, splitBoundaries, toGlobalOffset, findClosestTextNode } from 'app/shared/utils/html';
 
 @Component({
