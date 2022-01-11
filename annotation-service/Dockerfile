@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Create image based on the official Node 6 image from the dockerhub
-FROM node:14-alpine
+FROM node:16-alpine
 
 COPY package.json .
 
