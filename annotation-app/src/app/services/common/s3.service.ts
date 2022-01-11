@@ -145,8 +145,8 @@ export class S3Service {
         let realEntryIndex = 0;
         _.forIn(e.entry.files, function (value1, key1) {
           if (!value1.dir && that.unZipService.validImageType(value1.name)) {
+            realEntryIndex++;
             value1.async('blob').then(async function (blob) {
-              realEntryIndex++;
               const uploadParams = {
                 Bucket: new Buffer(res.bucket, 'base64').toString(),
                 Key: new Buffer(res.key, 'base64').toString() + '/' + outNo + '/' + value1.name,
