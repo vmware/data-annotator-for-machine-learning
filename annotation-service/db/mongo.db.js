@@ -144,6 +144,18 @@ async function deleteOneByConditions(MODEL, conditions) {
     });
 }
 
+async function removeByConditions(MODEL, conditions) {
+    console.log('[ DB ] begin removeByConditions');
+    return MODEL.remove(conditions, function(error, result) {
+        if (error) {
+            console.error('[ DB ] [ ERROR ] DB removeByConditions fail with: ', error);
+            throw error;
+        }
+        console.log('[ DB ] removeByConditions succefully');
+        return result;
+    });
+}
+
 module.exports = {
     findByConditions,
     findAndCountByConditions,
@@ -158,4 +170,5 @@ module.exports = {
     paginateQuery,
     deleteManyByConditions,
     deleteOneByConditions,
+    removeByConditions,
 }

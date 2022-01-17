@@ -10,9 +10,8 @@
 const projectDB = require('../db/project-db');
 const userDB = require('../db/user-db');
 const {ROLES, SPECAILCHARTOSTRING} = require('../config/constant');
-const dataSetDB = require('../db/dataSet-db');
 const mongoDb = require('../db/mongo.db');
-const { ProjectModel } = require('../db/db-connect');
+const { ProjectModel, DataSetModel } = require('../db/db-connect');
 
 function isASCII(str) {
     return /^[\x00-\xFF\u2013-\u2122]*$/.test(str);
@@ -67,7 +66,7 @@ async function checkAnnotator(uid){
 }
 
 async function checkDataSet(conditions, checkExsit){
-     const ds = await dataSetDB.queryDataSetByConditions(conditions);
+    const ds = await mongoDb.findByConditions(DataSetModel, conditions);
      if (checkExsit) {
         if (!ds[0]) {
             throw {CODE: 4001, MSG: "NO DATASET FOUND"};
