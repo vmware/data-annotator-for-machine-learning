@@ -137,24 +137,24 @@ export class S3Service {
   public unzipImagesToS3(file, res, outNo, s3) {
     let response;
     return new Promise<any>((resolve) => {
-      this.unZipService.unzipImages(file).then((e) => {
+      this.unZipService.unzipImages(file).then(async (e) => {
         const that = this;
         const uploadEntries = [];
         const imagesLocation = [];
         let realEntryLength = e.realEntryLength;
         let realEntryIndex = 0;
-        _.forIn(e.entry.files, function (value1, key1) {
-          if (!value1.dir && that.unZipService.validImageType(value1.name)) {
-            realEntryIndex++;
-            value1.async('blob').then(async function (blob) {
+        for (const value1 of Object.values(e.entry.files)) {
+          if (!(value1 as any).dir && that.unZipService.validImageType((value1 as any).name)) {
+            await (value1 as any).async('blob').then(async function (blob) {
+              realEntryIndex++;
               const uploadParams = {
                 Bucket: new Buffer(res.bucket, 'base64').toString(),
-                Key: new Buffer(res.key, 'base64').toString() + '/' + outNo + '/' + value1.name,
+                Key: new Buffer(res.key, 'base64').toString() + '/' + outNo + '/' + (value1 as any).name,
                 Body: blob,
               };
               uploadEntries.push({
                 uploadParams,
-                fileName: value1.name,
+                fileName: (value1 as any).name,
                 fileSize: blob.size,
               });
 
@@ -189,7 +189,7 @@ export class S3Service {
               }
             });
           }
-        });
+        }
         if (realEntryIndex === 0) {
           response = {
             err: 'Upload datasets failed, please make sure there has at least one image type file in the zip.',
