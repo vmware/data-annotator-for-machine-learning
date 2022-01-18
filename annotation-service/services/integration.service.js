@@ -8,17 +8,18 @@
 
 
 const projectDB = require('../db/project-db');
-const srsDB = require('../db/srs-db');
 const ObjectId = require("mongodb").ObjectID;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
 const { findFrequentlyElementInArray } = require('../utils/common.utils');
-const FileService = require('./file-service');
 const { PAGINATELIMIT, FILEPATH } = require("../config/constant");
 const { internalMLApiUrl } = require("../config/config");
 const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
 const localFileSysService = require('./localFileSys.service');
+const mongoDb = require('../db/mongo.db');
+const { ProjectModel, SrModel } = require('../db/db-connect');
+
 
 async function generateLabelledCaseAsCSV(pid, user){
     
@@ -41,7 +42,7 @@ async function generateLabelledCaseAsCSV(pid, user){
     console.log(`[ INTEGRATION ] Service generate temp csv file`);
     while (hasData){
         const query = { projectName: proInfo.projectName,  userInputsLength: { $gt: 0 } }; 
-        let result = await srsDB.paginateQuerySrsData(query, options);
+        let result = await mongoDb.paginateQuery(SrModel, query, options);
 
         let cvsData = [];
         for (let i = 0; i < result.docs.length; i++) {

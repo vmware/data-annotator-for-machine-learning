@@ -8,7 +8,6 @@
 
 const srsImporter = require("../utils/srsImporter");
 const projectDB = require('../db/project-db');
-const srsDB = require('../db/srs-db');
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
 const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH } = require("../config/constant");
@@ -25,7 +24,7 @@ const logImporter = require("../utils/logImporter");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const mongoDb = require("../db/mongo.db");
 const S3Utils = require('../utils/s3');
-const { DataSetModel,ProjectModel } = require("../db/db-connect");
+const { DataSetModel, ProjectModel, SrModel } = require("../db/db-connect");
 const compressing = require('compressing');
 const streamifier = require('streamifier');
 const readline = require('readline');
@@ -384,7 +383,6 @@ async function prepareCsv(mp, format, onlyLabelled, user) {
 
     while (true) {
         
-        // let result = await srsDB.paginateQuerySrsData(query, options);
         let result = await mongoDb.paginateQuery(mp.model, query, options);
         let cvsData = await prepareContents(result.docs, mp.project, format);
 
@@ -500,7 +498,8 @@ async function generateAllSr(projectName, filePosition) {
 
     let options = { page: 1, limit: PAGINATELIMIT };
     while (true) {
-        let result = await srsDB.paginateQuerySrsData({ projectName: projectName }, options);
+
+        let result = await mongoDb.paginateQuery(SrModel, { projectName: projectName }, options);
         let cvsData = await csvContentsSrs(result);
 
         const csvWriter = await CSVArrayWriter(csvWriterOptions);

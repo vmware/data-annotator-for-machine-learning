@@ -7,7 +7,6 @@
 
 
 const ObjectId = require("mongodb").ObjectID;
-const srsDB = require('../db/srs-db');
 const projectDB = require('../db/project-db');
 const projectService = require('./project.service');
 const validator = require('../utils/validator');
@@ -15,7 +14,7 @@ const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDE
 const csv = require('csvtojson');
 const alService = require('./activelearning.service');
 const _ = require("lodash");
-const { ProjectModel, UserModel, LogModel } = require("../db/db-connect");
+const { ProjectModel, UserModel, LogModel, SrModel } = require("../db/db-connect");
 const mongoDb = require("../db/mongo.db");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const imgImporter = require("../utils/imgImporter");
@@ -488,7 +487,7 @@ async function appendSrsDataByForms(req, originalHeaders){
     });
     console.log(`[ SRS ] Service appendSrsDataByForms.insertManySrsData caseNum:`, caseNum);
     const options = { lean: true, ordered: false }; 
-    await srsDB.insertManySrsData(docs, options);
+    await mongoDb.insertMany(SrModel, docs, options);
 
     console.log(`[ SRS ] Service appendSrsDataByForms update appen sr status to done`);
     const conditions = { projectName: req.body.pname };
@@ -576,7 +575,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
         //batch write data to db 
         if(docs.length && docs.length % PAGINATELIMIT == 0){
             const options = { lean: true, ordered: false }; 
-            srsDB.insertManySrsData(docs, options);
+            mongoDb.insertMany(SrModel, docs, options);
             docs = [];
         }
     }, async (error) => {
@@ -585,7 +584,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
         try {
             console.log(`[ SRS ] Service inserte last sr to db: `, Date.now());
             const options = { lean: true, ordered: false }; 
-            await srsDB.insertManySrsData(docs, options);
+            await mongoDb.insertMany(SrModel, docs, options);
 
             console.log(`[ SRS ] Service appendSrsDataByCSVFile update appen sr status to done`);
             const conditions = { projectName: req.body.pname };
