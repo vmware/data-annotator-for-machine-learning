@@ -7,7 +7,6 @@
 ***/
 
 
-const projectDB = require('../db/project-db');
 const {ROLES, SPECAILCHARTOSTRING} = require('../config/constant');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel, DataSetModel, UserModel } = require('../db/db-connect');
@@ -21,7 +20,7 @@ function isNumeric(input){
 }
 
 async function checkProjectByconditions(conditions, checkExsit){
-    const pro = await projectDB.queryProjectByConditions(conditions);
+    const pro = await mongoDb.findByConditions(ProjectModel, conditions);
     if (checkExsit) {
         if (!pro[0]) {
             throw {CODE: 4001, MSG: "NO PROJECT FOUND"};

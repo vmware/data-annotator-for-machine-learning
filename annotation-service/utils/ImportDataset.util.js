@@ -9,7 +9,6 @@
 const csv = require('csvtojson');
 const request = require('request');
 const { PAGINATELIMIT, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
-const projectDB = require('../db/project-db');
 const emailService = require('../services/email-service');
 const fileService = require('../services/file-service');
 const S3Utils = require('./s3');
@@ -129,7 +128,7 @@ async function importLabelledDataset(req, lables, selectedColumn){
               }]
           }
         };
-        await projectDB.findUpdateProject(condition, update);
+        await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
 
         console.log(`[ IMPORT-DATASET ] Utils sendEmailToAnnotator`);
         let param = {

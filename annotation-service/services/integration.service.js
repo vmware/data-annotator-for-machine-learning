@@ -7,7 +7,6 @@
 ***/
 
 
-const projectDB = require('../db/project-db');
 const ObjectId = require("mongodb").ObjectID;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
 const { findFrequentlyElementInArray } = require('../utils/common.utils');
@@ -24,7 +23,7 @@ const { ProjectModel, SrModel } = require('../db/db-connect');
 async function generateLabelledCaseAsCSV(pid, user){
     
     console.log(`[ INTEGRATION ] Service generateLabelledCaseAsCSV.queryProjectById`);
-    const proInfo = await projectDB.queryProjectById(ObjectId(pid));
+    const proInfo = await mongoDb.findById(ProjectModel, ObjectId(pid));
 
     const csvHeaders = ['text','label'];
     const filePath = `./${FILEPATH.DOWNLOAD}/${user}`;
@@ -84,7 +83,7 @@ async function SyncLabelledCaseToInstaML(req){
     const fileLocation = `./${FILEPATH.DOWNLOAD}/${user}/${fileName}`;
 
     console.log(`[ INTEGRATION ] Service query project Info`);
-    const proInfo = await projectDB.queryProjectById(ObjectId(req.body.pid));
+    const proInfo = await mongoDb.findById(ProjectModel, ObjectId(req.body.pid));
     
     console.log(`[ INTEGRATION ] Service sort out FormData`);
     let form = new FormData();

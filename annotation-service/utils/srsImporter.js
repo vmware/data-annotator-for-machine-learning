@@ -9,7 +9,6 @@
 const csv = require('csvtojson');
 const config = require("../config/config");
 const { PAGINATELIMIT, PROJECTTYPE, ENCODE} = require("../config/constant");
-const projectDB = require('../db/project-db');
 const emailService = require('../services/email-service');
 const axios = require("axios");
 const fileSystemUtils = require('./fileSystem.utils');
@@ -136,7 +135,7 @@ module.exports = {
                     }
                 };
                 console.log(`[ SRS ] Utils update totalCase:`, totalCase);
-                await projectDB.findUpdateProject(condition, update);
+                await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
 
                 console.log(`[ SRS ] Utils srsImporter.execute end: within:[ ${(Date.now() - start) / 1000}s ] `);
 

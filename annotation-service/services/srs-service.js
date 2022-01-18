@@ -7,7 +7,6 @@
 
 
 const ObjectId = require("mongodb").ObjectID;
-const projectDB = require('../db/project-db');
 const projectService = require('./project.service');
 const validator = require('../utils/validator');
 const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDER } = require("../config/constant");
@@ -213,7 +212,7 @@ async function updateSrsUserInput(req) {
 
 async function getCategoriesSrs(req) {
     console.log(`[ SRS ] Service  get srs categories list by projectId`, req.query.pid);
-    const project = await projectDB.queryProjectById(ObjectId(req.query.pid));
+    const project = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
     const response = { 
         labelType: project.labelType ? project.labelType : LABELTYPE.TEXT, 
         lables: project.categoryList.split(","), 
@@ -367,7 +366,7 @@ async function getSelectedSrsById(req) {
 
 async function getProgress(req) {
     console.log(`[ SRS ] Service getProgress query user completed case `);
-    const projectInfo = await projectDB.queryProjectById(ObjectId(req.query.pid));
+    const projectInfo = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
     const user = req.auth.email;
     if (await validator.checkRequired(req.query.review)) {
         await validator.checkAnnotator(user);
@@ -455,7 +454,7 @@ async function skipOne(req){
         console.log(`[ SRS ] Service user skipOne save info to DB`);
         const conditions = { _id: ObjectId(pid), "userCompleteCase.user": user };
         const update = { $inc: { "userCompleteCase.$.skip": 1 }, $pull: {"al.queriedSr": ObjectId(tid)} };
-        await projectDB.findUpdateProject(conditions, update);
+        await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
     
         console.log(`[ SRS ] Service user skipOne.getOneSrs`);
         return await getOneSrs(request);
@@ -492,7 +491,7 @@ async function appendSrsDataByForms(req, originalHeaders){
     console.log(`[ SRS ] Service appendSrsDataByForms update appen sr status to done`);
     const conditions = { projectName: req.body.pname };
     const update = { $set: { "appendSr": APPENDSR.DONE, updatedDate: Date.now() }, $inc: { "totalCase": caseNum } };
-    await projectDB.findUpdateProject(conditions,update);
+    await mongoDb.findOneAndUpdate(ProjectModel, conditions,update);
 
     await projectService.updateAssinedCase(conditions, caseNum, true);
 
@@ -504,7 +503,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
     //update append status
     const conditions = { projectName: req.body.pname };
     const update = { $set: { "appendSr": APPENDSR.ADDING, updatedDate: Date.now() }};
-    await projectDB.findUpdateProject( conditions, update );
+    await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
 
     let fileStream = await fileSystemUtils.handleFileStream(req.body.location);
     
@@ -593,7 +592,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
                 $inc: { totalCase: caseNum },
                 $push: { selectedDataset: req.body.selectedDataset }
             };
-            await projectDB.findUpdateProject(conditions,update);
+            await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
 
             await projectService.updateAssinedCase(conditions, caseNum, true);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
@@ -893,10 +892,9 @@ async function deleteLabel(req){
         labelArray = categoryList.filter(a => Object.keys(a)[0] != label);
         labelArray = JSON.stringify(labelArray);
     }
-    const update = {$set: {"categoryList": labelArray}};
-
     
-    await projectDB.findUpdateProject(query, update, options);
+    const update = {$set: {"categoryList": labelArray}};
+    await mongoDb.findOneAndUpdate(ProjectModel, query, update, options);
     
     return {CODE: 200, MSG: "OK", LABELS: labelArray};
     

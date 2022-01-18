@@ -115,8 +115,8 @@ async function queryDataSetByUser(req) {
         }
     }
     const datasets = await mongoDb.findByConditions(DataSetModel, condition);
-    if (!format || format == DATASETTYPE.IMGAGE) {
-        return await imageTopPreview(datasets);
+    if (datasets && (!format || format == DATASETTYPE.IMGAGE) ) {
+        return imageTopPreview(datasets);
     }
     return datasets;
     

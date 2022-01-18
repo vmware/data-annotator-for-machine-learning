@@ -7,7 +7,6 @@
 
 
 const srsImporter = require("../utils/srsImporter");
-const projectDB = require('../db/project-db');
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
 const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH } = require("../config/constant");
@@ -424,13 +423,13 @@ async function updateGenerateStatus(id, status, file, messageId, format, onlyLab
     }
     const optional = { new: true };
     console.error(`[ FILE ] Service update file generate status`);
-    return await projectDB.findUpdateProject(condition, update, optional);
+    return mongoDb.findOneAndUpdate(ProjectModel, condition, update, optional);
 }
 
 async function queryFileForDownlad(req) {
 
     console.log(`[ FILE ] Service query file generate info`);
-    const data = await projectDB.queryProjectById(ObjectId(req.query.pid));
+    const data = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
     data._doc.generateInfo.labelType = data.labelType ? data.labelType : LABELTYPE.TEXT;
     let response = data.generateInfo;
     let originalDataSets = [];
