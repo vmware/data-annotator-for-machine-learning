@@ -6,16 +6,16 @@
 ***/
 
 
-const userDB = require('../db/user-db');
 const { ROLES } = require('../config/constant');
 const validator = require('../utils/validator');
 const config = require('../config/config');
-
+const mongoDb = require('../db/mongo.db');
+const { UserModel } = require('../db/db-connect');
 
 async function getAllusers(req) {
     await validator.checkUserRole(req.auth.email, ROLES.ADMIN);
     console.log('[ USER ] service getAllusers');
-    return userDB.queryUserByCondition({});
+    return mongoDb.findByConditions(UserModel, {});
 }
 
 async function saveUser(req) {
@@ -28,7 +28,7 @@ async function saveUser(req) {
         }
     }
     console.log('[ USER ] service saveUser find user if exist');
-    const user = await userDB.queryUserById(req.body.email);
+    const user = await mongoDb.findById(UserModel, req.body.email);
     if (user) {
         throw{CODE: 4003, MSG: "USER ALREADY EXIST"}
     }
@@ -54,13 +54,13 @@ async function saveUser(req) {
         schema.role = 'Admin';
     }
     console.log(`[ USER ] service saveUser ${req.body.email} info when first time login`);
-    return userDB.saveUser(schema);
+    return mongoDb.saveBySchema(UserModel, schema);
 }
 
 async function deleteUser(req) {
     await validator.checkUserRole(req.auth.email, ROLES.ADMIN);
     console.log('[ USER ] service deleteUser ID: ', req.body.uid);
-    await userDB.deleteUserById(req.body.uid);
+    await mongoDb.removeByConditions(UserModel, {_id: req.body.uid});
 }
 
 async function updateUserRole(req) {
@@ -71,7 +71,7 @@ async function updateUserRole(req) {
     let conditions = { _id: req.body.user };
     let update = { $set: { role: req.body.role, createdDate: Date.now() } };
     let options = { new: true };
-    return userDB.findUpdateUser(conditions, update, options);
+    return mongoDb.findOneAndUpdate(UserModel, conditions, update, options);
 
 }
 
@@ -101,14 +101,14 @@ async function getUserRank(req) {
             }
         }
     ];
-    let userData = await userDB.aggregateUserData(schema);
+    let userData = await mongoDb.aggregateBySchema(UserModel, schema);
     return userData[0].ranking + 1;
 }
 
 async function getUserLeaders(req) {
     console.log('[ USER ] service getUserLeaders');
     const limit = parseInt(req.params.limit, 10);
-    return await userDB.sortAndLimtUser({}, "-points", limit);
+    return mongoDb.findSortAndLimitByConditions(UserModel, {}, "-points", limit);
 }
 
 async function getUserPoint() {
@@ -119,7 +119,7 @@ async function getUserPoint() {
             totalpoints: { $sum: "$points" },
         }
     }];
-    let userData = await userDB.aggregateUserData(schema);
+    let userData = await mongoDb.aggregateBySchema(UserModel, schema);
     return userData[0].totalpoints;
 }
 
@@ -133,7 +133,7 @@ async function getUserRoleById(req) {
             const conditions = { _id: req.auth.email };
             const options = { new: true };
             const update = { $set: { fullName: req.auth.name } };
-            return userDB.findUpdateUser(conditions, update, options);
+            return mongoDb.findOneAndUpdate(UserModel, conditions, update, options);
         }
         return user;
         
@@ -149,20 +149,20 @@ async function getUserRoleById(req) {
         if (flag != -1) {
             schema.role = 'Admin';
         }
-        return userDB.saveUser(schema);
+        return mongoDb.saveBySchema(UserModel, schema);
     }
 }
 
 async function queryUserById(uid){
     console.log('[ USER ] service queryUserById: ', uid);
-    return userDB.queryUserById({ _id: uid });
+    return mongoDb.findById(UserModel, uid);
 }
 
 async function queryAndUpdateUser(email, userName){
     if (!email) {
         throw{CODE: 4001, MSG: "email must not be empty"};
     }
-    const user = await userDB.queryUserById(email);
+    const user = await mongoDb.findById(UserModel, email);
     if (user) {
         return user;
     }else{
@@ -179,9 +179,9 @@ async function queryAndUpdateUser(email, userName){
         if (flag != -1) {
             schema.role = 'Admin';
         }
-        await userDB.saveUser(schema);
+        await mongoDb.saveBySchema(UserModel, schema);
 
-        return userDB.queryUserById(email);
+        return mongoDb.findById(UserModel, email);
     }
 }
 

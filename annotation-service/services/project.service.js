@@ -7,7 +7,6 @@
 
 
 const projectDB = require('../db/project-db');
-const userDB = require('../db/user-db');
 const _ = require("lodash");
 const ObjectId = require("mongodb").ObjectID;
 const { PROJECTTYPE, SRCS, LABELTYPE, ROLES } = require("../config/constant");
@@ -20,8 +19,8 @@ async function getProjects(req) {
     console.log(`[ PROJECT ] Service getProjects query user role`);
     const src = req.query.src;
     const email = req.auth.email;
-    const user = await userDB.queryUserById({ _id: email });
-
+    const user = await mongoDb.findById(UserModel, email);
+    
     let condition, project=null;
     const options = { sort: { updatedDate: -1 } };
 
@@ -355,7 +354,7 @@ async function projectLeaderBoard(req) {
     const uc = proInfo.userCompleteCase;
     for (let i = 0; i < uc.length; i++) {
         //full name
-        const us = await userDB.queryUserById(uc[i].user);
+        const us = await mongoDb.findById(UserModel, uc[i].user);
         result.userCase.push({
             user: uc[i].user,
             fullName: us ? us.fullName : uc[i].user.split("@")[0],

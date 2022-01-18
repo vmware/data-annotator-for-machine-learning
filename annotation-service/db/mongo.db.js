@@ -29,6 +29,17 @@ async function findAndCountByConditions(MODEL, conditions, columns, options, fla
         return result;
     }).count(flag);
 }
+async function findSortAndLimitByConditions(MODEL, conditions, columns, options, sort, limit) {
+    console.log(`[ DB ] begin findSortAndLimitByConditions`);
+    return MODEL.find(conditions, columns, options).sort(sort).limit(limit).exec().then(function(result, error) {
+        if (error) {
+            console.error(`[ DB ] [ ERROR ] DB findSortAndLimitByConditions fail with: `, error);
+            throw error;
+        }
+        console.log(`[ DB ] findSortAndLimitByConditions succefully`);
+        return result;
+    });
+}
 
 async function findOneByConditions(MODEL, conditions, columns, options) {
     console.log(`[ DB ] begin findOneByConditions`);
@@ -92,8 +103,16 @@ async function updateManyByConditions(MODEL, conditions, doc, options) {
 }
 
 async function saveBySchema(MODEL, schema) {
+    console.log('[ DB ] saveBySchema begin');
     let model = await new MODEL(schema);
-    model.save();
+    return model.save().then(function(result,error){
+        if(error){
+            console.error('[ DB ] [ ERROR ] DB saveBySchema fail with: ', error );
+            throw error;
+        }
+        console.log('[ DB ] saveBySchema succefully');
+        return result;
+    });
 }
 
 async function insertMany(MODEL, docs, options) {
@@ -159,6 +178,7 @@ async function removeByConditions(MODEL, conditions) {
 module.exports = {
     findByConditions,
     findAndCountByConditions,
+    findSortAndLimitByConditions,
     findOneByConditions,
     findOneAndUpdate,
     findById,

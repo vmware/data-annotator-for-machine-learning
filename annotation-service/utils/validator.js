@@ -8,10 +8,9 @@
 
 
 const projectDB = require('../db/project-db');
-const userDB = require('../db/user-db');
 const {ROLES, SPECAILCHARTOSTRING} = require('../config/constant');
 const mongoDb = require('../db/mongo.db');
-const { ProjectModel, DataSetModel } = require('../db/db-connect');
+const { ProjectModel, DataSetModel, UserModel } = require('../db/db-connect');
 
 function isASCII(str) {
     return /^[\x00-\xFF\u2013-\u2122]*$/.test(str);
@@ -51,7 +50,7 @@ async function checkAppendTicketsHeaders(appendHeaders, originalHeaders){
 
 async function checkUserRole(uid, checkRole){
 
-   const user = await userDB.queryUserById(uid);
+   const user = await mongoDb.findById(UserModel, uid);
    if (checkRole != user.role) {
        throw {CODE: 4001, MSG: "ACCESS DENIED"}
    }
@@ -59,7 +58,7 @@ async function checkUserRole(uid, checkRole){
 
 async function checkAnnotator(uid){
 
-    const user = await userDB.queryUserById(uid);
+    const user = await mongoDb.findById(UserModel, uid);
     if (ROLES.ANNOTATOR == user.role) {
         throw {CODE: 4001, MSG: "ACCESS DENIED"}
     }
