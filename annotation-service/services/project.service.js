@@ -6,8 +6,6 @@
 ***/
 
 
-const projectDB = require('../db/project-db');
-const userDB = require('../db/user-db');
 const _ = require("lodash");
 const ObjectId = require("mongodb").ObjectID;
 const { PROJECTTYPE, SRCS, LABELTYPE, ROLES } = require("../config/constant");
@@ -20,8 +18,8 @@ async function getProjects(req) {
     console.log(`[ PROJECT ] Service getProjects query user role`);
     const src = req.query.src;
     const email = req.auth.email;
-    const user = await userDB.queryUserById({ _id: email });
-
+    const user = await mongoDb.findById(UserModel, email);
+    
     let condition, project=null;
     const options = { sort: { updatedDate: -1 } };
 
@@ -43,14 +41,14 @@ async function getProjects(req) {
         throw { CODE: 1001, MSG: "ERROR ID or src" };
     }
     console.log(`[ PROJECT ] Service query user: ${email} src:  ${src} project list`);
-    return projectDB.queryProjectByConditions(condition, project, options);
+    return mongoDb.findByConditions(ProjectModel, condition, project, options);
 }
 
 async function getProjectByAnnotator(req) {
     console.log(`[ PROJECT ] Service query project name by annotator: ${req.auth.email}`);
     const condition = { annotator: { $regex: req.auth.email } };
     const columns = "projectName";
-    return projectDB.queryProjectByConditions(condition, columns);
+    return mongoDb.findByConditions(ProjectModel, condition, columns);
 }
 
 async function getProjectName(req) {
@@ -59,12 +57,12 @@ async function getProjectName(req) {
 
 async function checkProjectName(pname) {
     console.log(`[ PROJECT ] Service query project name by projectName: ${pname}`);
-    return projectDB.queryProjectByConditions({ projectName: pname });
+    return mongoDb.findByConditions(ProjectModel, { projectName: pname });
 }
 
 async function getProjectInfo(req) {
     console.log(`[ PROJECT ] Service query Project info by pid: ${req.query.pid}`);
-    return projectDB.queryProjectById(ObjectId(req.query.pid))
+    return mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
 }
 
 async function deleteProject(req) {
@@ -337,7 +335,7 @@ async function updateProjectShare(req) {
     };
     const optional = { new: true };
     console.log(`[ PROJECT ] Service updateProjectShare.findUpdateProject`);
-    return projectDB.findUpdateProject(condition, update, optional);
+    return mongoDb.findOneAndUpdate(ProjectModel, condition, update, optional);
 }
 
 async function projectLeaderBoard(req) {
@@ -355,7 +353,7 @@ async function projectLeaderBoard(req) {
     const uc = proInfo.userCompleteCase;
     for (let i = 0; i < uc.length; i++) {
         //full name
-        const us = await userDB.queryUserById(uc[i].user);
+        const us = await mongoDb.findById(UserModel, uc[i].user);
         result.userCase.push({
             user: uc[i].user,
             fullName: us ? us.fullName : uc[i].user.split("@")[0],
@@ -452,8 +450,7 @@ async function removeSkippedCase(id, user, review) {
     }
 
     const options = { new: true };
-    
-    return projectDB.findUpdateProject(conditions, update, options);
+    return mongoDb.findOneAndUpdate(ProjectModel, conditions, update, options);
 }
 
 async function getReviewList(req) {

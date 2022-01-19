@@ -7,14 +7,13 @@
 
 
 const csv = require('csvtojson');
-const validator = require('./validator');
-let srsDB = require('../db/srs-db');
 const request = require('request');
 const { PAGINATELIMIT, PROJECTTYPE, S3OPERATIONS } = require("../config/constant");
-const projectDB = require('../db/project-db');
 const emailService = require('../services/email-service');
 const fileService = require('../services/file-service');
 const S3Utils = require('./s3');
+const mongoDb = require('../db/mongo.db');
+const { ProjectModel, SrModel } = require('../db/db-connect');
 
 async function importDataset(req){
   console.log('[ IMPORT-DATASET ] Utils Start Import dataset ');
@@ -106,7 +105,7 @@ async function importLabelledDataset(req, lables, selectedColumn){
       //batch write data to db 
       if(docs.length && docs.length % PAGINATELIMIT == 0){
         console.log(`import tickets lenth ${docs.length}`);
-        srsDB.insertManySrsData(docs, options);
+        mongoDb.insertMany(SrModel, docs, options);
         docs = [];
       }
 
@@ -115,7 +114,7 @@ async function importLabelledDataset(req, lables, selectedColumn){
   }, async () => {
       try {
         console.log(`[ IMPORT-DATASET ] Utils import last sr data to db: ${docs.length}`);
-        await srsDB.insertManySrsData(docs, options);
+        await mongoDb.insertMany(SrModel, docs, options);
 
         console.log(`[ IMPORT-DATASET ] Utils update totalcase and compelte: ${totalCase}`);
         const condition = {projectName: req.body.pname};
@@ -129,7 +128,7 @@ async function importLabelledDataset(req, lables, selectedColumn){
               }]
           }
         };
-        await projectDB.findUpdateProject(condition, update);
+        await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
 
         console.log(`[ IMPORT-DATASET ] Utils sendEmailToAnnotator`);
         let param = {

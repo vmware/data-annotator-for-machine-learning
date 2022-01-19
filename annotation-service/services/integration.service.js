@@ -7,23 +7,23 @@
 ***/
 
 
-const projectDB = require('../db/project-db');
-const srsDB = require('../db/srs-db');
 const ObjectId = require("mongodb").ObjectID;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
 const { findFrequentlyElementInArray } = require('../utils/common.utils');
-const FileService = require('./file-service');
 const { PAGINATELIMIT, FILEPATH } = require("../config/constant");
 const { internalMLApiUrl } = require("../config/config");
 const axios = require('axios');
 const fs = require('fs');
 const FormData = require('form-data');
 const localFileSysService = require('./localFileSys.service');
+const mongoDb = require('../db/mongo.db');
+const { ProjectModel, SrModel } = require('../db/db-connect');
+
 
 async function generateLabelledCaseAsCSV(pid, user){
     
     console.log(`[ INTEGRATION ] Service generateLabelledCaseAsCSV.queryProjectById`);
-    const proInfo = await projectDB.queryProjectById(ObjectId(pid));
+    const proInfo = await mongoDb.findById(ProjectModel, ObjectId(pid));
 
     const csvHeaders = ['text','label'];
     const filePath = `./${FILEPATH.DOWNLOAD}/${user}`;
@@ -41,7 +41,7 @@ async function generateLabelledCaseAsCSV(pid, user){
     console.log(`[ INTEGRATION ] Service generate temp csv file`);
     while (hasData){
         const query = { projectName: proInfo.projectName,  userInputsLength: { $gt: 0 } }; 
-        let result = await srsDB.paginateQuerySrsData(query, options);
+        let result = await mongoDb.paginateQuery(SrModel, query, options);
 
         let cvsData = [];
         for (let i = 0; i < result.docs.length; i++) {
@@ -83,7 +83,7 @@ async function SyncLabelledCaseToInstaML(req){
     const fileLocation = `./${FILEPATH.DOWNLOAD}/${user}/${fileName}`;
 
     console.log(`[ INTEGRATION ] Service query project Info`);
-    const proInfo = await projectDB.queryProjectById(ObjectId(req.body.pid));
+    const proInfo = await mongoDb.findById(ProjectModel, ObjectId(req.body.pid));
     
     console.log(`[ INTEGRATION ] Service sort out FormData`);
     let form = new FormData();

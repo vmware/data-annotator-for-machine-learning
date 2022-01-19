@@ -7,9 +7,9 @@
 
 
 const { DOWNLOADSRC } = require('../config/constant');
-const projectDB = require('../db/project-db');
 const ObjectId = require("mongodb").ObjectID;
-
+const mongoDb = require('../db/mongo.db');
+const { ProjectModel } = require('../db/db-connect');
 
 async function countCommunityDownload(req){
   
@@ -23,7 +23,7 @@ async function countCommunityDownload(req){
     
     const conditions = { _id: ObjectId(pid) };
     const update = { $inc: {"downloadCount.community": 1 } };
-    await projectDB.findUpdateProject(conditions, update);
+    await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
   
   }
 

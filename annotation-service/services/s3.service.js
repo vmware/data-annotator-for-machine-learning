@@ -9,14 +9,15 @@
 const STS = require('../utils/sts');
 const S3 = require('../utils/s3');
 const config = require('../config/config');
-const USER = require('../db/user-db');
 const localFileSysService = require('./localFileSys.service');
 const { ACCESS_TIME_60, AWSRESOURCE } = require('../config/constant');
+const mongoDb = require('../db/mongo.db');
+const { UserModel } = require('../db/db-connect');
 
 
 async function prepareS3Configs(req) {
     console.log(`[ S3 ] Service prepareS3Configs user: `, req.auth.email);
-    const user = await USER.queryUserById(req.auth.email);
+    const user = await mongoDb.findById(UserModel, req.auth.email);
     if (!user) {
         throw "unauthorized";
     }

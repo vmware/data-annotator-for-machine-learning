@@ -7,15 +7,13 @@
 
 
 const ObjectId = require("mongodb").ObjectID;
-const srsDB = require('../db/srs-db');
-const projectDB = require('../db/project-db');
 const projectService = require('./project.service');
 const validator = require('../utils/validator');
 const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDER } = require("../config/constant");
 const csv = require('csvtojson');
 const alService = require('./activelearning.service');
 const _ = require("lodash");
-const { ProjectModel, UserModel, LogModel } = require("../db/db-connect");
+const { ProjectModel, UserModel, LogModel, SrModel } = require("../db/db-connect");
 const mongoDb = require("../db/mongo.db");
 const { getModelProject } = require("../utils/mongoModel.utils");
 const imgImporter = require("../utils/imgImporter");
@@ -214,7 +212,7 @@ async function updateSrsUserInput(req) {
 
 async function getCategoriesSrs(req) {
     console.log(`[ SRS ] Service  get srs categories list by projectId`, req.query.pid);
-    const project = await projectDB.queryProjectById(ObjectId(req.query.pid));
+    const project = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
     const response = { 
         labelType: project.labelType ? project.labelType : LABELTYPE.TEXT, 
         lables: project.categoryList.split(","), 
@@ -368,7 +366,7 @@ async function getSelectedSrsById(req) {
 
 async function getProgress(req) {
     console.log(`[ SRS ] Service getProgress query user completed case `);
-    const projectInfo = await projectDB.queryProjectById(ObjectId(req.query.pid));
+    const projectInfo = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
     const user = req.auth.email;
     if (await validator.checkRequired(req.query.review)) {
         await validator.checkAnnotator(user);
@@ -456,7 +454,7 @@ async function skipOne(req){
         console.log(`[ SRS ] Service user skipOne save info to DB`);
         const conditions = { _id: ObjectId(pid), "userCompleteCase.user": user };
         const update = { $inc: { "userCompleteCase.$.skip": 1 }, $pull: {"al.queriedSr": ObjectId(tid)} };
-        await projectDB.findUpdateProject(conditions, update);
+        await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
     
         console.log(`[ SRS ] Service user skipOne.getOneSrs`);
         return await getOneSrs(request);
@@ -488,12 +486,12 @@ async function appendSrsDataByForms(req, originalHeaders){
     });
     console.log(`[ SRS ] Service appendSrsDataByForms.insertManySrsData caseNum:`, caseNum);
     const options = { lean: true, ordered: false }; 
-    await srsDB.insertManySrsData(docs, options);
+    await mongoDb.insertMany(SrModel, docs, options);
 
     console.log(`[ SRS ] Service appendSrsDataByForms update appen sr status to done`);
     const conditions = { projectName: req.body.pname };
     const update = { $set: { "appendSr": APPENDSR.DONE, updatedDate: Date.now() }, $inc: { "totalCase": caseNum } };
-    await projectDB.findUpdateProject(conditions,update);
+    await mongoDb.findOneAndUpdate(ProjectModel, conditions,update);
 
     await projectService.updateAssinedCase(conditions, caseNum, true);
 
@@ -505,7 +503,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
     //update append status
     const conditions = { projectName: req.body.pname };
     const update = { $set: { "appendSr": APPENDSR.ADDING, updatedDate: Date.now() }};
-    await projectDB.findUpdateProject( conditions, update );
+    await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
 
     let fileStream = await fileSystemUtils.handleFileStream(req.body.location);
     
@@ -576,7 +574,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
         //batch write data to db 
         if(docs.length && docs.length % PAGINATELIMIT == 0){
             const options = { lean: true, ordered: false }; 
-            srsDB.insertManySrsData(docs, options);
+            mongoDb.insertMany(SrModel, docs, options);
             docs = [];
         }
     }, async (error) => {
@@ -585,7 +583,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
         try {
             console.log(`[ SRS ] Service inserte last sr to db: `, Date.now());
             const options = { lean: true, ordered: false }; 
-            await srsDB.insertManySrsData(docs, options);
+            await mongoDb.insertMany(SrModel, docs, options);
 
             console.log(`[ SRS ] Service appendSrsDataByCSVFile update appen sr status to done`);
             const conditions = { projectName: req.body.pname };
@@ -594,7 +592,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
                 $inc: { totalCase: caseNum },
                 $push: { selectedDataset: req.body.selectedDataset }
             };
-            await projectDB.findUpdateProject(conditions,update);
+            await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
 
             await projectService.updateAssinedCase(conditions, caseNum, true);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
@@ -894,10 +892,9 @@ async function deleteLabel(req){
         labelArray = categoryList.filter(a => Object.keys(a)[0] != label);
         labelArray = JSON.stringify(labelArray);
     }
-    const update = {$set: {"categoryList": labelArray}};
-
     
-    await projectDB.findUpdateProject(query, update, options);
+    const update = {$set: {"categoryList": labelArray}};
+    await mongoDb.findOneAndUpdate(ProjectModel, query, update, options);
     
     return {CODE: 200, MSG: "OK", LABELS: labelArray};
     

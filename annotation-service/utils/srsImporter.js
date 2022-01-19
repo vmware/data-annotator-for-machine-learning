@@ -7,14 +7,13 @@
 
 
 const csv = require('csvtojson');
-const validator = require('./validator');
-const srsDB = require('../db/srs-db');
 const config = require("../config/config");
 const { PAGINATELIMIT, PROJECTTYPE, ENCODE} = require("../config/constant");
-const projectDB = require('../db/project-db');
 const emailService = require('../services/email-service');
 const axios = require("axios");
 const fileSystemUtils = require('./fileSystem.utils');
+const mongoDb = require('../db/mongo.db');
+const { ProjectModel, SrModel } = require('../db/db-connect');
 
 module.exports = {
     execute: async function (req, annotators) {
@@ -115,7 +114,7 @@ module.exports = {
             //batch write data to db 
             if(docs.length && docs.length % PAGINATELIMIT == 0){
                 const options = { lean: true, ordered: false }; 
-                srsDB.insertManySrsData(docs, options);
+                mongoDb.insertMany(SrModel, docs, options);
                 docs = [];
             }
         }
@@ -125,7 +124,7 @@ module.exports = {
             try {
                 console.log(`[ SRS ] Utils import last sr data to db`);
                 const options = { lean: true, ordered: false }; 
-                srsDB.insertManySrsData(docs, options);
+                mongoDb.insertMany(SrModel, docs, options);
                 docs = [];
 
                 console.log(`[ SRS ] Utils import data to db end: `);
@@ -136,7 +135,7 @@ module.exports = {
                     }
                 };
                 console.log(`[ SRS ] Utils update totalCase:`, totalCase);
-                await projectDB.findUpdateProject(condition, update);
+                await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
 
                 console.log(`[ SRS ] Utils srsImporter.execute end: within:[ ${(Date.now() - start) / 1000}s ] `);
 

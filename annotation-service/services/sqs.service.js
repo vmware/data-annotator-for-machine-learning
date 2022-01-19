@@ -10,12 +10,13 @@ const SQS = require('../utils/sqs');
 const config = require('../config/config');
 const { GENERATESTATUS, FILESIZE, PROJECTTYPE, FILEFORMAT, S3OPERATIONS, FILEPATH } = require('../config/constant');
 const FileService = require('./file-service');
-const ProjectDB = require('../db/project-db');
 const ObjectId = require("mongodb").ObjectID;
 const S3Service = require('./s3.service');
 const communityService = require('./community.service');
 const S3Utils = require('../utils/s3');
 const localFileSysService = require('./localFileSys.service');
+const mongoDb = require('../db/mongo.db');
+const { ProjectModel } = require('../db/db-connect');
 
 async function generateFile(req){
     
@@ -29,7 +30,7 @@ async function generateFile(req){
     let response = {};
     
     console.log(`[ SQS ] Service generateFile query file size and generate info`);
-    const pro = await ProjectDB.queryProjectById(ObjectId(data.id));
+    const pro = await mongoDb.findById(ProjectModel, ObjectId(data.id));
     const gen = pro.generateInfo;
 
     if ((pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.IMGAGE) && data.format != FILEFORMAT.STANDARD){

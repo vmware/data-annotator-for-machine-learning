@@ -6,7 +6,6 @@
 ***/
 
 
-const DataSetDB = require('../db/dataSet-db');
 const S3Utils = require('../utils/s3');
 const {DATASETTYPE, S3OPERATIONS, FILEPATH} = require('../config/constant');
 const ObjectId = require("mongodb").ObjectID;
@@ -16,7 +15,8 @@ const localFileSysService = require('./localFileSys.service');
 const EventEmitter = require('events');
 const _ = require("lodash");
 const fs = require('fs');
-
+const mongoDb = require('../db/mongo.db');
+const { ProjectModel, DataSetModel } = require('../db/db-connect');
 
 async function saveDataSetInfo(req) {
 
@@ -94,7 +94,7 @@ async function saveDataSetInfo(req) {
     let update = { $set: dataSet };
     let options = { new: true, upsert: true };
     console.log(`[ DATASET ] Service save dataset info to db`);
-    const datasets =  await DataSetDB.findAndUpdateDataSet(conditions, update, options);
+    const datasets =  await mongoDb.findOneAndUpdate(DataSetModel, conditions, update, options);
 
     return imageTopPreview(datasets, true);
 
@@ -114,9 +114,9 @@ async function queryDataSetByUser(req) {
             condition.format = format;
         }
     }
-    const datasets = await DataSetDB.queryDataSetByConditions(condition);
-    if (!format || format == DATASETTYPE.IMGAGE) {
-        return await imageTopPreview(datasets);
+    const datasets = await mongoDb.findByConditions(DataSetModel, condition);
+    if (datasets && (!format || format == DATASETTYPE.IMGAGE) ) {
+        return imageTopPreview(datasets);
     }
     return datasets;
     
@@ -161,7 +161,7 @@ async function imageTopPreview(datasets, singleData) {
 
 async function queryDataSetByDataSetName(req) {
     console.log(`[ DATASET ] Service queryDataSetByDataSetName`);
-    return await DataSetDB.queryDataSetByConditions({ dataSetName: req.query.dsname });
+    return mongoDb.findByConditions(DataSetModel, { dataSetName: req.query.dsname });
 }
 
 async function deleteDataSet(req) {
@@ -221,15 +221,15 @@ async function deleteDataSet(req) {
     }
 
     console.log(`[ DATASET ] Service deleteDataSet.removeDataSet`);
-    await DataSetDB.removeDataSet({ dataSetName: ds[0].dataSetName });
+    await mongoDb.removeByConditions(DataSetModel, { dataSetName: ds[0].dataSetName });
     
 }
 
 
 async function signS3Url(req) {
 
-    console.log(`[ DATASET ] Service DataSetDB.queryDataSetById`);
-    const dataSet = await DataSetDB.queryDataSetById(ObjectId(req.query.dsid));
+    console.log(`[ DATASET ] Service query datasets`);
+    const dataSet = await mongoDb.findById(DataSetModel, ObjectId(req.query.dsid));
 
     console.log(`[ DATASET ] Service S3Utils.signedUrlByS3`);
     return  await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, dataSet.location);

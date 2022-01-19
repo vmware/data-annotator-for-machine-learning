@@ -6,19 +6,21 @@
 ***/
 
 
-const projectDB = require('../db/project-db');
 const ObjectId = require("mongodb").ObjectID;
 const config = require("../config/config");
 const { LABELTYPE, PROJECTTYPE } = require("../config/constant");
 const _ = require("lodash");
 const axios = require ('axios');
+const mongoDb = require('../db/mongo.db');
+const { ProjectModel } = require('../db/db-connect');
+
 
 async function triggerActiveLearning(pid, _ids, user, token){
 
   // pull current srid from queriedSr
   const update = {$pullAll:{ "al.queriedSr": _ids }};
-  const project = await projectDB.findUpdateProject({_id: pid}, update, { new: true, multi: true });
- 
+  const project = await mongoDb.findOneAndUpdate(ProjectModel, {_id: pid}, update, { new: true, multi: true });
+
   // regression project or acteave learning faild
   if (project.projectType == PROJECTTYPE.IMGAGE || project.labelType == LABELTYPE.NUMERIC || project.al.alFailed) return;
   
@@ -37,14 +39,14 @@ async function triggerActiveLearning(pid, _ids, user, token){
     const url = "/al/model/train";
 
     //set a training flag to avoid repeate send rquest
-    await projectDB.findUpdateProject({_id: pid}, {$set: {"al.training": true}});
+    await mongoDb.findOneAndUpdate(ProjectModel, {_id: pid}, {$set: {"al.training": true}});
 
     axios.post(url, data).then(res =>{
       console.log(`[ ACTIVE-LEARNING ] [ SUCCESS ] TRAIN-MODEL`);
     }).catch( async err =>{
       console.error("[ ACTIVE-LEARNING ] [ ERROR ] TRAIN-MODEL:", err);
       // support retry
-      await projectDB.findUpdateProject({_id: pid}, {$set: {"al.training": false}});
+      await mongoDb.findOneAndUpdate(ProjectModel, {_id: pid}, {$set: {"al.training": false}});
     });
 
   }
@@ -58,14 +60,14 @@ async function triggerActiveLearning(pid, _ids, user, token){
       const url = "/al/model/teach";
 
       //set a teaching flag to avoid repeate send rquest
-      await projectDB.findUpdateProject({_id: pid}, {$set: {"al.teaching": true}});
+      await mongoDb.findOneAndUpdate(ProjectModel, {_id: pid}, {$set: {"al.teaching": true}});
       
       axios.post(url, data).then(res =>{
         console.log(`[ ACTIVE-LEARNING ] [ SUCCESS ] TEACH-MODEL`);
       }).catch( async err =>{
         console.error("[ ACTIVE-LEARNING ] [ ERROR ] TEACH-MODEL:", err);
         // support retry
-        await projectDB.findUpdateProject({_id: pid}, {$set: {"al.teaching": false}});
+        await mongoDb.findOneAndUpdate(ProjectModel, {_id: pid}, {$set: {"al.teaching": false}});
       });
 
     }
@@ -77,14 +79,14 @@ async function triggerActiveLearning(pid, _ids, user, token){
       const url = "/al/model/query";
       
       //set a querying flag to avoid repeate send rquest
-      await projectDB.findUpdateProject({_id: pid}, {$set: {"al.querying": true}});
+      await mongoDb.findOneAndUpdate(ProjectModel, {_id: pid}, {$set: {"al.querying": true}});
 
       axios.post(url, data).then(res =>{
         console.log(`[ ACTIVE-LEARNING ] [ SUCCESS ] QUERY-INSTANCE`);
       }).catch( async err =>{
         console.error("[ ACTIVE-LEARNING ] [ ERROR ] QUERY-INSTANCE:", err);
         // support retry
-        await projectDB.findUpdateProject({_id: pid}, {$set: {"al.querying": false}});
+        await mongoDb.findOneAndUpdate(ProjectModel, {_id: pid}, {$set: {"al.querying": false}});
       });
 
     }
@@ -94,7 +96,7 @@ async function triggerActiveLearning(pid, _ids, user, token){
 // find active learning accuracy
 async function findModelAccuracy(req){
   console.log(`[ ACTIVE-LEARNING ] findModelAccuracy projectId: ${req.query.pid}`)
-  const project = await projectDB.queryProjectById(ObjectId(req.query.pid));
+  const project = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
   return { status: project.al.trained, accuracy: project.al.accuracy};
 }
 
