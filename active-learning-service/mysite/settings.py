@@ -15,7 +15,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 
 from pathlib import Path
 import logging
-
+from config.config import config
 
 
 
@@ -29,8 +29,8 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '2^uri^on)%=14tslhw=8$^m66q0bl65pt8uc+olbqq3jnjm)0o'
+# SECURITY WARNING: keep the secret key used in production secret! we don't used in application
+SECRET_KEY = config["DJANGO_SECRET_KEY"]
 
 
 
@@ -154,7 +154,7 @@ LOGGING = {
     },
     'formatters': {
         'main_formatter': {
-            'format': '[%(asctime)s] %(levelname)s %(filename)s:%(lineno)d: %(message)s',
+            'format': "[%(asctime)s] %(levelname)s %(filename)s:%(lineno)d: %(message)s",
             'datefmt': "%Y-%m-%d %H:%M:%S"
         },
     },

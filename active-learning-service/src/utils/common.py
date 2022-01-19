@@ -12,8 +12,10 @@ from src.al.retry_service import support_al_retry
 from src.exceptions.base_exceptions import AuthException
 from src.utils.jwtVerification import verification_token
 
-log = logging.getLogger('loop_al')
+from config.config import config
 
+log = logging.getLogger('loop_al')
+log.info(f'[ config ]={config}')
 
 # common function to handle request
 def request_handle(request, fun):

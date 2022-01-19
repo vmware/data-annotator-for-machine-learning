@@ -23,5 +23,7 @@ app = {
     "TOKEN_ALGORITHM": os.getenv("TOKEN_ALGORITHM", "HS256"),
     "TOKEN_SECRET_OR_PRIVATE_KEY": os.getenv("TOKEN_SECRET_OR_PRIVATE_KEY", "OPEN SOURCE"),
 
+    # django SECRET_KEY a random generated value https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-SECRET_KEY
+    "DJANGO_SECRET_KEY": os.getenv("DJANGO_SECRET_KEY", "REpBTkdPX1NFQ1JFVF9LRVk="),
 
 }
