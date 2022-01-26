@@ -1,0 +1,89 @@
+{
+  "TextProject": {
+    "Instruction": "this is e2e test text project task instruction",
+    "Labels": "test1,test2",
+    "Source": "text-test-data.csv",
+    "ticketSessions": 52,
+    "assignedTickets": 10,
+    "duplicateLabelColumn": "Description",
+    "categoryLabelColumn": "GSS_Problem_Category__c",
+    "labelColumn": "No Labels",
+    "duplicateLabel": "test1",
+    "deleteLabel": "test3",
+    "maxAnnotation": 3,
+    "defaultEvenlyDistributedTickets": 26
+  },
+  "TextMultipleLabelsProject": {
+    "Instruction": "this is e2e test multiple labels project task instruction",
+    "Labels": "test1,test2",
+    "Source": "text-test-data.csv",
+    "ticketSessions": 52,
+    "maxAnnotation": 1
+  },
+  "TabularNumericLabelsProject": {
+    "Instruction": "this is e2e test tabular numeric labels project task instruction",
+    "MinLabel": 1,
+    "MaxLabel": 100,
+    "Source": "text-test-data.csv",
+    "ticketSessions": 52,
+    "maxAnnotation": 1
+  },
+
+  "TabularProject": {
+    "Instruction": "this is e2e test tabular project task instruction",
+    "Labels": "test1,test2",
+    "Source": "text-test-data.csv",
+    "ticketSessions": 52,
+    "labelColumn": "No Labels",
+    "maxAnnotation": 1
+  },
+
+  "NerLabelsExistingProject": {
+    "Instruction": "this is e2e test ner labels existing project task instruction",
+    "existingLabels": "label1",
+    "Labels": "test1",
+    "Source": "ner-test-data.csv",
+    "ticketSessions": 29,
+    "duplicateLabel": "test1",
+    "deleteLabel": "test2"
+  },
+  "LogProject": {
+    "Instruction": "this is e2e test log project task instruction",
+    "Labels": "test1,test2",
+    "Source": "log-test-data.tgz",
+    "ticketSessions": 10,
+    "keywordFilter": "build",
+    "regexFilter": "/[A-Z]/",
+    "rowFreeText": "row freeText",
+    "logFreeText": "log freeText",
+    "reviewRowFreetext": "e2e test from review of rowFreeText",
+    "reviewLogFreetext": "e2e test from review of logFreeText"
+  },
+  "ImageProject": {
+    "Instruction": "this is e2e test image project task instruction",
+    "Labels": "test1,test2",
+    "Source": "image-test-data.zip",
+    "ticketSessions": 5,
+    "firstStart": { "x": 30, "y": 30 },
+    "firstEnd": { "x": 40, "y": 40 },
+    "secondStart": { "x": 50, "y": 30 },
+    "secondEnd": { "x": 60, "y": 40 },
+    "deletePosition": { "x": 35, "y": 35 }
+  },
+  "TextMutilNumbericProject": {
+    "Instruction": "this is e2e test mutil numberic project task instruction",
+    "Label": "label-test",
+    "MinVal": 1,
+    "MaxVal": 10,
+    "sliderValue": 4,
+    "inputValue": 4.5,
+    "Source": "text-mutilNumberic-data.csv",
+    "ticketSessions": 52,
+    "assignedTickets": 10,
+    "duplicateLabelColumn": "Description",
+    "categoryLabelColumn": "GSS_Problem_Category__c",
+    "labelColumn": "No Labels",
+    "maxAnnotation": 3,
+    "defaultEvenlyDistributedTickets": 26
+  }
+}

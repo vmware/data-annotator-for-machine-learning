@@ -1,0 +1,7 @@
+{
+  "port": 4200,
+  "open": false,
+  "ghostMode": false,
+  "codeSync": false,
+  "server": { "baseDir": "./dist" }
+}

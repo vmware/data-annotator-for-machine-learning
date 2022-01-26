@@ -1,0 +1,9 @@
+Index,CreatedDate,Description,GSS_Problem_Category__c,GSS_Product_Name__c,GSS_Issue_Type__c,GSS_Resolution_Code__c,GSS_Resolution__c,CaseNumber
+1,2015-02-16T15:56:53.000Z,"Hi, I'd like to update all my hosts to latest 5.5 version as well as my Vcenter server but I'd like to avoid the use of a web console.
+
+There are some features and usability that we prefer to keep in the client that is why we prefer not to use a web client but continue using Vsphere stand Alone client. is this possible?",System Management,VMware vSphere ESXi 5.5,Configuration,Unresolved,Customer did not reply,15605800602
+2,2014-12-05T23:06:33.000Z,"Patching Remote Commands failing to run intermittingly (mostly fail) at some remote locations in our Asia Pacific region.  Sometimes the stage jobs will run, sometimes (mostly) fail with a variety of errors like ""crspiConnectionMachineHttpStartup.PushFile()  HRESULT 0x00002f78;"" and ""crspiConnectionMachineHttpStartup.PushFile()  HRESULT 0x80004005 = Unspecified error;"".
+
+I have uninstalled and re-installed the agents on these servers.  They are all 2008r2 machines, the agents are configured for HTTP and mutual authentication is working, so, no certificate issues.  Collections run without issues.  But, when creating a patch job, when the patching remote command job begins, they mostly fail almost instantly with these errors.
+
+I captured debug logs with debug = 1 in the csi_hf_settings table.  I can email this information after contacted.",Fault/Crash,VMware vRealize Configuration Manager,Non-Technical Support Issue,External infrastructure,issues possibly caused by internet outage in singapore,14569444412

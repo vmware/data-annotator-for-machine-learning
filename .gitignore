@@ -1,0 +1,7 @@
+node_modules
+package-lock.json
+doc/download
+coverage-output
+allure-results
+dist
+.nyc_output
