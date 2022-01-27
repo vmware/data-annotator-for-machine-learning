@@ -20,14 +20,10 @@ describe("Service", () => {
     await loginPage.navigateTo();
     await browser.sleep(10000);
     console.log(await browser.getCurrentUrl())
-    const myVMShow = await browser.isElementPresent(loginPage.BTN_Select);
-    console.log("has the selecte button: ", myVMShow);
-    if (myVMShow) {
-      console.log("Login with My VMware");
-      await loginPage.selectAccountType();
-    }
+    await FunctionUtil.elementVisibilityOf(loginPage.BTN_Select);
+    console.log("Login with My VMware");
+    await loginPage.selectAccountType();
     done();
-
   });
 
   it("Should login with normal user successfully", async (done) => {

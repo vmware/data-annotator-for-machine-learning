@@ -10,7 +10,6 @@ import { CommonPage } from "../general/commom-page";
 import { FunctionUtil } from "../utils/function-util";
 import { protractor } from "protractor/built/ptor";
 const projectEditData = require("../resources/project-edit-page/test-data");
-const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("edit project info on projects page..", () => {
   let since = require("jasmine2-custom-message");

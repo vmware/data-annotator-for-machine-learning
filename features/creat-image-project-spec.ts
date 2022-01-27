@@ -46,7 +46,9 @@ describe("Create new project ", () => {
     await newProjectPage.navigateTo();
     await browser.waitForAngular();
     await newProjectPage.clickNewProjectBtn(PROJECT_NER_CLASSIFICATION);
+    console.log('start to upload csv');
     await newProjectPage.uploadCSV(New_CSV_Name, CSV_Path);
+    console.log('end to upload csv');
     await newProjectPage.imageLoaded();
     await browser.sleep(5000);
     await newProjectPage.navigateTo();

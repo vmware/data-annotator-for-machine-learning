@@ -13,7 +13,8 @@ export class CommonAppend {
   commonPage: CommonPage = new CommonPage;
 
   COMMUNITY_DATASETS_TAB = $('.header-nav a[href="/projects"]')
-  
+  COMMUNITY_ADMIN_TAB = $('.header-nav a[href="/admin"]')
+
   APPEND_BTN = $('button[title="Click to Append New Entries"]');
   APP_NEW_LINE_BTN = element(by.partialButtonText('ADD'));
   APPEND_PUBLISH_BTN = element(by.partialButtonText('Publish'));
@@ -90,6 +91,11 @@ export class CommonAppend {
     await browser.sleep(2000);
     $$("option").each(async function(element) {
       if (await element.getText() == dataset_name) {
+        if (process.env.IN) {
+          console.log('dataset_name: ', dataset_name);
+          await browser.sleep(5000);
+          await FunctionUtil.elementVisibilityOf(element);
+        }
         await FunctionUtil.click(element);
       }
     });
@@ -97,9 +103,24 @@ export class CommonAppend {
     if (isNer) {
       await this.clickExistingLabel(2, 4);
     }
+    if (process.env.IN) {
+      await browser.sleep(10000);
+    }
     await browser.sleep(2000);
+    if (process.env.IN) {
+      console.log('show publish btn');
+      await FunctionUtil.elementVisibilityOf(this.APPEND_PUBLISH_BTN);
+    }
     await FunctionUtil.click(this.APPEND_PUBLISH_BTN);
+    if (process.env.IN) {
+      await browser.sleep(20000);
+      console.log('change to admin tab');
+      await FunctionUtil.click(this.COMMUNITY_ADMIN_TAB);
+      await browser.sleep(10000);
+      await FunctionUtil.click(this.COMMUNITY_DATASETS_TAB);
+    }
     if (await FunctionUtil.getAttribute(this.APPEND_BTN, 'class') == this.APPEND_DONE_CLASS) {
+      console.log('end click publish btn');
       return true;
     }
     console.log('succeed to fileAppendSelectExistingFile');
@@ -137,7 +158,6 @@ export class CommonAppend {
 
 
   async localFileChangeAndUpload(project_name, dataset_name, UPLOAD_FILE_1, UPLOAD_FILE_2){
-
     await this.locateProjectAppend(project_name);
     await FunctionUtil.click(this.APPEND_BY_FILE_TAB);
     await browser.sleep(2000);
@@ -150,9 +170,19 @@ export class CommonAppend {
     await browser.sleep(2000);
 
     await this.DATASET_NAME_ELEMENT.sendKeys(dataset_name);
+    if (process.env.IN) {
+      await browser.sleep(10000);
+      await FunctionUtil.elementVisibilityOf(this.APPEND_PUBLISH_BTN);
+    }
     await FunctionUtil.click(this.APPEND_PUBLISH_BTN);
-    
-    await browser.sleep(2000);
+    if (process.env.IN) {
+      await browser.sleep(20000);
+      await FunctionUtil.click(this.COMMUNITY_ADMIN_TAB);
+      await browser.sleep(10000);
+      await FunctionUtil.click(this.COMMUNITY_DATASETS_TAB);
+    } else {
+      await browser.sleep(2000);
+    }
     if (await FunctionUtil.getAttribute(this.APPEND_BTN, 'class') == this.APPEND_DONE_CLASS) {
       return true;
     }

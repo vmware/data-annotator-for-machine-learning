@@ -24,6 +24,9 @@ describe("annotate project ...", () => {
   });
 
   it("Should annotate ner labels existing project successfully.", async (done) => {
+    if (process.env.IN) {
+      await browser.sleep(10000);
+    }
     await annotatePage.navigateTo();
     await annotatePage.waitForGridLoading();
     await annotatePage.filterProjectName(project_name);

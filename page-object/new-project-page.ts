@@ -216,6 +216,9 @@ export class NewProjectPage extends CommonPage {
   }
 
   async setDataSubmit() {
+    if (process.env.IN) {
+      await FunctionUtil.elementVisibilityOf(this.SET_DATA_BTN);
+    }
     await this.SET_DATA_BTN.click();
     await ExpectedConditions.invisibilityOf($(".btn.uploadLoading"));
   }
@@ -355,9 +358,15 @@ export class NewProjectPage extends CommonPage {
         Constant.DEFAULT_TIME_OUT
       )
       .then(async () => {
+         if (process.env.IN) {
+          await browser.sleep(5000);
+          await FunctionUtil.elementVisibilityOf(this.CREATE_BTN);
+        }
+
         await this.CREATE_BTN.click();
       })
       .then(async () => {
+        console.log('end to clickCreateBtn');
         await this.waitForUploadloading();
       });
   }

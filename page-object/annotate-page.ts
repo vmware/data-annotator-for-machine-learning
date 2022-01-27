@@ -217,7 +217,8 @@ export class AnnotatePage extends CommonPage {
         await browser.sleep(1000);
         FunctionUtil.mouseDragMove(this.MAIN_TEXT, { x: 50, y: 0 }, { x: 150, y: 0 })
         await browser.waitForAngularEnabled(false);
-        await browser.sleep(2000);
+        await browser.sleep(5000);
+        console.log('start to click submit');
         await FunctionUtil.elementVisibilityOf(this.ANNOTATE_SUBMIT_BTN);
         await this.ANNOTATE_SUBMIT_BTN.click();
         console.log("finish ner annotate");

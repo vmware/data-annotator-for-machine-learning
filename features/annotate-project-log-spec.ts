@@ -29,6 +29,9 @@ describe("annotate project ...", () => {
   it("Should create and clear log project filter successfully.", async (done) => {
     await annotatePage.navigateTo();
     await annotatePage.waitForGridLoading();
+    if (process.env.IN) {
+      await browser.sleep(10000);
+    }
     await annotatePage.filterProjectName(project_name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
     let Project_Name_Text = await projectsPage.getCellText(0);

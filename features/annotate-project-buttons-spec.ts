@@ -5,9 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 import { LoginBussiness } from "../general/login-bussiness";
 import { Constant } from "../general/constant";
 import { AnnotatePage } from "../page-object/annotate-page";
-import { browser } from "protractor";
+import { browser, $ } from "protractor";
 import { ProjecstPage } from "../page-object/projects-page";
 import { CommonPage } from "../general/commom-page";
+import { FunctionUtil } from "../utils/function-util";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("annotate project ...", () => {
@@ -27,6 +28,9 @@ describe("annotate project ...", () => {
   });
 
   it("Should annotate project with less than 6 labels successfully.", async (done) => {
+    if (process.env.IN) {
+      await browser.sleep(20000);
+    }
     await annotatePage.navigateTo();
     await annotatePage.waitForGridLoading();
     await commonPage.changePageValue(2);
@@ -39,6 +43,7 @@ describe("annotate project ...", () => {
       await annotatePage.clickAnnotateStartBtn(project_name);
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
+      console.log('start to get project info');
       since("project info should show up and content correct")
         .expect(annotatePage.getProjectInfo())
         .toEqual({
@@ -47,6 +52,7 @@ describe("annotate project ...", () => {
           source: projectCreateData.TextProject.Source,
           instruction: projectCreateData.TextProject.Instruction,
         });
+      console.log('compare project info');
       await annotatePage.selectDisplay(1);
       await annotatePage.selectAnnoteLable();
       await annotatePage.waitForPageLoading();

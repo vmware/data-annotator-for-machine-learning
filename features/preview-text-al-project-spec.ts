@@ -52,7 +52,9 @@ describe("Enter projects tab...", () => {
       await projectsPage.clickGridFirstCell();
       await projectsPage.waitForUserChartLoading();
       await projectsPage.waitForCategoryChartLoading();
-      await browser.sleep(10000);
+      if (process.env.IN) {
+        await browser.sleep(20000);
+      }
       console.log("finish chart loading and sleeping");
       since("user chart rect should show up and have height")
         .expect(projectsPage.getChartRectHeight(USER_CHART_FIRST_RECT))
@@ -85,7 +87,9 @@ describe("Enter projects tab...", () => {
       console.log("start to delete flagged ticket");
       await projectsPage.clickDeleteTicketBtn();
       await projectsPage.waitForGridLoading();
-      await browser.sleep(1000);
+      if (process.env.IN) {
+        await browser.sleep(10000);
+      }
       since("table total items should reduce 1")
         .expect(
           Number((await projectsPage.getTableTotalItems()).trim().split(" ")[4])
@@ -96,7 +100,9 @@ describe("Enter projects tab...", () => {
       console.log("start to silence flagged ticket");
       await projectsPage.clickSilenceTicketBtn();
       await projectsPage.waitForGridLoading();
-      await browser.sleep(1000);
+      if (process.env.IN) {
+        await browser.sleep(10000);
+      }
       since("table total items should reduce 1")
         .expect(
           Number((await projectsPage.getTableTotalItems()).trim().split(" ")[4])

@@ -16,6 +16,9 @@ describe("Enter projects tab...", () => {
   });
 
   it("Should change the page value successfully.", async (done) => {
+    if (process.env.IN) {
+      await browser.sleep(10000);
+    }
     await projectsPage.navigateTo();
     await projectsPage.waitForPageLoading();
     await commonPage.changePageValue(1);

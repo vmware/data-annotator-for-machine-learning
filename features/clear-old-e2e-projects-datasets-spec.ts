@@ -42,8 +42,14 @@ describe("upload new dataset on myDatasets page..", () => {
     await myDatasetsPage.filterDatasetstName(datasetsName);
     let dataLength = await FunctionUtil.getElementsNum(TABLE_LIST);
     for (var i=0; i<dataLength; i++){
+      if (process.env.IN) {
+        await browser.sleep(20000);
+      }
       await CommonUtils.deleteDataGrid(DELETE_DATASET_BTN.first(), DELETE_DATASET_OK_BTN);;
     }
+    if (process.env.IN) {
+      await browser.sleep(20000);
+    } 
     await browser.sleep(2000);
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
   });
