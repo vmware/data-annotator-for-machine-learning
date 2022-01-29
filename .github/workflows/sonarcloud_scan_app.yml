@@ -1,0 +1,53 @@
+#
+# Copyright 2019-2021 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: sonarcloud_scan_app
+
+on:
+  push:
+    branches: ["**", '!master']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  #sonar cloud scan job for annotation app
+  scan_annotation_app:
+    runs-on: ubuntu-latest 
+
+    #define variables to be used for SonarCloud scan
+    env:
+      SONAR_ORG:  ${{ secrets.SONAR_ORG }}
+
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Checkout devops branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: 'devops'
+          path: 'devops'
+
+      - name: SonarCloud setup for annotation-app
+        working-directory: ./devops/sonar
+        run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
+
+      - name: SonarCloud Scan annotation-app
+        uses: sonarsource/sonarcloud-github-action@master  
+        with:
+          projectBaseDir: ./annotation-app
+          args: >
+            -Dsonar.organization=${{ env.SONAR_ORG }}
+            -Dsonar.projectKey=${{ env.SONAR_ORG }}-annotation-app
+            -Dsonar.test.exclusions=**/node_modules/**/*,*.md,*.txt,*.yml
+            -Dsonar.coverage.exclusions=**
+        #Set below secrets in your Github Actions secrets
+        env: 
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
+          

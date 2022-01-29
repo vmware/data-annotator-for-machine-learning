@@ -1,0 +1,89 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.mainArea {
+  margin: 0 2rem;
+}
+
+.cellWordBreak {
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  height: 1.8rem;
+  line-height: 0.7rem;
+}
+
+.float-right {
+  float: right !important;
+}
+
+::ng-deep .createBtn .btn.btn-sm {
+  margin-top: 1rem !important;
+}
+
+.add-doc {
+  margin-right: 0rem;
+  margin-top: 1rem !important;
+}
+
+.uploadModal input[type='text'],
+.uploadModal input[type='file'] {
+  width: 100% !important;
+  margin-bottom: 0px;
+}
+
+.uploadLoading {
+  background-color: rgba(0, 119, 184, 0.2);
+  border-color: rgba(0, 119, 184, 0.2);
+  padding-top: 0.2rem;
+}
+
+::ng-deep .md-check {
+  margin-left: 10px !important;
+}
+
+.form-group {
+  margin: 30px 0;
+}
+
+label span {
+  color: red;
+}
+
+.actionClass {
+  padding: 0.1rem 0.2rem;
+  height: 1rem;
+  line-height: 0.9rem;
+  min-width: 1.5rem;
+}
+
+.previewTableDiv {
+  border: 1px solid #ccc;
+  border-radius: 0.125rem;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin-left: 0.5rem;
+  padding-left: 0rem;
+  padding-right: 0rem;
+  max-height: 20rem;
+}
+
+.previewTable {
+  margin-top: 0rem !important;
+  border: unset;
+}
+
+thead tr th:last-child {
+  border-right: unset !important;
+}
+
+.noData {
+  margin: 2rem auto;
+  text-align: center;
+  color: #999;
+  font-size: 1.2em;
+}

@@ -1,0 +1,30 @@
+<!-- Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="footer">
+  <div class="vm-border"></div>
+  <table aria-describedby="loop-footer">
+    <tr>
+      <th id="logo"></th>
+      <th id="feedback"></th>
+    </tr>
+    <tr>
+      <td>
+        <img alt="vm-logo" src="assets/images/vm-logo.png" width="100" height="15" />
+      </td>
+      <td align="right" class="feedback">
+        <a
+          *ngIf="!env.config.feedbackUrl"
+          class="nostyle"
+          href="mailto:example@example.com"
+          target="_blank"
+        >
+          <clr-icon shape="talk-bubbles" class="is-solid"></clr-icon> Feedback
+        </a>
+        <a *ngIf="env.config.feedbackUrl" class="nostyle openFeedback">
+          <clr-icon shape="talk-bubbles" class="is-solid"></clr-icon> Feedback
+        </a>
+      </td>
+    </tr>
+  </table>
+</div>
