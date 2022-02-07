@@ -5,6 +5,7 @@
   "main": "protractor.config.js",
   "scripts": {
     "webdriver": "webdriver-manager update",
+    "webdriver-95": "webdriver-manager update --gecko=false --versions.chrome 95.0.4638.69",
     "e2e": "forever stopall && forever start node_modules/gulp/bin/gulp.js start && protractor-flake --parser standard --max-attempts=3 -- protractor.config.js && forever stopall",
     "e2e-serve": "lite-server -c bs-config.json",
     "instrument": "gulp instrument",
