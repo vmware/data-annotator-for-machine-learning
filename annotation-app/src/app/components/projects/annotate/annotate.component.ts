@@ -165,6 +165,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   scores: any = [];
   scoreMessage: any = [];
 
+  isShowPopLabel: boolean;
+
   sliderEvent() {
     if (this.numericOptions.step === 1) {
       if (parseInt(this.labelChoose) !== this.numericValue) {
@@ -230,6 +232,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.getProgress();
     this.getProjectsList();
+    this.isShowPopLabel = true;
   }
 
   createForm(): void {
@@ -2324,9 +2327,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     const range = selectedRanges[0];
     this.createSpans(range, this.selectedEntityID);
   }
+
+  showPopLabel(event) {
+    console.log(event.target);
+  }
   
   createSpans(self, selectedEntityID) {
-    const spans = highlightRange(self, 'spanMarked', { backgroundColor: this.toolService.hexToRgb(this.labelColor.get(this.categories[selectedEntityID])) });
+    const spans = highlightRange(self, 'spanMarked', { backgroundColor: this.toolService.hexToRgb(this.labelColor.get(this.categories[selectedEntityID])) },
+     this.isShowPopLabel, this.showPopLabel);
     
     const lastSpan = spans[spans.length - 1];
     lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);

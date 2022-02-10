@@ -119,6 +119,10 @@ export class CreateNewComponent implements OnInit {
   selectedDisplayColumn: any = [];
   isMutilNumericLabel: boolean;
   inputIsNull: boolean;
+  popLabelList: any = [];
+  showPopLabel: boolean;
+  activePopNew: number;
+  activePopOriginal: number;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -161,6 +165,12 @@ export class CreateNewComponent implements OnInit {
     this.overPerLabelLimit = false;
     this.setDataComplete = false;
     this.uploadErrorTip = false;
+    this.popLabelList = [
+      { name: 'Negative', value: 'Negative' },
+      { name: 'Positive', value: 'Positive' },
+      { name: 'Neutral', value: 'Neutral' },
+    ];
+    this.showPopLabel = false;
     this.classifier = [
       { name: 'RandomForestClassifier', value: 'RFC' },
       { name: 'KNeighborsClassifier', value: 'KNC' },
@@ -1380,6 +1390,64 @@ export class CreateNewComponent implements OnInit {
     this.mutilLabelArray.removeAt(delIndex);
     if (this.mutilLabelArray.value.length) {
       this.checkBoth();
+    }
+  }
+
+  clickPopLabel() {
+    this.showPopLabel = !this.showPopLabel;
+  }
+
+  deletePopLabel(index, from) {
+    if (from === 'new') {
+      this.popLabelList.splice(index, 1);
+    }
+  }
+
+  onEnterPopLabel(e) {
+    this.updatePopLabel(e);
+  }
+
+  poplabelsBlur(e: any) {
+    this.updatePopLabel(e.target.value);
+  }
+
+  
+  updatePopLabel(data) {
+    if (data && this.inputLabelValidation == false) {
+      if (this.projectType === 'ner') {
+        this.popLabelList.push({ name: data });
+      }
+    }
+  }
+
+  overPopLabels(index, from) {
+    if (from === 'new') {
+      this.activePopNew = index;
+    } else {
+      this.activePopOriginal = index;
+    }
+  }
+
+  outPopLabels(index, from) {
+    if (from === 'new') {
+      this.activePopNew = null;
+    } else {
+      this.activePopOriginal = null;
+    }
+  }
+
+  onPopLabelKeydown(e) {
+    if (this.projectType === 'ner') {
+      // const aa = [];
+      // const bb = this.dsDialogForm.value.labels;
+      // bb.forEach((e) => {
+      //   aa.push(e.name);
+      // });
+      // if (aa.indexOf(e.target.value) !== -1) {
+      //   this.inputLabelValidation = true;
+      // } else {
+      //   this.inputLabelValidation = false;
+      // }
     }
   }
 }

@@ -481,9 +481,25 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </div>
               <div class="nerContent">
-              <div class="nerPassage">  
-                <span (mouseup)="onMouseUp($event)" id='mainText'>{{ sr.originalData.text }}</span>
+              <div class="nerPassage" (mouseup)="onMouseUp($event)">  
+                <span id='mainText'>{{ sr.originalData.text }}</span>
               </div>
+              <div id="popLabelWin">  
+                <!-- <popover-content #myPopover 
+                title="Popover title" 
+                placement="left"
+                [animation]="false" 
+                [closeOnClickOutside]="false" >
+    <b>Very</b> <span style="color: #C21F39">Dynamic</span> <span style="color: #00b3ee">Reusable</span>
+    <b><i><span style="color: #ffc520">Popover With</span></i></b> <small>Html support</small>.
+</popover-content>
+  -->
+<!-- <span [popover]="myPopover">element on which this popover is applied.</span> -->
+<!-- <button type="button" class="btn btn-outline-secondary mr-2" ngbPopover="What a great tip!" [autoClose]="false" triggers="manual" #p="ngbPopover" (click)="p.open()" popoverTitle="Pop title">
+  Click me to open a popover
+</button> -->
+              </div>
+
               <div class="annotateLabel">
                 <div class="resultTip">
                   Tips:  When mouse over or click the selected text will highlight the labeled text on the passage.</div>

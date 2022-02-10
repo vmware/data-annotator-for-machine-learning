@@ -43,7 +43,7 @@ function splitText(node, offset) {
   return insertAfter(tail, node);
 }
 
-function highlightRange(normedRange, cssClass, cssStyle) {
+function highlightRange(normedRange, cssClass, cssStyle, isShowPopLabel, showPopLabel) {
   if (typeof cssClass === 'undefined' || cssClass === null) {
     cssClass = 'spanMarked';
   }
@@ -71,6 +71,9 @@ function highlightRange(normedRange, cssClass, cssStyle) {
       var hl = window.document.createElement('span');
       hl.style.backgroundColor = cssStyle.backgroundColor;
       hl.className = cssClass;
+      if (isShowPopLabel) {
+        hl.addEventListener('click', showPopLabel);
+      }
       node.parentNode.replaceChild(hl, node);
       hl.appendChild(node);
       results.push(hl);

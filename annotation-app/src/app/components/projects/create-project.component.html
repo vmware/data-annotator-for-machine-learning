@@ -573,6 +573,54 @@ SPDX-License-Identifier: Apache-2.0 -->
             </clr-tooltip>
           </div>
 
+          <div class="form-group clr-row" *ngIf="projectType === 'ner'">
+            <div class="clr-col-12 clr-col-md-1"></div>
+            <label for="PopupLables" class="label-tooltip clr-col-12 clr-col-md-2"
+              >Popup Lables
+            </label>
+            <div class="clr-col-12 clr-col-md-8 labelsList">
+              <!-- Popup label -->
+              <div>
+                <span
+                  *ngFor="let label of popLabelList; let i = index"
+                  class="label"
+                  style="position: relative; padding: 0 1rem 0 1rem; margin-top: 0.3rem"
+                  maxlength="5"
+                  (mouseenter)="overPopLabels(i, 'new')"
+                  (mouseleave)="outPopLabels(i, 'new')"
+                  [ngClass]="activePopNew == i ? 'overLabels' : ''"
+                  >{{ projectType == 'ner' ? label.name : label
+                  }}<clr-icon
+                    shape="times"
+                    *ngIf="activePopNew == i"
+                    style="position: absolute; right: 0.1rem"
+                    (click)="deletePopLabel(i, 'new')"
+                  >
+                  </clr-icon>
+                </span>
+                &nbsp; &nbsp;
+
+                <input
+                  #labels
+                  id="PopupLables"
+                  maxlength="3"
+                  clrInput
+                  placeholder="Add New Popup Lables"
+                  name="addPopupLables"
+                  class="clr-input"
+                  (keyup.enter)="onEnterPopLabel(labels.value)"
+                  (blur)="poplabelsBlur($event)"
+                  (keyup)="onPopLabelKeydown($event)"
+                  [disabled]="popLabelList.length > 2"
+                />
+                <clr-checkbox-wrapper>
+                  <input type="checkbox" clrCheckbox value="showPopLabel" name="showPopLabel" (change)="clickPopLabel($event)"  />
+                  <label>Show Popue Labels</label>
+                </clr-checkbox-wrapper>
+              </div>
+            </div>
+          </div>
+
           <div *ngIf="msg.type == 'text' || msg.type == 'tabular'" class="form-group clr-row">
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="maxAnnotations" class="label-tooltip clr-col-12 clr-col-md-2"
