@@ -484,22 +484,6 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="nerPassage" (mouseup)="onMouseUp($event)">  
                 <span id='mainText'>{{ sr.originalData.text }}</span>
               </div>
-              <div id="popLabelWin">  
-                <!-- <popover-content #myPopover 
-                title="Popover title" 
-                placement="left"
-                [animation]="false" 
-                [closeOnClickOutside]="false" >
-    <b>Very</b> <span style="color: #C21F39">Dynamic</span> <span style="color: #00b3ee">Reusable</span>
-    <b><i><span style="color: #ffc520">Popover With</span></i></b> <small>Html support</small>.
-</popover-content>
-  -->
-<!-- <span [popover]="myPopover">element on which this popover is applied.</span> -->
-<!-- <button type="button" class="btn btn-outline-secondary mr-2" ngbPopover="What a great tip!" [autoClose]="false" triggers="manual" #p="ngbPopover" (click)="p.open()" popoverTitle="Pop title">
-  Click me to open a popover
-</button> -->
-              </div>
-
               <div class="annotateLabel">
                 <div class="resultTip">
                   Tips:  When mouse over or click the selected text will highlight the labeled text on the passage.</div>
@@ -519,6 +503,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </div>
               </div>
+            </div>
+            <div class="popDialog" id="popDialog">
+              <div style="display: inline-flex; padding-top: 1rem; padding-right: 0.5rem; padding-left: 0.5rem;">
+                <button type="button" class="btn btn-primary btn-sm" title="Positive" (click)="clickPositive($event, spanText)">Positive</button>
+                <button type="button" class="btn btn-success btn-sm" title="Neutral" (click)="clickNegative($event, spanText)">Neutral</button>
+                <button type="button" class="btn btn-warning btn-sm" title="Negative" (click)="clickNegative($event, spanText)">Negative</button>
+              </div>
+              <div class="popDialog-arrow"></div>
+              <div class="popDialog-insideArrow"></div>
             </div>
             <!-- here is log annotation content -->
             <div *ngIf="projectType === 'log'">

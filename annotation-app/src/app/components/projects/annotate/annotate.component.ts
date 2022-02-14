@@ -166,6 +166,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   scoreMessage: any = [];
 
   isShowPopLabel: boolean;
+  isShowPopOver: boolean = false;
+  xAxis: number = 0;
+  yAxis: number = 0;
+  realYAxis: number = 0;
+  initScrollTop: number = 0;
+  targetPop: any;
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -233,6 +239,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getProgress();
     this.getProjectsList();
     this.isShowPopLabel = true;
+    this.targetPop = document.getElementById('mainText');
+    window.addEventListener('scroll', this.handleScroll, true);
+  }
+
+  handleScroll() {
+    console.log('this: ', this);
+    console.log('this.targetPop: ', this.targetPop.scrollTop);
+    this.realYAxis = this.yAxis - this.targetPop.scrollTop + this.initScrollTop;
   }
 
   createForm(): void {
@@ -2330,6 +2344,43 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   showPopLabel(event) {
     console.log(event.target);
+    this.targetPop = event.target;
+    const popDialog = document.getElementById('popDialog');
+    popDialog.style.display = 'block';
+    let domLoc = event.target.getBoundingClientRect();
+    this.isShowPopOver = !this.isShowPopOver;
+    console.log('domLoc.x: ', domLoc.x);
+    console.log('domLoc.width: ', domLoc.width);
+    this.xAxis = domLoc.x;
+    this.yAxis = domLoc.y - 130;
+    this.initScrollTop = event.target.scrollTop;
+    this.realYAxis = this.yAxis;
+    popDialog.style.top = this.realYAxis + 'px';
+    popDialog.style.left = this.xAxis + 'px';
+  }
+
+  clickPositive(e, data) {
+    const popDialog = document.getElementById('popDialog');
+    popDialog.style.display = 'none';
+    // const alllabeledDom = this.el.nativeElement.querySelectorAll('.annotateLabel .spanSelected');
+    // alllabeledDom.forEach(ele => {
+    //   this.renderer2.removeStyle(ele, 'backgroundColor');
+    // });
+    // e.target.parentNode.style.backgroundColor = '#b4d2e3';
+    
+    // if (data && data.spans) {
+    
+    //   data.spans.forEach((element, index) => {
+    //     if (index === 0) {
+    //       element.scrollIntoView({block: 'center'});
+    //     }
+    //     this.renderer2.setStyle(element, 'background-color', 'green');
+    //   });
+    // }
+  }
+
+  clickNegative(event) {
+    
   }
   
   createSpans(self, selectedEntityID) {
@@ -2338,7 +2389,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     
     const lastSpan = spans[spans.length - 1];
     lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
-
+    if (this.isShowPopLabel) {
+      lastSpan.addEventListener('click', this.showPopLabel);
+    }
     const part = { text: '', start: 0, end: 0, label: '', spans: [] };
     part.text = self.text;
     part.start = self.startOffset;
@@ -3407,6 +3460,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
       this.saveAnnotateSetting('display', this.renderFormat);
     }
+
+    window.removeEventListener('scroll', this.handleScroll, true);
   }
 
   formatDecimal(num, decimal) {

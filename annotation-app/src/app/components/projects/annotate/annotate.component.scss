@@ -901,3 +901,30 @@ label .label-leftBoard {
 .popLabels {
   display: none;
 }
+
+.popDialog {
+  display: none;
+  background: #fff;
+  position: absolute;
+  z-index: 100;
+  border: 1px solid #EBEEF5;
+  box-shadow: 1px 1px 2px 0px rgba(192, 196, 204, 1), -1px -1px 2px 0px rgba(192, 196, 204, 1);
+  &-arrow {
+    width: 0;
+    height: 0;
+    border: 14px solid transparent;
+    border-top-color: rgba(192, 196, 204, .7);
+    position: relative;
+    top: 54px;
+    left: 24px;
+  }
+  &-insideArrow {
+    width: 0;
+    height: 0;
+    border: 12px solid transparent;
+    border-top-color: #fff;
+    position: relative;
+    top: 24px;
+    left: 25px;
+  }
+}
