@@ -141,6 +141,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#97d778',
     '#2F4F4F',
   ];
+  popLabelColor =  new Map([
+    [ 'Positive', '#55b128' ],
+    [ 'Neutral', '#3377dd' ],
+    [ 'Negative', '#d70c3b' ],
+  ]);
+
   totalLen: number = 0;
   labelColor: any = {};
   selectedEntityColor: any = '';
@@ -171,7 +177,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   yAxis: number = 0;
   realYAxis: number = 0;
   initScrollTop: number = 0;
-  targetPop: any;
+  targetSpans: any;
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -239,14 +245,16 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getProgress();
     this.getProjectsList();
     this.isShowPopLabel = true;
-    this.targetPop = document.getElementById('mainText');
+
     window.addEventListener('scroll', this.handleScroll, true);
   }
 
   handleScroll() {
-    console.log('this: ', this);
-    console.log('this.targetPop: ', this.targetPop.scrollTop);
-    this.realYAxis = this.yAxis - this.targetPop.scrollTop + this.initScrollTop;
+    const popDialog = document.getElementById('popDialog');
+    if (popDialog) {
+      popDialog.style.display = 'none';
+      this.targetSpans = '';
+    }
   }
 
   createForm(): void {
@@ -2342,15 +2350,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.createSpans(range, this.selectedEntityID);
   }
 
-  showPopLabel(event) {
-    console.log(event.target);
-    this.targetPop = event.target;
+  showPopLabel(spans, event) {
+    this.targetSpans = spans;
     const popDialog = document.getElementById('popDialog');
     popDialog.style.display = 'block';
     let domLoc = event.target.getBoundingClientRect();
     this.isShowPopOver = !this.isShowPopOver;
-    console.log('domLoc.x: ', domLoc.x);
-    console.log('domLoc.width: ', domLoc.width);
     this.xAxis = domLoc.x;
     this.yAxis = domLoc.y - 130;
     this.initScrollTop = event.target.scrollTop;
@@ -2359,38 +2364,29 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     popDialog.style.left = this.xAxis + 'px';
   }
 
-  clickPositive(e, data) {
+  clickPositive(e, selectedPopLabel) {
     const popDialog = document.getElementById('popDialog');
     popDialog.style.display = 'none';
-    // const alllabeledDom = this.el.nativeElement.querySelectorAll('.annotateLabel .spanSelected');
-    // alllabeledDom.forEach(ele => {
-    //   this.renderer2.removeStyle(ele, 'backgroundColor');
-    // });
-    // e.target.parentNode.style.backgroundColor = '#b4d2e3';
-    
-    // if (data && data.spans) {
-    
-    //   data.spans.forEach((element, index) => {
-    //     if (index === 0) {
-    //       element.scrollIntoView({block: 'center'});
-    //     }
-    //     this.renderer2.setStyle(element, 'background-color', 'green');
-    //   });
-    // }
-  }
-
-  clickNegative(event) {
-    
+    console.log('targetSpans: ', this.targetSpans);
+    this.targetSpans.forEach(ele => {
+      this.renderer2.removeStyle(ele, 'backgroundColor');
+      this.renderer2.setStyle(ele, 'background-color', e.target.style.backgroundColor);
+    });
+    this.spansList.forEach(ele => {
+      if (ele.spans === this.targetSpans) {
+        ele.popLabel = selectedPopLabel;
+      }
+    });
+    console.log('spansList: ', this.spansList);
   }
   
   createSpans(self, selectedEntityID) {
-    const spans = highlightRange(self, 'spanMarked', { backgroundColor: this.toolService.hexToRgb(this.labelColor.get(this.categories[selectedEntityID])) },
-     this.isShowPopLabel, this.showPopLabel);
+    const spans = highlightRange(self, 'spanMarked', { backgroundColor: this.toolService.hexToRgb(this.labelColor.get(this.categories[selectedEntityID])) });
     
     const lastSpan = spans[spans.length - 1];
     lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
     if (this.isShowPopLabel) {
-      lastSpan.addEventListener('click', this.showPopLabel);
+      lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans));
     }
     const part = { text: '', start: 0, end: 0, label: '', spans: [] };
     part.text = self.text;
@@ -2463,7 +2459,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.renderer2.removeStyle(element, 'border');
         this.renderer2.removeStyle(element, 'padding');
         this.renderer2.removeStyle(element, 'border-radius');
-        this.renderer2.setStyle(element, 'background-color', labelColor);
+        if (data.popLabel) {
+          this.renderer2.setStyle(element, 'background-color', this.popLabelColor.get(data.popLabel));
+        } else {
+          this.renderer2.setStyle(element, 'background-color', labelColor);
+        }
       });
     }
   }
@@ -2476,6 +2476,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     if (data && data.spans) {
       removeSpans(data.spans);
+    }
+    if (this.targetSpans && popDialog && this.targetSpans === data.spans) {
+      popDialog.style.display = 'none';
+      this.targetSpans = '';
     }
     this.actionError = null;
   }
