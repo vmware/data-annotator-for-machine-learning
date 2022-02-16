@@ -31,6 +31,7 @@ export class DatasetUtil {
       maxAnnotations: 1,
       annotationDisplayName: 'Passage',
       labels: [],
+      popLabels: [],
       assigmentLogic: 'random',
       assignee: [],
       localFile: null,
@@ -79,6 +80,7 @@ export interface DatasetData {
   description: string;
   maxAnnotations: number;
   labels: any;
+  popLabels: any;
   assigmentLogic: string;
   assignee: any;
   localFile: any;

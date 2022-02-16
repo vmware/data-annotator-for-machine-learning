@@ -601,14 +601,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                 &nbsp; &nbsp;
 
                 <input
-                  #labels
-                  id="PopupLables"
-                  maxlength="3"
+                  #popupLables
+                  id="popupLables"
+                  maxlength="50"
                   clrInput
-                  placeholder="Add New Popup Lables"
+                  placeholder="Add New Popup Lable"
                   name="addPopupLables"
                   class="clr-input"
-                  (keyup.enter)="onEnterPopLabel(labels.value)"
+                  (keyup.enter)="onEnterPopLabel(popupLables.value)"
                   (blur)="poplabelsBlur($event)"
                   (keyup)="onPopLabelKeydown($event)"
                   [disabled]="popLabelList.length > 2"
@@ -618,6 +618,46 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <label>Show Popue Labels</label>
                 </clr-checkbox-wrapper>
               </div>
+            </div>
+            <div>
+              <clr-tooltip
+                *ngIf="dsDialogForm.get('popLabels').errors && dsDialogForm.get('popLabels').touched"
+              >
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>{{ dsDialogForm.get('popLabels').errors.msg.value }}</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+              <clr-tooltip *ngIf="popLabelValidation">
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>This popup Label has already exist!</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
             </div>
           </div>
 

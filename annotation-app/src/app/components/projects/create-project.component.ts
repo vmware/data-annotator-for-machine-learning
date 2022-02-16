@@ -42,6 +42,8 @@ export class CreateNewComponent implements OnInit {
   labels: ElementRef;
   @ViewChild('assignee', { static: false })
   assignee: ElementRef;
+  @ViewChild('popupLables', { static: false })
+  popupLables: ElementRef;
 
   user: string;
   dsDialogForm: FormGroup;
@@ -123,6 +125,7 @@ export class CreateNewComponent implements OnInit {
   showPopLabel: boolean;
   activePopNew: number;
   activePopOriginal: number;
+  popLabelValidation: boolean;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -170,6 +173,7 @@ export class CreateNewComponent implements OnInit {
       { name: 'Positive', value: 'Positive' },
       { name: 'Neutral', value: 'Neutral' },
     ];
+    this.popLabelValidation = false;
     this.showPopLabel = false;
     this.classifier = [
       { name: 'RandomForestClassifier', value: 'RFC' },
@@ -193,6 +197,7 @@ export class CreateNewComponent implements OnInit {
       taskInstruction: [this.dataset.description, null],
       maxAnnotations: [this.dataset.maxAnnotations, DatasetValidator.maxAnnotation()],
       labels: [this.dataset.labels, DatasetValidator.requiredTwo(this.projectType)],
+      popLabels: [this.dataset.popLabels, DatasetValidator.requiredTwoPopLabel(this.projectType)],
       assignmentLogic: [this.dataset.assigmentLogic, ''],
       assignee: [this.dataset.assignee, DatasetValidator.required()],
       selectDescription: [this.dataset.selectDescription, ''],
@@ -275,6 +280,12 @@ export class CreateNewComponent implements OnInit {
         }
         if (this.isMultipleLabel) {
           this.validMultiple();
+        }
+        this.dsDialogForm.get('popLabels').setValidators(null);
+        this.dsDialogForm.get('popLabels').updateValueAndValidity();
+        if (this.showPopLabel) {
+          this.dsDialogForm.get('popLabels').setValidators(DatasetValidator.requiredTwoPopLabel(this.projectType));
+          this.dsDialogForm.get('popLabels').updateValueAndValidity();
         }
         condition = !this.dsDialogForm.invalid && !this.nameExist;
       }
@@ -393,6 +404,13 @@ export class CreateNewComponent implements OnInit {
     }
     if (this.projectType === 'ner') {
       formData.append('regression', this.selectDescription.length > 0 ? 'true' : 'false');
+      if (this.showPopLabel && this.dsDialogForm.value.popLabels.length > 0) {
+        const popLabels = [];
+        this.dsDialogForm.value.popLabels.forEach((element) => {
+          popLabels.push(element.name);
+        });
+        formData.append('popLabels', popLabels.join(','));
+      }
     }
     if (this.projectType === 'log') {
       formData.append(
@@ -1400,6 +1418,7 @@ export class CreateNewComponent implements OnInit {
   deletePopLabel(index, from) {
     if (from === 'new') {
       this.popLabelList.splice(index, 1);
+      this.dsDialogForm.get('popLabels').setValue([...this.popLabelList]);
     }
   }
 
@@ -1413,10 +1432,12 @@ export class CreateNewComponent implements OnInit {
 
   
   updatePopLabel(data) {
-    if (data && this.inputLabelValidation == false) {
+    if (data && this.popLabelValidation == false) {
       if (this.projectType === 'ner') {
         this.popLabelList.push({ name: data });
+        this.dsDialogForm.get('popLabels').setValue([...this.popLabelList]);
       }
+      this.popupLables.nativeElement.value = null;
     }
   }
 
@@ -1438,16 +1459,22 @@ export class CreateNewComponent implements OnInit {
 
   onPopLabelKeydown(e) {
     if (this.projectType === 'ner') {
-      // const aa = [];
-      // const bb = this.dsDialogForm.value.labels;
-      // bb.forEach((e) => {
-      //   aa.push(e.name);
-      // });
-      // if (aa.indexOf(e.target.value) !== -1) {
-      //   this.inputLabelValidation = true;
-      // } else {
-      //   this.inputLabelValidation = false;
-      // }
+      const aa = [];
+      const bb = this.dsDialogForm.value.popLabels;
+      bb.forEach((e) => {
+        aa.push(e.name);
+      });
+      if (aa.indexOf(e.target.value) !== -1) {
+        this.popLabelValidation = true;
+      } else {
+        this.popLabelValidation = false;
+      }
+    } else {
+      if (this.popLabelList.indexOf(e.target.value) !== -1) {
+        this.popLabelValidation = true;
+      } else {
+        this.popLabelValidation = false;
+      }
     }
   }
 }

@@ -505,10 +505,11 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
             <div class="popDialog" id="popDialog">
+              <div class="clearPop" (click)="clearPopDialog()">×</div>
               <div style="display: inline-flex; padding-top: 1rem; padding-right: 0.5rem; padding-left: 0.5rem;">
-                <button type="button" class="btn btn-sm" style="background-color: #55b128; border-color: #55b128; color: white" title="Positive" (click)="clickPositive($event, 'Positive')">Positive</button>
-                <button type="button" class="btn btn-sm" style="background-color: #3377dd; border-color: #3377dd; color: white" title="Neutral" (click)="clickPositive($event, 'Neutral')">Neutral</button>
-                <button type="button" class="btn btn-sm" style="background-color: #d70c3b; border-color: #d70c3b; color: white" title="Negative" (click)="clickPositive($event, 'Negative')">Negative</button>
+                <button *ngFor="let poplabel of popLabels; let i = index" type="button" class="btn btn-sm"
+                  [style.background-color]="popLabelColors[i]" [style.border-color]="popLabelColors[i]" style="color: white" [title]="poplabel"
+                  (click)="clickPopLabel($event, poplabel, popLabelColors[i] )">{{ poplabel }}</button>
               </div>
               <div class="popDialog-arrow"></div>
               <div class="popDialog-insideArrow"></div>
