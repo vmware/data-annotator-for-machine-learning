@@ -2350,9 +2350,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.createSpans(range, this.selectedEntityID);
   }
 
-  showPopLabel(spans, event) {
-    this.targetSpans = spans;
+  showPopLabel(spans, lastSpan, event) {
     const popDialog = document.getElementById('popDialog');
+    if (popDialog.style.display === 'block') {
+      return false;
+    }
+    this.targetSpans = spans;
     popDialog.style.display = 'block';
     let domLoc = event.target.getBoundingClientRect();
     this.isShowPopOver = !this.isShowPopOver;
@@ -2367,17 +2370,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   clickPositive(e, selectedPopLabel) {
     const popDialog = document.getElementById('popDialog');
     popDialog.style.display = 'none';
-    console.log('targetSpans: ', this.targetSpans);
-    this.targetSpans.forEach(ele => {
-      this.renderer2.removeStyle(ele, 'backgroundColor');
-      this.renderer2.setStyle(ele, 'background-color', e.target.style.backgroundColor);
-    });
     this.spansList.forEach(ele => {
       if (ele.spans === this.targetSpans) {
         ele.popLabel = selectedPopLabel;
       }
     });
-    console.log('spansList: ', this.spansList);
+    this.targetSpans.forEach((element, index) => {
+      this.renderer2.removeStyle(element, 'backgroundColor');
+      this.renderer2.setStyle(element, 'background-color', e.target.style.backgroundColor);
+    });
   }
   
   createSpans(self, selectedEntityID) {
@@ -2386,7 +2387,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     const lastSpan = spans[spans.length - 1];
     lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
     if (this.isShowPopLabel) {
-      lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans));
+      lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans, lastSpan));
     }
     const part = { text: '', start: 0, end: 0, label: '', spans: [] };
     part.text = self.text;
