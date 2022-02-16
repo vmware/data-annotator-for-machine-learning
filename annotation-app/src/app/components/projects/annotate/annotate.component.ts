@@ -3289,6 +3289,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.isDrawer = true;
     }
+    this.clearPopDialog();
   }
 
   toShowExistingLabel() {
