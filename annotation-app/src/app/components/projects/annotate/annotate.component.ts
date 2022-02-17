@@ -2339,7 +2339,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
     normedRange.startOffset = ss;
     normedRange.endOffset = ee;
-    this.createSpans(normedRange, selectedEntityID);
+    this.createSpans(normedRange, selectedEntityID, element);
   }
 
   onMouseUp() {
@@ -2347,7 +2347,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     var selectedRanges = this.captureDocSelection();
     if (selectedRanges.length === 0) return;
     const range = selectedRanges[0];
-    this.createSpans(range, this.selectedEntityID);
+    this.createSpans(range, this.selectedEntityID, '');
   }
 
   showPopLabel(spans, lastSpan, event) {
@@ -2386,20 +2386,29 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
   
-  createSpans(self, selectedEntityID) {
-    const spans = highlightRange(self, 'spanMarked', { backgroundColor: this.toolService.hexToRgb(this.labelColor.get(this.categories[selectedEntityID])) });
-    
+  createSpans(self, selectedEntityID, element) {
+    let spans;
+    if (element.popLabelColor) {
+      spans = highlightRange(self, 'spanMarked', { backgroundColor: element.popLabelColor });
+    } else {
+      spans = highlightRange(self, 'spanMarked', { backgroundColor: this.toolService.hexToRgb(this.labelColor.get(this.categories[selectedEntityID])) });
+    }
+   
     const lastSpan = spans[spans.length - 1];
     lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
     if (this.isShowPopLabel) {
       lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans, lastSpan));
     }
-    const part = { text: '', start: 0, end: 0, label: '', spans: [] };
+    const part = { text: '', start: 0, end: 0, label: '', spans: [], popLabelColor: '', popLabel: ''};
     part.text = self.text;
     part.start = self.startOffset;
     part.end = self.endOffset;
     part.label = this.categories[selectedEntityID];
     part.spans = spans;
+    if (element.popLabelColor) {
+      part.popLabelColor = element.popLabelColor;
+      part.popLabel = element.popLabel;
+    }
     this.spansList.push(part);
     this.actionError = null;
   }
