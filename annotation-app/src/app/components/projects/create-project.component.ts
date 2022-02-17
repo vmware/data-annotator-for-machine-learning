@@ -169,8 +169,8 @@ export class CreateNewComponent implements OnInit {
     this.setDataComplete = false;
     this.uploadErrorTip = false;
     this.popLabelList = [
-      { name: 'Negative', value: 'Negative' },
       { name: 'Positive', value: 'Positive' },
+      { name: 'Negative', value: 'Negative' },
       { name: 'Neutral', value: 'Neutral' },
     ];
     this.popLabelValidation = false;

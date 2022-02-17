@@ -142,7 +142,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#2F4F4F',
   ];
 
-  popLabelColors = [ '#55b128', '#3377dd', '#d70c3b' ];
+  popLabelColors = [ '#55b128', '#d70c3b', '#3377dd' ];
 
   totalLen: number = 0;
   labelColor: any = {};
@@ -175,6 +175,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   realYAxis: number = 0;
   initScrollTop: number = 0;
   targetSpans: any;
+  popLabels: any;
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -2482,6 +2483,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (data && data.spans) {
       removeSpans(data.spans);
     }
+    const popDialog = document.getElementById('popDialog');
     if (this.targetSpans && popDialog && this.targetSpans === data.spans) {
       popDialog.style.display = 'none';
       this.targetSpans = '';
