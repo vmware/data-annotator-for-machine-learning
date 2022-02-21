@@ -168,11 +168,6 @@ export class CreateNewComponent implements OnInit {
     this.overPerLabelLimit = false;
     this.setDataComplete = false;
     this.uploadErrorTip = false;
-    // this.popLabelList = [
-    //   { name: 'Positive', value: 'Positive' },
-    //   { name: 'Negative', value: 'Negative' },
-    //   { name: 'Neutral', value: 'Neutral' },
-    // ];
     this.popLabelValidation = false;
     this.showPopLabel = false;
     this.classifier = [
@@ -192,6 +187,7 @@ export class CreateNewComponent implements OnInit {
     if (!this.dataset) {
       this.dataset = DatasetUtil.init();
     }
+    this.popLabelList = this.dataset.popLabels;
     this.dsDialogForm = this.formBuilder.group({
       projectName: [this.dataset.name || '', DatasetValidator.modelName()],
       taskInstruction: [this.dataset.description, null],
