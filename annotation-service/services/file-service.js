@@ -174,7 +174,8 @@ async function prepareHeaders(project, format) {
         await project.categoryList.split(",").forEach(item => {
             headerArray.push({ id: item, title: item });
         });
-        if(project.projectType == LABELTYPE.NER && project.popUpLabels){
+        if(project.projectType == PROJECTTYPE.NER){
+            //init pop-up label headers
             await project.popUpLabels.forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
