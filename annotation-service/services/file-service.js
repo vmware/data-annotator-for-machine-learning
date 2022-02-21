@@ -89,7 +89,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     if (projectType == PROJECTTYPE.LOG && preLabels && Object.keys(preLabels).length) {
         regression = true;
     }
-    const popUpLabels = [];
+    let popUpLabels = [];
     if(projectType == PROJECTTYPE.NER){
         const plb = req.body.popUpLabels;
         popUpLabels = ((plb && typeof plb === 'string')? JSON.parse(plb):plb)
