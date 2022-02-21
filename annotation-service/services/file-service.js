@@ -89,7 +89,11 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     if (projectType == PROJECTTYPE.LOG && preLabels && Object.keys(preLabels).length) {
         regression = true;
     }
-    const popUpLabels = (projectType == PROJECTTYPE.NER && req.body.popUpLabels)? req.body.popUpLabels: [];
+    const popUpLabels = [];
+    if(projectType == PROJECTTYPE.NER){
+        const plb = req.body.popUpLabels;
+        popUpLabels = ((plb && typeof plb === 'string')? JSON.parse(plb):plb)
+    };
 
     const project = {
         creator: [req.auth.email],
@@ -248,24 +252,21 @@ async function prepareContents(srData, project, format) {
             });
             
             await srs.userInputs.forEach(async item => {
-                //normal labels
+                
                 await item.problemCategory.forEach(async lb =>{
+                    //normal labels
                     await project.categoryList.split(",").forEach((label) => {
                         if (lb.label === label) {
                             newCase[label].push({[lb.text]: [lb.start, lb.end]})
                         }
                     });
-                });
-                //popup lablels
-                if(item.popUpLabels){
-                    await item.popUpLabels.forEach(async lb =>{
-                        await project.popUpLabels.forEach(label =>{
-                            if (lb.label === label) {
-                                newCase[label].push({[lb.text]: [lb.start, lb.end]})
-                            }
-                        });
+                    //popup lablels
+                    await project.popUpLabels.forEach(label =>{
+                        if (lb.popUpLabel === label) {
+                            newCase[label].push({[lb.text]: [lb.start, lb.end]})
+                        }
                     });
-                }
+                });
             });
             //change annotations to a string array 
             await project.categoryList.split(",").forEach(item => {
