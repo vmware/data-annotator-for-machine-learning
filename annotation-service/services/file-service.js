@@ -174,7 +174,7 @@ async function prepareHeaders(project, format) {
         await project.categoryList.split(",").forEach(item => {
             headerArray.push({ id: item, title: item });
         });
-        if(project.labelType == LABELTYPE.NER && project.popUpLabels){
+        if(project.projectType == LABELTYPE.NER && project.popUpLabels){
             await project.popUpLabels.forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
@@ -246,8 +246,12 @@ async function prepareContents(srData, project, format) {
             await project.selectedColumn.forEach(item => {
                 newCase[item] = (srs.originalData)[item];
             });
-
+            // init lables
             await project.categoryList.split(",").forEach(item => {
+                newCase[item] = [];
+            });
+            // init pop-up lables
+            await project.popUpLabels.forEach(item => {
                 newCase[item] = [];
             });
             
@@ -270,6 +274,10 @@ async function prepareContents(srData, project, format) {
             });
             //change annotations to a string array 
             await project.categoryList.split(",").forEach(item => {
+                newCase[item] = newCase[item][0]? JSON.stringify(newCase[item]):[];
+            });
+            //change annotations pop-up labels to a string array
+            await project.popUpLabels.forEach(item => {
                 newCase[item] = newCase[item][0]? JSON.stringify(newCase[item]):[];
             });
         }else if(project.projectType == PROJECTTYPE.LOG){
