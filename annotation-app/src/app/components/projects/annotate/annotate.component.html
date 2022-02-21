@@ -506,7 +506,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
             <div class="popDialog" id="popDialog">
               <div class="clearPop" (click)="clearPopDialog()">×</div>
-              <div style="display: inline-table; padding-top: 1rem; padding-right: 0.5rem; padding-left: 0.5rem;">
+              <div style="display: inline-table; padding-top: 1rem; padding-left: 0.5rem;">
                 <button *ngFor="let poplabel of popLabels; let i = index" type="button" class="btn btn-sm"
                   [style.background-color]="popLabelColors[i]" [style.border-color]="popLabelColors[i]" style="color: white" [title]="poplabel"
                   (click)="clickPopLabel($event, poplabel, popLabelColors[i] )">{{ poplabel }}</button>

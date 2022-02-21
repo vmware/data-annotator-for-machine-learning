@@ -1291,7 +1291,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           });
         } else {
           this.categories = response.categoryList.split(',');
-          this.popLabels = ['Positive', 'Negative', 'Neutral'];
+          this.popLabels = response.popUpLabels;
         }
         if (this.startFrom === 'review') {
           this.questionForm.get('questionGroup.reviewee').setValue(reviewee);
@@ -2350,7 +2350,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.createSpans(range, this.selectedEntityID, '');
   }
 
-  showPopLabel(spans, lastSpan, event) {
+  showPopLabel(spans, event) {
     const popDialog = document.getElementById('popDialog');
     if (popDialog.style.display === 'block') {
       return false;
@@ -2376,7 +2376,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     popDialog.style.display = 'none';
     this.spansList.forEach(ele => {
       if (ele.spans === this.targetSpans) {
-        ele.popLabel = selectedPopLabel;
+        ele.popUpLabel = selectedPopLabel;
         ele.popLabelColor = popLabelColor;
       }
     });
@@ -2396,10 +2396,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
    
     const lastSpan = spans[spans.length - 1];
     lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
-    if (this.isShowPopLabel) {
-      lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans, lastSpan));
+    if (this.isShowPopLabel && this.popLabels.length) {
+      lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans));
     }
-    const part = { text: '', start: 0, end: 0, label: '', spans: [], popLabelColor: '', popLabel: ''};
+    const part = { text: '', start: 0, end: 0, label: '', spans: [], popLabelColor: '', popUpLabel: ''};
     part.text = self.text;
     part.start = self.startOffset;
     part.end = self.endOffset;
@@ -2407,7 +2407,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     part.spans = spans;
     if (element.popLabelColor) {
       part.popLabelColor = element.popLabelColor;
-      part.popLabel = element.popLabel;
+      part.popUpLabel = element.popUpLabel;
     }
     this.spansList.push(part);
     this.actionError = null;
@@ -2474,7 +2474,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.renderer2.removeStyle(element, 'border');
         this.renderer2.removeStyle(element, 'padding');
         this.renderer2.removeStyle(element, 'border-radius');
-        if (data.popLabel) {
+        if (data.popUpLabel) {
           this.renderer2.setStyle(element, 'background-color', data.popLabelColor);
         } else {
           this.renderer2.setStyle(element, 'background-color', labelColor);

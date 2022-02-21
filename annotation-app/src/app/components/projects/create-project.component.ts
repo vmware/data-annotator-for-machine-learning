@@ -168,11 +168,11 @@ export class CreateNewComponent implements OnInit {
     this.overPerLabelLimit = false;
     this.setDataComplete = false;
     this.uploadErrorTip = false;
-    this.popLabelList = [
-      { name: 'Positive', value: 'Positive' },
-      { name: 'Negative', value: 'Negative' },
-      { name: 'Neutral', value: 'Neutral' },
-    ];
+    // this.popLabelList = [
+    //   { name: 'Positive', value: 'Positive' },
+    //   { name: 'Negative', value: 'Negative' },
+    //   { name: 'Neutral', value: 'Neutral' },
+    // ];
     this.popLabelValidation = false;
     this.showPopLabel = false;
     this.classifier = [
@@ -409,7 +409,7 @@ export class CreateNewComponent implements OnInit {
         this.dsDialogForm.value.popLabels.forEach((element) => {
           popLabels.push(element.name);
         });
-        formData.append('popLabels', popLabels.join(','));
+        formData.append('popUpLabels', JSON.stringify(popLabels));
       }
     }
     if (this.projectType === 'log') {

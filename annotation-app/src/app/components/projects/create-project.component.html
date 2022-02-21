@@ -1023,8 +1023,8 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="clr-col-12 clr-col-md-3"></div>
             <div class="clr-col-12 clr-col-md-8">
               <clr-checkbox-wrapper>
-                <input type="checkbox" clrCheckbox value="showPopLabel" name="showPopLabel" (change)="clickPopLabel($event)"  />
-                <label>Show Popue Labels</label>
+                <input type="checkbox" id="showPopLabels" clrCheckbox value="showPopLabel" name="showPopLabel" (change)="clickPopLabel($event)"  />
+                <label for="showPopLabels">Show Popue Labels</label>
               </clr-checkbox-wrapper>
             </div>
           </div>
@@ -1034,7 +1034,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <label for="PopupLables" class="label-tooltip clr-col-12 clr-col-md-2"
               >Popup Lables
             </label>
-            <div class="clr-col-12 clr-col-md-8 labelsList">
+            <div class="clr-col-12 clr-col-md-8 labelsList popLabelsList">
               <!-- Popup label -->
               <div>
                 <span
