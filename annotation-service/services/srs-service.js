@@ -86,6 +86,7 @@ async function updateSrsUserInput(req) {
             if (ui.tid == ticket._id.toString()) {
                 if (pro.projectType == PROJECTTYPE.NER) {
                     userInputs.push({
+                        popUpLabels: ui.popUpLabels? ui.popUpLabels:[],
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
@@ -139,6 +140,7 @@ async function updateSrsUserInput(req) {
             if (ui.tid == id) {
                 if (pro.projectType == PROJECTTYPE.NER) {
                     userInputs.push({
+                        popUpLabels: ui.popUpLabels? ui.popUpLabels:[],
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()

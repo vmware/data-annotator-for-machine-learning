@@ -35,7 +35,7 @@ async function getProjects(req) {
     } else if (src == SRCS.COMMUNITY) {
         console.log(`[ PROJECT ] Service query current user datasets list`);
         condition = { shareStatus: true };
-        project = "projectName shareDescription creator updatedDate totalCase projectCompleteCase userCompleteCase categoryList generateInfo downloadCount labelType min max projectType isMultipleLabel";
+        project = "projectName shareDescription creator updatedDate totalCase projectCompleteCase userCompleteCase categoryList generateInfo downloadCount labelType min max projectType isMultipleLabel popUpLabels";
     } else {
         console.log(`[ PROJECT ] [ERROR] Service errors in ${email} or ${src}`);
         throw { CODE: 1001, MSG: "ERROR ID or src" };
