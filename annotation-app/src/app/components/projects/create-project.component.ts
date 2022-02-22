@@ -42,6 +42,8 @@ export class CreateNewComponent implements OnInit {
   labels: ElementRef;
   @ViewChild('assignee', { static: false })
   assignee: ElementRef;
+  @ViewChild('popupLables', { static: false })
+  popupLables: ElementRef;
 
   user: string;
   dsDialogForm: FormGroup;
@@ -119,6 +121,11 @@ export class CreateNewComponent implements OnInit {
   selectedDisplayColumn: any = [];
   isMutilNumericLabel: boolean;
   inputIsNull: boolean;
+  popLabelList: any = [];
+  showPopLabel: boolean;
+  activePopNew: number;
+  activePopOriginal: number;
+  popLabelValidation: boolean;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -161,6 +168,8 @@ export class CreateNewComponent implements OnInit {
     this.overPerLabelLimit = false;
     this.setDataComplete = false;
     this.uploadErrorTip = false;
+    this.popLabelValidation = false;
+    this.showPopLabel = false;
     this.classifier = [
       { name: 'RandomForestClassifier', value: 'RFC' },
       { name: 'KNeighborsClassifier', value: 'KNC' },
@@ -178,11 +187,13 @@ export class CreateNewComponent implements OnInit {
     if (!this.dataset) {
       this.dataset = DatasetUtil.init();
     }
+    this.popLabelList = this.dataset.popLabels;
     this.dsDialogForm = this.formBuilder.group({
       projectName: [this.dataset.name || '', DatasetValidator.modelName()],
       taskInstruction: [this.dataset.description, null],
       maxAnnotations: [this.dataset.maxAnnotations, DatasetValidator.maxAnnotation()],
       labels: [this.dataset.labels, DatasetValidator.requiredTwo(this.projectType)],
+      popLabels: [this.dataset.popLabels, DatasetValidator.requiredTwoPopLabel(this.projectType)],
       assignmentLogic: [this.dataset.assigmentLogic, ''],
       assignee: [this.dataset.assignee, DatasetValidator.required()],
       selectDescription: [this.dataset.selectDescription, ''],
@@ -265,6 +276,12 @@ export class CreateNewComponent implements OnInit {
         }
         if (this.isMultipleLabel) {
           this.validMultiple();
+        }
+        this.dsDialogForm.get('popLabels').setValidators(null);
+        this.dsDialogForm.get('popLabels').updateValueAndValidity();
+        if (this.showPopLabel) {
+          this.dsDialogForm.get('popLabels').setValidators(DatasetValidator.requiredTwoPopLabel(this.projectType));
+          this.dsDialogForm.get('popLabels').updateValueAndValidity();
         }
         condition = !this.dsDialogForm.invalid && !this.nameExist;
       }
@@ -383,6 +400,13 @@ export class CreateNewComponent implements OnInit {
     }
     if (this.projectType === 'ner') {
       formData.append('regression', this.selectDescription.length > 0 ? 'true' : 'false');
+      if (this.showPopLabel && this.dsDialogForm.value.popLabels.length > 0) {
+        const popLabels = [];
+        this.dsDialogForm.value.popLabels.forEach((element) => {
+          popLabels.push(element.name);
+        });
+        formData.append('popUpLabels', JSON.stringify(popLabels));
+      }
     }
     if (this.projectType === 'log') {
       formData.append(
@@ -1380,6 +1404,73 @@ export class CreateNewComponent implements OnInit {
     this.mutilLabelArray.removeAt(delIndex);
     if (this.mutilLabelArray.value.length) {
       this.checkBoth();
+    }
+  }
+
+  clickPopLabel() {
+    this.showPopLabel = !this.showPopLabel;
+  }
+
+  deletePopLabel(index, from) {
+    if (from === 'new') {
+      this.popLabelList.splice(index, 1);
+      this.dsDialogForm.get('popLabels').setValue([...this.popLabelList]);
+    }
+  }
+
+  onEnterPopLabel(e) {
+    this.updatePopLabel(e);
+  }
+
+  poplabelsBlur(e: any) {
+    this.updatePopLabel(e.target.value);
+  }
+
+  
+  updatePopLabel(data) {
+    if (data && this.popLabelValidation == false) {
+      if (this.projectType === 'ner') {
+        this.popLabelList.push({ name: data });
+        this.dsDialogForm.get('popLabels').setValue([...this.popLabelList]);
+      }
+      this.popupLables.nativeElement.value = null;
+    }
+  }
+
+  overPopLabels(index, from) {
+    if (from === 'new') {
+      this.activePopNew = index;
+    } else {
+      this.activePopOriginal = index;
+    }
+  }
+
+  outPopLabels(index, from) {
+    if (from === 'new') {
+      this.activePopNew = null;
+    } else {
+      this.activePopOriginal = null;
+    }
+  }
+
+  onPopLabelKeydown(e) {
+    if (this.projectType === 'ner') {
+      const aa = [];
+      const bb = this.dsDialogForm.value.popLabels;
+      bb.forEach((e) => {
+        aa.push(e.name);
+      });
+      if (aa.indexOf(e.target.value) !== -1) {
+        this.popLabelValidation = true;
+      } else {
+        this.popLabelValidation = false;
+      }
+    } else {
+      if (this.popLabelList.indexOf(e.target.value) !== -1) {
+        this.popLabelValidation = true;
+      } else {
+        this.popLabelValidation = false;
+      }
     }
   }
 }
