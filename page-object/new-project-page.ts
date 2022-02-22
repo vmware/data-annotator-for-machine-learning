@@ -78,6 +78,13 @@ export class NewProjectPage extends CommonPage {
     .last();
   DELETE_LABEL_ICON = element(by.css("clr-icon[shape=times]"));
   ASSIGN_TICKET_DELETE_ICON = element(by.css("ul li:last-child clr-icon"));
+  SHOW_POPUE_LABEL_CHECK = element(
+    by.css("clr-checkbox-wrapper label[for=showPopLabels]")
+  );
+  DELETE_POP_LABEL = element
+    .all(by.css("div.popLabelsList div:last-child span"))
+    .last();
+  ADD_POP_LABLE = $(".labelsList .clr-input[name=addPopupLables]");
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.MY_PROJECTS_TAB);
@@ -444,4 +451,17 @@ export class NewProjectPage extends CommonPage {
     console.log("succeed to setMutilNumericLabel...");
   }
 
+  async setPopLabel() {
+    console.log("start to setPopLabel...");
+    await FunctionUtil.elementVisibilityOf(this.PROJECT_NAME);
+    await this.SHOW_POPUE_LABEL_CHECK.click();
+    await FunctionUtil.operationSuspensionElements(
+      this.DELETE_POP_LABEL,
+      this.DELETE_LABEL_ICON
+    );
+    await browser.sleep(3000);
+    await this.ADD_POP_LABLE.clear();
+    await this.ADD_POP_LABLE.sendKeys('Neutral');
+    console.log("end to setPopLabel...");
+ }
 }

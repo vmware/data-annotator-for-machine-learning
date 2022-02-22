@@ -29,7 +29,7 @@ export class AnnotatePage extends CommonPage {
   NUMERIC_LABEL_INPUT = element(by.css("input[id=example]"));
   SKIP_BTN = element(by.css("button.btn.btn-outline clr-icon[shape=ban]"));
   NER_SELECTED_LABEL = element(by.css("button.btn.entitySelected"));
-  NER_SECOND_LABEL = element(by.css(".questionContainer button:nth-child(2)"));
+  NER_SECOND_LABEL = element(by.css(".questionContainer .label:nth-child(2)"));
   MAIN_TEXT = element(by.css("div.nerPassage span[id=mainText]"));
   NER_SELECTED_MARK_TEXT = element(by.css("div.selectedSection div.spanSelected:first-child"));
   NER_SELECTED_MARK_CLEAR = element(by.css("div.selectedSection div.spanSelected:first-child span.clear"));
@@ -91,6 +91,12 @@ export class AnnotatePage extends CommonPage {
   SCORE_IPUT = element.all(by.css("input[id='scoreInput']"));
   ALERT_TEXT = element(by.css('div.alert-text'));
   INPUT_ERROR = element(by.css(".clr-error"));
+  NER_CLICK_SPAN1 = $('span[id=mainText] .spanMarked[data-label=test1]');
+  NER_CLICK_SPAN2 = $('span[id=mainText] .spanMarked[data-label=label1]');
+  POSITIVE_BTN = $('button[title=Positive]');
+  NEGATIVE_BTN = $('button[title=Negative]');
+  CLEAR_POPUP_WIN = $('div .clearPop');
+  DRAWER_BTN = $('div .drawer');
 
   async navigateTo() {
     await browser.sleep(5000);
@@ -218,6 +224,9 @@ export class AnnotatePage extends CommonPage {
         FunctionUtil.mouseDragMove(this.MAIN_TEXT, { x: 50, y: 0 }, { x: 150, y: 0 })
         await browser.waitForAngularEnabled(false);
         await browser.sleep(5000);
+        await this.setPopupLabel();
+        await this.clearPopupLabel();
+        await browser.sleep(5000);
         console.log('start to click submit');
         await FunctionUtil.elementVisibilityOf(this.ANNOTATE_SUBMIT_BTN);
         await this.ANNOTATE_SUBMIT_BTN.click();
@@ -225,6 +234,42 @@ export class AnnotatePage extends CommonPage {
       }
     });
   };
+
+  setPopupLabel = async () => {
+    console.log('start to set popup label');
+    await FunctionUtil.elementVisibilityOf(this.NER_CLICK_SPAN1);
+    await this.NER_CLICK_SPAN1.click();
+    await browser.sleep(1000);
+    await FunctionUtil.elementVisibilityOf(this.POSITIVE_BTN);
+    await this.POSITIVE_BTN.click();
+    await browser.sleep(1000);
+    await FunctionUtil.elementVisibilityOf(this.NER_CLICK_SPAN2);
+    await this.NER_CLICK_SPAN2.click();
+    await browser.sleep(1000);
+    await FunctionUtil.elementVisibilityOf(this.NEGATIVE_BTN);
+    await this.NEGATIVE_BTN.click();
+    console.log('end to set popup label');
+  }
+
+  clearPopupLabel =async () => {
+    console.log('start to set clear popupLabel');
+    await browser.sleep(1000);
+    await FunctionUtil.elementVisibilityOf(this.NER_CLICK_SPAN2);
+    await this.NER_CLICK_SPAN2.click();
+    await browser.sleep(1000);
+    await FunctionUtil.elementVisibilityOf(this.CLEAR_POPUP_WIN);
+    await this.CLEAR_POPUP_WIN.click();
+    await browser.sleep(1000);
+    await FunctionUtil.elementVisibilityOf(this.NER_CLICK_SPAN2);
+    await this.NER_CLICK_SPAN2.click();
+    await browser.sleep(1000);
+    await FunctionUtil.elementVisibilityOf(this.DRAWER_BTN);
+    await this.DRAWER_BTN.click();
+    await browser.sleep(1000);
+    await FunctionUtil.elementVisibilityOf(this.DRAWER_BTN);
+    await this.DRAWER_BTN.click();
+    console.log('end to set clear popupLabel');
+  }
 
   async logFilterByKeyword(filter) {
     console.log("start to logFilterByKeyword....");
