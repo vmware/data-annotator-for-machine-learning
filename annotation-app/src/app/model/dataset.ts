@@ -31,6 +31,11 @@ export class DatasetUtil {
       maxAnnotations: 1,
       annotationDisplayName: 'Passage',
       labels: [],
+      popLabels: [
+        { name: 'Positive', value: 'Positive' },
+        { name: 'Negative', value: 'Negative' },
+        { name: 'Neutral', value: 'Neutral' },
+      ],
       assigmentLogic: 'random',
       assignee: [],
       localFile: null,
@@ -79,6 +84,7 @@ export interface DatasetData {
   description: string;
   maxAnnotations: number;
   labels: any;
+  popLabels: any;
   assigmentLogic: string;
   assignee: any;
   localFile: any;

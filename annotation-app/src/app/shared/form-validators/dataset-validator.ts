@@ -8,6 +8,7 @@ import { AbstractControl, ValidatorFn } from '@angular/forms';
 export class DatasetValidator {
   private static readonly REQUIRED_FIELD: string = 'This field is required';
   private static readonly REQUIRED_FIELD_LABEL: string = 'This field is required at least 2 labels';
+  private static readonly REQUIRED_FIELD_POP_LABEL: string = 'This field is required at least 2 popup labels';
   private static readonly REQUIRED_FIELD_ENTITY: string =
     'This field is required at least 1 entity';
   private static readonly FILE_FORMAT_NOT_SUPPORT: string = 'Selected file format is not supported';
@@ -207,6 +208,17 @@ export class DatasetValidator {
       } else {
         if (control.value.length < 2) {
           return { msg: { value: DatasetValidator.REQUIRED_FIELD_LABEL } };
+        }
+      }
+      return null;
+    };
+  }
+
+  static requiredTwoPopLabel(type): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } => {
+      if (type == 'ner') {
+        if (control.value.length < 2) {
+          return { msg: { value: DatasetValidator.REQUIRED_FIELD_POP_LABEL } };
         }
       }
       return null;

@@ -141,6 +141,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#97d778',
     '#2F4F4F',
   ];
+
+  popLabelColors = [ '#55b128', '#d70c3b', '#3377dd' ];
+
   totalLen: number = 0;
   labelColor: any = {};
   selectedEntityColor: any = '';
@@ -164,6 +167,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   scores: any = [];
   scoreMessage: any = [];
+
+  isShowPopLabel: boolean;
+  isShowPopOver: boolean = false;
+  xAxis: number = 0;
+  yAxis: number = 0;
+  realYAxis: number = 0;
+  initScrollTop: number = 0;
+  targetSpans: any;
+  popLabels: any;
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -230,6 +242,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.getProgress();
     this.getProjectsList();
+    this.isShowPopLabel = true;
+
+    window.addEventListener('scroll', this.handleScroll, true);
+  }
+
+  handleScroll() {
+    const popDialog = document.getElementById('popDialog');
+    if (popDialog) {
+      popDialog.style.display = 'none';
+      this.targetSpans = '';
+    }
   }
 
   createForm(): void {
@@ -1260,7 +1283,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               clrErrorTip: false,
               scoreOptions: {
                 floor: minVal,
-                step:  Number(1 / Number(step)),
+                step: Number(1 / Number(step)),
                 ceil: maxVal,
               },
             });
@@ -1268,6 +1291,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           });
         } else {
           this.categories = response.categoryList.split(',');
+          this.popLabels = response.popUpLabels;
         }
         if (this.startFrom === 'review') {
           this.questionForm.get('questionGroup.reviewee').setValue(reviewee);
@@ -2315,28 +2339,76 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
     normedRange.startOffset = ss;
     normedRange.endOffset = ee;
-    this.createSpans(normedRange, selectedEntityID);
+    this.createSpans(normedRange, selectedEntityID, element);
   }
 
   onMouseUp() {
+    this.handleScroll();
     var selectedRanges = this.captureDocSelection();
     if (selectedRanges.length === 0) return;
     const range = selectedRanges[0];
-    this.createSpans(range, this.selectedEntityID);
+    this.createSpans(range, this.selectedEntityID, '');
+  }
+
+  showPopLabel(spans, event) {
+    const popDialog = document.getElementById('popDialog');
+    if (popDialog.style.display === 'block') {
+      return false;
+    }
+    this.targetSpans = spans;
+    popDialog.style.display = 'block';
+    let domLoc = event.target.getBoundingClientRect();
+    this.isShowPopOver = !this.isShowPopOver;
+    this.xAxis = domLoc.x;
+    this.yAxis = domLoc.y - 130;
+    this.initScrollTop = event.target.scrollTop;
+    this.realYAxis = this.yAxis;
+    popDialog.style.top = this.realYAxis + 'px';
+    popDialog.style.left = this.xAxis + 'px';
+  }
+
+  clearPopDialog() {
+    this.handleScroll();
+  }
+
+  clickPopLabel(e, selectedPopLabel, popLabelColor) {
+    const popDialog = document.getElementById('popDialog');
+    popDialog.style.display = 'none';
+    this.spansList.forEach(ele => {
+      if (ele.spans === this.targetSpans) {
+        ele.popUpLabel = selectedPopLabel;
+        ele.popLabelColor = popLabelColor;
+      }
+    });
+    this.targetSpans.forEach((element, index) => {
+      this.renderer2.removeStyle(element, 'backgroundColor');
+      this.renderer2.setStyle(element, 'background-color', e.target.style.backgroundColor);
+    });
   }
   
-  createSpans(self, selectedEntityID) {
-    const spans = highlightRange(self, 'spanMarked', { backgroundColor: this.toolService.hexToRgb(this.labelColor.get(this.categories[selectedEntityID])) });
-    
+  createSpans(self, selectedEntityID, element) {
+    let spans;
+    if (element.popLabelColor) {
+      spans = highlightRange(self, 'spanMarked', { backgroundColor: element.popLabelColor });
+    } else {
+      spans = highlightRange(self, 'spanMarked', { backgroundColor: this.toolService.hexToRgb(this.labelColor.get(this.categories[selectedEntityID])) });
+    }
+   
     const lastSpan = spans[spans.length - 1];
     lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
-
-    const part = { text: '', start: 0, end: 0, label: '', spans: [] };
+    if (this.isShowPopLabel && this.popLabels.length) {
+      lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans));
+    }
+    const part = { text: '', start: 0, end: 0, label: '', spans: [], popLabelColor: '', popUpLabel: ''};
     part.text = self.text;
     part.start = self.startOffset;
     part.end = self.endOffset;
     part.label = this.categories[selectedEntityID];
     part.spans = spans;
+    if (element.popLabelColor) {
+      part.popLabelColor = element.popLabelColor;
+      part.popUpLabel = element.popUpLabel;
+    }
     this.spansList.push(part);
     this.actionError = null;
   }
@@ -2402,7 +2474,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.renderer2.removeStyle(element, 'border');
         this.renderer2.removeStyle(element, 'padding');
         this.renderer2.removeStyle(element, 'border-radius');
-        this.renderer2.setStyle(element, 'background-color', labelColor);
+        if (data.popUpLabel) {
+          this.renderer2.setStyle(element, 'background-color', data.popLabelColor);
+        } else {
+          this.renderer2.setStyle(element, 'background-color', labelColor);
+        }
       });
     }
   }
@@ -2415,6 +2491,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     if (data && data.spans) {
       removeSpans(data.spans);
+    }
+    const popDialog = document.getElementById('popDialog');
+    if (this.targetSpans && popDialog && this.targetSpans === data.spans) {
+      popDialog.style.display = 'none';
+      this.targetSpans = '';
     }
     this.actionError = null;
   }
@@ -3219,6 +3300,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.isDrawer = true;
     }
+    this.clearPopDialog();
   }
 
   toShowExistingLabel() {
@@ -3399,6 +3481,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
       this.saveAnnotateSetting('display', this.renderFormat);
     }
+
+    window.removeEventListener('scroll', this.handleScroll, true);
   }
 
   formatDecimal(num, decimal) {
