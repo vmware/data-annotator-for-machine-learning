@@ -89,6 +89,11 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     if (projectType == PROJECTTYPE.LOG && preLabels && Object.keys(preLabels).length) {
         regression = true;
     }
+    let popUpLabels = [];
+    if(projectType == PROJECTTYPE.NER){
+        const plb = req.body.popUpLabels;
+        popUpLabels = ((plb && typeof plb === 'string')? JSON.parse(plb):plb)
+    };
 
     const project = {
         creator: [req.auth.email],
@@ -127,6 +132,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         isShowFilename: (req.body.isShowFilename === 'true' || req.body.isShowFilename === true)? true: false,
         ticketDescription: req.body.ticketDescription,
         ticketQuestion: req.body.ticketQuestions,
+        popUpLabels:  popUpLabels
     };
 
     const conditions = {projectName: req.body.pname};
@@ -168,6 +174,12 @@ async function prepareHeaders(project, format) {
         await project.categoryList.split(",").forEach(item => {
             headerArray.push({ id: item, title: item });
         });
+        if(project.projectType == PROJECTTYPE.NER){
+            //init pop-up label headers
+            await project.popUpLabels.forEach(item => {
+                headerArray.push({ id: item, title: item });
+            });
+        }
     }
 
     if (format == FILEFORMAT.TOPLABEL) {
@@ -235,15 +247,27 @@ async function prepareContents(srData, project, format) {
             await project.selectedColumn.forEach(item => {
                 newCase[item] = (srs.originalData)[item];
             });
-
+            // init lables
             await project.categoryList.split(",").forEach(item => {
+                newCase[item] = [];
+            });
+            // init pop-up lables
+            await project.popUpLabels.forEach(item => {
                 newCase[item] = [];
             });
             
             await srs.userInputs.forEach(async item => {
+                
                 await item.problemCategory.forEach(async lb =>{
+                    //normal labels
                     await project.categoryList.split(",").forEach((label) => {
                         if (lb.label === label) {
+                            newCase[label].push({[lb.text]: [lb.start, lb.end]})
+                        }
+                    });
+                    //popup lablels
+                    await project.popUpLabels.forEach(label =>{
+                        if (lb.popUpLabel === label) {
                             newCase[label].push({[lb.text]: [lb.start, lb.end]})
                         }
                     });
@@ -251,6 +275,10 @@ async function prepareContents(srData, project, format) {
             });
             //change annotations to a string array 
             await project.categoryList.split(",").forEach(item => {
+                newCase[item] = newCase[item][0]? JSON.stringify(newCase[item]):[];
+            });
+            //change annotations pop-up labels to a string array
+            await project.popUpLabels.forEach(item => {
                 newCase[item] = newCase[item][0]? JSON.stringify(newCase[item]):[];
             });
         }else if(project.projectType == PROJECTTYPE.LOG){

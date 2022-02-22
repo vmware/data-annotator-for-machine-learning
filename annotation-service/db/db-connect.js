@@ -212,6 +212,7 @@ const projectSchema = new mongoose.Schema({
     isShowFilename: {type: Boolean, default: false},
     ticketDescription: {type: String, default: 'Passage'},
     ticketQuestions: { type: Array },
+    popUpLabels:{ type: Array },
 }, { _id: true });
 projectSchema.index({ projectName: 1 });
 projectSchema.set("toJSON", { virtuals: true });
