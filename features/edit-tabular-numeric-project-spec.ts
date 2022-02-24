@@ -56,7 +56,7 @@ describe("edit project info on projects page..", () => {
       let New_Project_Name_Text = await projectsPage.getCellText(0);
       let New_Project_Labels;
       if (New_Project_Name_Text !== "" || New_Project_Count_After_Filter > 0) {
-        New_Project_Labels = await projectsPage.getCellText(6);
+        New_Project_Labels = await projectsPage.getCellText(7);
         console.log("labels:", New_Project_Labels);
       } else {
         console.log("can not filter out the projects....");

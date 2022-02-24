@@ -114,14 +114,14 @@ describe("edit project info on projects page..", () => {
       );
       console.log("New_Project_Name_Text:::", New_Project_Name_Text);
       if (New_Project_Name_Text !== "" || New_Project_Count_After_Filter > 0) {
-        New_Project_Owner = await projectsPage.getCellText(1);
+        New_Project_Owner = await projectsPage.getCellText(2);
         console.log("New_Project_Owner:::", New_Project_Owner);
-        New_Project_Annotator = await projectsPage.getCellText(4);
+        New_Project_Annotator = await projectsPage.getCellText(5);
         console.log(
           "New_Project_Annotator:::",
           New_Project_Annotator.split("\n")
         );
-        New_Project_Labels = await projectsPage.getCellText(6);
+        New_Project_Labels = await projectsPage.getCellText(7);
         console.log("New_Project_Labels:::", New_Project_Labels);
       } else {
         console.log("can not filter out the projects....");
