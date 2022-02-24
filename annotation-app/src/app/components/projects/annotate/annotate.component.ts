@@ -142,7 +142,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#2F4F4F',
   ];
 
-  popLabelColors = [ '#55b128', '#d70c3b', '#3377dd' ];
+  popLabelColors = [ '#55b128', '#d70c3b', '#3377dd', '#973633', '#f7a604', '#864ac1', '#09cbe5', '#a0f709', '#edf709', '#e9098f' ];
 
   totalLen: number = 0;
   labelColor: any = {};
@@ -172,8 +172,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   isShowPopOver: boolean = false;
   xAxis: number = 0;
   yAxis: number = 0;
-  realYAxis: number = 0;
-  initScrollTop: number = 0;
   targetSpans: any;
   popLabels: any;
 
@@ -2360,11 +2358,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     let domLoc = event.target.getBoundingClientRect();
     this.isShowPopOver = !this.isShowPopOver;
     this.xAxis = domLoc.x;
-    this.yAxis = domLoc.y - 130;
-    this.initScrollTop = event.target.scrollTop;
-    this.realYAxis = this.yAxis;
-    popDialog.style.top = this.realYAxis + 'px';
     popDialog.style.left = this.xAxis + 'px';
+    this.yAxis = domLoc.y - popDialog.clientHeight - 10;
+    popDialog.style.top = this.yAxis + 'px';
   }
 
   clearPopDialog() {
