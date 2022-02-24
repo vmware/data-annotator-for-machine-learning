@@ -34,6 +34,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
           <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid" style="max-width: 300px">Project Name
           </clr-dg-column>
+          <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid" style="max-width: 200px">Project Type
+          </clr-dg-column>
           <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid" style="max-width: 300px">Project Owner
           </clr-dg-column>
           <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">Updated Date</clr-dg-column>
@@ -58,6 +60,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <a style="cursor: pointer" (click)="clickToPreview(dataset)">{{
                   dataset.projectName
                   }}</a>
+              </clr-dg-cell>
+              <clr-dg-cell class="cellWordBreak" title="{{ dataset.projectType }}" style="max-width: 200px">
+                {{ dataset.projectType }}
               </clr-dg-cell>
               <clr-dg-cell class="cellWordBreak" title="{{ dataset.creator }}" style="max-width: 300px">
                 {{ dataset.creator }}
