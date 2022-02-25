@@ -389,7 +389,7 @@ label .label-leftBoard {
   font-weight: 900;
   font-family: 'Roboto Condensed', 'Arial Narrow', sans-serif;
   display: inline-block;
-  width: 70px;
+  max-width: 70px;
   text-overflow: ellipsis;
   overflow: hidden;;
 }
@@ -861,8 +861,8 @@ label .label-leftBoard {
 
 .resultTip {
   color: #6e7781;
-  padding: 0.5rem 0;
   margin-bottom: 0.5rem;
+  word-break: break-word;
 }
 
 .nerContent {

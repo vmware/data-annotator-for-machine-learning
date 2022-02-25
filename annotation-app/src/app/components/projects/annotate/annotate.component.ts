@@ -240,8 +240,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     this.getProgress();
     this.getProjectsList();
-    this.isShowPopLabel = true;
-
     window.addEventListener('scroll', this.handleScroll, true);
   }
 
@@ -1290,6 +1288,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           this.categories = response.categoryList.split(',');
           this.popLabels = response.popUpLabels;
+          this.isShowPopLabel = response.popUpLabels && response.popUpLabels.length;
         }
         if (this.startFrom === 'review') {
           this.questionForm.get('questionGroup.reviewee').setValue(reviewee);
@@ -2392,7 +2391,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
    
     const lastSpan = spans[spans.length - 1];
     lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
-    if (this.isShowPopLabel && this.popLabels.length) {
+    if (this.isShowPopLabel) {
       lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans));
     }
     const part = { text: '', start: 0, end: 0, label: '', spans: [], popLabelColor: '', popUpLabel: ''};

@@ -485,8 +485,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <span id='mainText'>{{ sr.originalData.text }}</span>
               </div>
               <div class="annotateLabel">
-                <div class="resultTip">
-                  Tips:  When mouse over or click the selected text will highlight the labeled text on the passage.</div>
+                <div style="font-weight: 500;">Tips:</div>
+                <ul class="resultTip">
+                  <li>When mouse over or click the selected text will highlight the labeled text on the passage.</li>
+                  <li *ngIf="isShowPopLabel">Click labeled text to see the secondary labels.</li>
+                </ul>
                 <div class="result">Results</div>
                 <div *ngIf="spansList.length === 0">Nothing selected</div>  
                 <div class="selectedSection">
@@ -498,6 +501,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   >
                   <span (click)="clickShowMark($event, spanText)" class="selectText">{{ spanText.text }}</span>
                   <span class="entity" [style.color]="getLabelColor(spanText.label)" title="{{ spanText.label | uppercase }}">{{ spanText.label }}</span>
+                  <span *ngIf="isShowPopLabel && spanText.popUpLabel " class="entity" [style.color]="spanText.popLabelColor" title="{{ spanText.popUpLabel | uppercase }}">{{ spanText.popUpLabel }}</span>
                   <span class="clear" (click)="clickClearMark($event, spanText)">×</span>
                   </div>
                 </div>
