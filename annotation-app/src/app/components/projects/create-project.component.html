@@ -1023,8 +1023,22 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="clr-col-12 clr-col-md-3"></div>
             <div class="clr-col-12 clr-col-md-8">
               <clr-checkbox-wrapper>
-                <input type="checkbox" id="showPopLabels" clrCheckbox value="showPopLabel" name="showPopLabel" (change)="clickPopLabel($event)"  />
-                <label for="showPopLabels">Add Popup Labels</label>
+                <input type="checkbox" id="showPopLabels" clrCheckbox value="showPopLabel" name="showPopLabel" (change)="clickPopLabel($event)" />
+                <label for="showPopLabels">Add Secondary Labels
+                  <clr-tooltip>
+                    <clr-icon
+                      clrTooltipTrigger
+                      shape="info-circle"
+                      size="20"
+                      aria-label="Uniq tooltip 5"
+                    ></clr-icon>
+                    <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+                      &nbsp;<span class="tooltip-content"
+                        >The secondary label contains information about the main label such as its sentiment etc.
+                      </span>
+                    </clr-tooltip-content>
+                  </clr-tooltip>
+                </label>
               </clr-checkbox-wrapper>
             </div>
           </div>
@@ -1032,7 +1046,20 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="form-group clr-row" *ngIf="projectType === 'ner' && showPopLabel">
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="PopupLables" class="label-tooltip clr-col-12 clr-col-md-2"
-              >Popup Lables
+              >Secondary Labels
+              <clr-tooltip>
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="info-circle"
+                  size="20"
+                  aria-label="Uniq tooltip 5"
+                ></clr-icon>
+                <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+                  &nbsp;<span class="tooltip-content"
+                    >The secondary label contains information about the main label such as its sentiment etc.
+                  </span>
+                </clr-tooltip-content>
+              </clr-tooltip>
             </label>
             <div class="clr-col-12 clr-col-md-8 labelsList popLabelsList">
               <!-- Popup label -->
@@ -1061,7 +1088,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                   id="popupLables"
                   maxlength="50"
                   clrInput
-                  placeholder="Add New Popup Lable"
+                  style="width: 7rem;"
+                  placeholder="Add New Secondary Label"
                   name="addPopupLables"
                   class="clr-input"
                   (keyup.enter)="onEnterPopLabel(popupLables.value)"
@@ -1107,7 +1135,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   clrSize="md"
                   *clrIfOpen
                 >
-                  <span>This popup Label has already exist!</span>
+                  <span>This secondary Label has already exist!</span>
                 </clr-tooltip-content>
               </clr-tooltip>
             </div>
