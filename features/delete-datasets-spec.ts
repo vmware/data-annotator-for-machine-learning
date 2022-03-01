@@ -28,13 +28,13 @@ describe("delete function", () => {
     const TABLE_LIST = $$('clr-dg-row');
     let dataLength = await FunctionUtil.getElementsNum(TABLE_LIST);
     for (var i=0; i<dataLength; i++){
-      if (process.env.IN) {
-        await browser.sleep(20000);
+      if (process.env.IN && i > 0) {
+        await browser.sleep(5000);
       }
       await CommonUtils.deleteDataGrid(myDatasetsPage.DELETE_DATASET_BTN.first(), myDatasetsPage.DELETE_DATASET_OK_BTN);;
     }
     if (process.env.IN) {
-      await browser.sleep(20000);
+      await browser.sleep(5000);
     } 
     await browser.sleep(2000);
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
