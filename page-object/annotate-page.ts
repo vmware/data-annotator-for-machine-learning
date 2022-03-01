@@ -568,6 +568,10 @@ export class AnnotatePage extends CommonPage {
     });
     await browser.waitForAngularEnabled(false);
     await browser.sleep(1000);
+    if (process.env.IN) {
+      await FunctionUtil.elementVisibilityOf(this.ANNOTATE_SUBMIT_BTN);
+      await browser.actions().mouseMove(this.ANNOTATE_SUBMIT_BTN).perform();
+    }
     await this.ANNOTATE_SUBMIT_BTN.click();
   }
 
@@ -583,7 +587,10 @@ export class AnnotatePage extends CommonPage {
       });
     });
     await browser.waitForAngularEnabled(false);
-    await browser.sleep(1000);
+    if (process.env.IN) {
+      await FunctionUtil.elementVisibilityOf(this.ANNOTATE_SUBMIT_BTN);
+      await browser.actions().mouseMove(this.ANNOTATE_SUBMIT_BTN).perform();
+    }
     await this.ANNOTATE_SUBMIT_BTN.click();
     await FunctionUtil.elementVisibilityOf(this.INPUT_ERROR);
     await browser.sleep(2000);
@@ -593,6 +600,10 @@ export class AnnotatePage extends CommonPage {
           await input.sendKeys(inputValue);
       });
     });
+    if (process.env.IN) {
+      await FunctionUtil.elementVisibilityOf(this.ANNOTATE_SUBMIT_BTN);
+      await browser.actions().mouseMove(this.ANNOTATE_SUBMIT_BTN).perform();
+    }
     await this.ANNOTATE_SUBMIT_BTN.click();
   }
 }

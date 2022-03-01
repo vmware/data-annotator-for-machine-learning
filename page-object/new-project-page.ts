@@ -225,6 +225,7 @@ export class NewProjectPage extends CommonPage {
   async setDataSubmit() {
     if (process.env.IN) {
       await FunctionUtil.elementVisibilityOf(this.SET_DATA_BTN);
+      await browser.actions().mouseMove(this.SET_DATA_BTN).perform();
     }
     await this.SET_DATA_BTN.click();
     await ExpectedConditions.invisibilityOf($(".btn.uploadLoading"));
