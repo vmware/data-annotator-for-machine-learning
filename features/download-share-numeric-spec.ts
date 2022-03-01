@@ -35,7 +35,11 @@ describe("verify generate-download-share funtion", () => {
       await downloadSharePage.shareProject(
         Constant.project_name_tabular_numeric
       );
-      expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
+      if (process.env.IN) {
+        expect(downloadSharePage.verifySharedStatus()).toEqual("folder");
+      } else {
+        expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
+      }
       done();
     });
   });
