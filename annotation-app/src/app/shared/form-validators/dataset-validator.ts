@@ -8,7 +8,7 @@ import { AbstractControl, ValidatorFn } from '@angular/forms';
 export class DatasetValidator {
   private static readonly REQUIRED_FIELD: string = 'This field is required';
   private static readonly REQUIRED_FIELD_LABEL: string = 'This field is required at least 2 labels';
-  private static readonly REQUIRED_FIELD_POP_LABEL: string = 'This field is required at least 2 popup labels';
+  private static readonly REQUIRED_FIELD_POP_LABEL: string = 'This field is required at least 2 secondary labels';
   private static readonly REQUIRED_FIELD_ENTITY: string =
     'This field is required at least 1 entity';
   private static readonly FILE_FORMAT_NOT_SUPPORT: string = 'Selected file format is not supported';
