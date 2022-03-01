@@ -35,11 +35,7 @@ describe("verify generate-download-share funtion", () => {
 
     it("Share log project.", async (done) => {
       await downloadSharePage.shareProject(Constant.project_name_log);
-      if (process.env.IN) {
-        expect(downloadSharePage.verifySharedStatus()).toEqual("folder");
-      } else {
-        expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
-      }
+      expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
       done();
     });
   });
