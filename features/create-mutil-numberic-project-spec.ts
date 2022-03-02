@@ -58,17 +58,19 @@ describe("Create new project ", () => {
     );
 
     await newProjectPage.setData("text");
-    await newProjectPage.setLabelValidation(
-      projectCreateData.TextMutilNumbericProject.duplicateLabelColumn
-    );
-    await newProjectPage.setLabelValidation(
-      projectCreateData.TextMutilNumbericProject.categoryLabelColumn
-    );
-    await newProjectPage.setDataSubmit();
-    await newProjectPage.setLabelValidation(
-      projectCreateData.TextMutilNumbericProject.labelColumn
-    );
-    await newProjectPage.setDataSubmit();
+    if (!process.env.IN) {
+      await newProjectPage.setLabelValidation(
+        projectCreateData.TextMutilNumbericProject.duplicateLabelColumn
+      );
+      await newProjectPage.setLabelValidation(
+        projectCreateData.TextMutilNumbericProject.categoryLabelColumn
+      );
+      await newProjectPage.setDataSubmit();
+      await newProjectPage.setLabelValidation(
+        projectCreateData.TextMutilNumbericProject.labelColumn
+      );
+      await newProjectPage.setDataSubmit();
+    }
     await newProjectPage.setMaxAnnotation(
       projectCreateData.TextMutilNumbericProject.maxAnnotation - 2
     );
