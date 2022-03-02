@@ -214,8 +214,8 @@ export class UploadComponent implements OnInit {
             fileName: this.inputFile.name,
             fileSize: this.inputFile.size,
             format: uploadFormat,
-            fileKey: data.key,
-            location: data.key,
+            fileKey: data.Key,
+            location: data.Key,
           };
         } else {
           formData.append('dsname', this.uploadGroup.get('datasetsName').value);
