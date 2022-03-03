@@ -68,6 +68,18 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
         <div class="prev-info clr-row">
+          <label for="taskInstruction" class="label-tooltip clr-col-12 clr-col-md-4"
+            >Task Instruction</label>
+          <div class="clr-textarea-wrapper clr-col-12 clr-col-md-8">
+            <textarea
+              id="taskInstruction"
+              [(ngModel)]="inputTaskInstruction"
+              class="clr-textarea"
+              style="width: 90%;"
+            ></textarea>
+          </div>
+        </div>
+        <div class="prev-info clr-row">
           <label for="projectOwner" class="label-tooltip clr-col-12 clr-col-md-4"
             >Project Owner</label
           >
