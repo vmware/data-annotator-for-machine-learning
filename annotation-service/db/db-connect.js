@@ -203,6 +203,7 @@ const projectSchema = new mongoose.Schema({
         teaching: { type: Boolean, default: false },
         accuracy: { type: Array },
         estimator: { type: String },
+        queryStrategy: { type: String },
         numberColumn: { type: Array },
         objectColumn: { type: Array }
     },

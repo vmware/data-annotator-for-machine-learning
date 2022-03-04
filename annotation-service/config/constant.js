@@ -106,5 +106,6 @@ module.exports = {
     AWSRESOURCE:{
         S3: "S3",
         SQS: "SQS",
-    }
+    },
+    
 }

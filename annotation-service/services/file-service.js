@@ -132,7 +132,8 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         isShowFilename: (req.body.isShowFilename === 'true' || req.body.isShowFilename === true)? true: false,
         ticketDescription: req.body.ticketDescription,
         ticketQuestion: req.body.ticketQuestions,
-        popUpLabels:  popUpLabels
+        popUpLabels:  popUpLabels,
+        queryStrategy: req.body.queryStrategy,
     };
 
     const conditions = {projectName: req.body.pname};
