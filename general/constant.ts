@@ -31,4 +31,5 @@ export let Constant = {
   username_owner: "test@test.com",
   fullname_owner: "Test Hub",
   password_owner: "Abcd1234@",
+  task_instruction_log: 'This is a e2e test project',
 };

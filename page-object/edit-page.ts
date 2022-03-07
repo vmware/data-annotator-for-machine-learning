@@ -15,6 +15,7 @@ export class EditPage {
   EDIT_PROJECT_CANCEL_BTN = $(".modal-footer .btn.btn-outline");
   NEW_LABEL_INPUT = element(by.css('input[name="addNewLabel"]'));
   PROJECT_NAME_INPUT = element(by.css("input[id=projectName]"));
+  TASK_INSTRUCTION_TEXT = element(by.css("textarea[id=taskInstruction]"));
   PROJECT_OWNER_INPUT = element(by.css("input[id=projectOwner]"));
   PROJECT_ANNOTATOR_INPUT = element(by.css("input[id=assignee]"));
   AL_THRESHOLD_INPUT = element(by.css("input[id=trigger]"));
@@ -66,6 +67,15 @@ export class EditPage {
     await this.PROJECT_NAME_INPUT.sendKeys(Constant.project_name_text_al);
     await browser.waitForAngularEnabled(false);
   }
+
+  async editTaskInstructions() {
+    await FunctionUtil.elementVisibilityOf(this.TASK_INSTRUCTION_TEXT);
+    console.log("editTaskInstructions:::");
+    await this.TASK_INSTRUCTION_TEXT.clear();
+    await this.TASK_INSTRUCTION_TEXT.click();
+    await this.TASK_INSTRUCTION_TEXT.sendKeys(Constant.task_instruction_log);
+    await browser.waitForAngularEnabled(false);
+  };
 
   async editDuplicateProjectName(log_name, text_al_name) {
     await FunctionUtil.elementVisibilityOf(this.PROJECT_NAME_INPUT);

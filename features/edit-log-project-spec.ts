@@ -39,6 +39,7 @@ describe("edit project info on projects page..", () => {
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
       console.log("----------start to edit projects----------");
       await editPage.clickEditButton();
+      await editPage.editTaskInstructions();
       await editPage.editAssignedTickets(
         projectEditData.LogProject.Annotator,
         projectEditData.LogProject.OverMax
