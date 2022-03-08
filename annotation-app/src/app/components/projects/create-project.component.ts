@@ -126,6 +126,7 @@ export class CreateNewComponent implements OnInit {
   activePopNew: number;
   activePopOriginal: number;
   popLabelValidation: boolean;
+  queryStrategyBase: any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -179,6 +180,12 @@ export class CreateNewComponent implements OnInit {
       { name: ' One-Hot Encoding', value: 'oneHot' },
       { name: 'Categorical Embeddings', value: 'embeddings' },
     ];
+    this.queryStrategyBase = [
+      { name: 'uncertainty_sampling', value: 'PB_UNS' },
+      { name: 'margin_sampling', value: 'PB_MS' },
+      { name: 'entropy_sampling', value: 'PB_ES' },
+      { name: 'uncertainty_batch_sampling', value: 'RBM_UNBS'},
+    ];
     this.createForm();
     this.getMyDatasets();
   }
@@ -210,6 +217,7 @@ export class CreateNewComponent implements OnInit {
       min: [this.dataset.min, DatasetValidator.minNumber()],
       max: [this.dataset.max, DatasetValidator.minNumber()],
       selectedClassifier: ['', DatasetValidator.required()],
+      selectedqueryStrategy: ['PB_UNS', DatasetValidator.required()],
       selectedEncoder: ['', DatasetValidator.required()],
       multipleLabel: [this.dataset.multipleLabel, null],
       selectedText: [this.dataset.selectedText, ''],
@@ -368,6 +376,7 @@ export class CreateNewComponent implements OnInit {
     formData.append('min', this.dsDialogForm.value.min);
     formData.append('max', this.dsDialogForm.value.max);  
     formData.append('estimator', this.dsDialogForm.value.selectedClassifier);
+    formData.append('queryStrategy', this.dsDialogForm.value.selectedqueryStrategy);
     formData.append('projectType', this.projectType);
     formData.append('encoder', this.dsDialogForm.value.selectedEncoder);
     if (this.isMutilNumericLabel) {
@@ -1318,6 +1327,9 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogForm.get('selectedClassifier').setValue(null);
     this.dsDialogForm.get('selectedClassifier').setValidators(null);
     this.dsDialogForm.get('selectedClassifier').updateValueAndValidity();
+    this.dsDialogForm.get('selectedqueryStrategy').setValue(null);
+    this.dsDialogForm.get('selectedqueryStrategy').setValidators(null);
+    this.dsDialogForm.get('selectedqueryStrategy').updateValueAndValidity();
     this.dsDialogForm.get('selectedEncoder').setValue(null);
     this.dsDialogForm.get('selectedEncoder').setValidators(null);
     this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
@@ -1333,6 +1345,9 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogForm.get('selectedClassifier').setValue(null);
     this.dsDialogForm.get('selectedClassifier').setValidators(null);
     this.dsDialogForm.get('selectedClassifier').updateValueAndValidity();
+    this.dsDialogForm.get('selectedqueryStrategy').setValue(null);
+    this.dsDialogForm.get('selectedqueryStrategy').setValidators(null);
+    this.dsDialogForm.get('selectedqueryStrategy').updateValueAndValidity();
     this.dsDialogForm.get('selectedEncoder').setValue(null);
     this.dsDialogForm.get('selectedEncoder').setValidators(null);
     this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
@@ -1349,6 +1364,9 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogForm.get('selectedClassifier').setValue(null);
     this.dsDialogForm.get('selectedClassifier').setValidators(null);
     this.dsDialogForm.get('selectedClassifier').updateValueAndValidity();
+    this.dsDialogForm.get('selectedqueryStrategy').setValue(null);
+    this.dsDialogForm.get('selectedqueryStrategy').setValidators(null);
+    this.dsDialogForm.get('selectedqueryStrategy').updateValueAndValidity();
     this.dsDialogForm.get('selectedEncoder').setValue(null);
     this.dsDialogForm.get('selectedEncoder').setValidators(null);
     this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
