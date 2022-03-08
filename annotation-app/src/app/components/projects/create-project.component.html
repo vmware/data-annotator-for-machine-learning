@@ -1332,6 +1332,49 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <div
+          *ngIf="
+            !isNumeric && !isMultipleLabel && (msg.type === 'tabular' || msg.type === 'text') && !isMutilNumericLabel
+          "
+          class="form-group clr-row"
+        >
+          <div class="clr-col-12 clr-col-md-1"></div>
+          <label for="selectedClassifier" class="label-tooltip clr-col-12 clr-col-md-2"
+            >Query Strategy</label
+          >
+          <div class="clr-select-wrapper clr-col-12 clr-col-md-8">
+            <select id="select-basic" class="clr-select" formControlName="selectedqueryStrategy">
+              <option *ngFor="let item of queryStrategyBase" [value]="item.value">
+                {{ item.name }}
+              </option>
+            </select>
+          </div>
+          <div class="clr-col-12 clr-col-md-1">
+            <clr-tooltip
+              *ngIf="
+                dsDialogForm.get('selectedClassifier').errors &&
+                dsDialogForm.get('selectedClassifier').touched
+              "
+            >
+              <clr-icon
+                clrTooltipTrigger
+                shape="error-standard"
+                size="18"
+                style="color: red"
+                class="valid-tooltip"
+              >
+              </clr-icon>
+              <clr-tooltip-content
+                class="error-tooltip"
+                clrPosition="bottom-right"
+                clrSize="md"
+                *clrIfOpen
+              >
+                <span>{{ dsDialogForm.get('selectedClassifier').errors.msg.value }}</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </div>
+        </div>
+          <div
             class="form-group clr-row"
             *ngIf="!isNumeric && msg.type === 'tabular' && !isMultipleLabel && !isMutilNumericLabel"
           >
