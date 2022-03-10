@@ -34,6 +34,7 @@ export class EditProjectComponent implements OnInit {
   onDeleteLabelEmitter = new EventEmitter();
 
   inputProjectName = '';
+  inputTaskInstruction = '';
   nameExist: boolean;
   inputProjectCreator = '';
   emailRegForOwner = true;
@@ -99,6 +100,7 @@ export class EditProjectComponent implements OnInit {
     const al = this.msg.al;
     this.previousProjectName = this.msg.projectName;
     this.inputProjectName = this.msg.projectName;
+    this.inputTaskInstruction = this.msg.taskInstructions;
     this.inputfrequency = al.frequency ? al.frequency : null;
     this.inputTrigger = al.trigger ? al.trigger : null;
     this.labelType = this.msg.labelType;
@@ -371,6 +373,7 @@ export class EditProjectComponent implements OnInit {
         pid: this.msg.id,
         previousPname: this.previousProjectName,
         pname: this.inputProjectName,
+        taskInstructions: this.inputTaskInstruction,
         projectOwner: this.ownerList,
         assignee: this.assigneeList,
         assignmentLogic: this.assignmentLogicEdit,
