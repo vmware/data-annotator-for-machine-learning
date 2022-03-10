@@ -4,6 +4,7 @@ import json
 import logging
 import os
 
+from config.constant import cst
 from src.al.embeddings import gain_srs_embedding_vector, train_embedding_model_gain_vector
 from src.al.get_vectors import request_text_vectors
 from src.al.separate_data import separate_data, vector_sr
@@ -61,7 +62,10 @@ def active_learning_train(request):
     data = separate_data(srs)
 
     # al train the model with the labeled sr data
-    al = train_model(data, project_id, pro[0]['al']['estimator'])
+    query_strategy = cst['QUERY_STRATEGY']['POOL_BASED_SAMPLING']['PB_UNS']
+    if 'queryStrategy' in pro[0]['al']:
+        query_strategy = pro[0]['al']['queryStrategy']
+    al = train_model(data, project_id, pro[0]['al']['estimator'], query_strategy)
 
     # upload al-model to s3
     local_file = './' + modelDir + al['model']
@@ -127,7 +131,10 @@ def active_learning_query(request):
             unl_srs = query_saved_sr_vectors(req['projectName'])
 
     # al query uncertain instance
-    sr_queried = query_instance(unl_srs, model_file, 10)
+    query_strategy = cst['QUERY_STRATEGY']['POOL_BASED_SAMPLING']['PB_UNS']
+    if 'queryStrategy' in pro[0]['al']:
+        query_strategy = pro[0]['al']['queryStrategy']
+    sr_queried = query_instance(unl_srs, model_file, 10, query_strategy)
 
     # save queried instance
     conditions = {"projectName": req['projectName']}
