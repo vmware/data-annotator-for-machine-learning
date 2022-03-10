@@ -1339,8 +1339,12 @@ SPDX-License-Identifier: Apache-2.0 -->
         >
           <div class="clr-col-12 clr-col-md-1"></div>
           <label for="selectedClassifier" class="label-tooltip clr-col-12 clr-col-md-2"
-            >Query Strategy</label
-          >
+            >Query Strategy
+            <a href="https://modal-python.readthedocs.io/en/latest/" target="_blank" role="tooltip" aria-haspopup="true" class="tooltip tooltip-right">
+              <clr-icon shape="info-circle" size="20"></clr-icon>
+              <span class="tooltip-content">For more details please click the tooltip to see modal query strategy</span>
+            </a>
+          </label>
           <div class="clr-select-wrapper clr-col-12 clr-col-md-8">
             <select id="select-basic" class="clr-select" formControlName="selectedqueryStrategy">
               <option *ngFor="let item of queryStrategyBase" [value]="item.value">
