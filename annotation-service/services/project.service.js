@@ -144,7 +144,7 @@ async function updateProject(req) {
             assignmentLogic: req.body.assignmentLogic
         }
     };
-    if(req.body.taskInstructions && projectInfo.taskInstructions != req.body.taskInstructions){
+    if(projectInfo.taskInstructions != req.body.taskInstructions){
         update.$set['taskInstructions'] = req.body.taskInstructions;
     }
     if (req.body.frequency) {

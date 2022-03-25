@@ -53,10 +53,7 @@ def prepare_dataset(project_name):
             sr['originalData']['_top_label_'] = top_label
         sr_text.append(sr['originalData'])
 
-    sr_text = pd.DataFrame(sr_text).drop_duplicates().reset_index(drop=True)
-    sr_text.replace("", 0, inplace=True)
-    sr_text.replace(np.nan, "", inplace=True)
-
+    sr_text = pd.DataFrame(sr_text)
     for k, v in sr_text.dtypes.items():
         if k == '_top_label_':
             continue
@@ -64,27 +61,34 @@ def prepare_dataset(project_name):
             num_col.append(k)
         else:
             obj_col.append(k)
+    if len(num_col) == 0:
+        sr_text = sr_text.astype(str)
+    sr_text = sr_text.drop_duplicates().reset_index(drop=True)
+    sr_text.replace("", 0, inplace=True)
+    sr_text.replace(np.nan, "", inplace=True)
+
     return {"sr_text": sr_text, "num_col": num_col, "obj_col": obj_col}
 
 
 # train a embedding model to generate sr vectors and get sr vectors
 def train_embedding_model_gain_vector(project_id, project_name, sr_text, token):
-
+    emb_list, upload_file = {}, ""
     sr_data = prepare_dataset(project_name)
 
-    learn = embeddings_model(sr_data['sr_text'], sr_data['obj_col'], sr_data['num_col'], '_top_label_')
+    if sr_data['obj_col']:
+        learn = embeddings_model(sr_data['sr_text'], sr_data['obj_col'], sr_data['num_col'], '_top_label_')
 
-    emb_list = get_cat_emb_list(learn)
+        emb_list = get_cat_emb_list(learn)
 
-    # save the model to disk
-    model_name = project_id + "_vaporizer_model.pkl"
-    local_file = str("./" + modelDir + model_name)
-    with open(local_file, 'wb') as vec_pickle:
-        pickle.dump(emb_list, vec_pickle)
+        # save the model to disk
+        model_name = project_id + "_vaporizer_model.pkl"
+        local_file = str("./" + modelDir + model_name)
+        with open(local_file, 'wb') as vec_pickle:
+            pickle.dump(emb_list, vec_pickle)
 
-    # upload model to s3
-    upload_file = modelDir + project_id + '/' + model_name
-    upload_file = fileSystem.upload_file(upload_file, local_file, token)
+        # upload model to s3
+        upload_file = modelDir + project_id + '/' + model_name
+        upload_file = fileSystem.upload_file(upload_file, local_file, token)
 
     # update al info
     update = {"$set": {
@@ -122,14 +126,16 @@ def embedding_vectors(sr_text, emb_list, num_col):
 
 # get embeddings vector
 def gain_srs_embedding_vector(sr_text, vector_model, project_id, num_col, token):
-    # download embeddings model if not exist
-    model_name = project_id + "_vaporizer_model.pkl"
-    local_file = str("./" + modelDir + model_name)
-    fileSystem.download_file(True, vector_model, local_file, token)
+    emb_list = {}
+    if vector_model:
+        # download embeddings model if not exist
+        model_name = project_id + "_vaporizer_model.pkl"
+        local_file = str("./" + modelDir + model_name)
+        fileSystem.download_file(True, vector_model, local_file, token)
 
-    # load embedding model to get sr vectors
-    with open(local_file, 'rb') as model_vec:
-        emb_list = pickle.load(model_vec)
+        # load embedding model to get sr vectors
+        with open(local_file, 'rb') as model_vec:
+            emb_list = pickle.load(model_vec)
 
     srs_vectors = embedding_vectors(sr_text, emb_list, num_col)
     return srs_vectors
