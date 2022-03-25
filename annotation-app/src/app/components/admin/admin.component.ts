@@ -544,6 +544,7 @@ export class AdminComponent implements OnInit {
         threshold: dataset.al.trigger,
         frequency: dataset.al.frequency,
         isMultipleLabel: dataset.isMultipleLabel,
+        queryStrategy: dataset.al.queryStrategy,
       },
     });
   }
