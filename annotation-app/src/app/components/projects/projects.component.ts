@@ -399,6 +399,7 @@ export class ProjectsComponent implements OnInit {
         projectType: dataset.projectType,
         id: dataset.id,
         estimator: dataset.al.estimator,
+        queryStrategy: dataset.al.queryStrategy,
         threshold: dataset.al.trigger,
         frequency: dataset.al.frequency,
         isMultipleLabel: dataset.isMultipleLabel,
