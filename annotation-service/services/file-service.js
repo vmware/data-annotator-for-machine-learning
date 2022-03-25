@@ -124,6 +124,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         al: {
             estimator: req.body.estimator,
             alFailed: alFailed,
+            queryStrategy: req.body.queryStrategy,
         },
         projectType: projectType,
         encoder: req.body.encoder,
@@ -133,7 +134,6 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
         ticketDescription: req.body.ticketDescription,
         ticketQuestion: req.body.ticketQuestions,
         popUpLabels:  popUpLabels,
-        queryStrategy: req.body.queryStrategy,
     };
 
     const conditions = {projectName: req.body.pname};
