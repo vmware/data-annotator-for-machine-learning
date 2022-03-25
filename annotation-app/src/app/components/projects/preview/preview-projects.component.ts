@@ -199,7 +199,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
       }
       return sampling[queryStrategy];
     }
-    return '';
+    return 'Pool-based uncertainty_sampling';
  }
 
   ngAfterViewInit() {
