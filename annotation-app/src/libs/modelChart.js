@@ -16,6 +16,8 @@ function modelChart(options) {
   frequency = options.frequency;
   threshold = options.threshold;
   estimator = options.estimator;
+  samplingStrategy = options.samplingStrategy,
+
   model_margin = { top: 50, right: 300, bottom: 10, left: 40 };
   data = options.data;
   data = Object.assign(
@@ -45,7 +47,7 @@ function modelChart(options) {
     .scaleLinear()
     .domain(d3.extent(data, (d) => d.name))
     .nice()
-    .range([model_margin.left, model_width - model_margin.right]);
+    .range([model_margin.left, model_width - model_margin.right - 110]);
   //  NOTE: xAxis not auto combined,will list every ticket!!!!!!!
   //  var x = d3.scaleBand()
   // 	.domain(data.map(d => d.name))
@@ -77,7 +79,7 @@ function modelChart(options) {
   svg
     .append('text')
     .attr('text-anchor', 'end')
-    .attr('x', model_width - model_margin.right)
+    .attr('x', model_width - model_margin.right - 110)
     .attr('y', model_height + 35)
     .text('# Annotated Tickets');
 
@@ -93,32 +95,32 @@ function modelChart(options) {
   // Handmade legend
   svg
     .append('circle')
-    .attr('cx', model_width - model_margin.right + 30)
+    .attr('cx', model_width - model_margin.right - 80)
     .attr('cy', 100)
     .attr('r', 4)
     .style('fill', 'steelblue');
   svg
     .append('circle')
-    .attr('cx', model_width - model_margin.right + 30)
+    .attr('cx', model_width - model_margin.right - 80)
     .attr('cy', 130)
     .attr('r', 4)
     .style('fill', 'steelblue');
   svg
     .append('circle')
-    .attr('cx', model_width - model_margin.right + 30)
+    .attr('cx', model_width - model_margin.right - 80)
     .attr('cy', 160)
     .attr('r', 4)
     .style('fill', 'steelblue');
   svg
     .append('circle')
-    .attr('cx', model_width - model_margin.right + 30)
+    .attr('cx', model_width - model_margin.right - 80)
     .attr('cy', 190)
     .attr('r', 4)
     .style('fill', 'steelblue');
 
   svg
     .append('text')
-    .attr('x', model_width - model_margin.right + 40)
+    .attr('x', model_width - model_margin.right - 70)
     .attr('y', 100)
     .text('Estimator: ' + estimator)
     .style('font-size', '12px')
@@ -126,21 +128,21 @@ function modelChart(options) {
   // svg.append("text").attr("x", model_width - model_margin.right + 40).attr("y", 115).text(estimator).style("font-size", "12px").attr("alignment-baseline", "middle")
   svg
     .append('text')
-    .attr('x', model_width - model_margin.right + 40)
+    .attr('x', model_width - model_margin.right - 70)
     .attr('y', 130)
-    .text('Sampling Strategy: Pool-based sampling')
+    .text('Sampling Strategy: ' + samplingStrategy)
     .style('font-size', '12px')
     .attr('alignment-baseline', 'middle');
   svg
     .append('text')
-    .attr('x', model_width - model_margin.right + 40)
+    .attr('x', model_width - model_margin.right - 70)
     .attr('y', 160)
     .text('Threshold: ' + threshold)
     .style('font-size', '12px')
     .attr('alignment-baseline', 'middle');
   svg
     .append('text')
-    .attr('x', model_width - model_margin.right + 40)
+    .attr('x', model_width - model_margin.right - 70)
     .attr('y', 190)
     .text('Frequency: ' + frequency)
     .style('font-size', '12px')
@@ -162,7 +164,7 @@ function modelChart(options) {
     .attr('y1', y)
     .attr('y2', y)
     .attr('x1', model_margin.left)
-    .attr('x2', model_width - model_margin.right)
+    .attr('x2', model_width - model_margin.right - 110)
     .attr('stroke', '#000000')
     .attr('stroke-width', 0.1)
     .attr('shape-rendering', 'crispEdges');

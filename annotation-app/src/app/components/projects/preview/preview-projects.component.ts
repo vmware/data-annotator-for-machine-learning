@@ -128,6 +128,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     '#9DA3DB',
     '#ffff00',
   ];
+  samplingStrategy: any;
 
   constructor(
     private avaService: AvaService,
@@ -154,6 +155,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
       this.projectType = params['projectType'];
       this.projectId = params['id'];
       const al = params['estimator'];
+      this.samplingStrategy = this.getSamplingStrategy(params['queryStrategy']);
       this.alFrequency = params['frequency'];
       this.alThreshold = params['threshold'];
       this.isMultipleLabel = params['isMultipleLabel'];
@@ -187,6 +189,19 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     this.getALLFlag();
   }
 
+  getSamplingStrategy(queryStrategy: any) {
+    if (queryStrategy) {
+      const sampling = {
+       'PB_UNS': 'Pool-based uncertainty_sampling',
+       'PB_MS': 'Pool-based margin_sampling',
+       'PB_ES': 'Pool-based entropy_sampling',
+       'RBM_UNBS': 'Ranked batch mode uncertainty_batch_sampling',
+      }
+      return sampling[queryStrategy];
+    }
+    return 'Pool-based uncertainty_sampling';
+ }
+
   ngAfterViewInit() {
     this.chartWidth = this.el.nativeElement.querySelector('.categoryChart').offsetWidth;
     if (this.labelType != 'numericLabel' && !this.isMultipleLabel) {
@@ -213,6 +228,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
               this.alEstimator,
               this.alThreshold,
               this.alFrequency,
+              this.samplingStrategy,
             );
           }
         }
@@ -246,7 +262,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  showModelChart(conf, data, width, estimator, threshold, frequency) {
+  showModelChart(conf, data, width, estimator, threshold, frequency, samplingStrategy) {
     modelChart({
       container: conf,
       data,
@@ -254,6 +270,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
       estimator,
       threshold,
       frequency,
+      samplingStrategy,
     });
   }
 
@@ -668,6 +685,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
               this.alEstimator,
               this.alThreshold,
               this.alFrequency,
+              this.samplingStrategy,
             );
             this.loadingModelD3 = false;
           } catch (err) {
