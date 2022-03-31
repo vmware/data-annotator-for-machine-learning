@@ -128,10 +128,14 @@ const userSchema = new mongoose.Schema({
     fullName: { type: String },
     points: { type: Number, default: 0 },
     role: { type: String, default: USER_ROLE },
-    createdDate: { type: String, default: Date.now() }
+    createdDate: { type: String },
+    updateDate: { type: String },
+    regularNotification: {type: Boolean, default: true},
+    manul: {type: Boolean, default: false},
 }, { _id: false });
 userSchema.set("toJSON", { virtuals: true });
 userSchema.set("toObject", { virtuals: true });
+userSchema.plugin(mongoosePaginate);
 
 // create User model
 const UserModel = mongoose.model("User", userSchema);
@@ -154,6 +158,9 @@ const projectSchema = new mongoose.Schema({
         skip: { type: Number, default: 0 },
         reviewed: { type: Number, default: 0 },
         assignedCase: { type: Number },
+        assignedDate:  { type: String },
+        updateDate: { type: String },
+        regularNotification: {type: Boolean, default: true},
     }],
     reviewInfo:[{
         user: { type: String },
@@ -217,6 +224,7 @@ const projectSchema = new mongoose.Schema({
 }, { _id: true });
 projectSchema.index({ projectName: 1 });
 projectSchema.set("toJSON", { virtuals: true });
+projectSchema.plugin(mongoosePaginate);
 
 // create Annotation Project model
 const ProjectModel = mongoose.model("Project", projectSchema);
@@ -249,6 +257,7 @@ const dataSetSchema = new mongoose.Schema({
 });
 dataSetSchema.set("toJSON", { virtuals: true });
 dataSetSchema.index({ dataSetName: 1 });
+dataSetSchema.plugin(mongoosePaginate);
 
 const DataSetModel = mongoose.model("DataSet", dataSetSchema);
 

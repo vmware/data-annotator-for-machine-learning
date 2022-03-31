@@ -184,8 +184,11 @@ async function updateSrsUserInput(req) {
     
         console.log(`[ SRS ] Service update project userCompleteCase`);
         conditions = { _id: projectId, "userCompleteCase.user": user };
-        update = { 
-            $set: { updatedDate: Date.now() }, 
+        update = {
+            $set: { 
+                updatedDate: Date.now(),
+                "userCompleteCase.$.updateDate": Date.now(),
+            }, 
             $inc: { "userCompleteCase.$.completeCase": 1 }
         };
         if (!pro.al.alFailed && pro.labelType != LABELTYPE.NUMERIC) {

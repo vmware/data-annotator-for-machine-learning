@@ -56,8 +56,12 @@ module.exports  = {
   emailPassword: process.env.EMAIL_PASSWORD || null,
   emailServerHost: process.env.EMAIL_SERVER_HOST || null,
   emailServerPort: process.env.EMAIL_SERVER_PORT || 465,
+  //regular notification recommond local/uat/test env set to false only enable at prod env
+  regularNotificatnoEmail: process.env.REGULAR_NOTIFICATNO_EMAIL || true,
   //if enableEmail=true, annotation-app-url should be set as the real value 
   WebClientUrl: process.env.WEBCLIENT_URL || 'http://localhost:4200',
+  //if enableEmail=true, annotation-service-url should be set as the real value 
+  annotationServiceUrl: process.env.ANNOTATION_SERVICE_URL || 'http://localhost:3000',
   //if enableEmail=true, can set teamTitle for sending email or use default value
   teamTitle: process.env.TEAM_TITILE || "Data-Annotator-For-Machine-Learning",
   //-------------------- send email config end-------------//

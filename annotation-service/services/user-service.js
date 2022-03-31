@@ -29,16 +29,35 @@ async function saveUser(req) {
     }
     console.log('[ USER ] service saveUser find user if exist');
     const user = await mongoDb.findById(UserModel, req.body.email);
+    
     if (user) {
-        throw{CODE: 4003, MSG: "USER ALREADY EXIST"}
+        if (!user.manul) {
+            throw{CODE: 4003, MSG: "USER ALREADY EXIST"}
+        }
+        //user set by manul already
+        const conditions = {_id: req.body.email};
+        const options = {new: true};
+        let update = {
+            $set: {
+                fullName: req.body.uname?req.body.uname: req.body.email.split("@")[0],
+                manul: false,
+            }
+        };
+        if (req.body.password) {
+            update.$set.password = Buffer.from(req.body.password).toString("base64");
+        }
+        if (req.body.role) {
+            update.$set.role = req.body.role;
+        }
+        return mongoDb.findOneAndUpdate(UserModel, conditions, update, options);
     }
-    //save user
-    console.log('[ USER ] service user not exist');
+
     let schema = {
         _id: req.body.email,
         email: req.body.email,
         fullName: req.body.uname,
-        createdDate: Date.now()
+        createdDate: Date.now(),
+        updateDate: Date.now(),
     };
     if (!req.body.uname) {
         schema.fullName = req.body.email.split("@")[0];
@@ -47,12 +66,13 @@ async function saveUser(req) {
         schema.password = Buffer.from(req.body.password).toString("base64");
     }
     if (req.body.role) {
-        schema.password = req.body.role;
+        schema.role = req.body.role;
     }
     const flag = config.adminDefault.indexOf(req.body.email);
     if (flag != -1) {
         schema.role = 'Admin';
     }
+    
     console.log(`[ USER ] service saveUser ${req.body.email} info when first time login`);
     return mongoDb.saveBySchema(UserModel, schema);
 }
@@ -69,7 +89,10 @@ async function updateUserRole(req) {
 
     console.log('[ USER ] service updateUserRole user: ', req.auth.email);
     let conditions = { _id: req.body.user };
-    let update = { $set: { role: req.body.role, createdDate: Date.now() } };
+    let update = { $set: { 
+        role: req.body.role, 
+        updateDate: Date.now(),
+    } };
     let options = { new: true };
     return mongoDb.findOneAndUpdate(UserModel, conditions, update, options);
 
@@ -132,7 +155,10 @@ async function getUserRoleById(req) {
             console.log('[ USER ] service update user fullName');
             const conditions = { _id: req.auth.email };
             const options = { new: true };
-            const update = { $set: { fullName: req.auth.name } };
+            const update = { $set: { 
+                fullName: req.auth.name,
+                updateDate: Date.now(),
+            } };
             return mongoDb.findOneAndUpdate(UserModel, conditions, update, options);
         }
         return user;
@@ -143,7 +169,8 @@ async function getUserRoleById(req) {
             _id: req.auth.email,
             email: req.auth.email,
             fullName: req.auth.name,
-            createdDate: Date.now()
+            createdDate: Date.now(),
+            updateDate: Date.now(),
         };
         const flag = config.adminDefault.indexOf(req.auth.email);
         if (flag != -1) {

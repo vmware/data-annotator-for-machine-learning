@@ -9,7 +9,7 @@ const jwt = require('express-jwt');
 const config = require('../config/config');
 const JWTS = require('jsonwebtoken');
 const {API_VERSION, TOKEN_EXPIRE_TIME, TOKEN_ALGORITHM, TOKEN_SECRET_OR_PRIVATE_KEY} = require('../config/constant');
-
+const APIs = require('../resources/APIs');
 
 jwtTokenAuthrization = (data) => {
     if (config.ESP) {
@@ -28,8 +28,9 @@ jwtTokenAuthrization = (data) => {
             requestProperty: 'auth',
         }).unless({
             path: [
-                `/api/${API_VERSION}/register`,
-                `/api/${API_VERSION}/login`,
+                `/api/${API_VERSION}${APIs.REGISTER}`,
+                `/api/${API_VERSION}${APIs.LOGIN}`,
+                `/api/${API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
             ],
         });
     }
