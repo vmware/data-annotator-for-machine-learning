@@ -19,6 +19,10 @@ jwtTokenAuthrization = (data) => {
             issuer: config.tokenIssuer,
             getToken: fromHeaderOrQuerystring,
             requestProperty: 'auth',
+        }).unless({
+            path: [
+                `/api/${API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
+            ],
         });
     }else{
         return jwt({
