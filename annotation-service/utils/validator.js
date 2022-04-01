@@ -47,6 +47,15 @@ async function checkAppendTicketsHeaders(appendHeaders, originalHeaders){
     });
 }
 
+async function checkUser(uid, checkExsit){
+
+    const user = await mongoDb.findById(UserModel, uid);
+    if (checkExsit && !user) {
+        throw {CODE: 4001, MSG: "ACCESS DENIED"}
+    }
+    return user;
+ }
+
 async function checkUserRole(uid, checkRole){
 
    const user = await mongoDb.findById(UserModel, uid);
@@ -137,6 +146,7 @@ module.exports = {
     isNumeric,
     checkProjectByconditions,
     checkAppendTicketsHeaders,
+    checkUser,
     checkUserRole,
     checkAnnotator,
     checkDataSet,

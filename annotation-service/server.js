@@ -13,6 +13,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const glob = require('glob');
 const { consumeSQSMessage } = require('./utils/sqs');
+const { regularNotification } = require('./utils/taskSchedule');
 const config = require('./config/config');
 const { API_VERSION } = require('./config/constant')
 
@@ -76,10 +77,8 @@ authService.authentication().then(data => {
     routers.forEach(
       api => app.use(`/api/${API_VERSION}`, require(api))
     );
-    if (config.ESP || config.useAWS &&  config.sqsRoleArn && config.sqsUrl) {
-      //consume SQS message
-      consumeSQSMessage();
-    }
+    consumeSQSMessage();
+    regularNotification();
 
     const server = http.createServer(app);
     server.listen(config.serverPort, () => console.log(`[ SERVER ] API running on localhost:${config.serverPort}`));

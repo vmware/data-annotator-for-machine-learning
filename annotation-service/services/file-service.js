@@ -43,8 +43,14 @@ async function createProject(req) {
         req.body.ticketQuestions = JSON.parse(req.body.ticketQuestions);
     }
     let userCompleteCase = [], annotators = [];
+    
     await req.body.assignee.forEach(item => {
-        const inintUser = { user: item.email, assignedCase: item.assignedCase };
+        const inintUser = { 
+            user: item.email, 
+            assignedCase: item.assignedCase,
+            assignedDate: Date.now(),
+            updateDate: Date.now(),
+        };
         annotators.push(item.email);
         userCompleteCase.push(inintUser);
     })
