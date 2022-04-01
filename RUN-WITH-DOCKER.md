@@ -31,6 +31,9 @@ In active-learning-service we use _en_core_web_md_ as the default spacy module i
   docker compose -f docker-compose.yml down
   ```
 
+## How to use
+Open `http://localhost:4200` with your browser, now you can use full of the DAML application functions.
+
 ## More commands
 For more commands you can reference here [docker compose commands](https://docs.docker.com/engine/reference/commandline/compose/#child-commands).
 
