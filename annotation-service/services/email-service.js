@@ -15,6 +15,7 @@ const AWS = require('aws-sdk');
 const STS = require('../utils/sts');
 const { ACCESS_TIME_15, API_VERSION } = require('../config/constant')
 const nodemailer = require("nodemailer");
+const APIs = require('../resources/APIs');
 
 //email template
 const OwnerTemp = fs.readFileSync(path.join(__dirname, "../resources/template-owner.html"), "utf8");
@@ -58,6 +59,7 @@ async function sendNotStartLabelingNotificationEmail(user, projectName, projectO
         .replace(/\${projectName}/g, projectName)
         .replace(/\${serviceHost}/g, config.annotationServiceUrl)
         .replace(/\${apiVersion}/g, API_VERSION)
+        .replace(/\${notification}/g, APIs.EMAIL_REGULAR_NOTIFICATION)
         .replace("${projectOwner}", projectOwner)
         .replace("${assignedDate}", assignedDate)
         .replace("${hostname}", config.WebClientUrl);
@@ -72,6 +74,7 @@ async function sendNotFinishLabelingNotificationEmail(user, projectName, project
         .replace(/\${projectName}/g, projectName)
         .replace(/\${serviceHost}/g, config.annotationServiceUrl)
         .replace(/\${apiVersion}/g, API_VERSION)
+        .replace(/\${notification}/g, APIs.EMAIL_REGULAR_NOTIFICATION)
         .replace("${projectOwner}", projectOwner)
         .replace("${assignedDate}", assignedDate)
         .replace("${hostname}", config.WebClientUrl);

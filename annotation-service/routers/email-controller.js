@@ -40,10 +40,10 @@ router.get(APIs.EMAIL_REGULAR_NOTIFICATION, (req, res) => {
   console.log(`[ EMAIL ] [ ACCESS ] Router ${req.originalUrl} ${req.query.u}`);
   taskSchedule.regularNotificationSubscription(req).then(() => {
     console.log(`[ EMAIL ] [ SUCCESS ] Router ${req.originalUrl} ${req.query.u}`);
-    res.status(200).redirect(`${config.WebClientUrl}/home?o=email`);
+    res.status(200).redirect(`${config.WebClientUrl}/home?o=email&s=1`);
   }).catch(error => {
     console.error(`[ EMAIL ] [ ERROR ] Router ${req.originalUrl} ${req.query.u}`, error);
-    res.status(500).redirect(`${config.WebClientUrl}/home?o=email`);
+    res.status(500).redirect(`${config.WebClientUrl}/home?o=email&s=0`);
   });
 });
 

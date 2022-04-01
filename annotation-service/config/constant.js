@@ -108,7 +108,7 @@ module.exports = {
         SQS: "SQS",
     },
     MILLISECOND_DAY: 1000 * 60 * 60 * 24,
-    REGULAR_NOTIFICATNO: process.env.REGULAR_NOTIFICATNO || "0 0 9 * * 1-5",
+    REGULAR_NOTIFICATNO: process.env.REGULAR_NOTIFICATNO || "0 26 10 * * 1-5",
     NOT_START_DAY: process.env.NOT_START_DAY || 7,
     NOT_FINISH_DAY: process.env.NOT_FINISH_DAY || 14,
 }

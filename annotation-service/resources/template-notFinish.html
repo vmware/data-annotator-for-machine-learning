@@ -9,8 +9,8 @@
       <p style="margin-bottom: 30px">Hi ${user},</p>
       <p style="margin-top: 30px">Your annotation task <a href="${hostname}">${projectName}</a> assigned to you on ${assignedDate} by ${projectOwner} is nearly complete.</p>
       <p style="margin-top: 30px">Please visit the annotations page to finish your task.</p>
-      <p style="margin-top: 50px">If you don't want to receive such emails in the future, please unsubscribe from here: <a href="${serviceHost}/api/${apiVersion}/emails/regaular-notification?u=${user}&p=${projectName}&n=0">STOP CURRENT PROJECT REGULA NOTIFICATION</a> for this project.</p>
-      <p style="margin-top: 10px">You can also unsubscribe such notification from all projects from here: <a href="${serviceHost}/api/${apiVersion}/emails/regaular-notification?u=${user}&n=0">STOP ALL PROJECTS REGULA NOTIFICATION</a>.</p>
+      <p style="margin-top: 50px">If you don't want to receive such emails in the future, please unsubscribe from here: <a href="${serviceHost}/api/${apiVersion}${notification}?u=${user}&p=${projectName}&n=0">STOP CURRENT PROJECT REGULA NOTIFICATION</a> for this project.</p>
+      <p style="margin-top: 10px">You can also unsubscribe such notification from all projects from here: <a href="${serviceHost}/api/${apiVersion}${notification}?u=${user}&n=0">STOP ALL PROJECTS REGULA NOTIFICATION</a>.</p>
       <p style="margin-bottom: 5px;margin-top: 50px;">Regards,</p>
       <p style="margin-top: 5px;">${team} Team</p>
     </div>
