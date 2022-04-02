@@ -109,7 +109,9 @@ async function updateProject(req) {
                 user: user.email,
                 completeCase: 0,
                 skip: 0,
-                assignedCase: user.assignedCase
+                assignedCase: user.assignedCase,
+                assignedDate: Date.now(),
+                updateDate: Date.now(),
             });
         }
     }

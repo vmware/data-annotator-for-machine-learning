@@ -12,6 +12,7 @@
         "body-parser": "^1.19.0",
         "compressing": "^1.5.1",
         "cors": "2.8.5",
+        "cron": "^1.8.2",
         "csv-writer": "^1.6.0",
         "csvtojson": "^2.0.10",
         "express": "^4.17.1",
@@ -33,11 +34,11 @@
         "unzip-stream": "^0.3.1"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "2.11.0",
-        "@typescript-eslint/parser": "2.11.0",
+        "@typescript-eslint/eslint-plugin": "^5.15.0",
+        "@typescript-eslint/parser": "^5.15.0",
         "babel-eslint": "10.0.3",
-        "eslint": "6.1.0",
-        "eslint-config-airbnb": "18.0.1",
+        "eslint": "^8.11.0",
+        "eslint-config-airbnb": "^18.2.1",
         "eslint-config-google": "0.14.0",
         "eslint-config-prettier": "6.7.0",
         "eslint-plugin-import": "2.18.2",

@@ -124,3 +124,6 @@ $ cd active-learning-service
 $ python manage.py runserver localhost:8000
 
 ```
+
+## How to use
+Open `http://localhost:4200` with your browser, now you can use full of the DAML application functions.

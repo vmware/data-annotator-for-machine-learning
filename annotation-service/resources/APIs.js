@@ -74,7 +74,8 @@ module.exports = {
     
     //email
     EMAIL_TO_OWNER: "/emails/send-to-owners",//swagger
-    EMAIL_TO_ANNOTATOR: "/emails/send-to-annotators",//swagger 
+    EMAIL_TO_ANNOTATOR: "/emails/send-to-annotators",//swagger
+    EMAIL_REGULAR_NOTIFICATION: "/emails/regular-notification/unsubscription",
 
     //Integration
     INTEGRATION_CSV: "/integration/labelled/csv",

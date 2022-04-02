@@ -1,0 +1,18 @@
+<!-- 
+  Copyright 2019-2021 VMware, Inc.
+  SPDX-License-Identifier: Apache-2.0 
+-->
+
+<div style="font-family:Helvetica,Arial,sans-serif; font-size:16px; line-height:normal; background-color:rgb(253,253,253)">
+  <div style="background-color: #f5f5f5;padding: 20px 20px;padding-left: 26px;">
+    <div style="background-color: white;box-shadow: 0px 0px 10px 1px #ccc inset;padding: 10px 10px;">
+      <p style="margin-bottom: 30px">Hi ${user},</p>
+      <p style="margin-top: 30px">Your annotation task <a href="${hostname}">${projectName}</a> assigned to you on ${assignedDate} by ${projectOwner} is nearly complete.</p>
+      <p style="margin-top: 30px">Please visit the annotations page to finish your task.</p>
+      <p style="margin-top: 50px">If you don't want to receive such emails in the future, please unsubscribe from here: <a href="${serviceHost}/api/${apiVersion}${notification}?u=${user}&p=${projectName}&n=0">STOP CURRENT PROJECT REGULA NOTIFICATION</a> for this project.</p>
+      <p style="margin-top: 10px">You can also unsubscribe such notification from all projects from here: <a href="${serviceHost}/api/${apiVersion}${notification}?u=${user}&n=0">STOP ALL PROJECTS REGULA NOTIFICATION</a>.</p>
+      <p style="margin-bottom: 5px;margin-top: 50px;">Regards,</p>
+      <p style="margin-top: 5px;">${team} Team</p>
+    </div>
+  </div>
+</div>
