@@ -63,7 +63,7 @@ export class AvaService {
   public deleteProject(payload: any): Observable<any> {
     const options = {
       headers: new HttpHeaders(),
-    }
+    };
     return this.http.delete(`${this.baseUrl}/projects?pid=${payload.pid}`, options);
   }
 

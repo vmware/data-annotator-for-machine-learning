@@ -4,6 +4,31 @@ SPDX-License-Identifier: Apache-2.0 -->
 <div class="clr-row">
   <div class="clr-col-2"></div>
   <div class="clr-col-8">
+    <div *ngIf="!unsubscribe && isUnsubscribe" class="alert alert-danger" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+          </div>
+          <span class="alert-text">
+            Failed to unsubscribe from reminder emails about annotation jobs.</span
+          >
+        </div>
+      </div>
+    </div>
+    <div *ngIf="unsubscribe && isUnsubscribe" class="alert alert-success" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
+          </div>
+          <span class="alert-text">
+            Succeed to unsubscribe from reminder emails about annotation jobs.
+          </span>
+        </div>
+      </div>
+    </div>
+
     <h1 style="margin-bottom: 2rem">{{ env.config.serviceTitle }}</h1>
     <h3>What is {{ env.config.serviceTitle }}?</h3>
     <p>
