@@ -678,6 +678,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 style="margin: 0.3rem 0.2rem"
                 type="submit"
                 (click)="onSelectingCategory(label, i)"
+                title="{{ label }}"
                 [ngClass]="
                   active == i && i == 0
                     ? 'clickActive0'
@@ -763,6 +764,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   entityLabel: i !== selectedEntityID
                 }"
                 (click)="onSelectingEntity($event, label, i)"
+                title="{{ label }}"
               >
                 {{ label }}
               </button>
@@ -788,7 +790,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="clr-checkbox"
                     (click)="selectLabel($event, i)"
                   />
-                  <label for="{{ label }}" class="clr-control-label">{{ label }}</label>
+                  <label title="{{ label }}" for="{{ label }}" class="clr-control-label">{{ label }}</label>
                 </div>
               </div>
             </div>
@@ -812,7 +814,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="clr-checkbox"
                     (click)="selectLabel($event, i)"
                   />
-                  <label for="{{ score.label }}" class="clr-control-label multiple-label">{{ score.label }}</label>
+                  <label for="{{ score.label }}" class="clr-control-label multiple-label" title="{{ score.label }}">{{ score.label }}</label>
                 </div>
                 <div class="scoreSlider clr-control-container">
                   <ngx-slider [(value)]="scores[i].scoreValue" [options]="scores[i].scoreOptions" (valueChange)="scoreSliderEvent(i)"></ngx-slider>
@@ -857,6 +859,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   'box-shadow': '1px 1px 3px 0px ' + '#9A9A9A'
                 }"
                 (click)="onSelectingEntity($event, label, i)"
+                title="{{ item.label }}"
               >
                 {{ item.label }}
               </button>
