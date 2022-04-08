@@ -257,6 +257,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                             Data processing for large datasets may take up to 60 seconds...
                           </span>
                         </button>
+                        <div *ngIf="setDataError" class="alert alert-danger" role="alert" style="margin-right: 1rem; margin-left: 0.25rem;">
+                          <div class="alert-items">
+                              <div class="alert-item static">
+                                  <div class="alert-icon-wrapper">
+                                      <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                                  </div>
+                                  <span class="alert-text">
+                                    Failed to set data, please try again later!
+                                  </span>
+                              </div>
+                          </div>
+                       </div>
                         <div
                           *ngIf="msg.type == 'text' || msg.type == 'tabular'"
                           class="clr-row"
