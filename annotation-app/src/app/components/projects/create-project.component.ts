@@ -127,6 +127,7 @@ export class CreateNewComponent implements OnInit {
   activePopOriginal: number;
   popLabelValidation: boolean;
   queryStrategyBase: any;
+  setDataError: boolean = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -975,6 +976,7 @@ export class CreateNewComponent implements OnInit {
       error: (error) => {
         console.log('parse_error: ', error);
         this.setDataComplete = false;
+        this.setDataError = true;
       },
       chunk: (results, parser) => {
         const chunkData = results.data;
@@ -1021,8 +1023,9 @@ export class CreateNewComponent implements OnInit {
   }
 
   sureSet() {
-    if (this.changePreview || this.changeSetData || this.msg.type == 'ner') {
+    if (this.setDataError || this.changePreview || this.changeSetData || this.msg.type == 'ner') {
       this.setDataComplete = true;
+      this.setDataError = false;
       this.nonEnglish = 0;
       this.totalCase = 0;
       this.previewTotalData = [];
@@ -1053,6 +1056,8 @@ export class CreateNewComponent implements OnInit {
           (error) => {
             console.log('Error:', error);
             this.uploadComplete = false;
+            this.setDataComplete = false;
+            this.setDataError = true;
           },
         );
       } else {

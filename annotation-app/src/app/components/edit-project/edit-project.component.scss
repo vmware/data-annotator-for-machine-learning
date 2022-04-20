@@ -70,6 +70,10 @@ ul li {
   margin: initial;
   border-bottom: unset;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .numeric .clr-input {
