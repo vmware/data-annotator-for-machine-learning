@@ -21,7 +21,7 @@ export class FooterComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    if (this.env.config.feedbackUrl) {
+    if (this.env.config.lumosUrl) {
       this.feedback.showFeedback();
       this.userAuthService.loggedUserListener().subscribe((user) => {
         this.feedback.identifyUser(user);
