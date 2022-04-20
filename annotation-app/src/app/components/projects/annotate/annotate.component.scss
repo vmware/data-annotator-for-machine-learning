@@ -178,6 +178,10 @@ label .label-leftBoard {
   font-size: unset;
   font-weight: bold;
   height: 1.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 .yellow {
   color: black;
@@ -836,6 +840,7 @@ label .label-leftBoard {
   width: 200px;
   text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .multiple-checkbox{

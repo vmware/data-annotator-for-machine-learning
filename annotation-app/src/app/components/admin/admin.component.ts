@@ -17,6 +17,8 @@ import { DatasetValidator } from '../../shared/form-validators/dataset-validator
 import { DownloadService } from 'app/services/common/download.service';
 import { ToolService } from 'app/services/common/tool.service';
 import { CommonService } from 'app/services/common/common.service';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-admin',
@@ -85,6 +87,7 @@ export class AdminComponent implements OnInit {
   modelExist = false;
   msgEdit: any;
   setUserErrMessage: string;
+  inputUserNameUpdate = new Subject<string>();
 
   constructor(
     private router: Router,
@@ -101,6 +104,10 @@ export class AdminComponent implements OnInit {
     this.pageUser = 1;
     this.pageSizeUser = 10;
     this.download = `${this.env.config.annotationService}/api`;
+    this.inputUserNameUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
+      let userName = value.trim();
+      this.validateUserName(userName);
+   });
   }
 
   ngOnInit() {
@@ -565,5 +572,20 @@ export class AdminComponent implements OnInit {
 
   receiveDeleteLabel(e) {
     this.getProjects();
+  }
+
+  validateUserName(value: any) {
+    if (value) {
+      const emailReg = this.toolService.toRegEmail([this.inputEmail]);
+      if (emailReg) {
+        this.setUserErrMessage = '';
+      } else {
+        this.setUserErrMessage = this.env.config.enableAWSS3
+          ? 'Wrong format! Email only accept vmware emailbox'
+          : 'Wrong format! Only accept email address';
+      }  
+    } else {
+      this.setUserErrMessage = 'This field is required';
+    }
   }
 }
