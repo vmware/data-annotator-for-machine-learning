@@ -19,8 +19,10 @@ var common = {
       window[d]._url = c;
       window[d].init = window[d].init || function (p, q, r) {
         window[d]._clientId = p; window[d]._clientName = q; window[d]._configs = r || {};
-        e = a.createElement(b); e.async = 1; e.src = c + '?client_id=' + p + '&namespace=' + d;
-        f = a.getElementsByTagName(b)[0]; f.parentNode.insertBefore(e, f);
+        let eVar = e;
+        eVar = a.createElement(b); eVar.async = 1; eVar.src = c + '?client_id=' + p + '&namespace=' + d;
+        let fVar = f;
+        fVar = a.getElementsByTagName(b)[0]; fVar.parentNode.insertBefore(eVar, fVar);
       };
     })(document, 'script', url, 'lumos');
 
