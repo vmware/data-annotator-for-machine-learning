@@ -376,7 +376,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <label for="userName" class="label-tooltip clr-col-12 clr-col-md-3">User Name</label>
       <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
         <input id="userName" type="text" class="clr-input" placeholder="Email Address required"
-          [(ngModel)]="inputEmail" />
+          [(ngModel)]="inputEmail" (ngModelChange)="this.inputUserNameUpdate.next($event)" />
       </div>
       <clr-tooltip *ngIf="setUserErrMessage">
         <clr-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">

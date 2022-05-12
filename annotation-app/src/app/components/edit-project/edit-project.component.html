@@ -221,6 +221,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   maxlength="50"
                   clrInput
                   placeholder="{{ label.editLabel }}"
+                  title="{{ label.editLabel }}"
                   name="editLabel"
                   class="clr-input editInput"
                   [(ngModel)]="label.editLabel"
@@ -321,6 +322,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       #multiLabels
                       id="multiLabels"
                       maxlength="50"
+                      title="{{ mutilLabelArray.value[i].editLabel }}"
                       class="clr-input mutilLabel-input"
                       placeholder="New Label"
                       name="multiLabel"
