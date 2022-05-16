@@ -41,14 +41,12 @@ async function checkingRunningInstance() {
   const instance = await mongoDb.findByConditions(InstanceModel, NODE_INSTANCE);
   
   if (instance.length) {
-    console.log(instance);
     return true;
   }
 
   try {
     await mongoDb.saveBySchema(InstanceModel, NODE_INSTANCE);
   } catch (error) {
-    console.log(error);
     return true;
   }
   return false;
