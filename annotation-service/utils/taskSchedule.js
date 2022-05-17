@@ -31,13 +31,13 @@ module.exports.regularNotification = async () => {
       return;
     }
     findProjectAndSendRegularNotification();
-    deleteInstanceName();
   });
   job.start();
   
 }
 async function checkingRunningInstance() {
-  const NODE_INSTANCE = {name: "NODE_INSTANCE"}
+
+  const NODE_INSTANCE = {data: new Date(Date.now()).toLocaleDateString()}
   const instance = await mongoDb.findByConditions(InstanceModel, NODE_INSTANCE);
   
   if (instance.length) {
@@ -52,10 +52,6 @@ async function checkingRunningInstance() {
   return false;
 }
 
-async function deleteInstanceName() {
-  const NODE_INSTANCE = {name: "NODE_INSTANCE"}
-  await mongoDb.deleteOneByConditions(InstanceModel, NODE_INSTANCE);
-}
 
 async function findProjectAndSendRegularNotification() {
   let options = { page: 1, limit: 10 };
