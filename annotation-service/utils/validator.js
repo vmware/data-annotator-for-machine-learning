@@ -141,6 +141,15 @@ async function checkJsonFormat(data){
     }
 }
 
+
+async function validateBool(data){
+    if(data == true || data == 'true'){
+        return true;
+    }
+    return false;
+}
+
+
 module.exports = {
     isASCII,
     isNumeric,
@@ -154,5 +163,6 @@ module.exports = {
     validateRequired,
     checkDataSetInUse,
     checkJsonFormat,
+    validateBool,
 
 };

@@ -16,7 +16,7 @@ export interface Env {
   tokenUrl?: string;
   logoutUrl?: string;
   CLIENT_ID?: string;
-  feedbackUrl?: string;
+  lumosUrl?: string;
   videoSrc?: string;
   googleTrackId?: string;
   enableAWSS3?: boolean;

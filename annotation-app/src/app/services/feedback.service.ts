@@ -19,11 +19,11 @@ export class FeedbackService {
     feedbackClientId = feedbackClientId.startsWith('$')
       ? this.env.config.CLIENT_ID
       : feedbackClientId;
-    common.feedback(this.env.config.feedbackUrl).init(feedbackClientId, 'Loop');
+    common.feedback(this.env.config.lumosUrl).init(feedbackClientId, this.env.config.serviceTitle);
   }
 
   identifyUser(user) {
-    common.esp.identify(user ? user.email : 'Guest');
-    common.esp.metadata({ 'Full Name': user ? user.fullName : 'Guest' });
+    common.lumos.identify(user ? user.email : 'Guest');
+    common.lumos.metadata({ 'Full Name': user ? user.fullName : 'Guest' });
   }
 }
