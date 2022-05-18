@@ -5,7 +5,7 @@
  * 
 ***/
 
-const { MILLISECOND_DAY, REGULAR_NOTIFICATNO, NOT_START_DAY, NOT_FINISH_DAY } = require("../config/constant");
+const { MILLISECOND_DAY, REGULAR_NOTIFICATNO, CURRENT_TIME_ZONE, NOT_START_DAY, NOT_FINISH_DAY } = require("../config/constant");
 const config = require("../config/config");
 const { ProjectModel, UserModel, InstanceModel } = require("../db/db-connect");
 const mongoDb = require("../db/mongo.db");
@@ -25,21 +25,25 @@ module.exports.regularNotification = async () => {
     return;
   }
 
-  var job = new CronJob(REGULAR_NOTIFICATNO, async () => {
-
-    if (await checkingRunningInstance()) {
-      return;
-    }
-    findProjectAndSendRegularNotification();
-  });
-  job.start();
+  var job = new CronJob(
+      REGULAR_NOTIFICATNO, 
+      async () => {
+        if (await checkingRunningInstance()) {
+            return;
+        }
+        findProjectAndSendRegularNotification();
+      },
+      () => console.log('[ REGULAR-NOTIFICATION ] [ COMPLETE ]'),
+      true,
+      CURRENT_TIME_ZONE
+    );
   
 }
 async function checkingRunningInstance() {
 
-  const NODE_INSTANCE = {data: new Date(Date.now()).toLocaleDateString()}
+  const NODE_INSTANCE = {data: new Date(Date.now()).toLocaleDateString("en-US", {timeZone: CURRENT_TIME_ZONE})};
   const instance = await mongoDb.findByConditions(InstanceModel, NODE_INSTANCE);
-  
+  console.log(NODE_INSTANCE);
   if (instance.length) {
     return true;
   }
