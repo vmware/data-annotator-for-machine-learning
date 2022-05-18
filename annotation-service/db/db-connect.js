@@ -264,7 +264,7 @@ const DataSetModel = mongoose.model("DataSet", dataSetSchema);
 
 //dataSet Model
 const instanceSchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true},
+    data: { type: String, required: true, unique: true},
 });
 
 const InstanceModel = mongoose.model("instance", instanceSchema);

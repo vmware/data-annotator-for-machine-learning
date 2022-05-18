@@ -11,7 +11,7 @@ const path = require('path');
 const http = require('http');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const glob = require('glob');
+const fs = require('fs')
 const { consumeSQSMessage } = require('./utils/sqs');
 const { regularNotification } = require('./utils/taskSchedule');
 const config = require('./config/config');
@@ -22,7 +22,8 @@ const authService = require('./services/auth.service');
 const {jwtTokenAuthrization} = require('./middlewares/jwt.middleware');
 
 const app = express();
-const routers = glob.sync(path.resolve(__dirname, `./routers/*.js`));
+
+const routers = fs.readdirSync(path.join(__dirname, 'routers'));
 
 //manually swagger
 const swaggerUi = require('swagger-ui-express');
@@ -75,7 +76,7 @@ authService.authentication().then(data => {
 }).finally(()=>{
     // Set our api routers
     routers.forEach(
-      api => app.use(`/api/${API_VERSION}`, require(api))
+      api => app.use(`/api/${API_VERSION}`, require(`./routers/${api}`))
     );
     consumeSQSMessage();
     regularNotification();
