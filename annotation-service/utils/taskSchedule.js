@@ -33,7 +33,7 @@ module.exports.regularNotification = async () => {
         }
         findProjectAndSendRegularNotification();
       },
-      () => console.log('[ REGULAR-NOTIFICATION ] [ COMPLETE ]'),
+      null,
       true,
       CURRENT_TIME_ZONE
     );
@@ -43,7 +43,7 @@ async function checkingRunningInstance() {
 
   const NODE_INSTANCE = {data: new Date(Date.now()).toLocaleDateString("en-US", {timeZone: CURRENT_TIME_ZONE})};
   const instance = await mongoDb.findByConditions(InstanceModel, NODE_INSTANCE);
-  console.log(NODE_INSTANCE);
+  console.log('[ REGULAR-NOTIFICATION ]', NODE_INSTANCE);
   if (instance.length) {
     return true;
   }
