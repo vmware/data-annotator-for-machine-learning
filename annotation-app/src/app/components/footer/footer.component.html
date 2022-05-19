@@ -14,14 +14,14 @@ SPDX-License-Identifier: Apache-2.0 -->
       </td>
       <td align="right" class="feedback">
         <a
-          *ngIf="!env.config.feedbackUrl"
+          *ngIf="!env.config.lumosUrl"
           class="nostyle"
           href="mailto:example@example.com"
           target="_blank"
         >
           <clr-icon shape="talk-bubbles" class="is-solid"></clr-icon> Feedback
         </a>
-        <a *ngIf="env.config.feedbackUrl" class="nostyle openFeedback">
+        <a *ngIf="env.config.lumosUrl" class="nostyle openFeedback">
           <clr-icon shape="talk-bubbles" class="is-solid"></clr-icon> Feedback
         </a>
       </td>

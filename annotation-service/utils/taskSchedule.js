@@ -5,9 +5,9 @@
  * 
 ***/
 
-const { MILLISECOND_DAY, REGULAR_NOTIFICATNO, NOT_START_DAY, NOT_FINISH_DAY } = require("../config/constant");
+const { MILLISECOND_DAY, REGULAR_NOTIFICATNO, CURRENT_TIME_ZONE, NOT_START_DAY, NOT_FINISH_DAY } = require("../config/constant");
 const config = require("../config/config");
-const { ProjectModel, UserModel } = require("../db/db-connect");
+const { ProjectModel, UserModel, InstanceModel } = require("../db/db-connect");
 const mongoDb = require("../db/mongo.db");
 const emailService = require('../services/email-service');
 const validator = require('./validator');
@@ -16,19 +16,46 @@ var CronJob = require('cron').CronJob;
 
 
 module.exports.regularNotification = async () => {
-  if(!config.regularNotificatnoEmail){
+
+  if(!await validator.validateBool(config.regularNotificatnoEmail)){
     return;
   }
-  const emableEmail = await emailService.isEnableEamil()
-  if(!emableEmail){
+
+  if(!await emailService.isEnableEamil()){
     return;
   }
-  var job = new CronJob(REGULAR_NOTIFICATNO, async () => {
-    findProjectAndSendRegularNotification();
-  });
-  job.start();
+
+  var job = new CronJob(
+      REGULAR_NOTIFICATNO, 
+      async () => {
+        if (await checkingRunningInstance()) {
+            return;
+        }
+        findProjectAndSendRegularNotification();
+      },
+      null,
+      true,
+      CURRENT_TIME_ZONE
+    );
   
 }
+async function checkingRunningInstance() {
+
+  const NODE_INSTANCE = {data: new Date(Date.now()).toLocaleDateString("en-US", {timeZone: CURRENT_TIME_ZONE})};
+  const instance = await mongoDb.findByConditions(InstanceModel, NODE_INSTANCE);
+  console.log('[ REGULAR-NOTIFICATION ]', NODE_INSTANCE);
+  if (instance.length) {
+    return true;
+  }
+
+  try {
+    await mongoDb.saveBySchema(InstanceModel, NODE_INSTANCE);
+  } catch (error) {
+    return true;
+  }
+  return false;
+}
+
 
 async function findProjectAndSendRegularNotification() {
   let options = { page: 1, limit: 10 };
@@ -56,10 +83,7 @@ async function findProjectAndSendRegularNotification() {
     }else{
       break;
     }
-  
   }
-
-
 }
 
 async function findUserSendNotification(pro, today){
@@ -163,10 +187,5 @@ module.exports.regularNotificationSubscription = async (req) => {
     }
 
   }
-  
-
-
-  
-
   
 }

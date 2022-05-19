@@ -109,6 +109,7 @@ module.exports = {
     },
     MILLISECOND_DAY: 1000 * 60 * 60 * 24,
     REGULAR_NOTIFICATNO: process.env.REGULAR_NOTIFICATNO || "0 0 9 * * 1-5",
+    CURRENT_TIME_ZONE: process.env.CURRENT_TIME_ZONE || "America/Los_Angeles",
     NOT_START_DAY: process.env.NOT_START_DAY || 7,
     NOT_FINISH_DAY: process.env.NOT_FINISH_DAY || 14,
 }

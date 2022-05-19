@@ -262,6 +262,14 @@ dataSetSchema.plugin(mongoosePaginate);
 const DataSetModel = mongoose.model("DataSet", dataSetSchema);
 
 
+//dataSet Model
+const instanceSchema = new mongoose.Schema({
+    data: { type: String, required: true, unique: true},
+});
+
+const InstanceModel = mongoose.model("instance", instanceSchema);
+InstanceModel.createIndexes().catch(err => console.log('[ DB-instance ]', err));
+
 module.exports = {
     SrModel,
     ImgModel,
@@ -269,6 +277,7 @@ module.exports = {
     UserModel,
     ProjectModel,
     DataSetModel,
+    InstanceModel,
     db,
 
 }
