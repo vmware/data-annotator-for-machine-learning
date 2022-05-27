@@ -6,7 +6,7 @@
 ***/
 
 const config = require('../config/config');
-const { USER_ROLE } = require('../config/constant');
+const { USER_ROLE, GENERATESTATUS, APPENDSR, QUERYORDER, ANNOTATION_QUESTION, TICKET_DESCRIPTION } = require('../config/constant');
 const mongoose = require("mongoose"),
     Schema = mongoose.Schema;
 const mongoosePaginate = require('mongoose-paginate-v2');
@@ -149,9 +149,9 @@ const projectSchema = new mongoose.Schema({
     createdDate: { type: String },
     updatedDate: { type: String },
     projectName: { type: String },
-    taskInstructions: { type: String },
+    taskInstructions: { type: String, default: "" },
     totalCase: { type: Number },
-    projectCompleteCase: { type: Number },
+    projectCompleteCase: { type: Number, default: 0 },
     userCompleteCase: [{
         user: { type: String },
         completeCase: { type: Number, default: 0 },
@@ -167,18 +167,18 @@ const projectSchema = new mongoose.Schema({
         reviewedCase: { type: Number, default: 0 },
         skip: { type: Number, default: 0 },
     }],
-    maxAnnotation: { type: Number },
+    maxAnnotation: { type: Number, default: 1 },
     categoryList: { type: String },
-    assignmentLogic: { type: String },
+    assignmentLogic: { type: String, default: QUERYORDER.RANDOM },
     annotator: { type: Array },
-    dataSource: { type: String },
+    dataSource: { type: String, default: "" },
     selectedDataset: { type: Array },
     selectedColumn: { type: Array },
-    annotationQuestion: { type: String, default: 'What label does this ticket belong to ?' },
-    shareStatus: { type: Boolean },
-    shareDescription: { type: String },
+    annotationQuestion: { type: String, default: ANNOTATION_QUESTION },
+    shareStatus: { type: Boolean, default: false },
+    shareDescription: { type: String, default: "" },
     generateInfo: {
-        status: { type: String, default: "pending" },
+        status: { type: String, default: GENERATESTATUS.DEFAULT },
         messageId: { type: String },
         startTime: { type: String },
         updateTime: { type: String },
@@ -186,8 +186,8 @@ const projectSchema = new mongoose.Schema({
         format: { type: String, default: "standard" },
         onlyLabelled: { type: String}
     },
-    fileSize: { type: Number, default: 0 },
-    appendSr: { type: String, default: "pending" },
+    fileSize: { type: Number, default: 1 },
+    appendSr: { type: String, default: APPENDSR.DEFAULT },
     labelType: { type: String },
     projectType: { type: String },
     min: { type: Number, default: 0 },
@@ -218,9 +218,9 @@ const projectSchema = new mongoose.Schema({
     isMultipleLabel: { type: Boolean, default: false },
     regression: {type: Boolean, default: false},
     isShowFilename: {type: Boolean, default: false},
-    ticketDescription: {type: String, default: 'Passage'},
-    ticketQuestions: { type: Array },
+    ticketDescription: {type: String, default: TICKET_DESCRIPTION},
     popUpLabels:{ type: Array },
+    source: {type: String, default: ""},
 }, { _id: true });
 projectSchema.index({ projectName: 1 });
 projectSchema.set("toJSON", { virtuals: true });

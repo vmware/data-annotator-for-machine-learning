@@ -36,6 +36,7 @@ module.exports = {
     COUNT_COMMUNITY_DOWNLOAD: "/projects/download/community-download-count",
     PROJECT_SHARE: "/projects/share", // swagger
     SRS_CATEGORIES: "/projects/labels", //no
+    PROJECT_UPDATE_LABEL: "/projects/labels",//swagger
     SRS_DELETE_LABEL: "/projects/labels",//swagger
     PROJECT_PREVIEW: "/projects/annotations", // swagger
     SRS_PROGRESS: "/projects/users/progression",//no

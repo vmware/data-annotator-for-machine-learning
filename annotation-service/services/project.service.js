@@ -40,6 +40,11 @@ async function getProjects(req) {
         console.log(`[ PROJECT ] [ERROR] Service errors in ${email} or ${src}`);
         throw { CODE: 1001, MSG: "ERROR ID or src" };
     }
+    if(req.query.projectType){
+        condition['projectType'] = req.query.projectType;
+        project = "creator annotator selectedColumn source projectName categoryList labelType projectType";
+    }
+    console.log(condition);
     console.log(`[ PROJECT ] Service query user: ${email} src:  ${src} project list`);
     return mongoDb.findByConditions(ProjectModel, condition, project, options);
 }
@@ -85,7 +90,7 @@ async function updateProject(req) {
     await validator.checkAnnotator(req.auth.email);
     const mp = await getModelProject({_id: ObjectId(req.body.pid)});
 
-    if (req.body.previousPname != req.body.pname) {
+    if (req.body.previousPname != req.body.pname && req.body.pname) {
         await validator.checkProjectByconditions({projectName: req.body.pname}, false);
 
         console.log(`[ PROJECT ] Service update tickets projectName`);
@@ -600,6 +605,28 @@ async function updateAssinedCase(QueryCondition, totalCase, append){
     return mongoDb.findOneAndUpdate(ProjectModel, QueryCondition, update, options);
 }
 
+
+async function updateProjectLabels(req) {
+    const _id = req.body.pid;
+    const labels = req.body.labels;
+    
+    const condition = {_id: ObjectId(_id)}
+    let update = {};
+    let options = {new : true};
+    const pro = await validator.checkProjectByconditions(condition, true);
+    // add labels
+    if(labels.length){
+        let categoryList = pro[0].categoryList.split(',');
+        for await(const label of labels) {
+            if (label && categoryList.indexOf(label) == -1) {
+                categoryList.push(label);
+            }
+        }
+        update = {$set: {categoryList: categoryList.toString()}}
+    }
+    return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
+}
+
 module.exports = {
     getProjects,
     getProjectByAnnotator,
@@ -615,5 +642,6 @@ module.exports = {
     getLogProjectFileList,
     fileterLogTicketsByFileName,
     updateAssinedCase,
+    updateProjectLabels
 
 }
