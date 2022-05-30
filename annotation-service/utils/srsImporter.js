@@ -8,7 +8,7 @@
 
 const csv = require('csvtojson');
 const config = require("../config/config");
-const { PAGINATELIMIT, PROJECTTYPE, ENCODE} = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, ENCODE, SOURCE} = require("../config/constant");
 const emailService = require('../services/email-service');
 const axios = require("axios");
 const fileSystemUtils = require('./fileSystem.utils');
@@ -18,7 +18,8 @@ const { ProjectModel, SrModel } = require('../db/db-connect');
 module.exports = {
     execute: async function (req, annotators) {
         const projectType = req.body.projectType;
-        if (projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER ) {
+        const source = req.body.source;
+        if ((projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER) || source == SOURCE.MODEL_FEEDBACK) {
             return;
         }
         const start = Date.now();

@@ -608,13 +608,15 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
 async function appendSrsData(req){
     //validate user and project
     await validator.checkAnnotator(req.auth.email);
-    const queryProjectCondition = {projectName: req.body.pname};
+    const queryProjectCondition = req.body.pname? {projectName: req.body.pname} : {_id: req.body.pid};
+    
     const mp = await getModelProject(queryProjectCondition);
     
     const dataset = req.body.selectedDataset;
     const project = mp.project;
     const projectType = mp.project.projectType;
     req.body.projectType = projectType;
+    req.body.pname = req.body.pname? req.body.pname: mp.project.projectName;
 
     if (dataset) {
         const conditions = { dataSetName: dataset }

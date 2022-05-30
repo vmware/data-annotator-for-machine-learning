@@ -41,8 +41,9 @@ module.exports = {
     TOKEN_ALGORITHM: process.env.TOKEN_ALGORITHM || "HS256",
     //generate the key yourself. should keep the same with active-learning-serviceTOKEN_SECRET_OR_PRIVATE_KEY
     TOKEN_SECRET_OR_PRIVATE_KEY: process.env.TOKEN_SECRET_OR_PRIVATE_KEY || "OPEN SOURCE",    
-    TOKEN_EXPIRED_MESSAGE: 'SQS receive message failed: The security token included in the request is expired',//SQS Clinet
-
+    TOKEN_EXPIRED_MESSAGE: 'SQS receive message failed: The security token included in the request is expired', //SQS Clinet
+    ANNOTATION_QUESTION: "What label does this ticket belong to ?",
+    TICKET_DESCRIPTION: "Passage",
     FILEFORMAT:{
         STANDARD:"standard",
         TOPLABEL:"topLabel",
@@ -112,4 +113,23 @@ module.exports = {
     CURRENT_TIME_ZONE: process.env.CURRENT_TIME_ZONE || "America/Los_Angeles",
     NOT_START_DAY: process.env.NOT_START_DAY || 7,
     NOT_FINISH_DAY: process.env.NOT_FINISH_DAY || 14,
+    SOURCE: {
+        MODEL_FEEDBACK: "MODEL_FEEDBACK",
+        NIMBUS: "NIMBUS",
+    },
+    QUERY_STRATEGY: {
+        POOL_BASED_SAMPLING: {
+            PB_UNS: "PB_UNS",
+            PB_MS: "PB_MS",
+            PB_ES: "PB_ES",
+        },
+        RANKED_BATCH_MODE: {
+            RBM_UNBS: "RBM_UNBS",
+        },
+    },
+    ESTIMATOR: {
+        KNC: "KNC",
+        GBC: "GBC",
+        RFC: "RFC",
+    },
 }
