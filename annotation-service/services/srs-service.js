@@ -607,7 +607,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project){
 
 async function appendSrsData(req){
     //validate user and project
-    await validator.checkAnnotator(req.auth.email);
+    // await validator.checkAnnotator(req.auth.email);
     const queryProjectCondition = req.body.pname? {projectName: req.body.pname} : {_id: req.body.pid};
     
     const mp = await getModelProject(queryProjectCondition);
