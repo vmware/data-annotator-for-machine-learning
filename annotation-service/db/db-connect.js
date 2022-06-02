@@ -220,7 +220,10 @@ const projectSchema = new mongoose.Schema({
     isShowFilename: {type: Boolean, default: false},
     ticketDescription: {type: String, default: TICKET_DESCRIPTION},
     popUpLabels:{ type: Array },
-    source: {type: String, default: ""},
+    integration:{
+        source: {type: String, default: ""},
+        externalId: { type: Array, default: [] },
+    }
 }, { _id: true });
 projectSchema.index({ projectName: 1 });
 projectSchema.set("toJSON", { virtuals: true });

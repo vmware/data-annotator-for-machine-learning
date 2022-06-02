@@ -184,5 +184,15 @@ router.patch(APIs.PROJECT_UPDATE_LABEL, (req, res) => {
   });
 });
 
+router.patch(APIs.PROJECT_INTEGRATION_EDIT, (req, res) => {
+  console.log(`[ PROJECT ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+  projectService.projectIntegrationEdit(req).then(response => {
+    console.log(`[ PROJECT ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+    res.status(200).json(response);
+  }).catch(error => {
+    console.error(`[ PROJECT ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+    res.status(500).send(error);
+  });
+});
 
 module.exports = router;

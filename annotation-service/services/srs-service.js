@@ -255,7 +255,7 @@ async function getOneSrs(req) {
                 }
             });
             conditions = {_id: {$in: ids} };
-            return await mongoDb.findByConditions(mp.model, conditions, filterFileds);
+            return mongoDb.findByConditions(mp.model, conditions, filterFileds);
         }else{
             conditions = {_id: { $in: project.al.queriedSr } };
             alQueriedSr = await mongoDb.findByConditions(mp.model, conditions, filterFileds);
@@ -683,7 +683,7 @@ async function sampleSr(req){
     console.log(`[ SRS ] Service sampleSr.aggregateSrsData`);
     const schema = [
         { $match: { projectName: mp.project.projectName}}, 
-        { $limit: 100 },
+        { $limit: 10 },
         { $sample: { size: 1 }}
     ];
     const sr = await mongoDb.aggregateBySchema(mp.model, schema);
@@ -913,24 +913,25 @@ async function reviewTicket(req) {
     let tids = [];
     const pid = req.body.pid;
     req.body.tid.forEach(_id =>{tids.push(ObjectId(_id))});
+    const mp = await getModelProject({_id: ObjectId(pid)});
     
     if (await validator.checkRequired(req.body.review)) {
-        await flagToReview(tids);
+        await flagToReview(mp, tids);
     }else if (await validator.checkRequired(req.body.modify)) {
         await calculateReviewdCase(pid, tids, user);
         await modifyReview(tids,user, req.body.problemCategory, req.body.logFreeText);
     }else if (!await validator.checkRequired(req.body.modify)) {
         await calculateReviewdCase(pid, tids, user);
-        await passReview(tids,user);  
+        await passReview(mp, tids, user);  
     }
 }
 
-async function flagToReview(tids) {
+async function flagToReview(mp, tids) {
     const conditions = {_id: {$in: tids}};
     const update = { $set: {"reviewInfo.review": true} };
-    await mongoDb.updateManyByConditions(LogModel, conditions, update);
+    await mongoDb.updateManyByConditions(mp.model, conditions, update);
 }
-async function passReview(tids,user) {
+async function passReview(mp, tids, user) {
     const conditions = {_id: {$in: tids}};
     const update = { $set: {
         "reviewInfo.review": false, 
@@ -939,20 +940,23 @@ async function passReview(tids,user) {
         "reviewInfo.user": user,
         "reviewInfo.reviewedTime": Date.now()
     }};
-    await mongoDb.updateManyByConditions(LogModel, conditions, update);
+    await mongoDb.updateManyByConditions(mp.model, conditions, update);
 }
-async function modifyReview(tids,user,problemCategory, logFreeText) {
+async function modifyReview(mp, tids, user, problemCategory, logFreeText) {
     const conditions = {_id: tids[0]};
     const update = { $set: {
         "reviewInfo.review": false, 
         "reviewInfo.reviewed": true,
         "reviewInfo.modified": true,
         "reviewInfo.user": user,
-        "reviewInfo.reviewedTime": Date.now(),
-        "userInputs.0.problemCategory": problemCategory,
-        "userInputs.0.logFreeText": logFreeText
+        "reviewInfo.reviewedTime": Date.now()
     }};
-    await mongoDb.updateByConditions(LogModel, conditions, update);
+
+    if(mp.project.projectType == PROJECTTYPE.LOG){
+        update.$set["userInputs.0.problemCategory"] = problemCategory;
+        update.$set["userInputs.0.logFreeText"] = logFreeText;
+    }
+    await mongoDb.updateByConditions(mp.model, conditions, update);
 }
 
 async function calculateReviewdCase(pid, tids, user) {
@@ -1008,23 +1012,21 @@ async function queryTicketsForReview(req) {
     const pid = req.query.pid;
     const byUser = req.query.user;
 
-    const conditions = {_id: ObjectId(pid)};
-    const projects = await validator.checkProjectByconditions(conditions, true);
-    const projectName = projects[0].projectName;
+    const mp = await getModelProject({_id: ObjectId(pid)})
 
-    const findUser = await projects[0].reviewInfo.find( info => info.user == user);
+    const findUser = await mp.project.reviewInfo.find( info => info.user == user);
     const skip = findUser? findUser.skip: 0;
 
     //1. query need reReview tickets
-    let ticket = await reReviewQueryForReview(projectName, user);
+    let ticket = await reReviewQueryForReview(mp, user);
     if (!ticket[0]) {
         if (await validator.checkRequired(byUser)) {
             //2.user defined the query rules
             const order = req.query.order;
-            ticket = await specailQueryForReview(projectName, byUser, order, skip, user);
+            ticket = await specailQueryForReview(mp, byUser, order, skip, user);
         }else{
             //3.if the step2 is empty query from default
-            ticket = await defualtQueryForReview(projectName, skip, user);
+            ticket = await defualtQueryForReview(mp, skip, user);
         }
     }
     
@@ -1035,44 +1037,54 @@ async function queryTicketsForReview(req) {
             console.log(`[ SRS ] Service remove marked skipped case`);
             await projectService.removeSkippedCase(pid, user, true);
 
-            return await queryTicketsForReview(req);
+            return queryTicketsForReview(req);
         }
     }
     return ticket;
 }
 
 
-async function specailQueryForReview(projectName, byUser, order, skip, user) {
+async function specailQueryForReview(mp, byUser, order, skip, user) {
 
     const conditions = {
-        projectName: projectName, 
-        userInputsLength: 1, 
+        projectName: mp.project.projectName, 
+        userInputsLength: {$gte: mp.project.maxAnnotation}, 
         "userInputs.user": byUser, 
         "reviewInfo.reviewed": {$ne: true },
         "flag.users": { $ne: user }
     };
     if (order == QUERYORDER.SEQUENTIAL) {
         const options = { skip: skip, limit: 1 };
-        return await mongoDb.findByConditions(LogModel, conditions, null, options);
+        return mongoDb.findByConditions(mp.model, conditions, null, options);
     }else{
         const schema = [
             { $match: conditions }, 
             { $skip: skip },
             { $sample: { size: 1 } }
         ]
-        return await mongoDb.aggregateBySchema(LogModel, schema);
+        return mongoDb.aggregateBySchema(mp.model, schema);
     }
 
 }
-async function reReviewQueryForReview(projectName, user) {
-    const conditions = {projectName: projectName, userInputsLength: 1, "reviewInfo.review": true, "flag.users": { $ne: user } };
+async function reReviewQueryForReview(mp, user) {
+    const conditions = {
+        projectName: mp.project.projectName, 
+        userInputsLength: {$gte: mp.project.maxAnnotation},
+        "reviewInfo.review": true, 
+        "flag.users": { $ne: user } 
+    };
     const options = { limit: 1 };
-    return await mongoDb.findByConditions(LogModel, conditions, null, options);
+    return mongoDb.findByConditions(mp.model, conditions, null, options);
 }
-async function defualtQueryForReview(projectName, skip, user) {
-    const conditions = {projectName: projectName, userInputsLength: 1, "reviewInfo.reviewed": {$ne: true }, "flag.users": { $ne: user } };
+async function defualtQueryForReview(mp, skip, user) {
+    const conditions = {
+        projectName: mp.project.projectName,
+        userInputsLength: {$gte: mp.project.maxAnnotation},
+        "reviewInfo.reviewed": {$ne: true }, 
+        "flag.users": { $ne: user } 
+    };
     const options = { skip: skip, limit: 1 };
-    return await mongoDb.findByConditions(LogModel, conditions, null, options);
+    return mongoDb.findByConditions(mp.model, conditions, null, options);
 }
 
 
