@@ -852,7 +852,9 @@ async function deleteSrs(req){
 
 async function deleteLabel(req){
     const label = req.body.label;
-    let conditions = {projectName: req.body.pname};
+    const projectName = req.body.pname;
+    const _id = req.body.pid;
+    let conditions = {projectName: projectName?projectName: _id};
 
     const mp = await getModelProject(conditions);
 
@@ -870,7 +872,7 @@ async function deleteLabel(req){
         conditions["userInputs.problemCategory.label"] = label;
     }else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
         conditions = {
-            projectName: req.body.pname, 
+            projectName: mp.project.projectName, 
             $or:[
                 {"userInputs.problemCategory.value.polygonlabels.0": label},
                 {"userInputs.problemCategory.value.rectanglelabels.0": label}
@@ -888,7 +890,7 @@ async function deleteLabel(req){
         throw {CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED"};
     }
     
-    const query = {projectName: req.body.pname}
+    const query = {projectName: mp.project.projectName}
     const options = { new: true };
     _.pull(labelArray, label);
     labelArray = labelArray.toString();
