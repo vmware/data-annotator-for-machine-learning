@@ -315,7 +315,7 @@ async function getOneSrs(req) {
             await projectService.removeSkippedCase(req.query.pid, req.auth.email);
             
             console.log(`[ SRS ] Service find out skipped before skipped case`);
-            return await getOneSrs(req);
+            return getOneSrs(req);
         }
     }
 }
@@ -451,7 +451,7 @@ async function skipOne(req){
         
         console.log(`[ SRS ] Service reviewer skipOne.getOneSrs`);
         request.query.user = req.body.user;
-        return await queryTicketsForReview(request);
+        return queryTicketsForReview(request);
 
     }else{
         console.log(`[ SRS ] Service user skipOne save info to DB`);
@@ -460,7 +460,7 @@ async function skipOne(req){
         await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
     
         console.log(`[ SRS ] Service user skipOne.getOneSrs`);
-        return await getOneSrs(request);
+        return getOneSrs(request);
     }
     
 }
@@ -722,7 +722,7 @@ async function flagSr(req){
         const update = { $push: { 'flag.users': user } };
         await mongoDb.findOneAndUpdate(LogModel, conditions, update);
 
-        return await queryTicketsForReview(request);
+        return queryTicketsForReview(request);
 
     }else{
 
@@ -738,7 +738,7 @@ async function flagSr(req){
         const updatePro = { $pull: {"al.queriedSr": ObjectId(tid)} };
         await mongoDb.findOneAndUpdate(ProjectModel, queryPro, updatePro);
     
-        return await getOneSrs(request);
+        return getOneSrs(request);
     }
 
     
@@ -759,7 +759,7 @@ async function queryUserFlagTicket(req){
     const mp = await getModelProject({projectName: projectName});
     const query = { projectName: projectName, "flag.users":req.auth.email }; 
     const options = { page: req.query.page, limit: req.query.limit, select : "originalData"};
-    return await mongoDb.paginateQuery(mp.model, query, options);
+    return mongoDb.paginateQuery(mp.model, query, options);
 }
 
 async function queryAllFlagSrs(req){
@@ -770,7 +770,7 @@ async function queryAllFlagSrs(req){
     console.log(`[ SRS ] Service queryAllFlagSrs`);
     const query = { projectName: req.query.pname, "flag.users": { $exists: true, $ne: [] }}; 
     const options = { page: req.query.page, limit: req.query.limit };
-    return await mongoDb.paginateQuery(mp.model, query, options);
+    return mongoDb.paginateQuery(mp.model, query, options);
 }
 
 async function slienceFlagSrs(req){

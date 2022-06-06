@@ -23,7 +23,7 @@ async function handleFileStream(fileLocation) {
   }else if (config.useLocalFileSys && !config.useAWS) {
     
     console.log(`[ FILE_SYSTEM ] Utils localFileSysService.readFileFromLocalSys`);
-    return await localFileSysService.readFileFromLocalSys(fileLocation);
+    return localFileSysService.readFileFromLocalSys(fileLocation);
 
   }else{
 
