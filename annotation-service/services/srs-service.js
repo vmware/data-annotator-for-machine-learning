@@ -851,59 +851,14 @@ async function deleteSrs(req){
 
 
 async function deleteLabel(req){
-    const label = req.body.label;
+    console.log(`[ SRS ] Service deleteLabel`);
+    const label = req.body.label;// "", string DERECTLY DELETE
     const projectName = req.body.pname;
     const _id = req.body.pid;
-    let conditions = {projectName: projectName?projectName: _id};
 
-    const mp = await getModelProject(conditions);
+    const operation = req.body.operation;//2 query
 
-    let labelArray = mp.project.categoryList.split(",");
-    const multiTextNumberica = mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC;
-    if (multiTextNumberica) {
-        const categoryList = JSON.parse(mp.project.categoryList);
-        labelArray = categoryList.map(a=> Object.keys(a)[0]);
-    }
-    if (!labelArray.includes(label)) {
-        throw {CODE: 4004, MSG: "LABEL NOT EXIST"};
-    }
-    
-    if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.LOG) {
-        conditions["userInputs.problemCategory.label"] = label;
-    }else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
-        conditions = {
-            projectName: mp.project.projectName, 
-            $or:[
-                {"userInputs.problemCategory.value.polygonlabels.0": label},
-                {"userInputs.problemCategory.value.rectanglelabels.0": label}
-            ]  
-        };
-
-    }else if(mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC){
-        conditions["userInputs.problemCategory.label"] = label;
-    }else{
-        conditions["userInputs.problemCategory"] = label;
-    }
-    
-    const tickets = await mongoDb.findByConditions(mp.model, conditions);
-    if (tickets[0]) {
-        throw {CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED"};
-    }
-    
-    const query = {projectName: mp.project.projectName}
-    const options = { new: true };
-    _.pull(labelArray, label);
-    labelArray = labelArray.toString();
-    if (multiTextNumberica) {
-        const categoryList = JSON.parse(mp.project.categoryList);
-        labelArray = categoryList.filter(a => Object.keys(a)[0] != label);
-        labelArray = JSON.stringify(labelArray);
-    }
-    
-    const update = {$set: {"categoryList": labelArray}};
-    await mongoDb.findOneAndUpdate(ProjectModel, query, update, options);
-    
-    return {CODE: 200, MSG: "OK", LABELS: labelArray};
+    return projectService.deleteProjectLables(label, _id, projectName, operation);
     
 }
 
@@ -920,10 +875,10 @@ async function reviewTicket(req) {
     if (await validator.checkRequired(req.body.review)) {
         await flagToReview(mp, tids);
     }else if (await validator.checkRequired(req.body.modify)) {
-        await calculateReviewdCase(pid, tids, user);
+        await calculateReviewdCase(mp, tids, user);
         await modifyReview(tids,user, req.body.problemCategory, req.body.logFreeText);
     }else if (!await validator.checkRequired(req.body.modify)) {
-        await calculateReviewdCase(pid, tids, user);
+        await calculateReviewdCase(mp, tids, user);
         await passReview(mp, tids, user);  
     }
 }
@@ -945,6 +900,9 @@ async function passReview(mp, tids, user) {
     await mongoDb.updateManyByConditions(mp.model, conditions, update);
 }
 async function modifyReview(mp, tids, user, problemCategory, logFreeText) {
+    const projectType = mp.project.projectType;
+    const model = mp.model;
+
     const conditions = {_id: tids[0]};
     const update = { $set: {
         "reviewInfo.review": false, 
@@ -953,22 +911,29 @@ async function modifyReview(mp, tids, user, problemCategory, logFreeText) {
         "reviewInfo.user": user,
         "reviewInfo.reviewedTime": Date.now()
     }};
-
-    if(mp.project.projectType == PROJECTTYPE.LOG){
+    //max-annotation=1
+    if(projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.IMGAGE || projectType == PROJECTTYPE.LOG){
         update.$set["userInputs.0.problemCategory"] = problemCategory;
-        update.$set["userInputs.0.logFreeText"] = logFreeText;
+        if(projectType == PROJECTTYPE.LOG){
+            update.$set["userInputs.0.logFreeText"] = logFreeText;
+        }
+    }else{
+    //max-annotation>1
+
     }
-    await mongoDb.updateByConditions(mp.model, conditions, update);
+    await mongoDb.updateByConditions(model, conditions, update);
 }
 
-async function calculateReviewdCase(pid, tids, user) {
+async function calculateReviewdCase(mp, tids, user) {
     
     let ticketsLegth = tids.length;
-    const project = await mongoDb.findById(ProjectModel, pid);
+    const _id = mp.project._id;
+    const project = mp.project;
+    const model = mp.model;
 
     const conditions = {_id: {$in: tids}};
     const columns = {userInputs: 1, reviewInfo: 1};
-    const tickets = await mongoDb.findByConditions(LogModel, conditions, columns);
+    const tickets = await mongoDb.findByConditions(model, conditions, columns);
     
     // update annotator was reviewed case
     for (const ticket of tickets) {
@@ -1002,8 +967,14 @@ async function calculateReviewdCase(pid, tids, user) {
         });
     }
     
-    const conditionsP = {_id: ObjectId(pid)}
-    const update = {$set: {reviewInfo: project.reviewInfo, userCompleteCase: project.userCompleteCase, updatedDate: Date.now()}};
+    const conditionsP = {_id: ObjectId(_id)}
+    const update = {
+        $set: {
+            reviewInfo: project.reviewInfo, 
+            userCompleteCase: project.userCompleteCase, 
+            updatedDate: Date.now()
+        }
+    };
     await mongoDb.findOneAndUpdate(ProjectModel,conditionsP, update)
 }
 

@@ -471,6 +471,11 @@ async function updateProjectLabels(req) {
     const _id = req.body.pid;
     const addLabels = req.body.addLabels;
     const editLabels = req.body.editLabels;
+    const deleteLabels = req.body.deleteLabels;
+    
+    for await(const label of deleteLabels) {
+        await deleteProjectLables(label, _id);
+    }
 
     return editProjectLabels(_id, editLabels, addLabels);
 }
@@ -680,6 +685,67 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
     return mongoDb.findOneAndUpdate(ProjectModel, condition, updateProject, optionsProject);
 }
 
+async function deleteProjectLables(label, _id, projectName, operation){
+    let queryProject = _id ? {_id: _id}: {projectName: projectName};
+    const mp = await getModelProject(queryProject);
+
+
+    let labelArray = mp.project.categoryList.split(",");
+    const multiTextNumberica = mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC;
+    if (multiTextNumberica) {
+        const categoryList = JSON.parse(mp.project.categoryList);
+        labelArray = categoryList.map(a=> Object.keys(a)[0]);
+    }
+    if (!labelArray.includes(label)) {
+        throw {CODE: 4004, MSG: "LABEL NOT EXIST"};
+    }
+    
+    let conditions = {projectName: mp.project.projectName}
+    if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.LOG) {
+        conditions["userInputs.problemCategory.label"] = label;
+    }else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
+        conditions = {
+            projectName: mp.project.projectName,
+            $or:[
+                {"userInputs.problemCategory.value.polygonlabels.0": label},
+                {"userInputs.problemCategory.value.rectanglelabels.0": label}
+            ]  
+        };
+
+    }else if(mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC){
+        conditions["userInputs.problemCategory.label"] = label;
+    }else{
+        conditions["userInputs.problemCategory"] = label;
+    }
+    const tickets = await mongoDb.findByConditions(mp.model, conditions);
+
+    if(operation == OPERATION.QUERY){
+        if (tickets[0]) {
+            return {CODE: 400, MSG: "LABEL HAS BEEN ANNOTATED", DATA: [label]};
+        }
+        return {CODE: 200, MSG: "LABEL CAN BE DELETE", DATA: [label]};
+    }else{
+        if (tickets[0]) {
+            throw {CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED"};
+        }
+        
+        const query = {projectName: mp.project.projectName}
+        const options = { new: true };
+        _.pull(labelArray, label);
+        labelArray = labelArray.toString();
+        if (multiTextNumberica) {
+            const categoryList = JSON.parse(mp.project.categoryList);
+            labelArray = categoryList.filter(a => Object.keys(a)[0] != label);
+            labelArray = JSON.stringify(labelArray);
+        }
+        
+        const update = {$set: {"categoryList": labelArray}};
+        await mongoDb.findOneAndUpdate(ProjectModel, query, update, options);
+        
+        return {CODE: 200, MSG: "OK", LABELS: labelArray};
+    }
+}
+
 module.exports = {
     getProjects,
     getProjectByAnnotator,
@@ -698,6 +764,6 @@ module.exports = {
     updateProjectLabels,
     projectIntegrationEdit,
     editProjectLabels,
-
+    deleteProjectLables,
 
 }

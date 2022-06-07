@@ -136,5 +136,6 @@ module.exports = {
         DELETE: -1,
         ADD: 1,
         UPDATE: 0,
+        QUERY: 2,
     }
 }
