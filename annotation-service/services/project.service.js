@@ -81,7 +81,7 @@ async function deleteProject(req) {
     
     console.log(`[ PROJECT ] Service delete all srs data`, conditions);
     await mongoDb.deleteManyByConditions(mp.model, conditions);
-    if(config.ESP && mp.project.integration.source == SOURCE.MODEL_FEEDBACK){
+    if(config.ESP && mp.project.integration.source == SOURCE.MODEL_FEEDBACK && mp.project.integration.externalId.length){
         const url = config.modelFeedbackAPI + "/loop";
         const reqConfig = {
             headers: {
