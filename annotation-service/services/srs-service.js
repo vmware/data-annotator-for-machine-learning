@@ -867,29 +867,29 @@ async function reviewTicket(req) {
     const user = req.auth.email;
     await validator.checkAnnotator(user);
     
-    let tids = [];
+    const tid = ObjectId(req.body.tid);
     const pid = req.body.pid;
-    req.body.tid.forEach(_id =>{tids.push(ObjectId(_id))});
+
     const mp = await getModelProject({_id: ObjectId(pid)});
     
     if (await validator.checkRequired(req.body.review)) {
-        await flagToReview(mp, tids);
+        await flagToReview(mp, tid);
     }else if (await validator.checkRequired(req.body.modify)) {
-        await calculateReviewdCase(mp, tids, user);
-        await modifyReview(tids,user, req.body.problemCategory, req.body.logFreeText);
+        await calculateReviewdCase(mp, [tid], user);
+        await modifyReview(mp, tid, user, req.body.problemCategory, req.body.logFreeText);
     }else if (!await validator.checkRequired(req.body.modify)) {
-        await calculateReviewdCase(mp, tids, user);
-        await passReview(mp, tids, user);  
+        await calculateReviewdCase(mp, [tid], user);
+        await passReview(mp, tid, user);  
     }
 }
 
-async function flagToReview(mp, tids) {
-    const conditions = {_id: {$in: tids}};
+async function flagToReview(mp, tid) {
+    const conditions = {_id: tid};
     const update = { $set: {"reviewInfo.review": true} };
-    await mongoDb.updateManyByConditions(mp.model, conditions, update);
+    await mongoDb.updateByConditions(mp.model, conditions, update);
 }
-async function passReview(mp, tids, user) {
-    const conditions = {_id: {$in: tids}};
+async function passReview(mp, tid, user) {
+    const conditions = {_id: tid};
     const update = { $set: {
         "reviewInfo.review": false, 
         "reviewInfo.reviewed": true,
@@ -897,13 +897,15 @@ async function passReview(mp, tids, user) {
         "reviewInfo.user": user,
         "reviewInfo.reviewedTime": Date.now()
     }};
-    await mongoDb.updateManyByConditions(mp.model, conditions, update);
+    await mongoDb.updateByConditions(mp.model, conditions, update);
 }
-async function modifyReview(mp, tids, user, problemCategory, logFreeText) {
+async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
     const projectType = mp.project.projectType;
+    const isMultipleLabel = mp.project.isMultipleLabel;
+    const labelType = mp.project.labelType;
     const model = mp.model;
 
-    const conditions = {_id: tids[0]};
+    const conditions = {_id: tid};
     const update = { $set: {
         "reviewInfo.review": false, 
         "reviewInfo.reviewed": true,
@@ -919,7 +921,28 @@ async function modifyReview(mp, tids, user, problemCategory, logFreeText) {
         }
     }else{
     //max-annotation>1
-
+        let userInputs = []; 
+        if(labelType == LABELTYPE.NUMERIC && isMultipleLabel){
+            problemCategory.forEach(lb =>{
+                userInputs.push({
+                    problemCategory: {
+                        label: Object.keys(lb)[0],
+                        value: Object.values(lb)[0]
+                    },
+                    user: user,
+                    timestamp: Date.now()
+                });
+            });
+        }else {
+            problemCategory.forEach(lb =>{
+                userInputs.push({
+                    problemCategory: lb,
+                    user: user,
+                    timestamp: Date.now()
+                });
+            });
+        }
+        update.$set["userInputs"] = userInputs;
     }
     await mongoDb.updateByConditions(model, conditions, update);
 }
@@ -1011,6 +1034,11 @@ async function queryTicketsForReview(req) {
             await projectService.removeSkippedCase(pid, user, true);
 
             return queryTicketsForReview(req);
+        }
+    }
+    if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
+        if (config.useAWS) {
+            ticket[0].originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ticket[0].originalData.location);
         }
     }
     return ticket;
