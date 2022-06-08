@@ -966,9 +966,10 @@ async function calculateReviewdCase(mp, tids, user) {
         if (ticket.reviewInfo.reviewed) {
             continue;
         }
-        for (const input of ticket.userInputs) {
+        const ticketUsers = _.uniq(ticket.userInputs.map(obj => obj.user));
+        for (const ticketUser of ticketUsers) {
             for (const uc of project.userCompleteCase) {
-                if (input.user == uc.user) {
+                if (ticketUser == uc.user) {
                     uc.reviewed += 1;
                 }
             }
