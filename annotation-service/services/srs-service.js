@@ -308,7 +308,7 @@ async function getOneSrs(req) {
     } else {
         if(usc.skip == 0){
             console.log(`[ SRS ] Service all case has annotated`);
-            return { CODE: 5001, "MSG": "No Data Found" };
+            return { CODE: 5001, "MSG": "ANNOTATION DONE" };
         }else{
             //show skipped before
             console.log(`[ SRS ] Service remove marked skipped case`);
@@ -1029,7 +1029,7 @@ async function queryTicketsForReview(req) {
     
     if (!ticket[0]) {
         if (!skip) {
-            return { CODE: 5001, "MSG": "No Data Found" };
+            return { CODE: 5001, "MSG": "REVIEW DONE" };
         }else{
             console.log(`[ SRS ] Service remove marked skipped case`);
             await projectService.removeSkippedCase(pid, user, true);
