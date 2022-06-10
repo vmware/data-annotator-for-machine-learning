@@ -914,7 +914,7 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
         "reviewInfo.reviewedTime": Date.now()
     }};
     //max-annotation=1
-    if(projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.IMGAGE || projectType == PROJECTTYPE.LOG){
+    if(projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.LOG){
         update.$set["userInputs.0.problemCategory"] = problemCategory;
         if(projectType == PROJECTTYPE.LOG){
             update.$set["userInputs.0.logFreeText"] = logFreeText;
