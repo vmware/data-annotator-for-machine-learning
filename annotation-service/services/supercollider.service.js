@@ -60,7 +60,7 @@ async function superColliderQuery(req){
     };
     let saveInfo = { 'body': body };
     console.log('[ SUPER-COLLIDER ] Service DataSetService.saveDataSetInfo end time: ', Date.now());
-    return await DataSetService.saveDataSetInfo(saveInfo);
+    return DataSetService.saveDataSetInfo(saveInfo);
 }
 
 module.exports = {
