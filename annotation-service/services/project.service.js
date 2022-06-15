@@ -596,7 +596,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
                 
             }
         }else{
-            if(min && max){
+            if((min != null || min != undefined || min != "") && (max != null || max != undefined || max != "")){
                 if (min >= max || typeof min != "number" || typeof max != "number" || min > project.min || max < project.max) {
                     throw {CODE: 4006, MSG: "INPUT MIN/MAX ERROR"};
                 }
