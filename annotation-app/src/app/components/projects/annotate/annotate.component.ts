@@ -1045,14 +1045,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (difference.length > 0) {
       this.actionError = this.tipMessage;
       return;
-    } else {
-      if (from === 'skip') {
-        this.skipAndFetchNewQuestion();
-        return;
-      } else {
-        this.getNextSrc(from, id);
-      }
     }
+    this.checkTextProject(from, id);
   }
 
   checkNumeric(isCategory?: any, from?: string, id?: string) {
@@ -1071,14 +1065,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (difference.length > 0) {
       this.actionError = this.tipMessage;
       return;
-    } else {
-      if (from === 'skip') {
-        this.skipAndFetchNewQuestion();
-        return;
-      } else {
-        this.getNextSrc(from, id);
-      }
     }
+    this.checkTextProject(from, id);
   }
 
   checkMoreReviewChanged() {
@@ -1467,8 +1455,16 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           } else if (!this.isNumeric && this.isMultipleLabel && !this.isMultipleNumericLabel) {
             if (this.annotationHistory[i].category.length === 0) {
-              this.skipAndFetchNewQuestion();
-              return;
+              if (from == 'skip') {
+                this.skipAndFetchNewQuestion();
+                return;
+              } else if (from == 'pass') {
+                this.onSubmit(from);
+                return;
+              } else {
+                this.getNextSrc(from, id);
+                return;
+              }
             } else if (this.annotationHistory[i].category.length - this.multipleLabelList.length >= 0) {
               difference = _.difference(
                 this.annotationHistory[i].category,
@@ -1480,10 +1476,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.annotationHistory[i].category,
               );
             }
+            if (difference.length > 0) {
+              this.actionError = this.tipMessage;
+              return;
+            }
           } else {
             if (this.annotationHistory[i].category.length === 0) {
-              this.skipAndFetchNewQuestion();
-              return;
+              if (from == 'skip') {
+                this.skipAndFetchNewQuestion();
+                return;
+              } else if (from == 'pass') {
+                this.onSubmit(from);
+                return;
+              } else {
+                this.getNextSrc(from, id);
+                return;
+              }
             }
             if (this.annotationHistory[i].category.length - isCategory.length >= 0) {
               difference = _.difference(this.annotationHistory[i].category, isCategory);
@@ -1508,9 +1516,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.startFrom === 'review' && !this.isMultipleNumericLabel && this.isNumeric) {
         this.checkNumeric(isCategory, from, id);
         return;
-      }
-      if (!this.checkMoreReviewChanged()) {
-        return false;
       }
       if (from == 'skip') {
         this.skipAndFetchNewQuestion();
@@ -1556,8 +1561,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }
+    this.checkTextProject(from, id);
+  }
+
+  checkTextProject(from?: any, id?: string) {
+    if (!this.checkMoreReviewChanged()) {
+      return false;
+    }
     if (from === 'skip') {
       this.skipAndFetchNewQuestion();
+    } else if (from == 'pass') {
+      this.onSubmit(from);
     } else {
       this.getNextSrc(from, id);
     }
@@ -1652,6 +1666,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         flag2 = isCategory.length == a.length;
       } else if (this.isMultipleNumericLabel) {
         flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
+      } else if (this.isMultipleLabel && !this.isNumeric && !this.isMultipleNumericLabel) {
+        flag2 = this.checkMutilLabel(type);
       } else if (this.projectType == 'text' || this.projectType == 'tabular') {
         if (isCategory.length > 1) {
           flag2 = isCategory.length == this.sr.userInputs.length;
