@@ -655,7 +655,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
       tid: [],
     };
     if (type === 'single') {
-      param.tid = [data._id];
+      param.tid = data._id;
     } else {
       param.tid = this.selectedLogsToModify;
     }

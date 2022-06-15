@@ -57,7 +57,7 @@ export class GameFormComponent implements OnInit {
     this.avaService.getProjects('annotate').subscribe(
       (res) => {
         res.forEach((project) => {
-          if (project.projectType === 'log' && project.creator.indexOf(this.user.email) > -1) {
+          if (project.creator.indexOf(this.user.email) > -1) {
             project.allowOwnerReview = true;
           }
           if (project.annotator.indexOf(this.user.email) > -1) {
