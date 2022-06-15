@@ -1702,11 +1702,16 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             let aaString;
             let bbString;
             if (this.projectType === 'ner') {
-              aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label;
-              bbString = bb[i].text + aa[i].start + aa[i].end + bb[i].label;
+              const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
+              const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
+              aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
+              bbString = bb[i].text + bb[i].start + bb[i].end + bb[i].label + bbPopupLabel;
             } else if (this.projectType === 'log') {
-              aaString = aa[i].line + aa[i].label + aa[i].freeText;
-              bbString = bb[i].line + bb[i].label + bb[i].freeText;
+              const logFreeText = this.questionForm.get('questionGroup.logFreeText').value
+                ? this.questionForm.get('questionGroup.logFreeText').value : '';
+              const srlogFreeText = this.sr.userInputs[0].logFreeText ? this.sr.userInputs[0].logFreeText : '';
+              aaString = aa[i].line + aa[i].label + aa[i].freeText + logFreeText;
+              bbString = bb[i].line + bb[i].label + bb[i].freeText + srlogFreeText;
             } else if (this.projectType === 'image') {
               aaString = aa[i].valueInfo;
               bbString = bb[i].valueInfo;
@@ -1814,11 +1819,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   let aaString;
                   let bbString;
                   if (this.projectType === 'ner') {
-                    aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label;
-                    bbString = bb[i].text + aa[i].start + aa[i].end + bb[i].label;
+                    const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
+                    const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
+                    aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
+                    bbString = bb[i].text + bb[i].start + bb[i].end + bb[i].label + bbPopupLabel;
                   } else if (this.projectType === 'log') {
-                    aaString = aa[i].line + aa[i].label + aa[i].freeText;
-                    bbString = bb[i].line + bb[i].label + bb[i].freeText;
+                    const logFreeText = this.questionForm.get('questionGroup.logFreeText').value
+                      ? this.questionForm.get('questionGroup.logFreeText').value
+                      : '';
+                    const srlogFreeText = this.annotationHistory[i].logFreeText ? this.annotationHistory[i].logFreeText : '';
+                    aaString = aa[i].line + aa[i].label + aa[i].freeText + srlogFreeText;
+                    bbString = bb[i].line + bb[i].label + bb[i].freeText + logFreeText;
                   } else if (this.projectType === 'image') {
                     aaString = aa[i].valueInfo;
                     bbString = bb[i].valueInfo;
