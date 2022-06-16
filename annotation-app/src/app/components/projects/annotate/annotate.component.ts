@@ -1044,7 +1044,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     if (difference.length > 0) {
       this.actionError = this.tipMessage;
-      return;
+      return false;
     }
     this.checkTextProject(from, id);
   }
@@ -1669,6 +1669,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
         } else if (this.isMultipleLabel && !this.isNumeric && !this.isMultipleNumericLabel) {
           flag2 = this.checkMutilLabel(type);
+          return false;
         } else if (isCategory.length > 1) {
           flag2 = isCategory.length == this.sr.userInputs.length;
         } else {
