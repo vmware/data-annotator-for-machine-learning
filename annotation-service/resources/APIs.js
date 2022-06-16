@@ -28,6 +28,7 @@ module.exports = {
     PROJECT_SAVE: "/projects", // no
     PROJECT_DELETE: "/projects", // swagger
     PROJECT_LIST: "/projects", // swagger
+    PROJECT_INTEGRATION_EDIT: "/projects/integration",
     PROJECT_INFO: "/projects/details", // swagger
     PROJECT_NAME: "/projects/names", // no
     PROJECT_MODEL_ACCURACY: "/projects/al/accuracy",//swagger

@@ -52,6 +52,10 @@ app.get('/health', (req, res) => {
   return res.status(200).json({CODE: 200, MSG: "SUCCESS"});
 });
 
+process.on('uncaughtException', err => {
+  console.error('[SERVER-ERROR]', err);
+});
+
 // esp author
 authService.authentication().then(data => {
   app.use(jwtTokenAuthrization(data))

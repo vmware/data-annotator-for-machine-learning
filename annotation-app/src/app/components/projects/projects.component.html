@@ -272,6 +272,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             role="tooltip"
             aria-haspopup="true"
             title="Click to Append New Entries"
+            [disabled]="dataset.totalCase === 0"
             (click)="checkAddStatus(dataset.id, dataset.projectName, dataset.projectType, dataset.categoryList, dataset.regression)"
           >
             <clr-icon shape="add-text"></clr-icon>
@@ -293,6 +294,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             role="tooltip"
             aria-haspopup="true"
             title="Click to Append New Entries"
+            [disabled]="dataset.totalCase === 0"
             (click)="availableNewEntry(dataset.id, dataset.projectName, dataset.projectType, dataset.categoryList, dataset.regression)"
           >
             <clr-icon shape="add-text"></clr-icon>

@@ -132,4 +132,10 @@ module.exports = {
         GBC: "GBC",
         RFC: "RFC",
     },
+    OPERATION:{
+        DELETE: -1,
+        ADD: 1,
+        UPDATE: 0,
+        QUERY: 2,
+    }
 }
