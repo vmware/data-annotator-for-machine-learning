@@ -1917,7 +1917,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       (response) => {
         this.sr = response;
         if (this.sr.MSG) {
-          this.error = 'All cases have been completely annotated.';
+          if (this.startFrom === 'review') {
+            this.error = 'All cases have been completely reviewed.';
+          } else {
+            this.error = 'All cases have been completely annotated.';
+          }
           return;
         }
         if (
@@ -1926,6 +1930,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.projectType == 'regression'
         ) {
           this.sr = this.resetTabularSrData(this.sr);
+          if (this.sr.userInputsLength > 0 ) {
+            this.categoryBackFunc();
+            this.sortLabelForColor(this.categories);
+            this.getProgress();
+          }
         }
         if (this.projectType == 'ner') {
           this.sr = this.resetNerSrData(this.sr);
@@ -1933,6 +1942,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
+          if (this.startFrom === 'review') {
+            const images = [];
+            this.sr.userInputs.forEach(item => {
+              images.push(item.problemCategory);
+            })
+            this.historyTask = [{ result: images }];
+            this.currentBoundingData = images;
+          }
           setTimeout(() => {
             const option = {
               dom: 'label-studio',
