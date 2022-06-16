@@ -709,6 +709,9 @@ async function flagSr(req){
     
     const request = { 'query': { 'pid': pid}, 'auth': {"email": user}, headers:{authorization: token} };
 
+    const queryPro = { _id: ObjectId(pid)};
+    const mp = await getModelProject(queryPro);
+
     if (await validator.checkRequired(review)) {
         await validator.checkAnnotator(user);
         
@@ -720,15 +723,13 @@ async function flagSr(req){
 
         const conditions = {_id: ObjectId(tid)};
         const update = { $push: { 'flag.users': user } };
-        await mongoDb.findOneAndUpdate(LogModel, conditions, update);
+        await mongoDb.findOneAndUpdate(mp.model, conditions, update);
 
         return queryTicketsForReview(request);
 
     }else{
 
         console.log(`[ SRS ] Service flagSr`, tid);
-        const queryPro = { _id: ObjectId(pid)};
-        const mp = await getModelProject(queryPro);
 
         const conditions = {_id: ObjectId(tid)};
         const update = { $push: { 'flag.users': user } };
