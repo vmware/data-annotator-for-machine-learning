@@ -1045,14 +1045,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (difference.length > 0) {
       this.actionError = this.tipMessage;
       return;
-    } else {
-      if (from === 'skip') {
-        this.skipAndFetchNewQuestion();
-        return;
-      } else {
-        this.getNextSrc(from, id);
-      }
     }
+    this.checkTextProject(from, id);
   }
 
   checkNumeric(isCategory?: any, from?: string, id?: string) {
@@ -1071,14 +1065,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (difference.length > 0) {
       this.actionError = this.tipMessage;
       return;
-    } else {
-      if (from === 'skip') {
-        this.skipAndFetchNewQuestion();
-        return;
-      } else {
-        this.getNextSrc(from, id);
-      }
     }
+    this.checkTextProject(from, id);
   }
 
   checkMoreReviewChanged() {
@@ -1467,8 +1455,16 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           } else if (!this.isNumeric && this.isMultipleLabel && !this.isMultipleNumericLabel) {
             if (this.annotationHistory[i].category.length === 0) {
-              this.skipAndFetchNewQuestion();
-              return;
+              if (from == 'skip') {
+                this.skipAndFetchNewQuestion();
+                return;
+              } else if (from == 'pass') {
+                this.onSubmit(from);
+                return;
+              } else {
+                this.getNextSrc(from, id);
+                return;
+              }
             } else if (this.annotationHistory[i].category.length - this.multipleLabelList.length >= 0) {
               difference = _.difference(
                 this.annotationHistory[i].category,
@@ -1480,10 +1476,22 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.annotationHistory[i].category,
               );
             }
+            if (difference.length > 0) {
+              this.actionError = this.tipMessage;
+              return;
+            }
           } else {
             if (this.annotationHistory[i].category.length === 0) {
-              this.skipAndFetchNewQuestion();
-              return;
+              if (from == 'skip') {
+                this.skipAndFetchNewQuestion();
+                return;
+              } else if (from == 'pass') {
+                this.onSubmit(from);
+                return;
+              } else {
+                this.getNextSrc(from, id);
+                return;
+              }
             }
             if (this.annotationHistory[i].category.length - isCategory.length >= 0) {
               difference = _.difference(this.annotationHistory[i].category, isCategory);
@@ -1508,9 +1516,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.startFrom === 'review' && !this.isMultipleNumericLabel && this.isNumeric) {
         this.checkNumeric(isCategory, from, id);
         return;
-      }
-      if (!this.checkMoreReviewChanged()) {
-        return false;
       }
       if (from == 'skip') {
         this.skipAndFetchNewQuestion();
@@ -1556,8 +1561,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }
+    this.checkTextProject(from, id);
+  }
+
+  checkTextProject(from?: any, id?: string) {
+    if (!this.checkMoreReviewChanged()) {
+      return false;
+    }
     if (from === 'skip') {
       this.skipAndFetchNewQuestion();
+    } else if (from == 'pass') {
+      this.onSubmit(from);
     } else {
       this.getNextSrc(from, id);
     }
@@ -1650,10 +1664,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         });
         flag2 = isCategory.length == a.length;
-      } else if (this.isMultipleNumericLabel) {
-        flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
       } else if (this.projectType == 'text' || this.projectType == 'tabular') {
-        if (isCategory.length > 1) {
+        if (this.isMultipleNumericLabel) {
+          flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
+        } else if (this.isMultipleLabel && !this.isNumeric && !this.isMultipleNumericLabel) {
+          flag2 = this.checkMutilLabel(type);
+        } else if (isCategory.length > 1) {
           flag2 = isCategory.length == this.sr.userInputs.length;
         } else {
           flag2 = isCategory[0] == this.sr.userInputs[0].problemCategory;
@@ -1901,7 +1917,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       (response) => {
         this.sr = response;
         if (this.sr.MSG) {
-          this.error = 'All cases have been completely annotated.';
+          if (this.startFrom === 'review') {
+            this.error = 'All cases have been completely reviewed.';
+          } else {
+            this.error = 'All cases have been completely annotated.';
+          }
           return;
         }
         if (
@@ -1910,6 +1930,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.projectType == 'regression'
         ) {
           this.sr = this.resetTabularSrData(this.sr);
+          if (this.sr.userInputsLength > 0 ) {
+            this.categoryBackFunc();
+            this.sortLabelForColor(this.categories);
+            this.getProgress();
+          }
         }
         if (this.projectType == 'ner') {
           this.sr = this.resetNerSrData(this.sr);
@@ -1917,6 +1942,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
+          if (this.startFrom === 'review') {
+            const images = [];
+            this.sr.userInputs.forEach(item => {
+              images.push(item.problemCategory);
+            })
+            this.historyTask = [{ result: images }];
+            this.currentBoundingData = images;
+          }
           setTimeout(() => {
             const option = {
               dom: 'label-studio',
@@ -3380,10 +3413,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateFreeText(e, index) {
-    if (this.spansList.length > 0 && e.trim() !== '') {
+    if (this.spansList.length > 0) {
       for (let i = 0; i < this.spansList.length; i++) {
         if (this.spansList[i].index === index) {
-          this.spansList[i].freeText = e;
+          this.spansList[i].freeText =  e.trim() !== '' ? e : '';
           return;
         }
       }
