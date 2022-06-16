@@ -1664,12 +1664,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         });
         flag2 = isCategory.length == a.length;
-      } else if (this.isMultipleNumericLabel) {
-        flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
-      } else if (this.isMultipleLabel && !this.isNumeric && !this.isMultipleNumericLabel) {
-        flag2 = this.checkMutilLabel(type);
       } else if (this.projectType == 'text' || this.projectType == 'tabular') {
-        if (isCategory.length > 1) {
+        if (this.isMultipleNumericLabel) {
+          flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
+        } else if (this.isMultipleLabel && !this.isNumeric && !this.isMultipleNumericLabel) {
+          flag2 = this.checkMutilLabel(type);
+        } else if (isCategory.length > 1) {
           flag2 = isCategory.length == this.sr.userInputs.length;
         } else {
           flag2 = isCategory[0] == this.sr.userInputs[0].problemCategory;
@@ -3396,10 +3396,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateFreeText(e, index) {
-    if (this.spansList.length > 0 && e.trim() !== '') {
+    if (this.spansList.length > 0) {
       for (let i = 0; i < this.spansList.length; i++) {
         if (this.spansList[i].index === index) {
-          this.spansList[i].freeText = e;
+          this.spansList[i].freeText =  e.trim() !== '' ? e : '';
           return;
         }
       }
