@@ -16,8 +16,6 @@ const { getModelProject } = require('../utils/mongoModel.utils');
 const { ProjectModel, UserModel, LogModel } = require('../db/db-connect');
 const { formatDate } = require('../utils/common.utils');
 const slackPostMsg = require("./slack/slackPostMsg.service");
-const { config } = require("aws-sdk");
-const configure = require("../config/config");
 const { default: axios } = require("axios");
 
 async function getProjects(req) {
@@ -186,7 +184,7 @@ async function updateProject(req) {
     if (req.body.isShowFilename == true || req.body.isShowFilename == false) {
         update.$set['isShowFilename'] = req.body.isShowFilename;
     }
-    if (configure.buildSlackApp && req.body.assignSlackChannels.length > 0) {
+    if (config.buildSlackApp && req.body.assignSlackChannels.length > 0) {
         let newChannels = _.differenceBy(req.body.assignSlackChannels, projectInfo.assignSlackChannels, 'slackId')
         if (newChannels.length > 0) {
             let params = {
