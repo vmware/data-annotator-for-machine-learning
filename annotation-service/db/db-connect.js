@@ -13,7 +13,7 @@ const mongoosePaginate = require('mongoose-paginate-v2');
 
 // MongoDB database name
 connectOptions = { autoIndex: config.mongoDBAutoIndex, useNewUrlParser: true, useUnifiedTopology: true };
-if(config.ESP){
+if (config.ESP) {
     connectOptions = { autoIndex: config.mongoDBAutoIndex };
 }
 
@@ -43,7 +43,7 @@ const srSchema = new mongoose.Schema({
     },
     text_vector: { type: String },
     al_test: { type: Boolean },
-    reviewInfo:{
+    reviewInfo: {
         user: { type: String },
         reviewed: { type: Boolean, default: false },
         review: { type: Boolean, default: false },
@@ -73,7 +73,7 @@ const imgSchema = new mongoose.Schema({
         users: [],
         silence: { type: Boolean, default: false }
     },
-    reviewInfo:{
+    reviewInfo: {
         user: { type: String },
         reviewed: { type: Boolean, default: false },
         review: { type: Boolean, default: false },
@@ -97,12 +97,12 @@ const logSchema = new mongoose.Schema({
     userInputsLength: { type: Number },
     userInputs: [],
     originalData: { type: Object },
-    fileInfo:{ type: Object },
+    fileInfo: { type: Object },
     flag: {
         users: [],
         silence: { type: Boolean, default: false }
     },
-    reviewInfo:{
+    reviewInfo: {
         user: { type: String },
         reviewed: { type: Boolean, default: false },
         review: { type: Boolean, default: false },
@@ -124,14 +124,14 @@ const LogModel = mongoose.model("LOG", logSchema);
 const userSchema = new mongoose.Schema({
     _id: { type: String },
     email: { type: String },
-    password: {type: String},
+    password: { type: String },
     fullName: { type: String },
     points: { type: Number, default: 0 },
     role: { type: String, default: USER_ROLE },
     createdDate: { type: String },
     updateDate: { type: String },
-    regularNotification: {type: Boolean, default: true},
-    manul: {type: Boolean, default: false},
+    regularNotification: { type: Boolean, default: true },
+    manul: { type: Boolean, default: false },
 }, { _id: false });
 userSchema.set("toJSON", { virtuals: true });
 userSchema.set("toObject", { virtuals: true });
@@ -158,11 +158,11 @@ const projectSchema = new mongoose.Schema({
         skip: { type: Number, default: 0 },
         reviewed: { type: Number, default: 0 },
         assignedCase: { type: Number },
-        assignedDate:  { type: String },
+        assignedDate: { type: String },
         updateDate: { type: String },
-        regularNotification: {type: Boolean, default: true},
+        regularNotification: { type: Boolean, default: true },
     }],
-    reviewInfo:[{
+    reviewInfo: [{
         user: { type: String },
         reviewedCase: { type: Number, default: 0 },
         skip: { type: Number, default: 0 },
@@ -184,7 +184,7 @@ const projectSchema = new mongoose.Schema({
         updateTime: { type: String },
         file: { type: String },
         format: { type: String, default: "standard" },
-        onlyLabelled: { type: String}
+        onlyLabelled: { type: String }
     },
     fileSize: { type: Number, default: 0 },
     appendSr: { type: String, default: "pending" },
@@ -200,7 +200,7 @@ const projectSchema = new mongoose.Schema({
         model: { type: String },
         vectorModel: { type: String },
         newLBSr: { type: Array },
-        queriedSr: [ { type: Schema.Types.ObjectId } ],
+        queriedSr: [{ type: Schema.Types.ObjectId }],
         frequency: { type: Number, default: 10 },
         trigger: { type: Number, default: 50 },
         trained: { type: Boolean, default: false },
@@ -216,11 +216,12 @@ const projectSchema = new mongoose.Schema({
     },
     encoder: { type: String },
     isMultipleLabel: { type: Boolean, default: false },
-    regression: {type: Boolean, default: false},
-    isShowFilename: {type: Boolean, default: false},
-    ticketDescription: {type: String, default: 'Passage'},
+    regression: { type: Boolean, default: false },
+    isShowFilename: { type: Boolean, default: false },
+    ticketDescription: { type: String, default: 'Passage' },
     ticketQuestions: { type: Array },
-    popUpLabels:{ type: Array },
+    popUpLabels: { type: Array },
+    assignSlackChannels: { type: Array },
 }, { _id: true });
 projectSchema.index({ projectName: 1 });
 projectSchema.set("toJSON", { virtuals: true });
@@ -248,7 +249,7 @@ const dataSetSchema = new mongoose.Schema({
         type: { type: String },
         uniqueLength: { type: Number }
     }],
-    images:[{
+    images: [{
         fileName: { type: String },
         location: { type: String },
         fileSize: { type: Number },
@@ -264,7 +265,7 @@ const DataSetModel = mongoose.model("DataSet", dataSetSchema);
 
 //dataSet Model
 const instanceSchema = new mongoose.Schema({
-    data: { type: String, required: true, unique: true},
+    data: { type: String, required: true, unique: true },
 });
 
 const InstanceModel = mongoose.model("instance", instanceSchema);

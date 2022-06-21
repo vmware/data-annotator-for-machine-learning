@@ -13,21 +13,25 @@ const validator = require('../utils/validator');
 const mongoDb = require('../db/mongo.db');
 const { getModelProject } = require('../utils/mongoModel.utils');
 const { ProjectModel, UserModel, LogModel } = require('../db/db-connect');
+const { formatDate } = require('../utils/common.utils');
+const slackPostMsg = require("./slack/slackPostMsg.service");
+const { config } = require("aws-sdk");
+const configure = require("../config/config");
 
 async function getProjects(req) {
     console.log(`[ PROJECT ] Service getProjects query user role`);
     const src = req.query.src;
     const email = req.auth.email;
     const user = await mongoDb.findById(UserModel, email);
-    
-    let condition, project=null;
+
+    let condition, project = null;
     const options = { sort: { updatedDate: -1 } };
 
     if (src == SRCS.ANNOTATE) {
         console.log(`[ PROJECT ] Service query current annotator project list`);
         const annotateConditions = { annotator: { $regex: email } };
         const logReviewConditions = { creator: { $regex: email }, projectType: PROJECTTYPE.LOG };
-        condition = { $or: [ annotateConditions, logReviewConditions ] };        
+        condition = { $or: [annotateConditions, logReviewConditions] };
     } else if (src == SRCS.PROJECTS && user.role != "Annotator") {
         condition = { creator: { $regex: email } };
     } else if (src == SRCS.ADMIN && user.role == "Admin") {
@@ -69,9 +73,9 @@ async function deleteProject(req) {
 
     await validator.checkAnnotator(req.auth.email);
 
-    const mp = await getModelProject({_id: ObjectId(req.query.pid)});
-    const conditions = {projectName: mp.project.projectName};
-    
+    const mp = await getModelProject({ _id: ObjectId(req.query.pid) });
+    const conditions = { projectName: mp.project.projectName };
+
     console.log(`[ PROJECT ] Service delete project`, conditions);
     await mongoDb.deleteOneByConditions(ProjectModel, conditions);
 
@@ -79,24 +83,23 @@ async function deleteProject(req) {
     await mongoDb.deleteManyByConditions(mp.model, conditions);
 
 }
-
 async function updateProject(req) {
     console.log(`[ PROJECT ] Service updateProject`);
     await validator.checkAnnotator(req.auth.email);
-    const mp = await getModelProject({_id: ObjectId(req.body.pid)});
+    const mp = await getModelProject({ _id: ObjectId(req.body.pid) });
 
     if (req.body.previousPname != req.body.pname) {
-        await validator.checkProjectByconditions({projectName: req.body.pname}, false);
+        await validator.checkProjectByconditions({ projectName: req.body.pname }, false);
 
         console.log(`[ PROJECT ] Service update tickets projectName`);
         const srsCondition = { projectName: req.body.previousPname };
         const srsDoc = { projectName: req.body.pname };
         await mongoDb.updateManyByConditions(mp.model, srsCondition, srsDoc);
     }
-    
+
     const projectInfo = mp.project;
-    let annotators = [], completeCase = [];    
-    
+    let annotators = [], completeCase = [];
+
     //update userCompleteCase
     for (const user of req.body.assignee) {
         annotators.push(user.email);
@@ -104,8 +107,8 @@ async function updateProject(req) {
         if (ucase) {
             ucase.assignedCase = user.assignedCase;
             completeCase.push(ucase);
-        }else{
-            completeCase.push({ 
+        } else {
+            completeCase.push({
                 user: user.email,
                 completeCase: 0,
                 skip: 0,
@@ -124,11 +127,11 @@ async function updateProject(req) {
     }
 
     if (!req.body.projectOwner.length) {
-        throw {CODE: 4001, MSG: "PROJECT OWNER CAN'T BE EMPTY"};
+        throw { CODE: 4001, MSG: "PROJECT OWNER CAN'T BE EMPTY" };
     }
     for (const owner of req.body.projectOwner) {
         // update annotator role to prjectOwner
-        const condition = {_id: owner, role: ROLES.ANNOTATOR};
+        const condition = { _id: owner, role: ROLES.ANNOTATOR };
         const update = {
             $set: {
                 role: ROLES.PROJECT_OWNER
@@ -143,10 +146,12 @@ async function updateProject(req) {
             creator: req.body.projectOwner,
             userCompleteCase: completeCase,
             annotator: annotators,
-            assignmentLogic: req.body.assignmentLogic
+            assignmentLogic: req.body.assignmentLogic,
+            assignSlackChannels: req.body.assignSlackChannels,
+
         }
     };
-    if(projectInfo.taskInstructions != req.body.taskInstructions){
+    if (projectInfo.taskInstructions != req.body.taskInstructions) {
         update.$set['taskInstructions'] = req.body.taskInstructions;
     }
     if (req.body.frequency) {
@@ -158,14 +163,28 @@ async function updateProject(req) {
     if (req.body.isShowFilename == true || req.body.isShowFilename == false) {
         update.$set['isShowFilename'] = req.body.isShowFilename;
     }
+    if (configure.buildSlackApp && req.body.assignSlackChannels.length > 0) {
+        let newChannels = _.differenceBy(req.body.assignSlackChannels, projectInfo.assignSlackChannels, 'slackId')
+        if (newChannels.length > 0) {
+            let params = {
+                channels: newChannels,
+                pname: req.body.pname,
+                creator: projectInfo.creator,
+                totalCase: projectInfo.totalCase,
+                createdDate: await formatDate(Number(projectInfo.createdDate)),
+                pid: projectInfo._id
+            };
+            await slackPostMsg.publishMessage(params);
+        }
+    }
 
     //edit lables
     if (projectInfo.labelType == LABELTYPE.NUMERIC) {
-        if(projectInfo.isMultipleLabel){
+        if (projectInfo.isMultipleLabel) {
             let originalLabels = JSON.parse(projectInfo.categoryList);
             const editLabels = req.body.editLabels;
             const addLabels = req.body.addLabels;
-            
+
             let editLBList = [];
             //validate edit label data
             for (const elabel of editLabels) {
@@ -174,7 +193,7 @@ async function updateProject(req) {
                     const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == orgLB);
 
                     if (!originLBDB) {
-                        throw {CODE: 4006, MSG: "INPUT originLB ERROR"};
+                        throw { CODE: 4006, MSG: "INPUT originLB ERROR" };
                     }
                     const dbMin = originLBDB[orgLB][0];
                     const dbMax = originLBDB[orgLB][1];
@@ -185,21 +204,21 @@ async function updateProject(req) {
                     const editLB = Object.keys(elabel.editLB)[0];
                     const editMin = elabel.editLB[editLB][0];
                     const editMax = elabel.editLB[editLB][1];
-                    
+
                     if (editLB == orgLB && editMin == dbMin && editMax == dbMax) {
                         continue;
                     }
                     //find if edit label already exist
                     const editLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == editLB);
                     if (editLBDB && editLB != orgLB) {
-                        throw {CODE: 4006, MSG: "INPUT editLB already exist"};
+                        throw { CODE: 4006, MSG: "INPUT editLB already exist" };
                     }
 
                     if (dbMin != orgMin || dbMax != orgMax) {
-                        throw {CODE: 4006, MSG: "INPUT originLB min/max ERROR"};
+                        throw { CODE: 4006, MSG: "INPUT originLB min/max ERROR" };
                     }
                     if (editMin >= editMax || editMin > dbMin || editMax < dbMax) {
-                        throw {CODE: 4006, MSG: "INPUT editLB min/max ERROR"};
+                        throw { CODE: 4006, MSG: "INPUT editLB min/max ERROR" };
                     }
                     //add to edit list
                     editLBList.push([orgLB, editLB]);
@@ -210,16 +229,16 @@ async function updateProject(req) {
             //validate add label data
             let addLabel = false;
             for (const aLabel of addLabels) {
-               const addLB = Object.keys(aLabel)[0];
-               const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == addLB);
-               if (originLBDB) {
-                   continue;
-               }
-               if (aLabel[addLB][0] > aLabel[addLB][1]){
-                throw {CODE: 4006, MSG: "INPUT addLabels min/max ERROR"};
-               }
-               originalLabels.push(aLabel);
-               addLabel = true;
+                const addLB = Object.keys(aLabel)[0];
+                const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == addLB);
+                if (originLBDB) {
+                    continue;
+                }
+                if (aLabel[addLB][0] > aLabel[addLB][1]) {
+                    throw { CODE: 4006, MSG: "INPUT addLabels min/max ERROR" };
+                }
+                originalLabels.push(aLabel);
+                addLabel = true;
             }
             //update label
             if (editLBList.length || addLabel) {
@@ -227,52 +246,52 @@ async function updateProject(req) {
             }
             //edit existing labels
             for (const label of editLBList) {
-                const query = { 
-                    projectName: req.body.pname,  
+                const query = {
+                    projectName: req.body.pname,
                     [`userInputs.problemCategory.label`]: label[0]
                 };
-                const updateTickets = { $set: { "userInputs.$[elem].problemCategory.label" : label[1] } };
-                const options = {arrayFilters: [ { "elem.problemCategory.label": label[0] } ]};
+                const updateTickets = { $set: { "userInputs.$[elem].problemCategory.label": label[1] } };
+                const options = { arrayFilters: [{ "elem.problemCategory.label": label[0] }] };
                 await mongoDb.updateManyByConditions(mp.model, query, updateTickets, options);
-                
+
             }
 
 
-        }else{
+        } else {
             const min = req.body.min;
             const max = req.body.max;
-            
+
             if (min >= max || typeof min != "number" || typeof max != "number" || min > projectInfo.min || max < projectInfo.max) {
-                throw {CODE: 4006, MSG: "INPUT MIN/MAX ERROR"};
+                throw { CODE: 4006, MSG: "INPUT MIN/MAX ERROR" };
             }
-            
+
             update.$set['min'] = min;
             update.$set['max'] = max;
         }
-        
-    }else{
+
+    } else {
         const originalLabels = projectInfo.categoryList.split(",");
         const editLabels = req.body.editLabels;
         const addLabels = req.body.addLabels;
         const inputLabels = _.uniq(Object.values(editLabels).concat(addLabels));
-        
+
         if (originalLabels.length > inputLabels.length) {
-            throw {CODE: 4006, MSG: "INPUT LABELS ERROR"}
+            throw { CODE: 4006, MSG: "INPUT LABELS ERROR" }
         }
-        
-        let labelAdd = inputLabels.length > originalLabels.length ? true: false;
-        let labelEdit = false, editLb={};
-    
+
+        let labelAdd = inputLabels.length > originalLabels.length ? true : false;
+        let labelEdit = false, editLb = {};
+
         for (const key in editLabels) {
             if (!originalLabels.includes(key)) {
-                throw {CODE: 4006, MSG: "INPUT EDITlABELS ERROR"};
+                throw { CODE: 4006, MSG: "INPUT EDITlABELS ERROR" };
             }
-            if(key != editLabels[key]){
-                editLb[key]=editLabels[key];
+            if (key != editLabels[key]) {
+                editLb[key] = editLabels[key];
                 labelEdit = true;
             }
         }
-        
+
         if (labelAdd || labelEdit) {
             update.$set['categoryList'] = inputLabels.toString();
 
@@ -281,9 +300,9 @@ async function updateProject(req) {
                 let newLabelID = {};
                 //for edit
                 for (const key in labelID) {
-                    if(editLabels[key]){
+                    if (editLabels[key]) {
                         newLabelID[editLabels[key]] = labelID[key];
-                    }else{
+                    } else {
                         newLabelID[key] = labelID[key];
                     }
                 }
@@ -294,37 +313,37 @@ async function updateProject(req) {
                 update.$set['al.labelID'] = newLabelID;
             }
         }
-        
+
         if (labelEdit) {
-            for(const key in editLb){
-                let query,update,options;
+            for (const key in editLb) {
+                let query, update, options;
                 if (projectInfo.projectType == PROJECTTYPE.NER || projectInfo.projectType == PROJECTTYPE.LOG) {
-                    query = { projectName: req.body.pname, "userInputs.problemCategory.label": key};
-                    update = { $set: { "userInputs.0.problemCategory.$[elem].label" : editLb[key] } };
-                    options = {arrayFilters: [ { "elem.label": key } ]}; 
+                    query = { projectName: req.body.pname, "userInputs.problemCategory.label": key };
+                    update = { $set: { "userInputs.0.problemCategory.$[elem].label": editLb[key] } };
+                    options = { arrayFilters: [{ "elem.label": key }] };
                     await mongoDb.updateManyByConditions(mp.model, query, update, options);
-                }else if (projectInfo.projectType == PROJECTTYPE.IMGAGE) {
-                    query = { projectName: req.body.pname, "userInputs.problemCategory.value.polygonlabels.0": key};
-                    update = { $set: { "userInputs.$[elem].problemCategory.value.polygonlabels.0" : editLb[key] } };
-                    options = {arrayFilters: [ { "elem.problemCategory.value.polygonlabels.0": key } ]};
+                } else if (projectInfo.projectType == PROJECTTYPE.IMGAGE) {
+                    query = { projectName: req.body.pname, "userInputs.problemCategory.value.polygonlabels.0": key };
+                    update = { $set: { "userInputs.$[elem].problemCategory.value.polygonlabels.0": editLb[key] } };
+                    options = { arrayFilters: [{ "elem.problemCategory.value.polygonlabels.0": key }] };
                     await mongoDb.updateManyByConditions(mp.model, query, update, options);
-                    
-                    query = { projectName: req.body.pname, "userInputs.problemCategory.value.rectanglelabels.0": key};
-                    update = { $set: { "userInputs.$[elem].problemCategory.value.rectanglelabels.0" : editLb[key] } };
-                    options = {arrayFilters: [ { "elem.problemCategory.value.rectanglelabels.0": key } ]};
+
+                    query = { projectName: req.body.pname, "userInputs.problemCategory.value.rectanglelabels.0": key };
+                    update = { $set: { "userInputs.$[elem].problemCategory.value.rectanglelabels.0": editLb[key] } };
+                    options = { arrayFilters: [{ "elem.problemCategory.value.rectanglelabels.0": key }] };
                     await mongoDb.updateManyByConditions(mp.model, query, update, options);
                 } else if (projectInfo.projectType == PROJECTTYPE.TEXT || projectInfo.projectType == PROJECTTYPE.TABULAR) {
-                    query = { projectName: req.body.pname,  "userInputs.problemCategory": key};
-                    update = { $set: { "userInputs.$[elem].problemCategory" : editLb[key] } };
-                    options = {arrayFilters: [ { "elem.problemCategory": key } ]};
+                    query = { projectName: req.body.pname, "userInputs.problemCategory": key };
+                    update = { $set: { "userInputs.$[elem].problemCategory": editLb[key] } };
+                    options = { arrayFilters: [{ "elem.problemCategory": key }] };
                     await mongoDb.updateManyByConditions(mp.model, query, update, options);
                 }
             }
         }
     }
-    
-    console.log(`[ PROJECT ] Service update project info`,completeCase);
-    const condition = {projectName: req.body.previousPname};
+
+    console.log(`[ PROJECT ] Service update project info`, completeCase);
+    const condition = { projectName: req.body.previousPname };
     const options = { new: true };
     return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
 }
@@ -344,13 +363,13 @@ async function updateProjectShare(req) {
 }
 
 async function projectLeaderBoard(req) {
-    
+
     await validator.checkAnnotator(req.auth.email);
 
     let result = { userCase: [], labels: [] };
 
     console.log(`[ PROJECT ] Service projectLeaderBoard.queryProjectById`);
-    const mp = await getModelProject({_id: ObjectId(req.query.pid)});
+    const mp = await getModelProject({ _id: ObjectId(req.query.pid) });
     const proInfo = mp.project;
 
     console.log(`[ PROJECT ] Service sort out user complete ticket`);
@@ -383,13 +402,13 @@ async function projectLeaderBoard(req) {
                         if (ui.problemCategory.label == label) {
                             let value = ui.problemCategory.value;
                             currentLabelVaules.push(value);
-                            lb.annotated = _.floor(_.mean(currentLabelVaules),2);
+                            lb.annotated = _.floor(_.mean(currentLabelVaules), 2);
                         }
                     });
                 });
                 result.labels.push(lb);
             });
-        }else{
+        } else {
             let mid = _.floor((proInfo.max - proInfo.min) / 6);
             let start = _.floor(proInfo.min);
             for (let i = 0; i < 6; i++) {
@@ -411,15 +430,15 @@ async function projectLeaderBoard(req) {
             srsUI.forEach(UIS => {
                 UIS.userInputs.forEach(ui => {
                     if (proInfo.projectType == PROJECTTYPE.NER || proInfo.projectType == PROJECTTYPE.LOG) {
-                        ui.problemCategory.forEach(ann =>{
-                            if (ann.label == label){
+                        ui.problemCategory.forEach(ann => {
+                            if (ann.label == label) {
                                 lb.annotated += 1;
                             }
                         })
-                    }else if (proInfo.projectType == PROJECTTYPE.IMGAGE) {
+                    } else if (proInfo.projectType == PROJECTTYPE.IMGAGE) {
                         const pc = ui.problemCategory.value;
-                        const annLabel = pc.rectanglelabels? pc.rectanglelabels[0]: pc.polygonlabels[0];
-                        if (annLabel == label){
+                        const annLabel = pc.rectanglelabels ? pc.rectanglelabels[0] : pc.polygonlabels[0];
+                        if (annLabel == label) {
                             lb.annotated += 1;
                         }
                     } else {
@@ -427,7 +446,7 @@ async function projectLeaderBoard(req) {
                             lb.annotated += 1;
                         }
                     }
-                    
+
                 });
             });
             result.labels.push(lb);
@@ -443,13 +462,13 @@ async function projectLeaderBoard(req) {
 }
 
 async function removeSkippedCase(id, user, review) {
-    
+
     console.log(`[ PROJECT ] Service removeSkippedCase.findUpdateProject`);
 
     if (review) {
         conditions = { _id: ObjectId(id), "reviewInfo.user": user };
         update = { $set: { "reviewInfo.$.skip": 0 } };
-    }else{
+    } else {
         conditions = { _id: ObjectId(id), "userCompleteCase.user": user };
         update = { $set: { "userCompleteCase.$.skip": 0 } };
     }
@@ -459,34 +478,34 @@ async function removeSkippedCase(id, user, review) {
 }
 
 async function getReviewList(req) {
-    
+
     console.log(`[ PROJECT ] Service getReviewList.checkAnnotator`);
     const user = req.auth.email;
     await validator.checkAnnotator(user);
-    
+
     const conditions = { creator: { $regex: user }, projectType: PROJECTTYPE.LOG };
     const options = { sort: { updatedDate: -1 } };
     return mongoDb.findByConditions(ProjectModel, conditions, null, options);
 }
 
 async function getLogProjectFileList(req) {
-    
+
     console.log(`[ PROJECT ] Service getLogProjectFileList`);
-    const condition = {_id: ObjectId(req.query.pid)}
+    const condition = { _id: ObjectId(req.query.pid) }
     const pro = await validator.checkProjectByconditions(condition, true);
     const schema = [
-        { $match: { projectName: pro[0].projectName, userInputsLength:1 } },
-        { $project: {_id: 0, fileName: "$fileInfo.fileName"}},
+        { $match: { projectName: pro[0].projectName, userInputsLength: 1 } },
+        { $project: { _id: 0, fileName: "$fileInfo.fileName" } },
     ]
     return mongoDb.aggregateBySchema(LogModel, schema);
 }
 
 async function fileterLogTicketsByFileName(req) {
-    
-    console.log(`[ PROJECT ] Service fileterLogTicketsByFileName`);    
+
+    console.log(`[ PROJECT ] Service fileterLogTicketsByFileName`);
     await validator.validateRequired(req.query.fname);
 
-    const condition = {_id: ObjectId(req.query.pid)}
+    const condition = { _id: ObjectId(req.query.pid) }
     const pro = await validator.checkProjectByconditions(condition, true);
     const schema = [
         { $match: { projectName: pro[0].projectName, "fileInfo.fileName": { $regex: req.query.fname } } },
@@ -513,19 +532,19 @@ async function fileterLogTicketsByFileName(req) {
  * 
  * 
  */
-async function updateAssinedCase(QueryCondition, totalCase, append){
-    
-    console.log(`[ PROJECT ] Service updateAssinedCase START`, QueryCondition, totalCase); 
-    
+async function updateAssinedCase(QueryCondition, totalCase, append) {
+
+    console.log(`[ PROJECT ] Service updateAssinedCase START`, QueryCondition, totalCase);
+
     const pro = await mongoDb.findOneByConditions(ProjectModel, QueryCondition)
     if (!pro) return;
-    
+
     const annoatorsNumber = pro.annotator.length;
     const maxAnnotation = pro.maxAnnotation;
-    
+
     const avgCase = Math.floor(totalCase * maxAnnotation / annoatorsNumber);
     const perCase = totalCase * maxAnnotation % annoatorsNumber;
-    
+
     //pro.annotator save annotor list
     //pro.userCompleteCase.user has the users that he has annotation info but removed from annotor
     if (append) {//append tickets
@@ -535,61 +554,61 @@ async function updateAssinedCase(QueryCondition, totalCase, append){
                     uc.assignedCase += totalCase;
                 }
             });
-        }else{
+        } else {
             await pro.userCompleteCase.forEach(uc => {
                 if (pro.annotator.indexOf(uc.user) != -1) {
                     uc.assignedCase += avgCase;
                 }
             });
             let index = 0;
-            await pro.userCompleteCase.sort((a,b) => a.assignedCase - b.assignedCase).forEach(uc => {
-                if (index < perCase && pro.annotator.indexOf(uc.user) != -1){
+            await pro.userCompleteCase.sort((a, b) => a.assignedCase - b.assignedCase).forEach(uc => {
+                if (index < perCase && pro.annotator.indexOf(uc.user) != -1) {
                     uc.assignedCase += 1;
                     index++;
                 }
             });
         }
 
-    }else{//delete tickets
+    } else {//delete tickets
         if (maxAnnotation >= annoatorsNumber) {
             await pro.userCompleteCase.forEach(uc => {
                 if (pro.annotator.indexOf(uc.user) != -1) {
                     uc.assignedCase -= totalCase;
                 }
             });
-        }else{
+        } else {
             await pro.userCompleteCase.forEach(async uc => {
                 if (pro.annotator.indexOf(uc.user) != -1) {
                     if (avgCase > uc.assignedCase) {
                         let remained = avgCase - uc.assignedCase;
                         uc.assignedCase = 0;
                         //seperate remained case to other annotators
-                        while(true){
+                        while (true) {
                             if (remained == 0) {
                                 break;
                             }
-                            await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(u => {
-                                if (remained > 0 && pro.annotator.indexOf(u.user) != -1 && u.assignedCase > 0){
+                            await pro.userCompleteCase.sort((a, b) => -(a.assignedCase - b.assignedCase)).forEach(u => {
+                                if (remained > 0 && pro.annotator.indexOf(u.user) != -1 && u.assignedCase > 0) {
                                     u.assignedCase -= 1;
                                     remained--;
                                 }
                             });
                         }
-                    }else{
+                    } else {
                         uc.assignedCase -= avgCase;
                     }
                 }
             });
             let index = 0;
-            while(true){
+            while (true) {
                 if (perCase == 0 || index >= perCase) {
                     break;
                 }
-                await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(uc => {
-                    if (index < perCase && pro.annotator.indexOf(uc.user) != -1 && uc.assignedCase > 0){
+                await pro.userCompleteCase.sort((a, b) => -(a.assignedCase - b.assignedCase)).forEach(uc => {
+                    if (index < perCase && pro.annotator.indexOf(uc.user) != -1 && uc.assignedCase > 0) {
                         uc.assignedCase -= 1;
                         index++;
-                    } 
+                    }
                 });
             }
         }
@@ -599,7 +618,6 @@ async function updateAssinedCase(QueryCondition, totalCase, append){
     const options = { new: true };
     return mongoDb.findOneAndUpdate(ProjectModel, QueryCondition, update, options);
 }
-
 module.exports = {
     getProjects,
     getProjectByAnnotator,
