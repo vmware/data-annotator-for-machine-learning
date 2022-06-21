@@ -90,15 +90,22 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div class="clr-form-group left-project-info clr-row">
             <label for="Created Date" class="label-leftBoard">Created Date: </label>&nbsp;&nbsp;
-            <div style="word-break: break-all">{{ projectInfo?.createdDate | date: 'yyyy-MM-dd HH:mm:ss' }}</div>
+            <div style="word-break: break-all">
+              {{ projectInfo?.createdDate | date: 'yyyy-MM-dd HH:mm:ss' }}
+            </div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
             <label for="Created Date" class="label-leftBoard">Assignment Logic: </label>&nbsp;&nbsp;
-            <div style="word-break: break-all">{{ (projectInfo?.labelType == 'numericLabel' ||
-              projectInfo.projectType == 'ner' ||
-              projectInfo.isMultipleLabel ||
-              projectInfo.projectType == 'image' ||
-              projectInfo.projectType == 'log') ? (projectInfo?.assignmentLogic | toUpperCase) : 'Active learning' }}
+            <div style="word-break: break-all">
+              {{
+                projectInfo?.labelType == 'numericLabel' ||
+                projectInfo.projectType == 'ner' ||
+                projectInfo.isMultipleLabel ||
+                projectInfo.projectType == 'image' ||
+                projectInfo.projectType == 'log'
+                  ? (projectInfo?.assignmentLogic | toUpperCase)
+                  : 'Active learning'
+              }}
             </div>
           </div>
           <div class="clr-form-group left-project-info">
@@ -291,7 +298,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </clr-alert>
           </div>
 
-          <h2 class="originalH2" style="word-break: break-all;">
+          <h2 class="originalH2" style="word-break: break-all">
             {{ projectInfo?.ticketDescription }}&nbsp;&nbsp;&nbsp;
             <a
               *ngIf="!silenceStatus"
@@ -424,7 +431,10 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'">
               <div class="textBox">
                 <div *ngFor="let ticket of sr.originalData">
-                  <p class="question-paragraph" style="word-break: break-word; white-space: pre-wrap">
+                  <p
+                    class="question-paragraph"
+                    style="word-break: break-word; white-space: pre-wrap"
+                  >
                     <span class="ticketColumn">{{ ticket.key }}</span>
                     <span>:&nbsp;&nbsp;</span>
                     <span
@@ -506,14 +516,22 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                 </div>
               </div>
-              </div>
             </div>
             <div class="popDialog" id="popDialog">
               <div class="clearPop" (click)="clearPopDialog()">×</div>
-              <div style="display: inline-table; padding-top: 1rem; padding-left: 0.5rem;">
-                <button *ngFor="let poplabel of popLabels; let i = index" type="button" class="btn btn-sm"
-                  [style.background-color]="popLabelColors[i]" [style.border-color]="popLabelColors[i]" style="color: white" [title]="poplabel"
-                  (click)="clickPopLabel($event, poplabel, popLabelColors[i] )">{{ poplabel }}</button>
+              <div style="display: inline-table; padding-top: 1rem; padding-left: 0.5rem">
+                <button
+                  *ngFor="let poplabel of popLabels; let i = index"
+                  type="button"
+                  class="btn btn-sm"
+                  [style.background-color]="popLabelColors[i]"
+                  [style.border-color]="popLabelColors[i]"
+                  style="color: white"
+                  [title]="poplabel"
+                  (click)="clickPopLabel($event, poplabel, popLabelColors[i])"
+                >
+                  {{ poplabel }}
+                </button>
               </div>
               <div class="popDialog-arrow"></div>
               <div class="popDialog-insideArrow"></div>
@@ -737,29 +755,36 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <!-- numeric labels input -->
           <div *ngIf="isNumeric && !isMultipleLabel" class="clr-row">
-              <div class="clr-control-container clr-col-3" style="margin-top: 0.5rem">
-                <ngx-slider [(value)]="numericValue" [options]="numericOptions" (valueChange)="sliderEvent()"></ngx-slider>
+            <div class="clr-control-container clr-col-3" style="margin-top: 0.5rem">
+              <ngx-slider
+                [(value)]="numericValue"
+                [options]="numericOptions"
+                (valueChange)="sliderEvent()"
+              ></ngx-slider>
+            </div>
+            <div
+              class="clr-control-container clr-col-3"
+              style="margin-top: 1rem"
+              [ngClass]="{ 'clr-error': clrErrorTip }"
+            >
+              <div class="clr-input-wrapper">
+                <input
+                  #numericInput
+                  autocomplete="off"
+                  type="text"
+                  id="example"
+                  placeholder="Input value here and press enter"
+                  class="clr-input"
+                  style="width: 90%"
+                  (keyup.enter)="enterNumeric($event)"
+                  (keyup)="enterNumericUp($event)"
+                  [(ngModel)]="labelChoose"
+                  [ngModelOptions]="{ standalone: true }"
+                />
+                <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
               </div>
-              <div class="clr-control-container clr-col-3" style="margin-top: 1rem"
-                [ngClass]="{ 'clr-error': clrErrorTip }">
-                <div class="clr-input-wrapper">
-                  <input
-                    #numericInput
-                    autocomplete="off"
-                    type="text"
-                    id="example"
-                    placeholder="Input value here and press enter"
-                    class="clr-input"
-                    style="width: 90%"
-                    (keyup.enter)="enterNumeric($event)"
-                    (keyup)="enterNumericUp($event)"
-                    [(ngModel)]="labelChoose"
-                    [ngModelOptions]="{ standalone: true }"
-                  />
-                  <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
-                </div>
-                <span class="clr-subtext">{{ numericMessage }}</span>
-              </div>
+              <span class="clr-subtext">{{ numericMessage }}</span>
+            </div>
           </div>
           <!-- ner entity label -->
           <div class="questionContainer" *ngIf="projectType == 'ner'">
@@ -767,9 +792,9 @@ SPDX-License-Identifier: Apache-2.0 -->
               <button
                 *ngFor="let label of categories; let i = index"
                 class="btn labels label entityLabel"
-                [style.color]=" i == selectedEntityID ? 'white' : getLabelColor(label) "
+                [style.color]="i == selectedEntityID ? 'white' : getLabelColor(label)"
                 [style.border-color]="getLabelColor(label)"
-                [style.background-color]=" i == selectedEntityID ? getLabelColor(label) : '' "
+                [style.background-color]="i == selectedEntityID ? getLabelColor(label) : ''"
                 [ngClass]="{
                   entitySelected: i == selectedEntityID,
                   entityLabel: i !== selectedEntityID
@@ -785,7 +810,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           <!-- multiple checkbox labels -->
           <div
             class="questionContainer"
-            *ngIf="isMultipleLabel && !isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular')"
+            *ngIf="
+              isMultipleLabel &&
+              !isMultipleNumericLabel &&
+              (projectType == 'text' || projectType == 'tabular')
+            "
           >
             <div class="clr-form-control" style="margin-top: 0">
               <div class="clr-control-container" style="width: 100%">
@@ -801,57 +830,72 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="clr-checkbox"
                     (click)="selectLabel($event, i)"
                   />
-                  <label title="{{ label }}" for="{{ label }}" class="clr-control-label">{{ label }}</label>
+                  <label title="{{ label }}" for="{{ label }}" class="clr-control-label">{{
+                    label
+                  }}</label>
                 </div>
               </div>
             </div>
           </div>
           <!-- multiple numeric checkbox labels -->
-          <div class="questionContainer"
+          <div
+            class="questionContainer"
             *ngIf="isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular')"
           >
-          <div class="clr-form-control" style="margin-top: 0">
-            <div class="clr-control-container clr-row" style="width: 100%">
-              <div
-                class="clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
-                *ngFor="let score of scores; let i = index"
-              >
-                <div class="multiple-checkbox clr-control-container">
-                  <input
-                    type="checkbox"
-                    id="{{ score.label }}"
-                    name="checkbox"
-                    value="{{ score.label }}"
-                    class="clr-checkbox"
-                    (click)="selectLabel($event, i)"
-                  />
-                  <label for="{{ score.label }}" class="clr-control-label multiple-label" title="{{ score.label }}">{{ score.label }}</label>
-                </div>
-                <div class="scoreSlider clr-control-container">
-                  <ngx-slider [(value)]="scores[i].scoreValue" [options]="scores[i].scoreOptions" (valueChange)="scoreSliderEvent(i)"></ngx-slider>
-                </div>
-                <div class="scoreInput clr-control-container" [ngClass]="{ 'clr-error': scores[i].clrErrorTip }">
-                  <div class="clr-input-wrapper">
+            <div class="clr-form-control" style="margin-top: 0">
+              <div class="clr-control-container clr-row" style="width: 100%">
+                <div
+                  class="clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
+                  *ngFor="let score of scores; let i = index"
+                >
+                  <div class="multiple-checkbox clr-control-container">
                     <input
-                      #scoreInput
-                      autocomplete="off"
-                      type="text"
-                      id="scoreInput"
-                      placeholder="Input value here and press enter"
-                      class="clr-input"
-                      style="width: 90%"
-                      (keyup)="enterScoreUp($event, i)"
-                      [(ngModel)]="scores[i].scoreInputValue"
-                      [ngModelOptions]="{ standalone: true }"
+                      type="checkbox"
+                      id="{{ score.label }}"
+                      name="checkbox"
+                      value="{{ score.label }}"
+                      class="clr-checkbox"
+                      (click)="selectLabel($event, i)"
                     />
-                    <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+                    <label
+                      for="{{ score.label }}"
+                      class="clr-control-label multiple-label"
+                      title="{{ score.label }}"
+                      >{{ score.label }}</label
+                    >
                   </div>
-                  <span class="clr-subtext">{{ scoreMessage[i] }}</span>
+                  <div class="scoreSlider clr-control-container">
+                    <ngx-slider
+                      [(value)]="scores[i].scoreValue"
+                      [options]="scores[i].scoreOptions"
+                      (valueChange)="scoreSliderEvent(i)"
+                    ></ngx-slider>
+                  </div>
+                  <div
+                    class="scoreInput clr-control-container"
+                    [ngClass]="{ 'clr-error': scores[i].clrErrorTip }"
+                  >
+                    <div class="clr-input-wrapper">
+                      <input
+                        #scoreInput
+                        autocomplete="off"
+                        type="text"
+                        id="scoreInput"
+                        placeholder="Input value here and press enter"
+                        class="clr-input"
+                        style="width: 90%"
+                        (keyup)="enterScoreUp($event, i)"
+                        [(ngModel)]="scores[i].scoreInputValue"
+                        [ngModelOptions]="{ standalone: true }"
+                      />
+                      <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+                    </div>
+                    <span class="clr-subtext">{{ scoreMessage[i] }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
           <!-- txt log labels -->
           <div class="questionContainer" *ngIf="projectType == 'log'">
             <div>

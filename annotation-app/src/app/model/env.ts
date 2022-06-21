@@ -23,4 +23,6 @@ export interface Env {
   contactEmail?: string;
   contactSlack?: string;
   fileSize?: number;
+  enableSlack?: boolean;
+  slackAppName?: string;
 }

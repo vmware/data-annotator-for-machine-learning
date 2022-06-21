@@ -176,7 +176,7 @@ table thead th:first-child {
   margin-right: 1rem;
 }
 
-::ng-deep input.disabled-checkbox+label::before {
+::ng-deep input.disabled-checkbox + label::before {
   background-color: #eee;
   cursor: not-allowed;
   opacity: 0.3;
@@ -196,4 +196,11 @@ table thead th:first-child {
 
 .mutilLabel-row {
   margin-top: 1rem;
+}
+
+.assignee-input {
+  max-height: unset !important;
+  ul {
+    margin-bottom: 0;
+  }
 }

@@ -84,12 +84,12 @@ ul li {
   background-color: white;
 }
 
-.completeTicketNumber{
+.completeTicketNumber {
   margin-left: 1rem;
   margin-right: 1rem;
 }
 
-.form input{
+.form input {
   width: 120px;
 }
 
@@ -103,4 +103,31 @@ ul li {
 .scoreErr {
   float: left;
   margin-top: -0.7rem;
+}
+
+.assignee-input {
+  max-height: unset !important;
+  ul {
+    margin-bottom: 0;
+  }
+}
+
+::ng-deep app-assign-slack.slack-assign {
+  label {
+    margin-left: -3.3rem;
+  }
+  .clr-input-wrapper {
+    margin-left: 5.9rem;
+    input.clr-input {
+      width: 88% !important;
+    }
+  }
+  .tooltip {
+    clr-tooltip {
+      margin-left: -3rem;
+    }
+    span.spinner {
+      margin-left: -3rem;
+    }
+  }
 }
