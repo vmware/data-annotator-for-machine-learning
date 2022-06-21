@@ -9,7 +9,7 @@
 const srsImporter = require("../utils/srsImporter");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
-const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH } = require("../config/constant");
+const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH, QUERYORDER, ANNOTATION_QUESTION, TICKET_DESCRIPTION, SOURCE, QUERY_STRATEGY, ESTIMATOR } = require("../config/constant");
 const fs = require('fs');
 const ObjectId = require("mongodb").ObjectID;
 const moment = require('moment');
@@ -105,6 +105,13 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
         popUpLabels = ((plb && typeof plb === 'string') ? JSON.parse(plb) : plb)
     };
 
+    let estimator = req.body.estimator ? req.body.estimator : "";
+    let queryStrategy = req.body.queryStrategy ? req.body.queryStrategy : "";
+    if (!alFailed && req.body.source == SOURCE.MODEL_FEEDBACK) {
+        estimator = ESTIMATOR.RFC;
+        queryStrategy = QUERY_STRATEGY.PB_UNS
+    }
+
     const project = {
         creator: [req.auth.email],
         createdDate: Date.now(),
@@ -113,38 +120,35 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
         taskInstructions: req.body.taskInstruction ? req.body.taskInstruction : "",
         totalCase: totalCase,
         userCompleteCase: userCompleteCase,
-        maxAnnotation: req.body.maxAnnotations,
-        projectCompleteCase: 0,
+        maxAnnotation: req.body.maxAnnotations ? req.body.maxAnnotations : 1,
         categoryList: labels,
-        assignmentLogic: req.body.assignmentLogic,
+        assignmentLogic: req.body.assignmentLogic ? req.body.assignmentLogic : QUERYORDER.RANDOM,
         annotator: annotators,
-        dataSource: req.body.fileName,
-        selectedDataset: [req.body.selectedDataset],
+        dataSource: req.body.fileName ? req.body.fileName : "",
+        selectedDataset: [req.body.selectedDataset ? req.body.selectedDataset : ""],
         selectedColumn: selectedColumn,
-        annotationQuestion: req.body.annotationQuestion,
-        shareStatus: false,
-        shareDescription: '',
-        generateInfo: {
-            status: GENERATESTATUS.DEFAULT,
-        },
-        fileSize: req.body.fileSize,
+        annotationQuestion: req.body.annotationQuestion ? req.body.annotationQuestion : ANNOTATION_QUESTION,
+        fileSize: req.body.fileSize ? req.body.fileSize : 1,
         labelType: req.body.labelType,
         min: (Number.isNaN(+req.body.min) ? 0 : +req.body.min),
         max: (Number.isNaN(+req.body.max) ? 0 : +req.body.max),
         al: {
-            estimator: req.body.estimator,
+            estimator: estimator,
             alFailed: alFailed,
-            queryStrategy: req.body.queryStrategy,
+            queryStrategy: queryStrategy,
         },
         projectType: projectType,
         encoder: req.body.encoder,
         isMultipleLabel: isMultipleLabel,
         regression: regression,
         isShowFilename: (req.body.isShowFilename === 'true' || req.body.isShowFilename === true) ? true : false,
-        ticketDescription: req.body.ticketDescription,
-        ticketQuestion: req.body.ticketQuestions,
+        ticketDescription: req.body.ticketDescription ? req.body.ticketDescription : TICKET_DESCRIPTION,
         popUpLabels: popUpLabels,
-        assignSlackChannels: req.body.slack,
+        integration: {
+            source: req.body.source ? req.body.source : "",
+            externalId: req.body.externalId ? [req.body.externalId] : [],
+        },
+        assignSlackChannels: req.body.slack
     };
 
     const conditions = { projectName: req.body.pname };

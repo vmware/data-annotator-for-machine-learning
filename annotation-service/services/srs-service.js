@@ -255,7 +255,7 @@ async function getOneSrs(req) {
                 }
             });
             conditions = { _id: { $in: ids } };
-            return await mongoDb.findByConditions(mp.model, conditions, filterFileds);
+            return mongoDb.findByConditions(mp.model, conditions, filterFileds);
         } else {
             conditions = { _id: { $in: project.al.queriedSr } };
             alQueriedSr = await mongoDb.findByConditions(mp.model, conditions, filterFileds);
@@ -308,14 +308,14 @@ async function getOneSrs(req) {
     } else {
         if (usc.skip == 0) {
             console.log(`[ SRS ] Service all case has annotated`);
-            return { CODE: 5001, "MSG": "No Data Found" };
+            return { CODE: 5001, "MSG": "ANNOTATION DONE" };
         } else {
             //show skipped before
             console.log(`[ SRS ] Service remove marked skipped case`);
             await projectService.removeSkippedCase(req.query.pid, req.auth.email);
 
             console.log(`[ SRS ] Service find out skipped before skipped case`);
-            return await getOneSrs(req);
+            return getOneSrs(req);
         }
     }
 }
@@ -451,7 +451,7 @@ async function skipOne(req) {
 
         console.log(`[ SRS ] Service reviewer skipOne.getOneSrs`);
         request.query.user = req.body.user;
-        return await queryTicketsForReview(request);
+        return queryTicketsForReview(request);
 
     } else {
         console.log(`[ SRS ] Service user skipOne save info to DB`);
@@ -460,7 +460,7 @@ async function skipOne(req) {
         await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
 
         console.log(`[ SRS ] Service user skipOne.getOneSrs`);
-        return await getOneSrs(request);
+        return getOneSrs(request);
     }
 
 }
@@ -607,14 +607,16 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
 
 async function appendSrsData(req) {
     //validate user and project
-    await validator.checkAnnotator(req.auth.email);
-    const queryProjectCondition = { projectName: req.body.pname };
+    // await validator.checkAnnotator(req.auth.email);
+    const queryProjectCondition = req.body.pname ? { projectName: req.body.pname } : { _id: req.body.pid };
+
     const mp = await getModelProject(queryProjectCondition);
 
     const dataset = req.body.selectedDataset;
     const project = mp.project;
     const projectType = mp.project.projectType;
     req.body.projectType = projectType;
+    req.body.pname = req.body.pname ? req.body.pname : mp.project.projectName;
 
     if (dataset) {
         const conditions = { dataSetName: dataset }
@@ -681,7 +683,7 @@ async function sampleSr(req) {
     console.log(`[ SRS ] Service sampleSr.aggregateSrsData`);
     const schema = [
         { $match: { projectName: mp.project.projectName } },
-        { $limit: 100 },
+        { $limit: 10 },
         { $sample: { size: 1 } }
     ];
     const sr = await mongoDb.aggregateBySchema(mp.model, schema);
@@ -707,6 +709,9 @@ async function flagSr(req) {
 
     const request = { 'query': { 'pid': pid }, 'auth': { "email": user }, headers: { authorization: token } };
 
+    const queryPro = { _id: ObjectId(pid) };
+    const mp = await getModelProject(queryPro);
+
     if (await validator.checkRequired(review)) {
         await validator.checkAnnotator(user);
 
@@ -718,15 +723,13 @@ async function flagSr(req) {
 
         const conditions = { _id: ObjectId(tid) };
         const update = { $push: { 'flag.users': user } };
-        await mongoDb.findOneAndUpdate(LogModel, conditions, update);
+        await mongoDb.findOneAndUpdate(mp.model, conditions, update);
 
-        return await queryTicketsForReview(request);
+        return queryTicketsForReview(request);
 
     } else {
 
         console.log(`[ SRS ] Service flagSr`, tid);
-        const queryPro = { _id: ObjectId(pid) };
-        const mp = await getModelProject(queryPro);
 
         const conditions = { _id: ObjectId(tid) };
         const update = { $push: { 'flag.users': user } };
@@ -736,7 +739,7 @@ async function flagSr(req) {
         const updatePro = { $pull: { "al.queriedSr": ObjectId(tid) } };
         await mongoDb.findOneAndUpdate(ProjectModel, queryPro, updatePro);
 
-        return await getOneSrs(request);
+        return getOneSrs(request);
     }
 
 
@@ -757,7 +760,7 @@ async function queryUserFlagTicket(req) {
     const mp = await getModelProject({ projectName: projectName });
     const query = { projectName: projectName, "flag.users": req.auth.email };
     const options = { page: req.query.page, limit: req.query.limit, select: "originalData" };
-    return await mongoDb.paginateQuery(mp.model, query, options);
+    return mongoDb.paginateQuery(mp.model, query, options);
 }
 
 async function queryAllFlagSrs(req) {
@@ -768,7 +771,7 @@ async function queryAllFlagSrs(req) {
     console.log(`[ SRS ] Service queryAllFlagSrs`);
     const query = { projectName: req.query.pname, "flag.users": { $exists: true, $ne: [] } };
     const options = { page: req.query.page, limit: req.query.limit };
-    return await mongoDb.paginateQuery(mp.model, query, options);
+    return mongoDb.paginateQuery(mp.model, query, options);
 }
 
 async function slienceFlagSrs(req) {
@@ -849,57 +852,14 @@ async function deleteSrs(req) {
 
 
 async function deleteLabel(req) {
-    const label = req.body.label;
-    let conditions = { projectName: req.body.pname };
+    console.log(`[ SRS ] Service deleteLabel`);
+    const label = req.body.label;// "", string DERECTLY DELETE
+    const projectName = req.body.pname;
+    const _id = req.body.pid;
 
-    const mp = await getModelProject(conditions);
+    const operation = req.body.operation;//2 query
 
-    let labelArray = mp.project.categoryList.split(",");
-    const multiTextNumberica = mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC;
-    if (multiTextNumberica) {
-        const categoryList = JSON.parse(mp.project.categoryList);
-        labelArray = categoryList.map(a => Object.keys(a)[0]);
-    }
-    if (!labelArray.includes(label)) {
-        throw { CODE: 4004, MSG: "LABEL NOT EXIST" };
-    }
-
-    if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.LOG) {
-        conditions["userInputs.problemCategory.label"] = label;
-    } else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
-        conditions = {
-            projectName: req.body.pname,
-            $or: [
-                { "userInputs.problemCategory.value.polygonlabels.0": label },
-                { "userInputs.problemCategory.value.rectanglelabels.0": label }
-            ]
-        };
-
-    } else if (mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC) {
-        conditions["userInputs.problemCategory.label"] = label;
-    } else {
-        conditions["userInputs.problemCategory"] = label;
-    }
-
-    const tickets = await mongoDb.findByConditions(mp.model, conditions);
-    if (tickets[0]) {
-        throw { CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED" };
-    }
-
-    const query = { projectName: req.body.pname }
-    const options = { new: true };
-    _.pull(labelArray, label);
-    labelArray = labelArray.toString();
-    if (multiTextNumberica) {
-        const categoryList = JSON.parse(mp.project.categoryList);
-        labelArray = categoryList.filter(a => Object.keys(a)[0] != label);
-        labelArray = JSON.stringify(labelArray);
-    }
-
-    const update = { $set: { "categoryList": labelArray } };
-    await mongoDb.findOneAndUpdate(ProjectModel, query, update, options);
-
-    return { CODE: 200, MSG: "OK", LABELS: labelArray };
+    return projectService.deleteProjectLables(label, _id, projectName, operation);
 
 }
 
@@ -908,28 +868,29 @@ async function reviewTicket(req) {
     const user = req.auth.email;
     await validator.checkAnnotator(user);
 
-    let tids = [];
+    const tid = ObjectId(req.body.tid);
     const pid = req.body.pid;
-    req.body.tid.forEach(_id => { tids.push(ObjectId(_id)) });
+
+    const mp = await getModelProject({ _id: ObjectId(pid) });
 
     if (await validator.checkRequired(req.body.review)) {
-        await flagToReview(tids);
+        await flagToReview(mp, tid);
     } else if (await validator.checkRequired(req.body.modify)) {
-        await calculateReviewdCase(pid, tids, user);
-        await modifyReview(tids, user, req.body.problemCategory, req.body.logFreeText);
+        await calculateReviewdCase(mp, [tid], user);
+        await modifyReview(mp, tid, user, req.body.problemCategory, req.body.logFreeText);
     } else if (!await validator.checkRequired(req.body.modify)) {
-        await calculateReviewdCase(pid, tids, user);
-        await passReview(tids, user);
+        await calculateReviewdCase(mp, [tid], user);
+        await passReview(mp, tid, user);
     }
 }
 
-async function flagToReview(tids) {
-    const conditions = { _id: { $in: tids } };
+async function flagToReview(mp, tid) {
+    const conditions = { _id: tid };
     const update = { $set: { "reviewInfo.review": true } };
-    await mongoDb.updateManyByConditions(LogModel, conditions, update);
+    await mongoDb.updateByConditions(mp.model, conditions, update);
 }
-async function passReview(tids, user) {
-    const conditions = { _id: { $in: tids } };
+async function passReview(mp, tid, user) {
+    const conditions = { _id: tid };
     const update = {
         $set: {
             "reviewInfo.review": false,
@@ -939,32 +900,68 @@ async function passReview(tids, user) {
             "reviewInfo.reviewedTime": Date.now()
         }
     };
-    await mongoDb.updateManyByConditions(LogModel, conditions, update);
+    await mongoDb.updateByConditions(mp.model, conditions, update);
 }
-async function modifyReview(tids, user, problemCategory, logFreeText) {
-    const conditions = { _id: tids[0] };
+async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
+    const projectType = mp.project.projectType;
+    const isMultipleLabel = mp.project.isMultipleLabel;
+    const labelType = mp.project.labelType;
+    const model = mp.model;
+
+    const conditions = { _id: tid };
     const update = {
         $set: {
             "reviewInfo.review": false,
             "reviewInfo.reviewed": true,
             "reviewInfo.modified": true,
             "reviewInfo.user": user,
-            "reviewInfo.reviewedTime": Date.now(),
-            "userInputs.0.problemCategory": problemCategory,
-            "userInputs.0.logFreeText": logFreeText
+            "reviewInfo.reviewedTime": Date.now()
         }
     };
-    await mongoDb.updateByConditions(LogModel, conditions, update);
+    //max-annotation=1
+    if (projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.LOG) {
+        update.$set["userInputs.0.problemCategory"] = problemCategory;
+        if (projectType == PROJECTTYPE.LOG) {
+            update.$set["userInputs.0.logFreeText"] = logFreeText;
+        }
+    } else {
+        //max-annotation>1
+        let userInputs = [];
+        if (labelType == LABELTYPE.NUMERIC && isMultipleLabel) {
+            problemCategory.forEach(lb => {
+                userInputs.push({
+                    problemCategory: {
+                        label: Object.keys(lb)[0],
+                        value: Object.values(lb)[0]
+                    },
+                    user: user,
+                    timestamp: Date.now()
+                });
+            });
+        } else {
+            problemCategory.forEach(lb => {
+                userInputs.push({
+                    problemCategory: lb,
+                    user: user,
+                    timestamp: Date.now()
+                });
+            });
+        }
+        update.$set["userInputs"] = userInputs;
+    }
+    await mongoDb.updateByConditions(model, conditions, update);
 }
 
-async function calculateReviewdCase(pid, tids, user) {
+async function calculateReviewdCase(mp, tids, user) {
 
     let ticketsLegth = tids.length;
-    const project = await mongoDb.findById(ProjectModel, pid);
+    const _id = mp.project._id;
+    const project = mp.project;
+    const model = mp.model;
 
     const conditions = { _id: { $in: tids } };
     const columns = { userInputs: 1, reviewInfo: 1 };
-    const tickets = await mongoDb.findByConditions(LogModel, conditions, columns);
+    const tickets = await mongoDb.findByConditions(model, conditions, columns);
 
     // update annotator was reviewed case
     for (const ticket of tickets) {
@@ -974,9 +971,10 @@ async function calculateReviewdCase(pid, tids, user) {
         if (ticket.reviewInfo.reviewed) {
             continue;
         }
-        for (const input of ticket.userInputs) {
+        const ticketUsers = _.uniq(ticket.userInputs.map(obj => obj.user));
+        for (const ticketUser of ticketUsers) {
             for (const uc of project.userCompleteCase) {
-                if (input.user == uc.user) {
+                if (ticketUser == uc.user) {
                     uc.reviewed += 1;
                 }
             }
@@ -998,8 +996,14 @@ async function calculateReviewdCase(pid, tids, user) {
         });
     }
 
-    const conditionsP = { _id: ObjectId(pid) }
-    const update = { $set: { reviewInfo: project.reviewInfo, userCompleteCase: project.userCompleteCase, updatedDate: Date.now() } };
+    const conditionsP = { _id: ObjectId(_id) }
+    const update = {
+        $set: {
+            reviewInfo: project.reviewInfo,
+            userCompleteCase: project.userCompleteCase,
+            updatedDate: Date.now()
+        }
+    };
     await mongoDb.findOneAndUpdate(ProjectModel, conditionsP, update)
 }
 
@@ -1010,71 +1014,84 @@ async function queryTicketsForReview(req) {
     const pid = req.query.pid;
     const byUser = req.query.user;
 
-    const conditions = { _id: ObjectId(pid) };
-    const projects = await validator.checkProjectByconditions(conditions, true);
-    const projectName = projects[0].projectName;
+    const mp = await getModelProject({ _id: ObjectId(pid) })
 
-    const findUser = await projects[0].reviewInfo.find(info => info.user == user);
+    const findUser = await mp.project.reviewInfo.find(info => info.user == user);
     const skip = findUser ? findUser.skip : 0;
 
     //1. query need reReview tickets
-    let ticket = await reReviewQueryForReview(projectName, user);
+    let ticket = await reReviewQueryForReview(mp, user);
     if (!ticket[0]) {
         if (await validator.checkRequired(byUser)) {
             //2.user defined the query rules
             const order = req.query.order;
-            ticket = await specailQueryForReview(projectName, byUser, order, skip, user);
+            ticket = await specailQueryForReview(mp, byUser, order, skip, user);
         } else {
             //3.if the step2 is empty query from default
-            ticket = await defualtQueryForReview(projectName, skip, user);
+            ticket = await defualtQueryForReview(mp, skip, user);
         }
     }
 
     if (!ticket[0]) {
         if (!skip) {
-            return { CODE: 5001, "MSG": "No Data Found" };
+            return { CODE: 5001, "MSG": "REVIEW DONE" };
         } else {
             console.log(`[ SRS ] Service remove marked skipped case`);
             await projectService.removeSkippedCase(pid, user, true);
 
-            return await queryTicketsForReview(req);
+            return queryTicketsForReview(req);
+        }
+    }
+    if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
+        if (config.useAWS) {
+            ticket[0].originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ticket[0].originalData.location);
         }
     }
     return ticket;
 }
 
 
-async function specailQueryForReview(projectName, byUser, order, skip, user) {
+async function specailQueryForReview(mp, byUser, order, skip, user) {
 
     const conditions = {
-        projectName: projectName,
-        userInputsLength: 1,
+        projectName: mp.project.projectName,
+        userInputsLength: { $gte: mp.project.maxAnnotation },
         "userInputs.user": byUser,
         "reviewInfo.reviewed": { $ne: true },
         "flag.users": { $ne: user }
     };
     if (order == QUERYORDER.SEQUENTIAL) {
         const options = { skip: skip, limit: 1 };
-        return await mongoDb.findByConditions(LogModel, conditions, null, options);
+        return mongoDb.findByConditions(mp.model, conditions, null, options);
     } else {
         const schema = [
             { $match: conditions },
             { $skip: skip },
             { $sample: { size: 1 } }
         ]
-        return await mongoDb.aggregateBySchema(LogModel, schema);
+        return mongoDb.aggregateBySchema(mp.model, schema);
     }
 
 }
-async function reReviewQueryForReview(projectName, user) {
-    const conditions = { projectName: projectName, userInputsLength: 1, "reviewInfo.review": true, "flag.users": { $ne: user } };
+async function reReviewQueryForReview(mp, user) {
+    const conditions = {
+        projectName: mp.project.projectName,
+        userInputsLength: { $gte: mp.project.maxAnnotation },
+        "reviewInfo.review": true,
+        "flag.users": { $ne: user }
+    };
     const options = { limit: 1 };
-    return await mongoDb.findByConditions(LogModel, conditions, null, options);
+    return mongoDb.findByConditions(mp.model, conditions, null, options);
 }
-async function defualtQueryForReview(projectName, skip, user) {
-    const conditions = { projectName: projectName, userInputsLength: 1, "reviewInfo.reviewed": { $ne: true }, "flag.users": { $ne: user } };
+async function defualtQueryForReview(mp, skip, user) {
+    const conditions = {
+        projectName: mp.project.projectName,
+        userInputsLength: { $gte: mp.project.maxAnnotation },
+        "reviewInfo.reviewed": { $ne: true },
+        "flag.users": { $ne: user }
+    };
     const options = { skip: skip, limit: 1 };
-    return await mongoDb.findByConditions(LogModel, conditions, null, options);
+    return mongoDb.findByConditions(mp.model, conditions, null, options);
 }
 
 

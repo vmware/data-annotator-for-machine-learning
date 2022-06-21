@@ -45,7 +45,7 @@ async function prepareOSCredentails(resource, sessionDuration){
         RoleArn: roleArn
     };
     console.log(`[ STS ] Utils sts.assumeRole`);
-    return await sts.assumeRole(stsAssecume).promise();
+    return sts.assumeRole(stsAssecume).promise();
 }
 
 async function prepareESPCredentails(resource, sessionDuration){

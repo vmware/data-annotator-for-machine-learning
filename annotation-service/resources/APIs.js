@@ -28,6 +28,7 @@ module.exports = {
     PROJECT_SAVE: "/projects", // no
     PROJECT_DELETE: "/projects", // swagger
     PROJECT_LIST: "/projects", // swagger
+    PROJECT_INTEGRATION_EDIT: "/projects/integration",
     PROJECT_INFO: "/projects/details", // swagger
     PROJECT_NAME: "/projects/names", // no
     PROJECT_MODEL_ACCURACY: "/projects/al/accuracy",//swagger
@@ -36,6 +37,7 @@ module.exports = {
     COUNT_COMMUNITY_DOWNLOAD: "/projects/download/community-download-count",
     PROJECT_SHARE: "/projects/share", // swagger
     SRS_CATEGORIES: "/projects/labels", //no
+    PROJECT_UPDATE_LABEL: "/projects/labels",//swagger
     SRS_DELETE_LABEL: "/projects/labels",//swagger
     PROJECT_PREVIEW: "/projects/annotations", // swagger
     SRS_PROGRESS: "/projects/users/progression",//no

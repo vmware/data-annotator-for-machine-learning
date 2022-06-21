@@ -292,4 +292,8 @@ export class AvaService {
       ),
     );
   }
+
+  public validSlackChannel(payload: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/conversations-list`, payload);
+  }
 }

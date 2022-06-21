@@ -145,7 +145,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   popLabelColors = [ '#55b128', '#d70c3b', '#3377dd', '#973633', '#f7a604', '#864ac1', '#09cbe5', '#a0f709', '#edf709', '#e9098f' ];
 
   totalLen: number = 0;
-  labelColor: any = {};
+  labelColor: any;
   selectedEntityColor: any = '';
   startFrom: string;
   annotationPrevious: any = [];
@@ -174,6 +174,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   yAxis: number = 0;
   targetSpans: any;
   popLabels: any;
+  disabledSkip: boolean = false;
+  moreReviewInfo: any = [];
+  submitMessage: string;
+  tipMessage: string;
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -339,31 +343,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           if (this.sr && this.sr.flag && this.sr.flag.silence) {
             this.silenceStatus = true;
           }
-
-          if (this.labelType == 'numericLabel' && !this.isMultipleLabel) {
-            this.isNumeric = true;
-            this.numericMessage =
-              'Allowed values are between ' + this.minLabel + ' and ' + this.maxLabel + ' .';
-            setTimeout(() => {
-              this.numericInput.nativeElement.focus();
-            }, 500);
-          } else {
-            if (this.projectType == 'log') {
-              this.sortLabelForColor(this.categories);
-            }
-            if (this.projectType == 'ner') {
-              this.nerLabelForColor(this.categories);
-            }
-            this.isShowDropDown = false;
-            if ( this.categories &&
-              this.categories.length > 6 &&
-              this.projectType != 'ner' &&
-              this.projectType != 'image' &&
-              this.projectType != 'log'
-            ) {
-              this.isShowDropDown = true;
-            }
-          }
+          this.initInfo();
         }
       },
       (error) => {
@@ -387,6 +367,33 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       },
     );
+  }
+
+  initInfo() {
+    if (this.labelType == 'numericLabel' && !this.isMultipleLabel) {
+      this.isNumeric = true;
+      this.numericMessage =
+        'Allowed values are between ' + this.minLabel + ' and ' + this.maxLabel + ' .';
+      setTimeout(() => {
+        this.numericInput.nativeElement.focus();
+      }, 500);
+    } else {
+      if (this.projectType == 'log' || (this.projectType == 'image' && this.startFrom == 'review')) {
+        this.sortLabelForColor(this.categories);
+      }
+      if (this.projectType == 'ner') {
+        this.nerLabelForColor(this.categories);
+      }
+      this.isShowDropDown = false;
+      if ( this.categories &&
+        this.categories.length > 6 &&
+        this.projectType != 'ner' &&
+        this.projectType != 'image' &&
+        this.projectType != 'log'
+      ) {
+        this.isShowDropDown = true;
+      }
+    }
   }
 
   addLogScrollListener() {
@@ -481,16 +488,19 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         (res) => {
           this.loading = false;
           if (res && res.MSG) {
-            this.error = res.MSG;
+            this.error = 'All cases have been completely reviewed.';
             return;
           } else {
+            this.disabledSkip = res[0].reviewInfo.review;
             this.submitAndHistory(res, from);
-            this.currentLogFile = this.sr.fileInfo.fileName;
-            if (this.sr && this.sr.flag && this.sr.flag.silence) {
-              this.silenceStatus = true;
+            if (this.projectType === 'log') {
+              this.currentLogFile = this.sr.fileInfo.fileName;
+              if (this.sr && this.sr.flag && this.sr.flag.silence) {
+                this.silenceStatus = true;
+              }
+              this.getAllLogFilename();
             }
-            this.getAllLogFilename();
-            this.sortLabelForColor(this.categories);
+            this.initInfo();
             this.categoryBackFunc();
             this.getProgress();
             this.toReadStorageSetting('logFilter');
@@ -516,7 +526,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   pass() {
-    this.isSkipOrBack('pass');
+    if (this.moreReviewInfo.length > 1) {
+      if (!this.checkMoreReviewChanged()) {
+        return false;
+      }
+      this.submitReview('pass');
+    } else {
+      this.isSkipOrBack('pass');
+    } 
   }
 
   dropDownSubmit() {
@@ -529,6 +546,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     return false;
   }
+
   onSubmit(from?): void {
     if (this.isNumeric && this.isInValidateNumber()) {
       this.clrErrorTip = true;
@@ -633,14 +651,34 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.modifyChangeHistory(null, from);
     const param = {
       pid: this.projectId,
-      tid: [this.sr._id],
+      tid: this.sr._id,
     };
     if (from === 'pass') {
       param['modify'] = false;
     } else {
       param['modify'] = true;
-      param['problemCategory'] = this.spansList;
-      param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
+      if (this.projectType === 'log' || this.projectType === 'ner') {
+        param['problemCategory'] = this.spansList;
+        param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
+      } else if (this.isMultipleNumericLabel || this.isNumeric) {
+        if (this.moreReviewInfo.length > 1 && this.categoryFunc().length === 0) {
+          param['modify'] = false;  
+        } else {
+          param['problemCategory'] = this.categoryFunc();
+        }   
+      } else if (this.projectType === 'text' || this.projectType === 'tabular') {
+        if (this.isShowDropDown || this.isMultipleLabel) {
+          if (this.moreReviewInfo.length > 1 && this.categoryFunc().length === 0) {
+            param['modify'] = false;  
+          } else {
+            param['problemCategory'] = this.categoryFunc();
+          }
+        } else {
+          param['problemCategory'] = [this.labelChoose];
+        }
+      } else if (this.projectType === 'image') {
+        param['problemCategory'] = this.categoryFunc();
+      }
     }
     this.avaService.passTicket(param).subscribe((res) => {
       this.getOneReview(from);
@@ -704,10 +742,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           } else {
             let difference = [];
-            if (originalLabel.length - this.multipleLabelList.length >= 0) {
-              difference = _.difference(originalLabel, this.multipleLabelList);
-            } else {
-              difference = _.difference(this.multipleLabelList, originalLabel);
+            if (originalLabel) {
+              if (originalLabel.length - this.multipleLabelList.length >= 0) {
+                difference = _.difference(originalLabel, this.multipleLabelList);
+              } else {
+                difference = _.difference(this.multipleLabelList, originalLabel);
+              }
+            }
+            if (this.startFrom === 'review' && this.annotationHistory[i].srId === this.sr._id && !originalLabel) {
+              this.annotationHistory[i].category = this.multipleLabelList;
+              this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+              break;
             }
             if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
               this.annotationHistory.splice(i, 1);
@@ -834,7 +879,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   submitAndHistory(newSr, from?) {
     // add to the history
-    if (this.maxAnnotationError == null && this.sr._id !== 0) {
+    if (this.maxAnnotationError == null && this.sr._id !== 0 && from !== 'review') {
       const OldSr = JSON.parse(JSON.stringify(this.sr));
       const addSubmit = {
         srId: OldSr._id,
@@ -873,7 +918,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       if (from !== 'order') {
         if (!this.srInHistory()) {
-          this.annotationHistory.unshift(addSubmit);
+            this.annotationHistory.unshift(addSubmit);
         }
         this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
       }
@@ -886,16 +931,26 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.projectType == 'text' ||
       this.projectType == 'tabular' ||
       this.projectType == 'regression'
-    ) {
+    ) {     
       this.sr = this.resetTabularSrData(this.sr);
     }
     if (this.projectType == 'ner') {
       this.sr = this.resetNerSrData(this.sr);
-      this.toShowExistingLabel();
+      if (from !== 'review' && from !== 'pass' && this.startFrom !== 'review') {
+        this.toShowExistingLabel();
+      }
     }
     if (this.projectType == 'image') {
       this.sr = this.resetImageSrData(this.sr);
       // console.log("getOne.this.sr:::", this.sr)
+      if (this.startFrom === 'review') {
+        const images = [];
+        this.sr.userInputs.forEach(item => {
+          images.push(item.problemCategory);
+        })
+        this.historyTask = [{ result: images }];
+        this.currentBoundingData = images;
+      }
       setTimeout(() => {
         const option = {
           dom: 'label-studio',
@@ -932,7 +987,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.numericInput.nativeElement.focus();
       }, 500);
     }
-    this.clearUserInput();
+    if (from !== 'review') {
+      this.clearUserInput();
+    }
   }
 
   onEndGame(): void {
@@ -951,58 +1008,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.skipAndFetchNewQuestion();
     } else {
       if (
+        this.isNumeric ||
+        this.isMultipleNumericLabel ||
         this.isMultipleLabel &&
         this.projectType !== 'ner' &&
         this.projectType !== 'image' &&
         this.projectType !== 'log'
       ) {
-        if (!this.sr.userInputsLength && !this.sr.userInputs) {
-          const isCategory = this.categoryFunc();
-          this.isActionErr(isCategory, null, 'skip');
-        } else {
-          for (let i = 0; i < this.annotationHistory.length; i++) {
-            if (this.annotationHistory[i].srId === this.sr._id) {
-              let difference = [];
-              if (this.isMultipleNumericLabel) {
-                if (this.annotationHistory[i].category.length !== this.scores.filter(item => item.checked).length) {
-                  this.actionError =
-                  'The current label is diiferent from the original existing label, please do submit first.';
-                  return;
-                } 
-                for (const item of this.scores) {
-                  for (const ele of this.annotationHistory[i].category) {
-                    const key = Object.keys(ele)[0];
-                    if (item.label === key && item.scoreInputValue !== ele[key]) {
-                      this.actionError =
-                      'The current label is diiferent from the original existing label, please do submit first.';
-                      return;
-                    }
-                  }
-                }
-              } else {
-                if (this.annotationHistory[i].category.length - this.multipleLabelList.length >= 0) {
-                  difference = _.difference(
-                    this.annotationHistory[i].category,
-                    this.multipleLabelList,
-                  );
-                } else {
-                  difference = _.difference(
-                    this.multipleLabelList,
-                    this.annotationHistory[i].category,
-                  );
-                }
-              }
-              if (difference.length > 0) {
-                this.actionError =
-                  'The current label is diiferent from the original existing label, please do submit first.';
-                return;
-              } else {
-                this.skipAndFetchNewQuestion();
-                return;
-              }
-            }
-          }
-        }
+        const isCategory = this.categoryFunc();
+        this.isActionErr(isCategory, null, 'skip');
       } else if (this.projectType == 'ner') {
         this.isSkipOrBack('skip');
       } else if (this.projectType == 'image') {
@@ -1013,6 +1027,54 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.skipAndFetchNewQuestion();
       }
     }
+  }
+
+  checkMutilLabel(from?: string, id?: string) {
+    let multiLabels = [];
+    this.sr.userInputs.forEach(item => {
+      if (item.user === this.user.email) {
+        multiLabels.push(item.problemCategory);
+      }
+    });
+    let difference = [];
+    if (multiLabels.length > this.multipleLabelList.length) {
+      difference = _.difference(multiLabels, this.multipleLabelList);
+    } else {
+      difference = _.difference(this.multipleLabelList, multiLabels);
+    }
+    if (difference.length > 0) {
+      this.actionError = this.tipMessage;
+      return false;
+    }
+    this.checkTextProject(from, id);
+  }
+
+  checkNumeric(isCategory?: any, from?: string, id?: string) {
+    let multiLabels = [];
+    this.sr.userInputs.forEach(item => {
+      if (item.user === this.user.email) {
+        multiLabels.push(item.problemCategory);
+      }
+    });
+    let difference = [];
+    if (multiLabels.length > isCategory.length) {
+      difference = _.difference(multiLabels, isCategory);
+    } else {
+      difference = _.difference(isCategory, multiLabels);
+    }
+    if (difference.length > 0) {
+      this.actionError = this.tipMessage;
+      return;
+    }
+    this.checkTextProject(from, id);
+  }
+
+  checkMoreReviewChanged() {
+    if (this.startFrom === 'review' && this.moreReviewInfo.length > 1 && this.categoryFunc().length > 0) {
+      this.actionError = this.tipMessage;
+      return false;
+    }
+    return true;
   }
 
   skipAndFetchNewQuestion(): void {
@@ -1047,6 +1109,18 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
           }`;
         }
+        let category = [];
+        if (this.projectType === 'ner' || this.projectType === 'log') {
+          category = this.spansList;
+        } else if (this.startFrom === 'review' && this.isMultipleLabel && !this.isNumeric) {
+            if (OldSr.userInputs && OldSr.userInputs.length > 0) {
+              for (let j = 0; j < OldSr.userInputs.length; j++) {
+                if (OldSr.userInputs[j].user === this.user.email) {
+                  category.push(this.sr.userInputs[j].problemCategory);
+                }
+              }
+            }
+        }
         const addSkip = {
           srId: OldSr._id,
           historyDescription:
@@ -1054,7 +1128,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               ? [OldSr.originalData]
               : OldSr.originalData.slice(0, 10),
           type: 'skip',
-          category: this.projectType === 'ner' || this.projectType === 'log' ? this.spansList : [],
+          category,
           rewrite: '',
           solution: '',
           activeClass: -1,
@@ -1066,7 +1140,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
 
         this.sr = responseSr;
-        this.currentBoundingData = [];
+        if (this.startFrom !== 'review') {
+          this.currentBoundingData = [];
+        }
         if (
           this.projectType == 'text' ||
           this.projectType == 'tabular' ||
@@ -1080,6 +1156,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
+          if (this.startFrom === 'review') {
+            const images = [];
+            this.sr.userInputs.forEach(item => {
+              images.push(item.problemCategory);
+            })
+            this.historyTask = [{ result: images }];
+          }
           setTimeout(() => {
             const option = {
               dom: 'label-studio',
@@ -1097,7 +1180,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
               from: 'annotate',
             };
-            this.toCallStudio(option);
+            this.toCallStudio(option); 
           }, 0);
         }
         if (this.projectType == 'log') {
@@ -1109,11 +1192,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               : '';
           this.setSelectedFile();
           this.toFilterLog(this.filterList);
-          if (this.sr.userInputsLength > 0) {
+        }
+        if (this.sr.userInputsLength > 0 ) {
+          if (this.projectType !== 'ner')  {
             this.categoryBackFunc();
-            this.sortLabelForColor(this.categories);
-            this.getProgress();
           }
+          if (this.projectType !== 'image') {
+            this.sortLabelForColor(this.categories);
+          }
+          this.getProgress();
         }
         if (this.sr && this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
@@ -1125,7 +1212,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.numericInput.nativeElement.focus();
           }, 500);
         }
-        this.clearUserInput();
+        if (this.startFrom !== 'review' || this.projectType === 'ner') {
+          this.clearUserInput();
+        }
       },
       (error) => {
         this.error = JSON.stringify(error, null, 2);
@@ -1222,6 +1311,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isMultipleLabel = response.isMultipleLabel;
         this.projectType = response.projectType;
         this.labelType = response.labelType;
+        this.selectParam = response.projectName;
+        this.createForm();
         this.isMultipleNumericLabel = (this.isMultipleLabel && this.labelType === 'numericLabel');
         if (this.labelType === 'numericLabel' && !this.isMultipleLabel) {
           this.minLabel = response.min;
@@ -1291,11 +1382,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.isShowPopLabel = response.popUpLabels && response.popUpLabels.length;
         }
         if (this.startFrom === 'review') {
+          this.submitMessage = 'modify';
           this.questionForm.get('questionGroup.reviewee').setValue(reviewee);
-          this.getOneReview();
+          this.getOneReview('review');
         } else {
+          this.submitMessage = 'submit';
           this.fetchData();
         }
+        this.tipMessage = `The current label is diiferent from the original existing label, please do ${this.submitMessage} first.`;
       },
       (error) => {
         console.log(error);
@@ -1335,57 +1429,163 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isActionErr(isCategory, id?, from?) {
-    if (!this.sr.userInputsLength && !this.sr.userInputs) {
-      this.actionError =
-        'The current label is diiferent from the original existing label, please do submit first.';
+    if (!this.sr.userInputsLength && !this.sr.userInputs && !this.isNumeric) {
+      this.actionError = this.tipMessage;
+      return;
+    } else if (!this.sr.userInputsLength && !this.sr.userInputs && this.isNumeric  && isCategory[0] !== this.minLabel) {
+      this.actionError = this.tipMessage;
       return;
     } else {
       for (let i = 0; i < this.annotationHistory.length; i++) {
-        if (this.isMultipleNumericLabel && this.annotationHistory[i].srId === this.sr._id ) {
-          if (this.annotationHistory[i].category.length !== this.scores.filter(item => item.checked).length) {
-            this.actionError =
-            'The current label is diiferent from the original existing label, please do submit first.';
-            return;
-          } 
-          for (const item of this.scores) {
-            for (const ele of this.annotationHistory[i].category) {
-              const key = Object.keys(ele)[0];
-              if (item.label === key && item.scoreInputValue !== ele[key]) {
-                this.actionError =
-                'The current label is diiferent from the original existing label, please do submit first.';
+        if (this.annotationHistory[i].srId === this.sr._id) {
+          let difference = [];
+          if (this.isMultipleNumericLabel) {
+            if (this.annotationHistory[i].category.length !== this.scores.filter(item => item.checked).length) {
+              this.actionError = this.tipMessage;
+              return;
+            } 
+            for (const item of this.scores) {
+              for (const ele of this.annotationHistory[i].category) {
+                const key = Object.keys(ele)[0];
+                if (item.label === key && item.scoreInputValue !== ele[key]) {
+                  this.actionError = this.tipMessage;
+                  return;
+                }
+              }
+            }
+          } else if (!this.isNumeric && this.isMultipleLabel && !this.isMultipleNumericLabel) {
+            if (this.annotationHistory[i].category.length === 0) {
+              if (from == 'skip') {
+                this.skipAndFetchNewQuestion();
+                return;
+              } else if (from == 'pass') {
+                this.onSubmit(from);
+                return;
+              } else {
+                this.getNextSrc(from, id);
+                return;
+              }
+            } else if (this.annotationHistory[i].category.length - this.multipleLabelList.length >= 0) {
+              difference = _.difference(
+                this.annotationHistory[i].category,
+                this.multipleLabelList,
+              );
+            } else {
+              difference = _.difference(
+                this.multipleLabelList,
+                this.annotationHistory[i].category,
+              );
+            }
+            if (difference.length > 0) {
+              this.actionError = this.tipMessage;
+              return;
+            }
+          } else {
+            if (this.annotationHistory[i].category.length === 0) {
+              if (from == 'skip') {
+                this.skipAndFetchNewQuestion();
+                return;
+              } else if (from == 'pass') {
+                this.onSubmit(from);
+                return;
+              } else {
+                this.getNextSrc(from, id);
                 return;
               }
             }
-          }
-        } else {
-          let difference = [];
-          if (this.annotationHistory[i].category.length - isCategory.length >= 0) {
-            difference = _.difference(this.annotationHistory[i].category, isCategory);
-          } else {
-            difference = _.difference(isCategory, this.annotationHistory[i].category);
-          }
-          if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
-            this.actionError =
-              'The current label is diiferent from the original existing label, please do submit first.';
-            return;
+            if (this.annotationHistory[i].category.length - isCategory.length >= 0) {
+              difference = _.difference(this.annotationHistory[i].category, isCategory);
+            } else {
+              difference = _.difference(isCategory, this.annotationHistory[i].category);
+            }
+            if (this.annotationHistory[i].srId === this.sr._id && difference.length > 0) {
+              this.actionError = this.tipMessage;
+              return;
+            }
           }
         }
+      }
+      if (this.startFrom === 'review' && this.isMultipleNumericLabel) {
+        this.checkMutilNumbericDiff(isCategory, from, id);
+        return;
+      }
+      if (this.startFrom === 'review' && !this.isMultipleNumericLabel && this.isMultipleLabel) {
+        this.checkMutilLabel(from, id);
+        return;
+      }
+      if (this.startFrom === 'review' && !this.isMultipleNumericLabel && this.isNumeric) {
+        this.checkNumeric(isCategory, from, id);
+        return;
       }
       if (from == 'skip') {
         this.skipAndFetchNewQuestion();
       } else if (from == 'pass') {
         this.onSubmit(from);
       } else {
-        if (!this.actionError) {
-          this.clearCheckbox();
-          this.multipleLabelList = [];
-          const param = {
-            id,
-            pid: this.projectId,
-          };
-          this.getSrById(param, 0, from === 'history' ? from: 'previous');
+        this.getNextSrc(from, id);
+      }
+    }
+  }
+
+  checkMutilNumbericDiff(isCategory: any, from?: string, id?: string) {
+    let inputMultipleNumericLabels = [];
+    this.sr.userInputs.forEach(item => {
+      if (item.user === this.user.email) {
+        inputMultipleNumericLabels.push({[item.problemCategory.label]: item.problemCategory.value});
+      }
+    });
+    if (isCategory.length !== inputMultipleNumericLabels.length) {
+      this.actionError = this.tipMessage;
+      return;
+    }
+    if (isCategory.length > 0 && inputMultipleNumericLabels.length > 0 && isCategory.length === inputMultipleNumericLabels.length) {
+      let inputKeys = [];
+      for (const item of isCategory) {
+        inputKeys.push(Object.keys(item)[0]);
+      }
+      let originKeys = [];
+      for (const ele of inputMultipleNumericLabels) { 
+        originKeys.push(Object.keys(ele)[0]);
+      }
+      if (_.difference(inputKeys, originKeys).length > 0 || _.difference(originKeys, inputKeys).length > 0) {
+        this.actionError = this.tipMessage;
+        return;
+      }
+      for (const item of isCategory) {
+        for (const ele of inputMultipleNumericLabels) {
+          const key = Object.keys(ele)[0];
+          if (Object.keys(item)[0] === key && item[key] !== ele[key]) {
+            this.actionError = this.tipMessage;
+            return;
+          }
         }
       }
+    }
+    this.checkTextProject(from, id);
+  }
+
+  checkTextProject(from?: any, id?: string) {
+    if (!this.checkMoreReviewChanged()) {
+      return false;
+    }
+    if (from === 'skip') {
+      this.skipAndFetchNewQuestion();
+    } else if (from == 'pass') {
+      this.onSubmit(from);
+    } else {
+      this.getNextSrc(from, id);
+    }
+  }
+
+  getNextSrc(from, id: string) {
+    if (!this.actionError) {
+      this.clearCheckbox();
+      this.multipleLabelList = [];
+      const param = {
+        id,
+        pid: this.projectId,
+      };
+      this.getSrById(param, 0, from === 'history' ? from: 'previous');
     }
   }
 
@@ -1398,9 +1598,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.projectType !== 'image') {
       this.annotationPrevious = this.annotationHistory.slice(index + 1);
     }
-
     if (isCategory.length > 0) {
       if (
+        this.isNumeric ||
+        this.isMultipleNumericLabel ||
         this.isMultipleLabel &&
         this.projectType !== 'ner' &&
         this.projectType !== 'image' &&
@@ -1430,6 +1631,18 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  checkMutilNumberChanged(changedValues, originalValues) {
+      const originalVals = [];
+      if (originalValues && originalValues.length) {
+        originalValues.forEach(item => {
+          if (item.user === this.user.email) {
+            originalVals.push({[item.problemCategory.label]: item.problemCategory.value });
+          }
+        })
+      }
+      return  _.isEqual(changedValues, originalVals);
+  }
+
   isSkipOrBack(type, id?, index?) {
     const isCategory = this.categoryFunc();
     let flag1;
@@ -1438,7 +1651,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       flag1 =
         this.sr.userInputs &&
         this.sr.userInputs.length > 0 &&
-        this.sr.userInputs[0].problemCategory.length > 0;
+        this.sr.userInputs[0].problemCategory.length >= 0;
     } else {
       flag1 = this.sr.userInputs && this.sr.userInputs.length > 0;
     }
@@ -1451,6 +1664,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         });
         flag2 = isCategory.length == a.length;
+      } else if (this.projectType == 'text' || this.projectType == 'tabular') {
+        if (this.isMultipleNumericLabel) {
+          flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
+        } else if (this.isMultipleLabel && !this.isNumeric && !this.isMultipleNumericLabel) {
+          flag2 = this.checkMutilLabel(type);
+          return false;
+        } else if (isCategory.length > 1) {
+          flag2 = isCategory.length == this.sr.userInputs.length;
+        } else {
+          flag2 = isCategory[0] == this.sr.userInputs[0].problemCategory;
+        }
       } else {
         flag2 = isCategory.length == this.sr.userInputs[0].problemCategory.length;
       }
@@ -1475,38 +1699,44 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           });
         }
-        const aa = isCategory.sort(
-          this.toolService.sortBy(
-            this.projectType === 'ner' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
-            'ascending',
-          ),
-        );
-        let bb;
-        if (this.projectType === 'image') {
-          bb = a.sort(this.toolService.sortBy('sort', 'ascending'));
-        } else {
-          bb = this.sr.userInputs[0].problemCategory.sort(
-            this.toolService.sortBy(this.projectType === 'ner' ? 'start' : 'line', 'ascending'),
+        if (this.projectType !== 'text' && this.projectType !== 'tabular') {
+          const aa = isCategory.sort(
+            this.toolService.sortBy(
+              this.projectType === 'ner' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
+              'ascending',
+            ),
           );
-        }
-
-        for (let i = 0; i < aa.length; i++) {
-          let aaString;
-          let bbString;
-          if (this.projectType === 'ner') {
-            aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label;
-            bbString = bb[i].text + aa[i].start + aa[i].end + bb[i].label;
-          } else if (this.projectType === 'log') {
-            aaString = aa[i].line + aa[i].label + aa[i].freeText;
-            bbString = bb[i].line + bb[i].label + bb[i].freeText;
-          } else if (this.projectType === 'image') {
-            aaString = aa[i].valueInfo;
-            bbString = bb[i].valueInfo;
+          let bb;
+          if (this.projectType === 'image') {
+            bb = a.sort(this.toolService.sortBy('sort', 'ascending'));
+          } else {
+            bb = this.sr.userInputs[0].problemCategory.sort(
+              this.toolService.sortBy(this.projectType === 'ner' ? 'start' : 'line', 'ascending'),
+            );
           }
-          if (aaString !== bbString) {
-            this.actionError =
-              'The current label is diiferent from the original existing label, please do submit first.';
-            return false;
+
+          for (let i = 0; i < aa.length; i++) {
+            let aaString;
+            let bbString;
+            if (this.projectType === 'ner') {
+              const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
+              const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
+              aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
+              bbString = bb[i].text + bb[i].start + bb[i].end + bb[i].label + bbPopupLabel;
+            } else if (this.projectType === 'log') {
+              const logFreeText = this.questionForm.get('questionGroup.logFreeText').value
+                ? this.questionForm.get('questionGroup.logFreeText').value : '';
+              const srlogFreeText = this.sr.userInputs[0].logFreeText ? this.sr.userInputs[0].logFreeText : '';
+              aaString = aa[i].line + aa[i].label + aa[i].freeText + logFreeText;
+              bbString = bb[i].line + bb[i].label + bb[i].freeText + srlogFreeText;
+            } else if (this.projectType === 'image') {
+              aaString = aa[i].valueInfo;
+              bbString = bb[i].valueInfo;
+            }
+            if (aaString !== bbString) {
+              this.actionError = this.tipMessage;
+              return false;
+            }
           }
         }
         this.loading = true;
@@ -1528,13 +1758,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.onSubmit(type);
         }
       } else {
-        this.actionError =
-          'The current label is diiferent from the original existing label, please do submit first.';
+        this.actionError = this.tipMessage;
         return false;
       }
     } else {
-      this.actionError =
-        'The current label is diiferent from the original existing label, please do submit first.';
+      this.actionError = this.tipMessage;
       return;
     }
   }
@@ -1546,6 +1774,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       const isCategory = this.categoryFunc();
       if (isCategory.length > 0) {
         if (
+          this.isNumeric ||
+          this.isMultipleNumericLabel ||
           this.isMultipleLabel &&
           this.projectType !== 'ner' &&
           this.projectType !== 'image' &&
@@ -1606,18 +1836,23 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                   let aaString;
                   let bbString;
                   if (this.projectType === 'ner') {
-                    aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label;
-                    bbString = bb[i].text + aa[i].start + aa[i].end + bb[i].label;
+                    const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
+                    const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
+                    aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
+                    bbString = bb[i].text + bb[i].start + bb[i].end + bb[i].label + bbPopupLabel;
                   } else if (this.projectType === 'log') {
-                    aaString = aa[i].line + aa[i].label + aa[i].freeText;
-                    bbString = bb[i].line + bb[i].label + bb[i].freeText;
+                    const logFreeText = this.questionForm.get('questionGroup.logFreeText').value
+                      ? this.questionForm.get('questionGroup.logFreeText').value
+                      : '';
+                    const srlogFreeText = this.annotationHistory[i].logFreeText ? this.annotationHistory[i].logFreeText : '';
+                    aaString = aa[i].line + aa[i].label + aa[i].freeText + srlogFreeText;
+                    bbString = bb[i].line + bb[i].label + bb[i].freeText + logFreeText;
                   } else if (this.projectType === 'image') {
                     aaString = aa[i].valueInfo;
                     bbString = bb[i].valueInfo;
                   }
                   if (aaString !== bbString) {
-                    this.actionError =
-                      'The current label is diiferent from the original existing label, please do submit first.';
+                    this.actionError = this.tipMessage;
                     return false;
                   }
                 }
@@ -1628,8 +1863,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 };
                 this.getSrById(param, 0, 'previous');
               } else {
-                this.actionError =
-                  'The current label is diiferent from the original existing label, please do submit first.';
+                this.actionError = this.tipMessage;
                 return;
               }
             }
@@ -1684,7 +1918,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       (response) => {
         this.sr = response;
         if (this.sr.MSG) {
-          this.error = 'All cases have been completely annotated.';
+          if (this.startFrom === 'review') {
+            this.error = 'All cases have been completely reviewed.';
+          } else {
+            this.error = 'All cases have been completely annotated.';
+          }
           return;
         }
         if (
@@ -1693,6 +1931,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.projectType == 'regression'
         ) {
           this.sr = this.resetTabularSrData(this.sr);
+          if (this.sr.userInputsLength > 0 ) {
+            this.categoryBackFunc();
+            this.sortLabelForColor(this.categories);
+            this.getProgress();
+          }
         }
         if (this.projectType == 'ner') {
           this.sr = this.resetNerSrData(this.sr);
@@ -1700,6 +1943,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
+          if (this.startFrom === 'review') {
+            const images = [];
+            this.sr.userInputs.forEach(item => {
+              images.push(item.problemCategory);
+            })
+            this.historyTask = [{ result: images }];
+            this.currentBoundingData = images;
+          }
           setTimeout(() => {
             const option = {
               dom: 'label-studio',
@@ -1875,7 +2126,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.projectType !== 'log') ||
       this.isNumeric
     ) {
-      if (this.labelChoose !== '' || this.labelChoose !== null ) {
+      if (this.moreReviewInfo.length > 1 && this.isNumeric && this.labelChoose !== this.minLabel) {
+        category.push(Number(this.labelChoose));
+      } 
+      if (this.moreReviewInfo.length < 2 && this.isNumeric && this.labelChoose !== '' && this.labelChoose !== null) {
+        category.push(Number(this.labelChoose));
+      }
+      if (this.labelChoose && !this.isNumeric) {
         category.push(this.labelChoose);
       }
       return category;
@@ -1914,6 +2171,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getProblemCategory() {
+    if (this.moreReviewInfo.length > 1) {
+      return;
+    }
     if (this.sr.userInputs.length > 0) {
       for (let i = 0; i < this.sr.userInputs.length; i++) {
         if (this.sr.userInputs[i].user == this.user.email) {
@@ -1927,7 +2187,42 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  setReviewInfo() {
+    if (this.sr.userInputs.length > 1) {
+      this.moreReviewInfo = [];
+      this.sr.userInputs.forEach((item, index) => {
+        let annotationInfo = '';
+        if ((this.projectType === 'text' || this.projectType === 'tabular') && this.isMultipleNumericLabel) {
+          annotationInfo = `${item.problemCategory.label}[${item.problemCategory.value}]`;
+        } else {
+          annotationInfo = item.problemCategory;
+        }
+        if (!index) {
+          this.moreReviewInfo.push({ annotator: item.user, annotationInfo });
+        } else {
+          let existInfo = this.moreReviewInfo.find(info => info.annotator === item.user);
+          if (existInfo) {
+            existInfo.annotationInfo += `,${annotationInfo}`;
+          } else {
+            this.moreReviewInfo.push({ annotator: item.user, annotationInfo }); 
+          }
+        }
+      });
+      if (this.moreReviewInfo.length > 1) {
+        this.labelChoose = null;
+        this.el.nativeElement.querySelectorAll('.cleanColor').forEach((element) => {
+          this.renderer2.setStyle(element, 'background-color', 'unset');
+        });
+      }
+    } else {
+      this.moreReviewInfo = [];
+    }
+  }
+
   categoryBackFunc(index?, from?) {
+    if (this.startFrom === 'review') {
+      this.setReviewInfo();
+    }
     if (this.isShowDropDown && !this.isMultipleLabel && !this.isNumeric) {
       this.questionForm.get('questionGroup.category').setValue(this.getProblemCategory());
     } else if (
@@ -1935,7 +2230,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       !this.isShowDropDown &&
       !this.isMultipleLabel &&
       this.projectType != 'ner' &&
-      this.projectType !== 'image'
+      this.projectType !== 'image' &&
+      this.moreReviewInfo.length < 2
     ) {
       // to storage the ticket label
       this.el.nativeElement.querySelectorAll('.cleanColor').forEach((element) => {
@@ -1945,7 +2241,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       // get the previous label color
       const labelIndex = this.categories.indexOf(this.labelChoose);
       this.idName = 'label' + labelIndex;
-      switch (labelIndex) {
+      setTimeout(() => { switch (labelIndex) {
         case 0:
           this.renderer2.setStyle(
             this.el.nativeElement.querySelector('.' + this.idName),
@@ -1988,10 +2284,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             '#ff9c32',
           );
           break;
-      }
+      } }, 10);
     } else if (this.isNumeric) {
-      this.labelChoose = this.getProblemCategory();
-      this.numericValue = this.numericOptions.step === 1 ? parseInt(this.labelChoose) : Number(this.formatDecimal(this.labelChoose, this.stepLen));
+      if (this.moreReviewInfo.length > 1) {
+        this.labelChoose = this.minLabel;
+        this.numericValue = this.minLabel;
+      } else {
+        this.labelChoose = this.getProblemCategory();
+        this.numericValue = this.numericOptions.step === 1 ? parseInt(this.labelChoose) : Number(this.formatDecimal(this.labelChoose, this.stepLen));
+      }
     } else if (
       !this.isNumeric &&
       this.isMultipleLabel &&
@@ -2016,49 +2317,55 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         } else if (this.sr.userInputs.length == 0) {
           originalLabel = [];
         }
-        this.multipleLabelList = originalLabel;
+        if (this.moreReviewInfo.length < 2) {
+          this.multipleLabelList = originalLabel;
+        }
       }
       this.clearScores(true);
-      this.multipleLabelList.forEach((e) => {
-        let multiLabelClass = '';
-        if (this.isMultipleNumericLabel) { 
-          const checkedIndex = this.scores.findIndex(item => item.label === e.label);
-          if (checkedIndex !== -1) {
-            multiLabelClass = 'multiLabel' + checkedIndex;
-            this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].children[0].checked = true;
-            this.scores.forEach(item => {
-              if (item.label === e.label) {
-                item.checked = true;
-                item.scoreInputValue = e.value;
-                item.scoreValue = Number(this.formatDecimal(item.scoreInputValue, item.stepLen));
+      if (this.moreReviewInfo.length < 2) {
+        setTimeout(() => {
+          this.multipleLabelList.forEach((e) => {
+            let multiLabelClass = '';
+            if (this.isMultipleNumericLabel) { 
+              const checkedIndex = this.scores.findIndex(item => item.label === e.label);
+              if (checkedIndex !== -1) {
+                multiLabelClass = 'multiLabel' + checkedIndex;
+                this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].children[0].checked = true;
+                this.scores.forEach(item => {
+                  if (item.label === e.label) {
+                    item.checked = true;
+                    item.scoreInputValue = e.value;
+                    item.scoreValue = Number(this.formatDecimal(item.scoreInputValue, item.stepLen));
+                  }
+                });
               }
-            });
-          }
-        } else {
-          multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
-          this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].checked = true;
-        }    
-        this.renderer2.setStyle(
-          this.el.nativeElement.querySelector('.' + multiLabelClass),
-          'background-color',
-          '#fafafa',
-        );
-        this.renderer2.setStyle(
-          this.el.nativeElement.querySelector('.' + multiLabelClass),
-          'border-color',
-          '#ccc',
-        );
-        this.renderer2.setStyle(
-          this.el.nativeElement.querySelector('.' + multiLabelClass),
-          'border-bottom-width',
-          'medium',
-        );
-        this.renderer2.setStyle(
-          this.el.nativeElement.querySelector('.' + multiLabelClass + ' label'),
-          'font-weight',
-          'bold',
-        );
-      });
+            } else {
+              multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
+              this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].checked = true;
+            }    
+            this.renderer2.setStyle(
+              this.el.nativeElement.querySelector('.' + multiLabelClass),
+              'background-color',
+              '#fafafa',
+            );
+            this.renderer2.setStyle(
+              this.el.nativeElement.querySelector('.' + multiLabelClass),
+              'border-color',
+              '#ccc',
+            );
+            this.renderer2.setStyle(
+              this.el.nativeElement.querySelector('.' + multiLabelClass),
+              'border-bottom-width',
+              'medium',
+            );
+            this.renderer2.setStyle(
+              this.el.nativeElement.querySelector('.' + multiLabelClass + ' label'),
+              'font-weight',
+              'bold',
+            );
+          });
+        }, 10);
+      }
     } else if (
       !this.isShowDropDown &&
       !this.isNumeric &&
@@ -2106,8 +2413,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clearUserInput() {
     this.isShowDropDown
-      ? this.questionForm.get('questionGroup.category').reset()
-      : (this.labelChoose = null);
+    ? this.questionForm.get('questionGroup.category').reset()
+    : (this.labelChoose = null);
     if (this.isNumeric) {
       this.labelChoose = this.minLabel;
       this.numericValue = this.minLabel;
@@ -2140,9 +2447,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       item.checked = false;
       if (isClearChecked) {
         const multiLabelClass = 'multiLabel' + index;
-        console.log(this.el.nativeElement);
-        this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].children[0].checked = false;
-        this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].children[0].nextElementSibling.style.fontWeight = '';
+        setTimeout(()=> {
+          this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].children[0].checked = false;
+          this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].children[0].nextElementSibling.style.fontWeight = '';
+        }, 10);
       }
     });
   }
@@ -2517,7 +2825,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getLabelColor(lable) {
-    return this.labelColor.get(lable);
+    if (this.labelColor) {
+      return this.labelColor.get(lable);
+    }
   }
 
   sortStartEndID() {
@@ -2577,6 +2887,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                     : this.annotationHistory[index].images,
               },
             ];
+            if (this.startFrom == 'review') {
+              const images = [];
+              responseSr.userInputs.forEach(item => {
+                images.push(item.problemCategory);
+              })
+              this.historyTask = [{ result: images }];
+              this.currentBoundingData = images;
+            }
             setTimeout(() => {
               const option = {
                 dom: 'label-studio',
@@ -2591,12 +2909,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 from: 'annotate',
               };
               this.toCallStudio(option);
-              this.historyTask = [];
-              this.currentBoundingData =
-                from == 'previous'
-                  ? this.annotationPrevious[index].images
-                  : this.annotationHistory[index].images;
-
+              if (this.startFrom !== 'review') {
+                this.historyTask = [];
+                this.currentBoundingData =
+                  from == 'previous'
+                    ? this.annotationPrevious[index].images
+                    : this.annotationHistory[index].images;
+              }
               if (from == 'previous') {
                 this.annotationPrevious.splice(index, 1);
               } else if (from == 'history') {
@@ -2622,11 +2941,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.sr.flag = responseSr.flag;
           this.sr.userInputs = responseSr.userInputs;
           this.sr.ticketQuestions = responseSr.ticketQuestions;
-          this.currentLogFile =
-            this.projectInfo.isShowFilename || this.startFrom === 'review'
-              ? responseSr.fileInfo.fileName
-              : '';
-          this.setSelectedFile();
+          if (this.projectType === 'log') {
+            this.currentLogFile =
+              this.projectInfo.isShowFilename || this.startFrom === 'review'
+                ? responseSr.fileInfo.fileName
+                : '';
+            this.setSelectedFile();
+          }
           if (this.projectType !== 'image') {
             this.categoryBackFunc(index, from);
           }
@@ -2764,17 +3085,21 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   sortLabelForColor(categories) {
     this.logCategories = [];
-    categories.forEach((element, index) => {
-      if (index >= 30) {
-        index = index - 30;
-      }
-      if (this.projectType == 'log') {
-        this.logCategories.push({ label: element, color: this.colorsRainbow[index] });
-      } else {
-        this.imageRectLabelTemplate += `<Label value="${element}" background="${this.colorsRainbow[index]}" selectedColor="white"/>`;
-        this.imagePolyLabelTemplate += `<Label value="${element}" background="${this.colorsRainbow[index]}" selectedColor="white"/>`;
-      }
-    });
+    this.imageRectLabelTemplate = [];
+    this.imagePolyLabelTemplate = [];
+    if (categories) {
+      categories.forEach((element, index) => {
+        if (index >= 30) {
+          index = index - 30;
+        }
+        if (this.projectType == 'log') {
+          this.logCategories.push({ label: element, color: this.colorsRainbow[index] });
+        } else {
+          this.imageRectLabelTemplate += `<Label value="${element}" background="${this.colorsRainbow[index]}" selectedColor="white"/>`;
+          this.imagePolyLabelTemplate += `<Label value="${element}" background="${this.colorsRainbow[index]}" selectedColor="white"/>`;
+        }
+      });
+    }
   }
 
   nerLabelForColor(categories) {
@@ -3089,10 +3414,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateFreeText(e, index) {
-    if (this.spansList.length > 0 && e.trim() !== '') {
+    if (this.spansList.length > 0) {
       for (let i = 0; i < this.spansList.length; i++) {
         if (this.spansList[i].index === index) {
-          this.spansList[i].freeText = e;
+          this.spansList[i].freeText =  e.trim() !== '' ? e : '';
           return;
         }
       }
