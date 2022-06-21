@@ -215,7 +215,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           [inputSlackChannelsMsg]="inputSlackChannels"
           (slackListOuter)="receiveSlackAssign($event)"
         ></app-assign-slack>
-        <div class="prev-info clr-row">
+        <div class="prev-info clr-row" *ngIf="showLabel">
           <label for="label" class="label-tooltip clr-col-12 clr-col-md-4">Label</label>
           <div class="clr-input-wrapper clr-col-12 clr-col-md-7 labelBox">
             <div *ngIf="labelType != 'numericLabel'">

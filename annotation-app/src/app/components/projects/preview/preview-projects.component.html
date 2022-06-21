@@ -193,7 +193,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                   >Annotator
                 </clr-dg-column>
                 <clr-dg-column
-                  *ngIf="projectType === 'log'"
                   class="ellipsis-datagrid"
                   style="min-width: 250px"
                   >Action
@@ -325,7 +324,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <div *ngFor="let a of dataset.userInputs">{{ a.user }}</div>
                     </clr-dg-cell>
                     <clr-dg-cell
-                      *ngIf="dataset.projectType == 'log'"
                       class="ellipsis-datagrid previewHeight"
                       style="min-width: 250px"
                     >
@@ -335,7 +333,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           [disabled]="dataset.userInputsLength <= 0 || dataset.reviewInfo.review"
                           (click)="modify(dataset, 'single')"
                         >
-                          Return to annotator
+                          Return to review
                         </button>
                       </div>
                     </clr-dg-cell>

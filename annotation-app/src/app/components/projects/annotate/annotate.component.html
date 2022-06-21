@@ -115,13 +115,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
 
           <h3>
-            {{ projectType === 'log' && startFrom === 'review' ? 'Review' : 'Annotation' }} Progress
+            {{ startFrom === 'review' ? 'Review' : 'Annotation' }} Progress
           </h3>
           <div class="clr-form-group left-project-info clr-row">
             <label for="name" class="label-leftBoard">This session:</label>&nbsp;&nbsp;
             <div>
               {{
-                projectType === 'log' && startFrom === 'review'
+                startFrom === 'review'
                   ? progressInfo?.totalCase
                   : progressInfo?.assignedCase
               }}
@@ -130,7 +130,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="clr-form-group left-project-info clr-row">
             <label for="owner" class="label-leftBoard"
               >{{
-                projectType === 'log' && startFrom === 'review' ? 'Reviewed' : 'Annotations'
+                startFrom === 'review' ? 'Reviewed' : 'Annotations'
               }}
               : </label
             >&nbsp;&nbsp;
@@ -144,7 +144,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             >
             </clr-progress-bar>
           </div>
-          <div *ngIf="projectType === 'log' && startFrom === 'review'">
+          <div *ngIf="startFrom === 'review'">
             <div class="clr-form-group left-project-info clr-row">
               <label for="name" class="label-leftBoard">Reviewee:</label>&nbsp;&nbsp;
               <div class="clr-select-wrapper" style="width: 70%">
@@ -491,45 +491,28 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </div>
               <div class="nerContent">
-                <div class="nerPassage" (mouseup)="onMouseUp($event)">
-                  <span id="mainText">{{ sr.originalData.text }}</span>
-                </div>
-                <div class="annotateLabel">
-                  <div style="font-weight: 500">Tips:</div>
-                  <ul class="resultTip">
-                    <li>
-                      When mouse over or click the selected text will highlight the labeled text on
-                      the passage.
-                    </li>
-                    <li *ngIf="isShowPopLabel">Click labeled text to see the secondary labels.</li>
-                  </ul>
-                  <div class="result">Results</div>
-                  <div *ngIf="spansList.length === 0">Nothing selected</div>
-                  <div class="selectedSection">
-                    <div
-                      *ngFor="let spanText of spansList"
-                      class="spanSelected"
-                      (mouseenter)="mouseenterMark($event, spanText)"
-                      (mouseleave)="mouseleaveMark($event, spanText)"
-                    >
-                      <span (click)="clickShowMark($event, spanText)" class="selectText">{{
-                        spanText.text
-                      }}</span>
-                      <span
-                        class="entity"
-                        [style.color]="getLabelColor(spanText.label)"
-                        title="{{ spanText.label | uppercase }}"
-                        >{{ spanText.label }}</span
-                      >
-                      <span
-                        *ngIf="isShowPopLabel && spanText.popUpLabel"
-                        class="entity"
-                        [style.color]="spanText.popLabelColor"
-                        title="{{ spanText.popUpLabel | uppercase }}"
-                        >{{ spanText.popUpLabel }}</span
-                      >
-                      <span class="clear" (click)="clickClearMark($event, spanText)">×</span>
-                    </div>
+              <div class="nerPassage" (mouseup)="onMouseUp($event)">  
+                <span id='mainText'>{{ sr?.originalData?.text }}</span>
+              </div>
+              <div class="annotateLabel">
+                <div style="font-weight: 500;">Tips:</div>
+                <ul class="resultTip">
+                  <li>When mouse over or click the selected text will highlight the labeled text on the passage.</li>
+                  <li *ngIf="isShowPopLabel">Click labeled text to see the secondary labels.</li>
+                </ul>
+                <div class="result">Results</div>
+                <div *ngIf="spansList.length === 0">Nothing selected</div>  
+                <div class="selectedSection">
+                  <div
+                  *ngFor="let spanText of spansList"
+                  class="spanSelected"
+                  (mouseenter)="mouseenterMark($event, spanText)"
+                  (mouseleave)="mouseleaveMark($event, spanText)"
+                  >
+                  <span (click)="clickShowMark($event, spanText)" class="selectText">{{ spanText.text }}</span>
+                  <span class="entity" [style.color]="getLabelColor(spanText.label)" title="{{ spanText.label | uppercase }}">{{ spanText.label }}</span>
+                  <span *ngIf="isShowPopLabel && spanText.popUpLabel " class="entity" [style.color]="spanText.popLabelColor" title="{{ spanText.popUpLabel | uppercase }}">{{ spanText.popUpLabel }}</span>
+                  <span class="clear" (click)="clickClearMark($event, spanText)">×</span>
                   </div>
                 </div>
               </div>
@@ -689,6 +672,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </div>
             </div>
+          </div>
+          <div *ngIf="moreReviewInfo?.length > 1" class="limit-height">
+            <clr-datagrid>
+              <clr-dg-column>Annotator</clr-dg-column>
+              <clr-dg-column>Annotation</clr-dg-column>
+              <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
+                  <clr-dg-cell>{{reviewInfo.annotator}}</clr-dg-cell>
+                  <clr-dg-cell>{{reviewInfo.annotationInfo}}</clr-dg-cell>
+              </clr-dg-row>
+              <clr-dg-footer>{{moreReviewInfo.length}} annotation info</clr-dg-footer>
+          </clr-datagrid>
           </div>
           <div class="clr-row" *ngIf="projectType !== 'image'">
             <h4 style="margin-top: 2rem; margin-left: 0.5rem">
@@ -935,7 +929,6 @@ SPDX-License-Identifier: Apache-2.0 -->
               ></textarea>
             </div>
           </div>
-
           <div class="actions">
             <div
               *ngIf="actionError"
@@ -961,18 +954,14 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </div>
             <button
-              *ngIf="
-                (((isMultipleLabel || isMultipleNumericLabel) && projectType !== 'log') ||
-                  projectType == 'image' ||
-                  (projectType == 'log' && startFrom !== 'review')) &&
-                projectType !== 'ner'
-              "
+              *ngIf="startFrom !== 'review'
+                && (projectType !== 'text' && projectType !== 'tabular' || isMultipleNumericLabel || isNumeric || isMultipleLabel)"   
               class="btn btn-success submit"
               type="submit"
               [disabled]="
                 multipleLabelList.length == 0 &&
                 spansList.length == 0 &&
-                currentBoundingData.length == 0
+                currentBoundingData.length == 0 && !isNumeric
               "
               title="{{
                 multipleLabelList.length > 0 ||
@@ -985,18 +974,20 @@ SPDX-License-Identifier: Apache-2.0 -->
               Submit
             </button>
             <button
-              *ngIf="
-                projectType == 'ner' ||
-                (projectType == 'log' && startFrom == 'review') ||
-                (isNumeric && !isMultipleLabel)
+              *ngIf="startFrom == 'review'
+                && (projectType !== 'text' && projectType !== 'tabular' || isMultipleNumericLabel  || isNumeric || isMultipleLabel)"
+              [disabled]="
+                multipleLabelList.length == 0 &&
+                spansList.length == 0 &&
+                currentBoundingData.length == 0 && !isNumeric
               "
               class="btn btn-success submit"
               type="submit"
             >
-              Submit
+              modify
             </button>
             <button
-              *ngIf="projectType === 'log' && startFrom === 'review'"
+              *ngIf="startFrom === 'review'"
               class="btn btn-outline"
               type="button"
               (click)="pass()"
@@ -1005,7 +996,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               Pass
             </button>
 
-            <button class="btn btn-outline" type="button" (click)="onSkipGame()">
+            <button class="btn btn-outline" type="button" (click)="onSkipGame()" [disabled]="disabledSkip">
               <clr-icon shape="ban"></clr-icon>
               Skip
             </button>

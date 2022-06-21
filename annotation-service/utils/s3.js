@@ -61,7 +61,7 @@ async function uploadObject(Key, Body){
         Body: Body
     }
     console.log('[ S3 ] Utils uploadObject.S3.upload', Key);
-    return await S3.upload(uploadParams).promise();
+    return S3.upload(uploadParams).promise();
 }
 
 async function signedUrlByS3(operation, key, S3) {
@@ -74,7 +74,7 @@ async function signedUrlByS3(operation, key, S3) {
         Expires: ACCESS_TIME_60
     };
 
-    return await S3.getSignedUrl(operation, params);
+    return S3.getSignedUrl(operation, params);
 
 }
 

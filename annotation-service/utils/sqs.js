@@ -37,7 +37,7 @@ async function sendSQSMessage(sqsQueueUrl,sqsMessageBody){
         MessageBody: sqsMessageBody
     };
     console.log('[ SQS ] Utils SQSClinet.sendMessage');
-    return await SQSClinet.sendMessage(params).promise();
+    return SQSClinet.sendMessage(params).promise();
 }
 async function consumeSQSMessage(){
     const setSQS = config.useAWS && config.sqsRoleArn && config.sqsUrl;
