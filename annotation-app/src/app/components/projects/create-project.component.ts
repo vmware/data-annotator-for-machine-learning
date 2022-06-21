@@ -128,6 +128,9 @@ export class CreateNewComponent implements OnInit {
   popLabelValidation: boolean;
   queryStrategyBase: any;
   setDataError: boolean = false;
+  slackList: any = [];
+  inputSlackValidation: string;
+  loadingSlack: boolean = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -185,7 +188,7 @@ export class CreateNewComponent implements OnInit {
       { name: 'uncertainty_sampling', value: 'PB_UNS' },
       { name: 'margin_sampling', value: 'PB_MS' },
       { name: 'entropy_sampling', value: 'PB_ES' },
-      { name: 'uncertainty_batch_sampling', value: 'RBM_UNBS'},
+      { name: 'uncertainty_batch_sampling', value: 'RBM_UNBS' },
     ];
     this.createForm();
     this.getMyDatasets();
@@ -224,15 +227,19 @@ export class CreateNewComponent implements OnInit {
       selectedText: [this.dataset.selectedText, ''],
       selectedDisplayColumn: [this.dataset.selectedDisplayColumn, ''],
       isShowFilename: [this.dataset.isShowFilename, ''],
-      mutilLabelArray: this.formBuilder.array([this.formBuilder.group({
-        label: this.formBuilder.control(''),
-        maxMutilVal: this.formBuilder.control(''),
-        minMutilVal: this.formBuilder.control(''),
-      }), this.formBuilder.group({
-        label: this.formBuilder.control(''),
-        maxMutilVal: this.formBuilder.control(''),
-        minMutilVal: this.formBuilder.control(''),
-      })]),
+      mutilLabelArray: this.formBuilder.array([
+        this.formBuilder.group({
+          label: this.formBuilder.control(''),
+          maxMutilVal: this.formBuilder.control(''),
+          minMutilVal: this.formBuilder.control(''),
+        }),
+        this.formBuilder.group({
+          label: this.formBuilder.control(''),
+          maxMutilVal: this.formBuilder.control(''),
+          minMutilVal: this.formBuilder.control(''),
+        }),
+      ]),
+      slack: [this.dataset.slack, null],
     });
   }
 
@@ -253,11 +260,12 @@ export class CreateNewComponent implements OnInit {
         condition = !this.dsDialogForm.invalid && !this.nameExist && !this.sizeError;
       } else if (this.isMutilNumericLabel) {
         this.validBoth();
-        condition = !this.dsDialogForm.invalid
-          && !this.nameExist
-          && !this.sizeError
-          && !this.inputLabelValidation
-          && !this.inputIsNull;
+        condition =
+          !this.dsDialogForm.invalid &&
+          !this.nameExist &&
+          !this.sizeError &&
+          !this.inputLabelValidation &&
+          !this.inputIsNull;
       } else {
         this.labelType = 'textLabel';
         this.dsDialogForm.get('min').setValidators(null);
@@ -289,10 +297,16 @@ export class CreateNewComponent implements OnInit {
         this.dsDialogForm.get('popLabels').setValidators(null);
         this.dsDialogForm.get('popLabels').updateValueAndValidity();
         if (this.showPopLabel) {
-          this.dsDialogForm.get('popLabels').setValidators(DatasetValidator.requiredTwoPopLabel(this.projectType));
+          this.dsDialogForm
+            .get('popLabels')
+            .setValidators(DatasetValidator.requiredTwoPopLabel(this.projectType));
           this.dsDialogForm.get('popLabels').updateValueAndValidity();
         }
-        condition = !this.dsDialogForm.invalid && !this.nameExist;
+        condition =
+          !this.dsDialogForm.invalid &&
+          !this.nameExist &&
+          !this.inputSlackValidation &&
+          !this.loadingSlack;
       }
       FormValidatorUtil.markControlsAsTouched(this.dsDialogForm);
       if (condition) {
@@ -343,6 +357,7 @@ export class CreateNewComponent implements OnInit {
           ? [...this.categoryList, ...this.selectDescription]
           : this.categoryList,
       );
+    formData.append('slack', JSON.stringify(this.slackList));
     formData.append('pname', this.dsDialogForm.value.projectName);
     formData.append('taskInstruction', this.dsDialogForm.value.taskInstruction);
     formData.append('maxAnnotations', this.dsDialogForm.value.maxAnnotations);
@@ -375,7 +390,7 @@ export class CreateNewComponent implements OnInit {
     formData.append('location', this.location);
     formData.append('selectedDataset', this.dsDialogForm.value.selectedDataset);
     formData.append('min', this.dsDialogForm.value.min);
-    formData.append('max', this.dsDialogForm.value.max);  
+    formData.append('max', this.dsDialogForm.value.max);
     formData.append('estimator', this.dsDialogForm.value.selectedClassifier);
     formData.append('queryStrategy', this.dsDialogForm.value.selectedqueryStrategy);
     formData.append('projectType', this.projectType);
@@ -384,10 +399,10 @@ export class CreateNewComponent implements OnInit {
       formData.append('isMultipleLabel', 'true');
       formData.append('labelType', 'numericLabel');
       const labels = [];
-      this.mutilLabelArray.value.forEach(element => {
+      this.mutilLabelArray.value.forEach((element) => {
         labels.push({
-          [element.label]: [element.minMutilVal, element.maxMutilVal]
-        })
+          [element.label]: [element.minMutilVal, element.maxMutilVal],
+        });
       });
       formData.append('labels', JSON.stringify(labels));
     } else {
@@ -1273,33 +1288,40 @@ export class CreateNewComponent implements OnInit {
 
   checkBoth() {
     if (this.mutilLabelArray.value.length) {
-      this.sizeError = this.mutilLabelArray.value.some(item => !DatasetValidator.isInvalidNumber(item.minMutilVal)
-        && !DatasetValidator.isInvalidNumber(item.maxMutilVal)
-        && Number(item.minMutilVal) >= Number(item.maxMutilVal));
-      this.inputIsNull = this.mutilLabelArray.value.some(item => DatasetValidator.isInvalidNumber(item.minMutilVal)
-        || DatasetValidator.isInvalidNumber(item.maxMutilVal) || !item.label);
+      this.sizeError = this.mutilLabelArray.value.some(
+        (item) =>
+          !DatasetValidator.isInvalidNumber(item.minMutilVal) &&
+          !DatasetValidator.isInvalidNumber(item.maxMutilVal) &&
+          Number(item.minMutilVal) >= Number(item.maxMutilVal),
+      );
+      this.inputIsNull = this.mutilLabelArray.value.some(
+        (item) =>
+          DatasetValidator.isInvalidNumber(item.minMutilVal) ||
+          DatasetValidator.isInvalidNumber(item.maxMutilVal) ||
+          !item.label,
+      );
     }
   }
 
   minUpdate(e) {
     if (this.isMutilNumericLabel) {
-       this.checkBoth();
+      this.checkBoth();
     } else {
       this.minLabel = e.target.value;
       Number(this.minLabel) >= Number(this.maxLabel)
-      ? (this.sizeError = true)
-      : (this.sizeError = false);
+        ? (this.sizeError = true)
+        : (this.sizeError = false);
     }
   }
 
-  maxUpdate(e) {  
+  maxUpdate(e) {
     if (this.isMutilNumericLabel) {
       this.checkBoth();
     } else {
       this.maxLabel = e.target.value;
       Number(this.minLabel) >= Number(this.maxLabel)
-      ? (this.sizeError = true)
-      : (this.sizeError = false);
+        ? (this.sizeError = true)
+        : (this.sizeError = false);
     }
   }
 
@@ -1364,7 +1386,7 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogForm.get('labels').updateValueAndValidity();
     this.checkBoth();
   }
- 
+
   validMultiple() {
     this.dsDialogForm.get('selectedClassifier').setValue(null);
     this.dsDialogForm.get('selectedClassifier').setValidators(null);
@@ -1403,11 +1425,11 @@ export class CreateNewComponent implements OnInit {
   onMutilLabelKeydown() {
     let labelValues = [];
     if (this.mutilLabelArray.value.length) {
-      this.mutilLabelArray.value.forEach(ele => {
+      this.mutilLabelArray.value.forEach((ele) => {
         labelValues.push(ele.label);
       });
     }
-    this.inputIsNull = labelValues.filter(item => item).length !== this.mutilLabelArray.length;
+    this.inputIsNull = labelValues.filter((item) => item).length !== this.mutilLabelArray.length;
     this.inputLabelValidation = DatasetValidator.isRepeatArr(labelValues);
   }
 
@@ -1449,7 +1471,6 @@ export class CreateNewComponent implements OnInit {
     this.updatePopLabel(e.target.value);
   }
 
-  
   updatePopLabel(data) {
     if (data && this.popLabelValidation == false) {
       if (this.projectType === 'ner') {
@@ -1495,5 +1516,11 @@ export class CreateNewComponent implements OnInit {
         this.popLabelValidation = false;
       }
     }
+  }
+
+  receiveSlackAssign(e) {
+    this.slackList = e.slackList;
+    this.loadingSlack = e.loadingSlack;
+    this.inputSlackValidation = e.inputSlackValidation;
   }
 }

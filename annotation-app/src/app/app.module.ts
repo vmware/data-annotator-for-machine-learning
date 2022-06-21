@@ -55,7 +55,8 @@ import { MarkdownParserService } from './services/common/markdown-parser.service
 import { CommonService } from './services/common/common.service';
 import { S3Service } from './services/common/s3.service';
 import { EmailService } from './services/common/email.service';
-import { NgxSliderModule } from "@angular-slider/ngx-slider";
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { AssignSlackComponent } from './shared/components/assign-slack/assign-slack.component';
 
 @NgModule({
   declarations: [
@@ -87,6 +88,7 @@ import { NgxSliderModule } from "@angular-slider/ngx-slider";
     LoginComponent,
     EditProjectComponent,
     MyFilter,
+    AssignSlackComponent,
   ],
   imports: [
     BrowserAnimationsModule,

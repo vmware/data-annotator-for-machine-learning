@@ -21,7 +21,9 @@ export const environment: Env = {
   googleTrackId: null, // google track ID
   enableSendEmail: false, // Set to true to enable email notification for project creation, annotator assignment or edit project owner
   enableAWSS3: false, // Set to true to upload and download files with AWS S3 that requires some related AWS CONFIG IAM to be configured in annotation-service
-  
+  enableSlack: false, // Set to true to allow annotator use slack to post message and do annotate. And please follow the path annotation-service/config/app-os.js to set buildSlackApp=true at the same time. While first of all, in order to support this feature you need to create an app from an app manifest which containing basic info, scopes, settings, and features. You can find this yaml file in the path vmware/data-annotator-for-machine-learning/master/docs/manifets.yaml.
+  slackAppName: '', //If enableSlack=true, here should be the slack app name
+
   // This value is default file size limit for upload
   fileSize: 1024 * 1024 * 1024,
 };
