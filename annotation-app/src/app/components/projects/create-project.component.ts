@@ -141,7 +141,7 @@ export class CreateNewComponent implements OnInit {
     private route: ActivatedRoute,
     private papa: Papa,
     private renderer2: Renderer2,
-    private env: EnvironmentsService,
+    public env: EnvironmentsService,
     private toolService: ToolService,
     private commonService: CommonService,
     private emailService: EmailService,

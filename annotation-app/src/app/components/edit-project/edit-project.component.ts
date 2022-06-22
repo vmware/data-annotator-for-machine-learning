@@ -90,7 +90,7 @@ export class EditProjectComponent implements OnInit {
 
   constructor(
     private avaService: AvaService,
-    private env: EnvironmentsService,
+    public env: EnvironmentsService,
     private toolService: ToolService,
     private commonService: CommonService,
     private emailService: EmailService,
