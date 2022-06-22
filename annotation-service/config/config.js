@@ -11,5 +11,5 @@ const app = require(`./app-${sysEnv}`);
 module.exports = app
 
 console.log('----------------------------------------------------------------------------------------');
-console.log(`[ CONFIG ]  [ SYS_ENV ]=${ sysEnv }  [app]=`, module.exports);
+console.log(`[ CONFIG ]  [ SYS_ENV ]=${sysEnv}  [app]=`, module.exports);
 console.log('----------------------------------------------------------------------------------------');
