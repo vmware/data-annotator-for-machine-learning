@@ -101,6 +101,10 @@ SPDX-License-Identifier: Apache-2.0 -->
               projectInfo.projectType == 'log') ? (projectInfo?.assignmentLogic | toUpperCase) : 'Active learning' }}
             </div>
           </div>
+          <div class="clr-form-group left-project-info clr-row">
+            <label for="source" class="label-leftBoard">Max Annotation: </label>&nbsp;&nbsp;
+            <div>{{ projectInfo?.maxAnnotation }}</div>
+          </div>
           <div class="clr-form-group left-project-info">
             <label for="source" class="label-leftBoard">Instruction : </label>&nbsp;&nbsp;
             <div class="instructionBox" [innerHTML]="projectInfo?.taskInstructions"></div>
@@ -111,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             {{ startFrom === 'review' ? 'Review' : 'Annotation' }} Progress
           </h3>
           <div class="clr-form-group left-project-info clr-row">
-            <label for="name" class="label-leftBoard">This session:</label>&nbsp;&nbsp;
+            <label for="name" class="label-leftBoard">Total tickets:</label>&nbsp;&nbsp;
             <div>
               {{
                 startFrom === 'review'
@@ -123,13 +127,16 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="clr-form-group left-project-info clr-row">
             <label for="owner" class="label-leftBoard"
               >{{
-                startFrom === 'review' ? 'Reviewed' : 'Annotations'
+                startFrom === 'review' ? 'Reviewed tickets' : 'Annotations'
               }}
               : </label
             >&nbsp;&nbsp;
             <div>{{ progressInfo?.completeCase }}</div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
+            <label style="margin-bottom: 0.5rem">{{
+              startFrom === 'review' ? 'Project reviewed progress:' : ''
+            }}</label>
             <clr-progress-bar
               clrValue="{{ percentage }}"
               clrLabeled
@@ -193,6 +200,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
             <div class="clr-form-group left-project-info">
+              <label style="margin-bottom: 0.5rem; display: block">Annotator reviewed progress:</label>
               <div
                 class="clr-row"
                 style="margin-bottom: 0.3rem"
@@ -656,9 +664,10 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <div *ngIf="moreReviewInfo?.length > 1" class="limit-height">
+            <h5 style="margin-top: 1rem">Annotator labeled results:</h5>
             <clr-datagrid>
               <clr-dg-column>Annotator</clr-dg-column>
-              <clr-dg-column>Annotation</clr-dg-column>
+              <clr-dg-column>Label</clr-dg-column>
               <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
                   <clr-dg-cell>{{reviewInfo.annotator}}</clr-dg-cell>
                   <clr-dg-cell>{{reviewInfo.annotationInfo}}</clr-dg-cell>
