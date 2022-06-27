@@ -934,6 +934,9 @@ export class CreateNewComponent implements OnInit {
         return;
       }
       for (let d = 0; d < flag.length; d++) {
+        if (flag[d] == null || String(flag[d]).trim() == '') {
+          flag.splice(d, 1);
+        }
         if (flag[d].length > 50) {
           this.overPerLabelLimit = true;
           const sliceStr = flag[d].slice(0, 50);
@@ -966,7 +969,10 @@ export class CreateNewComponent implements OnInit {
     let count = 0;
     let invalidCount = 0;
     const selectedLabel = this.dsDialogForm.get('selectLabels').value;
-    const selectedLabelIndex = this.previewHeadDatas.indexOf(selectedLabel);
+    let selectedLabelIndex = this.previewHeadDatas.indexOf(selectedLabel);
+    if (this.projectType === 'ner') {
+      selectedLabelIndex = -1;
+    }
     this.papa.parse(location, {
       header: false,
       download: true,
