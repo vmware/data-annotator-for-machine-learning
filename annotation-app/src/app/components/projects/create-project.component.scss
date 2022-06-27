@@ -59,6 +59,18 @@ label span {
   padding: 0.5rem;
 }
 
+@media (min-width: 1880px) {
+  .labelsList, .preview {
+    max-width: calc(100% - 28vw) !important;
+  }
+}
+
+@media (max-width: 1881px) {
+  .labelsList, .preview {
+    max-width: calc(100% - 28.3vw) !important;
+  }
+}
+
 ::ng-deep clr-tooltip-content {
   left: auto !important;
   top: auto !important;
@@ -196,4 +208,16 @@ table thead th:first-child {
 
 .mutilLabel-row {
   margin-top: 1rem;
+}
+
+.clr-textarea {
+  max-width: 100%;
+}
+
+.clr-select-wrapper::after {
+  right: 0.5rem;
+}
+
+.setDataLineHeight .clr-select-wrapper::after {
+  right: 0.02rem !important
 }

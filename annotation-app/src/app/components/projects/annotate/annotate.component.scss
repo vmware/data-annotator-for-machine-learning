@@ -945,3 +945,7 @@ label .label-leftBoard {
 .limit-height clr-datagrid {
   max-height: 10rem;
 }
+
+.clr-select-wrapper::after {
+  right: 0.02rem;
+}

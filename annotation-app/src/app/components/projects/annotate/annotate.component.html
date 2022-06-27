@@ -149,7 +149,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <label for="name" class="label-leftBoard">Reviewee:</label>&nbsp;&nbsp;
               <div class="clr-select-wrapper" style="width: 70%">
                 <select
-                  style="width: 95%"
+                  style="width: 100%"
                   (change)="onSelectingReviewee($event)"
                   formControlName="reviewee"
                 >
@@ -735,7 +735,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           >
             <label for="category" class="label-tooltip">Labels : </label>
             <div class="clr-select-wrapper" style="min-width: 20%">
-              <select formControlName="category" (click)="dropDownSubmit()" style="min-width: 90%">
+              <select formControlName="category" (click)="dropDownSubmit()" style="min-width: 100%">
                 <option *ngFor="let category of categories" [value]="category">
                   {{ category }}
                 </option>
@@ -958,16 +958,16 @@ SPDX-License-Identifier: Apache-2.0 -->
               (click)="pass()"
             >
               <clr-icon shape="checkbox-list"></clr-icon>
-              Pass
+              PASS
             </button>
 
             <button class="btn btn-outline" type="button" (click)="onSkipGame()" [disabled]="disabledSkip">
               <clr-icon shape="ban"></clr-icon>
-              Skip
+              SKIP
             </button>
             <button class="btn btn-outline" type="button" (click)="isBack()">
               <clr-icon shape="undo"></clr-icon>
-              Back to Previous
+              BACK TO PREVIOUS
             </button>
             <button class="btn btn-primary btn-danger" type="button" (click)="onEndGame()">
               Exit
