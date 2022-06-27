@@ -123,7 +123,7 @@ export class GameFormComponent implements OnInit {
         projectType: data.projectType,
         id: data.id,
         from: 'review',
-        reviewee: reviewee === '' ? flag[0].user : reviewee,
+        reviewee: reviewee,
       },
     });
   }

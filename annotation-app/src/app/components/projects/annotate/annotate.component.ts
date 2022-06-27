@@ -178,6 +178,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   moreReviewInfo: any = [];
   submitMessage: string;
   tipMessage: string;
+  initReview: string;
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -240,6 +241,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.projectId = data.id;
       this.projectType = data.projectType;
       this.startFrom = data.from;
+      this.initReview = data.reviewee;
       this.toGetProjectInfo(this.projectId, data.reviewee);
     });
     this.getProgress();
@@ -488,7 +490,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         (res) => {
           this.loading = false;
           if (res && res.MSG) {
-            this.error = 'All cases have been completely reviewed.';
+            const reviewee = this.questionForm.get('questionGroup.reviewee').value;
+            if (reviewee) {
+              this.error = `${this.questionForm.get('questionGroup.reviewee').value } cases have been completely reviewed.`;
+            } else {
+              this.error = 'All cases have been completely reviewed.';
+            }
             return;
           } else {
             this.disabledSkip = res[0].reviewInfo.review;
@@ -1032,8 +1039,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   checkMutilLabel(from?: string, id?: string) {
     let multiLabels = [];
     this.sr.userInputs.forEach(item => {
-      if (item.user === this.user.email) {
+      if (this.startFrom === 'review') {
         multiLabels.push(item.problemCategory);
+      } else {
+        if (item.user === this.user.email) {
+          multiLabels.push(item.problemCategory);
+        }
       }
     });
     let difference = [];
@@ -1052,8 +1063,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   checkNumeric(isCategory?: any, from?: string, id?: string) {
     let multiLabels = [];
     this.sr.userInputs.forEach(item => {
-      if (item.user === this.user.email) {
+      if (this.startFrom === 'review') {
         multiLabels.push(item.problemCategory);
+      } else {
+        if (item.user === this.user.email) {
+          multiLabels.push(item.problemCategory);
+        }
       }
     });
     let difference = [];
@@ -1307,6 +1322,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       (response) => {
         response.taskInstructions = response.taskInstructions.replace(/(\r\n|\n|\r)/gm, '<br/>');
         this.projectInfo = response;
+        if (this.startFrom === 'review') {
+          this.projectInfo.annotationQuestion = "What's the final label?";
+        }
+        if (response.maxAnnotation > 1) {
+          reviewee = '';
+        } else {
+          reviewee = this.initReview;
+        }
         this.max = response.maxAnnotation;
         this.isMultipleLabel = response.isMultipleLabel;
         this.projectType = response.projectType;
@@ -1530,8 +1553,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   checkMutilNumbericDiff(isCategory: any, from?: string, id?: string) {
     let inputMultipleNumericLabels = [];
     this.sr.userInputs.forEach(item => {
-      if (item.user === this.user.email) {
+      if (this.startFrom === 'review') {
         inputMultipleNumericLabels.push({[item.problemCategory.label]: item.problemCategory.value});
+      } else {
+        if (item.user === this.user.email) {
+          inputMultipleNumericLabels.push({[item.problemCategory.label]: item.problemCategory.value});
+        }
       }
     });
     if (isCategory.length !== inputMultipleNumericLabels.length) {
@@ -1635,8 +1662,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       const originalVals = [];
       if (originalValues && originalValues.length) {
         originalValues.forEach(item => {
-          if (item.user === this.user.email) {
+          if (this.startFrom === 'review') {
             originalVals.push({[item.problemCategory.label]: item.problemCategory.value });
+          } else {
+            if (item.user === this.user.email) {
+              originalVals.push({[item.problemCategory.label]: item.problemCategory.value });
+            }
           }
         })
       }
@@ -1659,8 +1690,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       const a = [];
       if (this.projectType === 'image') {
         this.sr.userInputs.forEach((e) => {
-          if (e.user == this.user.email) {
+          if (this.startFrom === 'review') {
             a.push(e.problemCategory);
+          } else {
+            if (e.user == this.user.email) {
+              a.push(e.problemCategory);
+            }
           }
         });
         flag2 = isCategory.length == a.length;
@@ -1919,7 +1954,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.sr = response;
         if (this.sr.MSG) {
           if (this.startFrom === 'review') {
-            this.error = 'All cases have been completely reviewed.';
+            const reviewee = this.questionForm.get('questionGroup.reviewee').value;
+            if (reviewee) {
+              this.error = `${this.questionForm.get('questionGroup.reviewee').value } cases have been completely reviewed.`;
+            } else {
+              this.error = 'All cases have been completely reviewed.';
+            }
           } else {
             this.error = 'All cases have been completely annotated.';
           }
@@ -2176,8 +2216,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     if (this.sr.userInputs.length > 0) {
       for (let i = 0; i < this.sr.userInputs.length; i++) {
-        if (this.sr.userInputs[i].user == this.user.email) {
+        if (this.startFrom === 'review') {
           return this.sr.userInputs[i].problemCategory;
+        } else {
+          if (this.sr.userInputs[i].user == this.user.email) {
+            return this.sr.userInputs[i].problemCategory;
+          }
         }
       }
     } else if (this.sr.userInputs.length == 0 && this.isNumeric) {
@@ -2310,8 +2354,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         let originalLabel = [];
         if (this.sr.userInputs.length > 0) {
           for (let j = 0; j < this.sr.userInputs.length; j++) {
-            if (this.sr.userInputs[j].user === this.user.email) {
+            if (this.startFrom === 'review') {
               originalLabel.push(this.sr.userInputs[j].problemCategory);
+            } else {
+              if (this.sr.userInputs[j].user === this.user.email) {
+                originalLabel.push(this.sr.userInputs[j].problemCategory);
+              }
             }
           }
         } else if (this.sr.userInputs.length == 0) {
