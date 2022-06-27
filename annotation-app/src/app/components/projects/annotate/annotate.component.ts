@@ -26,6 +26,7 @@ import { EnvironmentsService } from 'app/services/environments.service';
 import { MarkdownParserService } from 'app/services/common/markdown-parser.service';
 import { Options } from '@angular-slider/ngx-slider';
 import { highlightRange, removeSpans, splitBoundaries, toGlobalOffset, findClosestTextNode } from 'app/shared/utils/html';
+import { filterTreeLabel } from 'app/shared/utils/treeView';
 
 @Component({
   selector: 'app-annotate',
@@ -179,6 +180,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   submitMessage: string;
   tipMessage: string;
   initReview: string;
+  treeLabels: any;
+  originTreeLabels: any;
+  selectedTreeLabels: any = [];
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -576,7 +580,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         pid: this.projectId,
         userInput: [
           {
-            problemCategory: this.categoryFunc(),
+            problemCategory: this.categoryFunc(true),
             tid: this.sr._id,
           },
         ],
@@ -933,6 +937,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       // console.log('getOne.annotationHistory:::', this.annotationHistory, this.annotationPrevious);
     }
     this.sr = newSr;
+    if (this.labelType === 'HTL') {
+      this.treeLabels = this.originTreeLabels ? JSON.parse(JSON.stringify(this.originTreeLabels)) : [];
+    }
     this.currentBoundingData = [];
     if (
       this.projectType == 'text' ||
@@ -1018,6 +1025,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isNumeric ||
         this.isMultipleNumericLabel ||
         this.isMultipleLabel &&
+        this.labelType !== 'HTL' &&
         this.projectType !== 'ner' &&
         this.projectType !== 'image' &&
         this.projectType !== 'log'
@@ -1220,6 +1228,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.sr && this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
         }
+        if (this.labelType === 'HTL') {
+          this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
+        }
         this.loading = false;
         this.isSkippingGameDialog = false;
         if (this.isNumeric) {
@@ -1399,6 +1410,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             });
             this.scoreMessage.push('Allowed values are between ' + minVal + ' and ' + maxVal + ' .');
           });
+        } else if (this.labelType === 'HTL') {
+          this.originTreeLabels = JSON.parse(response.categoryList);
+          this.treeLabels = this.originTreeLabels ? JSON.parse(JSON.stringify(this.originTreeLabels)) : [];
         } else {
           this.categories = response.categoryList.split(',');
           this.popLabels = response.popUpLabels;
@@ -1630,6 +1644,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isNumeric ||
         this.isMultipleNumericLabel ||
         this.isMultipleLabel &&
+        this.labelType !== 'HTL' &&
         this.projectType !== 'ner' &&
         this.projectType !== 'image' &&
         this.projectType !== 'log'
@@ -1812,6 +1827,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.isNumeric ||
           this.isMultipleNumericLabel ||
           this.isMultipleLabel &&
+          this.labelType !== 'HTL' &&
           this.projectType !== 'ner' &&
           this.projectType !== 'image' &&
           this.projectType !== 'log'
@@ -2145,7 +2161,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     return /^(\-|\+)?\d+(\.\d+)?$/.test(data);
   }
 
-  categoryFunc() {
+  categoryFunc(isSubmit?: boolean) {
     let category = [];
     if (
       this.isShowDropDown &&
@@ -2188,6 +2204,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (
       !this.isNumeric &&
       this.isMultipleLabel &&
+      this.labelType !== 'HTL' &&
       this.projectType !== 'ner' &&
       this.projectType !== 'image' &&
       this.projectType !== 'log'
@@ -2206,6 +2223,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       return category;
     } else if (this.projectType == 'image') {
       category = this.currentBoundingData;
+      return category;
+    } else if (this.labelType === 'HTL') {
+      if (isSubmit) {
+        category = this.treeLabels;
+      } else {
+        category = this.selectedTreeLabels;
+      }
       return category;
     }
   }
@@ -2340,6 +2364,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (
       !this.isNumeric &&
       this.isMultipleLabel &&
+      this.labelType !== 'HTL' &&
       this.projectType != 'ner' &&
       this.projectType !== 'image' &&
       this.projectType !== 'log'
@@ -2452,6 +2477,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             );
         }
       }, 10);
+    } else if (this.labelType === 'HTL' && this.sr.userInputs && this.sr.userInputs.length) {
+      this.treeLabels = this.sr.userInputs[0].problemCategory;
     }
 
     if (from == 'previous') {
@@ -2479,7 +2506,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clearCheckbox() {
-    if (!this.isMultipleNumericLabel) {
+    if (!this.isMultipleNumericLabel && this.labelType !== 'HTL') {
       this.multipleLabelList.forEach((e) => {
         const multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
         console.log(this.el.nativeElement);
@@ -2988,6 +3015,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.sr.originalData = responseSr.originalData;
           this.sr.flag = responseSr.flag;
           this.sr.userInputs = responseSr.userInputs;
+          if (!this.sr.userInputs.length && this.labelType === 'HTL') {
+            this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
+          }
           this.sr.ticketQuestions = responseSr.ticketQuestions;
           if (this.projectType === 'log') {
             this.currentLogFile =
@@ -3860,5 +3890,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       num = num.substring(0, decimal + index + 1);
     }
     return parseFloat(num).toFixed(decimal);
+  }
+
+  getChildren = (folder) => folder.children;
+
+  changeSelectedlabel(label, data) {
+    if (data === 0 || data === 1) {
+      label.enable = !!data;
+    }
+    const treeLabels = this.treeLabels ? JSON.parse(JSON.stringify(this.treeLabels)) : [];
+    this.selectedTreeLabels = treeLabels ? filterTreeLabel(treeLabels) : [];
   }
 }

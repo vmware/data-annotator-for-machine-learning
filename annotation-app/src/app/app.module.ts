@@ -56,6 +56,7 @@ import { CommonService } from './services/common/common.service';
 import { S3Service } from './services/common/s3.service';
 import { EmailService } from './services/common/email.service';
 import { NgxSliderModule } from "@angular-slider/ngx-slider";
+import { UploadLabelComponent } from './components/projects/upload-label/upload-label.component';
 
 @NgModule({
   declarations: [
@@ -87,6 +88,7 @@ import { NgxSliderModule } from "@angular-slider/ngx-slider";
     LoginComponent,
     EditProjectComponent,
     MyFilter,
+    UploadLabelComponent,
   ],
   imports: [
     BrowserAnimationsModule,

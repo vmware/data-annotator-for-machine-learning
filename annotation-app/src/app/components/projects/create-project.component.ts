@@ -29,6 +29,7 @@ import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
 import { CommonService } from 'app/services/common/common.service';
 import { EmailService } from 'app/services/common/email.service';
+import { filterTreeLabel } from 'app/shared/utils/treeView';
 
 @Component({
   selector: 'app-create',
@@ -128,6 +129,10 @@ export class CreateNewComponent implements OnInit {
   popLabelValidation: boolean;
   queryStrategyBase: any;
   setDataError: boolean = false;
+  isUploadLabel: boolean = false;
+  showUploadLabelDialog: boolean = false;
+  treeLabels: any;
+  selectedTreeLabel: any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -258,6 +263,19 @@ export class CreateNewComponent implements OnInit {
           && !this.sizeError
           && !this.inputLabelValidation
           && !this.inputIsNull;
+      } else if (this.isUploadLabel) {
+        this.dsDialogForm.get('labels').setValidators(null);
+        this.dsDialogForm.get('labels').updateValueAndValidity();
+        const treeLabels = this.treeLabels ? JSON.parse(JSON.stringify(this.treeLabels)) : [];
+        this.selectedTreeLabel = this.treeLabels ? filterTreeLabel(treeLabels) : [];
+        if (this.selectedTreeLabel.length > 0) {
+          this.labelType = 'HTL';
+          condition = this.dsDialogForm.invalid
+          && !this.nameExist
+          && !this.sizeError
+          && !this.inputLabelValidation
+          && !this.inputIsNull;
+        }
       } else {
         this.labelType = 'textLabel';
         this.dsDialogForm.get('min').setValidators(null);
@@ -335,7 +353,6 @@ export class CreateNewComponent implements OnInit {
 
   public postLocalFile(dataset: DatasetData): Observable<any> {
     const formData = new FormData();
-
     this.dsDialogForm
       .get('labels')
       .setValue(
@@ -392,12 +409,15 @@ export class CreateNewComponent implements OnInit {
       formData.append('labels', JSON.stringify(labels));
     } else {
       formData.append('labelType', this.labelType);
-      formData.append(
-        'isMultipleLabel',
-        this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log'
-          ? true
-          : this.dsDialogForm.value.multipleLabel,
-      );
+      if (this.labelType !== "HTL") {
+        formData.append(
+          'isMultipleLabel',
+          this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log'
+            ? true
+            : this.dsDialogForm.value.multipleLabel,
+        );
+      }
+
       if (this.projectType === 'ner') {
         const aa = [];
         this.dsDialogForm.value.labels.forEach((element) => {
@@ -405,7 +425,9 @@ export class CreateNewComponent implements OnInit {
         });
         formData.append('labels', aa.join(','));
       } else {
-        formData.append('labels', this.dsDialogForm.value.labels);
+        if (this.labelType !== "HTL") {
+          formData.append('labels', this.dsDialogForm.value.labels);
+        }
       }
     }
     if (this.projectType === 'ner') {
@@ -423,6 +445,10 @@ export class CreateNewComponent implements OnInit {
         'isShowFilename',
         JSON.stringify(this.dsDialogForm.get('isShowFilename').value),
       );
+    }
+    if (this.labelType === "HTL") {
+      formData.append('labels', JSON.stringify(this.selectedTreeLabel));
+      formData.append('isMultipleLabel', 'true');
     }
     return this.avaService.postDataset(formData);
   }
@@ -1314,18 +1340,27 @@ export class CreateNewComponent implements OnInit {
       this.isShowNumeric = true;
       this.isNumeric = true;
       this.isMutilNumericLabel = false;
+      this.isUploadLabel = false;
     } else if (e.target.value == 'mutilNumericLabel') {
       this.isMutilNumericLabel = true;
       this.isShowNumeric = false;
       this.isNumeric = false;
       this.dsDialogForm.get('labels').setValidators(null);
       this.dsDialogForm.get('labels').updateValueAndValidity();
+      this.isUploadLabel = false;
+    } else if (e.target.value == 'uploadLabel') {
+      this.isMultipleLabel = null;
+      this.isShowNumeric = false;
+      this.isNumeric = false;
+      this.isMutilNumericLabel = false;
+      this.isUploadLabel = true;
     } else {
       this.dsDialogForm.get('multipleLabel').setValue(null);
       this.isMultipleLabel = null;
       this.isShowNumeric = false;
       this.isNumeric = false;
       this.isMutilNumericLabel = false;
+      this.isUploadLabel = false;
     }
   }
 
@@ -1500,6 +1535,46 @@ export class CreateNewComponent implements OnInit {
       } else {
         this.popLabelValidation = false;
       }
+    }
+  }
+
+  uploadLabels() {
+    this.showUploadLabelDialog = true;
+  }
+
+  uploadLabelsErr(event) {
+    this.showUploadLabelDialog = false;
+    this.errorMessageTop = event;
+    setTimeout(() => {
+      this.errorMessageTop = '';
+    }, 10000);
+  }
+
+  uploadLabelsCloseInfo() {
+    this.showUploadLabelDialog = false;
+  }
+
+  uploadLabelsSuccessInfo(event) {
+    this.treeLabels = this.recursionLabel(event.data);
+    this.showUploadLabelDialog = false;
+  }
+
+  recursionLabel(datas: any) {
+    datas.forEach(item => {
+       if (item.children && item.children.length) {
+          this.recursionLabel(item.children);
+       } else {
+          item['enable'] = true;
+       }
+    });
+    return datas;
+  }
+
+  getChildren = (folder) => folder.children;
+
+  changeSelectedlabel(label, data) {
+    if (data === 0 || data === 1) {
+      label.enable = !!data;
     }
   }
 }

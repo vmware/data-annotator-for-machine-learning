@@ -894,6 +894,14 @@ SPDX-License-Identifier: Apache-2.0 -->
               ></textarea>
             </div>
           </div>
+          <div class="questionContainer" *ngIf="labelType === 'HTL' && (projectType == 'text' || projectType == 'tabular')">
+            <clr-tree>
+              <clr-tree-node [clrExpanded]="true" *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
+                [clrSelected]="label.enable" (clrSelectedChange)="changeSelectedlabel(label, $event)">
+                  {{label.name}}
+              </clr-tree-node>
+            </clr-tree>
+          </div>
           <div class="actions">
             <div
               *ngIf="actionError"
@@ -924,6 +932,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               class="btn btn-success submit"
               type="submit"
               [disabled]="
+                selectedTreeLabels.length == 0 &&
                 multipleLabelList.length == 0 &&
                 spansList.length == 0 &&
                 currentBoundingData.length == 0 && !isNumeric

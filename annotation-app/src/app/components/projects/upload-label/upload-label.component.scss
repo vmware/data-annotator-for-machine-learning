@@ -1,0 +1,47 @@
+clr-alert {
+    margin-top: 1rem;
+  }
+  
+  label span {
+    color: red;
+  }
+  .form-group .select {
+    width: 100%;
+  }
+  
+  ::ng-deep .dcr-doc-form .select2-class {
+    width: 100% !important;
+  }
+  
+  .form-group input[type='text'],
+  .form-group input[type='file'] {
+    width: 100% !important;
+    margin-bottom: 0px;
+  }
+  
+  .form-group .select,
+  .form-group select {
+    width: 100% !important;
+  }
+  
+  .form-group textarea {
+    width: 100% !important;
+  }
+  
+  ::ng-deep .btn.btn-sm {
+    margin-top: 7px !important;
+  }
+  
+  ::ng-deep .md-check {
+    margin-left: 10px !important;
+  }
+  
+  .form-group {
+    margin: 30px 0;
+  }
+  
+  .querySQLLoading {
+    background-color: rgba(0, 119, 184, 0.2);
+    border-color: rgba(0, 119, 184, 0.2);
+  }
+  
