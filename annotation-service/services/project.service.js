@@ -69,8 +69,36 @@ async function checkProjectName(pname) {
 
 async function getProjectInfo(req) {
     console.log(`[ PROJECT ] Service query Project info by pid: ${req.query.pid}`);
-    return mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
+    let project = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
+    if (project && project.labelType == LABELTYPE.HIERARCHICAL) {
+        let labels = JSON.parse(project.categoryList);
+        await prepareSelectedHierarchicalLabels(labels, true);
+        project.categoryList = JSON.stringify(labels);
+    }
+    return project;
 }
+
+async function prepareSelectedHierarchicalLabels(nodes, unEnable){
+	for (let i in nodes) {
+        while(true){
+            if(nodes[i] && !nodes[i].enable){
+                nodes.splice(i, 1);
+            }else{
+                break;
+            }
+        }
+		
+		if(nodes[i] && nodes[i].enable){
+            if(unEnable){
+                nodes[i].enable = false;
+            }
+			if(nodes[i].children){
+				await prepareSelectedHierarchicalLabels(nodes[i].children, unEnable)
+			}
+		}
+	}
+}
+
 
 async function deleteProject(req) {
 
@@ -765,5 +793,7 @@ module.exports = {
     projectIntegrationEdit,
     editProjectLabels,
     deleteProjectLables,
+    prepareSelectedHierarchicalLabels,
+
 
 }

@@ -82,7 +82,7 @@ async function updateSrsUserInput(req) {
     usrSr.forEach(async ticket =>{
         reEditSrIds.push(ticket._id.toString());
         let userInputs = []
-        req.body.userInput.forEach(ui => {
+        req.body.userInput.forEach(async ui => {
             if (ui.tid == ticket._id.toString()) {
                 if (pro.projectType == PROJECTTYPE.NER) {
                     userInputs.push({
@@ -97,17 +97,27 @@ async function updateSrsUserInput(req) {
                         user: user,
                         timestamp: Date.now()
                     });
-                }else if(pro.labelType == LABELTYPE.NUMERIC && pro.isMultipleLabel){
-                    ui.problemCategory.forEach(lb =>{
+                }else if(pro.isMultipleLabel){
+                    if(pro.labelType == LABELTYPE.NUMERIC){
+                        ui.problemCategory.forEach(lb =>{
+                            userInputs.push({
+                                problemCategory: {
+                                    label: Object.keys(lb)[0],
+                                    value: Object.values(lb)[0]
+                                },
+                                user: user,
+                                timestamp: Date.now()
+                            });
+                        });
+                    }
+                    if (pro.labelType == LABELTYPE.HIERARCHICAL) {
+                        await projectService.prepareSelectedHierarchicalLabels(ui.problemCategory);
                         userInputs.push({
-                            problemCategory: {
-                                label: Object.keys(lb)[0],
-                                value: Object.values(lb)[0]
-                            },
+                            problemCategory: ui.problemCategory,
                             user: user,
                             timestamp: Date.now()
                         });
-                    });
+                    }
                 }else{
                     ui.problemCategory.forEach(lb =>{
                         userInputs.push({
