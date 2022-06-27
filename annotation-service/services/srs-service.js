@@ -159,17 +159,19 @@ async function updateSrsUserInput(req) {
                         user: user,
                         timestamp: Date.now()
                     });
-                }else if(pro.labelType == LABELTYPE.NUMERIC && pro.isMultipleLabel){
-                    ui.problemCategory.forEach(lb =>{
-                        userInputs.push({
-                            problemCategory: {
-                                label: Object.keys(lb)[0],
-                                value: Object.values(lb)[0]
-                            },
-                            user: user,
-                            timestamp: Date.now()
+                }else if(pro.isMultipleLabel){
+                    if(pro.labelType == LABELTYPE.NUMERIC){
+                        ui.problemCategory.forEach(lb =>{
+                            userInputs.push({
+                                problemCategory: {
+                                    label: Object.keys(lb)[0],
+                                    value: Object.values(lb)[0]
+                                },
+                                user: user,
+                                timestamp: Date.now()
+                            });
                         });
-                    });
+                    }
                     if (pro.labelType == LABELTYPE.HIERARCHICAL) {
                         userInputs.push({
                             problemCategory: ui.problemCategory,
