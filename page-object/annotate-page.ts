@@ -118,7 +118,7 @@ export class AnnotatePage extends CommonPage {
       infos.name = await list[0].getText();
       infos.owner = await list[1].getText();
       infos.source = await list[2].getText();
-      infos.instruction = await list[5].getText();
+      infos.instruction = await list[6].getText();
       console.log("getProjectInfo:", infos);
       return infos;
     });
@@ -127,8 +127,8 @@ export class AnnotatePage extends CommonPage {
   getProgress() {
     let result = { sessions: "", annotations: "" };
     return this.PROJECT_INFOS.then(async (list) => {
-      result.sessions = await list[7].getText();
-      result.annotations = await list[8].getText();
+      result.sessions = await list[8].getText();
+      result.annotations = await list[9].getText();
       return result;
     });
   }
