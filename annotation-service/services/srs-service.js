@@ -111,7 +111,6 @@ async function updateSrsUserInput(req) {
                         });
                     }
                     if (pro.labelType == LABELTYPE.HIERARCHICAL) {
-                        await projectService.prepareSelectedHierarchicalLabels(ui.problemCategory);
                         userInputs.push({
                             problemCategory: ui.problemCategory,
                             user: user,
@@ -171,6 +170,13 @@ async function updateSrsUserInput(req) {
                             timestamp: Date.now()
                         });
                     });
+                    if (pro.labelType == LABELTYPE.HIERARCHICAL) {
+                        userInputs.push({
+                            problemCategory: ui.problemCategory,
+                            user: user,
+                            timestamp: Date.now()
+                        });
+                    }
                 }else {
                     ui.problemCategory.forEach(lb =>{
                         userInputs.push({
