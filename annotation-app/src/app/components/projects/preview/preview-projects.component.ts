@@ -282,7 +282,11 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
         this.selectedDataset = response;
         this.projectId = response._id;
         this.totalCase = response.totalCase;
-        this.categoryList = response.categoryList.split(',');
+        if (this.labelType === 'HTL') {
+          this.categoryList = JSON.parse(response.categoryList);
+        } else {
+          this.categoryList = response.categoryList.split(',');
+        }
         this.getChartData();
         this.previewHeadDatas = ['Annotator', 'Annotate Time', 'Re-Label'];
         if (this.projectType === 'image') {
@@ -870,4 +874,6 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     this.formerFilenameFilter = '';
     this.getALLSrsParam.fname = '';
   }
+
+  getChildren = (folder) => folder.children;
 }

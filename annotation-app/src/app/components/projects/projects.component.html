@@ -173,8 +173,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </clr-dg-cell>
         <clr-dg-cell style="max-width: 200px"> {{ dataset.totalCase }}</clr-dg-cell>
-        
-        <clr-dg-cell *ngIf="dataset.labelType === 'HTL'">
+        <clr-dg-cell *ngIf="dataset.labelType === 'HTL'" style="max-width: 300px">
           <clr-tree>
             <clr-tree-node *clrRecursiveFor="let label of dataset.categoryList; getChildren: getChildren"
               [clrSelected]="label.enable">

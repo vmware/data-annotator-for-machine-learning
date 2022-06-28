@@ -1056,18 +1056,25 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   checkHTL(from?: string, id?: string) {
     let inputTreeArr = [];
-    if (this.sr.userInputs && this.sr.userInputs.length > 0) {
-      inputTreeArr = this.sr.userInputs[0].problemCategory;
-    }
-    if (inputTreeArr.length === 0 && this.selectedTreeLabels.length === 0) {
+    if (this.moreReviewInfo.length > 1 && this.selectedTreeLabels.length === 0) {
       this.checkTextProject(from, id);
+    } else if (this.moreReviewInfo.length > 1 && this.selectedTreeLabels.length > 0) {
+      this.actionError = this.tipMessage;
+      return false;
     } else {
-      const difference = JSON.stringify(this.treeLabels) === JSON.stringify(inputTreeArr);
-      if (!difference) {
-        this.actionError = this.tipMessage;
-        return false;
+      if (this.sr.userInputs && this.sr.userInputs.length > 0) {
+        inputTreeArr = this.sr.userInputs[0].problemCategory;
       }
-      this.checkTextProject(from, id);
+      if (inputTreeArr.length === 0 && this.selectedTreeLabels.length === 0) {
+        this.checkTextProject(from, id);
+      } else {
+        const difference = JSON.stringify(this.treeLabels) === JSON.stringify(inputTreeArr);
+        if (!difference) {
+          this.actionError = this.tipMessage;
+          return false;
+        }
+        this.checkTextProject(from, id);
+      }
     }
   }
 
@@ -1120,9 +1127,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   checkMoreReviewChanged() {
-    if (this.startFrom === 'review' && this.moreReviewInfo.length > 1 && this.categoryFunc().length > 0) {
-      this.actionError = this.tipMessage;
-      return false;
+    if (this.startFrom === 'review' && this.moreReviewInfo.length > 1) {
+      if (this.labelType === 'HTL' && this.selectedTreeLabels.length > 0) {
+        this.actionError = this.tipMessage;
+        return false;
+      }
+      if (this.labelType !== 'HTL' && this.categoryFunc().length > 0) {
+        this.actionError = this.tipMessage;
+        return false;
+      }
     }
     return true;
   }
@@ -2309,6 +2322,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.el.nativeElement.querySelectorAll('.cleanColor').forEach((element) => {
           this.renderer2.setStyle(element, 'background-color', 'unset');
         });
+        this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
       }
     } else {
       this.moreReviewInfo = [];
@@ -2505,7 +2519,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             );
         }
       }, 10);
-    } else if (this.labelType === 'HTL' && this.sr.userInputs && this.sr.userInputs.length) {
+    } else if (this.labelType === 'HTL' && this.sr.userInputs && this.sr.userInputs.length && this.moreReviewInfo.length < 2) {
       this.treeLabels = JSON.parse(JSON.stringify(this.sr.userInputs[0].problemCategory));
     }
 

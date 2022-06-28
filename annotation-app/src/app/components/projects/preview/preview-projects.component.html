@@ -389,11 +389,28 @@ SPDX-License-Identifier: Apache-2.0 -->
                               *ngIf="
                                 projectType != 'ner' &&
                                 projectType != 'image' &&
-                                projectType != 'log'
+                                projectType != 'log' &&
+                                labelType !== 'HTL'
                               "
                               style="min-width: 20rem"
                             >
                               {{ flag.problemCategory }}
+                            </clr-dg-cell>
+                            <clr-dg-cell
+                              *ngIf="
+                                projectType != 'ner' &&
+                                projectType != 'image' &&
+                                projectType != 'log' &&
+                                labelType === 'HTL'
+                              "
+                              style="min-width: 20rem"
+                            >
+                              <clr-tree>
+                                <clr-tree-node *clrRecursiveFor="let label of flag.problemCategory[0]; getChildren: getChildren"
+                                  [clrSelected]="label.enable">
+                                    {{label.name}}
+                                </clr-tree-node>
+                              </clr-tree>
                             </clr-dg-cell>
                             <clr-dg-cell *ngIf="projectType == 'ner'" class="studioCell">
                               <clr-datagrid>
