@@ -264,13 +264,17 @@ export class CreateNewComponent implements OnInit {
           && !this.inputLabelValidation
           && !this.inputIsNull;
       } else if (this.isUploadLabel) {
-        this.dsDialogForm.get('labels').setValidators(null);
-        this.dsDialogForm.get('labels').updateValueAndValidity();
+        this.dsDialogForm.get('min').setValidators(null);
+        this.dsDialogForm.get('max').setValidators(null);
+        this.dsDialogForm.get('selectedEncoder').setValidators(null);
+        this.dsDialogForm.get('min').updateValueAndValidity();
+        this.dsDialogForm.get('max').updateValueAndValidity();
+        this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
         const treeLabels = this.treeLabels ? JSON.parse(JSON.stringify(this.treeLabels)) : [];
         this.selectedTreeLabel = this.treeLabels ? filterTreeLabel(treeLabels) : [];
         if (this.selectedTreeLabel.length > 0) {
           this.labelType = 'HTL';
-          condition = this.dsDialogForm.invalid
+          condition = !this.dsDialogForm.invalid
           && !this.nameExist
           && !this.sizeError
           && !this.inputLabelValidation
@@ -447,7 +451,7 @@ export class CreateNewComponent implements OnInit {
       );
     }
     if (this.labelType === "HTL") {
-      formData.append('labels', JSON.stringify(this.selectedTreeLabel));
+      formData.append('labels', JSON.stringify(this.treeLabels));
       formData.append('isMultipleLabel', 'true');
     }
     return this.avaService.postDataset(formData);
@@ -672,6 +676,7 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogForm.get('selectedText').setValue(null);
     this.dsDialogForm.get('isShowFilename').setValue(false);
     this.isMutilNumericLabel = false;
+    this.isUploadLabel = false;
     if (e.target.value == 'No Labels') {
       this.isShowLabelRadio = true;
     } else {
@@ -777,6 +782,7 @@ export class CreateNewComponent implements OnInit {
     this.labelType = '';
     this.isShowNumeric = false;
     this.isMutilNumericLabel = false;
+    this.isUploadLabel = false;
     this.dsDialogForm.get('mutilLabelArray').reset();
     while (this.mutilLabelArray.length > 2) {
       this.mutilLabelArray.removeAt(2);
@@ -1354,6 +1360,8 @@ export class CreateNewComponent implements OnInit {
       this.isNumeric = false;
       this.isMutilNumericLabel = false;
       this.isUploadLabel = true;
+      this.dsDialogForm.get('labels').setValidators(null);
+      this.dsDialogForm.get('labels').updateValueAndValidity();
     } else {
       this.dsDialogForm.get('multipleLabel').setValue(null);
       this.isMultipleLabel = null;
@@ -1563,8 +1571,9 @@ export class CreateNewComponent implements OnInit {
     datas.forEach(item => {
        if (item.children && item.children.length) {
           this.recursionLabel(item.children);
+          item['enable'] = 1;
        } else {
-          item['enable'] = true;
+          item['enable'] = 1;
        }
     });
     return datas;
@@ -1573,8 +1582,8 @@ export class CreateNewComponent implements OnInit {
   getChildren = (folder) => folder.children;
 
   changeSelectedlabel(label, data) {
-    if (data === 0 || data === 1) {
-      label.enable = !!data;
-    }
+    label.enable = data;
+    const treeLabels = this.treeLabels ? JSON.parse(JSON.stringify(this.treeLabels)) : [];
+    this.selectedTreeLabel = treeLabels ? filterTreeLabel(treeLabels) : [];
   }
 }

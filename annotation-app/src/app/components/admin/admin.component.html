@@ -123,7 +123,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-dg-cell>
               <clr-dg-cell style="max-width: 200px">
                 {{ dataset.totalCase}}</clr-dg-cell>
-              <clr-dg-cell class="cellWordBreak" title="{{
+              <clr-dg-cell *ngIf="dataset.labelType === 'HTL'">
+                <clr-tree>
+                  <clr-tree-node *clrRecursiveFor="let label of dataset.categoryList; getChildren: getChildren"
+                    [clrSelected]="label.enable">
+                      {{label.name}}
+                  </clr-tree-node>
+                </clr-tree>
+              </clr-dg-cell>  
+              <clr-dg-cell *ngIf="dataset.labelType !== 'HTL'" class="cellWordBreak" title="{{
                 dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
                   ? dataset.min + '--' + dataset.max
                   : (dataset.labelType == 'numericLabel' && dataset.isMultipleLabel)

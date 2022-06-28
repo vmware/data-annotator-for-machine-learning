@@ -951,6 +951,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               *ngIf="startFrom == 'review'
                 && (projectType !== 'text' && projectType !== 'tabular' || isMultipleNumericLabel  || isNumeric || isMultipleLabel)"
               [disabled]="
+                selectedTreeLabels.length == 0 &&
                 multipleLabelList.length == 0 &&
                 spansList.length == 0 &&
                 currentBoundingData.length == 0 && !isNumeric

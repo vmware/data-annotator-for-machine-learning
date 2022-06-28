@@ -167,6 +167,9 @@ export class AdminComponent implements OnInit {
             });
             item.mutilNumbericLabels = itemKeys.toString();
           }
+          if (item.labelType === 'HTL') {
+            item.categoryList = JSON.parse(item.categoryList);
+          }
         });
         this.totalItems = res.length;   
       },
@@ -588,4 +591,6 @@ export class AdminComponent implements OnInit {
       this.setUserErrMessage = 'This field is required';
     }
   }
+
+  getChildren = (folder) => folder.children;
 }

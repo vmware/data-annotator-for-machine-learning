@@ -140,6 +140,9 @@ export class ProjectsComponent implements OnInit {
             });
             item.mutilNumbericLabels = itemKeys.toString();
           }
+          if (item.labelType === 'HTL') {
+            item.categoryList = JSON.parse(item.categoryList);
+          }
         });
         this.totalItems = res.length;
         // this.filterTasks(res.result, params);
@@ -424,4 +427,6 @@ export class ProjectsComponent implements OnInit {
   receiveDeleteLabel(e) {
     this.getProjects();
   }
+
+  getChildren = (folder) => folder.children;
 }

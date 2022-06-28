@@ -251,7 +251,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                 </div>
               </clr-dg-cell>
-              <clr-dg-cell
+              <clr-dg-cell class="colwidth" *ngIf="dataset.labelType === 'HTL'">
+                <clr-tree>
+                  <clr-tree-node *clrRecursiveFor="let label of dataset.categoryList; getChildren: getChildren"
+                    [clrSelected]="label.enable">
+                      {{label.name}}
+                  </clr-tree-node>
+                </clr-tree>
+              </clr-dg-cell>
+              <clr-dg-cell *ngIf="dataset.labelType !== 'HTL'"
                 class="cellWordBreak colwidth"
                 title="{{
                   dataset.labelType == 'numericLabel' && (!dataset.isMultipleLabel)

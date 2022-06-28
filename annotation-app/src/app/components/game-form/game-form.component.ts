@@ -82,6 +82,9 @@ export class GameFormComponent implements OnInit {
             });
             item.mutilNumbericLabels = itemKeys.toString();
           }
+          if (item.labelType === 'HTL') {
+            item.categoryList = JSON.parse(item.categoryList);
+          }
         });
         this.totalItems = res.length;
         this.loading = false;
@@ -127,4 +130,6 @@ export class GameFormComponent implements OnInit {
       },
     });
   }
+  
+  getChildren = (folder) => folder.children;
 }

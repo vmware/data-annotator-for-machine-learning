@@ -781,8 +781,9 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div *ngIf="isUploadLabel" class="clr-input-wrapper" style="margin-bottom: 1rem;">
                 <button class="btn btn-sm add-doc" type="button" (click)="uploadLabels($event)">
                   upload a taxonomy file
-                </button>
+                </button>  
               </div>
+              <div *ngIf="isUploadLabel && treeLabels">Please select labels to anotation</div>      
               <clr-tree *ngIf="isUploadLabel && treeLabels">
                 <clr-tree-node [clrExpanded]="true" *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
                   [clrSelected]="label.enable" (clrSelectedChange)="changeSelectedlabel(label, $event)">

@@ -580,7 +580,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         pid: this.projectId,
         userInput: [
           {
-            problemCategory: this.categoryFunc(true),
+            problemCategory: this.categoryFunc(),
             tid: this.sr._id,
           },
         ],
@@ -677,7 +677,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           param['problemCategory'] = this.categoryFunc();
         }   
-      } else if (this.projectType === 'text' || this.projectType === 'tabular') {
+      } else if ((this.projectType === 'text' || this.projectType === 'tabular') && this.labelType !== 'HTL') {
         if (this.isShowDropDown || this.isMultipleLabel) {
           if (this.moreReviewInfo.length > 1 && this.categoryFunc().length === 0) {
             param['modify'] = false;  
@@ -687,6 +687,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           param['problemCategory'] = [this.labelChoose];
         }
+      } else if ((this.projectType === 'text' || this.projectType === 'tabular') && this.labelType === 'HTL') {
+        param['problemCategory'] = this.categoryFunc();
       } else if (this.projectType === 'image') {
         param['problemCategory'] = this.categoryFunc();
       }
@@ -748,6 +750,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
               });
               this.annotationHistory[i].category = labelScore;
+              this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+              break;
+            }
+          } else if (this.labelType === 'HTL') {
+            if (this.annotationHistory[i].srId === this.sr._id) {
+              this.annotationHistory.splice(i, 1);
               this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
               break;
             }
@@ -1038,9 +1046,28 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isSkipOrBack('skip');
       } else if (this.projectType == 'log') {
         this.isSkipOrBack('skip');
+      } else if (this.labelType == 'HTL') {
+        this.checkHTL('skip');
       } else {
         this.skipAndFetchNewQuestion();
       }
+    }
+  }
+
+  checkHTL(from?: string, id?: string) {
+    let inputTreeArr = [];
+    if (this.sr.userInputs && this.sr.userInputs.length > 0) {
+      inputTreeArr = this.sr.userInputs[0].problemCategory;
+    }
+    if (inputTreeArr.length === 0 && this.selectedTreeLabels.length === 0) {
+      this.checkTextProject(from, id);
+    } else {
+      const difference = JSON.stringify(this.treeLabels) === JSON.stringify(inputTreeArr);
+      if (!difference) {
+        this.actionError = this.tipMessage;
+        return false;
+      }
+      this.checkTextProject(from, id);
     }
   }
 
@@ -1228,7 +1255,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.sr && this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
         }
-        if (this.labelType === 'HTL') {
+        if (this.labelType === 'HTL' && this.startFrom !== 'review') {
           this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
         }
         this.loading = false;
@@ -1715,9 +1742,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         flag2 = isCategory.length == a.length;
       } else if (this.projectType == 'text' || this.projectType == 'tabular') {
-        if (this.isMultipleNumericLabel) {
+        if (this.labelType === 'HTL') {
+          this.checkHTL(type);
+          return false;
+        } else if (this.isMultipleNumericLabel) {
           flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
-        } else if (this.isMultipleLabel && !this.isNumeric && !this.isMultipleNumericLabel) {
+        } else if (this.isMultipleLabel && !this.isNumeric && !this.isMultipleNumericLabel && this.labelType !== 'HTL') {
           flag2 = this.checkMutilLabel(type);
           return false;
         } else if (isCategory.length > 1) {
@@ -1922,6 +1952,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           if (!flag) {
             this.isSkipOrBack('previous');
           }
+        } else if (this.labelType === 'HTL') {
+          this.checkHTL('previous', this.annotationPrevious[0].srId)
         } else {
           const param = {
             id: this.annotationPrevious[0].srId,
@@ -2161,7 +2193,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     return /^(\-|\+)?\d+(\.\d+)?$/.test(data);
   }
 
-  categoryFunc(isSubmit?: boolean) {
+  categoryFunc() {
     let category = [];
     if (
       this.isShowDropDown &&
@@ -2225,11 +2257,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       category = this.currentBoundingData;
       return category;
     } else if (this.labelType === 'HTL') {
-      if (isSubmit) {
-        category = this.treeLabels;
-      } else {
-        category = this.selectedTreeLabels;
-      }
+      category = this.treeLabels;
       return category;
     }
   }
@@ -2478,7 +2506,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }, 10);
     } else if (this.labelType === 'HTL' && this.sr.userInputs && this.sr.userInputs.length) {
-      this.treeLabels = this.sr.userInputs[0].problemCategory;
+      this.treeLabels = JSON.parse(JSON.stringify(this.sr.userInputs[0].problemCategory));
     }
 
     if (from == 'previous') {
@@ -3895,9 +3923,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   getChildren = (folder) => folder.children;
 
   changeSelectedlabel(label, data) {
-    if (data === 0 || data === 1) {
-      label.enable = !!data;
-    }
+    // if (data === 0 || data === 1) {
+    //   label.enable = !!data;
+    // } else {
+      label.enable = data;
+    // }
     const treeLabels = this.treeLabels ? JSON.parse(JSON.stringify(this.treeLabels)) : [];
     this.selectedTreeLabels = treeLabels ? filterTreeLabel(treeLabels) : [];
   }
