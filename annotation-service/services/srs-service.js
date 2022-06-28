@@ -954,7 +954,7 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
                     });
                 })
             }
-            if (pro.labelType == LABELTYPE.HIERARCHICAL) {
+            if (labelType == LABELTYPE.HIERARCHICAL) {
                 userInputs.push({
                     problemCategory: lb.problemCategory,
                     user: user,
