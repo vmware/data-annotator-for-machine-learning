@@ -956,7 +956,7 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
             }
             if (labelType == LABELTYPE.HIERARCHICAL) {
                 userInputs.push({
-                    problemCategory: lb.problemCategory,
+                    problemCategory: problemCategory,
                     user: user,
                     timestamp: Date.now()
                 });
