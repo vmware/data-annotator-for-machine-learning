@@ -941,17 +941,27 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
     }else{
     //max-annotation>1
         let userInputs = []; 
-        if(labelType == LABELTYPE.NUMERIC && isMultipleLabel){
-            problemCategory.forEach(lb =>{
+        if(isMultipleLabel){
+            if (labelType == LABELTYPE.NUMERIC) {
+                problemCategory.forEach(lb =>{
+                    userInputs.push({
+                        problemCategory: {
+                            label: Object.keys(lb)[0],
+                            value: Object.values(lb)[0]
+                        },
+                        user: user,
+                        timestamp: Date.now()
+                    });
+                })
+            }
+            if (pro.labelType == LABELTYPE.HIERARCHICAL) {
                 userInputs.push({
-                    problemCategory: {
-                        label: Object.keys(lb)[0],
-                        value: Object.values(lb)[0]
-                    },
+                    problemCategory: lb.problemCategory,
                     user: user,
                     timestamp: Date.now()
                 });
-            });
+            }
+            
         }else {
             problemCategory.forEach(lb =>{
                 userInputs.push({

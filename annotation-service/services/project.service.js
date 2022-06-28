@@ -81,16 +81,16 @@ async function getProjectInfo(req) {
 async function prepareSelectedHierarchicalLabels(nodes, unEnable){
 	for (let i in nodes) {
         while(true){
-            if(nodes[i] && !nodes[i].enable){
+            if(nodes[i] && nodes[i].enable == 0){
                 nodes.splice(i, 1);
             }else{
                 break;
             }
         }
 		
-		if(nodes[i] && nodes[i].enable){
+		if(nodes[i] && nodes[i].enable != 0){
             if(unEnable){
-                nodes[i].enable = false;
+                nodes[i].enable = 0;
             }
 			if(nodes[i].children){
 				await prepareSelectedHierarchicalLabels(nodes[i].children, unEnable)
