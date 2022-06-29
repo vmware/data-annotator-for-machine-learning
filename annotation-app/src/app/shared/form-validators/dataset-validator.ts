@@ -390,7 +390,11 @@ export class DatasetValidator {
 
   private static validateLabelFile(type: string, inputFile: any): boolean {
     const ext = inputFile.name.split('.').pop().toLowerCase();
-    return type === ext.toLowerCase();
+    if (type === 'json') {
+      return type === ext.toLowerCase();
+    } else {
+      return ['yaml', 'yml'].includes(ext.toLowerCase());
+    }
   }
 
   private static validateImageFile(inputFile: any): boolean {

@@ -12,6 +12,14 @@
           <div class="modal-body">
             <div class="form-group clr-row">
               <label for="localFile" class="label-tooltip clr-col-12 clr-col-md-3"
+                >Sample File</label>
+              <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+                <a *ngIf="uploadSet.fileFormat !== 'yaml'" href="../../assets/files/taxonomy_sample.json" download>taxonomy_sample.json</a>
+                <a *ngIf="uploadSet.fileFormat === 'yaml'" href="../../assets/files/taxonomy_sample.yaml" download>taxonomy_sample.yaml</a>
+              </div>
+            </div>
+            <div class="form-group clr-row">
+              <label for="localFile" class="label-tooltip clr-col-12 clr-col-md-3"
                 >File Upload
                 <clr-tooltip>
                   <clr-icon
@@ -32,7 +40,7 @@
                   name="localFileFile"
                   type="file"
                   (change)="onLocalFileChange($event)"
-                  [accept]="uploadSet.fileFormat === 'yaml' ? '.yaml' : '.json'"
+                  [accept]="uploadSet.fileFormat === 'yaml' ? '.yaml, .yml' : '.json'"
                 />
               </div>
               <div class="clr-col-12 clr-col-md-1">
@@ -54,6 +62,25 @@
                     *clrIfOpen
                   >
                     <span>{{ uploadGroup.get('localFile').errors.msg.value }}</span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+                <clr-tooltip
+                  *ngIf="errorMessage">
+                  <clr-icon
+                    clrTooltipTrigger
+                    shape="error-standard"
+                    size="18"
+                    style="color: red"
+                    class="valid-tooltip"
+                  >
+                  </clr-icon>
+                  <clr-tooltip-content
+                    class="error-tooltip"
+                    clrPosition="bottom-right"
+                    clrSize="sm"
+                    *clrIfOpen
+                  >
+                    <span>{{ errorMessage }}</span>
                   </clr-tooltip-content>
                 </clr-tooltip>
               </div>

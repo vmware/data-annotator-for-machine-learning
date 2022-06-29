@@ -27,6 +27,7 @@ export class UploadLabelComponent implements OnInit {
   inputFile: any;
   uploadComplete = false;
   waitingTip = false;
+  errorMessage: any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -61,6 +62,7 @@ export class UploadLabelComponent implements OnInit {
       this.inputFile = '';
       this.checkLocalFile();
     }
+    this.errorMessage = '';
   }
 
   checkLocalFile() {
@@ -90,10 +92,58 @@ export class UploadLabelComponent implements OnInit {
 
   showLables(content: any) {
     let result;
-    if (this.uploadGroup.get('fileFormat').value === 'yaml') {
-      result = YAML.load(content);
-    } else {
-      result = JSON.parse(content);
+    try {
+      if (this.uploadGroup.get('fileFormat').value === 'yaml') {
+        result = YAML.load(content);
+      } else {
+        result = JSON.parse(content);
+      }
+    } catch(e) {
+      this.errorMessage = 'The file format is incorrect, Please check it.';
+      this.uploadComplete = false;
+      this.waitingTip = false;
+      return false;
+    }
+    let name_same_err = false;
+    let name_err_flag = false;
+    const recursionLabel = (datas: any) => {
+      let itemArr = [];
+      for (let index = 0; index < datas.length; index++) {
+        let item = datas[index];
+        if (item.name.includes('.')) {
+          name_err_flag = true;
+        }
+        itemArr.push(item.name);
+        if (item.children && item.children.length) {
+          recursionLabel(item.children);
+        }
+      }
+      if (itemArr.length !== _.uniq(itemArr).length) {
+        name_same_err = true;
+      }
+    }
+    try {
+      if (result) {
+        recursionLabel(result.data);
+      }
+    } catch(e) {
+      this.errorMessage = 'The file format is incorrect, Please check it.';
+      this.uploadComplete = false;
+      this.waitingTip = false;
+      return false;
+    }
+    if (name_err_flag) {
+      this.errorMessage = 'Node name cannot contain points.';
+      this.uploadComplete = false;
+      this.waitingTip = false;
+      return false;
+    }
+
+    if (name_same_err) {
+      this.errorMessage = 'Node names at the same tier cannot be the same.';
+      this.uploadComplete = false;
+      this.waitingTip = false;
+      return false;
     }
     this.uploadSuccessEmitter.emit(result);
   }

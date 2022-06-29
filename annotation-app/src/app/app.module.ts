@@ -57,6 +57,7 @@ import { S3Service } from './services/common/s3.service';
 import { EmailService } from './services/common/email.service';
 import { NgxSliderModule } from "@angular-slider/ngx-slider";
 import { UploadLabelComponent } from './components/projects/upload-label/upload-label.component';
+import { TreeviewModalComponent } from './components/treeview-modal/treeview-modal.component';
 
 @NgModule({
   declarations: [
@@ -89,6 +90,7 @@ import { UploadLabelComponent } from './components/projects/upload-label/upload-
     EditProjectComponent,
     MyFilter,
     UploadLabelComponent,
+    TreeviewModalComponent,
   ],
   imports: [
     BrowserAnimationsModule,

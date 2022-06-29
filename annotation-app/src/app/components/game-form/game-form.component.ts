@@ -31,6 +31,8 @@ export class GameFormComponent implements OnInit {
   pageSize: number;
   page: number;
   totalItems: number;
+  showTreeView: boolean = false;
+  treeData: any;
 
   constructor(
     private avaService: AvaService,
@@ -132,4 +134,13 @@ export class GameFormComponent implements OnInit {
   }
   
   getChildren = (folder) => folder.children;
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
+  }
 }

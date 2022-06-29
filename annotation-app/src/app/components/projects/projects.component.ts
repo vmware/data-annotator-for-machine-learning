@@ -63,6 +63,8 @@ export class ProjectsComponent implements OnInit {
   labelType = '';
   subscription: Subscription;
   msgEdit: any;
+  showTreeView: boolean = false;
+  treeData: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -429,4 +431,13 @@ export class ProjectsComponent implements OnInit {
   }
 
   getChildren = (folder) => folder.children;
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
+  }
 }

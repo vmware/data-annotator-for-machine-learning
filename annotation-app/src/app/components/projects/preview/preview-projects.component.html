@@ -404,9 +404,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 labelType === 'HTL'
                               "
                               style="min-width: 20rem"
+                              class="disableTree"
                             >
+                              <clr-icon shape="view-list" style="float: right;"
+                                (click)="clickTreeView(flag.problemCategory[0])"
+                                title="tree view detail"></clr-icon>
                               <clr-tree>
-                                <clr-tree-node *clrRecursiveFor="let label of flag.problemCategory[0]; getChildren: getChildren"
+                                <clr-tree-node
+                                  *clrRecursiveFor="let label of flag.problemCategory[0]; getChildren: getChildren"
                                   [clrSelected]="label.enable">
                                     {{label.name}}
                                 </clr-tree-node>
@@ -639,3 +644,8 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
 </div>
+<app-treeview-modal
+  *ngIf="showTreeView"
+  (onCloseTreeDialog)="onCloseTreeDialog()"
+  [treeData]="treeData"
+></app-treeview-modal>

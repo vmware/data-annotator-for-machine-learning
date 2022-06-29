@@ -129,6 +129,8 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     '#ffff00',
   ];
   samplingStrategy: any;
+  showTreeView: boolean = false;
+  treeData: any;
 
   constructor(
     private avaService: AvaService,
@@ -876,4 +878,13 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   }
 
   getChildren = (folder) => folder.children;
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
+  }
 }

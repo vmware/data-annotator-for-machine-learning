@@ -88,6 +88,8 @@ export class AdminComponent implements OnInit {
   msgEdit: any;
   setUserErrMessage: string;
   inputUserNameUpdate = new Subject<string>();
+  showTreeView: boolean = false;
+  treeData: any;
 
   constructor(
     private router: Router,
@@ -593,4 +595,13 @@ export class AdminComponent implements OnInit {
   }
 
   getChildren = (folder) => folder.children;
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
+  }
 }

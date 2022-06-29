@@ -679,7 +679,10 @@ SPDX-License-Identifier: Apache-2.0 -->
               <clr-dg-column>Label</clr-dg-column>
               <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
                   <clr-dg-cell>{{reviewInfo.annotator}}</clr-dg-cell>
-                  <clr-dg-cell>
+                  <clr-dg-cell class="disableTree">
+                    <clr-icon shape="view-list" style="float: right;"
+                      (click)="clickTreeView(reviewInfo.annotationInfo)"
+                      title="tree view detail"></clr-icon>
                     <clr-tree>
                       <clr-tree-node
                         *clrRecursiveFor="let label of reviewInfo.annotationInfo; getChildren: getChildren"
@@ -1067,3 +1070,9 @@ SPDX-License-Identifier: Apache-2.0 -->
     </button>
   </div>
 </clr-modal>
+
+<app-treeview-modal
+ *ngIf="showTreeView"
+ (onCloseTreeDialog)="onCloseTreeDialog()"
+ [treeData]="treeData"
+></app-treeview-modal>

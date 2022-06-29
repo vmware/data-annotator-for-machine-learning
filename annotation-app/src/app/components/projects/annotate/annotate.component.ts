@@ -183,6 +183,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   treeLabels: any;
   originTreeLabels: any;
   selectedTreeLabels: any = [];
+  showTreeView: boolean = false;
+  treeData: any;
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -3937,12 +3939,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   getChildren = (folder) => folder.children;
 
   changeSelectedlabel(label, data) {
-    // if (data === 0 || data === 1) {
-    //   label.enable = !!data;
-    // } else {
-      label.enable = data;
-    // }
+    label.enable = data;
     const treeLabels = this.treeLabels ? JSON.parse(JSON.stringify(this.treeLabels)) : [];
     this.selectedTreeLabels = treeLabels ? filterTreeLabel(treeLabels) : [];
+  }
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
   }
 }
