@@ -10,10 +10,9 @@ const YAML = require('js-yaml');
 @Component({
   selector: 'app-upload-label',
   templateUrl: './upload-label.component.html',
-  styleUrls: ['./upload-label.component.scss']
+  styleUrls: ['./upload-label.component.scss'],
 })
 export class UploadLabelComponent implements OnInit {
-
   @Output('onCloseDialog')
   onCloseDialogEmitter = new EventEmitter();
 
@@ -29,10 +28,7 @@ export class UploadLabelComponent implements OnInit {
   waitingTip = false;
   errorMessage: any;
 
-  constructor(
-    private formBuilder: FormBuilder,
-    private userAuthService: UserAuthService,
-  ) {}
+  constructor(private formBuilder: FormBuilder, private userAuthService: UserAuthService) {}
 
   ngOnInit() {
     this.user = this.userAuthService.loggedUser().email;
@@ -67,8 +63,10 @@ export class UploadLabelComponent implements OnInit {
 
   checkLocalFile() {
     this.uploadGroup.get('localFile').setValue(this.inputFile);
-    this.uploadGroup.get('localFile').setValidators(DatasetValidator.localLabelFile(this.uploadSet.fileFormat, this.inputFile));
-    this.uploadGroup.get('localFile').updateValueAndValidity(); 
+    this.uploadGroup
+      .get('localFile')
+      .setValidators(DatasetValidator.localLabelFile(this.uploadSet.fileFormat, this.inputFile));
+    this.uploadGroup.get('localFile').updateValueAndValidity();
     FormValidatorUtil.markControlsAsTouched(this.uploadGroup);
   }
 
@@ -85,7 +83,7 @@ export class UploadLabelComponent implements OnInit {
     const fileread = new FileReader();
     const _this = this;
     fileread.onload = () => {
-        _this.showLables(fileread.result);
+      _this.showLables(fileread.result);
     };
     fileread.readAsText(this.inputFile);
   }
@@ -98,7 +96,7 @@ export class UploadLabelComponent implements OnInit {
       } else {
         result = JSON.parse(content);
       }
-    } catch(e) {
+    } catch (e) {
       this.errorMessage = 'The file format is incorrect, Please check it.';
       this.uploadComplete = false;
       this.waitingTip = false;
@@ -121,12 +119,12 @@ export class UploadLabelComponent implements OnInit {
       if (itemArr.length !== _.uniq(itemArr).length) {
         name_same_err = true;
       }
-    }
+    };
     try {
       if (result) {
         recursionLabel(result.data);
       }
-    } catch(e) {
+    } catch (e) {
       this.errorMessage = 'The file format is incorrect, Please check it.';
       this.uploadComplete = false;
       this.waitingTip = false;
