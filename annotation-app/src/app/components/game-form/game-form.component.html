@@ -257,7 +257,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   title="tree view detail"></clr-icon>
                 <clr-tree>
                   <clr-tree-node *clrRecursiveFor="let label of dataset.categoryList; getChildren: getChildren"
-                    [clrSelected]="label.enable">
+                    [clrSelected]="label.enable" title="{{label.name}}">
                       {{label.name}}
                   </clr-tree-node>
                 </clr-tree>

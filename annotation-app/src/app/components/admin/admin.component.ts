@@ -109,7 +109,7 @@ export class AdminComponent implements OnInit {
     this.inputUserNameUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       let userName = value.trim();
       this.validateUserName(userName);
-   });
+    });
   }
 
   ngOnInit() {
@@ -159,11 +159,11 @@ export class AdminComponent implements OnInit {
           res[i].isExtend = true;
         }
         this.projectData = res;
-        this.projectData.forEach(item => {
+        this.projectData.forEach((item) => {
           if (item.labelType == 'numericLabel' && item.isMultipleLabel) {
             const categoryList = JSON.parse(item.categoryList);
             const itemKeys = [];
-            categoryList.forEach(element => {
+            categoryList.forEach((element) => {
               const labels = Object.keys(element);
               itemKeys.push(labels[0]);
             });
@@ -173,7 +173,7 @@ export class AdminComponent implements OnInit {
             item.categoryList = JSON.parse(item.categoryList);
           }
         });
-        this.totalItems = res.length;   
+        this.totalItems = res.length;
       },
       (error: any) => {
         console.log(error);
@@ -457,7 +457,14 @@ export class AdminComponent implements OnInit {
             }, 10000);
           } else if (res.appendSr == 'pending') {
             this.router.navigate(['appendNewEntries'], {
-              queryParams: { id, name: projectName, from: 'admin', projectType, categoryList, regression },
+              queryParams: {
+                id,
+                name: projectName,
+                from: 'admin',
+                projectType,
+                categoryList,
+                regression,
+              },
             });
           }
         },
@@ -494,7 +501,14 @@ export class AdminComponent implements OnInit {
             }, 10000);
           } else if (res.appendSr == 'pending' || res.appendSr == 'done') {
             this.router.navigate(['appendNewEntries'], {
-              queryParams: { id, name: projectName, from: 'admin', projectType, categoryList, regression },
+              queryParams: {
+                id,
+                name: projectName,
+                from: 'admin',
+                projectType,
+                categoryList,
+                regression,
+              },
             });
           }
         },
@@ -588,7 +602,7 @@ export class AdminComponent implements OnInit {
         this.setUserErrMessage = this.env.config.enableAWSS3
           ? 'Wrong format! Email only accept vmware emailbox'
           : 'Wrong format! Only accept email address';
-      }  
+      }
     } else {
       this.setUserErrMessage = 'This field is required';
     }

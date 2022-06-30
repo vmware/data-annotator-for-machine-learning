@@ -10,7 +10,7 @@
       <div class="modal-body disableTree">
         <clr-tree>
           <clr-tree-node [clrExpanded]="true" *clrRecursiveFor="let label of treeData; getChildren: getChildren"
-            [clrSelected]="label.enable">
+            [clrSelected]="label.enable" title="{{label.name}}">
               {{label.name}}
           </clr-tree-node>
         </clr-tree>

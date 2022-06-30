@@ -202,18 +202,10 @@ SPDX-License-Identifier: Apache-2.0 -->
             </clr-tooltip>
           </div>
         </div>
-        <div class="prev-info clr-row" *ngIf="showLabel">
+        <div class="prev-info clr-row" *ngIf="showLabel && labelType !== 'HTL'">
           <label for="projectName" class="label-tooltip clr-col-12 clr-col-md-4">Label</label>
           <div class="clr-input-wrapper clr-col-12 clr-col-md-7 labelBox">
-            <div *ngIf="labelType === 'HTL'">
-              <clr-tree>
-                <clr-tree-node *clrRecursiveFor="let label of categoryList; getChildren: getChildren"
-                  [clrSelected]="label.enable" (clrSelectedChange)="changeSelectedlabel(label, $event)">
-                    {{label.name}}
-                </clr-tree-node>
-              </clr-tree>
-            </div>
-            <div *ngIf="labelType !== 'HTL' && labelType != 'numericLabel'">
+            <div *ngIf="labelType != 'numericLabel'">
               <span
                 *ngFor="let label of categoryList; let i = index"
                 class="label"
@@ -268,7 +260,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
             <div
               class="clr-row numeric"
-              *ngIf="labelType !== 'HTL' && labelType == 'numericLabel' && !isMultipleLabel "
+              *ngIf="labelType == 'numericLabel' && !isMultipleLabel "
               style="margin-top: 0.5rem; margin-left: 0.5rem"
             >
               <div class="clr-row clr-col-12 clr-col-md-5">
@@ -311,7 +303,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
             <!-- both label -->
             <form
-              *ngIf="labelType !== 'HTL' && labelType === 'numericLabel' && isMultipleLabel"
+              *ngIf="labelType === 'numericLabel' && isMultipleLabel"
               class="form"
               [formGroup]="mutilNumericForm"
               autocomplete="off"
@@ -426,7 +418,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </form>
           </div>
           <div>
-            <clr-tooltip *ngIf="labelType === 'HTL' && selectedTreeLabel.length === 0">
+            <clr-tooltip *ngIf="labelType === 'numericLabel' && isMultipleLabel && inputIsNull">
               <clr-icon
                 clrTooltipTrigger
                 shape="error-standard"
@@ -444,25 +436,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <span>This field is required!</span>
               </clr-tooltip-content>
             </clr-tooltip>
-            <clr-tooltip *ngIf="labelType !== 'HTL' && labelType === 'numericLabel' && isMultipleLabel && inputIsNull">
-              <clr-icon
-                clrTooltipTrigger
-                shape="error-standard"
-                size="18"
-                style="color: red"
-                class="valid-tooltip"
-              >
-              </clr-icon>
-              <clr-tooltip-content
-                class="error-tooltip"
-                clrPosition="bottom-right"
-                clrSize="md"
-                *clrIfOpen
-              >
-                <span>This field is required!</span>
-              </clr-tooltip-content>
-            </clr-tooltip>
-            <clr-tooltip *ngIf="labelType !== 'HTL' && labelType === 'numericLabel' && isMultipleLabel && inputLabelValidation">
+            <clr-tooltip *ngIf="labelType === 'numericLabel' && isMultipleLabel && inputLabelValidation">
               <clr-icon
                 clrTooltipTrigger
                 shape="error-standard"
@@ -480,7 +454,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <span>This label has already exist!</span>
               </clr-tooltip-content>
             </clr-tooltip>
-            <clr-tooltip *ngIf="labelType !== 'HTL' && !(labelType === 'numericLabel' && isMultipleLabel) && sizeError || msg.min > oldMin || msg.max < oldMax">
+            <clr-tooltip *ngIf="!(labelType === 'numericLabel' && isMultipleLabel) && sizeError || msg.min > oldMin || msg.max < oldMax">
               <clr-icon
                 clrTooltipTrigger
                 shape="error-standard"

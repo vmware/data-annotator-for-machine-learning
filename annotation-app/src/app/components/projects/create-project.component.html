@@ -783,14 +783,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                   upload a taxonomy file
                 </button>
               </div>
-              <div *ngIf="isUploadLabel && treeLabels">Please select labels to anotation</div>      
-              <clr-tree *ngIf="isUploadLabel && treeLabels">
-                <clr-tree-node [clrExpanded]="true" *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
-                  [clrSelected]="label.enable" (clrSelectedChange)="changeSelectedlabel(label, $event)">
-                    {{label.name}}
-                </clr-tree-node>
-              </clr-tree>
-
+              <div class="disableTree" *ngIf="isUploadLabel && treeLabels">
+                <clr-icon shape="view-list" style="float: right;"
+                (click)="clickTreeView(treeLabels)"
+                title="tree view detail"></clr-icon>
+                <clr-tree>
+                  <clr-tree-node *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
+                    [clrSelected]="label.enable" title="{{label.name}}">
+                      {{label.name}}
+                  </clr-tree-node>
+                </clr-tree>
+              </div>
               <!-- numeric label -->
               <div
                 class="clr-row numeric"
@@ -1619,3 +1622,9 @@ SPDX-License-Identifier: Apache-2.0 -->
   (onCloseDialog)="receiveCloseInfo($event)"
   (onQueriedDataset)="onAddedDataset($event)"
 ></app-supercollider> -->
+
+<app-treeview-modal
+ *ngIf="showTreeView"
+ (onCloseTreeDialog)="onCloseTreeDialog()"
+ [treeData]="treeData"
+></app-treeview-modal>

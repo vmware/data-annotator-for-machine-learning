@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div>
             <div class="clr-form-group form-group clr-row">
               <label for="selectProject" class="label-leftBoard">Projects </label>&nbsp;&nbsp;
-              <div class="clr-select-wrapper" style="max-width: 70%">
+              <div class="clr-select-wrapper" style="width: 70%">
                 <select
                   style="width: 100%"
                   (change)="onSelectingProjects($event)"
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               style="margin-top: -0.5rem"
             >
               <label class="label-leftBoard">Display </label>&nbsp;&nbsp;&nbsp;
-              <div class="clr-select-wrapper" style="max-width: 70%">
+              <div class="clr-select-wrapper" style="width: 70%">
                 <select
                   style="width: 100%"
                   formControlName="renderFormat"
@@ -663,20 +663,23 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
           </div>
-          <div *ngIf="moreReviewInfo?.length > 1" class="limit-height">
+          <div *ngIf="(projectType == 'text' || projectType == 'tabular') && startFrom==='review'" class="limit-height">
             <h5 style="margin-top: 1rem">Annotator labeled results:</h5>
             <clr-datagrid *ngIf="labelType !== 'HTL'">
               <clr-dg-column>Annotator</clr-dg-column>
               <clr-dg-column>Label</clr-dg-column>
+              <clr-dg-column>Time</clr-dg-column>
               <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
                   <clr-dg-cell>{{reviewInfo.annotator}}</clr-dg-cell>
                   <clr-dg-cell>{{reviewInfo.annotationInfo}}</clr-dg-cell>
+                  <clr-dg-cell>{{reviewInfo.time | date: 'yyyy-MM-dd HH:mm:ss'}}</clr-dg-cell>
               </clr-dg-row>
               <clr-dg-footer>{{moreReviewInfo.length}} annotation info</clr-dg-footer>
             </clr-datagrid>
             <clr-datagrid *ngIf="labelType === 'HTL'">
               <clr-dg-column>Annotator</clr-dg-column>
               <clr-dg-column>Label</clr-dg-column>
+              <clr-dg-column>Time</clr-dg-column>
               <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
                   <clr-dg-cell>{{reviewInfo.annotator}}</clr-dg-cell>
                   <clr-dg-cell class="disableTree">
@@ -686,11 +689,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <clr-tree>
                       <clr-tree-node
                         *clrRecursiveFor="let label of reviewInfo.annotationInfo; getChildren: getChildren"
-                        [clrSelected]="label.enable">
+                        [clrSelected]="label.enable" title="{{label.name}}">
                           {{label.name}}
                       </clr-tree-node>
                     </clr-tree>
                   </clr-dg-cell>
+                  <clr-dg-cell>{{reviewInfo.time | date: 'yyyy-MM-dd HH:mm:ss'}}</clr-dg-cell>
               </clr-dg-row>
               <clr-dg-footer>{{moreReviewInfo.length}} annotation info</clr-dg-footer>
             </clr-datagrid>
@@ -917,7 +921,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="questionContainer" *ngIf="labelType === 'HTL' && (projectType == 'text' || projectType == 'tabular')">
             <clr-tree>
               <clr-tree-node [clrExpanded]="true" *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
-                [clrSelected]="label.enable" (clrSelectedChange)="changeSelectedlabel(label, $event)">
+                [clrSelected]="label.enable" (clrSelectedChange)="changeSelectedlabel(label, $event)" title="{{label.name}}">
                   {{label.name}}
               </clr-tree-node>
             </clr-tree>

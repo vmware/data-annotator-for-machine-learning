@@ -412,7 +412,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <clr-tree>
                                 <clr-tree-node
                                   *clrRecursiveFor="let label of flag.problemCategory[0]; getChildren: getChildren"
-                                  [clrSelected]="label.enable">
+                                  [clrSelected]="label.enable" title="{{label.name}}">
                                     {{label.name}}
                                 </clr-tree-node>
                               </clr-tree>

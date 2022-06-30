@@ -14,7 +14,6 @@ import { CommonService } from 'app/services/common/common.service';
 import { EmailService } from 'app/services/common/email.service';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { DatasetValidator } from 'app/shared/form-validators/dataset-validator';
-import { filterTreeLabel } from 'app/shared/utils/treeView';
 
 @Component({
   selector: 'app-edit-project',
@@ -76,7 +75,6 @@ export class EditProjectComponent implements OnInit {
   inputIsNull: boolean;
   isMultipleLabel: boolean;
   showLabel: boolean = true;
-  selectedTreeLabel: any = [];
 
   constructor(
     private avaService: AvaService,
@@ -691,13 +689,5 @@ export class EditProjectComponent implements OnInit {
         }, 5000);
       },
     );
-  }
-
-  getChildren = (folder) => folder.children;
-
-  changeSelectedlabel(label, data) {
-    label.enable = data;
-    const treeLabels = this.categoryList ? JSON.parse(JSON.stringify(this.categoryList)) : [];
-    this.selectedTreeLabel = treeLabels ? filterTreeLabel(treeLabels) : [];
   }
 }

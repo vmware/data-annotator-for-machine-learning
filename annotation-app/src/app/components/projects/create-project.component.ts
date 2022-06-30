@@ -29,7 +29,6 @@ import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
 import { CommonService } from 'app/services/common/common.service';
 import { EmailService } from 'app/services/common/email.service';
-import { filterTreeLabel } from 'app/shared/utils/treeView';
 
 @Component({
   selector: 'app-create',
@@ -133,6 +132,8 @@ export class CreateNewComponent implements OnInit {
   showUploadLabelDialog: boolean = false;
   treeLabels: any;
   selectedTreeLabel: any;
+  showTreeView: boolean = false;
+  treeData: any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -270,9 +271,7 @@ export class CreateNewComponent implements OnInit {
         this.dsDialogForm.get('min').updateValueAndValidity();
         this.dsDialogForm.get('max').updateValueAndValidity();
         this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
-        const treeLabels = this.treeLabels ? JSON.parse(JSON.stringify(this.treeLabels)) : [];
-        this.selectedTreeLabel = this.treeLabels ? filterTreeLabel(treeLabels) : [];
-        if (this.selectedTreeLabel.length > 0) {
+        if (this.treeLabels.length > 0) {
           this.labelType = 'HTL';
           condition = !this.dsDialogForm.invalid
           && !this.nameExist
@@ -1581,9 +1580,12 @@ export class CreateNewComponent implements OnInit {
 
   getChildren = (folder) => folder.children;
 
-  changeSelectedlabel(label, data) {
-    label.enable = data;
-    const treeLabels = this.treeLabels ? JSON.parse(JSON.stringify(this.treeLabels)) : [];
-    this.selectedTreeLabel = treeLabels ? filterTreeLabel(treeLabels) : [];
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
   }
 }

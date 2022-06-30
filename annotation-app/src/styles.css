@@ -10,3 +10,10 @@ a {
 ng-select .ng-dropdown-panel {
   /* width: 150% !important; */
 }
+
+.clr-treenode-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
