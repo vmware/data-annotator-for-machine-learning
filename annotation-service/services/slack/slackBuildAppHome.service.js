@@ -7,8 +7,10 @@
 
 const projectService = require("../project.service");
 const { formatDate } = require('../../utils/common.utils');
-const { generateObj } = require('./slack.utils');
+const { generateObj, returnAllPageFunc } = require('./slack.utils');
 const config = require('../../config/config');
+const { findUserInChannels } = require('./slackUsers.service')
+const _ = require("lodash");
 
 
 
@@ -18,41 +20,36 @@ async function buildAppHome(bolt) {
     bolt.event('app_home_opened', async ({ event, client, logger }) => {
         try {
             // Call views.publish with the built-in client
-            const result = await client.views.publish({
-                user_id: event.user,
-                view: {
-                    "type": 'home',
-                    "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": `*:raised_hands: Welcome to start annotate, <@${event.user}>*\n\nWith DAML and Slack together ,you can annotate text classification and tabular data now. Please feel free to annotate any of the following project. For text annotation projects, where a label should be selected based on a text description and any additional attributes. For tabular, where a label should be selected based on a large set of attributes. And for more types (log/image/ner) of annotation please visit <${config.WebClientUrl}|${config.teamTitle}>.\n\n`
-                            }
-                        },
+            // const result = await client.views.publish({
+            //     user_id: event.user,
+            //     view: {
+            //         "type": 'home',
+            //         "blocks": [
+            //             {
+            //                 "type": "section",
+            //                 "text": {
+            //                     "type": "mrkdwn",
+            //                     "text": `*:raised_hands: Welcome to start annotate, <@${event.user}>*\n\nWith ${config.slackAppName} and Slack together ,you can annotate text classification and tabular data now. Please feel free to annotate any of the following project. For text annotation projects, where a label should be selected based on a text description and any additional attributes. For tabular, where a label should be selected based on a large set of attributes. And for more types (log/image/ner) of annotation please visit <${config.WebClientUrl}|${config.teamTitle}>.\n\n`
+            //                 }
+            //             },
 
-                        {
-                            "type": "image",
-                            "image_url": "https://icon-library.com/images/loading-icon-animated-gif/loading-icon-animated-gif-19.jpg",
-                            "alt_text": "data is on the way..."
-                        }
-                    ]
-                }
-            });
-            if (result.ok) {
-                const blocks = await generateHomeBlocks(event, client);
-                // Call views.publish with the built-in client
-                const newResult = await client.views.publish({
-                    user_id: event.user,
-                    view: {
-                        "type": "home",
-                        "blocks": blocks
-                    }
-                });
-                if (newResult.ok) {
-                    console.log('build_home_ok_ok_ok_ok')
-                }
-            }
+            //             {
+            //                 "type": "image",
+            //                 "image_url": "https://icon-library.com/images/loading-icon-animated-gif/loading-icon-animated-gif-19.jpg",
+            //                 "alt_text": "data is on the way..."
+            //             }
+            //         ]
+            //     }
+            // });
+            // if (result.ok) {
+            // Call the users.info method using the WebClient
+            const user = await client.users.info({ user: event.user });
+            const projects = await getProjectsForSlack(event, user.user.profile.email);
+            const blocks = await generateHomeBlocks(event, projects, 1);
+            await updateHomeView(event, client, blocks);
+            await listenPagination(event, bolt, "previus_page_btn", projects);
+            await listenPagination(event, bolt, "next_page_btn", projects);
+            // }
         }
         catch (error) {
             console.log(error);
@@ -61,17 +58,29 @@ async function buildAppHome(bolt) {
 }
 
 
+async function updateHomeView(event, client, blocks) {
+    const newResult = await client.views.publish({
+        user_id: event.user,
+        view: {
+            "type": "home",
+            "blocks": blocks
+        }
+    });
+    if (newResult.ok) {
+        console.log('build_home_ok_ok_ok_ok')
+    }
+}
 
 
-async function generateHomeBlocks(event, client) {
-    // Call the users.info method using the WebClient
-    const user = await client.users.info({ user: event.user });
-    const projects = await projectService.getProjects({ query: { src: 'annotate' }, auth: { email: user.user.profile.email } })
+
+async function generateHomeBlocks(event, projects, page) {
+
     let blocks = [];
-    blocks.push(await generateObj("section", await generateObj("mrkdwn", `*:raised_hands: Welcome to start annotate, <@${event.user}>*\n\nWith DAML and Slack together ,you can annotate text classification and tabular data now. Please feel free to annotate any of the following project. For text annotation projects, where a label should be selected based on a text description and any additional attributes. For tabular, where a label should be selected based on a large set of attributes. And for more types (log/image/ner) of annotation please visit <${config.WebClientUrl}|${config.teamTitle}>.\n\n`)));
+    blocks.push(await generateObj("section", await generateObj("mrkdwn", `*:raised_hands: Welcome to start annotate, <@${event.user}>*\n\nWith ${config.slackAppName} and Slack together ,you can annotate text classification and tabular data now. Please feel free to annotate any of the following project. For text annotation projects, where a label should be selected based on a text description and any additional attributes. For tabular, where a label should be selected based on a large set of attributes. And for more types (log/image/ner) of annotation please visit <${config.WebClientUrl}|${config.teamTitle}>.\n\n`)));
 
-    for (let project of projects) {
-        if (!project.isMultipleLabel && project.labelType === 'textLabel' && (project.projectType === 'tabular' || project.projectType === 'text')) {
+    if (projects.length > 0) {
+        for (let project of projects[page - 1].data) {
+
             const divider = await generateObj("divider");
             blocks.push(divider);
 
@@ -92,13 +101,68 @@ async function generateHomeBlocks(event, client) {
             info.fields = arr;
             blocks.push(info);
         }
-    }
-    if (blocks.length == 1) {
+        const divider = await generateObj("divider");
+        blocks.push(divider);
+        blocks.push(await generateObj("section", await generateObj("mrkdwn", `Viewing records ${(projects[page - 1].pageNum) * (projects[page - 1].pageSize) - (projects[page - 1].pageSize - 1)} - ${(page - 1) * (projects[page - 1].pageSize) + projects[page - 1].data.length} of ${projects[page - 1].total}`)));
+
+        const previousBtn = await generateObj("button", await generateObj("plain_text", `Previus`), undefined, String(page), 'previus_page_btn');
+        const nextBtn = await generateObj("button", await generateObj("plain_text", `Next`), undefined, String(page), 'next_page_btn');
+        blocks.push({ "type": "actions", "elements": [previousBtn, nextBtn] });
+    } else {
         blocks.push(await generateObj("divider"));
         let alert = await generateObj("section", await generateObj("mrkdwn", `:smiling_face_with_tear: *oh,sorry*\n\nWe couldn't find any project for you. Please go to <${config.WebClientUrl}|${config.teamTitle}> to create one first.`));
         blocks.push(alert)
     }
     return blocks
+}
+
+
+async function getProjectsForSlack(event, email) {
+    const projects = await projectService.getProjectsTextTabular(email)
+    let arr = [];
+    for (let i = 0; i < projects.length; i++) {
+        if (projects[i].annotator.indexOf(email) > -1) {
+            arr.push(projects[i])
+        } else {
+            let find = await findUserInChannels(event, _.map(projects[i].assignSlackChannels, "slackId"));
+            if (find) {
+                arr.push(projects[i])
+            }
+        }
+    }
+    // to do pagination
+    const pageObj = await returnAllPageFunc(10, arr);
+    return pageObj
+}
+
+
+async function listenPagination(event, bolt, action_id, projects) {
+    //to listening all the start-annotate-btn
+    bolt.action({ action_id },
+        async ({ body, client, ack, logger }) => {
+            await ack();
+            try {
+                if (body.user && body.actions) {
+                    if (action_id === 'previus_page_btn') {
+                        if (Number(body.actions[0].value) - 1 > 0) {
+                            var blocks = await generateHomeBlocks(event, projects, Number(body.actions[0].value) - 1)
+                        } else {
+                            return
+                        }
+                    } else if (action_id === 'next_page_btn') {
+                        if (Number(body.actions[0].value) + 1 > projects.length) {
+                            return
+                        } else {
+                            var blocks = await generateHomeBlocks(event, projects, Number(body.actions[0].value) + 1)
+                        }
+                    }
+                    await updateHomeView(event, client, blocks)
+                }
+            }
+            catch (error) {
+                logger.error(error);
+            }
+        });
 }
 
 

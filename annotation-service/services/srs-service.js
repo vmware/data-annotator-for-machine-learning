@@ -35,6 +35,11 @@ async function updateSrsUserInput(req) {
     console.log(`[ SRS ] Service query project info by proId`, projectId);
     const pro = await mongoDb.findById(ProjectModel, projectId);
 
+    // to check whether this email is in the annotator list
+    if (pro.annotator.indexOf(user) === -1) {
+        await projectService.addAnnotatorFromSlack(pro, user);
+    }
+
     const mp = await getModelProject({ _id: projectId });
 
     console.log(`[ SRS ] Service find if user already annotated tickets:`, usrSr.length);

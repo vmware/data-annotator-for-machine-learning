@@ -15,7 +15,7 @@ const mongoDb = require('../db/mongo.db');
 const { getModelProject } = require('../utils/mongoModel.utils');
 const { ProjectModel, UserModel, LogModel } = require('../db/db-connect');
 const { formatDate } = require('../utils/common.utils');
-const slackPostMsg = require("./slack/slackPostMsg.service");
+const slackChat = require("./slack/slackChat.service");
 const { default: axios } = require("axios");
 
 async function getProjects(req) {
@@ -195,7 +195,7 @@ async function updateProject(req) {
                 createdDate: await formatDate(Number(projectInfo.createdDate)),
                 pid: projectInfo._id
             };
-            await slackPostMsg.publishMessage(params);
+            await slackChat.publishMessage(params);
         }
     }
 
@@ -210,6 +210,64 @@ async function updateProject(req) {
     const condition = { projectName: req.body.previousPname };
     const options = { new: true };
     return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
+}
+
+async function addAnnotatorFromSlack(pro, slackUser) {
+    console.log(`[ PROJECT ] Service addAnnotatorFromSlack`);
+    let annotators = [], completeCase = [], assigneeList = [];
+    annotators = _.cloneDeep(pro.annotator);
+    annotators.push(slackUser)
+
+    //to new the assigned case according to the new annotators list
+    assigneeList = await evenlyDistributeTicket(annotators, pro.totalCase, pro.maxAnnotation);
+
+    for (const user of assigneeList) {
+        const ucase = await pro.userCompleteCase.find(uc => uc.user == user.email);
+        if (ucase) {
+            ucase.assignedCase = user.assignedCase;
+            completeCase.push(ucase);
+        } else {
+            completeCase.push({
+                user: user.email,
+                completeCase: 0,
+                skip: 0,
+                assignedCase: user.assignedCase,
+                assignedDate: Date.now(),
+                updateDate: Date.now(),
+            });
+        }
+    }
+    let update = {
+        $set: {
+            userCompleteCase: completeCase,
+            annotator: annotators,
+        }
+    };
+    console.log(`[ PROJECT ] Service update project info`, completeCase);
+    const condition = { projectName: pro.projectName };
+    const options = { new: true };
+    return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
+}
+
+async function evenlyDistributeTicket(annotators, totalRow, maxAnnotations) {
+    let assigneeList = [];
+    for (const email of annotators) { assigneeList.push({ email, assignedCase: 0 }) };
+
+    if (maxAnnotations >= assigneeList.length) {
+        assigneeList.forEach((value) => {
+            value.assignedCase = totalRow;
+        });
+    } else {
+        let totalNum = totalRow * maxAnnotations;
+        let personNum = assigneeList.length;
+        let a = Math.floor(totalNum / personNum);
+        let b = totalNum % personNum;
+        assigneeList.forEach((value) => {
+            value.assignedCase = a;
+        });
+        for (let i = 0; i <= b - 1; i++) { assigneeList[i].assignedCase = a + 1; }
+    }
+    return assigneeList
 }
 
 async function updateProjectShare(req) {
@@ -376,6 +434,7 @@ async function fileterLogTicketsByFileName(req) {
     ]
     return mongoDb.aggregateBySchema(LogModel, schema);
 }
+
 
 
 /**
@@ -763,6 +822,26 @@ async function deleteProjectLables(label, _id, projectName, operation) {
     }
 }
 
+
+async function getProjectsTextTabular(email) {
+    console.log(`[ PROJECT ] Service getProjects by type text and tabular`);
+    let project = null;
+    const options = { sort: { updatedDate: -1 } };
+    let condition = { labelType: "textLabel", isMultipleLabel: false };
+    condition.$or = [
+        { projectType: PROJECTTYPE.TEXT },
+        { projectType: PROJECTTYPE.TABULAR }
+    ];
+    condition.$or = [
+        { annotator: { $regex: email } },
+        { assignSlackChannels: { $exists: true }, $where: 'this.assignSlackChannels.length>0' }
+    ];
+    return mongoDb.findByConditions(ProjectModel, condition, project, options);
+}
+
+
+
+
 module.exports = {
     getProjects,
     getProjectByAnnotator,
@@ -782,5 +861,6 @@ module.exports = {
     projectIntegrationEdit,
     editProjectLabels,
     deleteProjectLables,
-
+    getProjectsTextTabular,
+    addAnnotatorFromSlack
 }

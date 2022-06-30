@@ -71,6 +71,7 @@ module.exports = {
   //SLACK
   //If buildSlackApp=true, slackBotUserOAuthToken, slackSigningSecret and slackAppToken must be set. And please follow the path annotation-app/src/environments/environment.ts to set enableSlack=true at the same time.
   buildSlackApp: process.env.BUILD_SLACK_APP || false,
+  slackAppName: process.env.SLACK_APP_NAME || null, //If buildSlackApp=true, here should be the slack app display name
   slackBotUserOAuthToken: process.env.SLACK_BOT_USER_OAUTH_TOKEN || null,
   slackSigningSecret: process.env.SLACK_SIGNING_SECRET || null,
   slackAppToken: process.env.SLACK_APP_TOKEN || null
