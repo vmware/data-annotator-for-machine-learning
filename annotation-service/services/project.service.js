@@ -72,28 +72,30 @@ async function getProjectInfo(req) {
     let project = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
     if (project && project.labelType == LABELTYPE.HIERARCHICAL) {
         let labels = JSON.parse(project.categoryList);
-        await prepareSelectedHierarchicalLabels(labels, true);
+        await prepareSelectedHierarchicalLabels(labels, true, false);
         project.categoryList = JSON.stringify(labels);
     }
     return project;
 }
 
-async function prepareSelectedHierarchicalLabels(nodes, unEnable){
+async function prepareSelectedHierarchicalLabels(nodes, unEnable, removeUnselected){
 	for (let i in nodes) {
-        while(true){
-            if(nodes[i] && nodes[i].enable == 0){
-                nodes.splice(i, 1);
-            }else{
-                break;
+        if (removeUnselected) {
+            while(true){
+                if(nodes[i] && nodes[i].enable == 0){
+                    nodes.splice(i, 1);
+                }else{
+                    break;
+                }
             }
         }
-		
+
 		if(nodes[i] && nodes[i].enable != 0){
             if(unEnable){
                 nodes[i].enable = 0;
             }
 			if(nodes[i].children){
-				await prepareSelectedHierarchicalLabels(nodes[i].children, unEnable)
+				await prepareSelectedHierarchicalLabels(nodes[i].children, unEnable, removeUnselected)
 			}
 		}
 	}

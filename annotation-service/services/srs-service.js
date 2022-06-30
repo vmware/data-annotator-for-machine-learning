@@ -97,26 +97,23 @@ async function updateSrsUserInput(req) {
                         user: user,
                         timestamp: Date.now()
                     });
-                }else if(pro.isMultipleLabel){
-                    if(pro.labelType == LABELTYPE.NUMERIC){
-                        ui.problemCategory.forEach(lb =>{
-                            userInputs.push({
-                                problemCategory: {
-                                    label: Object.keys(lb)[0],
-                                    value: Object.values(lb)[0]
-                                },
-                                user: user,
-                                timestamp: Date.now()
-                            });
-                        });
-                    }
-                    if (pro.labelType == LABELTYPE.HIERARCHICAL) {
+                }else if(pro.labelType == LABELTYPE.NUMERIC && pro.isMultipleLabel){
+                    ui.problemCategory.forEach(lb =>{
                         userInputs.push({
-                            problemCategory: ui.problemCategory,
+                            problemCategory: {
+                                label: Object.keys(lb)[0],
+                                value: Object.values(lb)[0]
+                            },
                             user: user,
                             timestamp: Date.now()
                         });
-                    }
+                    });
+                }else if (pro.labelType == LABELTYPE.HIERARCHICAL) {
+                    userInputs.push({
+                        problemCategory: ui.problemCategory,
+                        user: user,
+                        timestamp: Date.now()
+                    });
                 }else{
                     ui.problemCategory.forEach(lb =>{
                         userInputs.push({
@@ -159,26 +156,23 @@ async function updateSrsUserInput(req) {
                         user: user,
                         timestamp: Date.now()
                     });
-                }else if(pro.isMultipleLabel){
-                    if(pro.labelType == LABELTYPE.NUMERIC){
-                        ui.problemCategory.forEach(lb =>{
-                            userInputs.push({
-                                problemCategory: {
-                                    label: Object.keys(lb)[0],
-                                    value: Object.values(lb)[0]
-                                },
-                                user: user,
-                                timestamp: Date.now()
-                            });
-                        });
-                    }
-                    if (pro.labelType == LABELTYPE.HIERARCHICAL) {
+                }else if(pro.labelType == LABELTYPE.NUMERIC && pro.isMultipleLabel){
+                    ui.problemCategory.forEach(lb =>{
                         userInputs.push({
-                            problemCategory: ui.problemCategory,
+                            problemCategory: {
+                                label: Object.keys(lb)[0],
+                                value: Object.values(lb)[0]
+                            },
                             user: user,
                             timestamp: Date.now()
                         });
-                    }
+                    });
+                }else if (pro.labelType == LABELTYPE.HIERARCHICAL) {
+                    userInputs.push({
+                        problemCategory: ui.problemCategory,
+                        user: user,
+                        timestamp: Date.now()
+                    });
                 }else {
                     ui.problemCategory.forEach(lb =>{
                         userInputs.push({
@@ -941,27 +935,23 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
     }else{
     //max-annotation>1
         let userInputs = []; 
-        if(isMultipleLabel){
-            if (labelType == LABELTYPE.NUMERIC) {
-                problemCategory.forEach(lb =>{
-                    userInputs.push({
-                        problemCategory: {
-                            label: Object.keys(lb)[0],
-                            value: Object.values(lb)[0]
-                        },
-                        user: user,
-                        timestamp: Date.now()
-                    });
-                })
-            }
-            if (labelType == LABELTYPE.HIERARCHICAL) {
+        if(labelType == LABELTYPE.NUMERIC && isMultipleLabel){
+            problemCategory.forEach(lb =>{
                 userInputs.push({
-                    problemCategory: problemCategory,
+                    problemCategory: {
+                        label: Object.keys(lb)[0],
+                        value: Object.values(lb)[0]
+                    },
                     user: user,
                     timestamp: Date.now()
                 });
-            }
-            
+            });
+        }else if (labelType == LABELTYPE.HIERARCHICAL) {
+            userInputs.push({
+                problemCategory: problemCategory,
+                user: user,
+                timestamp: Date.now()
+            });
         }else {
             problemCategory.forEach(lb =>{
                 userInputs.push({
