@@ -239,6 +239,77 @@ async function updateProjectShare(req) {
     return mongoDb.findOneAndUpdate(ProjectModel, condition, update, optional);
 }
 
+async function matchUserInputsWithHierarchicalLabels(labels, tickets) {
+    
+    for (const i in labels) {
+        if (labels[i].children) {
+           await matchUserInputsWithHierarchicalLabels(labels[i].children, tickets)
+        }else{
+            for (const ticket of tickets) {
+                for (const input of ticket.userInputs) {
+                    const inputLabels = input.problemCategory;
+
+                    const path = labels[i].path.substr(0, labels[i].path.length-1);
+                    const currentLable = _.get(inputLabels, path);
+                    if(currentLable.name == labels[i].name && currentLable.enable == 1){
+                        labels[i].annotated += 1;
+                    }
+                    
+                }
+            }
+        }
+    }
+}
+async function initHierarchicalLabelsCase(labels, namePath, initLabelAnnotated, path) {
+    for (const i in labels) {
+        if (initLabelAnnotated) {
+            labels[i].label = labels[i].name;
+        }
+        if(!labels[i].children) {
+            if (i !=0 && labels[i-1].children) {
+                let namePathArray = namePath.split(":");
+                namePathArray.pop();
+                namePathArray.pop();
+                namePath = namePathArray.join(":") + ":";
+        
+                let pathArray = path.split(".");
+                pathArray.pop();
+                pathArray.pop();
+                if (pathArray.length) {
+                    path = pathArray.join(".") + "." + "children";
+                }else{
+                    path = pathArray.join(".");
+                }
+            }
+            labels[i].namePath = namePath + labels[i].name;
+            if (initLabelAnnotated) {
+                labels[i].annotated = 0;
+            }
+            labels[i].path = path + "["+ i +"]" + ".";
+            
+        }
+        if(labels[i].children){
+
+            if (i > 0) {
+                let namePathArray = namePath.split(":");
+                namePathArray.pop();
+                namePathArray.pop();
+                namePath = namePathArray.join(":") + ":";
+
+                let pathArray = path.split(".");
+                pathArray.pop();
+                pathArray.pop();
+                path = pathArray.join(".") + "." + "children";
+
+            }
+            path += "["+ i +"]" + "." + "children";
+            namePath += labels[i].name + ":";
+            await initHierarchicalLabelsCase(labels[i].children, namePath, initLabelAnnotated, path);
+            
+        }
+    }
+}
+
 async function projectLeaderBoard(req) {
     
     await validator.checkAnnotator(req.auth.email);
@@ -268,7 +339,15 @@ async function projectLeaderBoard(req) {
     const srsUI = await mongoDb.findByConditions(mp.model, conditions, 'userInputs');
 
     console.log(`[ PROJECT ] Service sort out labels info`);
-    if (labelType == LABELTYPE.NUMERIC) {
+    if (labelType == LABELTYPE.HIERARCHICAL) {
+        let lables = JSON.parse(proInfo.categoryList);
+        await initHierarchicalLabelsCase(lables, "", true, "");
+        
+        await matchUserInputsWithHierarchicalLabels(lables, srsUI);
+        result.labels = lables;
+        console.log(JSON.stringify(lables));
+    }
+    else if (labelType == LABELTYPE.NUMERIC) {
         if (proInfo.isMultipleLabel) {
             JSON.parse(proInfo.categoryList).forEach(labels => {
                 const label = Object.keys(labels)[0];
@@ -796,6 +875,6 @@ module.exports = {
     editProjectLabels,
     deleteProjectLables,
     prepareSelectedHierarchicalLabels,
-
+    matchUserInputsWithHierarchicalLabels,
 
 }
