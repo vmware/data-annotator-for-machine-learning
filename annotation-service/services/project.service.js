@@ -248,9 +248,7 @@ async function matchUserInputsWithHierarchicalLabels(labels, tickets) {
             for (const ticket of tickets) {
                 for (const input of ticket.userInputs) {
                     const inputLabels = input.problemCategory;
-
-                    const path = labels[i].path.substr(0, labels[i].path.length-1);
-                    const currentLable = _.get(inputLabels, path);
+                    const currentLable = _.get(inputLabels, labels[i].path);
                     if(currentLable.name == labels[i].name && currentLable.enable == 1){
                         labels[i].annotated += 1;
                     }
@@ -260,17 +258,20 @@ async function matchUserInputsWithHierarchicalLabels(labels, tickets) {
         }
     }
 }
-async function initHierarchicalLabelsCase(labels, namePath, initLabelAnnotated, path) {
+async function initHierarchicalLabelsCase(labels, namePath, path, labelsArray, labelsPathArray) {
     for (const i in labels) {
-        if (initLabelAnnotated) {
-            labels[i].label = labels[i].name;
-        }
+
         if(!labels[i].children) {
             if (i !=0 && labels[i-1].children) {
-                let namePathArray = namePath.split(":");
+                let namePathArray = namePath.split(".");
                 namePathArray.pop();
                 namePathArray.pop();
-                namePath = namePathArray.join(":") + ":";
+                if (namePathArray.length) {
+                    namePath = namePathArray.join(".") + ".";
+                }else{
+                    namePath = namePathArray.join(".");
+                }
+                
         
                 let pathArray = path.split(".");
                 pathArray.pop();
@@ -281,20 +282,25 @@ async function initHierarchicalLabelsCase(labels, namePath, initLabelAnnotated, 
                     path = pathArray.join(".");
                 }
             }
+
             labels[i].namePath = namePath + labels[i].name;
-            if (initLabelAnnotated) {
-                labels[i].annotated = 0;
+            labels[i].annotated = 0;
+            labels[i].path = path + "["+ i +"]";
+
+            if (labelsArray) {
+                labelsArray.push(namePath + labels[i].name);
             }
-            labels[i].path = path + "["+ i +"]" + ".";
-            
+            if (labelsPathArray) {
+                labelsPathArray.push(path + "["+ i +"]");
+            }
         }
         if(labels[i].children){
 
             if (i > 0) {
-                let namePathArray = namePath.split(":");
+                let namePathArray = namePath.split(".");
                 namePathArray.pop();
                 namePathArray.pop();
-                namePath = namePathArray.join(":") + ":";
+                namePath = namePathArray.join(".") + ".";
 
                 let pathArray = path.split(".");
                 pathArray.pop();
@@ -303,8 +309,8 @@ async function initHierarchicalLabelsCase(labels, namePath, initLabelAnnotated, 
 
             }
             path += "["+ i +"]" + "." + "children";
-            namePath += labels[i].name + ":";
-            await initHierarchicalLabelsCase(labels[i].children, namePath, initLabelAnnotated, path);
+            namePath += labels[i].name + ".";
+            await initHierarchicalLabelsCase(labels[i].children, namePath, path, labelsArray, labelsPathArray);
             
         }
     }
@@ -341,11 +347,9 @@ async function projectLeaderBoard(req) {
     console.log(`[ PROJECT ] Service sort out labels info`);
     if (labelType == LABELTYPE.HIERARCHICAL) {
         let lables = JSON.parse(proInfo.categoryList);
-        await initHierarchicalLabelsCase(lables, "", true, "");
-        
+        await initHierarchicalLabelsCase(lables, "", "");
         await matchUserInputsWithHierarchicalLabels(lables, srsUI);
         result.labels = lables;
-        console.log(JSON.stringify(lables));
     }
     else if (labelType == LABELTYPE.NUMERIC) {
         if (proInfo.isMultipleLabel) {
@@ -402,7 +406,6 @@ async function projectLeaderBoard(req) {
                             lb.annotated += 1;
                         }
                     }
-                    
                 });
             });
             result.labels.push(lb);
@@ -876,5 +879,6 @@ module.exports = {
     deleteProjectLables,
     prepareSelectedHierarchicalLabels,
     matchUserInputsWithHierarchicalLabels,
+    initHierarchicalLabelsCase,
 
 }
