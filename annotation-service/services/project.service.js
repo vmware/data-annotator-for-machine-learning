@@ -296,17 +296,25 @@ async function initHierarchicalLabelsCase(labels, namePath, path, labelsArray, l
         }
         if(labels[i].children){
 
-            if (i > 0) {
+            if (i != 0 && labels[i-1].children) {
                 let namePathArray = namePath.split(".");
                 namePathArray.pop();
                 namePathArray.pop();
-                namePath = namePathArray.join(".") + ".";
+                if(namePathArray.length){
+                    namePath = namePathArray.join(".") + ".";
+                }else{
+                    namePath = namePathArray.join(".");
+                }
+                
 
                 let pathArray = path.split(".");
                 pathArray.pop();
                 pathArray.pop();
-                path = pathArray.join(".") + "." + "children";
-
+                if (pathArray.length) {
+                    path = pathArray.join(".") + "." + "children";
+                }else{
+                    path = pathArray.join(".");
+                }
             }
             path += "["+ i +"]" + "." + "children";
             namePath += labels[i].name + ".";
