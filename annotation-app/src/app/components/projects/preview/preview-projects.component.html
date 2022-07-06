@@ -406,16 +406,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                               style="min-width: 20rem"
                               class="disableTree"
                             >
-                              <clr-icon shape="view-list" style="float: right;"
+                              <clr-icon shape="view-list"
                                 (click)="clickTreeView(flag.problemCategory[0])"
-                                title="tree view detail"></clr-icon>
-                              <clr-tree>
-                                <clr-tree-node
-                                  *clrRecursiveFor="let label of flag.problemCategory[0]; getChildren: getChildren"
-                                  [clrSelected]="label.enable" title="{{label.name}}">
-                                    {{label.name}}
-                                </clr-tree-node>
-                              </clr-tree>
+                                title="tree view detail"></clr-icon> clike icon show tree label
                             </clr-dg-cell>
                             <clr-dg-cell *ngIf="projectType == 'ner'" class="studioCell">
                               <clr-datagrid>

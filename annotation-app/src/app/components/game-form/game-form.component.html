@@ -252,15 +252,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </clr-dg-cell>
               <clr-dg-cell class="colwidth disableTree" *ngIf="dataset.labelType === 'HTL'">
-                <clr-icon shape="view-list" style="float: right;"
+                <clr-icon shape="view-list"
                   (click)="clickTreeView(dataset.categoryList)"
-                  title="tree view detail"></clr-icon>
-                <clr-tree>
-                  <clr-tree-node *clrRecursiveFor="let label of dataset.categoryList; getChildren: getChildren"
-                    [clrSelected]="label.enable" title="{{label.name}}">
-                      {{label.name}}
-                  </clr-tree-node>
-                </clr-tree>
+                  title="tree view detail"></clr-icon> clike icon show tree label
               </clr-dg-cell>
               <clr-dg-cell *ngIf="dataset.labelType !== 'HTL'"
                 class="cellWordBreak colwidth"

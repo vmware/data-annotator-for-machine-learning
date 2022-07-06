@@ -179,7 +179,6 @@ function hierarchicalChart(options) {
     bar
       .on('mouseover', function (event, d) {
         tip.show(event, d);
-        console.log(d3.select(this));
         d3.select(this).style('opacity', 0.5);
       })
       .on('mouseout', function () {
