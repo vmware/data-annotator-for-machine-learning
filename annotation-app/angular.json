@@ -30,6 +30,7 @@
               "node_modules/web-animations-js/web-animations.min.js",
               "src/libs/userChart.js",
               "src/libs/categoryChart.js",
+              "src/libs/hierarchicalChart.js",
               "src/libs/modelChart.js",
               "src/libs/feedback.js",
               "node_modules/label-studio/build/static/js/main.js"

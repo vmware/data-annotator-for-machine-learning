@@ -39,7 +39,7 @@ function categoryChart(options) {
     .style('border-radius', '4px')
     .style('font-size', '10px')
     .offset([-10, 0])
-    .html(function (d) {
+    .html(function (event, d) {
       return '<span>' + d.value + '</span>';
     });
 
@@ -82,11 +82,11 @@ function categoryChart(options) {
     .attr('y', (d) => y(d.value))
     .attr('height', (d) => y(0) - y(d.value))
     .attr('width', x.bandwidth())
-    .on('mouseover', function (d) {
-      tip.show(d, this);
+    .on('mouseover', function (event,d) {
+      tip.show(event,d);
       d3.select(this).style('opacity', 0.5);
     })
-    .on('mouseout', function (d) {
+    .on('mouseout', function (event,d) {
       tip.hide();
       d3.select(this).style('opacity', 1);
     });
@@ -106,8 +106,8 @@ function categoryChart(options) {
     svg.call(
       d3.zoom().scaleExtent([1, 45]).translateExtent(extent).extent(extent).on('zoom', zoomed),
     );
-    function zoomed() {
-      x.range([margin.left, width - margin.right].map((d) => d3.event.transform.applyX(d)));
+    function zoomed(event, d) {
+      x.range([margin.left, width - margin.right].map((event, d) => event.transform.applyX(d)));
       svg
         .selectAll('.bars rect')
         .attr('x', (d) => x(d.name))

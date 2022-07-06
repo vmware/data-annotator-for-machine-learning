@@ -243,7 +243,7 @@ function modelChart(options) {
     .attr('fill', 'white')
     .attr('stroke', 'steelblue')
     .attr('stroke-width', 2)
-    .on('mouseover', function (d, i) {
+    .on('mouseover', function (event, d) {
       d3.select(this).style('fill', 'steelblue');
       d3.select(this).attr('r', 7);
       Tooltip.style('visibility', 'visible').html(
@@ -252,14 +252,14 @@ function modelChart(options) {
       hoverLine.style('visibility', 'visible');
       return;
     })
-    .on('mousemove', function (d, i) {
+    .on('mousemove', function (event, d) {
       Tooltip.style('top', event.pageY - 30 + 'px').style('left', event.pageX + 10 + 'px');
-      var mouse_x = d3.mouse(this)[0];
+      var mouse_x = d3.pointer(event)[0];
       hoverLine.attr('x1', mouse_x).attr('x2', mouse_x);
       hoverLineGroup.style('opacity', 1);
       return;
     })
-    .on('mouseout', function (d, i) {
+    .on('mouseout', function (event, d) {
       d3.select(this).style('fill', 'white');
       d3.select(this).attr('r', 4);
       hoverLine.style('visibility', 'hidden');

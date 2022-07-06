@@ -26,6 +26,7 @@ enableProdMode();
 declare function userChart(options: any): any;
 declare function categoryChart(options: any): any;
 declare function modelChart(options: any): any;
+declare function hierarchicalChart(options: any): any;
 
 @Component({
   selector: 'app-preview-projects',
@@ -37,6 +38,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   @ViewChild('userChart', { static: false }) userChart: ElementRef;
   @ViewChild('categoryChart', { static: false }) categoryChart: ElementRef;
   @ViewChild('modelChart', { static: false }) modelChart: ElementRef;
+  @ViewChild('hierarchicalChart', { static: false }) hierarchicalChart: ElementRef;
 
   selectedDataset: any;
   previewHeadDatas: any;
@@ -130,7 +132,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   ];
   samplingStrategy: any;
   showTreeView: boolean = false;
-  treeData: any;
+  treeData: any;  
 
   constructor(
     private avaService: AvaService,
@@ -256,12 +258,24 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     for (const f in data) {
       items.push(data[f].name);
     }
-    categoryChart({
-      container: conf,
-      data,
-      labels: items,
-      width,
-    });
+    if (this.labelType !== 'HTL') {
+      categoryChart({
+        container: conf,
+        data,
+        labels: items,
+        width,
+      });
+    } else {
+      const hitBarData = {
+        name: 'flare',
+        children: data,
+      }
+      hierarchicalChart({
+        container: conf,
+        data: hitBarData,
+        width,
+      });
+    }
   }
 
   showModelChart(conf, data, width, estimator, threshold, frequency, samplingStrategy) {
