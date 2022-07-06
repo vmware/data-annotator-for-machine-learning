@@ -143,7 +143,7 @@ function hierarchicalChart(options) {
       .data(d.children)
       .join('g')
       .attr('cursor', (d) => (!d.children ? null : 'pointer'))
-      .on('click', (event, d) => down(svg, d));
+      .on('click', (event, d) =>(d.value ? down(svg, d) : null));
 
     bar
       .append('text')
@@ -178,8 +178,10 @@ function hierarchicalChart(options) {
 
     bar
       .on('mouseover', function (event, d) {
-        tip.show(event, d);
-        d3.select(this).style('opacity', 0.5);
+        if (d.value) {
+          tip.show(event, d);
+          d3.select(this).style('opacity', 0.5);
+        }
       })
       .on('mouseout', function () {
         tip.hide();
