@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div>
             <div class="clr-form-group form-group clr-row">
               <label for="selectProject" class="label-leftBoard">Projects </label>&nbsp;&nbsp;
-              <div class="clr-select-wrapper" style="max-width: 70%">
+              <div class="clr-select-wrapper" style="width: 70%">
                 <select
                   style="width: 100%"
                   (change)="onSelectingProjects($event)"
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               style="margin-top: -0.5rem"
             >
               <label class="label-leftBoard">Display </label>&nbsp;&nbsp;&nbsp;
-              <div class="clr-select-wrapper" style="max-width: 70%">
+              <div class="clr-select-wrapper" style="width: 70%">
                 <select
                   style="width: 100%"
                   formControlName="renderFormat"
@@ -663,17 +663,38 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
           </div>
-          <div *ngIf="moreReviewInfo?.length > 1" class="limit-height">
+          <div *ngIf="(projectType == 'text' || projectType == 'tabular') && startFrom==='review'" class="limit-height">
             <h5 style="margin-top: 1rem">Annotator labeled results:</h5>
-            <clr-datagrid>
+            <clr-datagrid *ngIf="labelType !== 'HTL'">
               <clr-dg-column>Annotator</clr-dg-column>
               <clr-dg-column>Label</clr-dg-column>
+              <clr-dg-column>Time</clr-dg-column>
               <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
                   <clr-dg-cell>{{reviewInfo.annotator}}</clr-dg-cell>
                   <clr-dg-cell>{{reviewInfo.annotationInfo}}</clr-dg-cell>
+                  <clr-dg-cell>{{reviewInfo.time | date: 'yyyy-MM-dd HH:mm:ss'}}</clr-dg-cell>
               </clr-dg-row>
               <clr-dg-footer>{{moreReviewInfo.length}} annotation info</clr-dg-footer>
-          </clr-datagrid>
+            </clr-datagrid>
+            <clr-datagrid *ngIf="labelType === 'HTL'">
+              <clr-dg-column>Annotator</clr-dg-column>
+              <clr-dg-column>Label</clr-dg-column>
+              <clr-dg-column>Time</clr-dg-column>
+              <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
+                  <clr-dg-cell>{{reviewInfo.annotator}}</clr-dg-cell>
+                  <clr-dg-cell class="disableTree">
+                    <div class="tree-icon" (click)="clickTreeView(reviewInfo.annotationInfo)">
+                      <clr-icon shape="view-list"
+                      title="tree view detail"></clr-icon> click the icon to review with tree label
+                    </div>
+                    <ul *ngFor="let selectedTreeLabel of reviewInfo.reducedCategory; let i = index">
+                      <li>{{ selectedTreeLabel }}</li>
+                    </ul>
+                  </clr-dg-cell>
+                  <clr-dg-cell>{{reviewInfo.time | date: 'yyyy-MM-dd HH:mm:ss'}}</clr-dg-cell>
+              </clr-dg-row>
+              <clr-dg-footer>{{moreReviewInfo.length}} annotation info</clr-dg-footer>
+            </clr-datagrid>
           </div>
           <div class="clr-row" *ngIf="projectType !== 'image'">
             <h4 style="margin-top: 2rem; margin-left: 0.5rem">
@@ -894,6 +915,14 @@ SPDX-License-Identifier: Apache-2.0 -->
               ></textarea>
             </div>
           </div>
+          <div class="questionContainer" *ngIf="labelType === 'HTL' && (projectType == 'text' || projectType == 'tabular')">
+            <clr-tree>
+              <clr-tree-node [clrExpanded]="true" *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
+                [clrSelected]="label.enable" (clrSelectedChange)="changeSelectedlabel(label, $event)" title="{{label.name}}">
+                  {{label.name}}
+              </clr-tree-node>
+            </clr-tree>
+          </div>
           <div class="actions">
             <div
               *ngIf="actionError"
@@ -924,6 +953,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               class="btn btn-success submit"
               type="submit"
               [disabled]="
+                selectedTreeLabels.length == 0 &&
                 multipleLabelList.length == 0 &&
                 spansList.length == 0 &&
                 currentBoundingData.length == 0 && !isNumeric
@@ -942,6 +972,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               *ngIf="startFrom == 'review'
                 && (projectType !== 'text' && projectType !== 'tabular' || isMultipleNumericLabel  || isNumeric || isMultipleLabel)"
               [disabled]="
+                selectedTreeLabels.length == 0 &&
                 multipleLabelList.length == 0 &&
                 spansList.length == 0 &&
                 currentBoundingData.length == 0 && !isNumeric
@@ -1040,3 +1071,9 @@ SPDX-License-Identifier: Apache-2.0 -->
     </button>
   </div>
 </clr-modal>
+
+<app-treeview-modal
+ *ngIf="showTreeView"
+ (onCloseTreeDialog)="onCloseTreeDialog()"
+ [treeData]="treeData"
+></app-treeview-modal>

@@ -169,6 +169,25 @@ export class DatasetValidator {
     };
   }
 
+  static localLabelFile(type: string, inputFile: any): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } => {
+      if (!control.parent) {
+        return null;
+      }
+      if (inputFile) {
+        if (!DatasetValidator.validateLabelFile(type,inputFile)) {
+          return { msg: { value: DatasetValidator.FILE_FORMAT_NOT_SUPPORT } };
+        }
+        if (!DatasetValidator.validateFileSize(inputFile)) {
+          return { msg: { value: DatasetValidator.FILE_SIZE_EXCEED_LIMIT } };
+        }
+      }
+      return DatasetValidator.isEmpty(control.value)
+        ? { msg: { value: DatasetValidator.REQUIRED_FIELD } }
+        : null;
+    };
+  }
+
   static imageFile(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {
       if (!control.parent) {
@@ -366,6 +385,15 @@ export class DatasetValidator {
       }
     } else {
       return false;
+    }
+  }
+
+  private static validateLabelFile(type: string, inputFile: any): boolean {
+    const ext = inputFile.name.split('.').pop().toLowerCase();
+    if (type === 'json') {
+      return type === ext.toLowerCase();
+    } else {
+      return ['yaml', 'yml'].includes(ext.toLowerCase());
     }
   }
 

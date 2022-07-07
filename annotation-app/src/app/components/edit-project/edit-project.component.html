@@ -202,7 +202,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </clr-tooltip>
           </div>
         </div>
-        <div class="prev-info clr-row" *ngIf="showLabel">
+        <div class="prev-info clr-row" *ngIf="showLabel && labelType !== 'HTL'">
           <label for="projectName" class="label-tooltip clr-col-12 clr-col-md-4">Label</label>
           <div class="clr-input-wrapper clr-col-12 clr-col-md-7 labelBox">
             <div *ngIf="labelType != 'numericLabel'">

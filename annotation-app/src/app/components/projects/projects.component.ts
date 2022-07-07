@@ -63,6 +63,8 @@ export class ProjectsComponent implements OnInit {
   labelType = '';
   subscription: Subscription;
   msgEdit: any;
+  showTreeView: boolean = false;
+  treeData: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -139,6 +141,9 @@ export class ProjectsComponent implements OnInit {
               itemKeys.push(labels[0]);
             });
             item.mutilNumbericLabels = itemKeys.toString();
+          }
+          if (item.labelType === 'HTL') {
+            item.categoryList = JSON.parse(item.categoryList);
           }
         });
         this.totalItems = res.length;
@@ -423,5 +428,16 @@ export class ProjectsComponent implements OnInit {
 
   receiveDeleteLabel(e) {
     this.getProjects();
+  }
+
+  getChildren = (folder) => folder.children;
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
   }
 }
