@@ -158,7 +158,7 @@ function hierarchicalChart(options) {
       .append('rect')
       .attr('x', x(0))
       .attr('width', (d) => x(d.value) - x(0))
-      .attr('height', barStep * (1 - barPadding));
+      .attr('height', barStep * (1 - barPadding) > 0 ? barStep * (1 - barPadding) : 0);
 
     let tip = d3
       .tip()

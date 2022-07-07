@@ -107,7 +107,7 @@ function categoryChart(options) {
       d3.zoom().scaleExtent([1, 45]).translateExtent(extent).extent(extent).on('zoom', zoomed),
     );
     function zoomed(event, d) {
-      x.range([margin.left, width - margin.right].map((event, d) => event.transform.applyX(d)));
+      x.range([margin.left, width - margin.right].map((d) => event.transform.applyX(d)));
       svg
         .selectAll('.bars rect')
         .attr('x', (d) => x(d.name))
