@@ -324,6 +324,18 @@ async function initHierarchicalLabelsCase(labels, namePath, path, labelsArray, l
     }
 }
 
+async function reduceHierarchicalUnselectedLabel(tickets) {
+    for await(const ticket of tickets) {
+        for await(const input of ticket.userInputs) {
+            let reducedCategory = [... input.problemCategory];
+            await prepareSelectedHierarchicalLabels(reducedCategory, false, true);
+            let labelsArray = [];
+            await initHierarchicalLabelsCase(reducedCategory, "", "", labelsArray);
+            input.reducedCategory = labelsArray;
+        }
+    }
+}
+
 async function projectLeaderBoard(req) {
     
     await validator.checkAnnotator(req.auth.email);
@@ -888,5 +900,6 @@ module.exports = {
     prepareSelectedHierarchicalLabels,
     matchUserInputsWithHierarchicalLabels,
     initHierarchicalLabelsCase,
+    reduceHierarchicalUnselectedLabel,
 
 }
