@@ -29,8 +29,8 @@ function categoryChart(options) {
     .attr('height', height + margin.top + margin.bottom)
     .call(zoom);
 
-  let tip = d3
-    .tip()
+  tip = options.tip;
+  tip
     .attr('class', 'd3-tip')
     .attr('class', 'd3-tip-category')
     .style('color', 'white')
@@ -82,11 +82,11 @@ function categoryChart(options) {
     .attr('y', (d) => y(d.value))
     .attr('height', (d) => y(0) - y(d.value))
     .attr('width', x.bandwidth())
-    .on('mouseover', function (event,d) {
-      tip.show(event,d);
+    .on('mouseover', function (event, d) {
+      tip.show(event, d);
       d3.select(this).style('opacity', 0.5);
     })
-    .on('mouseout', function (event,d) {
+    .on('mouseout', function (event, d) {
       tip.hide();
       d3.select(this).style('opacity', 1);
     });

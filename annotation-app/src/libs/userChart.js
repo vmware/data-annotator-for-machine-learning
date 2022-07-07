@@ -29,8 +29,8 @@ function userChart(options) {
     .attr('height', height + margin.top + margin.bottom)
     .call(zoom);
 
-  let tip = d3
-    .tip()
+  tip = options.tip;
+  tip
     .attr('class', 'd3-tip')
     .attr('class', 'd3-tip-user')
     .style('color', 'white')
@@ -39,7 +39,7 @@ function userChart(options) {
     .style('border-radius', '4px')
     .style('font-size', '10px')
     .offset([-10, 0])
-    .html(function (event,d) {
+    .html(function (event, d) {
       return '<span>' + d.value + '</span>';
     });
 

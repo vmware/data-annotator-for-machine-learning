@@ -20,6 +20,7 @@ import { ActivatedRoute } from '@angular/router';
 import { LabelStudioService } from 'app/services/label-studio.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
+import { tip as d3tip } from 'd3-v6-tip';
 
 enableProdMode();
 
@@ -250,6 +251,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
       data,
       labels: items,
       width,
+      tip: d3tip(),
     });
   }
 
@@ -264,6 +266,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
         data,
         labels: items,
         width,
+        tip: d3tip(),
       });
     } else {
       const hitBarData = {
@@ -274,6 +277,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
         container: conf,
         data: hitBarData,
         width,
+        tip: d3tip(),
       });
     }
   }

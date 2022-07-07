@@ -143,7 +143,7 @@ function hierarchicalChart(options) {
       .data(d.children)
       .join('g')
       .attr('cursor', (d) => (!d.children ? null : 'pointer'))
-      .on('click', (event, d) =>(d.value ? down(svg, d) : null));
+      .on('click', (event, d) => (d.value ? down(svg, d) : null));
 
     bar
       .append('text')
@@ -160,8 +160,8 @@ function hierarchicalChart(options) {
       .attr('width', (d) => x(d.value) - x(0))
       .attr('height', barStep * (1 - barPadding) > 0 ? barStep * (1 - barPadding) : 0);
 
-    let tip = d3
-      .tip()
+    hierTip = options.tip;
+    hierTip
       .attr('class', 'd3-tip')
       .attr('class', 'd3-tip-category')
       .style('color', 'white')
@@ -174,17 +174,18 @@ function hierarchicalChart(options) {
         return '<span>' + d.value + '</span>';
       });
 
-    bar.call(tip);
+    bar.call(hierTip);
 
     bar
+      .selectAll('rect')
       .on('mouseover', function (event, d) {
         if (d.value) {
-          tip.show(event, d);
+          hierTip.show(event, d);
           d3.select(this).style('opacity', 0.5);
         }
       })
       .on('mouseout', function () {
-        tip.hide();
+        hierTip.hide();
         d3.select(this).style('opacity', 1);
       });
 
