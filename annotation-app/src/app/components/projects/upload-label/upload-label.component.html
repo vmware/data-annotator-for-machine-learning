@@ -1,0 +1,188 @@
+<form [formGroup]="uploadGroup" (keydown.enter)="$event.preventDefault()" autocomplete="off">
+  <div class="modal">
+    <div class="modal-dialog modal-md" role="dialog" aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button aria-label="Close" class="close" type="button">
+            <clr-icon aria-hidden="true" shape="close" (click)="onCloseDialog()"></clr-icon>
+          </button>
+          <h3 class="modal-title">Upload Labels</h3>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group clr-row">
+            <label for="localFile" class="label-tooltip clr-col-12 clr-col-md-3">Sample File</label>
+            <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+              <a
+                *ngIf="uploadSet.fileFormat !== 'yaml'"
+                href="../../assets/files/taxonomy_sample.json"
+                download
+                >taxonomy_sample.json</a
+              >
+              <a
+                *ngIf="uploadSet.fileFormat === 'yaml'"
+                href="../../assets/files/taxonomy_sample.yaml"
+                download
+                >taxonomy_sample.yaml</a
+              >
+            </div>
+          </div>
+          <div class="form-group clr-row">
+            <label for="localFile" class="label-tooltip clr-col-12 clr-col-md-3"
+              >File Upload
+              <clr-tooltip>
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="info-circle"
+                  size="18"
+                  aria-label="Uniq tooltip 5"
+                ></clr-icon>
+                <clr-tooltip-content *clrIfOpen>
+                  <span style="color: currentColor"
+                    >Upload Labels only support json or yaml file.</span
+                  >
+                </clr-tooltip-content>
+              </clr-tooltip>
+              <span>*</span>
+            </label>
+            <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+              <input
+                name="localFileFile"
+                type="file"
+                (change)="onLocalFileChange($event)"
+                [accept]="uploadSet.fileFormat === 'yaml' ? '.yaml, .yml' : '.json'"
+              />
+            </div>
+            <div class="clr-col-12 clr-col-md-1">
+              <clr-tooltip
+                *ngIf="uploadGroup.get('localFile').errors && uploadGroup.get('localFile').touched"
+              >
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="sm"
+                  *clrIfOpen
+                >
+                  <span>{{ uploadGroup.get('localFile').errors.msg.value }}</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+              <clr-tooltip *ngIf="errorMessage">
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="sm"
+                  *clrIfOpen
+                >
+                  <span>{{ errorMessage }}</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+          </div>
+
+          <div class="form-group clr-row">
+            <label for="fileFormat" class="label-tooltip clr-col-12 clr-col-md-3"
+              >File Format<span>*</span></label
+            >
+            <div class="clr-row clr-col-12 clr-col-md-9" style="margin-top: 0.1rem">
+              <label class="md-check format clr-row">
+                <clr-radio-wrapper style="margin-right: 0.5rem">
+                  <input
+                    type="radio"
+                    clrRadio
+                    class="clr-radio"
+                    formControlName="fileFormat"
+                    value="json"
+                    id="json"
+                    name="fileFormat"
+                    (ngModelChange)="changeFileFormat($event)"
+                  />
+                  <label for="json">&nbsp;json</label>
+                </clr-radio-wrapper>
+                <clr-radio-wrapper style="margin-right: 0.5rem">
+                  <input
+                    type="radio"
+                    clrRadio
+                    class="clr-radio"
+                    formControlName="fileFormat"
+                    value="yaml"
+                    id="yaml"
+                    name="fileFormat"
+                    (ngModelChange)="changeFileFormat($event)"
+                  />
+                  <label for="yaml">&nbsp;yaml</label>
+                </clr-radio-wrapper>
+              </label>
+            </div>
+          </div>
+
+          <div *ngIf="parseErrorTip" class="alert alert-danger" role="alert">
+            <div class="alert-items">
+              <div class="alert-item static">
+                <div class="alert-icon-wrapper">
+                  <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                </div>
+                <span class="alert-text">
+                  {{ parseError }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="waitingTip" class="alert alert-info" role="alert">
+            <div class="alert-items">
+              <div class="alert-item static">
+                <div class="alert-icon-wrapper">
+                  <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
+                </div>
+                <span class="alert-text">
+                  Large dataset takes some time to upload, please wait.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" (click)="onCloseDialog()">Cancel</button>
+          <button
+            *ngIf="!uploadComplete"
+            type="button"
+            class="btn btn-primary"
+            (click)="saveUpload()"
+          >
+            OK
+          </button>
+          <button *ngIf="uploadComplete" type="button" class="btn uploadLoading">
+            <clr-spinner
+              clrSmall
+              clrAssertive
+              style="
+                min-height: 0.75rem;
+                min-width: 0.75rem;
+                height: 0.75rem;
+                width: 0.75rem;
+                margin-top: 0.35rem;
+              "
+              >loading
+            </clr-spinner>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" aria-hidden="true"></div>
+</form>

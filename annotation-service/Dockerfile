@@ -4,7 +4,7 @@
 # Create image based on the official Node 6 image from the dockerhub
 FROM node:16-alpine
 
-COPY package.json .
+COPY package*.json .
 
 RUN npm i && mkdir /app && cp -R ./node_modules ./app
 

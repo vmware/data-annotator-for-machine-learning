@@ -1,0 +1,8 @@
+# Set the default behavior,
+# in case people don't have core.autocrlf set.
+* text=auto
+# Declares that files will always have CRLF line ends
+*.sh text eol=lf
+docker*.yml text eol=lf
+*Dockerfile text eol=lf
+*nginx.conf text eol=lf

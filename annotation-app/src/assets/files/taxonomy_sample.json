@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "name": "Products",
+      "children": [
+        {
+          "name": "vSphere",
+          "children": [
+            {
+              "name": "vSphere1"
+            },
+            {
+              "name": "vSphere2"
+            },
+            {
+              "name": "vSphere3"
+            },
+            {
+              "name": "vSphere4"
+            }
+          ]
+        },
+        {
+          "name": "vMware",
+          "children": [
+            {
+              "name": "vMware1"
+            },
+            {
+              "name": "vMware2"
+            }
+          ]
+        },
+        {
+          "name": "FS"
+        },
+        {
+          "name": "Stack"
+        }
+      ]
+    },
+    {
+      "name": "Customer1"
+    },
+    {
+      "name": "Customer2"
+    }
+  ]
+}
