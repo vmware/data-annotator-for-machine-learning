@@ -283,9 +283,9 @@ function modelChart(options) {
         .on('zoom', zoomed),
     );
 
-    function zoomed() {
+    function zoomed(event) {
       // recover the new scale
-      var newX = d3.event.transform.rescaleX(x);
+      var newX = event.transform.rescaleX(x);
       // update axes with these new boundaries
       xAxis.call(d3.axisBottom(newX).ticks(10).tickSizeOuter(0));
       svg.selectAll('.myCircle').attr('cx', function (d) {
