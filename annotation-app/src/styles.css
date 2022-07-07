@@ -17,3 +17,9 @@ ng-select .ng-dropdown-panel {
   white-space: nowrap;
   display: inline-block;
 }
+
+.tree-icon {
+  margin: 0.5rem 0 1rem 0;
+  cursor: pointer;
+  font-weight: 500;
+}

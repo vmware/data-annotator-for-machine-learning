@@ -2389,6 +2389,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.moreReviewInfo = [];
       this.sr.userInputs.forEach((item, index) => {
         let annotationInfo = '';
+        let reducedCategory = [];
         if (
           (this.projectType === 'text' || this.projectType === 'tabular') &&
           this.isMultipleNumericLabel
@@ -2396,9 +2397,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           annotationInfo = `${item.problemCategory.label}[${item.problemCategory.value}]`;
         } else {
           annotationInfo = item.problemCategory;
+          if (this.labelType === 'HTL') {
+            reducedCategory = item['reducedCategory'];
+          }
         }
         if (!index) {
-          this.moreReviewInfo.push({ annotator: item.user, annotationInfo, time: item.timestamp });
+          this.moreReviewInfo.push({ annotator: item.user, annotationInfo, time: item.timestamp, reducedCategory });
         } else {
           let existInfo = this.moreReviewInfo.find((info) => info.annotator === item.user);
           if (existInfo) {
@@ -2408,6 +2412,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               annotator: item.user,
               annotationInfo,
               time: item.timestamp,
+              reducedCategory,
             });
           }
         }

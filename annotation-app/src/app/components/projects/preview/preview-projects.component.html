@@ -406,9 +406,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                               style="min-width: 20rem"
                               class="disableTree"
                             >
-                              <clr-icon shape="view-list"
-                                (click)="clickTreeView(flag.problemCategory[0])"
-                                title="tree view detail"></clr-icon> clike icon show tree label
+                              <div class="tree-icon" (click)="clickTreeView(flag.problemCategory[0])">
+                                <clr-icon shape="view-list"
+                                  title="tree view detail"></clr-icon> click the icon to review with tree label
+                              </div>
+                              <ul *ngFor="let selectedTreeLabel of flag.reducedCategory; let i = index">
+                                <li>{{ selectedTreeLabel }}</li>
+                              </ul>
                             </clr-dg-cell>
                             <clr-dg-cell *ngIf="projectType == 'ner'" class="studioCell">
                               <clr-datagrid>

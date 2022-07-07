@@ -683,9 +683,13 @@ SPDX-License-Identifier: Apache-2.0 -->
               <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
                   <clr-dg-cell>{{reviewInfo.annotator}}</clr-dg-cell>
                   <clr-dg-cell class="disableTree">
-                    <clr-icon shape="view-list"
-                      (click)="clickTreeView(reviewInfo.annotationInfo)"
-                      title="tree view detail"></clr-icon> clike icon show tree label
+                    <div class="tree-icon" (click)="clickTreeView(reviewInfo.annotationInfo)">
+                      <clr-icon shape="view-list"
+                      title="tree view detail"></clr-icon> click the icon to review with tree label
+                    </div>
+                    <ul *ngFor="let selectedTreeLabel of reviewInfo.reducedCategory; let i = index">
+                      <li>{{ selectedTreeLabel }}</li>
+                    </ul>
                   </clr-dg-cell>
                   <clr-dg-cell>{{reviewInfo.time | date: 'yyyy-MM-dd HH:mm:ss'}}</clr-dg-cell>
               </clr-dg-row>

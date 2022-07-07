@@ -747,6 +747,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
           problemCategory: labelList,
           timestamp: '',
           user: userList[i],
+          reducedCategory: [],
         };
         for (let j = 0; j < this.previewSrs[k].userInputs.length; j++) {
           if (userList[i] == this.previewSrs[k].userInputs[j].user) {
@@ -755,6 +756,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
                 + '[' + this.previewSrs[k].userInputs[j].problemCategory.value + ']');
             } else {
               param.problemCategory.push(this.previewSrs[k].userInputs[j].problemCategory);
+              param.reducedCategory = this.previewSrs[k].userInputs[j].reducedCategory;
             }
             param.timestamp = this.previewSrs[k].userInputs[j].timestamp;
           }

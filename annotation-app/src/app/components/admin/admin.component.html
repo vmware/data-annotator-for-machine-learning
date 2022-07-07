@@ -218,11 +218,12 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-dg-cell>
               <clr-dg-cell style="max-width: 200px"> {{ dataset.totalCase }}</clr-dg-cell>
               <clr-dg-cell *ngIf="dataset.labelType === 'HTL'" class="disableTree">
-                <clr-icon
-                  shape="view-list"
-                  (click)="clickTreeView(dataset.categoryList)"
-                  title="tree view detail"
-                ></clr-icon> clike icon show tree label
+                <div style="cursor: pointer;" (click)="clickTreeView(dataset.categoryList)">
+                  <clr-icon
+                    shape="view-list"
+                    title="tree view detail"
+                  ></clr-icon> click the icon to review with tree label
+                </div>
               </clr-dg-cell>
               <clr-dg-cell
                 *ngIf="dataset.labelType !== 'HTL'"
