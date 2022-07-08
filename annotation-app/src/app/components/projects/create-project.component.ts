@@ -271,6 +271,12 @@ export class CreateNewComponent implements OnInit {
         this.dsDialogForm.get('min').updateValueAndValidity();
         this.dsDialogForm.get('max').updateValueAndValidity();
         this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
+        this.dsDialogForm.get('selectedClassifier').setValue(null);
+        this.dsDialogForm.get('selectedClassifier').setValidators(null);
+        this.dsDialogForm.get('selectedClassifier').updateValueAndValidity();
+        this.dsDialogForm.get('selectedqueryStrategy').setValue(null);
+        this.dsDialogForm.get('selectedqueryStrategy').setValidators(null);
+        this.dsDialogForm.get('selectedqueryStrategy').updateValueAndValidity();
         if (this.treeLabels.length > 0) {
           this.labelType = 'HTL';
           condition = !this.dsDialogForm.invalid
