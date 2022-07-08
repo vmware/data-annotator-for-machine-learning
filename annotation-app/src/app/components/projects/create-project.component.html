@@ -1312,7 +1312,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 
           <div
             class="form-group clr-row"
-            *ngIf="isNumeric || isMultipleLabel || isMutilNumericLabel || msg.type == 'ner' || msg.type == 'log'"
+            *ngIf="isNumeric || isMultipleLabel || isMutilNumericLabel || msg.type == 'ner' || msg.type == 'log' || isUploadLabel"
           >
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="assignmentLogic" class="label-tooltip clr-col-12 clr-col-md-2"
@@ -1351,7 +1351,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div
             *ngIf="
-              !isNumeric && !isMultipleLabel && (msg.type === 'tabular' || msg.type === 'text') && !isMutilNumericLabel
+              !isNumeric && !isMultipleLabel && (msg.type === 'tabular' || msg.type === 'text') && !isMutilNumericLabel && !isUploadLabel
             "
             class="form-group clr-row"
           >
@@ -1395,7 +1395,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div
           *ngIf="
-            !isNumeric && !isMultipleLabel && (msg.type === 'tabular' || msg.type === 'text') && !isMutilNumericLabel
+            !isNumeric && !isMultipleLabel && (msg.type === 'tabular' || msg.type === 'text') && !isMutilNumericLabel && !isUploadLabel
           "
           class="form-group clr-row"
         >
