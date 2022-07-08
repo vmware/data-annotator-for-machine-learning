@@ -99,7 +99,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators){
     let popUpLabels = [];
     if(projectType == PROJECTTYPE.NER){
         const plb = req.body.popUpLabels;
-        popUpLabels = ((plb && typeof plb === 'string')? JSON.parse(plb):plb)
+        popUpLabels = plb? (typeof plb === 'string'? JSON.parse(plb): plb) : [];
     };
 
     let estimator = req.body.estimator?req.body.estimator:"" ;
