@@ -916,8 +916,12 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <div class="questionContainer" *ngIf="labelType === 'HTL' && (projectType == 'text' || projectType == 'tabular')">
+            <clr-toggle-wrapper>
+              <input type="checkbox" clrToggle name="expand" (change)="ExpandChanged($event)" />
+              <label style="font-weight: 500;">{{ expandName }}</label>
+            </clr-toggle-wrapper>
             <clr-tree>
-              <clr-tree-node [clrExpanded]="true" *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
+              <clr-tree-node [clrExpanded]="expandValue" *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
                 [clrSelected]="label.enable" (clrSelectedChange)="changeSelectedlabel(label, $event)" title="{{label.name}}">
                   {{label.name}}
               </clr-tree-node>
