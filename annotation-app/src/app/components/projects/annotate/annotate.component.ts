@@ -202,6 +202,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedTreeLabels: any = [];
   showTreeView: boolean = false;
   treeData: any;
+  expandValue: boolean = false;
+  expandName: string = 'Expand';
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -4098,5 +4100,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onCloseTreeDialog() {
     this.showTreeView = false;
+  }
+
+  ExpandChanged() {
+    this.expandValue = !this.expandValue;
+    if (this.expandValue) {
+      this.expandName = 'Collapse';
+    } else {
+      this.expandName = 'Expand';
+    }
   }
 }
