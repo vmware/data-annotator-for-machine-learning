@@ -9,11 +9,11 @@
 const express = require("express");
 const router = express.Router();
 const APIs = require('../resources/APIs');
-const slackPostMsg = require("../services/slack/slackPostMsg.service")
+const slackConversations = require("../services/slack/slackConversations.service")
 
 router.post(APIs.CONVERSATION_LIST, (req, res) => {
     console.log(`[ SLACK ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
-    slackPostMsg.findConversation(req).then(response => {
+    slackConversations.findConversation(req).then(response => {
         console.log(`[ SLACK ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
         res.status(200).json(response);
     }).catch(error => {

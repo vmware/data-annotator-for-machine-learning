@@ -6,25 +6,10 @@
 ***/
 
 const config = require('../../config/config');
-const { WebClient, LogLevel } = require('@slack/web-api');
+const { WebClient } = require('@slack/web-api');
 const web = new WebClient(config.slackBotUserOAuthToken);
 
 
-
-async function findConversation(req) {
-    try {
-        let id = req.body.slackId
-        const result = await web.conversations.info({ channel: id });
-        if (result.ok) {
-            return { id: result.channel.id, name: result.channel.name, is_member: result.channel.is_member }
-        } else {
-            return
-        }
-    }
-    catch (error) {
-        return
-    }
-}
 
 async function publishMessage(data) {
     try {
@@ -33,7 +18,7 @@ async function publishMessage(data) {
         for (let i = 0; i < data.channels.length; i++) {
             await web.chat.postMessage({
                 channel: data.channels[i].slackName,
-                text: `:raised_hands:${data.pname} is ready to annotate.`,
+                text: `:loud_sound:${data.pname} is ready to annotate.`,
                 blocks: blocks
             });
         }
@@ -92,7 +77,6 @@ async function generateMessageBlocks(data) {
 
 }
 module.exports = {
-    findConversation,
     publishMessage,
 }
 

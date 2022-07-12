@@ -14,7 +14,7 @@ const axios = require("axios");
 const fileSystemUtils = require('./fileSystem.utils');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel, SrModel } = require('../db/db-connect');
-const slackPostMsg = require("../services/slack/slackPostMsg.service");
+const slackChat = require("../services/slack/slackChat.service");
 const { formatDate } = require('./common.utils');
 
 
@@ -156,7 +156,7 @@ module.exports = {
                         pid: projectInfo._id
 
                     };
-                    await slackPostMsg.publishMessage(params)
+                    await slackChat.publishMessage(params)
                 }
 
                 console.log(`[ SRS ] Utils sendEmailToAnnotator`);

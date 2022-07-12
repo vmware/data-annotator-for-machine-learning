@@ -27,6 +27,7 @@ async function newBolt() {
 
 
 async function slackStart() {
+
     // Start your app
     const bolt = await newBolt();
     await bolt.start();
@@ -47,7 +48,8 @@ async function slackStart() {
                 logger.error(error);
             }
         });
-
+    //to listening all the radio
+    await slackAnnotateModalService.clickLabelRadioListening(bolt, "annotate_label_radio")
 }
 
 
