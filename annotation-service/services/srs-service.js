@@ -23,7 +23,7 @@ const fileSystemUtils = require('../utils/fileSystem.utils');
 const config = require('../config/config');
 
 
-async function updateSrsUserInput(req) {
+async function updateSrsUserInput(req, from) {
 
     console.log(`[ SRS ] Service updateSrsUserInput`);
     const projectId = ObjectId(req.body.pid);
@@ -213,7 +213,7 @@ async function updateSrsUserInput(req) {
 
     //trigger active learning
     const token = req.headers.authorization.split("Bearer ")[1];
-    await alService.triggerActiveLearning(projectId, _ids, user, token);
+    await alService.triggerActiveLearning(projectId, _ids, (from === 'slack' && config.ESP) ? undefined : user, token);
 
 
 }
@@ -424,7 +424,6 @@ async function getProgress(req) {
 }
 
 async function skipOne(req) {
-
     const pid = req.body.pid;
     const tid = req.body.tid;
     const user = req.auth.email;

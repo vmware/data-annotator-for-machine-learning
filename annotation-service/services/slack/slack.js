@@ -27,14 +27,13 @@ async function newBolt() {
 
 
 async function slackStart() {
-
-    // Start your app
+    // start your app
     const bolt = await newBolt();
     await bolt.start();
     console.log(`⚡️⚡️⚡️ Bolt app is running on localhost:${config.serverPort}`)
     await slackBuildAppHome.buildAppHome(bolt);
 
-    //to listening all the start-annotate-btn
+    // to listening all the start-annotate-btn
     bolt.action({ action_id: "click_btn_start_annotate" },
         async ({ body, client, ack, logger }) => {
             await ack();
@@ -48,8 +47,12 @@ async function slackStart() {
                 logger.error(error);
             }
         });
-    //to listening all the radio
-    await slackAnnotateModalService.clickLabelRadioListening(bolt, "annotate_label_radio")
+
+    // to listening all the radio
+    await slackAnnotateModalService.actionListening(bolt, "annotate_label_radio")
+    await slackAnnotateModalService.actionListening(bolt, "flag_btn")
+    await slackAnnotateModalService.actionListening(bolt, "skip_btn")
+
 }
 
 

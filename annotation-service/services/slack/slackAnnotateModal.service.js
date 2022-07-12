@@ -5,39 +5,11 @@
  * 
 ***/
 
-const { generateObj } = require("./slack.utils");
+const { generateObj } = require("./utils/slack.utils");
 const srsService = require("../../services/srs-service");
 const projectService = require("../project.service");
+const accessToken = require("./utils/accessToken.service")
 
-
-// async function modalLoading(client, body) {
-//     try {
-//         const result = await client.views.update({
-//             // Pass a valid trigger_id within 3 seconds of receiving it
-//             view_id: body.view.id,
-//             view: {
-//                 "type": 'modal',
-//                 "callback_id": 'annotate_modal',
-//                 "private_metadata": body.view.private_metadata,
-//                 "title": {
-//                     "type": 'plain_text',
-//                     "text": "Annotate Details"
-//                 },
-//                 "blocks": [
-//                     {
-//                         "type": "image",
-//                         "image_url": "https://icon-library.com/images/loading-icon-animated-gif/loading-icon-animated-gif-19.jpg",
-//                         "alt_text": "data is on the way..."
-//                     }
-//                 ]
-//             }
-//         });
-//         return result;
-//     }
-//     catch (error) {
-//         console.log(error);
-//     }
-// }
 
 async function openModal(bolt, client, body) {
     try {
@@ -69,33 +41,38 @@ async function openModal(bolt, client, body) {
             const sr = await srsService.getOneSrs({ query: { pid: body.actions[0].value }, auth: { email: user.user.profile.email } });
             const projectInfo = await projectService.getProjectInfo({ query: { pid: body.actions[0].value } });
             await updateAnnotateModal(result, client, sr, projectInfo);
-            // await clickLabelRadioListening(bolt, "annotate_label_radio")
         }
     }
     catch (error) {
-        console.log(error);
+        console.log('[ SLACK_MODAL ] [ ERROR ]  openModal: ' + error);
     }
 }
 
-async function clickLabelRadioListening(bolt, action_id) {
+async function actionListening(bolt, action_id) {
     bolt.action({ action_id: action_id },
         async ({ body, client, ack, logger }) => {
             await ack();
             try {
                 if (body.user && body.actions) {
                     const metadata = JSON.parse(body.view.private_metadata);
-                    await srsService.updateSrsUserInput({ body: { pid: metadata.pid, userInput: [{ problemCategory: [body.actions[0].selected_option.value], tid: body.actions[0].block_id }] }, auth: { email: metadata.email }, headers: { authorization: "Bearer " } })
-                    const sr = await srsService.getOneSrs({ query: { pid: metadata.pid }, auth: { email: metadata.email } });
+                    if (action_id === "annotate_label_radio") {
+                        const token = await accessToken.getEspToken(metadata.email);
+                        await srsService.updateSrsUserInput({ body: { pid: metadata.pid, userInput: [{ problemCategory: [body.actions[0].selected_option.value], tid: body.actions[0].block_id }] }, auth: { email: metadata.email }, headers: { authorization: "Bearer " + token } }, 'slack')
+                        var sr = await srsService.getOneSrs({ query: { pid: metadata.pid }, auth: { email: metadata.email } });
+                    } else if (action_id === "skip_btn") {
+                        var sr = await srsService.skipOne({ body: { pid: metadata.pid, tid: body.actions[0].value }, auth: { email: metadata.email }, headers: { authorization: '' } })
+                    } else if (action_id === "flag_btn") {
+                        var sr = await srsService.flagSr({ body: { pid: metadata.pid, tid: body.actions[0].value }, auth: { email: metadata.email }, headers: { authorization: '' } })
+                    }
                     const projectInfo = await projectService.getProjectInfo({ query: { pid: metadata.pid } });
                     await updateAnnotateModal(body, client, sr, projectInfo);
                 }
             }
             catch (error) {
-                console.log(error)
+                console.log('[ SLACK_MODAL ] [ ERROR ]  actionListening: ' + error);
             }
         });
 }
-
 
 
 
@@ -126,7 +103,7 @@ async function updateAnnotateModal(body, client, sr, projectInfo) {
         }
     }
     catch (error) {
-        console.log(error);
+        console.log('[ SLACK_MODAL ] [ ERROR ]  updateAnnotateModal: ' + error);
     }
 }
 
@@ -151,6 +128,17 @@ async function generateAnnotateModalBlocks(sr, projectInfo) {
     acsy.action_id = "annotate_label_radio";
     radioSection.accessory = acsy;
     blocks.push(radioSection);
+
+    // add flag and skip
+    let elements = [];
+    if (!sr[0].flag.silence) {
+        let flagBtn = await generateObj("button", await generateObj("plain_text", 'Flag'), 'danger', sr[0]._id, 'flag_btn')
+        elements.push(flagBtn)
+    }
+    let skipBtn = await generateObj("button", await generateObj("plain_text", 'Skip'), 'primary', sr[0]._id, 'skip_btn');
+    elements.push(skipBtn)
+    blocks.push({ "type": "actions", "elements": elements });
+
     return blocks;
 }
 
@@ -179,7 +167,30 @@ async function generateJobDoneView(body, client) {
     return
 }
 
+
+async function clickActionBtnListening(bolt, action_id) {
+    bolt.action({ action_id: action_id },
+        async ({ body, client, ack, logger }) => {
+            await ack();
+            try {
+                if (body.user && body.actions) {
+                    const metadata = JSON.parse(body.view.private_metadata);
+                    const sr = srsService.skipOne()
+
+
+                    const projectInfo = await projectService.getProjectInfo({ query: { pid: metadata.pid } });
+                    await updateAnnotateModal(body, client, sr, projectInfo);
+
+                }
+            }
+            catch (error) {
+                console.log('[ SLACK_MODAL ] [ ERROR ]  clickActionBtnListening: ' + error);
+            }
+        });
+}
+
 module.exports = {
     openModal,
-    clickLabelRadioListening
+    actionListening,
+    clickActionBtnListening
 }

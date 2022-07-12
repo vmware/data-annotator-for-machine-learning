@@ -159,15 +159,18 @@ module.exports = {
                     await slackChat.publishMessage(params)
                 }
 
-                console.log(`[ SRS ] Utils sendEmailToAnnotator`);
-                const param = {
-                    body: {
-                        annotator: annotators,
-                        pname: req.body.pname
-                    },
-                    auth: { email: user }
+                if (annotators.length > 0) {
+                    console.log(`[ SRS ] Utils sendEmailToAnnotator`);
+                    const param = {
+                        body: {
+                            annotator: annotators,
+                            pname: req.body.pname
+                        },
+                        auth: { email: user }
+                    }
+                    emailService.sendEmailToAnnotator(param).catch(err => console.error(`[ SRS ][ ERROR ] send email:`, err));
                 }
-                emailService.sendEmailToAnnotator(param).catch(err => console.error(`[ SRS ][ ERROR ] send email:`, err));
+
 
                 //trigger tabular one-hot-encoding project generate the vector model
                 if (req.body.encoder == ENCODE.ONEHOT) {

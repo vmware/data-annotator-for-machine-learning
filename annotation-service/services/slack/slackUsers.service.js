@@ -21,18 +21,18 @@ async function findUserInChannels(event, slackIds) {
             types: "public_channel,private_channel",
             cursor: ''
         }
-        let found = false;
-        while (!found) {
+        let found = 0;
+        while (found === 0) {
             const result = await web.users.conversations(params);
             params.cursor = result.response_metadata.next_cursor;
-            let arr = _.intersection(slackIds, _.map(result.channels, "id"))
+            let arr = _.intersection(slackIds, _.map(result.channels, "id"));
             if (arr.length > 0) {
-                found = true;
-                return true;
+                found = 1;
+                return found;
             }
             if (result.response_metadata.next_cursor === "") {
-                found = true;
-                return false;
+                found = 2;
+                return found;
             }
         }
     }
