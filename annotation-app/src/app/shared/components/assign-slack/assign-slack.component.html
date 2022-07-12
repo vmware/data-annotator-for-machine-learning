@@ -3,7 +3,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 <div class="prev-info clr-row">
   <div class="clr-col-12 clr-col-md-1"></div>
   <label for="slack" class="label-tooltip clr-col-12 clr-col-md-2"
-    >Slack
+    >Slack<span style="color: currentColor">*</span>
     <clr-tooltip>
       <clr-icon
         clrTooltipTrigger
@@ -16,7 +16,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           >Important, if you want to notice the target slack channel after this project is created
           successfully please make sure invite {{ env.config.slackAppName }} bot to the target
           channel first. Type "/invite @{{ env.config.slackAppName }}" and send in the target
-          channel.
+          channel. And for the slack id, please go to slack channel's 'About' tab and scroll down to
+          the bottom to get it.
         </span>
       </clr-tooltip-content>
     </clr-tooltip>
@@ -31,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       (blur)="slackBlur(slack.value)"
       (click)="reAssignSlack($event)"
       class="clr-input"
-      placeholder="(Optional) Enter slack channel id. Go to slack's 'About' tab and scroll to the bottom to get it."
+      placeholder="(Optional-Pick one of Assignee and Slack) Enter slack channel id"
     />
     <div *ngIf="showChannelList">
       <ul style="margin-bottom: 0">

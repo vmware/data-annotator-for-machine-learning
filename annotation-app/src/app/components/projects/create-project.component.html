@@ -593,7 +593,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div *ngIf="msg.type == 'text' || msg.type == 'tabular'" class="form-group clr-row">
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="maxAnnotations" class="label-tooltip clr-col-12 clr-col-md-2"
-              >Max Annotations Per Case
+              >Max Annotations Per Case<span>*</span>
               <clr-tooltip>
                 <clr-icon
                   clrTooltipTrigger
@@ -646,7 +646,9 @@ SPDX-License-Identifier: Apache-2.0 -->
 
           <div class="form-group clr-row" style="margin-top: 1rem">
             <div class="clr-col-12 clr-col-md-1"></div>
-            <label for="labels" class="label-tooltip clr-col-12 clr-col-md-2">Labels</label>
+            <label for="labels" class="label-tooltip clr-col-12 clr-col-md-2"
+              >Labels<span>*</span></label
+            >
 
             <div class="clr-col-12 clr-col-md-8 labelsList">
               <div
@@ -940,7 +942,9 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
             <div *ngIf="isShowNumeric">
               <clr-tooltip
-                *ngIf="dsDialogForm.get('min').errors && dsDialogForm.get('min').touched"
+                *ngIf="
+                  dsDialogForm.get('min').errors && dsDialogForm.get('min').touched && !sizeError
+                "
               >
                 <clr-icon
                   clrTooltipTrigger
@@ -957,26 +961,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *clrIfOpen
                 >
                   <span>{{ dsDialogForm.get('min').errors.msg.value }}</span>
-                </clr-tooltip-content>
-              </clr-tooltip>
-              <clr-tooltip
-                *ngIf="dsDialogForm.get('max').errors && dsDialogForm.get('max').touched"
-              >
-                <clr-icon
-                  clrTooltipTrigger
-                  shape="error-standard"
-                  size="18"
-                  style="color: red"
-                  class="valid-tooltip"
-                >
-                </clr-icon>
-                <clr-tooltip-content
-                  class="error-tooltip"
-                  clrPosition="bottom-right"
-                  clrSize="md"
-                  *clrIfOpen
-                >
-                  <span>{{ dsDialogForm.get('max').errors.msg.value }}</span>
                 </clr-tooltip-content>
               </clr-tooltip>
               <clr-tooltip *ngIf="sizeError">
@@ -1352,7 +1336,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           >
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="selectedClassifier" class="label-tooltip clr-col-12 clr-col-md-2"
-              >Active Learning Model</label
+              >Active Learning Model<span>*</span></label
             >
 
             <div class="clr-select-wrapper clr-col-12 clr-col-md-8">
@@ -1399,7 +1383,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           >
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="selectedClassifier" class="label-tooltip clr-col-12 clr-col-md-2"
-              >Query Strategy
+              >Query Strategy<span>*</span>
               <a
                 href="https://modal-python.readthedocs.io/en/latest/"
                 target="_blank"
@@ -1419,6 +1403,31 @@ SPDX-License-Identifier: Apache-2.0 -->
                   {{ item.name }}
                 </option>
               </select>
+            </div>
+            <div class="clr-col-12 clr-col-md-1">
+              <clr-tooltip
+                *ngIf="
+                  dsDialogForm.get('selectedqueryStrategy').errors &&
+                  dsDialogForm.get('selectedqueryStrategy').touched
+                "
+              >
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>{{ dsDialogForm.get('selectedqueryStrategy').errors.msg.value }}</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
             </div>
           </div>
           <div
@@ -1466,7 +1475,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="form-group clr-row">
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="assignee" class="label-tooltip clr-col-12 clr-col-md-2"
-              >Assignee<span>*</span>
+              >Assignee<span style="color: currentColor">*</span>
               <clr-tooltip>
                 <clr-icon
                   clrTooltipTrigger
@@ -1492,7 +1501,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                 (keyup.enter)="onEnter(assignee.value)"
                 (blur)="assigneeBlur($event)"
                 class="clr-input"
-                placeholder="Email Address Required"
+                placeholder="{{
+                  env.config.enableSlack &&
+                  !isNumeric &&
+                  !isMultipleLabel &&
+                  (msg.type === 'tabular' || msg.type === 'text') &&
+                  !isMutilNumericLabel
+                    ? '(Optional-Pick one of Assignee and Slack)'
+                    : '(Required)'
+                }} Enter Email Address"
               />
               <div>
                 <ul>

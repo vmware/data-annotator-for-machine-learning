@@ -3,15 +3,7 @@ Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import {
-  Component,
-  OnInit,
-  Input,
-  Output,
-  EventEmitter,
-  ViewChild,
-  ElementRef,
-} from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { AvaService } from '../../services/ava.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -87,6 +79,7 @@ export class EditProjectComponent implements OnInit {
   loadingSlack: boolean = false;
   inputSlackChannels: any = [];
   showLabel: boolean = true;
+  isShowSlack: boolean = false;
 
   constructor(
     private avaService: AvaService,
@@ -175,7 +168,13 @@ export class EditProjectComponent implements OnInit {
         this.inputSlackChannels.push(element.slackName);
       });
     }
+    this.isShowSlack =
+      this.env.config.enableSlack &&
+      ['text', 'tabular'].includes(this.msg.projectType) &&
+      !this.msg.isMultipleLabel &&
+      this.msg.labelType == 'textLabel';
   }
+
   get mutilLabelArray() {
     return this.mutilNumericForm.get('mutilLabelArray') as FormArray;
   }
@@ -367,8 +366,8 @@ export class EditProjectComponent implements OnInit {
 
     let condition =
       this.inputProjectName !== '' &&
-      this.inputProjectCreator !== '' &&
-      this.assigneeList.length > 0 &&
+      this.inputProjectCreator.length > 0 &&
+      (this.assigneeList.length > 0 || this.slackList.length > 0) &&
       this.ownerList.length > 0 &&
       !this.nameExist &&
       this.emailReg &&
@@ -446,7 +445,7 @@ export class EditProjectComponent implements OnInit {
         },
       );
     } else {
-      this.sizeError = true;
+      // this.sizeError = true;
     }
   }
 

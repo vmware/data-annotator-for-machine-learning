@@ -132,7 +132,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
         <div class="prev-info clr-row">
-          <label for="assignee" class="label-tooltip clr-col-12 clr-col-md-4">Annotators</label>
+          <label for="assignee" class="label-tooltip clr-col-12 clr-col-md-4"
+            >Assignee<span style="color: currentColor">*</span></label
+          >
           <div class="clr-input-wrapper clr-col-12 clr-col-md-7">
             <input
               autocomplete="off"
@@ -143,7 +145,9 @@ SPDX-License-Identifier: Apache-2.0 -->
               (keyup)="onAssigneeKeydown($event)"
               (click)="reAssign($event)"
               (change)="onInputingAssignee($event)"
-              placeholder="Email Address Required"
+              placeholder="{{
+                isShowSlack ? '(Optional-Pick one of Assignee and Slack)' : '(Required)'
+              }} Enter Email Address"
             />
             <div *ngIf="showAnnotatorList">
               <ul>
@@ -178,7 +182,13 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <div>
-            <clr-tooltip *ngIf="assigneeList.length == 0 || inputAssigneeValidation || !emailReg">
+            <clr-tooltip
+              *ngIf="
+                (assigneeList.length == 0 && slackList.length == 0) ||
+                inputAssigneeValidation ||
+                !emailReg
+              "
+            >
               <clr-icon
                 clrTooltipTrigger
                 shape="error-standard"
@@ -193,7 +203,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                 clrSize="md"
                 *clrIfOpen
               >
-                <span *ngIf="assigneeList.length == 0">This field is required</span>
+                <span *ngIf="assigneeList.length == 0 && slackList.length == 0"
+                  >This field is required</span
+                >
                 <span *ngIf="inputAssigneeValidation">This annotator has already exist!</span>
                 <span *ngIf="!emailReg && env.config.authUrl"
                   >Wrong format! Only allow Vmware email box!</span
@@ -205,18 +217,13 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
         <app-assign-slack
           class="slack-assign"
-          *ngIf="
-            env.config.enableSlack &&
-            (msg.projectType == 'text' || msg.projectType == 'tabular') &&
-            !msg.isMultipleLabel &&
-            msg.labelType == 'textLabel'
-          "
+          *ngIf="isShowSlack"
           [slackListMsg]="slackList"
           [inputSlackChannelsMsg]="inputSlackChannels"
           (slackListOuter)="receiveSlackAssign($event)"
         ></app-assign-slack>
         <div class="prev-info clr-row" *ngIf="showLabel">
-          <label for="label" class="label-tooltip clr-col-12 clr-col-md-4">Label</label>
+          <label for="label" class="label-tooltip clr-col-12 clr-col-md-4">Labels</label>
           <div class="clr-input-wrapper clr-col-12 clr-col-md-7 labelBox">
             <div *ngIf="labelType != 'numericLabel'">
               <span
