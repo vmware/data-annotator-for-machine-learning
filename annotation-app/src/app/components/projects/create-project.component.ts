@@ -130,8 +130,8 @@ export class CreateNewComponent implements OnInit {
   setDataError: boolean = false;
   isUploadLabel: boolean = false;
   showUploadLabelDialog: boolean = false;
-  treeLabels: any;
-  selectedTreeLabel: any;
+  treeLabels: any = [];
+  showTreeLabelTip: any;
   showTreeView: boolean = false;
   treeData: any;
 
@@ -278,12 +278,15 @@ export class CreateNewComponent implements OnInit {
         this.dsDialogForm.get('selectedqueryStrategy').setValidators(null);
         this.dsDialogForm.get('selectedqueryStrategy').updateValueAndValidity();
         if (this.treeLabels.length > 0) {
+          this.showTreeLabelTip = false;
           this.labelType = 'HTL';
           condition = !this.dsDialogForm.invalid
           && !this.nameExist
           && !this.sizeError
           && !this.inputLabelValidation
           && !this.inputIsNull;
+        } else {
+          this.showTreeLabelTip = true;
         }
       } else {
         this.labelType = 'textLabel';
@@ -1570,6 +1573,7 @@ export class CreateNewComponent implements OnInit {
   uploadLabelsSuccessInfo(event) {
     this.treeLabels = this.recursionLabel(event.data);
     this.showUploadLabelDialog = false;
+    this.showTreeLabelTip = false;
   }
 
   recursionLabel(datas: any) {
