@@ -20,12 +20,14 @@ import { ActivatedRoute } from '@angular/router';
 import { LabelStudioService } from 'app/services/label-studio.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';
+import { tip as d3tip } from 'd3-v6-tip';
 
 enableProdMode();
 
 declare function userChart(options: any): any;
 declare function categoryChart(options: any): any;
 declare function modelChart(options: any): any;
+declare function hierarchicalChart(options: any): any;
 
 @Component({
   selector: 'app-preview-projects',
@@ -37,6 +39,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   @ViewChild('userChart', { static: false }) userChart: ElementRef;
   @ViewChild('categoryChart', { static: false }) categoryChart: ElementRef;
   @ViewChild('modelChart', { static: false }) modelChart: ElementRef;
+  @ViewChild('hierarchicalChart', { static: false }) hierarchicalChart: ElementRef;
 
   selectedDataset: any;
   previewHeadDatas: any;
@@ -129,6 +132,8 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     '#ffff00',
   ];
   samplingStrategy: any;
+  showTreeView: boolean = false;
+  treeData: any;  
 
   constructor(
     private avaService: AvaService,
@@ -246,6 +251,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
       data,
       labels: items,
       width,
+      tip: d3tip(),
     });
   }
 
@@ -254,12 +260,26 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     for (const f in data) {
       items.push(data[f].name);
     }
-    categoryChart({
-      container: conf,
-      data,
-      labels: items,
-      width,
-    });
+    if (this.labelType !== 'HTL') {
+      categoryChart({
+        container: conf,
+        data,
+        labels: items,
+        width,
+        tip: d3tip(),
+      });
+    } else {
+      const hitBarData = {
+        name: 'flare',
+        children: data,
+      }
+      hierarchicalChart({
+        container: conf,
+        data: hitBarData,
+        width,
+        tip: d3tip(),
+      });
+    }
   }
 
   showModelChart(conf, data, width, estimator, threshold, frequency, samplingStrategy) {
@@ -282,7 +302,11 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
         this.selectedDataset = response;
         this.projectId = response._id;
         this.totalCase = response.totalCase;
-        this.categoryList = response.categoryList.split(',');
+        if (this.labelType === 'HTL') {
+          this.categoryList = JSON.parse(response.categoryList);
+        } else {
+          this.categoryList = response.categoryList.split(',');
+        }
         this.getChartData();
         this.previewHeadDatas = ['Annotator', 'Annotate Time', 'Re-Label'];
         if (this.projectType === 'image') {
@@ -727,6 +751,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
           problemCategory: labelList,
           timestamp: '',
           user: userList[i],
+          reducedCategory: [],
         };
         for (let j = 0; j < this.previewSrs[k].userInputs.length; j++) {
           if (userList[i] == this.previewSrs[k].userInputs[j].user) {
@@ -735,6 +760,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
                 + '[' + this.previewSrs[k].userInputs[j].problemCategory.value + ']');
             } else {
               param.problemCategory.push(this.previewSrs[k].userInputs[j].problemCategory);
+              param.reducedCategory = this.previewSrs[k].userInputs[j].reducedCategory;
             }
             param.timestamp = this.previewSrs[k].userInputs[j].timestamp;
           }
@@ -869,5 +895,16 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   clickFlagTab() {
     this.formerFilenameFilter = '';
     this.getALLSrsParam.fname = '';
+  }
+
+  getChildren = (folder) => folder.children;
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
   }
 }

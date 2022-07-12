@@ -173,7 +173,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </clr-dg-cell>
         <clr-dg-cell style="max-width: 200px"> {{ dataset.totalCase }}</clr-dg-cell>
-        <clr-dg-cell
+        <clr-dg-cell class="disableTree" *ngIf="dataset.labelType === 'HTL'" style="max-width: 300px">
+          <div style="cursor: pointer;" (click)="clickTreeView(dataset.categoryList)">
+            <clr-icon shape="view-list"
+            title="tree view detail"></clr-icon> click the icon to review with tree label
+          </div>
+        </clr-dg-cell>
+        <clr-dg-cell *ngIf="dataset.labelType !== 'HTL'"
           class="cellWordBreak"
           title="{{
             dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
@@ -463,3 +469,9 @@ SPDX-License-Identifier: Apache-2.0 -->
   (onCloseGenerateDialog)="receiveCloseGenerateInfo($event)"
   (refreshProject)="receiveGenerateInfo($event)"
 ></app-generate>
+
+<app-treeview-modal
+  *ngIf="showTreeView"
+  (onCloseTreeDialog)="onCloseTreeDialog()"
+  [treeData]="treeData"
+></app-treeview-modal>

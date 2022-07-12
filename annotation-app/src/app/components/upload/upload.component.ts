@@ -167,6 +167,13 @@ export class UploadComponent implements OnInit {
             console.log('parse_error: ', error);
           },
           step: (results, parser) => {
+            // check csv headers is empty.
+            if (hasHeader === 'yes') {
+              const data = results.data.map(item => item && String(item).trim());
+              if (_.sortedUniq(data).includes(null) || _.sortedUniq(data).includes('')) {
+                reject(false);
+              }
+            }
             if (
               !(_.sortedUniq(results.data).length == 1 && _.sortedUniq(results.data)[0] == null)
             ) {
@@ -358,6 +365,11 @@ export class UploadComponent implements OnInit {
             } else {
               this.updateDatasets('data');
             }
+          }).catch(() => {
+            this.waitingTip = false;
+            this.uploadComplete = false;
+            this.errorMessage ='Upload datasets failed, please make sure all columns has headers.';
+            return;
           });
         } else if (this.uploadGroup.get('fileFormat').value == 'tabular') {
           this.papaParse().then((e) => {
@@ -366,6 +378,11 @@ export class UploadComponent implements OnInit {
             } else {
               this.updateDatasets('data');
             }
+          }).catch(() => {
+            this.waitingTip = false;
+            this.uploadComplete = false;
+            this.errorMessage ='Upload datasets failed, please make sure all columns has headers.';
+            return;
           });
         } else if (this.uploadGroup.get('fileFormat').value == 'image') {
           if (this.env.config.enableAWSS3) {

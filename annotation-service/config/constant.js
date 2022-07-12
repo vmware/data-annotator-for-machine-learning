@@ -52,6 +52,7 @@ module.exports = {
     LABELTYPE:{
         TEXT: "textLabel",
         NUMERIC: "numericLabel",
+        HIERARCHICAL: "HTL",  //Hierarchical Taxonomy Label
     },
     PROJECTTYPE:{
         TABULAR: "tabular",

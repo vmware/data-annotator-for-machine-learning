@@ -171,3 +171,14 @@ clr-control-helper {
   margin-top: 1rem;
   margin-left: 0.5rem;
 }
+
+.disableTree {
+  ::ng-deep .clr-checkbox-wrapper .clr-control-label {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  ::ng-deep .clr-checkbox-wrapper input[type='checkbox'] {
+    pointer-events: none;
+  }
+}

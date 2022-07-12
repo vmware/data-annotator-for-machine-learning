@@ -31,6 +31,8 @@ export class GameFormComponent implements OnInit {
   pageSize: number;
   page: number;
   totalItems: number;
+  showTreeView: boolean = false;
+  treeData: any;
 
   constructor(
     private avaService: AvaService,
@@ -82,6 +84,9 @@ export class GameFormComponent implements OnInit {
             });
             item.mutilNumbericLabels = itemKeys.toString();
           }
+          if (item.labelType === 'HTL') {
+            item.categoryList = JSON.parse(item.categoryList);
+          }
         });
         this.totalItems = res.length;
         this.loading = false;
@@ -123,8 +128,19 @@ export class GameFormComponent implements OnInit {
         projectType: data.projectType,
         id: data.id,
         from: 'review',
-        reviewee: reviewee === '' ? flag[0].user : reviewee,
+        reviewee: reviewee,
       },
     });
+  }
+  
+  getChildren = (folder) => folder.children;
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
   }
 }
