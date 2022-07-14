@@ -815,7 +815,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <!-- multiple checkbox labels -->
           <div
             class="questionContainer"
-            *ngIf="isMultipleLabel && !isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular')"
+            *ngIf="isMultipleLabel && !isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular') && labelType !== 'HTL'"
           >
             <div class="clr-form-control" style="margin-top: 0">
               <div class="clr-control-container" style="width: 100%">
@@ -838,7 +838,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <!-- multiple numeric checkbox labels -->
           <div class="questionContainer"
-            *ngIf="isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular')"
+            *ngIf="isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular') && labelType !== 'HTL'"
           >
           <div class="clr-form-control" style="margin-top: 0">
             <div class="clr-control-container clr-row" style="width: 100%">

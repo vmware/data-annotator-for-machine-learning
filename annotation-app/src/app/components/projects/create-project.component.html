@@ -783,7 +783,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   upload a taxonomy file
                 </button>
               </div>
-              <div class="disableTree" *ngIf="isUploadLabel && treeLabels">
+              <div class="disableTree" *ngIf="isUploadLabel && treeLabels.length">
                 <clr-icon shape="view-list" style="float: right;"
                 (click)="clickTreeView(treeLabels)"
                 title="tree view detail"></clr-icon>
@@ -1061,7 +1061,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-tooltip>
             </div>
             <div *ngIf="isUploadLabel">
-              <clr-tooltip *ngIf="selectedTreeLabel && selectedTreeLabel.length === 0">
+              <clr-tooltip *ngIf="showTreeLabelTip">
                 <clr-icon
                   clrTooltipTrigger
                   shape="error-standard"
