@@ -257,18 +257,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                             Data processing for large datasets may take up to 60 seconds...
                           </span>
                         </button>
-                        <div *ngIf="setDataError" class="alert alert-danger" role="alert" style="margin-right: 1rem; margin-left: 0.25rem;">
+                        <div
+                          *ngIf="setDataError"
+                          class="alert alert-danger"
+                          role="alert"
+                          style="margin-right: 1rem; margin-left: 0.25rem"
+                        >
                           <div class="alert-items">
-                              <div class="alert-item static">
-                                  <div class="alert-icon-wrapper">
-                                      <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
-                                  </div>
-                                  <span class="alert-text">
-                                    Failed to set data, please try again later!
-                                  </span>
+                            <div class="alert-item static">
+                              <div class="alert-icon-wrapper">
+                                <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
                               </div>
+                              <span class="alert-text">
+                                Failed to set data, please try again later!
+                              </span>
+                            </div>
                           </div>
-                       </div>
+                        </div>
                         <div
                           *ngIf="msg.type == 'text' || msg.type == 'tabular'"
                           class="clr-row"
@@ -778,19 +783,25 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
 
               <!-- upload labels -->
-              <div *ngIf="isUploadLabel" class="clr-input-wrapper" style="margin-bottom: 1rem;">
+              <div *ngIf="isUploadLabel" class="clr-input-wrapper" style="margin-bottom: 1rem">
                 <button class="btn btn-sm add-doc" type="button" (click)="uploadLabels($event)">
                   upload a taxonomy file
                 </button>
               </div>
               <div class="disableTree" *ngIf="isUploadLabel && treeLabels.length">
-                <clr-icon shape="view-list" style="float: right;"
-                (click)="clickTreeView(treeLabels)"
-                title="tree view detail"></clr-icon>
+                <clr-icon
+                  shape="view-list"
+                  style="float: right"
+                  (click)="clickTreeView(treeLabels)"
+                  title="tree view detail"
+                ></clr-icon>
                 <clr-tree>
-                  <clr-tree-node *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
-                    [clrSelected]="label.enable" title="{{label.name}}">
-                      {{label.name}}
+                  <clr-tree-node
+                    *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
+                    [clrSelected]="label.enable"
+                    title="{{ label.name }}"
+                  >
+                    {{ label.name }}
                   </clr-tree-node>
                 </clr-tree>
               </div>
@@ -845,61 +856,80 @@ SPDX-License-Identifier: Apache-2.0 -->
                 style="margin-top: 1rem; margin-left: 1rem"
                 formArrayName="mutilLabelArray"
               >
-              <div *ngFor="let mutilLabelEle of mutilLabelArray.controls; let i=index" [formGroupName]="i" class="clr-row clr-col-12">
-                <div class="clr-row clr-col-12 clr-col-md-3 mutilLabel-row" >
-                  <div class="clr-control-container" style="width: 100%">
-                    <div class="clr-input-wrapper">
-                      <input
-                        #multiLabels
-                        id="multiLabels"
-                        maxlength="50"
-                        class="clr-input mutilLabel-input"
-                        placeholder="New Label Here"
-                        name="multiLabel"
-                        formControlName="label"
-                        (keyup)="onMutilLabelKeydown($event)"
-                      />
+                <div
+                  *ngFor="let mutilLabelEle of mutilLabelArray.controls; let i = index"
+                  [formGroupName]="i"
+                  class="clr-row clr-col-12"
+                >
+                  <div class="clr-row clr-col-12 clr-col-md-3 mutilLabel-row">
+                    <div class="clr-control-container" style="width: 100%">
+                      <div class="clr-input-wrapper">
+                        <input
+                          #multiLabels
+                          id="multiLabels"
+                          maxlength="50"
+                          class="clr-input mutilLabel-input"
+                          placeholder="New Label Here"
+                          name="multiLabel"
+                          formControlName="label"
+                          (keyup)="onMutilLabelKeydown($event)"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class="clr-row clr-col-12 clr-col-md-3 mutilLabel-row">
-                  <div class="clr-control-container" style="width: 100%">
-                    <div class="clr-input-wrapper">
-                      <input
-                        type="number"
-                        id="minMutilVal"
-                        formControlName="minMutilVal"
-                        placeholder="Enter minimum value"
-                        class="clr-input"
-                        (keyup)="minUpdate($event)"
-                        (change)="minUpdate($event)"
-                      />
+                  <div class="clr-row clr-col-12 clr-col-md-3 mutilLabel-row">
+                    <div class="clr-control-container" style="width: 100%">
+                      <div class="clr-input-wrapper">
+                        <input
+                          type="number"
+                          id="minMutilVal"
+                          formControlName="minMutilVal"
+                          placeholder="Enter minimum value"
+                          class="clr-input"
+                          (keyup)="minUpdate($event)"
+                          (change)="minUpdate($event)"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class="clr-col-12 clr-col-md-1 mutilLabel-row" style="text-align: center">——</div>
-                <div class="clr-col-12 clr-col-md-3 mutilLabel-row">
-                  <div class="clr-control-container" style="width: 100%">
-                    <div class="clr-input-wrapper">
-                      <input
-                        type="number"
-                        id="maxMutilVal"
-                        formControlName="maxMutilVal"
-                        placeholder="Enter maximum value"
-                        class="clr-input"
-                        (keyup)="maxUpdate($event)"
-                        (change)="maxUpdate($event)"
-                      />
+                  <div class="clr-col-12 clr-col-md-1 mutilLabel-row" style="text-align: center">
+                    ——
+                  </div>
+                  <div class="clr-col-12 clr-col-md-3 mutilLabel-row">
+                    <div class="clr-control-container" style="width: 100%">
+                      <div class="clr-input-wrapper">
+                        <input
+                          type="number"
+                          id="maxMutilVal"
+                          formControlName="maxMutilVal"
+                          placeholder="Enter maximum value"
+                          class="clr-input"
+                          (keyup)="maxUpdate($event)"
+                          (change)="maxUpdate($event)"
+                        />
+                      </div>
                     </div>
                   </div>
+                  <div
+                    *ngIf="mutilLabelArray.length > 2"
+                    class="clr-col-12 clr-col-md-1"
+                    style="align-self: center"
+                  >
+                    <clr-icon
+                      shape="times"
+                      size="14"
+                      (click)="deleteMutilLabel(i)"
+                      style="cursor: pointer"
+                    ></clr-icon>
+                  </div>
                 </div>
-                <div *ngIf="mutilLabelArray.length > 2" class="clr-col-12 clr-col-md-1" style="align-self: center;">
-                    <clr-icon shape="times" size="14" (click)="deleteMutilLabel(i)" style="cursor: pointer;"></clr-icon>
-                </div>
-              </div>
-              <button class="btn btn-icon add-btn" (click)="addMutilLabel()" [disabled]="mutilLabelArray.length > 49">
-                <clr-icon shape="plus"></clr-icon>
-              </button>
+                <button
+                  class="btn btn-icon add-btn"
+                  (click)="addMutilLabel()"
+                  [disabled]="mutilLabelArray.length > 49"
+                >
+                  <clr-icon shape="plus"></clr-icon>
+                </button>
               </div>
             </div>
 
@@ -1085,8 +1115,16 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="clr-col-12 clr-col-md-3"></div>
             <div class="clr-col-12 clr-col-md-8">
               <clr-checkbox-wrapper>
-                <input type="checkbox" id="showPopLabels" clrCheckbox value="showPopLabel" name="showPopLabel" (change)="clickPopLabel($event)" />
-                <label for="showPopLabels">Add Secondary Labels
+                <input
+                  type="checkbox"
+                  id="showPopLabels"
+                  clrCheckbox
+                  value="showPopLabel"
+                  name="showPopLabel"
+                  (change)="clickPopLabel($event)"
+                />
+                <label for="showPopLabels"
+                  >Add Secondary Labels
                   <clr-tooltip>
                     <clr-icon
                       clrTooltipTrigger
@@ -1096,7 +1134,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                     ></clr-icon>
                     <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
                       &nbsp;<span class="tooltip-content"
-                        >The secondary label contains information about the main label such as its sentiment etc.
+                        >The secondary label contains information about the main label such as its
+                        sentiment etc.
                       </span>
                     </clr-tooltip-content>
                   </clr-tooltip>
@@ -1118,7 +1157,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                 ></clr-icon>
                 <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
                   &nbsp;<span class="tooltip-content"
-                    >The secondary label contains information about the main label such as its sentiment etc.
+                    >The secondary label contains information about the main label such as its
+                    sentiment etc.
                   </span>
                 </clr-tooltip-content>
               </clr-tooltip>
@@ -1150,7 +1190,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   id="popupLables"
                   maxlength="50"
                   clrInput
-                  style="width: 7rem;"
+                  style="width: 7rem"
                   placeholder="Add New Secondary Label"
                   name="addPopupLables"
                   class="clr-input"
@@ -1163,7 +1203,9 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
             <div>
               <clr-tooltip
-                *ngIf="dsDialogForm.get('popLabels').errors && dsDialogForm.get('popLabels').touched"
+                *ngIf="
+                  dsDialogForm.get('popLabels').errors && dsDialogForm.get('popLabels').touched
+                "
               >
                 <clr-icon
                   clrTooltipTrigger
@@ -1312,7 +1354,14 @@ SPDX-License-Identifier: Apache-2.0 -->
 
           <div
             class="form-group clr-row"
-            *ngIf="isNumeric || isMultipleLabel || isMutilNumericLabel || msg.type == 'ner' || msg.type == 'log' || isUploadLabel"
+            *ngIf="
+              isNumeric ||
+              isMultipleLabel ||
+              isMutilNumericLabel ||
+              msg.type == 'ner' ||
+              msg.type == 'log' ||
+              isUploadLabel
+            "
           >
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="assignmentLogic" class="label-tooltip clr-col-12 clr-col-md-2"
@@ -1351,7 +1400,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div
             *ngIf="
-              !isNumeric && !isMultipleLabel && (msg.type === 'tabular' || msg.type === 'text') && !isMutilNumericLabel && !isUploadLabel
+              !isNumeric &&
+              !isMultipleLabel &&
+              (msg.type === 'tabular' || msg.type === 'text') &&
+              !isMutilNumericLabel &&
+              !isUploadLabel
             "
             class="form-group clr-row"
           >
@@ -1394,30 +1447,48 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <div
-          *ngIf="
-            !isNumeric && !isMultipleLabel && (msg.type === 'tabular' || msg.type === 'text') && !isMutilNumericLabel && !isUploadLabel
-          "
-          class="form-group clr-row"
-        >
-          <div class="clr-col-12 clr-col-md-1"></div>
-          <label for="selectedClassifier" class="label-tooltip clr-col-12 clr-col-md-2"
-            >Query Strategy
-            <a href="https://modal-python.readthedocs.io/en/latest/" target="_blank" role="tooltip" aria-haspopup="true" class="tooltip tooltip-right">
-              <clr-icon shape="info-circle" size="20"></clr-icon>
-              <span class="tooltip-content">For more details please click the tooltip to see modal query strategy</span>
-            </a>
-          </label>
-          <div class="clr-select-wrapper clr-col-12 clr-col-md-8">
-            <select id="select-basic" class="clr-select" formControlName="selectedqueryStrategy">
-              <option *ngFor="let item of queryStrategyBase" [value]="item.value">
-                {{ item.name }}
-              </option>
-            </select>
+            *ngIf="
+              !isNumeric &&
+              !isMultipleLabel &&
+              (msg.type === 'tabular' || msg.type === 'text') &&
+              !isMutilNumericLabel &&
+              !isUploadLabel
+            "
+            class="form-group clr-row"
+          >
+            <div class="clr-col-12 clr-col-md-1"></div>
+            <label for="selectedClassifier" class="label-tooltip clr-col-12 clr-col-md-2"
+              >Query Strategy
+              <a
+                href="https://modal-python.readthedocs.io/en/latest/"
+                target="_blank"
+                role="tooltip"
+                aria-haspopup="true"
+                class="tooltip tooltip-right"
+              >
+                <clr-icon shape="info-circle" size="20"></clr-icon>
+                <span class="tooltip-content"
+                  >For more details please click the tooltip to see modal query strategy</span
+                >
+              </a>
+            </label>
+            <div class="clr-select-wrapper clr-col-12 clr-col-md-8">
+              <select id="select-basic" class="clr-select" formControlName="selectedqueryStrategy">
+                <option *ngFor="let item of queryStrategyBase" [value]="item.value">
+                  {{ item.name }}
+                </option>
+              </select>
+            </div>
           </div>
-        </div>
           <div
             class="form-group clr-row"
-            *ngIf="!isNumeric && msg.type === 'tabular' && !isMultipleLabel && !isMutilNumericLabel && !isUploadLabel"
+            *ngIf="
+              !isNumeric &&
+              msg.type === 'tabular' &&
+              !isMultipleLabel &&
+              !isMutilNumericLabel &&
+              !isUploadLabel
+            "
           >
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="selectedEncoder" class="label-tooltip clr-col-12 clr-col-md-2"
@@ -1624,7 +1695,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 ></app-supercollider> -->
 
 <app-treeview-modal
- *ngIf="showTreeView"
- (onCloseTreeDialog)="onCloseTreeDialog()"
- [treeData]="treeData"
+  *ngIf="showTreeView"
+  (onCloseTreeDialog)="onCloseTreeDialog()"
+  [treeData]="treeData"
 ></app-treeview-modal>

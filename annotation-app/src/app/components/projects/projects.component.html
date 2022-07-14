@@ -173,18 +173,23 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </clr-dg-cell>
         <clr-dg-cell style="max-width: 200px"> {{ dataset.totalCase }}</clr-dg-cell>
-        <clr-dg-cell class="disableTree" *ngIf="dataset.labelType === 'HTL'" style="max-width: 300px">
-          <div style="cursor: pointer;" (click)="clickTreeView(dataset.categoryList)">
-            <clr-icon shape="view-list"
-            title="tree view detail"></clr-icon> click the icon to review with tree label
+        <clr-dg-cell
+          class="disableTree"
+          *ngIf="dataset.labelType === 'HTL'"
+          style="max-width: 300px"
+        >
+          <div style="cursor: pointer" (click)="clickTreeView(dataset.categoryList)">
+            <clr-icon shape="view-list" title="tree view detail"></clr-icon> click the icon to
+            review with tree label
           </div>
         </clr-dg-cell>
-        <clr-dg-cell *ngIf="dataset.labelType !== 'HTL'"
+        <clr-dg-cell
+          *ngIf="dataset.labelType !== 'HTL'"
           class="cellWordBreak"
           title="{{
             dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
               ? dataset.min + '--' + dataset.max
-              : (dataset.labelType == 'numericLabel' && dataset.isMultipleLabel)
+              : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
               ? dataset.mutilNumbericLabels
               : dataset.categoryList
           }}"
@@ -193,7 +198,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           {{
             dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
               ? dataset.min + '--' + dataset.max
-              : (dataset.labelType == 'numericLabel' && dataset.isMultipleLabel)
+              : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
               ? dataset.mutilNumbericLabels
               : dataset.categoryList
           }}</clr-dg-cell
@@ -203,7 +208,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <button
             type="button"
             class="btn btn-icon actionClass"
-            [disabled]="dataset.totalCase == 0" 
+            [disabled]="dataset.totalCase == 0"
             (click)="
               selectedDataset = dataset;
               editProjectDialog = true;
@@ -279,7 +284,15 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-haspopup="true"
             title="Click to Append New Entries"
             [disabled]="dataset.totalCase === 0"
-            (click)="checkAddStatus(dataset.id, dataset.projectName, dataset.projectType, dataset.categoryList, dataset.regression)"
+            (click)="
+              checkAddStatus(
+                dataset.id,
+                dataset.projectName,
+                dataset.projectType,
+                dataset.categoryList,
+                dataset.regression
+              )
+            "
           >
             <clr-icon shape="add-text"></clr-icon>
           </button>
@@ -301,7 +314,15 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-haspopup="true"
             title="Click to Append New Entries"
             [disabled]="dataset.totalCase === 0"
-            (click)="availableNewEntry(dataset.id, dataset.projectName, dataset.projectType, dataset.categoryList, dataset.regression)"
+            (click)="
+              availableNewEntry(
+                dataset.id,
+                dataset.projectName,
+                dataset.projectType,
+                dataset.categoryList,
+                dataset.regression
+              )
+            "
           >
             <clr-icon shape="add-text"></clr-icon>
           </button>

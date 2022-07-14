@@ -2404,7 +2404,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         }
         if (!index) {
-          this.moreReviewInfo.push({ annotator: item.user, annotationInfo, time: item.timestamp, reducedCategory });
+          this.moreReviewInfo.push({
+            annotator: item.user,
+            annotationInfo,
+            time: item.timestamp,
+            reducedCategory,
+          });
         } else {
           let existInfo = this.moreReviewInfo.find((info) => info.annotator === item.user);
           if (existInfo) {

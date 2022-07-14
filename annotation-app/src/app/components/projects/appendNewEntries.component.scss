@@ -171,12 +171,12 @@ label span {
   color: currentColor;
 }
 
-::ng-deep input.disabled-checkbox+label::before {
+::ng-deep input.disabled-checkbox + label::before {
   background-color: #eee;
   cursor: not-allowed;
   opacity: 0.3;
 }
 
 .uploadSelect .clr-select-wrapper::after {
-  right: 0.02rem !important
+  right: 0.02rem !important;
 }

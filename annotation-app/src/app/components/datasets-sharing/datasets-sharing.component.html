@@ -109,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           title="{{
             dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
               ? dataset.min + '--' + dataset.max
-              : (dataset.labelType == 'numericLabel' && dataset.isMultipleLabel)
+              : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
               ? dataset.mutilNumbericLabels
               : dataset.categoryList
           }}"
@@ -118,7 +118,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           {{
             dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
               ? dataset.min + '--' + dataset.max
-              : (dataset.labelType == 'numericLabel' && dataset.isMultipleLabel)
+              : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
               ? dataset.mutilNumbericLabels
               : dataset.categoryList
           }}</clr-dg-cell

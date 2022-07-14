@@ -16,9 +16,8 @@ function modelChart(options) {
   frequency = options.frequency;
   threshold = options.threshold;
   estimator = options.estimator;
-  samplingStrategy = options.samplingStrategy,
-
-  model_margin = { top: 50, right: 300, bottom: 10, left: 40 };
+  (samplingStrategy = options.samplingStrategy),
+    (model_margin = { top: 50, right: 300, bottom: 10, left: 40 });
   data = options.data;
   data = Object.assign(
     data.map(({ index, accuracy }) => ({ name: index, value: +accuracy })),
