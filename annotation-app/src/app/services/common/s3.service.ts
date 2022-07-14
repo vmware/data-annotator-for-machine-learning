@@ -149,7 +149,12 @@ export class S3Service {
               realEntryIndex++;
               const uploadParams = {
                 Bucket: new Buffer(res.bucket, 'base64').toString(),
-                Key: new Buffer(res.key, 'base64').toString() + '/' + outNo + '/' + (value1 as any).name,
+                Key:
+                  new Buffer(res.key, 'base64').toString() +
+                  '/' +
+                  outNo +
+                  '/' +
+                  (value1 as any).name,
                 Body: blob,
               };
               uploadEntries.push({

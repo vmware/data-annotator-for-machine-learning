@@ -60,13 +60,15 @@ label span {
 }
 
 @media (min-width: 1880px) {
-  .labelsList, .preview {
+  .labelsList,
+  .preview {
     max-width: calc(100% - 28vw) !important;
   }
 }
 
 @media (max-width: 1881px) {
-  .labelsList, .preview {
+  .labelsList,
+  .preview {
     max-width: calc(100% - 28.3vw) !important;
   }
 }
@@ -188,7 +190,7 @@ table thead th:first-child {
   margin-right: 1rem;
 }
 
-::ng-deep input.disabled-checkbox+label::before {
+::ng-deep input.disabled-checkbox + label::before {
   background-color: #eee;
   cursor: not-allowed;
   opacity: 0.3;
@@ -219,7 +221,7 @@ table thead th:first-child {
 }
 
 .setDataLineHeight .clr-select-wrapper::after {
-  right: 0.02rem !important
+  right: 0.02rem !important;
 }
 
 .disableTree {

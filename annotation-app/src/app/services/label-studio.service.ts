@@ -45,7 +45,7 @@ export class LabelStudioService {
         },
       },
 
-      onSubmitCompletion (ls, completion) {
+      onSubmitCompletion(ls, completion) {
         // console.log("onSubmitCompletion:::ls", ls);
         // console.log("onSubmitCompletion:::completion", completion);
         const bb = ls.completionStore.completions[0].serializeCompletion();
@@ -53,29 +53,29 @@ export class LabelStudioService {
         // console.log('bb:::', bb)
       },
 
-      updateCompletion (ls, completion) {
+      updateCompletion(ls, completion) {
         // console.log("updateCompletion:::ls", ls);
         // console.log("updateCompletion:::completion", completion)
       },
 
-      onDeleteCompletion (ls, completion) {
+      onDeleteCompletion(ls, completion) {
         // console.log("onDeleteCompletion:::ls", ls);
         // console.log("onDeleteCompletion:::completion", completion)
       },
 
-      onEntityCreate (region) {
+      onEntityCreate(region) {
         // console.log("onEntityCreate:::", region)
       },
 
-      onEntityDelete (region) {
+      onEntityDelete(region) {
         // console.log("onEntityDelete:::", region)
       },
 
-      onSkipTask (ls) {
+      onSkipTask(ls) {
         // console.log("onSkipTask:::", ls)
       },
 
-      onLabelStudioLoad (LS) {
+      onLabelStudioLoad(LS) {
         const c = LS.completionStore.addCompletion({
           userGenerate: true,
         });

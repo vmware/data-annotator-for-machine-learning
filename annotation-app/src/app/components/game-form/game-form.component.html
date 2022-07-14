@@ -34,25 +34,26 @@ SPDX-License-Identifier: Apache-2.0 -->
         <!-- <clr-datagrid #dataGird (clrDgRefresh)="refresh($event)" [clrDgLoading]="loading" class="gridHeight"> -->
         <clr-datagrid #dataGird [clrDgLoading]="loading" class="gridHeight">
           <clr-dg-placeholder>We couldn't find any project for you!</clr-dg-placeholder>
-          <clr-dg-column
-            [clrDgField]="'projectName'"
-            class="ellipsis-datagrid colwidth"
+          <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid colwidth"
             >Project Name
           </clr-dg-column>
-          <clr-dg-column
-            [clrDgField]="'updatedDate'"
-            class="ellipsis-datagrid"
+          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid"
             >Updated Date
           </clr-dg-column>
-          <clr-dg-column [clrDgField]="'userCompleteCase'" class="ellipsis-datagrid" style="max-width: 300px">
+          <clr-dg-column
+            [clrDgField]="'userCompleteCase'"
+            class="ellipsis-datagrid"
+            style="max-width: 300px"
+          >
             Complete/Assigned
           </clr-dg-column>
-          <clr-dg-column [clrDgField]="'userCompleteCase'" class="ellipsis-datagrid" style="max-width: 300px"
+          <clr-dg-column
+            [clrDgField]="'userCompleteCase'"
+            class="ellipsis-datagrid"
+            style="max-width: 300px"
             >Reviewed/Complete</clr-dg-column
           >
-          <clr-dg-column
-            [clrDgField]="'categoryList'"
-            class="ellipsis-datagrid labels colwidth"
+          <clr-dg-column [clrDgField]="'categoryList'" class="ellipsis-datagrid labels colwidth"
             >Labels
           </clr-dg-column>
           <clr-dg-column class="column-action" style="min-width: 180px">Action</clr-dg-column>
@@ -64,9 +65,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 title="{{ dataset.projectName }}"
                 >{{ dataset.projectName }}
               </clr-dg-cell>
-              <clr-dg-cell>{{
-                dataset.updatedDate | date: 'yyyy-MM-dd HH:mm:ss'
-              }}</clr-dg-cell>
+              <clr-dg-cell>{{ dataset.updatedDate | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
               <clr-dg-cell style="max-width: 300px">
                 <div>
                   <div *ngIf="dataset.userCompleteCase.length < 6">
@@ -252,25 +251,26 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </clr-dg-cell>
               <clr-dg-cell class="colwidth disableTree" *ngIf="dataset.labelType === 'HTL'">
-                <div style="cursor: pointer;" (click)="clickTreeView(dataset.categoryList)">
-                  <clr-icon shape="view-list"
-                  title="tree view detail"></clr-icon> click the icon to review with tree label
+                <div style="cursor: pointer" (click)="clickTreeView(dataset.categoryList)">
+                  <clr-icon shape="view-list" title="tree view detail"></clr-icon> click the icon to
+                  review with tree label
                 </div>
               </clr-dg-cell>
-              <clr-dg-cell *ngIf="dataset.labelType !== 'HTL'"
+              <clr-dg-cell
+                *ngIf="dataset.labelType !== 'HTL'"
                 class="cellWordBreak colwidth"
                 title="{{
-                  dataset.labelType == 'numericLabel' && (!dataset.isMultipleLabel)
+                  dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
                     ? dataset.min + '--' + dataset.max
-                    : (dataset.labelType == 'numericLabel' && dataset.isMultipleLabel)
+                    : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
                     ? dataset.mutilNumbericLabels
                     : dataset.categoryList
                 }}"
               >
                 {{
-                  dataset.labelType == 'numericLabel' && (!dataset.isMultipleLabel)
+                  dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
                     ? dataset.min + '--' + dataset.max
-                    : (dataset.labelType == 'numericLabel' && dataset.isMultipleLabel)
+                    : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
                     ? dataset.mutilNumbericLabels
                     : dataset.categoryList
                 }}</clr-dg-cell
@@ -321,7 +321,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </button>
                 <button
                   *ngIf="dataset.allowOwnerReview && dataset.totalCase !== 0"
-                  [disabled]="dataset.totalCase == 0 || !dataset.disableReview || dataset.projectCompleteCase == 0"
+                  [disabled]="
+                    dataset.totalCase == 0 ||
+                    !dataset.disableReview ||
+                    dataset.projectCompleteCase == 0
+                  "
                   class="btn btn-sm btn-primary"
                   style="margin: 0"
                   title="Start Review"

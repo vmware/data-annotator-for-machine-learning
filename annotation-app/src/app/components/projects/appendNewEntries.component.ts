@@ -202,7 +202,7 @@ export class AppendNewEntriesComponent implements OnInit {
       if (element.key == column) {
         element.format = true;
       }
-    });  
+    });
   }
 
   uploadSingleImageToS3() {
@@ -549,7 +549,8 @@ export class AppendNewEntriesComponent implements OnInit {
           name: this.previewHeadDatas[i],
           isOriginal: true,
           labelSelected: false,
-          labelSelectedDisable: this.regression=== "true" ? !enableLabels.includes(this.previewHeadDatas[i]) : true,
+          labelSelectedDisable:
+            this.regression === 'true' ? !enableLabels.includes(this.previewHeadDatas[i]) : true,
           textSelected: false,
           textSelectedDisable: false,
         });
@@ -908,7 +909,7 @@ export class AppendNewEntriesComponent implements OnInit {
   }
 
   changeLabelSelect(isSelected, data) {
-    if (isSelected && (!this.selectLabels.includes(data))) {
+    if (isSelected && !this.selectLabels.includes(data)) {
       this.selectLabels.push(data);
     }
     if (!isSelected && this.selectLabels.length > 0 && this.selectLabels.includes(data)) {
@@ -918,7 +919,7 @@ export class AppendNewEntriesComponent implements OnInit {
   }
 
   changeTextSelect(isSelected, data) {
-    if (isSelected && (!this.ticketQuestions.includes(data))) {
+    if (isSelected && !this.ticketQuestions.includes(data)) {
       this.ticketQuestions.push(data);
     }
     if (!isSelected && this.ticketQuestions.length > 0 && this.ticketQuestions.includes(data)) {

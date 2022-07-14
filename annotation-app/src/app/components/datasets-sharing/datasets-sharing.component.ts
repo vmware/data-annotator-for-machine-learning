@@ -87,11 +87,11 @@ export class DatasetsSharingComponent implements OnInit {
           res[i].labelCount = newA.length;
         }
         this.datasets = res;
-        this.datasets.forEach(item => {
+        this.datasets.forEach((item) => {
           if (item.labelType == 'numericLabel' && item.isMultipleLabel) {
             const categoryList = JSON.parse(item.categoryList);
             const itemKeys = [];
-            categoryList.forEach(element => {
+            categoryList.forEach((element) => {
               const labels = Object.keys(element);
               itemKeys.push(labels[0]);
             });

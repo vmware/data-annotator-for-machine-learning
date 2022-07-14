@@ -82,11 +82,11 @@ function userChart(options) {
     .attr('y', (d) => y(d.value))
     .attr('height', (d) => y(0) - y(d.value))
     .attr('width', d3.min([x.bandwidth(), 150]))
-    .on('mouseover', function (event,d) {
-      tip.show(event,d);
+    .on('mouseover', function (event, d) {
+      tip.show(event, d);
       d3.select(this).style('opacity', 0.5);
     })
-    .on('mouseout', function (event,d) {
+    .on('mouseout', function (event, d) {
       tip.hide();
       d3.select(this).style('opacity', 1);
     });

@@ -192,9 +192,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px"
                   >Annotator
                 </clr-dg-column>
-                <clr-dg-column
-                  class="ellipsis-datagrid"
-                  style="min-width: 250px"
+                <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px"
                   >Action
                 </clr-dg-column>
                 <ng-container>
@@ -323,10 +321,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     >
                       <div *ngFor="let a of dataset.userInputs">{{ a.user }}</div>
                     </clr-dg-cell>
-                    <clr-dg-cell
-                      class="ellipsis-datagrid previewHeight"
-                      style="min-width: 250px"
-                    >
+                    <clr-dg-cell class="ellipsis-datagrid previewHeight" style="min-width: 250px">
                       <div class="clr-row">
                         <button
                           class="btn btn-sm"
@@ -406,11 +401,19 @@ SPDX-License-Identifier: Apache-2.0 -->
                               style="min-width: 20rem"
                               class="disableTree"
                             >
-                              <div class="tree-icon" (click)="clickTreeView(flag.problemCategory[0])">
-                                <clr-icon shape="view-list"
-                                  title="tree view detail"></clr-icon> click the icon to review with tree label
+                              <div
+                                class="tree-icon"
+                                (click)="clickTreeView(flag.problemCategory[0])"
+                              >
+                                <clr-icon shape="view-list" title="tree view detail"></clr-icon>
+                                click the icon to review with tree label
                               </div>
-                              <ul *ngFor="let selectedTreeLabel of flag.reducedCategory; let i = index">
+                              <ul
+                                *ngFor="
+                                  let selectedTreeLabel of flag.reducedCategory;
+                                  let i = index
+                                "
+                              >
                                 <li>{{ selectedTreeLabel }}</li>
                               </ul>
                             </clr-dg-cell>

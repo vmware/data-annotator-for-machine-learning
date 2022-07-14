@@ -133,7 +133,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   ];
   samplingStrategy: any;
   showTreeView: boolean = false;
-  treeData: any;  
+  treeData: any;
 
   constructor(
     private avaService: AvaService,
@@ -197,15 +197,15 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   getSamplingStrategy(queryStrategy: any) {
     if (queryStrategy) {
       const sampling = {
-       'PB_UNS': 'Pool-based uncertainty_sampling',
-       'PB_MS': 'Pool-based margin_sampling',
-       'PB_ES': 'Pool-based entropy_sampling',
-       'RBM_UNBS': 'Ranked batch mode uncertainty_batch_sampling',
-      }
+        PB_UNS: 'Pool-based uncertainty_sampling',
+        PB_MS: 'Pool-based margin_sampling',
+        PB_ES: 'Pool-based entropy_sampling',
+        RBM_UNBS: 'Ranked batch mode uncertainty_batch_sampling',
+      };
       return sampling[queryStrategy];
     }
     return 'Pool-based uncertainty_sampling';
- }
+  }
 
   ngAfterViewInit() {
     this.chartWidth = this.el.nativeElement.querySelector('.categoryChart').offsetWidth;
@@ -272,7 +272,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
       const hitBarData = {
         name: 'flare',
         children: data,
-      }
+      };
       hierarchicalChart({
         container: conf,
         data: hitBarData,
@@ -756,8 +756,12 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
         for (let j = 0; j < this.previewSrs[k].userInputs.length; j++) {
           if (userList[i] == this.previewSrs[k].userInputs[j].user) {
             if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
-              param.problemCategory.push(this.previewSrs[k].userInputs[j].problemCategory.label
-                + '[' + this.previewSrs[k].userInputs[j].problemCategory.value + ']');
+              param.problemCategory.push(
+                this.previewSrs[k].userInputs[j].problemCategory.label +
+                  '[' +
+                  this.previewSrs[k].userInputs[j].problemCategory.value +
+                  ']',
+              );
             } else {
               param.problemCategory.push(this.previewSrs[k].userInputs[j].problemCategory);
               param.reducedCategory = this.previewSrs[k].userInputs[j].reducedCategory;

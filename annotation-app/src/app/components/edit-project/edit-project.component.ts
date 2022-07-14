@@ -130,24 +130,26 @@ export class EditProjectComponent implements OnInit {
     if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
       let mutilNumerics = [];
       let categoryList = JSON.parse(this.msg.categoryList);
-      categoryList.forEach(element => {
+      categoryList.forEach((element) => {
         const labels = Object.keys(element);
         const label = labels[0];
         const values = element[label];
         const minVal = values[0];
         const maxVal = values[1];
-        mutilNumerics.push(this.formBuilder.group({
-          status: 'old', 
-          originalLabel: label,
-          editLabel: label,
-          oldMinMutilVal:  this.formBuilder.control(minVal),
-          minMutilVal:  this.formBuilder.control(minVal),
-          oldMaxMutilVal:  this.formBuilder.control(maxVal),
-          maxMutilVal: this.formBuilder.control(maxVal),
-        }));
+        mutilNumerics.push(
+          this.formBuilder.group({
+            status: 'old',
+            originalLabel: label,
+            editLabel: label,
+            oldMinMutilVal: this.formBuilder.control(minVal),
+            minMutilVal: this.formBuilder.control(minVal),
+            oldMaxMutilVal: this.formBuilder.control(maxVal),
+            maxMutilVal: this.formBuilder.control(maxVal),
+          }),
+        );
       });
       this.mutilNumericForm = this.formBuilder.group({
-        mutilLabelArray: this.formBuilder.array(mutilNumerics)
+        mutilLabelArray: this.formBuilder.array(mutilNumerics),
       });
     } else if (this.labelType === 'HTL') {
       this.categoryList = this.msg.categoryList;
@@ -307,24 +309,34 @@ export class EditProjectComponent implements OnInit {
     let editLabels;
     const addLabels = [];
     if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
-      if (this.mutilLabelArray.value.some(item => (item.oldMinMutilVal && item.oldMinMutilVal < item.minMutilVal)
-        || (item.oldMaxMutilVal && item.oldMaxMutilVal > item.maxMutilVal) 
-        || (item.maxMutilVal <= item.minMutilVal))) {
-          return false;
+      if (
+        this.mutilLabelArray.value.some(
+          (item) =>
+            (item.oldMinMutilVal && item.oldMinMutilVal < item.minMutilVal) ||
+            (item.oldMaxMutilVal && item.oldMaxMutilVal > item.maxMutilVal) ||
+            item.maxMutilVal <= item.minMutilVal,
+        )
+      ) {
+        return false;
       } else {
-      editLabels = [];
-      this.mutilLabelArray.value.forEach(element => {
-        if (element.status == 'old') {
-          editLabels.push({
-            'edit': element.oldMinMutilVal !== element.minMutilVal || element.oldMaxMutilVal !== element.maxMutilVal || element.originalLabel !== element.editLabel,
-            'originLB': {[element.originalLabel]: [element.oldMinMutilVal, element.oldMaxMutilVal]},
-            'editLB': {[element.editLabel]: [element.minMutilVal, element.maxMutilVal]}
-          });
-        }
-        if (element.status == 'new') {
-          addLabels.push({[element.editLabel]: [element.minMutilVal, element.maxMutilVal]});
-        }
-      });
+        editLabels = [];
+        this.mutilLabelArray.value.forEach((element) => {
+          if (element.status == 'old') {
+            editLabels.push({
+              edit:
+                element.oldMinMutilVal !== element.minMutilVal ||
+                element.oldMaxMutilVal !== element.maxMutilVal ||
+                element.originalLabel !== element.editLabel,
+              originLB: {
+                [element.originalLabel]: [element.oldMinMutilVal, element.oldMaxMutilVal],
+              },
+              editLB: { [element.editLabel]: [element.minMutilVal, element.maxMutilVal] },
+            });
+          }
+          if (element.status == 'new') {
+            addLabels.push({ [element.editLabel]: [element.minMutilVal, element.maxMutilVal] });
+          }
+        });
       }
     } else {
       editLabels = {};
@@ -576,7 +588,11 @@ export class EditProjectComponent implements OnInit {
     if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
       this.checkBoth();
     } else {
-      if (e != null && Number(this.msg.max) >= Number(e) && Number(this.msg.max) !== Number(this.msg.min)) {
+      if (
+        e != null &&
+        Number(this.msg.max) >= Number(e) &&
+        Number(this.msg.max) !== Number(this.msg.min)
+      ) {
         this.sizeError = false;
       } else {
         this.sizeError = true;
@@ -588,7 +604,11 @@ export class EditProjectComponent implements OnInit {
     if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
       this.checkBoth();
     } else {
-      if (e != null && Number(e) >= Number(this.msg.min) && Number(this.msg.max) !== Number(this.msg.min)) {
+      if (
+        e != null &&
+        Number(e) >= Number(this.msg.min) &&
+        Number(this.msg.max) !== Number(this.msg.min)
+      ) {
         this.sizeError = false;
       } else {
         this.sizeError = true;
@@ -607,22 +627,29 @@ export class EditProjectComponent implements OnInit {
 
   checkBoth() {
     if (this.mutilLabelArray.value.length) {
-      this.sizeError = this.mutilLabelArray.value.some(item => !DatasetValidator.isInvalidNumber(item.minMutilVal)
-        && !DatasetValidator.isInvalidNumber(item.maxMutilVal)
-        && Number(item.minMutilVal) >= Number(item.maxMutilVal));
-      this.inputIsNull = this.mutilLabelArray.value.some(item => DatasetValidator.isInvalidNumber(item.minMutilVal)
-        || DatasetValidator.isInvalidNumber(item.maxMutilVal) || !item.editLabel);
+      this.sizeError = this.mutilLabelArray.value.some(
+        (item) =>
+          !DatasetValidator.isInvalidNumber(item.minMutilVal) &&
+          !DatasetValidator.isInvalidNumber(item.maxMutilVal) &&
+          Number(item.minMutilVal) >= Number(item.maxMutilVal),
+      );
+      this.inputIsNull = this.mutilLabelArray.value.some(
+        (item) =>
+          DatasetValidator.isInvalidNumber(item.minMutilVal) ||
+          DatasetValidator.isInvalidNumber(item.maxMutilVal) ||
+          !item.editLabel,
+      );
     }
   }
 
   onMutilLabelKeydown() {
     let labelValues = [];
     if (this.mutilLabelArray.value.length) {
-      this.mutilLabelArray.value.forEach(ele => {
+      this.mutilLabelArray.value.forEach((ele) => {
         labelValues.push(ele.editLabel);
       });
     }
-    this.inputIsNull = labelValues.filter(item => item).length !== this.mutilLabelArray.length;
+    this.inputIsNull = labelValues.filter((item) => item).length !== this.mutilLabelArray.length;
     this.inputLabelValidation = DatasetValidator.isRepeatArr(labelValues);
   }
 
@@ -632,7 +659,7 @@ export class EditProjectComponent implements OnInit {
 
   newMutliLabel(): FormGroup {
     return this.formBuilder.group({
-      status: 'new', 
+      status: 'new',
       originalLabel: this.formBuilder.control(''),
       editLabel: this.formBuilder.control(''),
       oldMinMutilVal: this.formBuilder.control(''),

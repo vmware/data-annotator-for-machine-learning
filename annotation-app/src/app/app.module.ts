@@ -55,7 +55,7 @@ import { MarkdownParserService } from './services/common/markdown-parser.service
 import { CommonService } from './services/common/common.service';
 import { S3Service } from './services/common/s3.service';
 import { EmailService } from './services/common/email.service';
-import { NgxSliderModule } from "@angular-slider/ngx-slider";
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { UploadLabelComponent } from './components/projects/upload-label/upload-label.component';
 import { TreeviewModalComponent } from './components/treeview-modal/treeview-modal.component';
 
