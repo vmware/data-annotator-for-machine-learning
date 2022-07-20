@@ -1403,7 +1403,8 @@ export class CreateNewComponent implements OnInit {
       this.isMutilNumericLabel = true;
       this.isShowNumeric = false;
       this.isNumeric = false;
-      this.dsDialogFormValidationReset('labels', undefined, null);
+      this.dsDialogForm.get('labels').setValidators(null);
+      this.dsDialogForm.get('labels').updateValueAndValidity();
       this.isUploadLabel = false;
     } else if (e.target.value == 'uploadLabel') {
       this.isMultipleLabel = null;
@@ -1411,7 +1412,8 @@ export class CreateNewComponent implements OnInit {
       this.isNumeric = false;
       this.isMutilNumericLabel = false;
       this.isUploadLabel = true;
-      this.dsDialogFormValidationReset('labels', undefined, null);
+      this.dsDialogForm.get('labels').setValidators(null);
+      this.dsDialogForm.get('labels').updateValueAndValidity();
     } else {
       this.dsDialogForm.get('multipleLabel').setValue(null);
       this.isMultipleLabel = null;

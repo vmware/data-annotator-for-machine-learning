@@ -1570,6 +1570,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   env.config.enableSlack &&
                   !isNumeric &&
                   !isMultipleLabel &&
+                  !isUploadLabel &&
                   (msg.type === 'tabular' || msg.type === 'text') &&
                   !isMutilNumericLabel
                     ? '(Optional-Pick one of Assignee and Slack)'
@@ -1643,6 +1644,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               env.config.enableSlack &&
               !isNumeric &&
               !isMultipleLabel &&
+              !isUploadLabel &&
               (msg.type === 'tabular' || msg.type === 'text') &&
               !isMutilNumericLabel
             "
