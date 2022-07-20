@@ -31,7 +31,8 @@ async function getProjects(req) {
         console.log(`[ PROJECT ] Service query current annotator project list`);
         const annotateConditions = { annotator: { $regex: email } };
         const logReviewConditions = { creator: { $regex: email } };
-        condition = { $or: [annotateConditions, logReviewConditions] };
+        condition = { annotator: { $exists: true }, $where: 'this.annotator.length>0' };
+        condition.$or = [annotateConditions, logReviewConditions];
     } else if (src == SRCS.PROJECTS && user.role != "Annotator") {
         condition = { creator: { $regex: email } };
     } else if (src == SRCS.ADMIN && user.role == "Admin") {

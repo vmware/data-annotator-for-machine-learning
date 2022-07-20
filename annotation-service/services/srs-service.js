@@ -213,7 +213,7 @@ async function updateSrsUserInput(req, from) {
 
     //trigger active learning
     const token = req.headers.authorization.split("Bearer ")[1];
-    await alService.triggerActiveLearning(projectId, _ids, (from === 'slack' && config.ESP) ? undefined : user, token);
+    await alService.triggerActiveLearning(projectId, _ids, (from === 'slack' && config.ESP) ? config.adminDefault[0] : user, token);
 
 
 }
