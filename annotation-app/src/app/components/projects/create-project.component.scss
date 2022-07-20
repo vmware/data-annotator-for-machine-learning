@@ -212,6 +212,13 @@ table thead th:first-child {
   margin-top: 1rem;
 }
 
+.assignee-input {
+  max-height: unset !important;
+  ul {
+    margin-bottom: 0;
+  }
+}
+
 .clr-textarea {
   max-width: 100%;
 }

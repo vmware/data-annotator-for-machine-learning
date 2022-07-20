@@ -74,11 +74,16 @@ export class EditProjectComponent implements OnInit {
   mutilNumericForm: FormGroup;
   inputIsNull: boolean;
   isMultipleLabel: boolean;
+  slackList: any = [];
+  inputSlackValidation: string;
+  loadingSlack: boolean = false;
+  inputSlackChannels: any = [];
   showLabel: boolean = true;
+  isShowSlack: boolean = false;
 
   constructor(
     private avaService: AvaService,
-    private env: EnvironmentsService,
+    public env: EnvironmentsService,
     private toolService: ToolService,
     private commonService: CommonService,
     private emailService: EmailService,
@@ -159,6 +164,17 @@ export class EditProjectComponent implements OnInit {
         this.categoryList.push(flag);
       });
     }
+    if (this.msg.assignSlackChannels.length > 0) {
+      this.slackList = this.msg.assignSlackChannels;
+      this.msg.assignSlackChannels.forEach((element) => {
+        this.inputSlackChannels.push(element.slackName);
+      });
+    }
+    this.isShowSlack =
+      this.env.config.enableSlack &&
+      ['text', 'tabular'].includes(this.msg.projectType) &&
+      !this.msg.isMultipleLabel &&
+      this.msg.labelType == 'textLabel';
   }
 
   get mutilLabelArray() {
@@ -352,8 +368,8 @@ export class EditProjectComponent implements OnInit {
 
     let condition =
       this.inputProjectName !== '' &&
-      this.inputProjectCreator !== '' &&
-      this.assigneeList.length > 0 &&
+      this.inputProjectCreator.length > 0 &&
+      (this.assigneeList.length > 0 || this.slackList.length > 0) &&
       this.ownerList.length > 0 &&
       !this.nameExist &&
       this.emailReg &&
@@ -366,7 +382,9 @@ export class EditProjectComponent implements OnInit {
       this.inputfrequency > 9 &&
       this.inputTrigger > 49 &&
       !this.inputIsNull &&
-      !this.inputLabelValidation;
+      !this.inputLabelValidation &&
+      !this.loadingSlack &&
+      !this.inputSlackValidation;
     if (this.labelType == 'numericLabel' && !this.isMultipleLabel) {
       condition =
         this.inputProjectName !== '' &&
@@ -398,6 +416,7 @@ export class EditProjectComponent implements OnInit {
         addLabels,
         min: null,
         max: null,
+        assignSlackChannels: this.slackList,
       };
       if (this.labelType == 'numericLabel' && !this.isMultipleLabel) {
         param.frequency = null;
@@ -428,7 +447,7 @@ export class EditProjectComponent implements OnInit {
         },
       );
     } else {
-      this.sizeError = true;
+      // this.sizeError = true;
     }
   }
 
@@ -716,5 +735,11 @@ export class EditProjectComponent implements OnInit {
         }, 5000);
       },
     );
+  }
+
+  receiveSlackAssign(e) {
+    this.slackList = e.slackList;
+    this.loadingSlack = e.loadingSlack;
+    this.inputSlackValidation = e.inputSlackValidation;
   }
 }

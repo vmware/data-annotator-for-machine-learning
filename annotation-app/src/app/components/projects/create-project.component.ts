@@ -128,6 +128,10 @@ export class CreateNewComponent implements OnInit {
   popLabelValidation: boolean;
   queryStrategyBase: any;
   setDataError: boolean = false;
+  slackList: any = [];
+  inputSlackValidation: string;
+  loadingSlack: boolean = false;
+  isShowSlack: boolean = false;
   isUploadLabel: boolean = false;
   showUploadLabelDialog: boolean = false;
   treeLabels: any = [];
@@ -144,7 +148,7 @@ export class CreateNewComponent implements OnInit {
     private route: ActivatedRoute,
     private papa: Papa,
     private renderer2: Renderer2,
-    private env: EnvironmentsService,
+    public env: EnvironmentsService,
     private toolService: ToolService,
     private commonService: CommonService,
     private emailService: EmailService,
@@ -224,7 +228,7 @@ export class CreateNewComponent implements OnInit {
       min: [this.dataset.min, DatasetValidator.minNumber()],
       max: [this.dataset.max, DatasetValidator.minNumber()],
       selectedClassifier: ['', DatasetValidator.required()],
-      selectedqueryStrategy: ['PB_UNS', DatasetValidator.required()],
+      selectedqueryStrategy: ['', DatasetValidator.required()],
       selectedEncoder: ['', DatasetValidator.required()],
       multipleLabel: [this.dataset.multipleLabel, null],
       selectedText: [this.dataset.selectedText, ''],
@@ -242,6 +246,7 @@ export class CreateNewComponent implements OnInit {
           minMutilVal: this.formBuilder.control(''),
         }),
       ]),
+      slack: [this.dataset.slack, null],
     });
   }
 
@@ -255,7 +260,7 @@ export class CreateNewComponent implements OnInit {
 
   onSubmit(event): void {
     if (event && 'submit'.includes(event.currentTarget.type)) {
-      let condition;
+      let condition: any;
       if (this.isNumeric) {
         this.labelType = 'numericLabel';
         this.validNumeirc();
@@ -295,22 +300,39 @@ export class CreateNewComponent implements OnInit {
         }
       } else {
         this.labelType = 'textLabel';
-        this.dsDialogForm.get('min').setValidators(null);
-        this.dsDialogForm.get('max').setValidators(null);
-        this.dsDialogForm
-          .get('labels')
-          .setValidators(DatasetValidator.requiredTwo(this.projectType));
-        this.dsDialogForm.get('labels').updateValueAndValidity();
-        this.dsDialogForm.get('min').updateValueAndValidity();
-        this.dsDialogForm.get('max').updateValueAndValidity();
+        this.dsDialogFormValidationReset('min', undefined, null);
+        this.dsDialogFormValidationReset('max', undefined, null);
+        this.dsDialogFormValidationReset(
+          'labels',
+          undefined,
+          DatasetValidator.requiredTwo(this.projectType),
+        );
+        this.dsDialogFormValidationReset(
+          'selectedClassifier',
+          undefined,
+          DatasetValidator.required(),
+        );
+
+        this.dsDialogFormValidationReset(
+          'selectedqueryStrategy',
+          undefined,
+          DatasetValidator.required(),
+        );
+
+        // ---start---to make email assign and channel assign is optional
+        if (this.slackList.length > 0) {
+          this.dsDialogFormValidationReset('assignee', undefined, null);
+        }
+        // ---end---to make email assign and channel assign is optional
         if (this.msg.type === 'text') {
-          this.dsDialogForm.get('selectedEncoder').setValue(null);
-          this.dsDialogForm.get('selectedEncoder').setValidators(null);
-          this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
+          this.dsDialogFormValidationReset('selectedEncoder', null, null);
         }
         if (this.msg.type === 'tabular') {
-          this.dsDialogForm.get('selectedEncoder').setValidators(DatasetValidator.required());
-          this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
+          this.dsDialogFormValidationReset(
+            'selectedEncoder',
+            undefined,
+            DatasetValidator.required(),
+          );
         }
         if (this.msg.type === 'ner' || this.msg.type === 'log') {
           this.validNer();
@@ -321,16 +343,22 @@ export class CreateNewComponent implements OnInit {
         if (this.isMultipleLabel) {
           this.validMultiple();
         }
-        this.dsDialogForm.get('popLabels').setValidators(null);
-        this.dsDialogForm.get('popLabels').updateValueAndValidity();
+
+        this.dsDialogFormValidationReset('popLabels', undefined, null);
         if (this.showPopLabel) {
-          this.dsDialogForm
-            .get('popLabels')
-            .setValidators(DatasetValidator.requiredTwoPopLabel(this.projectType));
-          this.dsDialogForm.get('popLabels').updateValueAndValidity();
+          this.dsDialogFormValidationReset(
+            'popLabels',
+            undefined,
+            DatasetValidator.requiredTwoPopLabel(this.projectType),
+          );
         }
-        condition = !this.dsDialogForm.invalid && !this.nameExist;
+        condition =
+          !this.dsDialogForm.invalid &&
+          !this.nameExist &&
+          !this.inputSlackValidation &&
+          !this.loadingSlack;
       }
+
       FormValidatorUtil.markControlsAsTouched(this.dsDialogForm);
       if (condition) {
         this.loading = true;
@@ -379,6 +407,7 @@ export class CreateNewComponent implements OnInit {
           ? [...this.categoryList, ...this.selectDescription]
           : this.categoryList,
       );
+    formData.append('slack', JSON.stringify(this.slackList));
     formData.append('pname', this.dsDialogForm.value.projectName);
     formData.append('taskInstruction', this.dsDialogForm.value.taskInstruction);
     formData.append('maxAnnotations', this.dsDialogForm.value.maxAnnotations);
@@ -1285,6 +1314,7 @@ export class CreateNewComponent implements OnInit {
     );
   }
 
+  // to supercollider
   // onQuerySQL() {
   //   this.showQueryDatasetDialog = true;
   // }
@@ -1400,52 +1430,34 @@ export class CreateNewComponent implements OnInit {
   }
 
   validNumeirc() {
-    this.dsDialogForm.get('selectedClassifier').setValue(null);
-    this.dsDialogForm.get('selectedClassifier').setValidators(null);
-    this.dsDialogForm.get('selectedClassifier').updateValueAndValidity();
-    this.dsDialogForm.get('selectedqueryStrategy').setValue(null);
-    this.dsDialogForm.get('selectedqueryStrategy').setValidators(null);
-    this.dsDialogForm.get('selectedqueryStrategy').updateValueAndValidity();
-    this.dsDialogForm.get('selectedEncoder').setValue(null);
-    this.dsDialogForm.get('selectedEncoder').setValidators(null);
-    this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
-    this.dsDialogForm.get('labels').setValidators(null);
-    this.dsDialogForm.get('labels').updateValueAndValidity();
-    this.dsDialogForm.get('min').setValidators(DatasetValidator.minNumber());
-    this.dsDialogForm.get('min').updateValueAndValidity();
-    this.dsDialogForm.get('max').setValidators(DatasetValidator.minNumber());
-    this.dsDialogForm.get('max').updateValueAndValidity();
+    this.dsDialogFormValidationReset('selectedClassifier', null, null);
+    this.dsDialogFormValidationReset('selectedqueryStrategy', null, null);
+    this.dsDialogFormValidationReset('selectedEncoder', null, null);
+    this.dsDialogFormValidationReset('labels', undefined, null);
+    this.dsDialogFormValidationReset('min', undefined, DatasetValidator.minNumber());
+    this.dsDialogFormValidationReset('max', undefined, DatasetValidator.minNumber());
+    this.slackList = [];
+    this.dsDialogFormValidationReset('assignee', undefined, DatasetValidator.required());
   }
 
   validBoth() {
-    this.dsDialogForm.get('selectedClassifier').setValue(null);
-    this.dsDialogForm.get('selectedClassifier').setValidators(null);
-    this.dsDialogForm.get('selectedClassifier').updateValueAndValidity();
-    this.dsDialogForm.get('selectedqueryStrategy').setValue(null);
-    this.dsDialogForm.get('selectedqueryStrategy').setValidators(null);
-    this.dsDialogForm.get('selectedqueryStrategy').updateValueAndValidity();
-    this.dsDialogForm.get('selectedEncoder').setValue(null);
-    this.dsDialogForm.get('selectedEncoder').setValidators(null);
-    this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
-    this.dsDialogForm.get('min').setValidators(null);
-    this.dsDialogForm.get('min').updateValueAndValidity();
-    this.dsDialogForm.get('max').setValidators(null);
-    this.dsDialogForm.get('max').updateValueAndValidity();
-    this.dsDialogForm.get('labels').setValidators(null);
-    this.dsDialogForm.get('labels').updateValueAndValidity();
+    this.dsDialogFormValidationReset('selectedClassifier', null, null);
+    this.dsDialogFormValidationReset('selectedqueryStrategy', null, null);
+    this.dsDialogFormValidationReset('selectedEncoder', null, null);
+    this.dsDialogFormValidationReset('min', undefined, null);
+    this.dsDialogFormValidationReset('max', undefined, null);
+    this.dsDialogFormValidationReset('labels', undefined, null);
+    this.slackList = [];
+    this.dsDialogFormValidationReset('assignee', undefined, DatasetValidator.required());
     this.checkBoth();
   }
 
   validMultiple() {
-    this.dsDialogForm.get('selectedClassifier').setValue(null);
-    this.dsDialogForm.get('selectedClassifier').setValidators(null);
-    this.dsDialogForm.get('selectedClassifier').updateValueAndValidity();
-    this.dsDialogForm.get('selectedqueryStrategy').setValue(null);
-    this.dsDialogForm.get('selectedqueryStrategy').setValidators(null);
-    this.dsDialogForm.get('selectedqueryStrategy').updateValueAndValidity();
-    this.dsDialogForm.get('selectedEncoder').setValue(null);
-    this.dsDialogForm.get('selectedEncoder').setValidators(null);
-    this.dsDialogForm.get('selectedEncoder').updateValueAndValidity();
+    this.dsDialogFormValidationReset('selectedClassifier', null, null);
+    this.dsDialogFormValidationReset('selectedqueryStrategy', null, null);
+    this.dsDialogFormValidationReset('selectedEncoder', null, null);
+    this.slackList = [];
+    this.dsDialogFormValidationReset('assignee', undefined, DatasetValidator.required());
   }
 
   validNer() {
@@ -1565,6 +1577,20 @@ export class CreateNewComponent implements OnInit {
         this.popLabelValidation = false;
       }
     }
+  }
+
+  receiveSlackAssign(e) {
+    this.slackList = e.slackList;
+    this.loadingSlack = e.loadingSlack;
+    this.inputSlackValidation = e.inputSlackValidation;
+  }
+
+  dsDialogFormValidationReset(form: string, value: any, validator: any) {
+    if (value === null) {
+      this.dsDialogForm.get(form).setValue(value);
+    }
+    this.dsDialogForm.get(form).setValidators(validator);
+    this.dsDialogForm.get(form).updateValueAndValidity();
   }
 
   uploadLabels() {

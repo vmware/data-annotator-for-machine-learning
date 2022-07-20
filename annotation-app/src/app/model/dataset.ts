@@ -53,6 +53,7 @@ export class DatasetUtil {
       selectedText: null,
       isShowFilename: false,
       selectedDisplayColumn: [],
+      slack: [],
     };
   }
 
@@ -100,6 +101,7 @@ export interface DatasetData {
   selectedText: string;
   isShowFilename: boolean;
   selectedDisplayColumn: any[];
+  slack: any;
 }
 
 export interface DatasetFile {

@@ -9,12 +9,13 @@
 Data Annotator for Machine Learning (DAML) is an application that helps machine learning teams facilitating the creation and management of annotations.
 
 Core features include:
+
 - Support for common annotation tasks:
   - Text classification
   - Named entity recognition
   - Tabular classification and regresion
   - Images recognition with bounding boxes and polygons
-  - Log labeling 
+  - Log labeling
 - Active learning with uncertainly sampling to query unlabeled data
 - Project tracking with real time data aggregation and review process
 - User management panel with role-based access control
@@ -28,15 +29,17 @@ Core features include:
 
 ## What is included
 
-DAML project includes three components: 
+DAML project includes three components:
+
 - annotation-app: Angular application for the UI
 - annotation-service: Backend services built with Node & Express
 - active-learning-service: Django application providing active learning api using modAL library for pool-based uncertainty sampling to rank the unlabelled data
 
-
 ## Quick start
+
 - For the docker version usage to see [run with docker documentation](RUN-WITH-DOCKER.md)
 - For development environment and build configuration see [build documentation](BUILD.md)
+- For the slack integration configuration see [manifest documentation](manifest.yml)
 
 ## Contributing
 

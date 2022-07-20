@@ -16,54 +16,54 @@ const config = require("../config/config");
 const localFileSysService = require('../services/localFileSys.service');
 
 async function execute(req, sendEmail, annotators) {
-      
+
   if (req.body.projectType != PROJECTTYPE.IMGAGE) {
     return;
   }
-  
+
   console.log(`[ IMAGE ] Utils imgImporter.execute start: `, Date.now());
   const options = { lean: true, ordered: false };
   let docs = [];
 
   const conditions = { dataSetName: req.body.selectedDataset }
   const ds = await validator.checkDataSet(conditions, true);
-  
+
   console.log(`[ IMAGE ] Utils save image data to db`);
   for (const imgage of ds[0].images) {
 
     let sechema = {
-        projectName: req.body.pname,
-        userInputsLength: 0,
-        originalData: imgage
+      projectName: req.body.pname,
+      userInputsLength: 0,
+      originalData: imgage
     }
     docs.push(sechema)
-    
-    if(docs.length && docs.length % PAGINATELIMIT == 0){ 
-        await mongoDb.insertMany(ImgModel, docs, options);
-        docs = [];
+
+    if (docs.length && docs.length % PAGINATELIMIT == 0) {
+      await mongoDb.insertMany(ImgModel, docs, options);
+      docs = [];
     }
   }
 
   await mongoDb.insertMany(ImgModel, docs, options);
-  
-  if (sendEmail) {
+
+  if (sendEmail && annotators.length > 0) {
     console.log(`[ IMAGE ] Utils import image sendEmailToAnnotator`);
     const param = {
       body: {
         annotator: annotators,
         pname: req.body.pname
       },
-      auth:{ email: req.auth.email }
+      auth: { email: req.auth.email }
     }
     emailService.sendEmailToAnnotator(param).catch(err => console.error(`[ IMAGE ][ ERROR ] send email:`, err));
   }
-  
-  console.log(`[ IMAGE ] Utils imgImporter.execute end: `, Date.now()); 
+
+  console.log(`[ IMAGE ] Utils imgImporter.execute end: `, Date.now());
 
 }
 
 
-async function quickAppendImages(req, dsName){
+async function quickAppendImages(req, dsName) {
   console.log(`[ IMAGE ] Utils imgImporter.quickAppendImages`);
   const startTime = Date.now();
   const user = req.auth.email;
@@ -85,28 +85,28 @@ async function quickAppendImages(req, dsName){
       }
     }
 
-    let data = Object.assign({_id: ObjectId()}, imgage);
+    let data = Object.assign({ _id: ObjectId() }, imgage);
     let sechema = {
-        projectName: req.body.pname,
-        userInputsLength: 0,
-        originalData: data
+      projectName: req.body.pname,
+      userInputsLength: 0,
+      originalData: data
     }
     docs.push(sechema)
   }
   await mongoDb.insertMany(ImgModel, docs);
 
   //save to dataset db
-  const condtions = {dataSetName: dsName}
+  const condtions = { dataSetName: dsName }
   const dataset = await mongoDb.findOneByConditions(DataSetModel, condtions);
   if (dataset) {
-    const update = {$push: { images: {$each: req.body.images} } };
+    const update = { $push: { images: { $each: req.body.images } } };
     await mongoDb.findOneAndUpdate(DataSetModel, condtions, update);
   }
-  
+
 }
 
 
 module.exports = {
-    execute,
-    quickAppendImages,
+  execute,
+  quickAppendImages,
 }

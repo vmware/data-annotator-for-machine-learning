@@ -40,6 +40,7 @@ export class UploadLabelComponent implements OnInit {
       this.uploadSet = DatasetUtil.uploadInit();
     }
     this.uploadSet.fileFormat = 'json';
+
     this.uploadGroup = this.formBuilder.group({
       localFile: [null, DatasetValidator.localLabelFile(this.uploadSet.fileFormat, this.inputFile)],
       fileFormat: [this.uploadSet.fileFormat, ''],

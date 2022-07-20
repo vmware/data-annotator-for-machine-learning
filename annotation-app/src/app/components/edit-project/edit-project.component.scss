@@ -104,3 +104,30 @@ ul li {
   float: left;
   margin-top: -0.7rem;
 }
+
+.assignee-input {
+  max-height: unset !important;
+  ul {
+    margin-bottom: 0;
+  }
+}
+
+::ng-deep app-assign-slack.slack-assign {
+  label {
+    margin-left: -3.3rem;
+  }
+  .clr-input-wrapper {
+    margin-left: 5.9rem;
+    input.clr-input {
+      width: 92.5% !important;
+    }
+  }
+  .tooltip {
+    clr-tooltip {
+      margin-left: -3rem;
+    }
+    span.spinner {
+      margin-left: -3rem;
+    }
+  }
+}

@@ -42,9 +42,9 @@ module.exports = {
     PROJECT_PREVIEW: "/projects/annotations", // swagger
     SRS_PROGRESS: "/projects/users/progression",//no
     PROJECT_REVIEW_LIST: "/projects/review",
-    PROJECT_LOG_FILE_LIST:"/projects/log/files",
-    PROJECT_LOG_FILE_FILTER:"/projects/log/filter",
-    
+    PROJECT_LOG_FILE_LIST: "/projects/log/files",
+    PROJECT_LOG_FILE_FILTER: "/projects/log/filter",
+
     //tickets
     SRS_UPDATE: "/projects/tickets",//swagger
     SRS_APPEND: "/projects/tickets", //swagger
@@ -73,7 +73,7 @@ module.exports = {
     FILE_SET_DATA: "/datasets/set-data",
     FILE_DOWNLOAD_FROM_LOCAL_SYSTEM: "/datasets/download-from-local-system",
     FILE_DATASET_FILE_UNIQUE: "/datasets/file",
-    
+
     //email
     EMAIL_TO_OWNER: "/emails/send-to-owners",//swagger
     EMAIL_TO_ANNOTATOR: "/emails/send-to-annotators",//swagger
@@ -83,8 +83,8 @@ module.exports = {
     INTEGRATION_CSV: "/integration/labelled/csv",
 
     //import labelled dataset
-    DATASET_IMPORT:"/datasets/import",
+    DATASET_IMPORT: "/datasets/import",
     DB_UPDATE_COLUMN_TYPE: "/db/update-column-type",
 
-
+    CONVERSATION_LIST: "/conversations-list"
 }

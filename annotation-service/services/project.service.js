@@ -14,6 +14,8 @@ const validator = require('../utils/validator');
 const mongoDb = require('../db/mongo.db');
 const { getModelProject } = require('../utils/mongoModel.utils');
 const { ProjectModel, UserModel, LogModel } = require('../db/db-connect');
+const { formatDate } = require('../utils/common.utils');
+const slackChat = require("./slack/slackChat.service");
 const { default: axios } = require("axios");
 
 async function getProjects(req) {
@@ -21,15 +23,16 @@ async function getProjects(req) {
     const src = req.query.src;
     const email = req.auth.email;
     const user = await mongoDb.findById(UserModel, email);
-    
-    let condition, project=null;
+
+    let condition, project = null;
     const options = { sort: { updatedDate: -1 } };
 
     if (src == SRCS.ANNOTATE) {
         console.log(`[ PROJECT ] Service query current annotator project list`);
         const annotateConditions = { annotator: { $regex: email } };
-        const logReviewConditions = { creator: { $regex: email }};
-        condition = { $or: [ annotateConditions, logReviewConditions ] };        
+        const logReviewConditions = { creator: { $regex: email } };
+        condition = { annotator: { $exists: true }, $where: 'this.annotator.length>0' };
+        condition.$or = [annotateConditions, logReviewConditions];
     } else if (src == SRCS.PROJECTS && user.role != "Annotator") {
         condition = { creator: { $regex: email } };
     } else if (src == SRCS.ADMIN && user.role == "Admin") {
@@ -42,7 +45,7 @@ async function getProjects(req) {
         console.log(`[ PROJECT ] [ERROR] Service errors in ${email} or ${src}`);
         throw { CODE: 1001, MSG: "ERROR ID or src" };
     }
-    if(req.query.projectType){
+    if (req.query.projectType) {
         condition['projectType'] = req.query.projectType;
         project = "creator annotator selectedColumn integration projectName categoryList labelType projectType";
     }
@@ -78,27 +81,27 @@ async function getProjectInfo(req) {
     return project;
 }
 
-async function prepareSelectedHierarchicalLabels(nodes, unEnable, removeUnselected){
-	for (let i in nodes) {
+async function prepareSelectedHierarchicalLabels(nodes, unEnable, removeUnselected) {
+    for (let i in nodes) {
         if (removeUnselected) {
-            while(true){
-                if(nodes[i] && nodes[i].enable == 0){
+            while (true) {
+                if (nodes[i] && nodes[i].enable == 0) {
                     nodes.splice(i, 1);
-                }else{
+                } else {
                     break;
                 }
             }
         }
 
-		if(nodes[i] && nodes[i].enable != 0){
-            if(unEnable){
+        if (nodes[i] && nodes[i].enable != 0) {
+            if (unEnable) {
                 nodes[i].enable = 0;
             }
-			if(nodes[i].children){
-				await prepareSelectedHierarchicalLabels(nodes[i].children, unEnable, removeUnselected)
-			}
-		}
-	}
+            if (nodes[i].children) {
+                await prepareSelectedHierarchicalLabels(nodes[i].children, unEnable, removeUnselected)
+            }
+        }
+    }
 }
 
 
@@ -106,17 +109,17 @@ async function deleteProject(req) {
 
     await validator.checkAnnotator(req.auth.email);
 
-    const mp = await getModelProject({_id: ObjectId(req.query.pid)});
-    const conditions = {projectName: mp.project.projectName};
-    
+    const mp = await getModelProject({ _id: ObjectId(req.query.pid) });
+    const conditions = { projectName: mp.project.projectName };
+
     console.log(`[ PROJECT ] Service delete all srs data`, conditions);
     await mongoDb.deleteManyByConditions(mp.model, conditions);
-    if(config.ESP && mp.project.integration.source == SOURCE.MODEL_FEEDBACK && mp.project.integration.externalId.length){
+    if (config.ESP && mp.project.integration.source == SOURCE.MODEL_FEEDBACK && mp.project.integration.externalId.length) {
         const url = config.modelFeedbackAPI + "/loop";
         const reqConfig = {
             headers: {
                 accept: "application/json",
-                "Content-Type":"application/json",
+                "Content-Type": "application/json",
                 Authorization: req.headers.authorization
             },
             data: {
@@ -126,30 +129,29 @@ async function deleteProject(req) {
         };
         await axios.delete(url, reqConfig);
     }
-    
+
     console.log(`[ PROJECT ] Service delete project`, conditions);
     await mongoDb.deleteOneByConditions(ProjectModel, conditions);
 
 }
-
 async function updateProject(req) {
     console.log(`[ PROJECT ] Service updateProject`);
     await validator.checkAnnotator(req.auth.email);
     const _id = req.body.pid;
-    const mp = await getModelProject({_id: ObjectId(_id)});
+    const mp = await getModelProject({ _id: ObjectId(_id) });
 
     if (req.body.previousPname != req.body.pname && req.body.pname) {
-        await validator.checkProjectByconditions({projectName: req.body.pname}, false);
+        await validator.checkProjectByconditions({ projectName: req.body.pname }, false);
 
         console.log(`[ PROJECT ] Service update tickets projectName`);
         const srsCondition = { projectName: req.body.previousPname };
         const srsDoc = { projectName: req.body.pname };
         await mongoDb.updateManyByConditions(mp.model, srsCondition, srsDoc);
     }
-    
+
     const projectInfo = mp.project;
-    let annotators = [], completeCase = [];    
-    
+    let annotators = [], completeCase = [];
+
     //update userCompleteCase
     for (const user of req.body.assignee) {
         annotators.push(user.email);
@@ -157,8 +159,8 @@ async function updateProject(req) {
         if (ucase) {
             ucase.assignedCase = user.assignedCase;
             completeCase.push(ucase);
-        }else{
-            completeCase.push({ 
+        } else {
+            completeCase.push({
                 user: user.email,
                 completeCase: 0,
                 skip: 0,
@@ -177,11 +179,11 @@ async function updateProject(req) {
     }
 
     if (!req.body.projectOwner.length) {
-        throw {CODE: 4001, MSG: "PROJECT OWNER CAN'T BE EMPTY"};
+        throw { CODE: 4001, MSG: "PROJECT OWNER CAN'T BE EMPTY" };
     }
     for (const owner of req.body.projectOwner) {
         // update annotator role to prjectOwner
-        const condition = {_id: owner, role: ROLES.ANNOTATOR};
+        const condition = { _id: owner, role: ROLES.ANNOTATOR };
         const update = {
             $set: {
                 role: ROLES.PROJECT_OWNER
@@ -196,10 +198,12 @@ async function updateProject(req) {
             creator: req.body.projectOwner,
             userCompleteCase: completeCase,
             annotator: annotators,
-            assignmentLogic: req.body.assignmentLogic
+            assignmentLogic: req.body.assignmentLogic,
+            assignSlackChannels: req.body.assignSlackChannels,
+
         }
     };
-    if(projectInfo.taskInstructions != req.body.taskInstructions){
+    if (projectInfo.taskInstructions != req.body.taskInstructions) {
         update.$set['taskInstructions'] = req.body.taskInstructions;
     }
     if (req.body.frequency) {
@@ -211,18 +215,90 @@ async function updateProject(req) {
     if (req.body.isShowFilename == true || req.body.isShowFilename == false) {
         update.$set['isShowFilename'] = req.body.isShowFilename;
     }
+    if (config.buildSlackApp && req.body.assignSlackChannels.length > 0) {
+        let newChannels = _.differenceBy(req.body.assignSlackChannels, projectInfo.assignSlackChannels, 'slackId')
+        if (newChannels.length > 0) {
+            let params = {
+                channels: newChannels,
+                pname: req.body.pname,
+                creator: projectInfo.creator,
+                totalCase: projectInfo.totalCase,
+                createdDate: await formatDate(Number(projectInfo.createdDate)),
+                pid: projectInfo._id
+            };
+            await slackChat.publishMessage(params);
+        }
+    }
 
     //edit lables
     const editLabels = req.body.editLabels;
     const addLabels = req.body.addLabels;
     const min = req.body.min;
     const max = req.body.max;
-    await editProjectLabels(_id,  editLabels, addLabels, min, max);
-    
-    console.log(`[ PROJECT ] Service update project info`,completeCase);
-    const condition = {projectName: req.body.previousPname};
+    await editProjectLabels(_id, editLabels, addLabels, min, max);
+
+    console.log(`[ PROJECT ] Service update project info`, completeCase);
+    const condition = { projectName: req.body.previousPname };
     const options = { new: true };
     return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
+}
+
+async function addAnnotatorFromSlack(pro, slackUser) {
+    console.log(`[ PROJECT ] Service addAnnotatorFromSlack`);
+    let annotators = [], completeCase = [], assigneeList = [];
+    annotators = _.cloneDeep(pro.annotator);
+    annotators.push(slackUser)
+
+    //to new the assigned case according to the new annotators list
+    assigneeList = await evenlyDistributeTicket(annotators, pro.totalCase, pro.maxAnnotation);
+
+    for (const user of assigneeList) {
+        const ucase = await pro.userCompleteCase.find(uc => uc.user == user.email);
+        if (ucase) {
+            ucase.assignedCase = user.assignedCase;
+            completeCase.push(ucase);
+        } else {
+            completeCase.push({
+                user: user.email,
+                completeCase: 0,
+                skip: 0,
+                assignedCase: user.assignedCase,
+                assignedDate: Date.now(),
+                updateDate: Date.now(),
+            });
+        }
+    }
+    let update = {
+        $set: {
+            userCompleteCase: completeCase,
+            annotator: annotators,
+        }
+    };
+    console.log(`[ PROJECT ] Service update project info`, completeCase);
+    const condition = { projectName: pro.projectName };
+    const options = { new: true };
+    return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
+}
+
+async function evenlyDistributeTicket(annotators, totalRow, maxAnnotations) {
+    let assigneeList = [];
+    for (const email of annotators) { assigneeList.push({ email, assignedCase: 0 }) };
+
+    if (maxAnnotations >= assigneeList.length) {
+        assigneeList.forEach((value) => {
+            value.assignedCase = totalRow;
+        });
+    } else {
+        let totalNum = totalRow * maxAnnotations;
+        let personNum = assigneeList.length;
+        let a = Math.floor(totalNum / personNum);
+        let b = totalNum % personNum;
+        assigneeList.forEach((value) => {
+            value.assignedCase = a;
+        });
+        for (let i = 0; i <= b - 1; i++) { assigneeList[i].assignedCase = a + 1; }
+    }
+    return assigneeList
 }
 
 async function updateProjectShare(req) {
@@ -240,19 +316,19 @@ async function updateProjectShare(req) {
 }
 
 async function matchUserInputsWithHierarchicalLabels(labels, tickets) {
-    
+
     for (const i in labels) {
         if (labels[i].children) {
-           await matchUserInputsWithHierarchicalLabels(labels[i].children, tickets)
-        }else{
+            await matchUserInputsWithHierarchicalLabels(labels[i].children, tickets)
+        } else {
             for (const ticket of tickets) {
                 for (const input of ticket.userInputs) {
                     const inputLabels = input.problemCategory;
                     const currentLable = _.get(inputLabels, labels[i].path);
-                    if(currentLable.name == labels[i].name && currentLable.enable == 1){
+                    if (currentLable.name == labels[i].name && currentLable.enable == 1) {
                         labels[i].annotated += 1;
                     }
-                    
+
                 }
             }
         }
@@ -261,73 +337,73 @@ async function matchUserInputsWithHierarchicalLabels(labels, tickets) {
 async function initHierarchicalLabelsCase(labels, namePath, path, labelsArray, labelsPathArray) {
     for (const i in labels) {
 
-        if(!labels[i].children) {
-            if (i !=0 && labels[i-1].children) {
+        if (!labels[i].children) {
+            if (i != 0 && labels[i - 1].children) {
                 let namePathArray = namePath.split(".");
                 namePathArray.pop();
                 namePathArray.pop();
                 if (namePathArray.length) {
                     namePath = namePathArray.join(".") + ".";
-                }else{
+                } else {
                     namePath = namePathArray.join(".");
                 }
-                
-        
+
+
                 let pathArray = path.split(".");
                 pathArray.pop();
                 pathArray.pop();
                 if (pathArray.length) {
                     path = pathArray.join(".") + "." + "children";
-                }else{
+                } else {
                     path = pathArray.join(".");
                 }
             }
 
             labels[i].namePath = namePath + labels[i].name;
             labels[i].annotated = 0;
-            labels[i].path = path + "["+ i +"]";
+            labels[i].path = path + "[" + i + "]";
 
             if (labelsArray) {
                 labelsArray.push(namePath + labels[i].name);
             }
             if (labelsPathArray) {
-                labelsPathArray.push(path + "["+ i +"]");
+                labelsPathArray.push(path + "[" + i + "]");
             }
         }
-        if(labels[i].children){
+        if (labels[i].children) {
 
-            if (i != 0 && labels[i-1].children) {
+            if (i != 0 && labels[i - 1].children) {
                 let namePathArray = namePath.split(".");
                 namePathArray.pop();
                 namePathArray.pop();
-                if(namePathArray.length){
+                if (namePathArray.length) {
                     namePath = namePathArray.join(".") + ".";
-                }else{
+                } else {
                     namePath = namePathArray.join(".");
                 }
-                
+
 
                 let pathArray = path.split(".");
                 pathArray.pop();
                 pathArray.pop();
                 if (pathArray.length) {
                     path = pathArray.join(".") + "." + "children";
-                }else{
+                } else {
                     path = pathArray.join(".");
                 }
             }
-            path += "["+ i +"]" + "." + "children";
+            path += "[" + i + "]" + "." + "children";
             namePath += labels[i].name + ".";
             await initHierarchicalLabelsCase(labels[i].children, namePath, path, labelsArray, labelsPathArray);
-            
+
         }
     }
 }
 
 async function reduceHierarchicalUnselectedLabel(tickets) {
-    for await(const ticket of tickets) {
-        for await(const input of ticket.userInputs) {
-            let reducedCategory = [... input.problemCategory];
+    for await (const ticket of tickets) {
+        for await (const input of ticket.userInputs) {
+            let reducedCategory = [...input.problemCategory];
             await prepareSelectedHierarchicalLabels(reducedCategory, false, true);
             let labelsArray = [];
             await initHierarchicalLabelsCase(reducedCategory, "", "", labelsArray);
@@ -337,13 +413,13 @@ async function reduceHierarchicalUnselectedLabel(tickets) {
 }
 
 async function projectLeaderBoard(req) {
-    
+
     await validator.checkAnnotator(req.auth.email);
 
     let result = { userCase: [], labels: [] };
 
     console.log(`[ PROJECT ] Service projectLeaderBoard.queryProjectById`);
-    const mp = await getModelProject({_id: ObjectId(req.query.pid)});
+    const mp = await getModelProject({ _id: ObjectId(req.query.pid) });
     const proInfo = mp.project;
 
     console.log(`[ PROJECT ] Service sort out user complete ticket`);
@@ -382,13 +458,13 @@ async function projectLeaderBoard(req) {
                         if (ui.problemCategory.label == label) {
                             let value = ui.problemCategory.value;
                             currentLabelVaules.push(value);
-                            lb.annotated = _.floor(_.mean(currentLabelVaules),2);
+                            lb.annotated = _.floor(_.mean(currentLabelVaules), 2);
                         }
                     });
                 });
                 result.labels.push(lb);
             });
-        }else{
+        } else {
             let mid = _.floor((proInfo.max - proInfo.min) / 6);
             let start = _.floor(proInfo.min);
             for (let i = 0; i < 6; i++) {
@@ -410,15 +486,15 @@ async function projectLeaderBoard(req) {
             srsUI.forEach(UIS => {
                 UIS.userInputs.forEach(ui => {
                     if (proInfo.projectType == PROJECTTYPE.NER || proInfo.projectType == PROJECTTYPE.LOG) {
-                        ui.problemCategory.forEach(ann =>{
-                            if (ann.label == label){
+                        ui.problemCategory.forEach(ann => {
+                            if (ann.label == label) {
                                 lb.annotated += 1;
                             }
                         })
-                    }else if (proInfo.projectType == PROJECTTYPE.IMGAGE) {
+                    } else if (proInfo.projectType == PROJECTTYPE.IMGAGE) {
                         const pc = ui.problemCategory.value;
-                        const annLabel = pc.rectanglelabels? pc.rectanglelabels[0]: pc.polygonlabels[0];
-                        if (annLabel == label){
+                        const annLabel = pc.rectanglelabels ? pc.rectanglelabels[0] : pc.polygonlabels[0];
+                        if (annLabel == label) {
                             lb.annotated += 1;
                         }
                     } else {
@@ -441,13 +517,13 @@ async function projectLeaderBoard(req) {
 }
 
 async function removeSkippedCase(id, user, review) {
-    
+
     console.log(`[ PROJECT ] Service removeSkippedCase.findUpdateProject`);
 
     if (review) {
         conditions = { _id: ObjectId(id), "reviewInfo.user": user };
         update = { $set: { "reviewInfo.$.skip": 0 } };
-    }else{
+    } else {
         conditions = { _id: ObjectId(id), "userCompleteCase.user": user };
         update = { $set: { "userCompleteCase.$.skip": 0 } };
     }
@@ -457,40 +533,41 @@ async function removeSkippedCase(id, user, review) {
 }
 
 async function getReviewList(req) {
-    
+
     console.log(`[ PROJECT ] Service getReviewList.checkAnnotator`);
     const user = req.auth.email;
     await validator.checkAnnotator(user);
-    
+
     const conditions = { creator: { $regex: user }, projectType: PROJECTTYPE.LOG };
     const options = { sort: { updatedDate: -1 } };
     return mongoDb.findByConditions(ProjectModel, conditions, null, options);
 }
 
 async function getLogProjectFileList(req) {
-    
+
     console.log(`[ PROJECT ] Service getLogProjectFileList`);
-    const condition = {_id: ObjectId(req.query.pid)}
+    const condition = { _id: ObjectId(req.query.pid) }
     const pro = await validator.checkProjectByconditions(condition, true);
     const schema = [
-        { $match: { projectName: pro[0].projectName, userInputsLength:1 } },
-        { $project: {_id: 0, fileName: "$fileInfo.fileName"}},
+        { $match: { projectName: pro[0].projectName, userInputsLength: 1 } },
+        { $project: { _id: 0, fileName: "$fileInfo.fileName" } },
     ]
     return mongoDb.aggregateBySchema(LogModel, schema);
 }
 
 async function fileterLogTicketsByFileName(req) {
-    
-    console.log(`[ PROJECT ] Service fileterLogTicketsByFileName`);    
+
+    console.log(`[ PROJECT ] Service fileterLogTicketsByFileName`);
     await validator.validateRequired(req.query.fname);
 
-    const condition = {_id: ObjectId(req.query.pid)}
+    const condition = { _id: ObjectId(req.query.pid) }
     const pro = await validator.checkProjectByconditions(condition, true);
     const schema = [
         { $match: { projectName: pro[0].projectName, "fileInfo.fileName": { $regex: req.query.fname } } },
     ]
     return mongoDb.aggregateBySchema(LogModel, schema);
 }
+
 
 
 /**
@@ -511,19 +588,19 @@ async function fileterLogTicketsByFileName(req) {
  * 
  * 
  */
-async function updateAssinedCase(QueryCondition, totalCase, append){
-    
-    console.log(`[ PROJECT ] Service updateAssinedCase START`, QueryCondition, totalCase); 
-    
+async function updateAssinedCase(QueryCondition, totalCase, append) {
+
+    console.log(`[ PROJECT ] Service updateAssinedCase START`, QueryCondition, totalCase);
+
     const pro = await mongoDb.findOneByConditions(ProjectModel, QueryCondition)
     if (!pro) return;
-    
+
     const annoatorsNumber = pro.annotator.length;
     const maxAnnotation = pro.maxAnnotation;
-    
+
     const avgCase = Math.floor(totalCase * maxAnnotation / annoatorsNumber);
     const perCase = totalCase * maxAnnotation % annoatorsNumber;
-    
+
     //pro.annotator save annotor list
     //pro.userCompleteCase.user has the users that he has annotation info but removed from annotor
     if (append) {//append tickets
@@ -533,61 +610,61 @@ async function updateAssinedCase(QueryCondition, totalCase, append){
                     uc.assignedCase += totalCase;
                 }
             });
-        }else{
+        } else {
             await pro.userCompleteCase.forEach(uc => {
                 if (pro.annotator.indexOf(uc.user) != -1) {
                     uc.assignedCase += avgCase;
                 }
             });
             let index = 0;
-            await pro.userCompleteCase.sort((a,b) => a.assignedCase - b.assignedCase).forEach(uc => {
-                if (index < perCase && pro.annotator.indexOf(uc.user) != -1){
+            await pro.userCompleteCase.sort((a, b) => a.assignedCase - b.assignedCase).forEach(uc => {
+                if (index < perCase && pro.annotator.indexOf(uc.user) != -1) {
                     uc.assignedCase += 1;
                     index++;
                 }
             });
         }
 
-    }else{//delete tickets
+    } else {//delete tickets
         if (maxAnnotation >= annoatorsNumber) {
             await pro.userCompleteCase.forEach(uc => {
                 if (pro.annotator.indexOf(uc.user) != -1) {
                     uc.assignedCase -= totalCase;
                 }
             });
-        }else{
+        } else {
             await pro.userCompleteCase.forEach(async uc => {
                 if (pro.annotator.indexOf(uc.user) != -1) {
                     if (avgCase > uc.assignedCase) {
                         let remained = avgCase - uc.assignedCase;
                         uc.assignedCase = 0;
                         //seperate remained case to other annotators
-                        while(true){
+                        while (true) {
                             if (remained == 0) {
                                 break;
                             }
-                            await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(u => {
-                                if (remained > 0 && pro.annotator.indexOf(u.user) != -1 && u.assignedCase > 0){
+                            await pro.userCompleteCase.sort((a, b) => -(a.assignedCase - b.assignedCase)).forEach(u => {
+                                if (remained > 0 && pro.annotator.indexOf(u.user) != -1 && u.assignedCase > 0) {
                                     u.assignedCase -= 1;
                                     remained--;
                                 }
                             });
                         }
-                    }else{
+                    } else {
                         uc.assignedCase -= avgCase;
                     }
                 }
             });
             let index = 0;
-            while(true){
+            while (true) {
                 if (perCase == 0 || index >= perCase) {
                     break;
                 }
-                await pro.userCompleteCase.sort((a,b) => -(a.assignedCase - b.assignedCase)).forEach(uc => {
-                    if (index < perCase && pro.annotator.indexOf(uc.user) != -1 && uc.assignedCase > 0){
+                await pro.userCompleteCase.sort((a, b) => -(a.assignedCase - b.assignedCase)).forEach(uc => {
+                    if (index < perCase && pro.annotator.indexOf(uc.user) != -1 && uc.assignedCase > 0) {
                         uc.assignedCase -= 1;
                         index++;
-                    } 
+                    }
                 });
             }
         }
@@ -604,8 +681,8 @@ async function updateProjectLabels(req) {
     const addLabels = req.body.addLabels;
     const editLabels = req.body.editLabels;
     const deleteLabels = req.body.deleteLabels;
-    
-    for await(const label of deleteLabels) {
+
+    for await (const label of deleteLabels) {
         await deleteProjectLables(label, _id);
     }
 
@@ -619,19 +696,19 @@ async function projectIntegrationEdit(req) {
     const operation = req.body.operation;
     const source = req.body.source;
 
-    const condition = {_id: ObjectId(_id)}
+    const condition = { _id: ObjectId(_id) }
     await validator.checkProjectByconditions(condition, true);
-    
+
     let update = {};
     if (operation == OPERATION.ADD) {
-        update = {$push: {"integration.externalId": externalId}};
-    }else if(operation == OPERATION.DELETE){
-        update = {$pull: {"integration.externalId": externalId}};
+        update = { $push: { "integration.externalId": externalId } };
+    } else if (operation == OPERATION.DELETE) {
+        update = { $pull: { "integration.externalId": externalId } };
     }
-    if(source){
-        update["$set"] = {"integration.source": source};
+    if (source) {
+        update["$set"] = { "integration.source": source };
     }
-    const options = {new : true};
+    const options = { new: true };
     return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
 }
 
@@ -651,15 +728,15 @@ async function projectIntegrationEdit(req) {
  * 
  */
 async function editProjectLabels(pid, editLabels, addLabels, min, max) {
-    const condition = {_id: ObjectId(pid)};
+    const condition = { _id: ObjectId(pid) };
     const mp = await getModelProject(condition);
     const model = mp.model;
     const project = mp.project;
 
     let updateProject = { $set: { categoryList: project.categoryList } };
 
-    if(project.labelType == LABELTYPE.NUMERIC){
-        if(project.isMultipleLabel){
+    if (project.labelType == LABELTYPE.NUMERIC) {
+        if (project.isMultipleLabel) {
             let originalLabels = JSON.parse(project.categoryList);
             let editLBList = [];
             //validate edit label data
@@ -669,7 +746,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
                     const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == orgLB);
 
                     if (!originLBDB) {
-                        throw {CODE: 4006, MSG: "INPUT originLB ERROR"};
+                        throw { CODE: 4006, MSG: "INPUT originLB ERROR" };
                     }
                     const dbMin = originLBDB[orgLB][0];
                     const dbMax = originLBDB[orgLB][1];
@@ -680,21 +757,21 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
                     const editLB = Object.keys(elabel.editLB)[0];
                     const editMin = elabel.editLB[editLB][0];
                     const editMax = elabel.editLB[editLB][1];
-                    
+
                     if (editLB == orgLB && editMin == dbMin && editMax == dbMax) {
                         continue;
                     }
                     //find if edit label already exist
                     const editLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == editLB);
                     if (editLBDB && editLB != orgLB) {
-                        throw {CODE: 4006, MSG: "INPUT editLB already exist"};
+                        throw { CODE: 4006, MSG: "INPUT editLB already exist" };
                     }
 
                     if (dbMin != orgMin || dbMax != orgMax) {
-                        throw {CODE: 4006, MSG: "INPUT originLB min/max ERROR"};
+                        throw { CODE: 4006, MSG: "INPUT originLB min/max ERROR" };
                     }
                     if (editMin >= editMax || editMin > dbMin || editMax < dbMax) {
-                        throw {CODE: 4006, MSG: "INPUT editLB min/max ERROR"};
+                        throw { CODE: 4006, MSG: "INPUT editLB min/max ERROR" };
                     }
                     //add to edit list
                     editLBList.push([orgLB, editLB]);
@@ -704,66 +781,66 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
             }
             //validate add label data
             for (const aLabel of addLabels) {
-               const addLB = Object.keys(aLabel)[0];
-               const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == addLB);
-               if (originLBDB) {
-                   continue;
-               }
-               if (aLabel[addLB][0] > aLabel[addLB][1]){
-                throw {CODE: 4006, MSG: "INPUT addLabels min/max ERROR"};
-               }
-               originalLabels.push(aLabel);
+                const addLB = Object.keys(aLabel)[0];
+                const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == addLB);
+                if (originLBDB) {
+                    continue;
+                }
+                if (aLabel[addLB][0] > aLabel[addLB][1]) {
+                    throw { CODE: 4006, MSG: "INPUT addLabels min/max ERROR" };
+                }
+                originalLabels.push(aLabel);
             }
             //update label
             updateProject.$set['categoryList'] = JSON.stringify(originalLabels);
             //edit existing labels
             for (const label of editLBList) {
-                const query = { 
-                    projectName: project.projectName,  
+                const query = {
+                    projectName: project.projectName,
                     [`userInputs.problemCategory.label`]: label[0]
                 };
-                const updateTickets = { $set: { "userInputs.$[elem].problemCategory.label" : label[1] } };
-                const options = {arrayFilters: [ { "elem.problemCategory.label": label[0] } ]};
+                const updateTickets = { $set: { "userInputs.$[elem].problemCategory.label": label[1] } };
+                const options = { arrayFilters: [{ "elem.problemCategory.label": label[0] }] };
                 await mongoDb.updateManyByConditions(model, query, updateTickets, options);
-                
+
             }
-        }else{
-            if((min != null || min != undefined || min != "") && (max != null || max != undefined || max != "")){
+        } else {
+            if ((min != null || min != undefined || min != "") && (max != null || max != undefined || max != "")) {
                 if (min >= max || typeof min != "number" || typeof max != "number" || min > project.min || max < project.max) {
-                    throw {CODE: 4006, MSG: "INPUT MIN/MAX ERROR"};
+                    throw { CODE: 4006, MSG: "INPUT MIN/MAX ERROR" };
                 }
                 updateProject.$set['min'] = min;
                 updateProject.$set['max'] = max;
             }
         }
-    }else{
+    } else {
         let originalLabels = project.categoryList.split(",");
         //edit labels
         let editLb = {};
-        if(editLabels){
+        if (editLabels) {
             for (const key in editLabels) {
                 const index = originalLabels.indexOf(key);
                 if (index == -1) {
-                    throw {CODE: 4006, MSG: "INPUT EDITlABELS ERROR"};
+                    throw { CODE: 4006, MSG: "INPUT EDITlABELS ERROR" };
                 }
-                
-                if(key != editLabels[key]){
-                    editLb[key]=editLabels[key];
+
+                if (key != editLabels[key]) {
+                    editLb[key] = editLabels[key];
                     originalLabels[index] = editLabels[key];
                 }
             }
         }
         //add labels
         let addLb = [];
-        if(addLabels){
+        if (addLabels) {
             for (const label of addLabels) {
                 if (label && originalLabels.indexOf(label) == -1) {
                     originalLabels.push(label);
                     addLb.push(label);
                 }
-            } 
+            }
         }
-    
+
         updateProject.$set["categoryList"] = originalLabels.toString();
         //update active-learning lable id
         const labelID = project.al.labelID;
@@ -771,9 +848,9 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
             let newLabelID = {};
             //for edit
             for (const key in labelID) {
-                if(editLb[key]){
+                if (editLb[key]) {
                     newLabelID[editLb[key]] = labelID[key];
-                }else{
+                } else {
                     newLabelID[key] = labelID[key];
                 }
             }
@@ -783,42 +860,42 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
             }
             updateProject.$set['al.labelID'] = newLabelID;
         }
-    
+
         //update labeled tickets
-        for(const key in editLb){
-            let query = { projectName: project.projectName}
+        for (const key in editLb) {
+            let query = { projectName: project.projectName }
             let update = {};
             let options = {};
             if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.LOG) {
                 query["userInputs.problemCategory.label"] = key;
-                update = { $set: { "userInputs.0.problemCategory.$[elem].label" : editLb[key] } };
-                options = {arrayFilters: [ { "elem.label": key } ]}; 
+                update = { $set: { "userInputs.0.problemCategory.$[elem].label": editLb[key] } };
+                options = { arrayFilters: [{ "elem.label": key }] };
                 await mongoDb.updateManyByConditions(model, query, update, options);
-            }else if (project.projectType == PROJECTTYPE.IMGAGE) {
+            } else if (project.projectType == PROJECTTYPE.IMGAGE) {
                 query["userInputs.problemCategory.value.polygonlabels.0"] = key;
-                update = { $set: { "userInputs.$[elem].problemCategory.value.polygonlabels.0" : editLb[key] } };
-                options = {arrayFilters: [ { "elem.problemCategory.value.polygonlabels.0": key } ]};
+                update = { $set: { "userInputs.$[elem].problemCategory.value.polygonlabels.0": editLb[key] } };
+                options = { arrayFilters: [{ "elem.problemCategory.value.polygonlabels.0": key }] };
                 await mongoDb.updateManyByConditions(model, query, update, options);
-                
+
                 query["userInputs.problemCategory.value.rectanglelabels.0"] = key;
-                update = { $set: { "userInputs.$[elem].problemCategory.value.rectanglelabels.0" : editLb[key] } };
-                options = {arrayFilters: [ { "elem.problemCategory.value.rectanglelabels.0": key } ]};
+                update = { $set: { "userInputs.$[elem].problemCategory.value.rectanglelabels.0": editLb[key] } };
+                options = { arrayFilters: [{ "elem.problemCategory.value.rectanglelabels.0": key }] };
                 await mongoDb.updateManyByConditions(model, query, update, options);
             } else if (project.projectType == PROJECTTYPE.TEXT || project.projectType == PROJECTTYPE.TABULAR) {
                 query["userInputs.problemCategory"] = key;
-                update = { $set: { "userInputs.$[elem].problemCategory" : editLb[key] } };
-                options = {arrayFilters: [ { "elem.problemCategory": key } ]};
+                update = { $set: { "userInputs.$[elem].problemCategory": editLb[key] } };
+                options = { arrayFilters: [{ "elem.problemCategory": key }] };
                 await mongoDb.updateManyByConditions(model, query, update, options);
             }
         }
     }
-    
-    const optionsProject = {new : true};
+
+    const optionsProject = { new: true };
     return mongoDb.findOneAndUpdate(ProjectModel, condition, updateProject, optionsProject);
 }
 
-async function deleteProjectLables(label, _id, projectName, operation){
-    let queryProject = _id ? {_id: _id}: {projectName: projectName};
+async function deleteProjectLables(label, _id, projectName, operation) {
+    let queryProject = _id ? { _id: _id } : { projectName: projectName };
     const mp = await getModelProject(queryProject);
 
 
@@ -826,42 +903,42 @@ async function deleteProjectLables(label, _id, projectName, operation){
     const multiTextNumberica = mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC;
     if (multiTextNumberica) {
         const categoryList = JSON.parse(mp.project.categoryList);
-        labelArray = categoryList.map(a=> Object.keys(a)[0]);
+        labelArray = categoryList.map(a => Object.keys(a)[0]);
     }
     if (!labelArray.includes(label)) {
-        throw {CODE: 4004, MSG: "LABEL NOT EXIST"};
+        throw { CODE: 4004, MSG: "LABEL NOT EXIST" };
     }
-    
-    let conditions = {projectName: mp.project.projectName}
+
+    let conditions = { projectName: mp.project.projectName }
     if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.LOG) {
         conditions["userInputs.problemCategory.label"] = label;
-    }else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
+    } else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
         conditions = {
             projectName: mp.project.projectName,
-            $or:[
-                {"userInputs.problemCategory.value.polygonlabels.0": label},
-                {"userInputs.problemCategory.value.rectanglelabels.0": label}
-            ]  
+            $or: [
+                { "userInputs.problemCategory.value.polygonlabels.0": label },
+                { "userInputs.problemCategory.value.rectanglelabels.0": label }
+            ]
         };
 
-    }else if(mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC){
+    } else if (mp.project.isMultipleLabel && mp.project.labelType == LABELTYPE.NUMERIC) {
         conditions["userInputs.problemCategory.label"] = label;
-    }else{
+    } else {
         conditions["userInputs.problemCategory"] = label;
     }
     const tickets = await mongoDb.findByConditions(mp.model, conditions);
 
-    if(operation == OPERATION.QUERY){
+    if (operation == OPERATION.QUERY) {
         if (tickets[0]) {
-            return {CODE: 400, MSG: "LABEL HAS BEEN ANNOTATED", DATA: [label]};
+            return { CODE: 400, MSG: "LABEL HAS BEEN ANNOTATED", DATA: [label] };
         }
-        return {CODE: 200, MSG: "LABEL CAN BE DELETE", DATA: [label]};
-    }else{
+        return { CODE: 200, MSG: "LABEL CAN BE DELETE", DATA: [label] };
+    } else {
         if (tickets[0]) {
-            throw {CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED"};
+            throw { CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED" };
         }
-        
-        const query = {projectName: mp.project.projectName}
+
+        const query = { projectName: mp.project.projectName }
         const options = { new: true };
         _.pull(labelArray, label);
         labelArray = labelArray.toString();
@@ -870,13 +947,33 @@ async function deleteProjectLables(label, _id, projectName, operation){
             labelArray = categoryList.filter(a => Object.keys(a)[0] != label);
             labelArray = JSON.stringify(labelArray);
         }
-        
-        const update = {$set: {"categoryList": labelArray}};
+
+        const update = { $set: { "categoryList": labelArray } };
         await mongoDb.findOneAndUpdate(ProjectModel, query, update, options);
-        
-        return {CODE: 200, MSG: "OK", LABELS: labelArray};
+
+        return { CODE: 200, MSG: "OK", LABELS: labelArray };
     }
 }
+
+
+async function getProjectsTextTabular(email) {
+    console.log(`[ PROJECT ] Service getProjects by type text and tabular`);
+    let project = null;
+    const options = { sort: { updatedDate: -1 } };
+    let condition = { labelType: "textLabel", isMultipleLabel: false };
+    condition.$or = [
+        { projectType: PROJECTTYPE.TEXT },
+        { projectType: PROJECTTYPE.TABULAR }
+    ];
+    condition.$or = [
+        { annotator: { $regex: email } },
+        { assignSlackChannels: { $exists: true }, $where: 'this.assignSlackChannels.length>0' }
+    ];
+    return mongoDb.findByConditions(ProjectModel, condition, project, options);
+}
+
+
+
 
 module.exports = {
     getProjects,
@@ -897,6 +994,8 @@ module.exports = {
     projectIntegrationEdit,
     editProjectLabels,
     deleteProjectLables,
+    getProjectsTextTabular,
+    addAnnotatorFromSlack,
     prepareSelectedHierarchicalLabels,
     matchUserInputsWithHierarchicalLabels,
     initHierarchicalLabelsCase,
