@@ -17,7 +17,7 @@ In active-learning-service we use _en_core_web_md_ as the default spacy module i
     ```
   End the containers:
   ```bash
-  docker compose -f docker-compose.yml down
+  docker compose -f docker-compose-host-db.yml down
   ```
 
 - Else you need to download the [docker-compose.yml](docker-compose.yml) file and use it to run the DAML application.

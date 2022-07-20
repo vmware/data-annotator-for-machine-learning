@@ -32,6 +32,7 @@ import {
   toGlobalOffset,
   findClosestTextNode,
 } from 'app/shared/utils/html';
+import { filterTreeLabel } from 'app/shared/utils/treeView';
 
 @Component({
   selector: 'app-annotate',
@@ -195,6 +196,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   moreReviewInfo: any = [];
   submitMessage: string;
   tipMessage: string;
+  initReview: string;
+  treeLabels: any = [];
+  originTreeLabels: any = [];
+  selectedTreeLabels: any = [];
+  showTreeView: boolean = false;
+  treeData: any;
+  expandValue: boolean = false;
+  expandName: string = 'Expand';
 
   sliderEvent() {
     if (this.numericOptions.step === 1) {
@@ -257,6 +266,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.projectId = data.id;
       this.projectType = data.projectType;
       this.startFrom = data.from;
+      this.initReview = data.reviewee;
       this.toGetProjectInfo(this.projectId, data.reviewee);
     });
     this.getProgress();
@@ -509,7 +519,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         (res) => {
           this.loading = false;
           if (res && res.MSG) {
-            this.error = 'All cases have been completely reviewed.';
+            const reviewee = this.questionForm.get('questionGroup.reviewee').value;
+            if (reviewee) {
+              this.error = `${
+                this.questionForm.get('questionGroup.reviewee').value
+              } cases have been completely reviewed.`;
+            } else {
+              this.error = 'All cases have been completely reviewed.';
+            }
             return;
           } else {
             this.disabledSkip = res[0].reviewInfo.review;
@@ -547,7 +564,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   pass() {
-    if (this.moreReviewInfo.length > 1) {
+    if (this.moreReviewInfo.length !== 0) {
       if (!this.checkMoreReviewChanged()) {
         return false;
       }
@@ -682,14 +699,17 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         param['problemCategory'] = this.spansList;
         param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
       } else if (this.isMultipleNumericLabel || this.isNumeric) {
-        if (this.moreReviewInfo.length > 1 && this.categoryFunc().length === 0) {
+        if (this.moreReviewInfo.length !== 0 && this.categoryFunc().length === 0) {
           param['modify'] = false;
         } else {
           param['problemCategory'] = this.categoryFunc();
         }
-      } else if (this.projectType === 'text' || this.projectType === 'tabular') {
+      } else if (
+        (this.projectType === 'text' || this.projectType === 'tabular') &&
+        this.labelType !== 'HTL'
+      ) {
         if (this.isShowDropDown || this.isMultipleLabel) {
-          if (this.moreReviewInfo.length > 1 && this.categoryFunc().length === 0) {
+          if (this.moreReviewInfo.length !== 0 && this.categoryFunc().length === 0) {
             param['modify'] = false;
           } else {
             param['problemCategory'] = this.categoryFunc();
@@ -697,6 +717,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           param['problemCategory'] = [this.labelChoose];
         }
+      } else if (
+        (this.projectType === 'text' || this.projectType === 'tabular') &&
+        this.labelType === 'HTL'
+      ) {
+        param['problemCategory'] = this.categoryFunc();
       } else if (this.projectType === 'image') {
         param['problemCategory'] = this.categoryFunc();
       }
@@ -758,6 +783,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
               });
               this.annotationHistory[i].category = labelScore;
+              this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+              break;
+            }
+          } else if (this.labelType === 'HTL') {
+            if (this.annotationHistory[i].srId === this.sr._id) {
+              this.annotationHistory.splice(i, 1);
               this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
               break;
             }
@@ -951,6 +982,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       // console.log('getOne.annotationHistory:::', this.annotationHistory, this.annotationPrevious);
     }
     this.sr = newSr;
+    if (this.labelType === 'HTL') {
+      this.treeLabels = this.originTreeLabels
+        ? JSON.parse(JSON.stringify(this.originTreeLabels))
+        : [];
+    }
     this.currentBoundingData = [];
     if (
       this.projectType == 'text' ||
@@ -1036,6 +1072,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isNumeric ||
         this.isMultipleNumericLabel ||
         (this.isMultipleLabel &&
+          this.labelType !== 'HTL' &&
           this.projectType !== 'ner' &&
           this.projectType !== 'image' &&
           this.projectType !== 'log')
@@ -1048,8 +1085,34 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isSkipOrBack('skip');
       } else if (this.projectType == 'log') {
         this.isSkipOrBack('skip');
+      } else if (this.labelType == 'HTL') {
+        this.checkHTL('skip');
       } else {
         this.skipAndFetchNewQuestion();
+      }
+    }
+  }
+
+  checkHTL(from?: string, id?: string) {
+    let inputTreeArr = [];
+    if (this.moreReviewInfo.length !== 0 && this.selectedTreeLabels.length === 0) {
+      this.checkTextProject(from, id);
+    } else if (this.moreReviewInfo.length !== 0 && this.selectedTreeLabels.length > 0) {
+      this.actionError = this.tipMessage;
+      return false;
+    } else {
+      if (this.sr.userInputs && this.sr.userInputs.length > 0) {
+        inputTreeArr = this.sr.userInputs[0].problemCategory;
+      }
+      if (inputTreeArr.length === 0 && this.selectedTreeLabels.length === 0) {
+        this.checkTextProject(from, id);
+      } else {
+        const difference = JSON.stringify(this.treeLabels) === JSON.stringify(inputTreeArr);
+        if (!difference) {
+          this.actionError = this.tipMessage;
+          return false;
+        }
+        this.checkTextProject(from, id);
       }
     }
   }
@@ -1057,8 +1120,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   checkMutilLabel(from?: string, id?: string) {
     let multiLabels = [];
     this.sr.userInputs.forEach((item) => {
-      if (item.user === this.user.email) {
+      if (this.startFrom === 'review') {
         multiLabels.push(item.problemCategory);
+      } else {
+        if (item.user === this.user.email) {
+          multiLabels.push(item.problemCategory);
+        }
       }
     });
     let difference = [];
@@ -1077,8 +1144,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   checkNumeric(isCategory?: any, from?: string, id?: string) {
     let multiLabels = [];
     this.sr.userInputs.forEach((item) => {
-      if (item.user === this.user.email) {
+      if (this.startFrom === 'review') {
         multiLabels.push(item.problemCategory);
+      } else {
+        if (item.user === this.user.email) {
+          multiLabels.push(item.problemCategory);
+        }
       }
     });
     let difference = [];
@@ -1095,13 +1166,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   checkMoreReviewChanged() {
-    if (
-      this.startFrom === 'review' &&
-      this.moreReviewInfo.length > 1 &&
-      this.categoryFunc().length > 0
-    ) {
-      this.actionError = this.tipMessage;
-      return false;
+    if (this.startFrom === 'review' && this.moreReviewInfo.length !== 0) {
+      if (this.labelType === 'HTL' && this.selectedTreeLabels.length > 0) {
+        this.actionError = this.tipMessage;
+        return false;
+      }
+      if (this.labelType !== 'HTL' && this.categoryFunc().length > 0) {
+        this.actionError = this.tipMessage;
+        return false;
+      }
     }
     return true;
   }
@@ -1234,6 +1307,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.sr && this.sr.flag && this.sr.flag.silence) {
           this.silenceStatus = true;
         }
+        if (this.labelType === 'HTL' && this.startFrom !== 'review') {
+          this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
+        }
         this.loading = false;
         this.isSkippingGameDialog = false;
         if (this.isNumeric) {
@@ -1336,6 +1412,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       (response) => {
         response.taskInstructions = response.taskInstructions.replace(/(\r\n|\n|\r)/gm, '<br/>');
         this.projectInfo = response;
+        if (this.startFrom === 'review') {
+          this.projectInfo.annotationQuestion = "What's the final label?";
+        }
+        if (response.maxAnnotation > 1) {
+          reviewee = '';
+        } else {
+          reviewee = this.initReview;
+        }
         this.max = response.maxAnnotation;
         this.isMultipleLabel = response.isMultipleLabel;
         this.projectType = response.projectType;
@@ -1407,6 +1491,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               'Allowed values are between ' + minVal + ' and ' + maxVal + ' .',
             );
           });
+        } else if (this.labelType === 'HTL') {
+          this.originTreeLabels = JSON.parse(response.categoryList);
+          this.treeLabels = this.originTreeLabels
+            ? JSON.parse(JSON.stringify(this.originTreeLabels))
+            : [];
         } else {
           this.categories = response.categoryList.split(',');
           this.popLabels = response.popUpLabels;
@@ -1566,10 +1655,16 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   checkMutilNumbericDiff(isCategory: any, from?: string, id?: string) {
     let inputMultipleNumericLabels = [];
     this.sr.userInputs.forEach((item) => {
-      if (item.user === this.user.email) {
+      if (this.startFrom === 'review') {
         inputMultipleNumericLabels.push({
           [item.problemCategory.label]: item.problemCategory.value,
         });
+      } else {
+        if (item.user === this.user.email) {
+          inputMultipleNumericLabels.push({
+            [item.problemCategory.label]: item.problemCategory.value,
+          });
+        }
       }
     });
     if (isCategory.length !== inputMultipleNumericLabels.length) {
@@ -1648,6 +1743,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isNumeric ||
         this.isMultipleNumericLabel ||
         (this.isMultipleLabel &&
+          this.labelType !== 'HTL' &&
           this.projectType !== 'ner' &&
           this.projectType !== 'image' &&
           this.projectType !== 'log')
@@ -1680,8 +1776,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     const originalVals = [];
     if (originalValues && originalValues.length) {
       originalValues.forEach((item) => {
-        if (item.user === this.user.email) {
+        if (this.startFrom === 'review') {
           originalVals.push({ [item.problemCategory.label]: item.problemCategory.value });
+        } else {
+          if (item.user === this.user.email) {
+            originalVals.push({ [item.problemCategory.label]: item.problemCategory.value });
+          }
         }
       });
     }
@@ -1704,15 +1804,27 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       const a = [];
       if (this.projectType === 'image') {
         this.sr.userInputs.forEach((e) => {
-          if (e.user == this.user.email) {
+          if (this.startFrom === 'review') {
             a.push(e.problemCategory);
+          } else {
+            if (e.user == this.user.email) {
+              a.push(e.problemCategory);
+            }
           }
         });
         flag2 = isCategory.length == a.length;
       } else if (this.projectType == 'text' || this.projectType == 'tabular') {
-        if (this.isMultipleNumericLabel) {
+        if (this.labelType === 'HTL') {
+          this.checkHTL(type);
+          return false;
+        } else if (this.isMultipleNumericLabel) {
           flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
-        } else if (this.isMultipleLabel && !this.isNumeric && !this.isMultipleNumericLabel) {
+        } else if (
+          this.isMultipleLabel &&
+          !this.isNumeric &&
+          !this.isMultipleNumericLabel &&
+          this.labelType !== 'HTL'
+        ) {
           flag2 = this.checkMutilLabel(type);
           return false;
         } else if (isCategory.length > 1) {
@@ -1825,6 +1937,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.isNumeric ||
           this.isMultipleNumericLabel ||
           (this.isMultipleLabel &&
+            this.labelType !== 'HTL' &&
             this.projectType !== 'ner' &&
             this.projectType !== 'image' &&
             this.projectType !== 'log')
@@ -1921,6 +2034,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           if (!flag) {
             this.isSkipOrBack('previous');
           }
+        } else if (this.labelType === 'HTL') {
+          this.checkHTL('previous', this.annotationPrevious[0].srId);
         } else {
           const param = {
             id: this.annotationPrevious[0].srId,
@@ -1969,7 +2084,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.sr = response;
         if (this.sr.MSG) {
           if (this.startFrom === 'review') {
-            this.error = 'All cases have been completely reviewed.';
+            const reviewee = this.questionForm.get('questionGroup.reviewee').value;
+            if (reviewee) {
+              this.error = `${
+                this.questionForm.get('questionGroup.reviewee').value
+              } cases have been completely reviewed.`;
+            } else {
+              this.error = 'All cases have been completely reviewed.';
+            }
           } else {
             this.error = 'All cases have been completely annotated.';
           }
@@ -2183,11 +2305,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.projectType !== 'log') ||
       this.isNumeric
     ) {
-      if (this.moreReviewInfo.length > 1 && this.isNumeric && this.labelChoose !== this.minLabel) {
+      if (
+        this.moreReviewInfo.length !== 0 &&
+        this.isNumeric &&
+        this.labelChoose !== this.minLabel
+      ) {
         category.push(Number(this.labelChoose));
       }
       if (
-        this.moreReviewInfo.length < 2 &&
+        this.moreReviewInfo.length === 0 &&
         this.isNumeric &&
         this.labelChoose !== '' &&
         this.labelChoose !== null
@@ -2210,6 +2336,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (
       !this.isNumeric &&
       this.isMultipleLabel &&
+      this.labelType !== 'HTL' &&
       this.projectType !== 'ner' &&
       this.projectType !== 'image' &&
       this.projectType !== 'log'
@@ -2229,17 +2356,24 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (this.projectType == 'image') {
       category = this.currentBoundingData;
       return category;
+    } else if (this.labelType === 'HTL') {
+      category = this.treeLabels;
+      return category;
     }
   }
 
   getProblemCategory() {
-    if (this.moreReviewInfo.length > 1) {
+    if (this.moreReviewInfo.length !== 0) {
       return;
     }
     if (this.sr.userInputs.length > 0) {
       for (let i = 0; i < this.sr.userInputs.length; i++) {
-        if (this.sr.userInputs[i].user == this.user.email) {
+        if (this.startFrom === 'review') {
           return this.sr.userInputs[i].problemCategory;
+        } else {
+          if (this.sr.userInputs[i].user == this.user.email) {
+            return this.sr.userInputs[i].problemCategory;
+          }
         }
       }
     } else if (this.sr.userInputs.length == 0 && this.isNumeric) {
@@ -2250,10 +2384,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setReviewInfo() {
-    if (this.sr.userInputs.length > 1) {
+    if (
+      this.sr.userInputs.length &&
+      (this.projectType === 'text' || this.projectType === 'tabular')
+    ) {
       this.moreReviewInfo = [];
       this.sr.userInputs.forEach((item, index) => {
         let annotationInfo = '';
+        let reducedCategory = [];
         if (
           (this.projectType === 'text' || this.projectType === 'tabular') &&
           this.isMultipleNumericLabel
@@ -2261,23 +2399,37 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           annotationInfo = `${item.problemCategory.label}[${item.problemCategory.value}]`;
         } else {
           annotationInfo = item.problemCategory;
+          if (this.labelType === 'HTL') {
+            reducedCategory = item['reducedCategory'];
+          }
         }
         if (!index) {
-          this.moreReviewInfo.push({ annotator: item.user, annotationInfo });
+          this.moreReviewInfo.push({
+            annotator: item.user,
+            annotationInfo,
+            time: item.timestamp,
+            reducedCategory,
+          });
         } else {
           let existInfo = this.moreReviewInfo.find((info) => info.annotator === item.user);
           if (existInfo) {
             existInfo.annotationInfo += `,${annotationInfo}`;
           } else {
-            this.moreReviewInfo.push({ annotator: item.user, annotationInfo });
+            this.moreReviewInfo.push({
+              annotator: item.user,
+              annotationInfo,
+              time: item.timestamp,
+              reducedCategory,
+            });
           }
         }
       });
-      if (this.moreReviewInfo.length > 1) {
+      if (this.moreReviewInfo.length !== 0) {
         this.labelChoose = null;
         this.el.nativeElement.querySelectorAll('.cleanColor').forEach((element) => {
           this.renderer2.setStyle(element, 'background-color', 'unset');
         });
+        this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
       }
     } else {
       this.moreReviewInfo = [];
@@ -2295,8 +2447,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       !this.isShowDropDown &&
       !this.isMultipleLabel &&
       this.projectType != 'ner' &&
-      this.projectType !== 'image' &&
-      this.moreReviewInfo.length < 2
+      this.projectType !== 'image'
     ) {
       // to storage the ticket label
       this.el.nativeElement.querySelectorAll('.cleanColor').forEach((element) => {
@@ -2353,7 +2504,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }, 10);
     } else if (this.isNumeric) {
-      if (this.moreReviewInfo.length > 1) {
+      if (this.moreReviewInfo.length !== 0) {
         this.labelChoose = this.minLabel;
         this.numericValue = this.minLabel;
       } else {
@@ -2366,6 +2517,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (
       !this.isNumeric &&
       this.isMultipleLabel &&
+      this.labelType !== 'HTL' &&
       this.projectType != 'ner' &&
       this.projectType !== 'image' &&
       this.projectType !== 'log'
@@ -2380,19 +2532,23 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         let originalLabel = [];
         if (this.sr.userInputs.length > 0) {
           for (let j = 0; j < this.sr.userInputs.length; j++) {
-            if (this.sr.userInputs[j].user === this.user.email) {
+            if (this.startFrom === 'review') {
               originalLabel.push(this.sr.userInputs[j].problemCategory);
+            } else {
+              if (this.sr.userInputs[j].user === this.user.email) {
+                originalLabel.push(this.sr.userInputs[j].problemCategory);
+              }
             }
           }
         } else if (this.sr.userInputs.length == 0) {
           originalLabel = [];
         }
-        if (this.moreReviewInfo.length < 2) {
+        if (this.moreReviewInfo.length === 0) {
           this.multipleLabelList = originalLabel;
         }
       }
       this.clearScores(true);
-      if (this.moreReviewInfo.length < 2) {
+      if (this.moreReviewInfo.length === 0) {
         setTimeout(() => {
           this.multipleLabelList.forEach((e) => {
             let multiLabelClass = '';
@@ -2475,6 +2631,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             );
         }
       }, 10);
+    } else if (
+      this.labelType === 'HTL' &&
+      this.sr.userInputs &&
+      this.sr.userInputs.length &&
+      this.moreReviewInfo.length === 0
+    ) {
+      this.treeLabels = JSON.parse(JSON.stringify(this.sr.userInputs[0].problemCategory));
     }
 
     if (from == 'previous') {
@@ -2502,7 +2665,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clearCheckbox() {
-    if (!this.isMultipleNumericLabel) {
+    if (!this.isMultipleNumericLabel && this.labelType !== 'HTL') {
       this.multipleLabelList.forEach((e) => {
         const multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
         console.log(this.el.nativeElement);
@@ -3035,6 +3198,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.sr.originalData = responseSr.originalData;
           this.sr.flag = responseSr.flag;
           this.sr.userInputs = responseSr.userInputs;
+          if (!this.sr.userInputs.length && this.labelType === 'HTL') {
+            this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
+          }
           this.sr.ticketQuestions = responseSr.ticketQuestions;
           if (this.projectType === 'log') {
             this.currentLogFile =
@@ -3922,5 +4088,31 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       num = num.substring(0, decimal + index + 1);
     }
     return parseFloat(num).toFixed(decimal);
+  }
+
+  getChildren = (folder) => folder.children;
+
+  changeSelectedlabel(label, data) {
+    label.enable = data;
+    const treeLabels = this.treeLabels ? JSON.parse(JSON.stringify(this.treeLabels)) : [];
+    this.selectedTreeLabels = treeLabels ? filterTreeLabel(treeLabels) : [];
+  }
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
+  }
+
+  ExpandChanged() {
+    this.expandValue = !this.expandValue;
+    if (this.expandValue) {
+      this.expandName = 'Collapse';
+    } else {
+      this.expandName = 'Expand';
+    }
   }
 }

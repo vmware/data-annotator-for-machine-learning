@@ -167,6 +167,13 @@ export class UploadComponent implements OnInit {
             console.log('parse_error: ', error);
           },
           step: (results, parser) => {
+            // check csv headers is empty.
+            if (hasHeader === 'yes') {
+              const data = results.data.map((item) => item && String(item).trim());
+              if (_.sortedUniq(data).includes(null) || _.sortedUniq(data).includes('')) {
+                reject(false);
+              }
+            }
             if (
               !(_.sortedUniq(results.data).length == 1 && _.sortedUniq(results.data)[0] == null)
             ) {
@@ -341,32 +348,48 @@ export class UploadComponent implements OnInit {
         this.inputFile = null;
         return;
       } else if (this.inputFile.size > this.env.config.fileSize && this.msg.page == 'datasets') {
-        const limitFileSize = this.env.config.fileSize >= (1024 * 1024 * 1024)
-          ? this.env.config.fileSize / (1024 * 1024 * 1024) + 'GB'
-          : this.env.config.fileSize / (1024 * 1024) + 'MB';
-        this.errorMessage =
-          `File size exceeds the maximum ${limitFileSize}. Please select a new file to upload. `;
+        const limitFileSize =
+          this.env.config.fileSize >= 1024 * 1024 * 1024
+            ? this.env.config.fileSize / (1024 * 1024 * 1024) + 'GB'
+            : this.env.config.fileSize / (1024 * 1024) + 'MB';
+        this.errorMessage = `File size exceeds the maximum ${limitFileSize}. Please select a new file to upload. `;
         this.inputFile = null;
         return;
       } else {
         this.uploadComplete = true;
         this.inputFile.size < 10485760 ? (this.waitingTip = false) : (this.waitingTip = true);
         if (this.uploadGroup.get('fileFormat').value == 'csv') {
-          this.papaParse().then((e) => {
-            if (this.env.config.enableAWSS3) {
-              this.uploadToS3(this.inputFile);
-            } else {
-              this.updateDatasets('data');
-            }
-          });
+          this.papaParse()
+            .then((e) => {
+              if (this.env.config.enableAWSS3) {
+                this.uploadToS3(this.inputFile);
+              } else {
+                this.updateDatasets('data');
+              }
+            })
+            .catch(() => {
+              this.waitingTip = false;
+              this.uploadComplete = false;
+              this.errorMessage =
+                'Upload datasets failed, please make sure all columns has headers.';
+              return;
+            });
         } else if (this.uploadGroup.get('fileFormat').value == 'tabular') {
-          this.papaParse().then((e) => {
-            if (this.env.config.enableAWSS3) {
-              this.uploadToS3(this.inputFile);
-            } else {
-              this.updateDatasets('data');
-            }
-          });
+          this.papaParse()
+            .then((e) => {
+              if (this.env.config.enableAWSS3) {
+                this.uploadToS3(this.inputFile);
+              } else {
+                this.updateDatasets('data');
+              }
+            })
+            .catch(() => {
+              this.waitingTip = false;
+              this.uploadComplete = false;
+              this.errorMessage =
+                'Upload datasets failed, please make sure all columns has headers.';
+              return;
+            });
         } else if (this.uploadGroup.get('fileFormat').value == 'image') {
           if (this.env.config.enableAWSS3) {
             this.unzipImagesToS3();

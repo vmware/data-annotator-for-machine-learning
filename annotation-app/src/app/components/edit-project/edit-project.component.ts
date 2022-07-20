@@ -156,6 +156,8 @@ export class EditProjectComponent implements OnInit {
       this.mutilNumericForm = this.formBuilder.group({
         mutilLabelArray: this.formBuilder.array(mutilNumerics),
       });
+    } else if (this.labelType === 'HTL') {
+      this.categoryList = this.msg.categoryList;
     } else {
       this.msg.categoryList.split(',').forEach((element) => {
         const flag = { status: 'old', originalLabel: element, editLabel: element };

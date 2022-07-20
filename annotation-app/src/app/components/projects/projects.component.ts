@@ -63,6 +63,8 @@ export class ProjectsComponent implements OnInit {
   labelType = '';
   subscription: Subscription;
   msgEdit: any;
+  showTreeView: boolean = false;
+  treeData: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -130,15 +132,18 @@ export class ProjectsComponent implements OnInit {
           res[i].isExtend = true;
         }
         this.datasets = res;
-        this.datasets.forEach(item => {
+        this.datasets.forEach((item) => {
           if (item.labelType == 'numericLabel' && item.isMultipleLabel) {
             const categoryList = JSON.parse(item.categoryList);
             const itemKeys = [];
-            categoryList.forEach(element => {
+            categoryList.forEach((element) => {
               const labels = Object.keys(element);
               itemKeys.push(labels[0]);
             });
             item.mutilNumbericLabels = itemKeys.toString();
+          }
+          if (item.labelType === 'HTL') {
+            item.categoryList = JSON.parse(item.categoryList);
           }
         });
         this.totalItems = res.length;
@@ -160,12 +165,12 @@ export class ProjectsComponent implements OnInit {
   generateProject(e) {
     this.commonService.generateProject(e, this.datasets, this.user, 'projects').then((response) => {
       this.datasets = response.datasets;
-        this.showGenerateDatasets = true;
-        if (response.err) {
-          this.showGenerateDatasets = false;
-        } else {
-          this.msgGenerate = response.e;
-        }
+      this.showGenerateDatasets = true;
+      if (response.err) {
+        this.showGenerateDatasets = false;
+      } else {
+        this.msgGenerate = response.e;
+      }
     });
   }
 
@@ -423,5 +428,16 @@ export class ProjectsComponent implements OnInit {
 
   receiveDeleteLabel(e) {
     this.getProjects();
+  }
+
+  getChildren = (folder) => folder.children;
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
   }
 }

@@ -696,11 +696,24 @@ SPDX-License-Identifier: Apache-2.0 -->
                     />
                     <label for="mutilNumericLabel">&nbsp;Multiple Numerical Label</label>
                   </clr-radio-wrapper>
+                  &nbsp; &nbsp;
+                  <clr-radio-wrapper>
+                    <input
+                      type="radio"
+                      clrRadio
+                      class="clr-radio"
+                      value="uploadLabel"
+                      id="uploadLabel"
+                      name="labelType"
+                      (change)="changeLabelType($event)"
+                    />
+                    <label for="uploadLabel">&nbsp;upload a taxonomy file</label>
+                  </clr-radio-wrapper>
                 </label>
               </div>
 
               <!-- string label -->
-              <div *ngIf="!isShowNumeric && !isMutilNumericLabel">
+              <div *ngIf="!isShowNumeric && !isMutilNumericLabel && !isUploadLabel">
                 <div *ngIf="projectType === 'ner'">
                   <span
                     *ngFor="let label of selectDescription; let i = index"
@@ -771,6 +784,29 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </div>
 
+              <!-- upload labels -->
+              <div *ngIf="isUploadLabel" class="clr-input-wrapper" style="margin-bottom: 1rem">
+                <button class="btn btn-sm add-doc" type="button" (click)="uploadLabels($event)">
+                  upload a taxonomy file
+                </button>
+              </div>
+              <div class="disableTree" *ngIf="isUploadLabel && treeLabels.length">
+                <clr-icon
+                  shape="view-list"
+                  style="float: right"
+                  (click)="clickTreeView(treeLabels)"
+                  title="tree view detail"
+                ></clr-icon>
+                <clr-tree>
+                  <clr-tree-node
+                    *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
+                    [clrSelected]="label.enable"
+                    title="{{ label.name }}"
+                  >
+                    {{ label.name }}
+                  </clr-tree-node>
+                </clr-tree>
+              </div>
               <!-- numeric label -->
               <div
                 class="clr-row numeric"
@@ -1038,6 +1074,26 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </clr-tooltip-content>
               </clr-tooltip>
             </div>
+            <div *ngIf="isUploadLabel">
+              <clr-tooltip *ngIf="showTreeLabelTip">
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>This field is required.</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
           </div>
           <div class="form-group clr-row" *ngIf="projectType === 'ner'">
             <div class="clr-col-12 clr-col-md-3"></div>
@@ -1287,7 +1343,8 @@ SPDX-License-Identifier: Apache-2.0 -->
               isMultipleLabel ||
               isMutilNumericLabel ||
               msg.type == 'ner' ||
-              msg.type == 'log'
+              msg.type == 'log' ||
+              isUploadLabel
             "
           >
             <div class="clr-col-12 clr-col-md-1"></div>
@@ -1330,7 +1387,8 @@ SPDX-License-Identifier: Apache-2.0 -->
               !isNumeric &&
               !isMultipleLabel &&
               (msg.type === 'tabular' || msg.type === 'text') &&
-              !isMutilNumericLabel
+              !isMutilNumericLabel &&
+              !isUploadLabel
             "
             class="form-group clr-row"
           >
@@ -1377,7 +1435,8 @@ SPDX-License-Identifier: Apache-2.0 -->
               !isNumeric &&
               !isMultipleLabel &&
               (msg.type === 'tabular' || msg.type === 'text') &&
-              !isMutilNumericLabel
+              !isMutilNumericLabel &&
+              !isUploadLabel
             "
             class="form-group clr-row"
           >
@@ -1432,7 +1491,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div
             class="form-group clr-row"
-            *ngIf="!isNumeric && msg.type === 'tabular' && !isMultipleLabel && !isMutilNumericLabel"
+            *ngIf="
+              !isNumeric &&
+              msg.type === 'tabular' &&
+              !isMultipleLabel &&
+              !isMutilNumericLabel &&
+              !isUploadLabel
+            "
           >
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="selectedEncoder" class="label-tooltip clr-col-12 clr-col-md-2"
@@ -1644,8 +1709,22 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
 </clr-modal>
 
+<!-- popup dialog -upload csv  -->
+<app-upload-label
+  *ngIf="showUploadLabelDialog"
+  (onCloseDialog)="uploadLabelsCloseInfo($event)"
+  (uploadSuccess)="uploadLabelsSuccessInfo($event)"
+  (errorMessage)="uploadLabelsErr($event)"
+></app-upload-label>
+
 <!-- <app-supercollider
   *ngIf="showQueryDatasetDialog"
   (onCloseDialog)="receiveCloseInfo($event)"
   (onQueriedDataset)="onAddedDataset($event)"
 ></app-supercollider> -->
+
+<app-treeview-modal
+  *ngIf="showTreeView"
+  (onCloseTreeDialog)="onCloseTreeDialog()"
+  [treeData]="treeData"
+></app-treeview-modal>

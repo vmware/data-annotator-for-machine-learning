@@ -395,7 +395,7 @@ label .label-leftBoard {
   display: inline-block;
   max-width: 70px;
   text-overflow: ellipsis;
-  overflow: hidden;;
+  overflow: hidden;
 }
 
 .clear {
@@ -766,7 +766,7 @@ label .label-leftBoard {
   box-shadow: 0 7px 6px -9px #999;
 }
 
-.nerDisplayText{
+.nerDisplayText {
   box-shadow: 0 7px 6px -9px #999;
   margin-bottom: 0.5rem;
 }
@@ -843,14 +843,14 @@ label .label-leftBoard {
   white-space: nowrap;
 }
 
-.multiple-checkbox{
+.multiple-checkbox {
   display: inline-block;
   height: 15px;
   vertical-align: middle;
 }
 
 .annotateLabel {
-  padding: 10px; 
+  padding: 10px;
   border: 1px solid #e8e8e8;
   max-width: 30%;
 }
@@ -878,7 +878,7 @@ label .label-leftBoard {
 
 .nerPassage {
   width: 100%;
-  padding: 10px; 
+  padding: 10px;
   border: 1px solid #e8e8e8;
   margin-right: 1rem;
   word-break: break-word;
@@ -912,13 +912,13 @@ label .label-leftBoard {
   background: #fff;
   position: absolute;
   z-index: 100;
-  border: 1px solid #EBEEF5;
+  border: 1px solid #ebeef5;
   box-shadow: 1px 1px 2px 0px rgba(192, 196, 204, 1), -1px -1px 2px 0px rgba(192, 196, 204, 1);
   &-arrow {
     width: 0;
     height: 0;
     border: 14px solid transparent;
-    border-top-color: rgba(192, 196, 204, .7);
+    border-top-color: rgba(192, 196, 204, 0.7);
     position: relative;
     top: 54px;
     left: 24px;
@@ -944,4 +944,19 @@ label .label-leftBoard {
 
 .limit-height clr-datagrid {
   max-height: 10rem;
+}
+
+.clr-select-wrapper::after {
+  right: 0.02rem;
+}
+
+.disableTree {
+  ::ng-deep .clr-checkbox-wrapper .clr-control-label {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  ::ng-deep .clr-checkbox-wrapper input[type='checkbox'] {
+    pointer-events: none;
+  }
 }

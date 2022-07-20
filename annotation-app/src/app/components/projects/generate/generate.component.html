@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 required
                 value="standard"
                 [(ngModel)]="format"
-                [disabled]=" msg.labelType == 'numericLabel' "
+                [disabled]="msg.labelType == 'numericLabel'"
               />
               <label>Standard</label>
             </clr-radio-wrapper>
@@ -73,7 +73,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                 value="topLabel"
                 [(ngModel)]="format"
                 [disabled]="
-                  msg.projectType == 'ner' || msg.projectType == 'image' || msg.projectType == 'log' || msg.labelType == 'numericLabel'
+                  msg.projectType == 'ner' ||
+                  msg.projectType == 'image' ||
+                  msg.projectType == 'log' ||
+                  msg.labelType == 'numericLabel'
                 "
               />
               <label>Top Label</label>
@@ -87,7 +90,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                 value="probabilistic"
                 [(ngModel)]="format"
                 [disabled]="
-                  msg.projectType == 'ner' || msg.projectType == 'image' || msg.projectType == 'log' || msg.labelType == 'numericLabel'
+                  msg.projectType == 'ner' ||
+                  msg.projectType == 'image' ||
+                  msg.projectType == 'log' ||
+                  msg.labelType == 'numericLabel'
                 "
               />
               <label>Probabilistic</label>

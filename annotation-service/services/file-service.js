@@ -30,6 +30,7 @@ const readline = require('readline');
 const localFileSysService = require('./localFileSys.service');
 const _ = require("lodash");
 const config = require('../config/config');
+const { initHierarchicalLabelsCase } = require('./project.service');
 
 async function createProject(req) {
     const findProjectName = { projectName: req.body.pname };
@@ -81,7 +82,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
     if (isMultipleLabel === 'true' || isMultipleLabel === true) {
         alFailed = true;
         isMultipleLabel = true;
-        if (req.body.labelType == LABELTYPE.NUMERIC && typeof labels === 'object') {
+        if ((req.body.labelType == LABELTYPE.NUMERIC || req.body.labelType == LABELTYPE.HIERARCHICAL) && typeof labels === 'object') {
             labels = JSON.stringify(labels);
         }
     } else {
@@ -102,7 +103,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
     let popUpLabels = [];
     if (projectType == PROJECTTYPE.NER) {
         const plb = req.body.popUpLabels;
-        popUpLabels = ((plb && typeof plb === 'string') ? JSON.parse(plb) : plb)
+        popUpLabels = plb ? (typeof plb === 'string' ? JSON.parse(plb) : plb) : [];
     };
 
     let estimator = req.body.estimator ? req.body.estimator : "";
@@ -188,9 +189,18 @@ async function prepareHeaders(project, format) {
 
     // label info regression project doesn't need
     if (project.labelType != LABELTYPE.NUMERIC) {
-        await project.categoryList.split(",").forEach(item => {
-            headerArray.push({ id: item, title: item });
-        });
+        if (project.labelType == LABELTYPE.HIERARCHICAL) {
+            let labels = JSON.parse(project.categoryList);
+            let labelsArray = [];
+            await initHierarchicalLabelsCase(labels, "", "", labelsArray);
+            await labelsArray.forEach(item => {
+                headerArray.push({ id: item, title: item });
+            });
+        } else {
+            await project.categoryList.split(",").forEach(item => {
+                headerArray.push({ id: item, title: item });
+            });
+        }
         if (project.projectType == PROJECTTYPE.NER) {
             //init pop-up label headers
             await project.popUpLabels.forEach(item => {
@@ -334,20 +344,48 @@ async function prepareContents(srData, project, format) {
             });
 
             if (project.labelType != LABELTYPE.NUMERIC) {
-                // init label headers
-                await project.categoryList.split(",").forEach(item => {
-                    newCase[item] = 0;
-                    labelCase[item] = 0;
-                });
-                // calculate labeld case number
-                await srs.userInputs.forEach(async item => {
-                    await project.categoryList.split(",").forEach((labels) => {
-                        if (item.problemCategory === labels) {
-                            newCase[labels] += 1;
-                            labelCase[labels] += 1;
-                        }
+                if (project.labelType == LABELTYPE.HIERARCHICAL) {
+                    // init label headers
+                    let labels = JSON.parse(project.categoryList);
+                    let labelsArray = [];
+                    let pathsArray = [];
+                    await initHierarchicalLabelsCase(labels, "", "", labelsArray, pathsArray);
+                    project.labelsArray = labelsArray;
+                    project.pathsArray = pathsArray;
+
+                    await labelsArray.forEach(item => {
+                        newCase[item] = 0;
+                        labelCase[item] = 0;
                     });
-                });
+                    // calculate labeld case number
+                    for await (const input of srs.userInputs) {
+                        const userInputLabel = input.problemCategory;
+                        for (const i in pathsArray) {
+                            const currentLable = _.get(userInputLabel, pathsArray[i]);
+                            if (currentLable.name == labelsArray[i].split(".").pop() && currentLable.enable == 1) {
+                                newCase[labelsArray[i]] += 1;
+                                labelCase[labelsArray[i]] += 1;
+                            }
+                        }
+                    }
+                } else {
+                    // init label headers
+                    await project.categoryList.split(",").forEach(item => {
+                        newCase[item] = 0;
+                        labelCase[item] = 0;
+                    });
+                    // calculate labeld case number
+                    await srs.userInputs.forEach(async item => {
+                        await project.categoryList.split(",").forEach((labels) => {
+                            if (item.problemCategory === labels) {
+                                newCase[labels] += 1;
+                                labelCase[labels] += 1;
+                            }
+                        });
+                    });
+                }
+
+
             } else {
                 //multi-numberica lables
                 if (project.isMultipleLabel) {
@@ -378,9 +416,15 @@ async function prepareContents(srData, project, format) {
             const probab = await probabilisticInObject(labelCase);
             let probablistic = [];
             //to keep lables order
-            await project.categoryList.split(",").forEach(label => {
-                probablistic.push(probab[label]);
-            });
+            if (project.labelType == LABELTYPE.HIERARCHICAL) {
+                await project.labelsArray.forEach(label => {
+                    probablistic.push(probab[label]);
+                });
+            } else {
+                await project.categoryList.split(",").forEach(label => {
+                    probablistic.push(probab[label]);
+                });
+            }
             newCase.probabilistic = `(${probablistic})`;
         }
         //4. regression project

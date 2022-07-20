@@ -57,6 +57,8 @@ import { S3Service } from './services/common/s3.service';
 import { EmailService } from './services/common/email.service';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { AssignSlackComponent } from './shared/components/assign-slack/assign-slack.component';
+import { UploadLabelComponent } from './components/projects/upload-label/upload-label.component';
+import { TreeviewModalComponent } from './components/treeview-modal/treeview-modal.component';
 
 @NgModule({
   declarations: [
@@ -89,6 +91,8 @@ import { AssignSlackComponent } from './shared/components/assign-slack/assign-sl
     EditProjectComponent,
     MyFilter,
     AssignSlackComponent,
+    UploadLabelComponent,
+    TreeviewModalComponent,
   ],
   imports: [
     BrowserAnimationsModule,

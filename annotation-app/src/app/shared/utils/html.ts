@@ -1,4 +1,4 @@
-import insertAfter from "./index.es5";
+import insertAfter from './index.es5';
 
 function isTextNode(node) {
   const TEXT_NODE = 3;
@@ -49,7 +49,7 @@ function highlightRange(normedRange, cssClass, cssStyle) {
   }
 
   const allNodes = getNodesInRange(normedRange._range);
-  const textNodes = allNodes.filter(n => isTextNode(n));
+  const textNodes = allNodes.filter((n) => isTextNode(n));
 
   var white = /^\s*$/;
 
@@ -62,7 +62,7 @@ function highlightRange(normedRange, cssClass, cssStyle) {
 
   let nlen = nodes.length;
   if (nlen > 1 && nodes[nodes.length - 1].length !== normedRange._range.endOffset) {
-     nlen = nlen - 1;
+    nlen = nlen - 1;
   }
   const results = [];
   for (var i = start, len = nlen; i < len; i++) {
@@ -104,12 +104,12 @@ function splitBoundaries(range) {
 
 const toGlobalOffset = (container, element, len) => {
   let pos = 0;
-  const count = node => {
+  const count = (node) => {
     if (node === element) {
       return pos;
     }
-    if (node.nodeName === "#text") pos = pos + node.length;
-    if (node.nodeName === "BR") pos = pos + 1;
+    if (node.nodeName === '#text') pos = pos + node.length;
+    if (node.nodeName === 'BR') pos = pos + 1;
 
     for (var i = 0; i <= node.childNodes.length; i++) {
       const n = node.childNodes[i];
@@ -127,14 +127,14 @@ function removeSpans(spans) {
   var norm = [];
 
   if (spans) {
-    spans.forEach(span => {
+    spans.forEach((span) => {
       while (span.firstChild) span.parentNode.insertBefore(span.firstChild, span);
       norm.push(span.parentNode);
       span.parentNode.removeChild(span);
     });
   }
 
-  norm.forEach(n => n.normalize());
+  norm.forEach((n) => n.normalize());
 }
 
 function findClosestTextNode(node, lookBack = false) {
@@ -143,12 +143,6 @@ function findClosestTextNode(node, lookBack = false) {
   const child = findClosestTextNode(lookBack ? node.lastChild : node.firstChild, lookBack);
   if (child) return child;
   return findClosestTextNode(lookBack ? node.previousSibling : node.nextSibling, lookBack);
-};
+}
 
-export {
-  removeSpans,
-  toGlobalOffset,
-  highlightRange,
-  splitBoundaries,
-  findClosestTextNode,
-};
+export { removeSpans, toGlobalOffset, highlightRange, splitBoundaries, findClosestTextNode };

@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div>
             <div class="clr-form-group form-group clr-row">
               <label for="selectProject" class="label-leftBoard">Projects </label>&nbsp;&nbsp;
-              <div class="clr-select-wrapper" style="max-width: 70%">
+              <div class="clr-select-wrapper" style="width: 70%">
                 <select
                   style="width: 100%"
                   (change)="onSelectingProjects($event)"
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               style="margin-top: -0.5rem"
             >
               <label class="label-leftBoard">Display </label>&nbsp;&nbsp;&nbsp;
-              <div class="clr-select-wrapper" style="max-width: 70%">
+              <div class="clr-select-wrapper" style="width: 70%">
                 <select
                   style="width: 100%"
                   formControlName="renderFormat"
@@ -108,35 +108,33 @@ SPDX-License-Identifier: Apache-2.0 -->
               }}
             </div>
           </div>
+          <div class="clr-form-group left-project-info clr-row">
+            <label for="source" class="label-leftBoard">Max Annotation: </label>&nbsp;&nbsp;
+            <div>{{ projectInfo?.maxAnnotation }}</div>
+          </div>
           <div class="clr-form-group left-project-info">
             <label for="source" class="label-leftBoard">Instruction : </label>&nbsp;&nbsp;
             <div class="instructionBox" [innerHTML]="projectInfo?.taskInstructions"></div>
             <div class="line"></div>
           </div>
 
-          <h3>
-            {{ startFrom === 'review' ? 'Review' : 'Annotation' }} Progress
-          </h3>
+          <h3>{{ startFrom === 'review' ? 'Review' : 'Annotation' }} Progress</h3>
           <div class="clr-form-group left-project-info clr-row">
-            <label for="name" class="label-leftBoard">This session:</label>&nbsp;&nbsp;
+            <label for="name" class="label-leftBoard">Total tickets:</label>&nbsp;&nbsp;
             <div>
-              {{
-                startFrom === 'review'
-                  ? progressInfo?.totalCase
-                  : progressInfo?.assignedCase
-              }}
+              {{ startFrom === 'review' ? progressInfo?.totalCase : progressInfo?.assignedCase }}
             </div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
             <label for="owner" class="label-leftBoard"
-              >{{
-                startFrom === 'review' ? 'Reviewed' : 'Annotations'
-              }}
-              : </label
+              >{{ startFrom === 'review' ? 'Reviewed tickets' : 'Annotations' }} : </label
             >&nbsp;&nbsp;
             <div>{{ progressInfo?.completeCase }}</div>
           </div>
           <div class="clr-form-group left-project-info clr-row">
+            <label style="margin-bottom: 0.5rem">{{
+              startFrom === 'review' ? 'Project reviewed progress:' : ''
+            }}</label>
             <clr-progress-bar
               clrValue="{{ percentage }}"
               clrLabeled
@@ -149,7 +147,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <label for="name" class="label-leftBoard">Reviewee:</label>&nbsp;&nbsp;
               <div class="clr-select-wrapper" style="width: 70%">
                 <select
-                  style="width: 95%"
+                  style="width: 100%"
                   (change)="onSelectingReviewee($event)"
                   formControlName="reviewee"
                 >
@@ -200,6 +198,9 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
             <div class="clr-form-group left-project-info">
+              <label style="margin-bottom: 0.5rem; display: block"
+                >Annotator reviewed progress:</label
+              >
               <div
                 class="clr-row"
                 style="margin-bottom: 0.3rem"
@@ -491,31 +492,47 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </div>
               <div class="nerContent">
-              <div class="nerPassage" (mouseup)="onMouseUp($event)">  
-                <span id='mainText'>{{ sr?.originalData?.text }}</span>
-              </div>
-              <div class="annotateLabel">
-                <div style="font-weight: 500;">Tips:</div>
-                <ul class="resultTip">
-                  <li>When mouse over or click the selected text will highlight the labeled text on the passage.</li>
-                  <li *ngIf="isShowPopLabel">Click labeled text to see the secondary labels.</li>
-                </ul>
-                <div class="result">Results</div>
-                <div *ngIf="spansList.length === 0">Nothing selected</div>  
-                <div class="selectedSection">
-                  <div
-                  *ngFor="let spanText of spansList"
-                  class="spanSelected"
-                  (mouseenter)="mouseenterMark($event, spanText)"
-                  (mouseleave)="mouseleaveMark($event, spanText)"
-                  >
-                  <span (click)="clickShowMark($event, spanText)" class="selectText">{{ spanText.text }}</span>
-                  <span class="entity" [style.color]="getLabelColor(spanText.label)" title="{{ spanText.label | uppercase }}">{{ spanText.label }}</span>
-                  <span *ngIf="isShowPopLabel && spanText.popUpLabel " class="entity" [style.color]="spanText.popLabelColor" title="{{ spanText.popUpLabel | uppercase }}">{{ spanText.popUpLabel }}</span>
-                  <span class="clear" (click)="clickClearMark($event, spanText)">×</span>
+                <div class="nerPassage" (mouseup)="onMouseUp($event)">
+                  <span id="mainText">{{ sr?.originalData?.text }}</span>
+                </div>
+                <div class="annotateLabel">
+                  <div style="font-weight: 500">Tips:</div>
+                  <ul class="resultTip">
+                    <li>
+                      When mouse over or click the selected text will highlight the labeled text on
+                      the passage.
+                    </li>
+                    <li *ngIf="isShowPopLabel">Click labeled text to see the secondary labels.</li>
+                  </ul>
+                  <div class="result">Results</div>
+                  <div *ngIf="spansList.length === 0">Nothing selected</div>
+                  <div class="selectedSection">
+                    <div
+                      *ngFor="let spanText of spansList"
+                      class="spanSelected"
+                      (mouseenter)="mouseenterMark($event, spanText)"
+                      (mouseleave)="mouseleaveMark($event, spanText)"
+                    >
+                      <span (click)="clickShowMark($event, spanText)" class="selectText">{{
+                        spanText.text
+                      }}</span>
+                      <span
+                        class="entity"
+                        [style.color]="getLabelColor(spanText.label)"
+                        title="{{ spanText.label | uppercase }}"
+                        >{{ spanText.label }}</span
+                      >
+                      <span
+                        *ngIf="isShowPopLabel && spanText.popUpLabel"
+                        class="entity"
+                        [style.color]="spanText.popLabelColor"
+                        title="{{ spanText.popUpLabel | uppercase }}"
+                        >{{ spanText.popUpLabel }}</span
+                      >
+                      <span class="clear" (click)="clickClearMark($event, spanText)">×</span>
+                    </div>
                   </div>
                 </div>
-              </div>
               </div>
             </div>
             <div class="popDialog" id="popDialog">
@@ -674,16 +691,41 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
           </div>
-          <div *ngIf="moreReviewInfo?.length > 1" class="limit-height">
-            <clr-datagrid>
+          <div
+            *ngIf="(projectType == 'text' || projectType == 'tabular') && startFrom === 'review'"
+            class="limit-height"
+          >
+            <h5 style="margin-top: 1rem">Annotator labeled results:</h5>
+            <clr-datagrid *ngIf="labelType !== 'HTL'">
               <clr-dg-column>Annotator</clr-dg-column>
-              <clr-dg-column>Annotation</clr-dg-column>
+              <clr-dg-column>Label</clr-dg-column>
+              <clr-dg-column>Time</clr-dg-column>
               <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
-                  <clr-dg-cell>{{reviewInfo.annotator}}</clr-dg-cell>
-                  <clr-dg-cell>{{reviewInfo.annotationInfo}}</clr-dg-cell>
+                <clr-dg-cell>{{ reviewInfo.annotator }}</clr-dg-cell>
+                <clr-dg-cell>{{ reviewInfo.annotationInfo }}</clr-dg-cell>
+                <clr-dg-cell>{{ reviewInfo.time | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
               </clr-dg-row>
-              <clr-dg-footer>{{moreReviewInfo.length}} annotation info</clr-dg-footer>
-          </clr-datagrid>
+              <clr-dg-footer>{{ moreReviewInfo.length }} annotation info</clr-dg-footer>
+            </clr-datagrid>
+            <clr-datagrid *ngIf="labelType === 'HTL'">
+              <clr-dg-column>Annotator</clr-dg-column>
+              <clr-dg-column>Label</clr-dg-column>
+              <clr-dg-column>Time</clr-dg-column>
+              <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
+                <clr-dg-cell>{{ reviewInfo.annotator }}</clr-dg-cell>
+                <clr-dg-cell class="disableTree">
+                  <div class="tree-icon" (click)="clickTreeView(reviewInfo.annotationInfo)">
+                    <clr-icon shape="view-list" title="tree view detail"></clr-icon> click the icon
+                    to review with tree label
+                  </div>
+                  <ul *ngFor="let selectedTreeLabel of reviewInfo.reducedCategory; let i = index">
+                    <li>{{ selectedTreeLabel }}</li>
+                  </ul>
+                </clr-dg-cell>
+                <clr-dg-cell>{{ reviewInfo.time | date: 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+              </clr-dg-row>
+              <clr-dg-footer>{{ moreReviewInfo.length }} annotation info</clr-dg-footer>
+            </clr-datagrid>
           </div>
           <div class="clr-row" *ngIf="projectType !== 'image'">
             <h4 style="margin-top: 2rem; margin-left: 0.5rem">
@@ -745,7 +787,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           >
             <label for="category" class="label-tooltip">Labels : </label>
             <div class="clr-select-wrapper" style="min-width: 20%">
-              <select formControlName="category" (click)="dropDownSubmit()" style="min-width: 90%">
+              <select formControlName="category" (click)="dropDownSubmit()" style="min-width: 100%">
                 <option *ngFor="let category of categories" [value]="category">
                   {{ category }}
                 </option>
@@ -814,7 +856,8 @@ SPDX-License-Identifier: Apache-2.0 -->
             *ngIf="
               isMultipleLabel &&
               !isMultipleNumericLabel &&
-              (projectType == 'text' || projectType == 'tabular')
+              (projectType == 'text' || projectType == 'tabular') &&
+              labelType !== 'HTL'
             "
           >
             <div class="clr-form-control" style="margin-top: 0">
@@ -841,7 +884,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           <!-- multiple numeric checkbox labels -->
           <div
             class="questionContainer"
-            *ngIf="isMultipleNumericLabel && (projectType == 'text' || projectType == 'tabular')"
+            *ngIf="
+              isMultipleNumericLabel &&
+              (projectType == 'text' || projectType == 'tabular') &&
+              labelType !== 'HTL'
+            "
           >
             <div class="clr-form-control" style="margin-top: 0">
               <div class="clr-control-container clr-row" style="width: 100%">
@@ -930,6 +977,26 @@ SPDX-License-Identifier: Apache-2.0 -->
               ></textarea>
             </div>
           </div>
+          <div
+            class="questionContainer"
+            *ngIf="labelType === 'HTL' && (projectType == 'text' || projectType == 'tabular')"
+          >
+            <clr-toggle-wrapper>
+              <input type="checkbox" clrToggle name="expand" (change)="ExpandChanged($event)" />
+              <label style="font-weight: 500">{{ expandName }}</label>
+            </clr-toggle-wrapper>
+            <clr-tree>
+              <clr-tree-node
+                [clrExpanded]="expandValue"
+                *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
+                [clrSelected]="label.enable"
+                (clrSelectedChange)="changeSelectedlabel(label, $event)"
+                title="{{ label.name }}"
+              >
+                {{ label.name }}
+              </clr-tree-node>
+            </clr-tree>
+          </div>
           <div class="actions">
             <div
               *ngIf="actionError"
@@ -955,14 +1022,21 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </div>
             <button
-              *ngIf="startFrom !== 'review'
-                && (projectType !== 'text' && projectType !== 'tabular' || isMultipleNumericLabel || isNumeric || isMultipleLabel)"   
+              *ngIf="
+                startFrom !== 'review' &&
+                ((projectType !== 'text' && projectType !== 'tabular') ||
+                  isMultipleNumericLabel ||
+                  isNumeric ||
+                  isMultipleLabel)
+              "
               class="btn btn-success submit"
               type="submit"
               [disabled]="
+                selectedTreeLabels.length == 0 &&
                 multipleLabelList.length == 0 &&
                 spansList.length == 0 &&
-                currentBoundingData.length == 0 && !isNumeric
+                currentBoundingData.length == 0 &&
+                !isNumeric
               "
               title="{{
                 multipleLabelList.length > 0 ||
@@ -975,12 +1049,19 @@ SPDX-License-Identifier: Apache-2.0 -->
               Submit
             </button>
             <button
-              *ngIf="startFrom == 'review'
-                && (projectType !== 'text' && projectType !== 'tabular' || isMultipleNumericLabel  || isNumeric || isMultipleLabel)"
+              *ngIf="
+                startFrom == 'review' &&
+                ((projectType !== 'text' && projectType !== 'tabular') ||
+                  isMultipleNumericLabel ||
+                  isNumeric ||
+                  isMultipleLabel)
+              "
               [disabled]="
+                selectedTreeLabels.length == 0 &&
                 multipleLabelList.length == 0 &&
                 spansList.length == 0 &&
-                currentBoundingData.length == 0 && !isNumeric
+                currentBoundingData.length == 0 &&
+                !isNumeric
               "
               class="btn btn-success submit"
               type="submit"
@@ -994,16 +1075,21 @@ SPDX-License-Identifier: Apache-2.0 -->
               (click)="pass()"
             >
               <clr-icon shape="checkbox-list"></clr-icon>
-              Pass
+              PASS
             </button>
 
-            <button class="btn btn-outline" type="button" (click)="onSkipGame()" [disabled]="disabledSkip">
+            <button
+              class="btn btn-outline"
+              type="button"
+              (click)="onSkipGame()"
+              [disabled]="disabledSkip"
+            >
               <clr-icon shape="ban"></clr-icon>
-              Skip
+              SKIP
             </button>
             <button class="btn btn-outline" type="button" (click)="isBack()">
               <clr-icon shape="undo"></clr-icon>
-              Back to Previous
+              BACK TO PREVIOUS
             </button>
             <button class="btn btn-primary btn-danger" type="button" (click)="onEndGame()">
               Exit
@@ -1076,3 +1162,9 @@ SPDX-License-Identifier: Apache-2.0 -->
     </button>
   </div>
 </clr-modal>
+
+<app-treeview-modal
+  *ngIf="showTreeView"
+  (onCloseTreeDialog)="onCloseTreeDialog()"
+  [treeData]="treeData"
+></app-treeview-modal>

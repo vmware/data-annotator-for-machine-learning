@@ -21,7 +21,7 @@ const S3Utils = require('../utils/s3');
 const logImporter = require('../utils/logImporter');
 const fileSystemUtils = require('../utils/fileSystem.utils');
 const config = require('../config/config');
-
+const { reduceHierarchicalUnselectedLabel } = require('./project.service');
 
 async function updateSrsUserInput(req, from) {
 
@@ -87,7 +87,7 @@ async function updateSrsUserInput(req, from) {
     usrSr.forEach(async ticket => {
         reEditSrIds.push(ticket._id.toString());
         let userInputs = []
-        req.body.userInput.forEach(ui => {
+        req.body.userInput.forEach(async ui => {
             if (ui.tid == ticket._id.toString()) {
                 if (pro.projectType == PROJECTTYPE.NER) {
                     userInputs.push({
@@ -112,6 +112,12 @@ async function updateSrsUserInput(req, from) {
                             user: user,
                             timestamp: Date.now()
                         });
+                    });
+                } else if (pro.labelType == LABELTYPE.HIERARCHICAL) {
+                    userInputs.push({
+                        problemCategory: ui.problemCategory,
+                        user: user,
+                        timestamp: Date.now()
                     });
                 } else {
                     ui.problemCategory.forEach(lb => {
@@ -165,6 +171,12 @@ async function updateSrsUserInput(req, from) {
                             user: user,
                             timestamp: Date.now()
                         });
+                    });
+                } else if (pro.labelType == LABELTYPE.HIERARCHICAL) {
+                    userInputs.push({
+                        problemCategory: ui.problemCategory,
+                        user: user,
+                        timestamp: Date.now()
                     });
                 } else {
                     ui.problemCategory.forEach(lb => {
@@ -355,6 +367,9 @@ async function getALLSrs(req) {
         for (const ticket of data.docs) {
             ticket.originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ticket.originalData.location, S3);
         }
+    }
+    if (mp.project.labelType == LABELTYPE.HIERARCHICAL) {
+        await reduceHierarchicalUnselectedLabel(data.docs);
     }
     console.log(`[ SRS ] Service getALLSrs query projects info name end: `, Date.now());
     return { pageInfo: pageInfo, data: data.docs };
@@ -942,6 +957,12 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
                     timestamp: Date.now()
                 });
             });
+        } else if (labelType == LABELTYPE.HIERARCHICAL) {
+            userInputs.push({
+                problemCategory: problemCategory,
+                user: user,
+                timestamp: Date.now()
+            });
         } else {
             problemCategory.forEach(lb => {
                 userInputs.push({
@@ -1050,6 +1071,9 @@ async function queryTicketsForReview(req) {
         if (config.useAWS) {
             ticket[0].originalData.location = await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, ticket[0].originalData.location);
         }
+    }
+    if (mp.project.labelType == LABELTYPE.HIERARCHICAL) {
+        await reduceHierarchicalUnselectedLabel(ticket);
     }
     return ticket;
 }

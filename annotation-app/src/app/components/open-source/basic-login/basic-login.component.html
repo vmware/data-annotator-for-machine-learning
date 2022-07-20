@@ -12,8 +12,8 @@ SPDX-License-Identifier: Apache-2.0 -->
       <clr-select-container *ngIf="!this.isClickSignup">
         <label class="clr-sr-only">User Role</label>
         <select clrSelect name="loginType" (change)="selectedUserType($event)">
-            <option value="normal">Registered user login</option>
-            <option value="ldap">Login with LDAP</option>
+          <option value="normal">Registered user login</option>
+          <option value="ldap">Login with LDAP</option>
         </select>
       </clr-select-container>
       <clr-input-container *ngIf="isClickSignup">
@@ -131,7 +131,11 @@ SPDX-License-Identifier: Apache-2.0 -->
         >
       </button>
 
-      <a *ngIf="!isClickSignup && !isLadp" href="javascript://" class="signup" (click)="clickSignup()"
+      <a
+        *ngIf="!isClickSignup && !isLadp"
+        href="javascript://"
+        class="signup"
+        (click)="clickSignup()"
         >Sign up for a new account</a
       >
       <a *ngIf="isClickSignup" href="javascript://" class="signup" (click)="clickSignin()"

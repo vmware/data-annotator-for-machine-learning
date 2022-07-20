@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               id="taskInstruction"
               [(ngModel)]="inputTaskInstruction"
               class="clr-textarea"
-              style="width: 90%"
+              style="width: 91.5%"
             ></textarea>
           </div>
         </div>
@@ -222,8 +222,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           [inputSlackChannelsMsg]="inputSlackChannels"
           (slackListOuter)="receiveSlackAssign($event)"
         ></app-assign-slack>
-        <div class="prev-info clr-row" *ngIf="showLabel">
-          <label for="label" class="label-tooltip clr-col-12 clr-col-md-4">Labels</label>
+        <div class="prev-info clr-row" *ngIf="showLabel && labelType !== 'HTL'">
+          <label for="projectName" class="label-tooltip clr-col-12 clr-col-md-4">Label</label>
           <div class="clr-input-wrapper clr-col-12 clr-col-md-7 labelBox">
             <div *ngIf="labelType != 'numericLabel'">
               <span

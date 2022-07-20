@@ -16,9 +16,8 @@ function modelChart(options) {
   frequency = options.frequency;
   threshold = options.threshold;
   estimator = options.estimator;
-  samplingStrategy = options.samplingStrategy,
-
-  model_margin = { top: 50, right: 300, bottom: 10, left: 40 };
+  (samplingStrategy = options.samplingStrategy),
+    (model_margin = { top: 50, right: 300, bottom: 10, left: 40 });
   data = options.data;
   data = Object.assign(
     data.map(({ index, accuracy }) => ({ name: index, value: +accuracy })),
@@ -243,7 +242,7 @@ function modelChart(options) {
     .attr('fill', 'white')
     .attr('stroke', 'steelblue')
     .attr('stroke-width', 2)
-    .on('mouseover', function (d, i) {
+    .on('mouseover', function (event, d) {
       d3.select(this).style('fill', 'steelblue');
       d3.select(this).attr('r', 7);
       Tooltip.style('visibility', 'visible').html(
@@ -252,14 +251,14 @@ function modelChart(options) {
       hoverLine.style('visibility', 'visible');
       return;
     })
-    .on('mousemove', function (d, i) {
+    .on('mousemove', function (event, d) {
       Tooltip.style('top', event.pageY - 30 + 'px').style('left', event.pageX + 10 + 'px');
-      var mouse_x = d3.mouse(this)[0];
+      var mouse_x = d3.pointer(event)[0];
       hoverLine.attr('x1', mouse_x).attr('x2', mouse_x);
       hoverLineGroup.style('opacity', 1);
       return;
     })
-    .on('mouseout', function (d, i) {
+    .on('mouseout', function (event, d) {
       d3.select(this).style('fill', 'white');
       d3.select(this).attr('r', 4);
       hoverLine.style('visibility', 'hidden');
@@ -283,9 +282,9 @@ function modelChart(options) {
         .on('zoom', zoomed),
     );
 
-    function zoomed() {
+    function zoomed(event) {
       // recover the new scale
-      var newX = d3.event.transform.rescaleX(x);
+      var newX = event.transform.rescaleX(x);
       // update axes with these new boundaries
       xAxis.call(d3.axisBottom(newX).ticks(10).tickSizeOuter(0));
       svg.selectAll('.myCircle').attr('cx', function (d) {

@@ -72,8 +72,38 @@ async function checkProjectName(pname) {
 
 async function getProjectInfo(req) {
     console.log(`[ PROJECT ] Service query Project info by pid: ${req.query.pid}`);
-    return mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
+    let project = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
+    if (project && project.labelType == LABELTYPE.HIERARCHICAL) {
+        let labels = JSON.parse(project.categoryList);
+        await prepareSelectedHierarchicalLabels(labels, true, false);
+        project.categoryList = JSON.stringify(labels);
+    }
+    return project;
 }
+
+async function prepareSelectedHierarchicalLabels(nodes, unEnable, removeUnselected) {
+    for (let i in nodes) {
+        if (removeUnselected) {
+            while (true) {
+                if (nodes[i] && nodes[i].enable == 0) {
+                    nodes.splice(i, 1);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if (nodes[i] && nodes[i].enable != 0) {
+            if (unEnable) {
+                nodes[i].enable = 0;
+            }
+            if (nodes[i].children) {
+                await prepareSelectedHierarchicalLabels(nodes[i].children, unEnable, removeUnselected)
+            }
+        }
+    }
+}
+
 
 async function deleteProject(req) {
 
@@ -285,6 +315,103 @@ async function updateProjectShare(req) {
     return mongoDb.findOneAndUpdate(ProjectModel, condition, update, optional);
 }
 
+async function matchUserInputsWithHierarchicalLabels(labels, tickets) {
+
+    for (const i in labels) {
+        if (labels[i].children) {
+            await matchUserInputsWithHierarchicalLabels(labels[i].children, tickets)
+        } else {
+            for (const ticket of tickets) {
+                for (const input of ticket.userInputs) {
+                    const inputLabels = input.problemCategory;
+                    const currentLable = _.get(inputLabels, labels[i].path);
+                    if (currentLable.name == labels[i].name && currentLable.enable == 1) {
+                        labels[i].annotated += 1;
+                    }
+
+                }
+            }
+        }
+    }
+}
+async function initHierarchicalLabelsCase(labels, namePath, path, labelsArray, labelsPathArray) {
+    for (const i in labels) {
+
+        if (!labels[i].children) {
+            if (i != 0 && labels[i - 1].children) {
+                let namePathArray = namePath.split(".");
+                namePathArray.pop();
+                namePathArray.pop();
+                if (namePathArray.length) {
+                    namePath = namePathArray.join(".") + ".";
+                } else {
+                    namePath = namePathArray.join(".");
+                }
+
+
+                let pathArray = path.split(".");
+                pathArray.pop();
+                pathArray.pop();
+                if (pathArray.length) {
+                    path = pathArray.join(".") + "." + "children";
+                } else {
+                    path = pathArray.join(".");
+                }
+            }
+
+            labels[i].namePath = namePath + labels[i].name;
+            labels[i].annotated = 0;
+            labels[i].path = path + "[" + i + "]";
+
+            if (labelsArray) {
+                labelsArray.push(namePath + labels[i].name);
+            }
+            if (labelsPathArray) {
+                labelsPathArray.push(path + "[" + i + "]");
+            }
+        }
+        if (labels[i].children) {
+
+            if (i != 0 && labels[i - 1].children) {
+                let namePathArray = namePath.split(".");
+                namePathArray.pop();
+                namePathArray.pop();
+                if (namePathArray.length) {
+                    namePath = namePathArray.join(".") + ".";
+                } else {
+                    namePath = namePathArray.join(".");
+                }
+
+
+                let pathArray = path.split(".");
+                pathArray.pop();
+                pathArray.pop();
+                if (pathArray.length) {
+                    path = pathArray.join(".") + "." + "children";
+                } else {
+                    path = pathArray.join(".");
+                }
+            }
+            path += "[" + i + "]" + "." + "children";
+            namePath += labels[i].name + ".";
+            await initHierarchicalLabelsCase(labels[i].children, namePath, path, labelsArray, labelsPathArray);
+
+        }
+    }
+}
+
+async function reduceHierarchicalUnselectedLabel(tickets) {
+    for await (const ticket of tickets) {
+        for await (const input of ticket.userInputs) {
+            let reducedCategory = [...input.problemCategory];
+            await prepareSelectedHierarchicalLabels(reducedCategory, false, true);
+            let labelsArray = [];
+            await initHierarchicalLabelsCase(reducedCategory, "", "", labelsArray);
+            input.reducedCategory = labelsArray;
+        }
+    }
+}
+
 async function projectLeaderBoard(req) {
 
     await validator.checkAnnotator(req.auth.email);
@@ -314,7 +441,13 @@ async function projectLeaderBoard(req) {
     const srsUI = await mongoDb.findByConditions(mp.model, conditions, 'userInputs');
 
     console.log(`[ PROJECT ] Service sort out labels info`);
-    if (labelType == LABELTYPE.NUMERIC) {
+    if (labelType == LABELTYPE.HIERARCHICAL) {
+        let lables = JSON.parse(proInfo.categoryList);
+        await initHierarchicalLabelsCase(lables, "", "");
+        await matchUserInputsWithHierarchicalLabels(lables, srsUI);
+        result.labels = lables;
+    }
+    else if (labelType == LABELTYPE.NUMERIC) {
         if (proInfo.isMultipleLabel) {
             JSON.parse(proInfo.categoryList).forEach(labels => {
                 const label = Object.keys(labels)[0];
@@ -369,7 +502,6 @@ async function projectLeaderBoard(req) {
                             lb.annotated += 1;
                         }
                     }
-
                 });
             });
             result.labels.push(lb);
@@ -863,5 +995,10 @@ module.exports = {
     editProjectLabels,
     deleteProjectLables,
     getProjectsTextTabular,
-    addAnnotatorFromSlack
+    addAnnotatorFromSlack,
+    prepareSelectedHierarchicalLabels,
+    matchUserInputsWithHierarchicalLabels,
+    initHierarchicalLabelsCase,
+    reduceHierarchicalUnselectedLabel,
+
 }
