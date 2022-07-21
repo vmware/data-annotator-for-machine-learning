@@ -132,7 +132,7 @@ async function generateAnnotateModalBlocks(sr, projectInfo) {
     // add flag and skip
     let elements = [];
     if (!sr[0].flag.silence) {
-        let flagBtn = await generateObj("button", await generateObj("plain_text", 'Flag'), 'danger', sr[0]._id, 'flag_btn')
+        let flagBtn = await generateObj("button", await generateObj("plain_text", 'Flag to Review'), 'danger', sr[0]._id, 'flag_btn')
         elements.push(flagBtn)
     }
     let skipBtn = await generateObj("button", await generateObj("plain_text", 'Skip'), 'primary', sr[0]._id, 'skip_btn');

@@ -30,9 +30,8 @@ async function getProjects(req) {
     if (src == SRCS.ANNOTATE) {
         console.log(`[ PROJECT ] Service query current annotator project list`);
         const annotateConditions = { annotator: { $regex: email } };
-        const logReviewConditions = { creator: { $regex: email } };
-        condition = { annotator: { $exists: true }, $where: 'this.annotator.length>0' };
-        condition.$or = [annotateConditions, logReviewConditions];
+        const logReviewConditions = { creator: { $regex: email }, annotator: { $not: { $size: 0 } } };
+        condition = { $or: [annotateConditions, logReviewConditions] };
     } else if (src == SRCS.PROJECTS && user.role != "Annotator") {
         condition = { creator: { $regex: email } };
     } else if (src == SRCS.ADMIN && user.role == "Admin") {
@@ -967,7 +966,7 @@ async function getProjectsTextTabular(email) {
     ];
     condition.$or = [
         { annotator: { $regex: email } },
-        { assignSlackChannels: { $exists: true }, $where: 'this.assignSlackChannels.length>0' }
+        { assignSlackChannels: { $exists: true } }
     ];
     return mongoDb.findByConditions(ProjectModel, condition, project, options);
 }

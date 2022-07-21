@@ -39,7 +39,7 @@ DAML project includes three components:
 
 - For the docker version usage to see [run with docker documentation](RUN-WITH-DOCKER.md)
 - For development environment and build configuration see [build documentation](BUILD.md)
-- For the slack integration configuration see [manifest documentation](manifest.yml)
+- For the slack integration configuration see [manifest documentation](docs/manifest.yml)
 
 ## Contributing
 
