@@ -39,3 +39,26 @@ SPDX-License-Identifier: Apache-2.0
 ::ng-deep .footerLeft .modal-footer {
   display: inherit !important;
 }
+
+@media (max-width: 1440px) {
+  .colwidth {
+    max-width: 220px;
+  }
+}
+
+@media (min-width: 1441px) {
+  .colwidth {
+    max-width: 300px;
+  }
+}
+
+.disableTree {
+  ::ng-deep .clr-checkbox-wrapper .clr-control-label {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  ::ng-deep .clr-checkbox-wrapper input[type='checkbox'] {
+    pointer-events: none;
+  }
+}

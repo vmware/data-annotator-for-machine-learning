@@ -159,11 +159,20 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <button class="btn btn-sm add-doc" type="button" (click)="onAddingDataset($event)">
                   {{ msg.type == 'image' ? 'Upload Images' : 'Upload File' }}
                 </button>
+                <button
+                  *ngIf="msg.type == 'text' || msg.type == 'tabular' || msg.type == 'ner'"
+                  class="btn btn-sm add-doc"
+                  type="button"
+                  (click)="openWizard()"
+                >
+                  set data
+                </button>
                 <!-- <button class="btn btn-sm add-doc" type="button" (click)="onQuerySQL()">From
                   Supercollider</button> -->
               </div>
             </div>
             <!-- this is the csv data preview -->
+
             <div
               class="form-group clr-row"
               *ngIf="isShowSetHeader == 'csv' || isShowSetHeader == 'tabular'"
@@ -707,7 +716,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       name="labelType"
                       (change)="changeLabelType($event)"
                     />
-                    <label for="uploadLabel">&nbsp;upload a taxonomy file</label>
+                    <label for="uploadLabel">&nbsp;Upload Taxonomy File</label>
                   </clr-radio-wrapper>
                 </label>
               </div>
@@ -1730,3 +1739,9 @@ SPDX-License-Identifier: Apache-2.0 -->
   (onCloseTreeDialog)="onCloseTreeDialog()"
   [treeData]="treeData"
 ></app-treeview-modal>
+
+<app-set-data
+  *ngIf="isShowSetdataWizard"
+  [wizardData]="wizardData"
+  (wizardOuter)="receiveWizardInfo($event)"
+></app-set-data>

@@ -204,7 +204,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   treeData: any;
   expandValue: boolean = false;
   expandName: string = 'Expand';
-
+  textBoxResizedHeight: string;
   sliderEvent() {
     if (this.numericOptions.step === 1) {
       if (parseInt(this.labelChoose) !== this.numericValue) {
@@ -4113,6 +4113,19 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.expandName = 'Collapse';
     } else {
       this.expandName = 'Expand';
+    }
+  }
+
+  resizeBox() {
+    var target = document.querySelector('.textBox');
+    if (target) {
+      const config = { attributes: true, childList: true, subtree: true };
+      var that = this;
+      const callback = function (mutationList, observer) {
+        that.textBoxResizedHeight = `${mutationList[0].target.clientHeight}px`;
+      };
+      const observer = new MutationObserver(callback);
+      observer.observe(target, config);
     }
   }
 }

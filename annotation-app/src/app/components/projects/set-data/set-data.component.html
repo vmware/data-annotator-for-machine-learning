@@ -1,0 +1,116 @@
+<clr-wizard #wizard [(clrWizardOpen)]="open">
+  <clr-wizard-title>Set Data</clr-wizard-title>
+
+  <clr-wizard-button [type]="'cancel'">Close</clr-wizard-button>
+  <clr-wizard-button [type]="'previous'">Previous</clr-wizard-button>
+  <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+  <clr-wizard-button [type]="'finish'">Done</clr-wizard-button>
+  <!-- preview csv -->
+  <clr-wizard-page>
+    <ng-template clrPageTitle>Preview CSV</ng-template>
+    <div class="previewTable">
+      <table class="table" style="margin-top: 0rem !important">
+        <thead>
+          <tr>
+            <th
+              id="itemHeaderCsv"
+              aria-describedby="previewTable"
+              class="left"
+              *ngFor="let itemHeader of wizardData.previewHeadDatas"
+              style="vertical-align: baseline; border-right: 1px solid #ccc"
+            >
+              {{ itemHeader }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let previewCont of wizardData.previewContentDatas">
+            <td class="left" *ngFor="let item of previewCont">{{ item }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </clr-wizard-page>
+  <!-- select label -->
+  <clr-wizard-page [clrWizardPageNextDisabled]="!selectLabels || !formPageOne.valid">
+    <ng-template clrPageTitle
+      >Select the column which you intend to calculate labels from</ng-template
+    >
+    <ng-template clrPageNavTitle>Select Label Column</ng-template>
+    <form clrForm #formPageOne="ngForm">
+      <app-clr-select
+        [data]="clrSelectData"
+        (valueChange)="onReceiveSelectedItem($event)"
+      ></app-clr-select>
+    </form>
+  </clr-wizard-page>
+  <!-- select text -->
+  <clr-wizard-page
+    [clrWizardPageNextDisabled]="
+      selectDescription.length == 0 || !formPageOne.valid || !formPageTwo.valid
+    "
+  >
+    <ng-template clrPageTitle>Select the columns to present to annotators</ng-template>
+    <ng-template clrPageNavTitle>Select Text Column</ng-template>
+    <form clrForm #formPageTwo="ngForm">
+      <clr-datagrid [(clrDgSelected)]="selectDescription">
+        <clr-dg-column class="ellipsis-datagrid" style="color: #000; margin-left: 5px"
+          >Column Name</clr-dg-column
+        >
+
+        <clr-dg-row *clrDgItems="let column of textColumns; let i = index" [clrDgItem]="column">
+          <clr-dg-cell class="ellipsis-datagrid" style="color: #000; margin-left: 5px">{{
+            column
+          }}</clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+    </form>
+  </clr-wizard-page>
+  <!-- confirm form -->
+  <clr-wizard-page
+    [clrWizardPageNextDisabled]="!formPageOne.valid || !formPageTwo.valid"
+    clrWizardPagePreventDefault="true"
+    (clrWizardPageOnCommit)="onCommit()"
+    (clrWizardPageOnCancel)="doCancel()"
+    (clrWizardPagePrevious)="goBack()"
+  >
+    <ng-template clrPageTitle>Set Data</ng-template>
+    <ng-template clrPageNavTitle>
+      <span *ngIf="formPageOne.valid && formPageTwo.valid && selectDescription.length > 0">
+        Set Data
+      </span>
+      <span *ngIf="!formPageOne.valid || !formPageTwo.valid || selectDescription.length == 0">
+        Not ready yet
+      </span>
+    </ng-template>
+    <div *ngIf="formPageOne.valid && formPageTwo.valid">
+      <p>Please confirm that you are going to set data with all the below infomation.</p>
+      <section>
+        <form clrForm #formPageThree="ngForm">
+          <fieldset [disabled]="true">
+            <div class="clr-row">
+              <label>Selected Label Column: </label>
+              <input class="clr-input" type="text" disabled placeholder="{{ selectLabels }}" />
+            </div>
+            <div class="clr-row">
+              <label>Selected Text Column: </label>
+              <clr-datagrid [(clrDgSelected)]="selectDescription">
+                <clr-dg-column class="ellipsis-datagrid" style="color: #000; margin-left: 5px"
+                  >Column Name</clr-dg-column
+                >
+                <clr-dg-row
+                  *clrDgItems="let column of textColumns; let i = index"
+                  [clrDgItem]="column"
+                >
+                  <clr-dg-cell class="ellipsis-datagrid" style="color: #000; margin-left: 5px">{{
+                    column
+                  }}</clr-dg-cell>
+                </clr-dg-row>
+              </clr-datagrid>
+            </div>
+          </fieldset>
+        </form>
+      </section>
+    </div>
+  </clr-wizard-page>
+</clr-wizard>

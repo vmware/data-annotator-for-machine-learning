@@ -7,17 +7,16 @@ import {
   Component,
   OnInit,
   Input,
-  Output,
-  EventEmitter,
   Renderer2,
   ViewChild,
   ElementRef,
+  ChangeDetectorRef,
 } from '@angular/core';
-import { FormGroup, FormBuilder, FormArray, FormControl } from '@angular/forms';
-import { Observable, Subject } from 'rxjs';
+import { FormGroup, FormBuilder, FormArray } from '@angular/forms';
+import { Observable } from 'rxjs';
 import { AvaService } from '../../services/ava.service';
 import { FormValidatorUtil } from '../../shared/form-validators/form-validator-util';
-import { DatasetData, Dataset, UploadData } from '../../model/index';
+import { DatasetData, UploadData } from '../../model/index';
 import { UserAuthService } from '../../services/user-auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DatasetUtil } from 'app/model/index';
@@ -138,6 +137,8 @@ export class CreateNewComponent implements OnInit {
   showTreeLabelTip: any;
   showTreeView: boolean = false;
   treeData: any;
+  isShowSetdataWizard: boolean = false;
+  wizardData: any;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -152,6 +153,7 @@ export class CreateNewComponent implements OnInit {
     private toolService: ToolService,
     private commonService: CommonService,
     private emailService: EmailService,
+    private ref: ChangeDetectorRef,
   ) {
     this.user = this.userAuthService.loggedUser().email;
     this.page = 1;
@@ -1040,15 +1042,22 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-  papaParse(location, indexArray) {
+  public papaParse(location, selectedLabelColumn, selectedTextColumn) {
     let flag = [];
     let count = 0;
     let invalidCount = 0;
-    const selectedLabel = this.dsDialogForm.get('selectLabels').value;
-    let selectedLabelIndex = this.previewHeadDatas.indexOf(selectedLabel);
+    // const selectedLabel = this.dsDialogForm.get('selectLabels').value;
+    let indexArray = [];
+    let selectedLabelIndex = this.previewHeadDatas.indexOf(selectedLabelColumn);
     if (this.projectType === 'ner') {
       selectedLabelIndex = -1;
+      this.selectColumns = [this.dsDialogForm.get('selectedText').value];
     }
+
+    for (let k = 0; k < selectedTextColumn.length; k++) {
+      indexArray.push(this.previewHeadDatas.indexOf(selectedTextColumn[k]));
+    }
+
     this.papa.parse(location, {
       header: false,
       download: true,
@@ -1100,11 +1109,13 @@ export class CreateNewComponent implements OnInit {
         this.changeSetData = false;
         this.changePreview = false;
         this.toEvenlyDistributeTicket();
+        // to close wizard
+        this.wizardData['status'] = true;
       },
     });
   }
 
-  sureSet() {
+  sureSet(selectedLabelColumn, selectedTextColumn) {
     if (this.setDataError || this.changePreview || this.changeSetData || this.msg.type == 'ner') {
       this.setDataComplete = true;
       this.setDataError = false;
@@ -1122,18 +1133,18 @@ export class CreateNewComponent implements OnInit {
       this.dsDialogForm.get('multipleLabel').setValue(null);
       this.isMultipleLabel = null;
 
-      const indexArray = [];
-      if (this.msg.type == 'ner') {
-        this.selectColumns = [this.dsDialogForm.get('selectedText').value];
-      }
-      for (let k = 0; k < this.selectColumns.length; k++) {
-        indexArray.push(this.previewHeadDatas.indexOf(this.selectColumns[k]));
-      }
+      // const indexArray = [];
+      // if (this.msg.type == 'ner') {
+      //   this.selectColumns = [this.dsDialogForm.get('selectedText').value];
+      // }
+      // for (let k = 0; k < this.selectColumns.length; k++) {
+      //   indexArray.push(this.previewHeadDatas.indexOf(this.selectColumns[k]));
+      // }
 
       if (this.env.config.enableAWSS3) {
         this.avaService.getCloudUrl(this.dataSetId).subscribe(
           (res) => {
-            this.papaParse(res, indexArray);
+            this.papaParse(res, selectedLabelColumn, selectedTextColumn);
           },
           (error) => {
             console.log('Error:', error);
@@ -1150,7 +1161,8 @@ export class CreateNewComponent implements OnInit {
           }&token=${
             JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
           }`,
-          indexArray,
+          selectedLabelColumn,
+          selectedTextColumn,
         );
 
         // to post params to get file info with set-data api
@@ -1636,5 +1648,24 @@ export class CreateNewComponent implements OnInit {
 
   onCloseTreeDialog() {
     this.showTreeView = false;
+  }
+
+  openWizard() {
+    this.isShowSetdataWizard = true;
+    this.wizardData = {
+      previewHeadDatas: this.previewHeadDatas,
+      previewContentDatas: this.previewContentDatas,
+      chooseLabel: this.chooseLabel,
+      // fileLocation: this.env.config.enableAWSS3 ? this.dataSetId : this.fileLocation,
+      projectType: this.projectType,
+    };
+    console.log(1612, this.wizardData);
+  }
+
+  receiveWizardInfo(e) {
+    this.wizardData['status'] = true;
+    this.ref.detectChanges();
+
+    console.log(1621, e, this.wizardData);
   }
 }
