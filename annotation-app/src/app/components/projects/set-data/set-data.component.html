@@ -1,15 +1,24 @@
-<clr-wizard #wizard [(clrWizardOpen)]="open">
-  <clr-wizard-title>Set Data</clr-wizard-title>
+<!-- Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
 
-  <clr-wizard-button [type]="'cancel'">Close</clr-wizard-button>
-  <clr-wizard-button [type]="'previous'">Previous</clr-wizard-button>
-  <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
-  <clr-wizard-button [type]="'finish'">Done</clr-wizard-button>
+<clr-wizard #wizard [clrWizardOpen]="true" (clrWizardOpenChange)="clrWizardOpenChange($event)">
+  <clr-wizard-title>Set Data</clr-wizard-title>
+  <clr-wizard-button *ngIf="!isLoading" type="cancel">Cancel</clr-wizard-button>
+  <clr-wizard-button *ngIf="!isLoading" [type]="'previous'">Previous</clr-wizard-button>
+  <clr-wizard-button *ngIf="!isLoading" [type]="'next'">Next</clr-wizard-button>
+  <clr-wizard-button *ngIf="!isLoading" [type]="'finish'">Done</clr-wizard-button>
+  <clr-wizard-button *ngIf="isLoading" style="max-width: 25rem">
+    <span class="spinner spinner-inline"> Loading... </span>&nbsp;&nbsp;
+    <span title="Data processing for large datasets may take up to 60 seconds...">
+      Data processing for large datasets may take up to 60 seconds...
+    </span></clr-wizard-button
+  >
+
   <!-- preview csv -->
-  <clr-wizard-page>
+  <clr-wizard-page #firstPage>
     <ng-template clrPageTitle>Preview CSV</ng-template>
     <div class="previewTable">
-      <table class="table" style="margin-top: 0rem !important">
+      <table aria-describedby="preview data" class="table">
         <thead>
           <tr>
             <th
@@ -17,7 +26,7 @@
               aria-describedby="previewTable"
               class="left"
               *ngFor="let itemHeader of wizardData.previewHeadDatas"
-              style="vertical-align: baseline; border-right: 1px solid #ccc"
+              style="vertical-align: baseline; border-right: 2px solid white"
             >
               {{ itemHeader }}
             </th>
@@ -32,11 +41,19 @@
     </div>
   </clr-wizard-page>
   <!-- select label -->
-  <clr-wizard-page [clrWizardPageNextDisabled]="!selectLabels || !formPageOne.valid">
-    <ng-template clrPageTitle
-      >Select the column which you intend to calculate labels from</ng-template
-    >
-    <ng-template clrPageNavTitle>Select Label Column</ng-template>
+  <clr-wizard-page
+    [clrWizardPageNextDisabled]="!selectedDropDownItem || !formPageOne.valid"
+    (clrWizardPageOnLoad)="clrWizardPageOnLoad('page2')"
+    #secondPage
+  >
+    <ng-template clrPageTitle>{{
+      wizardData.projectType === 'ner'
+        ? 'Please select a single text column which you intend to present to annotators to annotate'
+        : 'Please select the column which you intend to calculate labels from'
+    }}</ng-template>
+    <ng-template clrPageNavTitle>{{
+      wizardData.projectType === 'ner' ? 'Select Text Column' : 'Select Label Column'
+    }}</ng-template>
     <form clrForm #formPageOne="ngForm">
       <app-clr-select
         [data]="clrSelectData"
@@ -46,67 +63,139 @@
   </clr-wizard-page>
   <!-- select text -->
   <clr-wizard-page
+    #thirdPage
+    (clrWizardPageOnLoad)="clrWizardPageOnLoad('page3')"
     [clrWizardPageNextDisabled]="
-      selectDescription.length == 0 || !formPageOne.valid || !formPageTwo.valid
+      wizardData.projectType === 'ner' ? false : selectDescription.length == 0
     "
   >
-    <ng-template clrPageTitle>Select the columns to present to annotators</ng-template>
-    <ng-template clrPageNavTitle>Select Text Column</ng-template>
+    <ng-template clrPageTitle>{{
+      wizardData.projectType === 'ner'
+        ? 'Select the columns to present to annotators about the existing labels (optional) or helpful text (optional)'
+        : 'Select the columns to present to annotators'
+    }}</ng-template>
+    <ng-template clrPageNavTitle>{{
+      wizardData.projectType === 'ner' ? 'Select Helpful Column' : 'Select Text Column'
+    }}</ng-template>
     <form clrForm #formPageTwo="ngForm">
-      <clr-datagrid [(clrDgSelected)]="selectDescription">
-        <clr-dg-column class="ellipsis-datagrid" style="color: #000; margin-left: 5px"
-          >Column Name</clr-dg-column
+      <div class="checkboxDatagrid">
+        <clr-datagrid
+          class="previewTable"
+          *ngIf="wizardData.projectType != 'ner'"
+          [(clrDgSelected)]="selectDescription"
         >
+          <clr-dg-column class="ellipsis-datagrid" style="color: #000; margin-left: 5px"
+            >Column Name</clr-dg-column
+          >
 
-        <clr-dg-row *clrDgItems="let column of textColumns; let i = index" [clrDgItem]="column">
-          <clr-dg-cell class="ellipsis-datagrid" style="color: #000; margin-left: 5px">{{
-            column
-          }}</clr-dg-cell>
-        </clr-dg-row>
-      </clr-datagrid>
+          <clr-dg-row
+            *clrDgItems="let column of checkboxColumns; let i = index"
+            [clrDgItem]="column"
+          >
+            <clr-dg-cell class="ellipsis-datagrid" style="color: #000; margin-left: 5px">{{
+              column
+            }}</clr-dg-cell>
+          </clr-dg-row>
+        </clr-datagrid>
+        <clr-datagrid *ngIf="wizardData.projectType === 'ner'">
+          <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
+          <clr-dg-column class="ellipsis-datagrid">Existing Labels</clr-dg-column>
+          <clr-dg-column class="ellipsis-datagrid">Helpful Text</clr-dg-column>
+          <clr-dg-row
+            *clrDgItems="let column of checkboxColumns; let i = index"
+            [clrDgItem]="column"
+          >
+            <clr-dg-cell class="ellipsis-datagrid" style="color: #000; word-break: break-all">{{
+              column.name
+            }}</clr-dg-cell>
+            <clr-dg-cell class="ellipsis-datagrid">
+              <input
+                type="checkbox"
+                clrCheckbox
+                name="options"
+                [ngClass]="{
+                  'disabled-checkbox': column.checkboxDisabled
+                }"
+                [disabled]="column.checkboxDisabled"
+                [(ngModel)]="column.labelChecked"
+                (ngModelChange)="changeCheckboxLabel(column.name)"
+                [ngModelOptions]="{ standalone: true }"
+              />
+            </clr-dg-cell>
+            <clr-dg-cell class="ellipsis-datagrid">
+              <input
+                type="checkbox"
+                clrCheckbox
+                name="options"
+                [(ngModel)]="column.helptextChecked"
+                (ngModelChange)="changeCheckboxHelptext(column.name)"
+                [ngModelOptions]="{ standalone: true }"
+              />
+            </clr-dg-cell>
+          </clr-dg-row>
+        </clr-datagrid>
+      </div>
     </form>
   </clr-wizard-page>
   <!-- confirm form -->
   <clr-wizard-page
-    [clrWizardPageNextDisabled]="!formPageOne.valid || !formPageTwo.valid"
+    #lastPage
     clrWizardPagePreventDefault="true"
     (clrWizardPageOnCommit)="onCommit()"
     (clrWizardPageOnCancel)="doCancel()"
-    (clrWizardPagePrevious)="goBack()"
+    (clrWizardPagePrevious)="goBack($event)"
+    (clrWizardPageOnLoad)="clrWizardPageOnLoad('page4')"
   >
     <ng-template clrPageTitle>Set Data</ng-template>
     <ng-template clrPageNavTitle>
-      <span *ngIf="formPageOne.valid && formPageTwo.valid && selectDescription.length > 0">
+      <span
+        *ngIf="
+          wizardData.projectType === 'ner' ? selectedDropDownItem : selectDescription.length > 0
+        "
+      >
         Set Data
       </span>
-      <span *ngIf="!formPageOne.valid || !formPageTwo.valid || selectDescription.length == 0">
+      <span
+        *ngIf="
+          wizardData.projectType === 'ner' ? !selectedDropDownItem : selectDescription.length === 0
+        "
+      >
         Not ready yet
       </span>
     </ng-template>
-    <div *ngIf="formPageOne.valid && formPageTwo.valid">
-      <p>Please confirm that you are going to set data with all the below infomation.</p>
+    <div>
       <section>
-        <form clrForm #formPageThree="ngForm">
+        <form clrForm>
+          <clr-alert
+            style="margin-bottom: 0.5rem"
+            *ngIf="wizardData.status && wizardData.status.msg"
+            [clrAlertType]="wizardData.status.ok ? 'warning' : 'danger'"
+          >
+            <clr-alert-item>
+              <span class="alert-text">
+                {{ wizardData.status?.msg }}
+              </span>
+            </clr-alert-item>
+          </clr-alert>
           <fieldset [disabled]="true">
+            <legend style="font-size: 1.2em !important; font-weight: bold">
+              Please confirm that you are going to set data with all the below infomation.
+            </legend>
             <div class="clr-row">
-              <label>Selected Label Column: </label>
-              <input class="clr-input" type="text" disabled placeholder="{{ selectLabels }}" />
+              <label>{{
+                wizardData.projectType === 'ner' ? 'Select Text Column' : 'Select Label Column'
+              }}</label>
+              <input
+                class="clr-input"
+                type="text"
+                name="selectedDropDownItem"
+                [(ngModel)]="selectedDropDownItem"
+              />
             </div>
-            <div class="clr-row">
-              <label>Selected Text Column: </label>
-              <clr-datagrid [(clrDgSelected)]="selectDescription">
-                <clr-dg-column class="ellipsis-datagrid" style="color: #000; margin-left: 5px"
-                  >Column Name</clr-dg-column
-                >
-                <clr-dg-row
-                  *clrDgItems="let column of textColumns; let i = index"
-                  [clrDgItem]="column"
-                >
-                  <clr-dg-cell class="ellipsis-datagrid" style="color: #000; margin-left: 5px">{{
-                    column
-                  }}</clr-dg-cell>
-                </clr-dg-row>
-              </clr-datagrid>
+            <div class="clr-row" #formDatagridConfirm>
+              <label>{{
+                wizardData.projectType === 'ner' ? 'Select Helpful Column' : 'Select Text Column'
+              }}</label>
             </div>
           </fieldset>
         </form>

@@ -9,7 +9,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
   selector: 'app-clr-select',
   template: `
     <clr-select-container>
-      <label *ngIf="data.labelText">{{ data.labelText }}</label>
+      <label *ngIf="data.labelText" style="min-width:30%">{{ data.labelText }}</label>
       <select
         clrSelect
         #clrSelect
@@ -25,7 +25,13 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
       <clr-control-error>This field is required!</clr-control-error>
     </clr-select-container>
   `,
-  styles: [],
+  styles: [
+    `
+      ::ng-deep app-clr-select .clr-control-container {
+        max-width: 68%;
+      }
+    `,
+  ],
 })
 export class ClrSelectComponent {
   @Output() valueChange = new EventEmitter();
