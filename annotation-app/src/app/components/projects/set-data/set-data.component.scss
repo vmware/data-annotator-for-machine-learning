@@ -1,7 +1,42 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
 .previewTable {
   max-height: 500px;
   overflow: hidden;
   overflow-x: auto;
   overflow-y: auto;
   margin-top: 0rem;
+}
+
+::ng-deep input.disabled-checkbox + label::before {
+  background-color: #eee;
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.checkboxDatagridCopy {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+::ng-deep .clr-wizard .clr-wizard-stepnav-wrapper {
+  min-width: 8rem !important;
+  width: 20%;
+}
+
+fieldset {
+  label {
+    min-width: 30%;
+  }
+  input {
+    width: 98%;
+    max-width: 69%;
+  }
+  .checkboxDatagridCopy {
+    width: 98%;
+    max-width: 69%;
+  }
 }

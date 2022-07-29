@@ -319,8 +319,7 @@ export class DatasetValidator {
       if (!control.parent) {
         return null;
       }
-
-      if (control.value == null || control.value == undefined) {
+      if (!control.value) {
         return { msg: { value: DatasetValidator.REQUIRED_FIELD } };
       }
 
@@ -421,14 +420,6 @@ export class DatasetValidator {
   private static validateFileSize(inputFile: any): boolean {
     const size = inputFile.size;
     return true;
-
-    // 500 MB
-    // if (inputFile.size < 524288000) {
-    //   return true;
-    // }
-    // else {
-    //   return false;
-    // }
   }
 
   private static isEmpty(str): boolean {
