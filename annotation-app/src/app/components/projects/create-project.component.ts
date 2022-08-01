@@ -635,33 +635,7 @@ export class CreateNewComponent implements OnInit {
   }
 
   selectedDatasets(e) {
-    this.nonEnglish = 0;
-    this.chooseLabel = [];
-    this.previewHeadDatas = [];
-    this.previewContentDatas = [];
-    this.totalCase = 0;
-    this.previewTotalData = [];
-    this.dsDialogForm.get('totalRow').setValue(0);
-    this.categoryList = [];
-    this.minLabel = null;
-    this.maxLabel = null;
-    this.labelType = '';
-    this.isNumeric = null;
-    this.isShowNumeric = false;
-    this.dropdownSelected = null;
-    this.checkboxChecked = [];
-    this.helpfulText = [];
-
-    this.dsDialogForm.get('multipleLabel').setValue(null);
-    this.isMultipleLabel = null;
-    this.dsDialogForm.get('isShowFilename').setValue(false);
-    this.isMutilNumericLabel = false;
-    this.isUploadLabel = false;
-    this.dsDialogForm.get('mutilLabelArray').reset();
-    while (this.mutilLabelArray.length > 2) {
-      this.mutilLabelArray.removeAt(2);
-    }
-
+    this.clearFormdata();
     this.datasetsList.forEach((dataset) => {
       if (dataset.dataSetName === e.target.value) {
         const choosedDataset = dataset;
@@ -779,6 +753,11 @@ export class CreateNewComponent implements OnInit {
       this.dsDialogForm.get('max').setValue(this.maxLabel);
       this.isShowNumeric = true;
     }
+
+    if (this.projectType === 'ner') {
+      this.dsDialogForm.get('labels').setValue([...this.categoryList, ...this.checkboxChecked]);
+    }
+
     this.toEvenlyDistributeTicket();
     this.inputMsgTOWizard(
       true,
@@ -855,19 +834,9 @@ export class CreateNewComponent implements OnInit {
   }
 
   sureSet() {
-    this.nonEnglish = 0;
-    this.totalCase = 0;
-    this.previewTotalData = [];
-    this.dsDialogForm.get('totalRow').setValue(0);
+
+    this.clearFormdata('set-data');
     this.toEvenlyDistributeTicket();
-    if (this.projectType !== 'ner') {
-      this.dsDialogForm.get('labels').setValue([]);
-      this.categoryList = [];
-    }
-    this.dsDialogFormValidationReset('min', null, null);
-    this.dsDialogFormValidationReset('max', null, null);
-    this.dsDialogFormValidationReset('multipleLabel', null, null);
-    this.isMultipleLabel = null;
 
     if (this.env.config.enableAWSS3) {
       this.avaService.getCloudUrl(this.dataSetId).subscribe(
@@ -1104,6 +1073,9 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogFormValidationReset('max', undefined, DatasetValidator.minNumber());
     this.slackList = [];
     this.dsDialogFormValidationReset('assignee', undefined, DatasetValidator.required());
+    Number(this.minLabel) >= Number(this.maxLabel)
+      ? (this.sizeError = true)
+      : (this.sizeError = false);
   }
 
   validBoth() {
@@ -1317,29 +1289,64 @@ export class CreateNewComponent implements OnInit {
     };
   }
 
+
   closeWizard(e) {
     this.isShowSetdataWizard = false;
   }
-
   receiveWizardInfo(e) {
     this.dropdownSelected = e.dropdownSelected;
     this.checkboxChecked = e.checkboxChecked;
     this.helpfulText = e.helpfulText ? e.helpfulText : [];
-    if (this.projectType === 'ner') {
-    } else {
+    this.sureSet();
+  }
+
+ inputMsgTOWizard(code, msg?) {
+    // to close wizard
+    if (this.projectType !== 'ner') {
       if (this.dropdownSelected === 'No Labels') {
         this.isShowLabelRadio = true;
       } else {
         this.isShowLabelRadio = false;
       }
     }
-    this.sureSet();
-  }
-
-  inputMsgTOWizard(code, msg?) {
-    // to close wizard
     this.wizardData['status'] = { ok: code, msg };
     let wizardDataCopy = _.cloneDeep(this.wizardData);
     this.wizardData = wizardDataCopy;
+  }
+
+    clearFormdata(from?) {
+    if (from !== 'set-data') {
+      this.chooseLabel = [];
+      this.previewHeadDatas = [];
+      this.previewContentDatas = [];
+      this.dropdownSelected = null;
+      this.checkboxChecked = [];
+      this.helpfulText = [];
+    }
+    if (this.projectType !== 'ner') {
+      this.dsDialogForm.get('labels').setValue([]);
+      this.categoryList = [];
+    }
+    this.isShowLabelRadio = false;
+    this.nonEnglish = 0;
+    this.totalCase = 0;
+    this.previewTotalData = [];
+    this.dsDialogForm.get('totalRow').setValue(0);
+    this.minLabel = null;
+    this.maxLabel = null;
+    this.dsDialogForm.get('min').setValue(null);
+    this.dsDialogForm.get('max').setValue(null);
+    this.labelType = '';
+    this.isNumeric = null;
+    this.isShowNumeric = false;
+    this.dsDialogForm.get('multipleLabel').setValue(null);
+    this.isMultipleLabel = null;
+    this.dsDialogForm.get('isShowFilename').setValue(false);
+    this.isMutilNumericLabel = false;
+    this.isUploadLabel = false;
+    this.dsDialogForm.get('mutilLabelArray').reset();
+    while (this.mutilLabelArray.length > 2) {
+      this.mutilLabelArray.removeAt(2);
+    }
   }
 }
