@@ -1050,7 +1050,7 @@ async function queryTicketsForReview(req) {
     //1. query need reReview tickets
     let ticket = await reReviewQueryForReview(mp, user);
     if (!ticket[0]) {
-        if(order != QUERYORDER.MOST_UNCERTAIN && mp.project.maxAnnotation > 1){
+        if(order == QUERYORDER.MOST_UNCERTAIN && mp.project.maxAnnotation > 1){
             ticket = await mostUnscertainQueryForReview(mp, user, skip)
         }else{
             //2.user defined the query rules
