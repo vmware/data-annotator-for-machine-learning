@@ -68,10 +68,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <clr-dg-column [clrDgField]="'dataset.categoryList.length'" class="ellipsis-datagrid"
       >Labels No.</clr-dg-column
     >
-    <clr-dg-column
-      [clrDgField]="'categoryList'"
-      class="ellipsis-datagrid labels"
-      style="max-width: 400px"
+    <clr-dg-column [clrDgField]="'categoryList'" class="ellipsis-datagrid labels colwidth"
       >Labels
     </clr-dg-column>
     <clr-dg-column [clrDgField]="'completeCase'" class="ellipsis-datagrid">Downloads</clr-dg-column>
@@ -112,7 +109,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </clr-dg-cell>
         <clr-dg-cell
           *ngIf="dataset.labelType !== 'HTL'"
-          class="cellWordBreak"
+          class="cellWordBreak colwidth"
           title="{{
             dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
               ? dataset.min + '--' + dataset.max
@@ -120,7 +117,6 @@ SPDX-License-Identifier: Apache-2.0 -->
               ? dataset.mutilNumbericLabels
               : dataset.categoryList
           }}"
-          style="max-width: 400px"
         >
           {{
             dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel

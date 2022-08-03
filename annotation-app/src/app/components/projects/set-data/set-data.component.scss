@@ -2,24 +2,44 @@
 Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
+table {
+  border-collapse: collapse;
+  margin-top: 0rem !important;
+  border-color: #eee !important;
+  th {
+    border-bottom: #eee !important;
+  }
+}
+
+table thead tr th {
+  /* Important */
+  background-color: #eee;
+  position: -webkit-sticky;
+  position: sticky;
+  z-index: 100;
+  top: -1px;
+}
 
 .previewTable {
-  max-height: 500px;
+  max-height: 54vh;
   overflow: hidden;
   overflow-x: auto;
   overflow-y: auto;
   margin-top: 0rem;
 }
 
+::ng-deep clr-wizard-page {
+  padding-bottom: unset !important;
+}
+
 ::ng-deep input.disabled-checkbox + label::before {
-  background-color: #eee;
+  background-color: #999;
   cursor: not-allowed;
-  opacity: 0.3;
+  opacity: 0.6;
 }
 
 .checkboxDatagridCopy {
   cursor: not-allowed;
-  pointer-events: none;
 }
 
 ::ng-deep .clr-wizard .clr-wizard-stepnav-wrapper {
@@ -28,12 +48,28 @@ SPDX-License-Identifier: Apache-2.0
 }
 
 fieldset {
+  clr-datagrid {
+    max-height: 44vh;
+    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: auto;
+    margin-top: 0rem;
+  }
   label {
     min-width: 30%;
   }
   input {
     width: 98%;
     max-width: 69%;
+  }
+  ::ng-deep .datagrid-row {
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+  ::ng-deep .clr-checkbox-wrapper input[type='checkbox'] + label::before {
+    background-color: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
   }
   .checkboxDatagridCopy {
     width: 98%;

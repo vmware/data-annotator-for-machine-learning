@@ -753,11 +753,9 @@ export class CreateNewComponent implements OnInit {
       this.dsDialogForm.get('max').setValue(this.maxLabel);
       this.isShowNumeric = true;
     }
-
     if (this.projectType === 'ner') {
       this.dsDialogForm.get('labels').setValue([...this.categoryList, ...this.checkboxChecked]);
     }
-
     this.toEvenlyDistributeTicket();
     this.inputMsgTOWizard(
       true,
@@ -834,10 +832,8 @@ export class CreateNewComponent implements OnInit {
   }
 
   sureSet() {
-
     this.clearFormdata('set-data');
     this.toEvenlyDistributeTicket();
-
     if (this.env.config.enableAWSS3) {
       this.avaService.getCloudUrl(this.dataSetId).subscribe(
         (res) => {
@@ -1289,7 +1285,6 @@ export class CreateNewComponent implements OnInit {
     };
   }
 
-
   closeWizard(e) {
     this.isShowSetdataWizard = false;
   }
@@ -1300,7 +1295,7 @@ export class CreateNewComponent implements OnInit {
     this.sureSet();
   }
 
- inputMsgTOWizard(code, msg?) {
+  inputMsgTOWizard(code, msg?) {
     // to close wizard
     if (this.projectType !== 'ner') {
       if (this.dropdownSelected === 'No Labels') {
@@ -1314,7 +1309,7 @@ export class CreateNewComponent implements OnInit {
     this.wizardData = wizardDataCopy;
   }
 
-    clearFormdata(from?) {
+  clearFormdata(from?) {
     if (from !== 'set-data') {
       this.chooseLabel = [];
       this.previewHeadDatas = [];
