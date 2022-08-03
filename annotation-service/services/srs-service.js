@@ -1096,12 +1096,12 @@ async function mostUnscertainQueryForReview(mp, user, skip){
         let labelsArray = [];
         let pathsArray = [];
         await initHierarchicalLabelsCase(labels, "", "", labelsArray, pathsArray);
-        
-        await labelsArray.forEach(item => {
-            labelCase[item] = 0;
-        });
         // calculate labeld case number
         for await(const srs of tickets) {
+            // init label headers
+            await labelsArray.forEach(item => {
+                labelCase[item] = 0;
+            });
             for await (const input of srs.userInputs) {
                 const userInputLabel = input.problemCategory;
                 for (const i in pathsArray) {
@@ -1115,12 +1115,12 @@ async function mostUnscertainQueryForReview(mp, user, skip){
             srs['probab'] = await Object.values(probab).sort((x,y)=> y-x);
         }
     }else{
-        // init label headers
-        await mp.project.categoryList.split(",").forEach(item => {
-            labelCase[item] = 0;
-        });
         // calculate labeld case number
         for await(const srs of tickets) {
+            // init label headers
+            await mp.project.categoryList.split(",").forEach(item => {
+                labelCase[item] = 0;
+            });
             for await(const item of srs.userInputs) {
                 for await(const labels of mp.project.categoryList.split(",")) {
                     if (item.problemCategory === labels) {
