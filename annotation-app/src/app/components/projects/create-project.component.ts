@@ -1104,6 +1104,10 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogForm.get('maxAnnotations').setValue(1);
   }
 
+  changeMaxAnnotations() {
+    this.toEvenlyDistributeTicket();
+  }
+
   toEvenlyDistributeTicket() {
     if (this.assigneeList.length > 0) {
       this.assigneeList.forEach((item) => {
