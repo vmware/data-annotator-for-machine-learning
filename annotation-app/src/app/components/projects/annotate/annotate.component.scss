@@ -480,7 +480,6 @@ label .label-leftBoard {
 
 .txtBox {
   overflow: auto;
-  // max-height: 18rem;
   padding-bottom: 3rem;
   height: 18rem;
   resize: vertical;
@@ -488,9 +487,8 @@ label .label-leftBoard {
 
 ::ng-deep .textBox {
   overflow: auto;
-  // max-height: 18rem;
-  height: 18rem;
-  padding-bottom: 3rem;
+  max-height: 50vh;
+  padding-bottom: 0.5rem;
   resize: vertical;
 }
 

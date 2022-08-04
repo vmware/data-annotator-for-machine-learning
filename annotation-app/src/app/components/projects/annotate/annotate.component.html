@@ -430,7 +430,14 @@ SPDX-License-Identifier: Apache-2.0 -->
 
           <div class="questionContainer">
             <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'">
-              <div class="textBox">
+              <div
+                class="textBox"
+                [ngStyle]="{
+                  height: textBoxResizedHeight
+                }"
+                (mousedown)="resizeBox()"
+                (onmousedown)="resizeBox()"
+              >
                 <div *ngFor="let ticket of sr.originalData">
                   <p
                     class="question-paragraph"

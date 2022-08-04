@@ -235,6 +235,11 @@ export class EditProjectComponent implements OnInit {
       element.originValue = element.assignedCase;
       element.isModify = false;
     });
+    this.commonService.evenlyDistributeTicket(
+      this.assigneeList,
+      this.msg.totalCase,
+      this.msg.maxAnnotation,
+    );
   }
 
   reOwner(e) {
@@ -446,8 +451,6 @@ export class EditProjectComponent implements OnInit {
           this.onSubmitEditEmitter.emit(false);
         },
       );
-    } else {
-      // this.sizeError = true;
     }
   }
 

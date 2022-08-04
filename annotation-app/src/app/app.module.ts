@@ -59,6 +59,8 @@ import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { AssignSlackComponent } from './shared/components/assign-slack/assign-slack.component';
 import { UploadLabelComponent } from './components/projects/upload-label/upload-label.component';
 import { TreeviewModalComponent } from './components/treeview-modal/treeview-modal.component';
+import { SetDataComponent } from './components/projects/set-data/set-data.component';
+import { ClrSelectComponent } from './components/widgets/clr-select.component';
 
 @NgModule({
   declarations: [
@@ -93,6 +95,8 @@ import { TreeviewModalComponent } from './components/treeview-modal/treeview-mod
     AssignSlackComponent,
     UploadLabelComponent,
     TreeviewModalComponent,
+    SetDataComponent,
+    ClrSelectComponent,
   ],
   imports: [
     BrowserAnimationsModule,

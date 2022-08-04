@@ -1,3 +1,7 @@
+/*
+Copyright 2019-2021 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({

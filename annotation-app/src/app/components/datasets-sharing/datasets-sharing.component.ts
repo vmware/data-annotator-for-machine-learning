@@ -43,6 +43,8 @@ export class DatasetsSharingComponent implements OnInit {
   msg;
   msgGenerate;
   showGenerateDatasets = false;
+  showTreeView: boolean = false;
+  treeData: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -97,6 +99,9 @@ export class DatasetsSharingComponent implements OnInit {
             });
             item.mutilNumbericLabels = itemKeys.toString();
             item.labelCount = itemKeys.length;
+          }
+          if (item.labelType === 'HTL') {
+            item.categoryList = JSON.parse(item.categoryList);
           }
         });
       },
@@ -197,5 +202,16 @@ export class DatasetsSharingComponent implements OnInit {
       this.msg = null;
       this.msgGenerate = null;
     }
+  }
+
+  getChildren = (folder) => folder.children;
+
+  clickTreeView(data) {
+    this.showTreeView = true;
+    this.treeData = data;
+  }
+
+  onCloseTreeDialog() {
+    this.showTreeView = false;
   }
 }
