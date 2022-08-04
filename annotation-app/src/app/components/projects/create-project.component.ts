@@ -3,15 +3,7 @@ Copyright 2019-2021 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import {
-  Component,
-  OnInit,
-  Input,
-  Renderer2,
-  ViewChild,
-  ElementRef,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 import { FormGroup, FormBuilder, FormArray } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { AvaService } from '../../services/ava.service';
@@ -789,7 +781,6 @@ export class CreateNewComponent implements OnInit {
       worker: true,
       error: (error) => {
         console.log('parse_error: ', error);
-        // this.setDataError = true;
       },
       chunk: (results, parser) => {
         const chunkData = results.data;
@@ -1007,9 +998,7 @@ export class CreateNewComponent implements OnInit {
       this.checkBoth();
     } else {
       this.minLabel = e.target.value;
-      Number(this.minLabel) >= Number(this.maxLabel)
-        ? (this.sizeError = true)
-        : (this.sizeError = false);
+      this.sizeError = Number(this.minLabel) >= Number(this.maxLabel);
     }
   }
 
@@ -1018,9 +1007,7 @@ export class CreateNewComponent implements OnInit {
       this.checkBoth();
     } else {
       this.maxLabel = e.target.value;
-      Number(this.minLabel) >= Number(this.maxLabel)
-        ? (this.sizeError = true)
-        : (this.sizeError = false);
+      this.sizeError = Number(this.minLabel) >= Number(this.maxLabel);
     }
   }
 
@@ -1069,9 +1056,7 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogFormValidationReset('max', undefined, DatasetValidator.minNumber());
     this.slackList = [];
     this.dsDialogFormValidationReset('assignee', undefined, DatasetValidator.required());
-    Number(this.minLabel) >= Number(this.maxLabel)
-      ? (this.sizeError = true)
-      : (this.sizeError = false);
+    this.sizeError = Number(this.minLabel) >= Number(this.maxLabel);
   }
 
   validBoth() {
@@ -1289,7 +1274,7 @@ export class CreateNewComponent implements OnInit {
     };
   }
 
-  closeWizard(e) {
+  closeWizard() {
     this.isShowSetdataWizard = false;
   }
   receiveWizardInfo(e) {

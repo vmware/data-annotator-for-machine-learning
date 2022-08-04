@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   >
 
   <!-- preview csv -->
-  <clr-wizard-page #firstPage>
+  <clr-wizard-page>
     <ng-template clrPageTitle>Preview CSV</ng-template>
     <div class="previewTable">
       <table aria-describedby="preview data" class="table">
@@ -44,7 +44,6 @@ SPDX-License-Identifier: Apache-2.0 -->
   <clr-wizard-page
     [clrWizardPageNextDisabled]="!selectedDropDownItem || !formPageOne.valid"
     (clrWizardPageOnLoad)="clrWizardPageOnLoad('page2')"
-    #secondPage
   >
     <ng-template clrPageTitle>{{
       wizardData.projectType === 'ner'
@@ -63,7 +62,6 @@ SPDX-License-Identifier: Apache-2.0 -->
   </clr-wizard-page>
   <!-- select text -->
   <clr-wizard-page
-    #thirdPage
     (clrWizardPageOnLoad)="clrWizardPageOnLoad('page3')"
     [clrWizardPageNextDisabled]="
       wizardData.projectType === 'ner' ? false : selectDescription.length == 0
@@ -118,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 }"
                 [disabled]="column.checkboxDisabled"
                 [(ngModel)]="column.labelChecked"
-                (ngModelChange)="changeCheckboxLabel(column.name)"
+                (ngModelChange)="changeCheckbox(column.name, 'labelChecked')"
                 [ngModelOptions]="{ standalone: true }"
               />
             </clr-dg-cell>
@@ -128,7 +126,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 clrCheckbox
                 name="options"
                 [(ngModel)]="column.helptextChecked"
-                (ngModelChange)="changeCheckboxHelptext(column.name)"
+                (ngModelChange)="changeCheckbox(column.name, 'helptextChecked')"
                 [ngModelOptions]="{ standalone: true }"
               />
             </clr-dg-cell>
@@ -139,7 +137,6 @@ SPDX-License-Identifier: Apache-2.0 -->
   </clr-wizard-page>
   <!-- confirm form -->
   <clr-wizard-page
-    #lastPage
     clrWizardPagePreventDefault="true"
     (clrWizardPageOnCommit)="onCommit()"
     (clrWizardPageOnCancel)="doCancel()"
