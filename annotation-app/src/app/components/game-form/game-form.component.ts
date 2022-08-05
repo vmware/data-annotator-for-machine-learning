@@ -127,6 +127,8 @@ export class GameFormComponent implements OnInit {
         name: data.projectName,
         projectType: data.projectType,
         id: data.id,
+        maxAnnotation: data.maxAnnotation,
+        labelType: data.labelType,
         from: 'review',
         reviewee: reviewee,
       },

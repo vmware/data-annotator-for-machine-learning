@@ -235,6 +235,11 @@ export class EditProjectComponent implements OnInit {
       element.originValue = element.assignedCase;
       element.isModify = false;
     });
+    this.commonService.evenlyDistributeTicket(
+      this.assigneeList,
+      this.msg.totalCase,
+      this.msg.maxAnnotation,
+    );
   }
 
   reOwner(e) {
@@ -245,6 +250,7 @@ export class EditProjectComponent implements OnInit {
   }
 
   onInputingAssignee(e) {
+    console.log(248);
     const emails = e.target.value.split(/,|;/);
     this.emailReg = this.toolService.toRegEmail(emails);
     if (this.emailReg && this.inputAssigneeValidation == false) {
