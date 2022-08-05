@@ -196,8 +196,8 @@ export class CreateNewComponent implements OnInit {
         DatasetValidator.required(),
       ],
       selectedDataset: ['', DatasetValidator.required()],
-      min: [this.dataset.min, DatasetValidator.minNumber()],
-      max: [this.dataset.max, DatasetValidator.minNumber()],
+      min: [this.dataset.min, null],
+      max: [this.dataset.max, null],
       selectedClassifier: ['', DatasetValidator.required()],
       selectedqueryStrategy: ['', DatasetValidator.required()],
       selectedEncoder: ['', DatasetValidator.required()],
@@ -993,21 +993,16 @@ export class CreateNewComponent implements OnInit {
     }
   }
 
-  minUpdate(e) {
+  minMaxUpdate(e, from?) {
     if (this.isMutilNumericLabel) {
       this.checkBoth();
     } else {
-      this.minLabel = e.target.value;
-      this.sizeError = Number(this.minLabel) >= Number(this.maxLabel);
-    }
-  }
-
-  maxUpdate(e) {
-    if (this.isMutilNumericLabel) {
-      this.checkBoth();
-    } else {
-      this.maxLabel = e.target.value;
-      this.sizeError = Number(this.minLabel) >= Number(this.maxLabel);
+      from === 'min' ? (this.minLabel = e.target.value) : (this.maxLabel = e.target.value);
+      if (_.intersection([this.minLabel, this.maxLabel], ['', undefined, null]).length > 0) {
+        this.sizeError = true;
+      } else {
+        this.sizeError = Number(this.minLabel) >= Number(this.maxLabel);
+      }
     }
   }
 
@@ -1052,11 +1047,13 @@ export class CreateNewComponent implements OnInit {
     this.dsDialogFormValidationReset('selectedqueryStrategy', null, null);
     this.dsDialogFormValidationReset('selectedEncoder', null, null);
     this.dsDialogFormValidationReset('labels', undefined, null);
-    this.dsDialogFormValidationReset('min', undefined, DatasetValidator.minNumber());
-    this.dsDialogFormValidationReset('max', undefined, DatasetValidator.minNumber());
     this.slackList = [];
     this.dsDialogFormValidationReset('assignee', undefined, DatasetValidator.required());
-    this.sizeError = Number(this.minLabel) >= Number(this.maxLabel);
+    if (_.intersection([this.minLabel, this.maxLabel], ['', undefined, null]).length > 0) {
+      this.sizeError = true;
+    } else {
+      this.sizeError = Number(this.minLabel) >= Number(this.maxLabel);
+    }
   }
 
   validBoth() {
