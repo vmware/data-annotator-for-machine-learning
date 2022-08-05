@@ -314,25 +314,6 @@ export class DatasetValidator {
       return null;
     };
   }
-  static minNumber(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } => {
-      if (!control.parent) {
-        return null;
-      }
-      if (!control.value) {
-        return { msg: { value: DatasetValidator.REQUIRED_FIELD } };
-      }
-
-      const pattern = `^(\\-|\\+)?\\d+(\\.\\d+)?$`;
-      // let pattern = `^[0-9]+$`;
-
-      const argRegEx = new RegExp(pattern, 'g');
-      if (!String(control.value).match(argRegEx)) {
-        return { msg: { value: 'Wrong format! number only' } };
-      }
-      return null;
-    };
-  }
 
   static textOnly(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } => {

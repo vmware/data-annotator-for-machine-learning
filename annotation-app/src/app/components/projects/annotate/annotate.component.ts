@@ -4117,7 +4117,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   resizeBox() {
-    console.log(4120);
     let target = document.querySelector('.textBox');
     if (target) {
       const config = { attributes: true, childList: true, subtree: true };
