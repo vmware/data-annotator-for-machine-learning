@@ -483,6 +483,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
         }
       },
       (error: any) => {
+        console.log('getALLSrs_err:', error);
         this.loading = false;
       },
     );
@@ -551,6 +552,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
         this.loadingFlag = false;
       },
       (error: any) => {
+        console.log('getALLFlag_err:', error);
         this.loadingFlag = false;
       },
     );
