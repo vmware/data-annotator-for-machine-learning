@@ -1274,6 +1274,7 @@ export class CreateNewComponent implements OnInit {
   closeWizard() {
     this.isShowSetdataWizard = false;
   }
+  
   receiveWizardInfo(e) {
     this.dropdownSelected = e.dropdownSelected;
     this.checkboxChecked = e.checkboxChecked;
