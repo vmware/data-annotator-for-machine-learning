@@ -1088,7 +1088,7 @@ async function mostUnscertainQueryForReview(mp, user, skip){
         "flag.users": { $ne: user }
     };
     const options = { skip: skip};
-    const tickets = await mongoDb.findByConditions(mp.model, conditions, null, options);
+    let tickets = await mongoDb.findByConditions(mp.model, conditions, null, options);
     
     let labelCase = {};
     if (mp.project.labelType == LABELTYPE.HIERARCHICAL) {
@@ -1111,8 +1111,7 @@ async function mostUnscertainQueryForReview(mp, user, skip){
                     }
                 }
             }
-            const probab = await probabilisticInObject(labelCase);
-            srs['probab'] = await Object.values(probab).sort((x,y)=> y-x);
+            srs['probab'] = Object.values(labelCase).sort((x,y)=> y-x);
         }
     }else{
         // calculate labeld case number
@@ -1128,14 +1127,27 @@ async function mostUnscertainQueryForReview(mp, user, skip){
                     }
                 }
             }
-            const probab = await probabilisticInObject(labelCase);
-            //sort by probablistic Descending
-            srs['probab'] = await Object.values(probab).sort((x,y)=> y-x);
+            srs['probab'] = Object.values(labelCase).sort((x,y)=> y-x);
         }
     }
     //sort the max-uncertain Ascending
-    await tickets.sort((a, b) => {return a.probab[0] - b.probab[0]});
+    tickets = await _.sortBy(tickets, 'probab');
+    let ticketsGrop = await _.groupBy(tickets, 'a[0]');
+    const annotationNum = Object.keys(ticketsGrop)[0];
 
+    let temp = [];
+    if(annotationNum >= mp.project.maxAnnotation){
+        for await(const ticket of ticketsGrop[annotationNum]) {
+            for await(const probab of ticket.probab){
+                if (probab > 0 && probab < mp.project.maxAnnotation) {
+                    temp.push(ticket);
+                    break;
+                }
+            }
+        }
+    }
+    tickets = temp.length? temp: tickets;
+    
     return [tickets[0]];
 }
 
