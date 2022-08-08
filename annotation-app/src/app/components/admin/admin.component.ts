@@ -26,8 +26,8 @@ import { Subject } from 'rxjs';
   styleUrls: ['./admin.component.scss'],
 })
 export class AdminComponent implements OnInit {
-  @ViewChild('dataGird', { static: false }) dataGird;
-  @ViewChild('dataGirdUser', { static: false }) dataGirdUser;
+  @ViewChild('dataGird') dataGird;
+  @ViewChild('dataGirdUser') dataGirdUser;
 
   download: string;
   user: User;

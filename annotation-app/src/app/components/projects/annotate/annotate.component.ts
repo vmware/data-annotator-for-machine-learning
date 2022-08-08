@@ -40,7 +40,7 @@ import { filterTreeLabel } from 'app/shared/utils/treeView';
   styleUrls: ['./annotate.component.scss'],
 })
 export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('numericInput', { static: false }) numericInput;
+  @ViewChild('numericInput') numericInput;
   user: any;
   questionForm: FormGroup;
   sr: SR;

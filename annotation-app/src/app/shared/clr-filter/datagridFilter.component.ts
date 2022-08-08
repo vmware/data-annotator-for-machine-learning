@@ -15,7 +15,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 export class MyFilter implements ClrDatagridFilterInterface<any> {
   @Input() filterMsg: boolean;
   @Output() filter = new EventEmitter();
-  @ViewChild('filenameFilterEl', { static: false }) filenameFilterEl: ElementRef;
+  @ViewChild('filenameFilterEl') filenameFilterEl: ElementRef;
 
   filename: string = '';
   filenameFilter = new Subject<string>();

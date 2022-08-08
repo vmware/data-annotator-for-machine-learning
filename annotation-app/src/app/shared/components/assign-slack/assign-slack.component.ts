@@ -28,7 +28,7 @@ export class AssignSlackComponent implements OnInit {
   @Output('slackListOuter')
   slackListOuterEmitter = new EventEmitter();
 
-  @ViewChild('slack', { static: false })
+  @ViewChild('slack')
   slack: ElementRef;
 
   slackList: any = [];

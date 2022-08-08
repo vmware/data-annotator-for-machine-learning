@@ -29,11 +29,11 @@ import { EmailService } from 'app/services/common/email.service';
 export class CreateNewComponent implements OnInit {
   @Input()
   format = 'cvs';
-  @ViewChild('labels', { static: false })
+  @ViewChild('labels')
   labels: ElementRef;
-  @ViewChild('assignee', { static: false })
+  @ViewChild('assignee')
   assignee: ElementRef;
-  @ViewChild('popupLables', { static: false })
+  @ViewChild('popupLables')
   popupLables: ElementRef;
 
   user: string;

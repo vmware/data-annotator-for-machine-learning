@@ -18,5 +18,10 @@
     "typeRoots": ["node_modules/@types"],
     "types": ["core-js", "node"]
   },
-  "exclude": ["node_modules", "dist"]
+  "files": [
+    "main.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
 }
