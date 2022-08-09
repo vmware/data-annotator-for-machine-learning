@@ -268,7 +268,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.max = data.maxAnnotation;
       this.labelType = data.labelType;
       if (data.maxAnnotation && data.labelType !== 'numericLabel') {
-        this.reviewOrder === 'most_uncertain';
         this.questionForm.get('questionGroup.reviewee').setValue(null);
       }
       this.projectId = data.id;
@@ -280,7 +279,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.getProgress();
     this.getProjectsList();
     window.addEventListener('scroll', this.handleScroll, true);
-    console.log(276, this.reviewOrder);
   }
 
   handleScroll() {
@@ -2682,7 +2680,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.isMultipleNumericLabel && this.labelType !== 'HTL') {
       this.multipleLabelList.forEach((e) => {
         const multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
-        console.log(this.el.nativeElement);
         this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].checked = false;
       });
     }
@@ -3947,14 +3944,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   changeReviewOrder(e) {
-    console.log(e.target.value);
     this.reviewOrder = e.target.value;
     this.getOneReview('order');
   }
 
   clickUncertain(e) {
-    console.log(3957, e);
-    console.log(this.reviewOrder);
     if (e.target.innerText === 'Uncertain' && this.reviewOrder !== 'most_uncertain') {
       this.changeReviewOrder({ target: { value: 'most_uncertain' } });
     }
