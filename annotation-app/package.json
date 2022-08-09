@@ -60,5 +60,9 @@
     "tslint-angular": "3.0.3",
     "tslint-config-prettier": "1.18.0",
     "typescript": "3.8.3"
-  }
+  },
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
