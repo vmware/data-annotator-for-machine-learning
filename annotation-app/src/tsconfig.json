@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
     "lib": ["es2019", "es6", "dom"],
     "mapRoot": "src",
-    "module": "esnext",
+    "module": "es2020",
     "moduleResolution": "node",
     "outDir": "dist/out-tsc",
     "sourceMap": true,
