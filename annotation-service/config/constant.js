@@ -87,6 +87,7 @@ module.exports = {
     QUERYORDER:{
         RANDOM: "random",
         SEQUENTIAL: "sequential",
+        MOST_UNCERTAIN: "most_uncertain",
     },
     SPECAILCHARTOSTRING:{
         "UNDEFINED":"undefined",

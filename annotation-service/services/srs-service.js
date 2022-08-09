@@ -20,8 +20,10 @@ const imgImporter = require("../utils/imgImporter");
 const S3Utils = require('../utils/s3');
 const logImporter = require('../utils/logImporter');
 const fileSystemUtils = require('../utils/fileSystem.utils');
+const { probabilisticInObject} = require('../utils/common.utils');
 const config = require('../config/config');
-const { reduceHierarchicalUnselectedLabel } = require('./project.service');
+const { reduceHierarchicalUnselectedLabel, initHierarchicalLabelsCase } = require('./project.service');
+
 
 async function updateSrsUserInput(req, from) {
 
@@ -1043,18 +1045,18 @@ async function queryTicketsForReview(req) {
 
     const findUser = await mp.project.reviewInfo.find(info => info.user == user);
     const skip = findUser ? findUser.skip : 0;
+    const order = req.query.order;
 
     //1. query need reReview tickets
     let ticket = await reReviewQueryForReview(mp, user);
     if (!ticket[0]) {
-        if (await validator.checkRequired(byUser)) {
+        if(order == QUERYORDER.MOST_UNCERTAIN && mp.project.maxAnnotation > 1){
+            ticket = await mostUnscertainQueryForReview(mp, user, skip)
+        }else{
             //2.user defined the query rules
-            const order = req.query.order;
             ticket = await specailQueryForReview(mp, byUser, order, skip, user);
-        } else {
-            //3.if the step2 is empty query from default
-            ticket = await defualtQueryForReview(mp, skip, user);
-        }
+        } 
+
     }
 
     if (!ticket[0]) {
@@ -1078,16 +1080,89 @@ async function queryTicketsForReview(req) {
     return ticket;
 }
 
+async function mostUnscertainQueryForReview(mp, user, skip){
+    const conditions = {
+        projectName: mp.project.projectName,
+        userInputsLength: { $gte: mp.project.maxAnnotation },
+        "reviewInfo.reviewed": { $ne: true },
+        "flag.users": { $ne: user }
+    };
+    const options = { skip: skip};
+    let tickets = await mongoDb.findByConditions(mp.model, conditions, null, options);
+    
+    let labelCase = {};
+    if (mp.project.labelType == LABELTYPE.HIERARCHICAL) {
+        let labels = JSON.parse(mp.project.categoryList);
+        let labelsArray = [];
+        let pathsArray = [];
+        await initHierarchicalLabelsCase(labels, "", "", labelsArray, pathsArray);
+        // calculate labeld case number
+        for await(const srs of tickets) {
+            // init label headers
+            await labelsArray.forEach(item => {
+                labelCase[item] = 0;
+            });
+            for await (const input of srs.userInputs) {
+                const userInputLabel = input.problemCategory;
+                for (const i in pathsArray) {
+                    const currentLable = _.get(userInputLabel, pathsArray[i]);
+                    if (currentLable.name == labelsArray[i].split(".").pop() && currentLable.enable == 1) {
+                        labelCase[labelsArray[i]] += 1;
+                    }
+                }
+            }
+            srs['probab'] = Object.values(labelCase).sort((x,y)=> y-x);
+        }
+    }else{
+        // calculate labeld case number
+        for await(const srs of tickets) {
+            // init label headers
+            await mp.project.categoryList.split(",").forEach(item => {
+                labelCase[item] = 0;
+            });
+            for await(const item of srs.userInputs) {
+                for await(const labels of mp.project.categoryList.split(",")) {
+                    if (item.problemCategory === labels) {
+                        labelCase[labels] += 1;
+                    }
+                }
+            }
+            srs['probab'] = Object.values(labelCase).sort((x,y)=> y-x);
+        }
+    }
+    //sort the max-uncertain Ascending
+    tickets = await _.sortBy(tickets, 'probab');
+    let ticketsGrop = await _.groupBy(tickets, 'a[0]');
+    const annotationNum = Object.keys(ticketsGrop)[0];
+
+    let temp = [];
+    if(annotationNum >= mp.project.maxAnnotation){
+        for await(const ticket of ticketsGrop[annotationNum]) {
+            for await(const probab of ticket.probab){
+                if (probab > 0 && probab < mp.project.maxAnnotation) {
+                    temp.push(ticket);
+                    break;
+                }
+            }
+        }
+    }
+    tickets = temp.length? temp: tickets;
+    
+    return [tickets[0]];
+}
 
 async function specailQueryForReview(mp, byUser, order, skip, user) {
 
     const conditions = {
         projectName: mp.project.projectName,
         userInputsLength: { $gte: mp.project.maxAnnotation },
-        "userInputs.user": byUser,
         "reviewInfo.reviewed": { $ne: true },
         "flag.users": { $ne: user }
     };
+    if (await validator.checkRequired(byUser)){
+        conditions["userInputs.user"] = byUser
+    }
+
     if (order == QUERYORDER.SEQUENTIAL) {
         const options = { skip: skip, limit: 1 };
         return mongoDb.findByConditions(mp.model, conditions, null, options);
@@ -1111,16 +1186,7 @@ async function reReviewQueryForReview(mp, user) {
     const options = { limit: 1 };
     return mongoDb.findByConditions(mp.model, conditions, null, options);
 }
-async function defualtQueryForReview(mp, skip, user) {
-    const conditions = {
-        projectName: mp.project.projectName,
-        userInputsLength: { $gte: mp.project.maxAnnotation },
-        "reviewInfo.reviewed": { $ne: true },
-        "flag.users": { $ne: user }
-    };
-    const options = { skip: skip, limit: 1 };
-    return mongoDb.findByConditions(mp.model, conditions, null, options);
-}
+
 
 
 module.exports = {
@@ -1148,7 +1214,7 @@ module.exports = {
     modifyReview,
     calculateReviewdCase,
     reReviewQueryForReview,
-    defualtQueryForReview,
     specailQueryForReview,
     queryTicketsForReview,
+    mostUnscertainQueryForReview,
 }
