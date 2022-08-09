@@ -452,8 +452,6 @@ export class EditProjectComponent implements OnInit {
           this.onSubmitEditEmitter.emit(false);
         },
       );
-    } else {
-      // this.sizeError = true;
     }
   }
 

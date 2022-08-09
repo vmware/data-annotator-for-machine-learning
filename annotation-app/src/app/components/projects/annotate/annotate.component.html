@@ -461,6 +461,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   height: textBoxResizedHeight
                 }"
                 (mousedown)="resizeBox()"
+                (onmousedown)="resizeBox()"
               >
                 <div *ngFor="let ticket of sr.originalData">
                   <p

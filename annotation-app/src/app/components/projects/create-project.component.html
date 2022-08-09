@@ -563,8 +563,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                         formControlName="min"
                         placeholder="Enter value here"
                         class="clr-input"
-                        (keyup)="minUpdate($event)"
-                        (change)="minUpdate($event)"
+                        (keyup)="minMaxUpdate($event, 'min')"
+                        (change)="minMaxUpdate($event, 'min')"
                       />
                     </div>
                     <span class="clr-subtext" style="margin-top: 0.5rem"
@@ -582,8 +582,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                         formControlName="max"
                         placeholder="Enter value here"
                         class="clr-input"
-                        (keyup)="maxUpdate($event)"
-                        (change)="maxUpdate($event)"
+                        (keyup)="minMaxUpdate($event, 'max')"
+                        (change)="minMaxUpdate($event, 'max')"
                       />
                     </div>
                     <span class="clr-subtext" style="margin-top: 0.5rem"
@@ -629,8 +629,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                           formControlName="minMutilVal"
                           placeholder="Enter minimum value"
                           class="clr-input"
-                          (keyup)="minUpdate($event)"
-                          (change)="minUpdate($event)"
+                          (keyup)="minMaxUpdate($event)"
+                          (change)="minMaxUpdate($event)"
                         />
                       </div>
                     </div>
@@ -647,8 +647,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                           formControlName="maxMutilVal"
                           placeholder="Enter maximum value"
                           class="clr-input"
-                          (keyup)="maxUpdate($event)"
-                          (change)="maxUpdate($event)"
+                          (keyup)="minMaxUpdate($event)"
+                          (change)="minMaxUpdate($event)"
                         />
                       </div>
                     </div>
@@ -718,28 +718,6 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-tooltip>
             </div>
             <div *ngIf="isShowNumeric">
-              <clr-tooltip
-                *ngIf="
-                  dsDialogForm.get('min').errors && dsDialogForm.get('min').touched && !sizeError
-                "
-              >
-                <clr-icon
-                  clrTooltipTrigger
-                  shape="error-standard"
-                  size="18"
-                  style="color: red"
-                  class="valid-tooltip"
-                >
-                </clr-icon>
-                <clr-tooltip-content
-                  class="error-tooltip"
-                  clrPosition="bottom-right"
-                  clrSize="md"
-                  *clrIfOpen
-                >
-                  <span>{{ dsDialogForm.get('min').errors.msg.value }}</span>
-                </clr-tooltip-content>
-              </clr-tooltip>
               <clr-tooltip *ngIf="sizeError">
                 <clr-icon
                   clrTooltipTrigger
@@ -1452,5 +1430,5 @@ SPDX-License-Identifier: Apache-2.0 -->
   *ngIf="isShowSetdataWizard"
   [wizardData]="wizardData"
   (wizardOuter)="receiveWizardInfo($event)"
-  (closeWizard)="closeWizard($event)"
+  (closeWizard)="closeWizard()"
 ></app-set-data>

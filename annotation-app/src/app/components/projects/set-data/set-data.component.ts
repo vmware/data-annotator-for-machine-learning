@@ -13,7 +13,7 @@ import {
   OnChanges,
   ElementRef,
 } from '@angular/core';
-import { ClrWizard, ClrWizardPage } from '@clr/angular';
+import { ClrWizard } from '@clr/angular';
 import * as _ from 'lodash';
 
 @Component({
@@ -25,10 +25,6 @@ export class SetDataComponent implements OnInit, OnChanges {
   @ViewChild('wizard', { static: true }) wizard: ClrWizard;
   @ViewChild('formDatagridConfirm', { static: false }) formDatagridConfirm: ElementRef;
   @ViewChild('formPageFour', { static: true }) formPageFour;
-  // @ViewChild('firstPage', { static: true }) firstPage: ClrWizardPage;
-  // @ViewChild('secondPage', { static: true }) secondPage: ClrWizardPage;
-  // @ViewChild('thirdPage', { static: true }) thirdPage: ClrWizardPage;
-  // @ViewChild('lastPage', { static: true }) lastPage: ClrWizardPage;
 
   @Input() wizardData: any;
   @Output() wizardOuter = new EventEmitter<any>();
@@ -40,8 +36,6 @@ export class SetDataComponent implements OnInit, OnChanges {
   clrSelectData = {};
   isLoading: boolean;
   formDatagrid: any;
-
-  constructor() {}
 
   ngOnInit() {
     this.wizard.navService.updateNavigation();
@@ -85,7 +79,7 @@ export class SetDataComponent implements OnInit, OnChanges {
   }
   onReceiveSelectedItem(e) {
     this.selectedDropDownItem = e;
-    var that = this;
+    let that = this;
     this.selectDescription = [];
     if (this.wizardData.projectType === 'ner') {
       this.checkboxColumns.forEach((item) => {
@@ -106,21 +100,14 @@ export class SetDataComponent implements OnInit, OnChanges {
     }
   }
 
-  changeCheckboxLabel(data) {
+  changeCheckbox(data, from) {
     let index = _.findIndex(this.checkboxColumns, function (o) {
       return o.name === data;
     });
-    !this.checkboxColumns[index].labelChecked;
+    !this.checkboxColumns[index][from];
   }
 
-  changeCheckboxHelptext(data) {
-    let index = _.findIndex(this.checkboxColumns, function (o) {
-      return o.name === data;
-    });
-    !this.checkboxColumns[index].helptextChecked;
-  }
-
-  goBack(e): void {
+  goBack(_e): void {
     this.wizard.previous();
   }
 
