@@ -24,7 +24,7 @@
     "@clr/angular": "2.2.0",
     "@clr/icons": "2.2.0",
     "@clr/ui": "2.2.0",
-    "@ng-select/ng-select": "3.7.3",
+    "@ng-select/ng-select": "~6.1.0",
     "@webcomponents/custom-elements": "^1.0.0",
     "aws-sdk": "2.814.0",
     "buffer": "5.5.0",
