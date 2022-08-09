@@ -250,7 +250,6 @@ export class EditProjectComponent implements OnInit {
   }
 
   onInputingAssignee(e) {
-    console.log(248);
     const emails = e.target.value.split(/,|;/);
     this.emailReg = this.toolService.toRegEmail(emails);
     if (this.emailReg && this.inputAssigneeValidation == false) {
