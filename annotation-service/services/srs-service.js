@@ -472,6 +472,7 @@ async function skipOne(req) {
 
         console.log(`[ SRS ] Service reviewer skipOne.getOneSrs`);
         request.query.user = req.body.user;
+        request.query.order = req.body.order;
         return queryTicketsForReview(request);
 
     } else {
