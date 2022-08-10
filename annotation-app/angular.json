@@ -16,6 +16,8 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "tsConfig": "src/tsconfig.json",
+            "polyfills": "src/polyfills.ts",
+            "preserveSymlinks": true,
             "assets": ["src/libs", "src/assets"],
             "styles": [
               "node_modules/@clr/icons/clr-icons.min.css",

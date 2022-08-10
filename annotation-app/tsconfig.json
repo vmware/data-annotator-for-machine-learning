@@ -13,7 +13,7 @@
     "target": "es2015",
     "allowJs": true,
     "typeRoots": ["node_modules/@types"],
-    "lib": ["es2019", "dom"],
+    "lib": ["es2019", "DOM"],
     "paths": {
       "@shared/*": ["src/app/shared/*"],
       "@core/*": ["src/app/core/*"]

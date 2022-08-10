@@ -7,7 +7,7 @@
     "declaration": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "lib": ["es2019", "es6", "dom"],
+    "lib": ["es2019", "es6", "DOM"],
     "mapRoot": "src",
     "module": "es2020",
     "moduleResolution": "node",
@@ -16,12 +16,9 @@
     "target": "es2015",
     "allowJs": true,
     "typeRoots": ["node_modules/@types"],
-    "types": ["core-js", "node"]
+    "types": ["core-js", "node", "resize-observer-browser"]
   },
-  "files": [
-    "main.ts"
-  ],
-  "include": [
-    "src/**/*.d.ts"
-  ]
+  "files": ["main.ts", "polyfills.ts"],
+  "include": ["environments/*.*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
