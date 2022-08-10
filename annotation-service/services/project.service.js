@@ -402,7 +402,8 @@ async function initHierarchicalLabelsCase(labels, namePath, path, labelsArray, l
 async function reduceHierarchicalUnselectedLabel(tickets) {
     for await (const ticket of tickets) {
         for await (const input of ticket.userInputs) {
-            let reducedCategory = [...input.problemCategory];
+            let jsonInput = JSON.stringify(input.problemCategory);
+            let reducedCategory = JSON.parse(jsonInput);
             await prepareSelectedHierarchicalLabels(reducedCategory, false, true);
             let labelsArray = [];
             await initHierarchicalLabelsCase(reducedCategory, "", "", labelsArray);

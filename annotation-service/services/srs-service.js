@@ -472,6 +472,7 @@ async function skipOne(req) {
 
         console.log(`[ SRS ] Service reviewer skipOne.getOneSrs`);
         request.query.user = req.body.user;
+        request.query.order = req.body.order;
         return queryTicketsForReview(request);
 
     } else {
@@ -1087,8 +1088,13 @@ async function mostUnscertainQueryForReview(mp, user, skip){
         "reviewInfo.reviewed": { $ne: true },
         "flag.users": { $ne: user }
     };
-    const options = { skip: skip};
-    let tickets = await mongoDb.findByConditions(mp.model, conditions, null, options);
+    const schema = [
+        { $match: conditions },
+        { $skip: skip },
+        { $sample: { size: 100 } }
+    ]
+    let tickets = await mongoDb.aggregateBySchema(mp.model, schema);
+
     
     let labelCase = {};
     if (mp.project.labelType == LABELTYPE.HIERARCHICAL) {
@@ -1132,7 +1138,7 @@ async function mostUnscertainQueryForReview(mp, user, skip){
     }
     //sort the max-uncertain Ascending
     tickets = await _.sortBy(tickets, 'probab');
-    let ticketsGrop = await _.groupBy(tickets, 'a[0]');
+    let ticketsGrop = await _.groupBy(tickets, 'probab[0]');
     const annotationNum = Object.keys(ticketsGrop)[0];
 
     let temp = [];
@@ -1147,7 +1153,6 @@ async function mostUnscertainQueryForReview(mp, user, skip){
         }
     }
     tickets = temp.length? temp: tickets;
-    
     return [tickets[0]];
 }
 
