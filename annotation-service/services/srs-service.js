@@ -1088,8 +1088,13 @@ async function mostUnscertainQueryForReview(mp, user, skip){
         "reviewInfo.reviewed": { $ne: true },
         "flag.users": { $ne: user }
     };
-    const options = { skip: skip};
-    let tickets = await mongoDb.findByConditions(mp.model, conditions, null, options);
+    const schema = [
+        { $match: conditions },
+        { $skip: skip },
+        { $sample: { size: 100 } }
+    ]
+    let tickets = await mongoDb.aggregateBySchema(mp.model, schema);
+
     
     let labelCase = {};
     if (mp.project.labelType == LABELTYPE.HIERARCHICAL) {
