@@ -1133,7 +1133,7 @@ async function mostUnscertainQueryForReview(mp, user, skip){
     }
     //sort the max-uncertain Ascending
     tickets = await _.sortBy(tickets, 'probab');
-    let ticketsGrop = await _.groupBy(tickets, 'a[0]');
+    let ticketsGrop = await _.groupBy(tickets, 'probab[0]');
     const annotationNum = Object.keys(ticketsGrop)[0];
 
     let temp = [];
@@ -1148,7 +1148,6 @@ async function mostUnscertainQueryForReview(mp, user, skip){
         }
     }
     tickets = temp.length? temp: tickets;
-    
     return [tickets[0]];
 }
 
