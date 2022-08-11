@@ -146,7 +146,15 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="clr-form-group left-project-info clr-row">
               <label for="name" class="label-leftBoard">Reviewee:</label>&nbsp;&nbsp;
               <div class="clr-select-wrapper" style="width: 70%">
+                <input
+                  *ngIf="reviewOrder === 'most_uncertain'"
+                  class="clr-input"
+                  style="width: 100%"
+                  type="text"
+                  disabled
+                />
                 <select
+                  *ngIf="reviewOrder !== 'most_uncertain'"
                   style="width: 100%"
                   (change)="onSelectingReviewee($event)"
                   formControlName="reviewee"
@@ -159,11 +167,29 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
             <div class="clr-form-group left-project-info clr-row">
-              <label for="assignmentLogic" class="label-leftBoard" style="margin-right: 1.3rem"
+              <label for="assignmentLogic" class="label-leftBoard" style="margin-right: 0.5rem"
                 >Review Assignment Logic:
               </label>
               <div class="clr-row">
                 <label class="md-check format clr-row" style="margin-left: 0.5rem">
+                  <clr-radio-wrapper
+                    *ngIf="max > 1 && labelType !== 'numericLabel'"
+                    (click)="clickUncertain($event)"
+                  >
+                    <input
+                      type="radio"
+                      clrRadio
+                      class="clr-radio"
+                      value="most_uncertain"
+                      id="most_uncertain"
+                      name="reviewOrder"
+                      [(ngModel)]="reviewOrder"
+                      [ngModelOptions]="{ standalone: true }"
+                      (change)="changeReviewOrder($event)"
+                    />
+                    <label for="uncertain">Uncertain</label>
+                  </clr-radio-wrapper>
+                  &nbsp;&nbsp;
                   <clr-radio-wrapper>
                     <input
                       type="radio"
@@ -174,7 +200,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                       name="reviewOrder"
                       [(ngModel)]="reviewOrder"
                       [ngModelOptions]="{ standalone: true }"
-                      checked
                       (change)="changeReviewOrder($event)"
                     />
                     <label for="random">Random</label>

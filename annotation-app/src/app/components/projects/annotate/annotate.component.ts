@@ -167,7 +167,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedEntityColor: any = '';
   startFrom: string;
   annotationPrevious: any = [];
-  reviewOrder = 'random';
+  reviewOrder: string;
   selectedFile: number;
   currentLogFile: string;
   logFiles: any = [];
@@ -263,6 +263,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.route.queryParams.subscribe((data) => {
       this.selectParam = data.name;
       this.createForm();
+      this.max = data.maxAnnotation;
+      this.labelType = data.labelType;
+      if (data.maxAnnotation && data.labelType !== 'numericLabel') {
+        this.questionForm.get('questionGroup.reviewee').setValue(null);
+      }
       this.projectId = data.id;
       this.projectType = data.projectType;
       this.startFrom = data.from;
@@ -1400,7 +1405,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderFormat = 'md';
     this.questionForm.get('questionGroup.renderFormat').setValue('md');
     this.selectedEntityID = 0;
-    this.reviewOrder = 'random';
+    this.reviewOrder = '';
     this.questionForm.get('questionGroup.reviewee').reset();
     if (this.projectType !== 'image' && this.projectType !== 'ner' && this.projectType !== 'log') {
       this.toReadStorageSetting('display');
@@ -1415,11 +1420,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.startFrom === 'review') {
           this.projectInfo.annotationQuestion = "What's the final label?";
         }
-        if (response.maxAnnotation > 1) {
-          reviewee = '';
-        } else {
-          reviewee = this.initReview;
-        }
+
         this.max = response.maxAnnotation;
         this.isMultipleLabel = response.isMultipleLabel;
         this.projectType = response.projectType;
@@ -1500,6 +1501,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.categories = response.categoryList.split(',');
           this.popLabels = response.popUpLabels;
           this.isShowPopLabel = response.popUpLabels && response.popUpLabels.length;
+        }
+        if (response.maxAnnotation > 1) {
+          reviewee = '';
+          if (this.labelType !== 'numericLabel') {
+            this.reviewOrder = 'most_uncertain';
+          }
+        } else {
+          reviewee = this.initReview;
+          this.reviewOrder = 'random';
         }
         if (this.startFrom === 'review') {
           this.submitMessage = 'modify';
@@ -2668,7 +2678,6 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.isMultipleNumericLabel && this.labelType !== 'HTL') {
       this.multipleLabelList.forEach((e) => {
         const multiLabelClass = 'multiLabel' + this.categories.indexOf(e);
-        console.log(this.el.nativeElement);
         this.el.nativeElement.querySelector('.' + multiLabelClass).children[0].checked = false;
       });
     }
@@ -3935,6 +3944,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   changeReviewOrder(e) {
     this.reviewOrder = e.target.value;
     this.getOneReview('order');
+  }
+
+  clickUncertain(e) {
+    if (e.target.innerText === 'Uncertain' && this.reviewOrder !== 'most_uncertain') {
+      this.changeReviewOrder({ target: { value: 'most_uncertain' } });
+    }
   }
 
   getAllLogFilename() {
