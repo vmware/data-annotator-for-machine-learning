@@ -1358,19 +1358,21 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-tooltip>
             </div>
           </div>
-          <app-assign-slack
-            *ngIf="
-              env.config.enableSlack &&
-              !isNumeric &&
-              !isMultipleLabel &&
-              !isUploadLabel &&
-              (msg.type === 'tabular' || msg.type === 'text') &&
-              !isMutilNumericLabel
-            "
-            [slackListMsg]="slackList"
-            [inputSlackChannelsMsg]="inputSlackChannels"
-            (slackListOuter)="receiveSlackAssign($event)"
-          ></app-assign-slack>
+          <div class="form-group">
+            <app-assign-slack
+              *ngIf="
+                env.config.enableSlack &&
+                !isNumeric &&
+                !isMultipleLabel &&
+                !isUploadLabel &&
+                (msg.type === 'tabular' || msg.type === 'text') &&
+                !isMutilNumericLabel
+              "
+              [slackListMsg]="slackList"
+              [inputSlackChannelsMsg]="inputSlackChannels"
+              (slackListOuter)="receiveSlackAssign($event)"
+            ></app-assign-slack>
+          </div>
         </section>
         <div class="clr-row">
           <div class="clr-col-12 clr-col-md-1"></div>
