@@ -41,6 +41,9 @@ const srSchema = new mongoose.Schema({
         users: [],
         silence: { type: Boolean, default: false }
     },
+    skip: {
+        users: []
+    },
     text_vector: { type: String },
     al_test: { type: Boolean },
     reviewInfo: {
@@ -73,6 +76,9 @@ const imgSchema = new mongoose.Schema({
         users: [],
         silence: { type: Boolean, default: false }
     },
+    skip: {
+        users: []
+    },
     reviewInfo: {
         user: { type: String },
         reviewed: { type: Boolean, default: false },
@@ -101,6 +107,9 @@ const logSchema = new mongoose.Schema({
     flag: {
         users: [],
         silence: { type: Boolean, default: false }
+    },
+    skip: {
+        users: [],
     },
     reviewInfo: {
         user: { type: String },
@@ -155,7 +164,6 @@ const projectSchema = new mongoose.Schema({
     userCompleteCase: [{
         user: { type: String },
         completeCase: { type: Number, default: 0 },
-        skip: { type: Number, default: 0 },
         reviewed: { type: Number, default: 0 },
         assignedCase: { type: Number },
         assignedDate: { type: String },
@@ -165,7 +173,6 @@ const projectSchema = new mongoose.Schema({
     reviewInfo: [{
         user: { type: String },
         reviewedCase: { type: Number, default: 0 },
-        skip: { type: Number, default: 0 },
     }],
     maxAnnotation: { type: Number, default: 1 },
     categoryList: { type: String },
