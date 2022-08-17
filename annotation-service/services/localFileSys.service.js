@@ -82,6 +82,9 @@ async function downloadFileFromLocalSystem(req) {
 
 
 async function checkFilePermission(user, filePath) {
+  if(filePath.indexOf("_UNZIPED-IMAGES_") != -1){
+    return;
+  }
   if (filePath.indexOf(user) == -1) {
     throw {CODE: 4001, MSG: "PERMISSION DENIED"};
   }
