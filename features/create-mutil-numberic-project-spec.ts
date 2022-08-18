@@ -3,16 +3,18 @@ import { NewProjectPage } from "../page-object/new-project-page";
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
-import { EditPage } from "../page-object/edit-page";
+import { FunctionUtil } from "../utils/function-util";
 const projectCreateData = require("../resources/project-create-page/test-data");
+const since = require("jasmine2-custom-message");
 
 describe("Create new project ", () => {
-  const Task_Instruction = projectCreateData.TextMutilNumbericProject.Instruction;
+  const Task_Instruction =
+    projectCreateData.TextMutilNumbericProject.Instruction;
   const CSV_Path = "/doc/upload-resource/text-mutilNumberic-data.csv";
   const New_Lable = projectCreateData.TextMutilNumbericProject.Label;
   const MinVal = projectCreateData.TextMutilNumbericProject.MinVal;
   const MaxVal = projectCreateData.TextMutilNumbericProject.MaxVal;
-  const SET_DATA_SECTION = $('ul[role="tablist"] .nav-item:last-child');
+  const SET_DATA_SECTION = $("clr-wizard.clr-wizard");
   const PROJECT_TEXT_CLASSIFICATION = element(
     by.css('clr-dropdown-menu a[href="/projects/create/text"]')
   );
@@ -22,7 +24,6 @@ describe("Create new project ", () => {
   let Serial_Num: string;
   let newProjectPage: NewProjectPage;
   let projectsPage: ProjecstPage;
-  let since = require("jasmine2-custom-message");
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
@@ -31,7 +32,7 @@ describe("Create new project ", () => {
     LoginBussiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();
-    console.log("start to create new project : " + New_Project_Name);
+    console.log("log-start to create new project : " + New_Project_Name);
     Constant.dataset_name_text = New_CSV_Name;
     Constant.project_name_numberic_mutiple = New_Project_Name;
   });
@@ -39,7 +40,9 @@ describe("Create new project ", () => {
   afterAll(() => {
     Constant.project_name_numberic_mutiple = New_Project_Name;
     Constant.dataset_name_text = New_CSV_Name;
-    console.log("project name after update: " + Constant.project_name_numberic_mutiple);
+    console.log(
+      "log-project name after update: " + Constant.project_name_numberic_mutiple
+    );
   });
 
   it("Should create new project successfully.", async (done) => {
@@ -56,21 +59,17 @@ describe("Create new project ", () => {
       ExpectedConditions.visibilityOf(SET_DATA_SECTION),
       Constant.DEFAULT_TIME_OUT
     );
-
-    await newProjectPage.setData("text");
-    if (!process.env.IN) {
-      await newProjectPage.setLabelValidation(
-        projectCreateData.TextMutilNumbericProject.duplicateLabelColumn
-      );
-      await newProjectPage.setLabelValidation(
-        projectCreateData.TextMutilNumbericProject.categoryLabelColumn
-      );
-      await newProjectPage.setDataSubmit();
-      await newProjectPage.setLabelValidation(
-        projectCreateData.TextMutilNumbericProject.labelColumn
-      );
-      await newProjectPage.setDataSubmit();
-    }
+    await newProjectPage.clickWizardNext();
+    await FunctionUtil.elementVisibilityOf(newProjectPage.WIZARD_SELECT_BTN);
+    await newProjectPage.setDataLable();
+    await newProjectPage.clickWizardNext();
+    await newProjectPage.selectMultipleTicketColumn(0, 3);
+    await newProjectPage.clickWizardNext();
+    await newProjectPage.setDataSubmit();
+    await browser.wait(
+      ExpectedConditions.invisibilityOf(SET_DATA_SECTION),
+      Constant.DEFAULT_TIME_OUT
+    );
     await newProjectPage.setMaxAnnotation(
       projectCreateData.TextMutilNumbericProject.maxAnnotation - 2
     );
@@ -78,15 +77,10 @@ describe("Create new project ", () => {
     await newProjectPage.addMutilNumericLabel(New_Lable, MinVal, MaxVal);
     await newProjectPage.delMutilNumericLabel();
 
-    console.log('start1 to setAssignee annotator');
-    await newProjectPage.setAssignee(
-      Constant.username,
-      Constant.username2
-    );
-    console.log('succeed1 to setAssignee annotator');
-    await newProjectPage.setDuplicateAnnotator(
-      Constant.username
-    );
+    console.log("start1 to setAssignee annotator");
+    await newProjectPage.setAssignee(Constant.username, Constant.username2);
+    console.log("succeed1 to setAssignee annotator");
+    await newProjectPage.setDuplicateAnnotator(Constant.username);
     await newProjectPage.setAssignedTicket(
       projectCreateData.TextMutilNumbericProject.assignedTickets
     );
@@ -114,7 +108,7 @@ describe("Create new project ", () => {
       since("the annotar should be the logged user")
         .expect(projectsPage.getAnnotatorCellText())
         .toContain(Constant.username);
-      since("should have 4 actions")
+      since("should have 5 actions")
         .expect(projectsPage.getActionsCount())
         .toBe(5);
       done();

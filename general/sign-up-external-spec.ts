@@ -37,7 +37,7 @@ describe("Service", () => {
       Constant.username_owner,
       Constant.password_owner
     );
-    browser.sleep(5000);
+    await browser.sleep(5000);
     since("prompt should show up and content correct")
       .expect(loginPage.getPromptText())
       .not.toEqual("");

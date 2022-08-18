@@ -23,13 +23,13 @@ export class CommonPage {
     by.css("clr-dg-column:nth-child(1) clr-dg-filter:nth-child(1) button")
   );
   LOG_FILE_NAME_FILTER_BTN = element(
-    by.css("clr-dg-column:nth-child(4) clr-icon[shape=filter-grid]")
+    by.css("clr-dg-column:nth-child(3) cds-icon[shape=filter-grid]")
   );
   LOG_FILE_NAME_FILTER_INPUT = element(
     by.css("input.filenameFilter[placeholder='Enter value here']")
   );
   PROJECT_NAME_FILTER_INPUT = $('.datagrid-filter input[name="search"]');
-  CLOSE_FILTER_BTN = $('.datagrid-filter clr-icon[shape="close"]');
+  CLOSE_FILTER_BTN = $('.datagrid-filter cds-icon[shape="window-close"]');
   Table_LISTS = $$(".datagrid-host .datagrid-scrolling-cells");
   FIRST_ROW_CELLS = $$(
     '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"]'
@@ -134,6 +134,13 @@ export class CommonPage {
   waitForGridLoading() {
     return browser.wait(
       ExpectedConditions.invisibilityOf($("clr-datagrid .datagrid-spinner")),
+      Constant.DEFAULT_TIME_OUT
+    );
+  }
+
+  waitForLoading() {
+    return browser.wait(
+      ExpectedConditions.invisibilityOf($("span.spinner")),
       Constant.DEFAULT_TIME_OUT
     );
   }
@@ -272,9 +279,9 @@ export class CommonPage {
     await this.CSV_NAME.clear();
     await this.CSV_NAME.sendKeys(csvName);
     await this.setLocalCSVPath(localCsvPath);
-    console.log('uploadErrorFormatCSV1');
+    console.log("uploadErrorFormatCSV1");
     await this.IMG_RADIO.click();
-    console.log('uploadErrorFormatCSV3')
+    console.log("uploadErrorFormatCSV3");
     await browser.sleep(2000);
     await FunctionUtil.elementVisibilityOf(this.UPLOAD_CSV_OK_BTN);
     await this.UPLOAD_CSV_OK_BTN.click();

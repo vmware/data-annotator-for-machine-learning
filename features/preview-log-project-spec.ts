@@ -30,25 +30,28 @@ describe("Enter projects tab...", () => {
     await projectsPage.filterProjectName(project_name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
     let Project_Name_Text = await projectsPage.getCellText(0);
-    console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
-    console.log("Project_Name_Text:::", Project_Name_Text);
+    console.log(
+      "log-Project_Count_After_Filter:::",
+      Project_Count_After_Filter
+    );
+    console.log("log-Project_Name_Text:::", Project_Name_Text);
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
       await projectsPage.clickGridFirstCell();
-      await projectsPage.waitForGridLoading();
+      await projectsPage.waitForLoading();
       await browser.sleep(1000);
       await projectsPage.filterLogFileName(
         projectEditData.LogProject.Filter_File_Name
       );
       let tableLengthBeforeReturn = await projectsPage.getTableLength();
-      console.log("tableLengthBeforeReturn", tableLengthBeforeReturn);
+      console.log("log-tableLengthBeforeReturn", tableLengthBeforeReturn);
       let aa = (await projectsPage.getTableTotalItems()).trim().split(" ")[4];
-      console.log("table total items", aa);
+      console.log("log-table total items", aa);
       await projectsPage.logShowDetails();
       await projectsPage.returnToAnnotatorBtn();
       await browser.sleep(1000);
       await projectsPage.toExpandCell();
     } else {
-      done.fail("can not filter out the consitent project....");
+      done.fail("log-can not filter out the consitent project....");
     }
     done();
   });

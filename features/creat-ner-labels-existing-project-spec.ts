@@ -10,11 +10,12 @@ import { ProjecstPage } from "../page-object/projects-page";
 import { FunctionUtil } from "../utils/function-util";
 
 const projectCreateData = require("../resources/project-create-page/test-data");
+const since = require("jasmine2-custom-message");
 
 describe("Create new project ", () => {
   const Task_Instruction =
     projectCreateData.NerLabelsExistingProject.Instruction;
-  const SET_DATA_SECTION = $('ul[role="tablist"] .nav-item:last-child');
+  const SET_DATA_SECTION = $("clr-wizard.clr-wizard");
   const PROJECT_NER_CLASSIFICATION = element(
     by.css('clr-dropdown-menu a[href="/projects/create/ner"]')
   );
@@ -25,7 +26,6 @@ describe("Create new project ", () => {
   let Serial_Num: string;
   let newProjectPage: NewProjectPage;
   let projectsPage: ProjecstPage;
-  let since = require("jasmine2-custom-message");
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
@@ -35,7 +35,7 @@ describe("Create new project ", () => {
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();
     console.log(
-      "start to create ner labels existing project : " + New_Project_Name
+      "log-start to create ner labels existing project : " + New_Project_Name
     );
   });
 
@@ -43,7 +43,7 @@ describe("Create new project ", () => {
     Constant.project_name_ner = New_Project_Name;
     Constant.dataset_name_ner = New_CSV_Name;
 
-    console.log("project name after update: " + Constant.project_name_ner);
+    console.log("log-project name after update: " + Constant.project_name_ner);
   });
 
   it("Should create ner labels existing project successfully.", async (done) => {
@@ -57,8 +57,18 @@ describe("Create new project ", () => {
       ExpectedConditions.visibilityOf(SET_DATA_SECTION),
       Constant.DEFAULT_TIME_OUT
     );
-    await newProjectPage.setData("ner", 1, 7);
+    await newProjectPage.clickWizardNext();
+    await FunctionUtil.elementVisibilityOf(newProjectPage.WIZARD_SELECT_BTN);
+    await newProjectPage.setDataLable();
+    await newProjectPage.clickWizardNext();
+    await newProjectPage.selectMultipleTicketColumn(1, 7);
     await newProjectPage.selectMultipleTicketColumn(5, 6);
+    await newProjectPage.clickWizardNext();
+    await newProjectPage.setDataSubmit();
+    await browser.wait(
+      ExpectedConditions.invisibilityOf(SET_DATA_SECTION),
+      Constant.DEFAULT_TIME_OUT
+    );
     await FunctionUtil.operationSuspensionElements(
       newProjectPage.DELETE_LABEL,
       newProjectPage.DELETE_LABEL_ICON
@@ -100,7 +110,7 @@ describe("Create new project ", () => {
             "," +
             projectCreateData.NerLabelsExistingProject.existingLabels
         );
-      since("should have 4 actions")
+      since("should have 5 actions")
         .expect(projectsPage.getActionsCount())
         .toBe(5);
       done();

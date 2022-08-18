@@ -6,6 +6,7 @@ import { browser, by, element, $, ExpectedConditions } from "protractor";
 import { FunctionUtil } from "../utils/function-util";
 
 describe("Log out service", () => {
+  let since = require("jasmine2-custom-message");
   let USERNAME_DROPDOWN = element(by.css("clr-dropdown"));
   let LOG_OUT = element(by.css("clr-dropdown-menu a"));
   let PROJECT_TAB = $('.header-nav a[href="/projects"]');

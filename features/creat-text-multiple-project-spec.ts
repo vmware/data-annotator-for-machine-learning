@@ -7,13 +7,14 @@ import { NewProjectPage } from "../page-object/new-project-page";
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
+import { FunctionUtil } from "../utils/function-util";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("Create new project ", () => {
   const Task_Instruction =
     projectCreateData.TextMultipleLabelsProject.Instruction;
   const New_Lable = projectCreateData.TextProject.Labels.split(",");
-  const SET_DATA_SECTION = $('ul[role="tablist"] .nav-item:last-child');
+  const SET_DATA_SECTION = $("clr-wizard.clr-wizard");
   const PROJECT_TEXT_CLASSIFICATION = element(
     by.css('clr-dropdown-menu a[href="/projects/create/text"]')
   );
@@ -34,14 +35,15 @@ describe("Create new project ", () => {
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();
     console.log(
-      "start to create new text multiple labels project : " + New_Project_Name
+      "log-start to create new text multiple labels project : " +
+        New_Project_Name
     );
   });
 
   afterAll(() => {
     Constant.project_name_text_multiple = New_Project_Name;
     console.log(
-      "project name after update: " + Constant.project_name_text_multiple
+      "log-project name after update: " + Constant.project_name_text_multiple
     );
   });
 
@@ -60,7 +62,17 @@ describe("Create new project ", () => {
       ExpectedConditions.visibilityOf(SET_DATA_SECTION),
       Constant.DEFAULT_TIME_OUT
     );
-    await newProjectPage.setData("text");
+    await newProjectPage.clickWizardNext();
+    await FunctionUtil.elementVisibilityOf(newProjectPage.WIZARD_SELECT_BTN);
+    await newProjectPage.setDataLable();
+    await newProjectPage.clickWizardNext();
+    await newProjectPage.selectMultipleTicketColumn(0, 3);
+    await newProjectPage.clickWizardNext();
+    await newProjectPage.setDataSubmit();
+    await browser.wait(
+      ExpectedConditions.invisibilityOf(SET_DATA_SECTION),
+      Constant.DEFAULT_TIME_OUT
+    );
     await newProjectPage.setMaxAnnotation(
       projectCreateData.TextMultipleLabelsProject.maxAnnotation
     );
@@ -90,7 +102,7 @@ describe("Create new project ", () => {
       since("the labels should contain the user typed lable")
         .expect(projectsPage.getCellText(5))
         .toContain(New_Lable.join(","));
-      since("should have 4 actions")
+      since("should have 5 actions")
         .expect(projectsPage.getActionsCount())
         .toBe(5);
       done();
