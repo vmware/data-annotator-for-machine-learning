@@ -35,11 +35,11 @@ declare function hierarchicalChart(options: any): any;
   styleUrls: ['./preview-projects.component.scss'],
 })
 export class previewProjectsComponent implements OnInit, AfterViewInit {
-  @ViewChild('dataGird', { static: false }) dataGird;
-  @ViewChild('userChart', { static: false }) userChart: ElementRef;
-  @ViewChild('categoryChart', { static: false }) categoryChart: ElementRef;
-  @ViewChild('modelChart', { static: false }) modelChart: ElementRef;
-  @ViewChild('hierarchicalChart', { static: false }) hierarchicalChart: ElementRef;
+  @ViewChild('dataGird') dataGird;
+  @ViewChild('userChart') userChart: ElementRef;
+  @ViewChild('categoryChart') categoryChart: ElementRef;
+  @ViewChild('modelChart') modelChart: ElementRef;
+  @ViewChild('hierarchicalChart') hierarchicalChart: ElementRef;
 
   selectedDataset: any;
   previewHeadDatas: any;

@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <clr-wizard-button *ngIf="!isLoading" [type]="'previous'">Previous</clr-wizard-button>
   <clr-wizard-button *ngIf="!isLoading" [type]="'next'">Next</clr-wizard-button>
   <clr-wizard-button *ngIf="!isLoading" [type]="'finish'">Done</clr-wizard-button>
-  <clr-wizard-button *ngIf="isLoading" style="max-width: 25rem">
+  <clr-wizard-button *ngIf="isLoading">
     <span class="spinner spinner-inline"> Loading... </span>&nbsp;&nbsp;
     <span title="Data processing for large datasets may take up to 60 seconds...">
       Data processing for large datasets may take up to 60 seconds...

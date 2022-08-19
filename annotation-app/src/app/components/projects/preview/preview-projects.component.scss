@@ -150,7 +150,8 @@ SPDX-License-Identifier: Apache-2.0
 .btnOutline {
   margin-top: 0.3rem;
   margin-left: -0.5rem;
-  outline-color: currentColor;
+  // outline-color: currentColor;
+  outline-color: transparent;
 }
 
 .labelInFilecontent {

@@ -23,7 +23,7 @@ import * as _ from 'lodash';
 })
 export class SetDataComponent implements OnInit, OnChanges {
   @ViewChild('wizard', { static: true }) wizard: ClrWizard;
-  @ViewChild('formDatagridConfirm', { static: false }) formDatagridConfirm: ElementRef;
+  @ViewChild('formDatagridConfirm') formDatagridConfirm: ElementRef;
   @ViewChild('formPageFour', { static: true }) formPageFour;
 
   @Input() wizardData: any;
