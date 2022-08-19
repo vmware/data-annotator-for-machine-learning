@@ -20,7 +20,6 @@ const imgImporter = require("../utils/imgImporter");
 const S3Utils = require('../utils/s3');
 const logImporter = require('../utils/logImporter');
 const fileSystemUtils = require('../utils/fileSystem.utils');
-const { probabilisticInObject} = require('../utils/common.utils');
 const config = require('../config/config');
 const { reduceHierarchicalUnselectedLabel, initHierarchicalLabelsCase } = require('./project.service');
 
@@ -245,12 +244,14 @@ async function getCategoriesSrs(req) {
 }
 
 async function getOneSrs(req) {
+    const user = req.auth.email;
+
     console.log(`[ SRS ] Service getOneSrs find project info by ID: `, req.query.pid);
     const project = await mongoDb.findById(ProjectModel, ObjectId(req.query.pid));
 
     let limitation = req.query.limit ? Number.parseInt(req.query.limit) : 1;
 
-    const filterFileds = { _id: 1, originalData: 1, flag: 1, ticketDescription: 1 };
+    const filterFileds = { _id: 1, originalData: 1, flag: 1, skip: 1, ticketDescription: 1 };
     //aws documentdb don't support exa. ilterFileds.userInputs = null;
     if (project.projectType == PROJECTTYPE.NER) {
         filterFileds.ticketQuestions = 1;
@@ -288,14 +289,12 @@ async function getOneSrs(req) {
     conditions = {
         projectName: project.projectName,
         userInputsLength: { $lt: project.maxAnnotation },
-        "userInputs.user": { $ne: req.auth.email },
-        "flag.users": { $ne: req.auth.email },
+        "userInputs.user": { $ne: user },
+        "flag.users": { $ne: user },
+        "skip.users": { $ne: user },
     };
-    const usc = project.userCompleteCase.find(ucase => {
-        return ucase.user == req.auth.email;
-    });
 
-    const options = { skip: usc ? usc.skip : 0, limit: limitation };
+    const options = { limit: limitation };
 
     if (project.assignmentLogic == 'sequential') {
         console.log(`[ SRS ] Service sequential query data skipped: `);
@@ -305,7 +304,6 @@ async function getOneSrs(req) {
         const schema = [
             { $match: conditions },
             { $project: filterFileds },
-            { $skip: usc ? usc.skip : 0 },
             { $limit: 10000 },
             { $sample: { size: limitation } }
         ];
@@ -325,18 +323,31 @@ async function getOneSrs(req) {
         return srs;
 
     } else {
-        if (usc.skip == 0) {
+        const skiped = await findSkippedCase(mp, user);
+        if (!skiped.length) {
             console.log(`[ SRS ] Service all case has annotated`);
             return { CODE: 5001, "MSG": "ANNOTATION DONE" };
         } else {
             //show skipped before
-            console.log(`[ SRS ] Service remove marked skipped case`);
-            await projectService.removeSkippedCase(req.query.pid, req.auth.email);
-
+            await removeSkippedCase(mp, user);
             console.log(`[ SRS ] Service find out skipped before skipped case`);
             return getOneSrs(req);
         }
     }
+}
+
+async function findSkippedCase(mp, user) {
+    console.log(`[ SRS ] Service findSkippedCase`, user);
+    const condistion = {projectName: mp.project.projectName, "skip.users": user};
+    return mongoDb.findByConditions(mp.model, condistion)
+}
+
+async function removeSkippedCase(mp, user) {
+
+    console.log(`[ SRS ] Service removeSkippedCase`, user);
+    const conditions = { projectName: mp.project.projectName, "skip.users": user };
+    const update = { $pull: { "skip.users": user } };
+    await mongoDb.updateManyByConditions(mp.model, conditions, update);
 }
 
 async function getALLSrs(req) {
@@ -448,39 +459,25 @@ async function skipOne(req) {
     const review = req.body.review;
     const request = { 'query': { 'pid': pid }, 'auth': { "email": user }, headers: { authorization: token } };
 
+    const mp = await getModelProject({ _id: ObjectId(pid) });
+
+    const conditions = { _id: ObjectId(tid) };
+    const update = { $push: { "skip.users": user } };
+    await mongoDb.findOneAndUpdate(mp.model, conditions, update);
+
     if (await validator.checkRequired(review)) {
-        console.log(`[ SRS ] Service reviewer skipOne save info to DB`);
-
-        const project = await mongoDb.findById(ProjectModel, pid);
-        const findUser = await project.reviewInfo.find(info => {
-            if (info.user == user) {
-                info.skip += 1;
-                return true;
-            }
-        });
-
-        if (!findUser) {
-            project.reviewInfo.push({
-                user: user,
-                reviewedCase: 0,
-                skip: 1
-            });
-        }
-        const conditionsP = { _id: ObjectId(pid) };
-        const update = { $set: { reviewInfo: project.reviewInfo } };
-        await mongoDb.findOneAndUpdate(ProjectModel, conditionsP, update);
-
-        console.log(`[ SRS ] Service reviewer skipOne.getOneSrs`);
+        console.log(`[ SRS ] Service user skipOne.queryTicketsForReview`);
         request.query.user = req.body.user;
         request.query.order = req.body.order;
         return queryTicketsForReview(request);
 
     } else {
-        console.log(`[ SRS ] Service user skipOne save info to DB`);
-        const conditions = { _id: ObjectId(pid), "userCompleteCase.user": user };
-        const update = { $inc: { "userCompleteCase.$.skip": 1 }, $pull: { "al.queriedSr": ObjectId(tid) } };
-        await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
-
+        if (mp.project.al.trained && !mp.project.alFailed) {
+            const conditionsP = { _id: ObjectId(pid)};
+            const updateP = { $pull: { "al.queriedSr": ObjectId(tid) } };
+            await mongoDb.findOneAndUpdate(ProjectModel, conditionsP, updateP);
+        }
+        
         console.log(`[ SRS ] Service user skipOne.getOneSrs`);
         return getOneSrs(request);
     }
@@ -694,9 +691,7 @@ async function appendSrsData(req) {
         }
 
     }
-
 }
-
 
 async function sampleSr(req) {
     console.log(`[ SRS ] Service sampleSr.getModelProject`);
@@ -734,37 +729,25 @@ async function flagSr(req) {
     const queryPro = { _id: ObjectId(pid) };
     const mp = await getModelProject(queryPro);
 
+    console.log(`[ SRS ] Service flagSr`, tid);
+    const conditions = { _id: ObjectId(tid) };
+    const update = { $push: { 'flag.users': user } };
+    await mongoDb.findOneAndUpdate(mp.model, conditions, update);
+
     if (await validator.checkRequired(review)) {
         await validator.checkAnnotator(user);
 
-        const byUser = req.body.user;
-        const order = req.body.order;
-
-        request.query.user = byUser;
-        request.query.order = order;
-
-        const conditions = { _id: ObjectId(tid) };
-        const update = { $push: { 'flag.users': user } };
-        await mongoDb.findOneAndUpdate(mp.model, conditions, update);
+        request.query.user = req.body.user;
+        request.query.order = req.body.order;
 
         return queryTicketsForReview(request);
-
     } else {
-
-        console.log(`[ SRS ] Service flagSr`, tid);
-
-        const conditions = { _id: ObjectId(tid) };
-        const update = { $push: { 'flag.users': user } };
-        await mongoDb.findOneAndUpdate(mp.model, conditions, update);
-
         console.log(`[ SRS ] Service pull the sr from queried sr list`);
         const updatePro = { $pull: { "al.queriedSr": ObjectId(tid) } };
         await mongoDb.findOneAndUpdate(ProjectModel, queryPro, updatePro);
 
         return getOneSrs(request);
     }
-
-
 }
 
 async function unflagSr(req) {
@@ -1019,8 +1002,7 @@ async function calculateReviewdCase(mp, tids, user) {
     if (!findUser) {
         project.reviewInfo.push({
             user: user,
-            reviewedCase: ticketsLegth,
-            skip: 0
+            reviewedCase: ticketsLegth
         });
     }
 
@@ -1041,31 +1023,28 @@ async function queryTicketsForReview(req) {
 
     const pid = req.query.pid;
     const byUser = req.query.user;
-
-    const mp = await getModelProject({ _id: ObjectId(pid) })
-
-    const findUser = await mp.project.reviewInfo.find(info => info.user == user);
-    const skip = findUser ? findUser.skip : 0;
     const order = req.query.order;
 
+    const mp = await getModelProject({ _id: ObjectId(pid) })
+    
     //1. query need reReview tickets
     let ticket = await reReviewQueryForReview(mp, user);
     if (!ticket[0]) {
         if(order == QUERYORDER.MOST_UNCERTAIN && mp.project.maxAnnotation > 1){
-            ticket = await mostUnscertainQueryForReview(mp, user, skip)
+            ticket = await mostUnscertainQueryForReview(mp, user)
         }else{
             //2.user defined the query rules
-            ticket = await specailQueryForReview(mp, byUser, order, skip, user);
-        } 
-
+            ticket = await specailQueryForReview(mp, byUser, order, user);
+        }
     }
 
     if (!ticket[0]) {
-        if (!skip) {
+        const skiped = await findSkippedCase(mp, user);
+        if (!skiped.length) {
             return { CODE: 5001, "MSG": "REVIEW DONE" };
         } else {
             console.log(`[ SRS ] Service remove marked skipped case`);
-            await projectService.removeSkippedCase(pid, user, true);
+            await removeSkippedCase(mp, user);
 
             return queryTicketsForReview(req);
         }
@@ -1081,19 +1060,16 @@ async function queryTicketsForReview(req) {
     return ticket;
 }
 
-async function mostUnscertainQueryForReview(mp, user, skip){
+async function mostUnscertainQueryForReview(mp, user){
     const conditions = {
         projectName: mp.project.projectName,
         userInputsLength: { $gte: mp.project.maxAnnotation },
         "reviewInfo.reviewed": { $ne: true },
-        "flag.users": { $ne: user }
+        "flag.users": { $ne: user },
+        "skip.users": { $ne: user },
     };
-    const schema = [
-        { $match: conditions },
-        { $skip: skip },
-        { $sample: { size: 100 } }
-    ]
-    let tickets = await mongoDb.aggregateBySchema(mp.model, schema);
+    const options = { limit: 500 };
+    let tickets = await mongoDb.findByConditions(mp.model, conditions, null, options);
 
     
     let labelCase = {};
@@ -1156,25 +1132,25 @@ async function mostUnscertainQueryForReview(mp, user, skip){
     return [tickets[0]];
 }
 
-async function specailQueryForReview(mp, byUser, order, skip, user) {
+async function specailQueryForReview(mp, byUser, order, user) {
 
     const conditions = {
         projectName: mp.project.projectName,
         userInputsLength: { $gte: mp.project.maxAnnotation },
         "reviewInfo.reviewed": { $ne: true },
-        "flag.users": { $ne: user }
+        "flag.users": { $ne: user },
+        "skip.users": { $ne: user },
     };
     if (await validator.checkRequired(byUser)){
         conditions["userInputs.user"] = byUser
     }
 
     if (order == QUERYORDER.SEQUENTIAL) {
-        const options = { skip: skip, limit: 1 };
+        const options = { limit: 1 };
         return mongoDb.findByConditions(mp.model, conditions, null, options);
     } else {
         const schema = [
             { $match: conditions },
-            { $skip: skip },
             { $sample: { size: 1 } }
         ]
         return mongoDb.aggregateBySchema(mp.model, schema);
@@ -1186,7 +1162,8 @@ async function reReviewQueryForReview(mp, user) {
         projectName: mp.project.projectName,
         userInputsLength: { $gte: mp.project.maxAnnotation },
         "reviewInfo.review": true,
-        "flag.users": { $ne: user }
+        "flag.users": { $ne: user },
+        "skip.users": { $ne: user },
     };
     const options = { limit: 1 };
     return mongoDb.findByConditions(mp.model, conditions, null, options);
@@ -1222,4 +1199,7 @@ module.exports = {
     specailQueryForReview,
     queryTicketsForReview,
     mostUnscertainQueryForReview,
+    removeSkippedCase,
+    findSkippedCase,
+
 }
