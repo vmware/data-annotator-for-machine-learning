@@ -162,7 +162,6 @@ async function updateProject(req) {
             completeCase.push({
                 user: user.email,
                 completeCase: 0,
-                skip: 0,
                 assignedCase: user.assignedCase,
                 assignedDate: Date.now(),
                 updateDate: Date.now(),
@@ -260,7 +259,6 @@ async function addAnnotatorFromSlack(pro, slackUser) {
             completeCase.push({
                 user: user.email,
                 completeCase: 0,
-                skip: 0,
                 assignedCase: user.assignedCase,
                 assignedDate: Date.now(),
                 updateDate: Date.now(),
@@ -514,22 +512,6 @@ async function projectLeaderBoard(req) {
     result.notLabeledYet = proInfo.totalCase - srsUI.length;
 
     return result;
-}
-
-async function removeSkippedCase(id, user, review) {
-
-    console.log(`[ PROJECT ] Service removeSkippedCase.findUpdateProject`);
-
-    if (review) {
-        conditions = { _id: ObjectId(id), "reviewInfo.user": user };
-        update = { $set: { "reviewInfo.$.skip": 0 } };
-    } else {
-        conditions = { _id: ObjectId(id), "userCompleteCase.user": user };
-        update = { $set: { "userCompleteCase.$.skip": 0 } };
-    }
-
-    const options = { new: true };
-    return mongoDb.findOneAndUpdate(ProjectModel, conditions, update, options);
 }
 
 async function getReviewList(req) {
@@ -984,7 +966,6 @@ module.exports = {
     updateProject,
     updateProjectShare,
     projectLeaderBoard,
-    removeSkippedCase,
     checkProjectName,
     getReviewList,
     getLogProjectFileList,
