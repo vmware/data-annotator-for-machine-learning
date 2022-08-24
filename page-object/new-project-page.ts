@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
@@ -18,10 +18,6 @@ export class NewProjectPage extends CommonPage {
   SET_DATA_TAB = $("clr-wizard clr-datagrid");
   WIZARD_SELECT_BTN = element(by.css("clr-wizard .clr-select-wrapper"));
   WIZARD_SELECT_OPTIONS = element.all(by.css("clr-wizard select option"));
-  // TEXT_BTN = element(by.css("select[formcontrolname=selectedText]"));
-  // TEXT_LIST = element.all(
-  //   by.css("select[formcontrolname=selectedText] option")
-  // );
   TICKET_COLUMN_CHECKBOX_FOR_TEXT = element(
     by.css("clr-dg-row:nth-child(4) .clr-checkbox-wrapper label")
   );

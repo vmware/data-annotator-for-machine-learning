@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { Constant } from "../general/constant";
@@ -69,6 +69,7 @@ describe("edit project info on projects page..", () => {
 
       await editPage.deleteLabel(LABEL3_INPUT);
       await editPage.editLabel(LABEL2_INPUT, "test3");
+
       await editPage.showFileName();
       await editPage.assignmentLogic();
       await editPage.clickEditSubmitButton();
@@ -87,10 +88,10 @@ describe("edit project info on projects page..", () => {
       if (New_Project_Name_Text !== "" || New_Project_Count_After_Filter > 0) {
         New_Project_Annotator = await projectsPage.getCellText(5);
         New_Project_Labels = await projectsPage.getCellText(7);
-        console.log("annotator:", New_Project_Annotator);
-        console.log("labels:", New_Project_Labels);
+        console.log("log-annotator:", New_Project_Annotator);
+        console.log("log-labels:", New_Project_Labels);
       } else {
-        console.log("can not filter out the projects....");
+        console.log("log-can not filter out the projects....");
       }
       since("project annotator should be 1 and content correct")
         .expect(New_Project_Annotator.split("\n").length)
@@ -99,7 +100,7 @@ describe("edit project info on projects page..", () => {
         .expect(New_Project_Labels)
         .toEqual(projectEditData.LogProject.editLabels);
     } else {
-      console.log("can not filter out the projects....");
+      console.log("log-can not filter out the projects....");
     }
     done();
   });

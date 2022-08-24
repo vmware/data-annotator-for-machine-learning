@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 // Protractor configuration file, see link for more information
@@ -178,6 +178,8 @@ exports.config = {
             "Screenshot",
             () => {
               return new Buffer(png, "base64");
+              // return Buffer.from(png, "base64");
+
             },
             "image/png"
           )();

@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { Constant } from "../general/constant";
@@ -250,14 +250,16 @@ export class EditPage {
   }
 
   async editLabel(label, value) {
-    console.log("start to editLabel...");
+    console.log("log-start to editLabel...");
     await FunctionUtil.elementVisibilityOf(label);
     await label.click();
+    // mac need use commang+a
     // await label.sendKeys(Key.COMMAND, "a");
+    // windows and linux need use control
     await label.sendKeys(Key.CONTROL, "a");
     await label.sendKeys(value);
     await browser.waitForAngularEnabled(false);
-    console.log("succeed to editLabel...");
+    console.log("log-succeed to editLabel...");
   }
 
   async showFileName() {
