@@ -350,7 +350,7 @@ export class AdminComponent implements OnInit {
             generateDoneTime: res.updateTime,
             format: res.format,
             downloadUrl: this.env.config.enableAWSS3
-              ? new Buffer(res.file, 'base64').toString()
+              ? Buffer.from(res.file, 'base64').toString()
               : res.file,
             datasets: this.datasets,
             id: e.id,
@@ -542,7 +542,7 @@ export class AdminComponent implements OnInit {
         this.infoMessage =
           'Dataset with annotations is already been generated. Please refresh the page.';
         this.downloadUrl = this.env.config.enableAWSS3
-          ? new Buffer(e.Body.file, 'base64').toString()
+          ? Buffer.from(e.Body.file, 'base64').toString()
           : e.Body.file;
         this.downloadProject();
         this.getProjects();
