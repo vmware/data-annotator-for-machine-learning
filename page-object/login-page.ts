@@ -113,7 +113,7 @@ export class LoginPage extends CommonPage {
     await this.SIGN_UP_BTN.click();
   }
 
-  verifyLoggedUserNameDisplayed() {
+  async verifyLoggedUserNameDisplayed() {
     return browser
       .wait(
         ExpectedConditions.visibilityOf(this.LOGGED_USER_NAME),

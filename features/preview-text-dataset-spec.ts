@@ -30,28 +30,28 @@ describe("start to preview my dataset page", () => {
     done();
   });
 
-  it("Should not delete image dataset successfully without delete the related image project.", async (done) => {
-    myDatasetsName = Constant.dataset_name_image;
-    await myDatasetsPage.filterDatasetstName(myDatasetsName);
-    let Datasets_Count_After_Filter = await myDatasetsPage.getTableLength();
-    if (Datasets_Count_After_Filter > 0) {
-      console.log("----------start to delete image dataset----------");
-      await commonPage.DELETE_DATASET_BTN.click();
-      await browser.sleep(1000);
-      await commonPage.DELETE_PROJECT_CANCEL_BTN.click();
-      await commonPage.DELETE_DATASET_BTN.click();
-      await browser.sleep(1000);
-      await commonPage.DELETE_PROJECT_OK_BTN.click();
-      await browser.sleep(1000);
-      since("prompt should show up and content correct")
-        .expect((await commonPage.getPromptText()).split("."))
-        .toContain("Delete dataset failed");
-      await browser.sleep(1000);
-    } else {
-      console.log("can not filter out the consitent datasets....");
-    }
-    done();
-  });
+  // it("Should not delete image dataset successfully without delete the related image project.", async (done) => {
+  //   myDatasetsName = Constant.dataset_name_image;
+  //   await myDatasetsPage.filterDatasetstName(myDatasetsName);
+  //   let Datasets_Count_After_Filter = await myDatasetsPage.getTableLength();
+  //   if (Datasets_Count_After_Filter > 0) {
+  //     console.log("----------start to delete image dataset----------");
+  //     await commonPage.DELETE_DATASET_BTN.click();
+  //     await browser.sleep(1000);
+  //     await commonPage.DELETE_PROJECT_CANCEL_BTN.click();
+  //     await commonPage.DELETE_DATASET_BTN.click();
+  //     await browser.sleep(1000);
+  //     await commonPage.DELETE_PROJECT_OK_BTN.click();
+  //     await browser.sleep(1000);
+  //     since("prompt should show up and content correct")
+  //       .expect((await commonPage.getPromptText()).split("."))
+  //       .toContain("Delete dataset failed");
+  //     await browser.sleep(1000);
+  //   } else {
+  //     console.log("can not filter out the consitent datasets....");
+  //   }
+  //   done();
+  // });
 
   it("Should preview text dataset successfully.", async (done) => {
     myDatasetsName = Constant.dataset_name_text;

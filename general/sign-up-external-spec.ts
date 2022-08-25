@@ -37,21 +37,25 @@ describe("Service", () => {
       Constant.username_owner,
       Constant.password_owner
     );
-    await browser.sleep(5000);
     since("prompt should show up and content correct")
       .expect(loginPage.getPromptText())
       .not.toEqual("");
+    await browser.sleep(5000);
     done();
   });
 
   it("Should login with normal owner user successfully", async (done) => {
     await FunctionUtil.elementVisibilityOf(SIGN_IN);
     await SIGN_IN.click();
+    await browser.sleep(3000);
+    await SIGN_IN.click();
+    await FunctionUtil.elementVisibilityOf(element(by.css("button[id=login-button]")));
     await loginBusiness.login(Constant.username_owner, Constant.password_owner);
+    console.log("log-succeed to verify login")
     await FunctionUtil.elementVisibilityOf(PROJECT_TAB);
     since("After owner log in there should only have 5 tabs in header")
       .expect(await FunctionUtil.getElementsNum(HEADER_TABS))
       .toEqual(5);
-    done();
+      done();
   });
 });

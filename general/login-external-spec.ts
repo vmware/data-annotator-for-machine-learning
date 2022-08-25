@@ -45,11 +45,11 @@ describe("Service", () => {
       Constant.username,
       Constant.password
     );
-    await browser.waitForAngularEnabled(false);
-    await browser.sleep(5000);
     since("prompt should show up and content correct")
       .expect(loginPage.getPromptText())
       .not.toEqual("");
+    await browser.waitForAngularEnabled(false);
+    await browser.sleep(5000);
     done();
   });
 

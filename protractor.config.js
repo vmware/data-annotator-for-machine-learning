@@ -42,7 +42,7 @@ var conf = {
 
     "./features/creat-text-multiple-project-spec.ts",
     "./features/annotate-project-multiple-spec.ts",
-    "./features/download_share_text_multiple.spec.ts",
+    "./features/download-share-text-multiple-spec.ts",
 
     "./features/creat-ner-labels-existing-project-spec.ts",
     "./features/annotate-project-ner-labels-existing-spec.ts",
@@ -177,8 +177,8 @@ exports.config = {
           allure.createAttachment(
             "Screenshot",
             () => {
-              return new Buffer(png, "base64");
-              // return Buffer.from(png, "base64");
+              // return new Buffer(png, "base64");
+              return Buffer.from(png, "base64");
 
             },
             "image/png"

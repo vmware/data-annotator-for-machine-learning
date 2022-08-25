@@ -256,8 +256,14 @@ export class EditPage {
     // mac need use commang+a
     // await label.sendKeys(Key.COMMAND, "a");
     // windows and linux need use control
-    await label.sendKeys(Key.CONTROL, "a");
-    await label.sendKeys(value);
+    // await label.sendKeys(Key.CONTROL, "a");
+    // await label.sendKeys(value);
+    let backspaceSeries = '';
+    for (var i = 5; i >0; --i) {
+        backspaceSeries += protractor.Key.BACK_SPACE;
+    }
+    await label.sendKeys(backspaceSeries+value);
+    console.log("log-start to editLabel sendvalue test3...");
     await browser.waitForAngularEnabled(false);
     console.log("log-succeed to editLabel...");
   }

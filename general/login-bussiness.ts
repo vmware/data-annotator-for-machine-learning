@@ -34,6 +34,7 @@ export class LoginBussiness {
         this.page.clickLogInBtn();
       })
       .then(() => {
+        console.log("log-start to verifyLoggedUserNameDisplayed")
         return this.page.verifyLoggedUserNameDisplayed();
       })
       .then(
@@ -80,9 +81,10 @@ export class LoginBussiness {
     await this.page.setUsername(username);
     await this.page.setPassword(password);
     await browser.waitForAngularEnabled(false);
-    await this.page.clickSignUpBtn();
+    // await this.page.clickSignUpBtn();
     await browser.sleep(5000);
     await this.page.clickSignUpBtn();
+    console.log('log-succed to signup')
   }
 
   async logValidation(username, password) {
