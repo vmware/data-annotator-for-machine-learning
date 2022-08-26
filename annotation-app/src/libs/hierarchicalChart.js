@@ -112,9 +112,6 @@ function hierarchicalChart(options) {
   }
 
   function bar(svg, down, d, selector) {
-    barPadding = 0.4;
-    barStep = (width - margin.left - margin.right) / d.children.length;
-
     const g = svg
       .insert('g', selector)
       .attr('class', 'enter')
