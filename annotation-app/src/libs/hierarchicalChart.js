@@ -19,9 +19,7 @@ function hierarchicalChart(options) {
     .select(container)
     .append('svg')
     .attr('width', options.width)
-    .attr('height', height + margin.top + margin.bottom);
-
-  x = d3.scaleLinear().range([39, height - margin.top]);
+    .attr('height', height + margin.top + margin.bottom).call(zoom);;
 
   root = d3
     .hierarchy(options.data)
@@ -29,31 +27,30 @@ function hierarchicalChart(options) {
     .sort((a, b) => b.value - a.value)
     .eachAfter((d) => (d.index = d.parent ? (d.parent.index = d.parent.index + 1 || 0) : 0));
 
-  x.domain([0, root.value]);
+  var y = d3
+    .scaleLinear()
+    .domain([0, d3.max(root.children, (d) => d.value)])
+    .nice()
+    .range([height - margin.bottom, margin.top]);
 
-  xAxis = (g) =>
+  var yAxis = (g) => g
+    .attr('transform', `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y))
+    .call((g) => g.select('.domain'));
+
+  var x = d3
+    .scaleBand()
+    .domain(root.children.map((d) => d.data.name))
+    .range([margin.left, width - margin.right])
+    .padding(0.4);
+
+  var xAxis = (g) =>
     g
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(40, 340) rotate(-90)`)
-      .call(d3.axisTop(x).ticks(height / 80))
-      .call((g) => (g.selection ? g.selection() : g).append('line').select('.domain').remove())
+      .attr('transform', `translate(0,${height - margin.bottom})`)
+      .call(d3.axisBottom(x))
       .selectAll('text')
-      .attr('transform', `rotate(90)`)
-      .attr('x', -20)
-      .attr('y', 0)
-      .attr('dy', '.35em');
-
-  yAxis = (g) =>
-    g
-      .attr('class', 'y-axis')
-      .attr('transform', `translate(0,300) rotate(-90)`)
-      .call((g) =>
-        g
-          .append('line')
-          .attr('stroke', 'currentColor')
-          .attr('y1', margin.left)
-          .attr('y2', width - margin.right),
-      );
+      .style('text-anchor', 'start')
+      .attr('transform', 'rotate(20 -10 10)');
 
   svg
     .append('rect')
@@ -69,9 +66,9 @@ function hierarchicalChart(options) {
 
   duration = 0;
 
-  svg.append('g').call(yAxis);
+  svg.append('g').attr('class', 'y-axis').call(yAxis);
 
-  svg.append('g').call(xAxis);
+  svg.append('g').attr('class', 'x-axis').call(xAxis);
 
   down(svg, root);
 
@@ -83,10 +80,6 @@ function hierarchicalChart(options) {
     // Rebind the current node to the background.
     svg.select('.background').datum(d);
 
-    // Define two sequenced transitions.
-    const transition1 = svg.transition().duration(duration);
-    const transition2 = transition1.transition();
-
     // Mark any currently-displayed bars as exiting.
     const exit = svg.selectAll('.enter').attr('class', 'exit');
 
@@ -94,51 +87,37 @@ function hierarchicalChart(options) {
     exit.selectAll('rect').attr('fill-opacity', (p) => (p === d ? 0 : null));
 
     // Transition exiting bars to fade out.
-    exit.transition(transition1).attr('fill-opacity', 0).remove();
+    exit.attr('fill-opacity', 0).remove();
+
+    // Update the x-scale domain.
+    y.domain([0, d3.max(d.children, (d) => d.value)]);
+
+    // Update the x-axis.
+    svg.selectAll('.y-axis').call(yAxis);
 
     // Enter the new bars for the clicked-on data.
     // Per above, entering bars are immediately visible.
-    const enter = bar(svg, down, d, '.y-axis').attr('fill-opacity', 0);
+    const enter = bar(svg, down, d, '.x-axis').attr('fill-opacity', 0);
 
     // Have the text fade-in, even though the bars are visible.
-    enter.transition(transition1).attr('fill-opacity', 1);
-
-    // Transition entering bars to their new y-position.
-    enter
-      .selectAll('g')
-      .attr('transform', stack(d.index))
-      .transition(transition1)
-      .attr('transform', stagger());
-
-    // Update the x-scale domain.
-    x.domain([0, d3.max(d.children, (d) => d.value)]);
-
-    // Update the x-axis.
-    svg.selectAll('.x-axis').transition(transition2).call(xAxis);
-
-    // Transition entering bars to the new x-scale.
-    enter
-      .selectAll('g')
-      .transition(transition2)
-      .attr('transform', (d, i) => `translate(0,${barStep * i})`);
+    enter.attr('fill-opacity', 1);
 
     // Color the bars as parents; they will fade to children if appropriate.
     enter
       .selectAll('rect')
       .attr('fill', color(true))
       .attr('fill-opacity', 1)
-      .transition(transition2)
       .attr('fill', (d) => color(!!d.children))
-      .attr('width', (d) => x(d.value) - x(0));
+      .attr('height', (d) => y(0) - y(d.value));
   }
 
   function bar(svg, down, d, selector) {
-    barStep = (width - margin.left - margin.right) / d.children.length;
     barPadding = 0.4;
+    barStep = (width - margin.left - margin.right) / d.children.length;
+
     const g = svg
       .insert('g', selector)
       .attr('class', 'enter')
-      .attr('transform', `translate(60,340) rotate(-90)`)
       .attr('text-anchor', 'end')
       .style('font', '10px sans-serif');
 
@@ -149,20 +128,20 @@ function hierarchicalChart(options) {
       .attr('cursor', (d) => (!d.children ? null : 'pointer'))
       .on('click', (event, d) => (d.value ? down(svg, d) : null));
 
-    bar
-      .append('text')
-      .attr('x', barStep / 8)
-      .attr('y', -barPadding - 15)
-      .attr('dy', '.35em')
-      .text((d) => d.data.name)
-      .style('text-anchor', 'start')
-      .attr('transform', 'rotate(120 10 10)');
+    x = d3
+      .scaleBand()
+      .domain(d.children.map((d) => d.data.name))
+      .range([margin.left, width - margin.right])
+      .padding(0.4);
 
-    bar
+    svg.selectAll('.x-axis').call(xAxis);
+
+    bar.attr('class', 'bars')
       .append('rect')
-      .attr('x', x(0))
-      .attr('width', (d) => x(d.value) - x(0))
-      .attr('height', barStep * (1 - barPadding) > 0 ? barStep * (1 - barPadding) : 0);
+      .attr('x', (d) => x(d.data.name) + (x.bandwidth() - d3.min([x.bandwidth(), 150])) / 2)
+      .attr('y', (d) => y(d.value))
+      .attr('height', (d) => y(0) - y(d.value))
+      .attr('width', d3.min([x.bandwidth(), 150]));
 
     hierTip = options.tip;
     hierTip
@@ -173,7 +152,7 @@ function hierarchicalChart(options) {
       .style('padding', '0px 5px 0px 5px')
       .style('border-radius', '4px')
       .style('font-size', '10px')
-      .offset([-155, barStep / 4 - barPadding])
+      .offset([-10, 0])
       .html(function (event, d) {
         return '<span>' + d.value + '</span>';
       });
@@ -202,74 +181,58 @@ function hierarchicalChart(options) {
     // Rebind the current node to the background.
     svg.select('.background').datum(d.parent);
 
-    // Define two sequenced transitions.
-    const transition1 = svg.transition().duration(duration);
-    const transition2 = transition1.transition();
-
     // Mark any currently-displayed bars as exiting.
     const exit = svg.selectAll('.enter').attr('class', 'exit');
 
     // Update the x-scale domain.
-    x.domain([0, d3.max(d.parent.children, (d) => d.value)]);
+    y.domain([0, d3.max(d.parent.children, (d) => d.value)]);
 
     // Update the x-axis.
-    svg.selectAll('.x-axis').transition(transition1).call(xAxis);
+    svg.selectAll('.y-axis').call(yAxis);
 
-    // Transition exiting bars to the new x-scale.
-    exit.selectAll('g').transition(transition1).attr('transform', stagger());
-
-    // Transition exiting bars to the parent’s position.
-    exit.selectAll('g').transition(transition2).attr('transform', stack(d.index));
 
     // Transition exiting rects to the new scale and fade to parent color.
     exit
       .selectAll('rect')
-      .transition(transition1)
-      .attr('width', (d) => x(d.value) - x(0))
+      .attr('width', (d) => d3.min([x.bandwidth(), 150]))
       .attr('fill', color(true));
 
     // Transition exiting text to fade out.
     // Remove exiting nodes.
-    exit.transition(transition2).attr('fill-opacity', 0).remove();
+    exit.attr('fill-opacity', 0).remove();
 
     // Enter the new bars for the clicked-on data's parent.
     const enter = bar(svg, down, d.parent, '.exit').attr('fill-opacity', 0);
 
-    enter.selectAll('g').attr('transform', (d, i) => `translate(0,${barStep * i})`);
+    enter.attr('fill-opacity', 1);
 
-    // Transition entering bars to fade in over the full duration.
-    enter.transition(transition2).attr('fill-opacity', 1);
-
-    // Color the bars as appropriate.
-    // Exiting nodes will obscure the parent bar, so hide it.
-    // Transition entering rects to the new x-scale.
-    // When the entering parent rect is done, make it visible!
     enter
       .selectAll('rect')
       .attr('fill', (d) => color(!!d.children))
-      .attr('fill-opacity', (p) => (p === d ? 0 : null))
-      .transition(transition2)
-      .attr('width', (d) => x(d.value) - x(0))
+      .attr('height', (d) => y(0) - y(d.value))
       .on('end', function (p) {
         d3.select(this).attr('fill-opacity', 1);
       });
   }
 
-  function stack(i) {
-    let value = 0;
-    return (d) => {
-      const t = `translate(${x(value) - x(0)},${barStep * i})`;
-      value += d.value;
-      return t;
-    };
+  function zoom(svg) {
+    const extent = [
+      [margin.left, margin.top],
+      [width - margin.right, height - margin.top],
+    ];
+
+    svg.call(
+      d3.zoom().scaleExtent([1, 5]).translateExtent(extent).extent(extent).on('zoom', zoomed),
+    );
+
+    function zoomed(event, d) {
+      x.range([margin.left, width - margin.right].map((d) => event.transform.applyX(d)));
+      svg
+        .selectAll('.bars rect')
+        .attr('x', (d) => x(d.data.name))
+        .attr('width', x.bandwidth());
+      svg.selectAll('.x-axis').call(xAxis);
+    }
   }
 
-  function stagger() {
-    let value = 0;
-    return (d, i) => {
-      const t = `translate(${x(value) - x(0)},${barStep * i})`;
-      value += d.value;
-      return t;
-    };
-  }
 }
