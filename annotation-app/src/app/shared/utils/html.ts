@@ -1,3 +1,7 @@
+/*
+Copyright 2019-2022 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
 import insertAfter from './index.es5';
 
 function isTextNode(node) {

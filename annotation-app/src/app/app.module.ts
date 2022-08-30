@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -19,7 +19,6 @@ import { UserAuthService } from './services/user-auth.service';
 import { AuthenticationComponent } from './components/authentication/authentication.component';
 import { AuthGuard } from './guards/auth.guard';
 import { FullNamePipe } from './pipes/full-name.pipe';
-import { ChartsModule } from 'ng2-charts/ng2-charts';
 import { FooterComponent } from './components/footer/footer.component';
 import { ProjectsComponent } from './components/projects/projects.component';
 import { DropdownPageComponent } from './components/widgets/dropdown-page.component';
@@ -106,7 +105,6 @@ import { ClrSelectComponent } from './components/widgets/clr-select.component';
     HttpClientModule,
     ClarityModule,
     ROUTING,
-    ChartsModule,
     CoreModule,
     SharedModule,
     NgSelectModule,

@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2021 VMware, Inc.
+<!-- Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <div class="modal">
@@ -484,6 +484,24 @@ SPDX-License-Identifier: Apache-2.0 -->
             </form>
           </div>
           <div>
+            <clr-tooltip *ngIf="inputLabelErrMsg">
+              <clr-icon
+                clrTooltipTrigger
+                shape="error-standard"
+                size="18"
+                style="color: red"
+                class="valid-tooltip"
+              >
+              </clr-icon>
+              <clr-tooltip-content
+                class="error-tooltip"
+                clrPosition="bottom-right"
+                clrSize="md"
+                *clrIfOpen
+              >
+                <span>{{inputLabelErrMsg}}</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
             <clr-tooltip *ngIf="labelType === 'numericLabel' && isMultipleLabel && inputIsNull">
               <clr-icon
                 clrTooltipTrigger

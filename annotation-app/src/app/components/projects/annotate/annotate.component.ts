@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -40,9 +40,7 @@ import { filterTreeLabel } from 'app/shared/utils/treeView';
   styleUrls: ['./annotate.component.scss'],
 })
 export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('numericInput', { static: false }) numericInput;
-  @ViewChild('revieweeDropdown', { static: false }) revieweeDropdown: ElementRef;
-
+  @ViewChild('numericInput') numericInput;
   user: any;
   questionForm: FormGroup;
   sr: SR;

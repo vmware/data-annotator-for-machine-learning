@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -114,10 +114,10 @@ ul li {
 
 ::ng-deep app-assign-slack.slack-assign {
   label {
-    margin-left: -3.3rem;
+    margin-left: -4rem;
   }
   .clr-input-wrapper {
-    margin-left: 5.9rem;
+    margin-left: 7.1rem;
     input.clr-input {
       width: 92.5% !important;
     }

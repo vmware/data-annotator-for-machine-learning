@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -28,7 +28,7 @@ export class AssignSlackComponent implements OnInit {
   @Output('slackListOuter')
   slackListOuterEmitter = new EventEmitter();
 
-  @ViewChild('slack', { static: false })
+  @ViewChild('slack')
   slack: ElementRef;
 
   slackList: any = [];

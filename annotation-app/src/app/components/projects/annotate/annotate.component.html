@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2021 VMware, Inc.
+<!-- Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 <!-- <div class="modalHide" (click)="clickModalHide()"></div> -->
 <form
@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="line"></div>
           </div>
 
-          <h3 style="margin-top: 0.2rem">Project Info</h3>
+          <h3>Project Info</h3>
           <div class="clr-form-group left-project-info clr-row">
             <label for="name" class="label-leftBoard">Name: </label>&nbsp;&nbsp;
             <div style="word-break: break-all">{{ selectParam }}</div>
@@ -261,7 +261,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div class="line"></div>
 
-          <h3 style="margin-top: 0.2rem">History</h3>
+          <h3>History</h3>
 
           <ng-container>
             <div class="historyBox">
@@ -360,7 +360,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           <!-- to show the filename -->
           <div
             *ngIf="projectType === 'log' && startFrom !== 'review' && projectInfo.isShowFilename"
-            style="font-size: 0.54167rem"
           >
             <div class="clr-row" style="margin-bottom: 0.7rem">
               <div class="clr-col-2">File Name</div>
@@ -372,10 +371,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <!-- to search the filename -->
-          <div
-            *ngIf="projectType === 'log' && startFrom === 'review'"
-            style="font-size: 0.54167rem"
-          >
+          <div *ngIf="projectType === 'log' && startFrom === 'review'">
             <div class="clr-row">
               <div class="clr-col-2" style="margin-top: -0.15rem">File Name</div>
               <div class="clr-col-10">

@@ -2,7 +2,7 @@
 
 The project includes three components:
 
-- [**_annotation-app_**](./annotation-app): Angular application built with [Angular 8.x](https://angular.io/guide/router-tutorial)
+- [**_annotation-app_**](./annotation-app): Angular application built with [Angular v11](https://angular.io/docs)
 - [**_annotation-service_**](./annotation-service): Backend services built with [Node](https://nodejs.org/en/), [mongodb](https://www.mongodb.com/download-center/community), [express](https://www.npmjs.com/package/express)
 - [**_active-learning-service_**](./active-learning-service): Django application providing active learning api built with [Python](https://www.python.org/downloads/) and [Django](https://www.djangoproject.com/) and [modAL](https://modal-python.readthedocs.io/en/latest/#) library for pool-based uncertainty sampling to rank the unlabelled data
 

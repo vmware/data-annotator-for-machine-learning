@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2021 VMware, Inc.
+<!-- Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <clr-header>
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <clr-dropdown *ngIf="loggedUser">
       <button class="nav-text" clrDropdownTrigger>
         {{ loggedUser.email }}
-        <clr-icon shape="caret down"></clr-icon>
+        <clr-icon shape="caret down" style="right: auto"></clr-icon>
       </button>
       <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
         <a (click)="logOut()" clrDropdownItem>Log out</a>

@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -106,10 +106,6 @@ h4 clr-signpost-content.signpost-content p {
 
 .form-group {
   margin: 15px 0;
-}
-
-.form-group label {
-  font-size: 0.54167rem;
 }
 
 label .label-leftBoard {
@@ -563,7 +559,7 @@ label .label-leftBoard {
   text-align: center;
   width: 0.8em;
   height: 0.8em;
-  line-height: 0.5em;
+  line-height: 0.8em;
   font-size: 1.5em;
 }
 
@@ -775,7 +771,6 @@ label .label-leftBoard {
   line-height: 0.8rem;
   min-width: 1.5rem;
   margin-top: -0.3rem;
-  outline-color: unset !important;
   outline-width: 0px;
 }
 
@@ -785,9 +780,11 @@ label .label-leftBoard {
   line-height: 0.8rem;
   min-width: 1.5rem;
   margin-top: -0.3rem;
-  outline-color: #0077b8 !important;
   background-color: #0077b8;
-  color: white;
+  color: white !important;
+  clr-icon {
+    color: white !important;
+  }
 }
 
 .modalHide {

@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 /* You can add global styles to this file, and also import other style files */
@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 a {
   color: currentColor;
 }
+
 ng-select .ng-dropdown-panel {
   /* width: 150% !important; */
 }

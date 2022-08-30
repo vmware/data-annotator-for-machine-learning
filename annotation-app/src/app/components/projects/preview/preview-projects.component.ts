@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -35,11 +35,11 @@ declare function hierarchicalChart(options: any): any;
   styleUrls: ['./preview-projects.component.scss'],
 })
 export class previewProjectsComponent implements OnInit, AfterViewInit {
-  @ViewChild('dataGird', { static: false }) dataGird;
-  @ViewChild('userChart', { static: false }) userChart: ElementRef;
-  @ViewChild('categoryChart', { static: false }) categoryChart: ElementRef;
-  @ViewChild('modelChart', { static: false }) modelChart: ElementRef;
-  @ViewChild('hierarchicalChart', { static: false }) hierarchicalChart: ElementRef;
+  @ViewChild('dataGird') dataGird;
+  @ViewChild('userChart') userChart: ElementRef;
+  @ViewChild('categoryChart') categoryChart: ElementRef;
+  @ViewChild('modelChart') modelChart: ElementRef;
+  @ViewChild('hierarchicalChart') hierarchicalChart: ElementRef;
 
   selectedDataset: any;
   previewHeadDatas: any;
@@ -190,8 +190,10 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
       this.projectType == 'ner'
         ? ['Entity', 'Text', 'Start_idx', 'End_idx']
         : ['LineNumber', 'LineContent', 'Label', 'FreeText'];
-    this.getALLSrs();
-    this.getALLFlag();
+    setTimeout(() => {
+      this.getALLSrs();
+      this.getALLFlag();
+    }, 1000);
   }
 
   getSamplingStrategy(queryStrategy: any) {
@@ -334,6 +336,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     this.avaService.getALLSrs(this.getALLSrsParam).subscribe(
       (res) => {
         if (res) {
+          const resCopy = JSON.parse(JSON.stringify(res));
           const oldRes = JSON.parse(JSON.stringify(res.data));
           this.totalItems = res.pageInfo.totalRowss;
           this.totalPages = res.pageInfo.totalPages;
@@ -368,7 +371,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
               res[w].selected = false;
             }
           } else {
-            if (flag.length > 0) {
+            if (flag.length > 0 && resCopy.pageInfo.currentPage === 1) {
               const pre = [];
               _.forIn(flag[0], function (value, key) {
                 pre.push(key);
@@ -378,11 +381,14 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
             for (let j = 0; j < flag.length; j++) {
               const a = flag[j];
               const cell = [];
-              for (const key in a) {
+              for (const index in this.previewSrsHeader) {
+                let key = this.previewSrsHeader[index];
                 cell.push(a[key]);
               }
+
               cellContent.push(cell);
             }
+
             for (let k = 0; k < res.length; k++) {
               res[k].originalData = cellContent[k];
             }
@@ -398,12 +404,14 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
               }
             });
           }
-
-          this.previewSrs = res;
-          // console.log('this.previewSrs:::', this.previewSrs)
-          // console.log('oldRes:::', oldRes)
+          setTimeout(() => {
+            this.previewSrs = res;
+            // console.log('this.previewSrs:::', this.previewSrs);
+            // console.log('oldRes:::', oldRes)
+          }, 100);
 
           if (this.projectType == 'image') {
+            this.previewSrs = res;
             setTimeout(() => {
               const detailRowDom = this.el.nativeElement.querySelectorAll(
                 'clr-dg-row-detail.datagrid-row-detail',
@@ -477,6 +485,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
             this.loading = false;
           }
           if (this.isMultipleLabel && this.projectType != 'ner' && this.projectType != 'log') {
+            this.previewSrs = res;
             this.toRenewPreviewSrs();
           }
           this.firstLoadTable = false;
