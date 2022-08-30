@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -118,6 +118,7 @@ export class CreateNewComponent implements OnInit {
   dropdownSelected: string;
   checkboxChecked: any = [];
   helpfulText: any = [];
+  inputLabelErrMsg: string;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -492,8 +493,8 @@ export class CreateNewComponent implements OnInit {
   }
 
   updateLabel(data) {
-    if (data && this.inputLabelValidation == false) {
-      this.categoryList.push(data);
+    if (data.trim() && this.inputLabelValidation == false && !this.inputLabelErrMsg) {
+      this.categoryList.push(data.trim());
       if (this.projectType === 'ner') {
         this.dsDialogForm.get('labels').setValue([...this.categoryList, ...this.checkboxChecked]);
       } else {
@@ -725,17 +726,25 @@ export class CreateNewComponent implements OnInit {
         );
         return;
       }
+      let commaLabel = [];
       for (let d = 0; d < flag.length; d++) {
-        if (flag[d] == null || String(flag[d]).trim() == '') {
+        if (!flag[d] || String(flag[d]).trim() == '') {
           flag.splice(d, 1);
         }
-        if (flag[d].length > 50) {
+        // to check format comma
+        let c = String(flag[d]).trim();
+        if (/[,，]/g.test(c)) {
+          commaLabel = [...commaLabel, ...c.split(',')];
+          flag.splice(d, 1);
+        }
+        if (flag[d] && flag[d].length > 50) {
           this.overPerLabelLimit = true;
           const sliceStr = flag[d].slice(0, 50);
           flag.splice(d, 1, sliceStr);
         }
       }
-      this.categoryList = flag;
+      let newCommaLabel = _.uniq(commaLabel);
+      this.categoryList = [...flag, ...newCommaLabel];
       this.dsDialogForm.get('labels').setValue(this.categoryList);
     } else if (selectedLabelIndex > -1 && isNumeric) {
       this.isNumeric = true;
@@ -849,16 +858,22 @@ export class CreateNewComponent implements OnInit {
 
   onLabelKeydown(e) {
     if (this.projectType === 'ner') {
-      if (this.dsDialogForm.value.labels.indexOf(e.target.value) !== -1) {
+      if (this.dsDialogForm.value.labels.indexOf(e.target.value.trim()) !== -1) {
         this.inputLabelValidation = true;
       } else {
         this.inputLabelValidation = false;
       }
     } else {
-      if (this.categoryList.indexOf(e.target.value) !== -1) {
+      if (this.categoryList.indexOf(e.target.value.trim()) !== -1) {
         this.inputLabelValidation = true;
       } else {
         this.inputLabelValidation = false;
+      }
+      // to check format comma
+      if (/[,，]/g.test(e.target.value.trim())) {
+        this.inputLabelErrMsg = 'Wrong format! Not allow comma.';
+      } else {
+        this.inputLabelErrMsg = '';
       }
     }
   }
@@ -1274,7 +1289,7 @@ export class CreateNewComponent implements OnInit {
   closeWizard() {
     this.isShowSetdataWizard = false;
   }
-  
+
   receiveWizardInfo(e) {
     this.dropdownSelected = e.dropdownSelected;
     this.checkboxChecked = e.checkboxChecked;

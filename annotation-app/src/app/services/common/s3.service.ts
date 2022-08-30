@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -22,11 +22,11 @@ export class S3Service {
           if (res) {
             let outNo = new Date().getTime();
             const s3 = new AWS.S3({
-              region: new Buffer(res.region, 'base64').toString(),
-              apiVersion: new Buffer(res.apiVersion, 'base64').toString(),
-              accessKeyId: new Buffer(res.credentials.accessKeyId, 'base64').toString(),
-              secretAccessKey: new Buffer(res.credentials.secretAccessKey, 'base64').toString(),
-              sessionToken: new Buffer(res.credentials.sessionToken, 'base64').toString(),
+              region: Buffer.from(res.region, 'base64').toString(),
+              apiVersion: Buffer.from(res.apiVersion, 'base64').toString(),
+              accessKeyId: Buffer.from(res.credentials.accessKeyId, 'base64').toString(),
+              secretAccessKey: Buffer.from(res.credentials.secretAccessKey, 'base64').toString(),
+              sessionToken: Buffer.from(res.credentials.sessionToken, 'base64').toString(),
             });
 
             response = {
@@ -81,8 +81,8 @@ export class S3Service {
             }
           } else {
             const uploadParams = {
-              Bucket: new Buffer(e.res.bucket, 'base64').toString(),
-              Key: new Buffer(e.res.key, 'base64').toString() + '/' + e.outNo + '_' + file.name,
+              Bucket: Buffer.from(e.res.bucket, 'base64').toString(),
+              Key: Buffer.from(e.res.key, 'base64').toString() + '/' + e.outNo + '_' + file.name,
               Body: file,
             };
             const data = await e.s3.upload(uploadParams).promise();
@@ -107,8 +107,8 @@ export class S3Service {
       let realEntryIndex = 0;
       for (let i = 0; i < entry.length; i++) {
         const uploadParams = {
-          Bucket: new Buffer(s3Config.bucket, 'base64').toString(),
-          Key: new Buffer(s3Config.key, 'base64').toString() + '/' + outNo + '/' + entry[i].name,
+          Bucket: Buffer.from(s3Config.bucket, 'base64').toString(),
+          Key: Buffer.from(s3Config.key, 'base64').toString() + '/' + outNo + '/' + entry[i].name,
           Body: entry[i].file,
         };
         s3.upload(uploadParams, async function (err, data) {
@@ -148,9 +148,9 @@ export class S3Service {
             await (value1 as any).async('blob').then(async function (blob) {
               realEntryIndex++;
               const uploadParams = {
-                Bucket: new Buffer(res.bucket, 'base64').toString(),
+                Bucket: Buffer.from(res.bucket, 'base64').toString(),
                 Key:
-                  new Buffer(res.key, 'base64').toString() +
+                  Buffer.from(res.key, 'base64').toString() +
                   '/' +
                   outNo +
                   '/' +

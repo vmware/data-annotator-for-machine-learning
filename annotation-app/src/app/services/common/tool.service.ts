@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -13,7 +13,7 @@ export class ToolService {
   constructor(public env: EnvironmentsService) {}
 
   hexToRgb(c) {
-    if (c.length == 4) {
+    if (c && c.length == 4) {
       c = '#' + [c[1], c[1], c[2], c[2], c[3], c[3]].join('');
     }
     c = '0x' + c.substring(1);
@@ -21,7 +21,7 @@ export class ToolService {
   }
 
   highToRgb(c) {
-    if (c.length == 4) {
+    if (c && c.length == 4) {
       c = '#' + [c[1], c[1], c[2], c[2], c[3], c[3]].join('');
     }
     c = '0x' + c.substring(1);

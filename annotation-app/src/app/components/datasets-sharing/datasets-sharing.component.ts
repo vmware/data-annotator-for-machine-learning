@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -137,7 +137,7 @@ export class DatasetsSharingComponent implements OnInit {
             latestAnnotationTime: e.updatedDate,
             generateDoneTime: res.updateTime,
             downloadUrl: this.env.config.enableAWSS3
-              ? new Buffer(res.file, 'base64').toString()
+              ? Buffer.from(res.file, 'base64').toString()
               : res.file,
             datasets: this.datasets,
             id: e.id,
@@ -187,7 +187,7 @@ export class DatasetsSharingComponent implements OnInit {
         this.infoMessage =
           'Dataset with annotations is already been generated. Please refresh the page.';
         this.downloadUrl = this.env.config.enableAWSS3
-          ? new Buffer(e.Body.file, 'base64').toString()
+          ? Buffer.from(e.Body.file, 'base64').toString()
           : e.Body.file;
         this.downloadProject();
         this.getProjects();

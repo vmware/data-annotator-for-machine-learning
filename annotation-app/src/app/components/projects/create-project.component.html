@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2021 VMware, Inc.
+<!-- Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <form
@@ -714,6 +714,24 @@ SPDX-License-Identifier: Apache-2.0 -->
                   *clrIfOpen
                 >
                   <span>This label has already exist!</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+              <clr-tooltip *ngIf="inputLabelErrMsg">
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                >
+                </clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="md"
+                  *clrIfOpen
+                >
+                  <span>{{inputLabelErrMsg}}</span>
                 </clr-tooltip-content>
               </clr-tooltip>
             </div>

@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -15,8 +15,6 @@ import { UploadData } from '../../model/index';
 import { DatasetUtil } from 'app/model/index';
 import { DatasetValidator } from '../../shared/form-validators/dataset-validator';
 import { FormValidatorUtil } from '../../shared/form-validators/form-validator-util';
-import AWS from 'aws-sdk/lib/aws';
-import { Buffer } from 'buffer';
 import { UnZipService } from 'app/services/common/up-zip.service';
 import { EnvironmentsService } from 'app/services/environments.service';
 import { ToolService } from 'app/services/common/tool.service';

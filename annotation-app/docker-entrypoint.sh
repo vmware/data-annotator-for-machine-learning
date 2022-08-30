@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 2019-2021 VMware, Inc.
+# Copyright 2019-2022 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
 ## Substitutes env variables in main.*.js bundle

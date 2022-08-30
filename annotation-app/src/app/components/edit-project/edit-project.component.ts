@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -80,6 +80,7 @@ export class EditProjectComponent implements OnInit {
   inputSlackChannels: any = [];
   showLabel: boolean = true;
   isShowSlack: boolean = false;
+  inputLabelErrMsg: string;
 
   constructor(
     private avaService: AvaService,
@@ -164,7 +165,7 @@ export class EditProjectComponent implements OnInit {
         this.categoryList.push(flag);
       });
     }
-    if (this.msg.assignSlackChannels.length > 0) {
+    if (this.msg.assignSlackChannels && this.msg.assignSlackChannels.length > 0) {
       this.slackList = this.msg.assignSlackChannels;
       this.msg.assignSlackChannels.forEach((element) => {
         this.inputSlackChannels.push(element.slackName);
@@ -541,8 +542,15 @@ export class EditProjectComponent implements OnInit {
   }
 
   onEnterLabel(e) {
-    if (e && this.inputLabelValidation == false) {
-      const flag = { status: 'new', originalLabel: e, editLabel: e };
+    // to check format comma
+    if (/[,，]/g.test(e.trim())) {
+      this.inputLabelErrMsg = 'Wrong format! Not allow comma.';
+      return;
+    } else {
+      this.inputLabelErrMsg = '';
+    }
+    if (e && this.inputLabelValidation == false && !this.inputLabelErrMsg) {
+      const flag = { status: 'new', originalLabel: e.trim(), editLabel: e.trim() };
       this.categoryList.push(flag);
       this.inputNewLabel = null;
     }
@@ -554,7 +562,7 @@ export class EditProjectComponent implements OnInit {
 
   onLabelKeyUp(e) {
     for (let i = 0; i < this.categoryList.length; i++) {
-      if (this.categoryList[i].editLabel == e.target.value) {
+      if (this.categoryList[i].editLabel == e.target.value.trim()) {
         this.inputLabelValidation = true;
         return;
       } else {
@@ -578,9 +586,10 @@ export class EditProjectComponent implements OnInit {
       this.activeClickInput = null;
     }
 
-    if (e.editLabel == '' || this.inputLabelValidation == true) {
+    if (e.editLabel == '' || this.inputLabelValidation == true || this.inputLabelErrMsg) {
       this.activeClickInput = null;
       e.editLabel = e.originalLabel;
+      this.inputLabelErrMsg = '';
     }
   }
 
@@ -595,7 +604,7 @@ export class EditProjectComponent implements OnInit {
     });
     let i = 0;
     flag.forEach((element) => {
-      if (element == e) {
+      if (element == e.trim()) {
         i = i + 1;
       }
     });
@@ -603,6 +612,13 @@ export class EditProjectComponent implements OnInit {
       this.inputLabelValidation = true;
     } else {
       this.inputLabelValidation = false;
+    }
+    // to check format comma
+    if (/[,，]/g.test(e.trim())) {
+      this.inputLabelErrMsg = 'Wrong format! Not allow comma.';
+      return;
+    } else {
+      this.inputLabelErrMsg = '';
     }
   }
 
