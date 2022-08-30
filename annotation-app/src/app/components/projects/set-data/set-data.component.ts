@@ -38,7 +38,6 @@ export class SetDataComponent implements OnInit, OnChanges {
   formDatagrid: any;
 
   ngOnInit() {
-    this.wizard.navService.updateNavigation();
     if (this.wizardData.projectType === 'ner') {
       this.clrSelectData = {
         required: true,
@@ -55,6 +54,15 @@ export class SetDataComponent implements OnInit, OnChanges {
       }
     } else {
       this.checkboxColumns = JSON.parse(JSON.stringify(this.wizardData.csvHeaders));
+      if (this.wizardData.dropdownSelected) {
+        let that = this;
+        this.checkboxColumns = _.remove(
+          JSON.parse(JSON.stringify(this.wizardData.csvHeaders)),
+          function (n) {
+            return n != that.wizardData.dropdownSelected;
+          },
+        );
+      }
       this.clrSelectData = {
         required: true,
         options: [...['No Labels'], ...this.wizardData.csvHeaders],

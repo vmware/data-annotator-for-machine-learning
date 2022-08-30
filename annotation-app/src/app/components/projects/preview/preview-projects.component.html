@@ -223,7 +223,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width: 90px">
                       {{ i + 1 }}
                     </clr-dg-cell>
-                    <ng-container *ngIf="!dataset.projectType || dataset.projectType !== 'log'">
+                    <ng-container *ngIf="dataset.projectType !== 'log'">
                       <clr-dg-cell
                         *ngFor="let content of dataset.originalData"
                         class="previewHeight ellipsis-datagrid"
