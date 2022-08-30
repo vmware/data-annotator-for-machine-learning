@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 // Protractor configuration file, see link for more information
@@ -42,7 +42,7 @@ var conf = {
 
     "./features/creat-text-multiple-project-spec.ts",
     "./features/annotate-project-multiple-spec.ts",
-    "./features/download_share_text_multiple.spec.ts",
+    "./features/download-share-text-multiple-spec.ts",
 
     "./features/creat-ner-labels-existing-project-spec.ts",
     "./features/annotate-project-ner-labels-existing-spec.ts",
@@ -69,7 +69,7 @@ var conf = {
     "./general/logout-spec.ts",
     "./general/login-external-spec.ts",
   ],
-  specsConstIn:[
+  specsConstIn: [
     "./general/login-spec.ts",
   ],
 
@@ -82,8 +82,8 @@ var conf = {
 
 exports.config = {
   allScriptsTimeout: 20000, //first page loading time
-// specs: conf.poc_specs,
-  specs: process.env.IN? conf.specsConstIn.concat(conf.ci_specs): conf.specsConstOut.concat(conf.ci_specs),
+  // specs: conf.poc_specs,
+  specs: process.env.IN ? conf.specsConstIn.concat(conf.ci_specs) : conf.specsConstOut.concat(conf.ci_specs),
   capabilities: {
     browserName: "chrome",
     chromeOptions: {
@@ -106,12 +106,12 @@ exports.config = {
     },
   },
   directConnect: true,
-  baseUrl: process.env.IN? process.env.BASE_URL: "http://localhost:4200/",
+  baseUrl: process.env.IN ? process.env.BASE_URL : "http://localhost:4200/",
   framework: "jasmine",
   jasmineNodeOpts: {
     showColors: true,
     defaultTimeoutInterval: 100000,
-    print: function () {},
+    print: function () { },
   },
   async beforeLaunch() {
     await setup();
@@ -140,9 +140,9 @@ exports.config = {
             const report = coverage.split("webpack://").join("root");
             require("fs").writeFile(
               process.cwd() +
-                "/" +
-                nycOutput +
-                `\/coverage-${new Date().getTime()}.json`,
+              "/" +
+              nycOutput +
+              `\/coverage-${new Date().getTime()}.json`,
               report,
               function (err) {
                 if (err) {
@@ -177,7 +177,9 @@ exports.config = {
           allure.createAttachment(
             "Screenshot",
             () => {
-              return new Buffer(png, "base64");
+              // return new Buffer(png, "base64");
+              return Buffer.from(png, "base64");
+
             },
             "image/png"
           )();
@@ -236,7 +238,7 @@ const setup = () => {
           flag = false;
           resolve(true);
         }
-      } catch (error) {}
+      } catch (error) { }
     }
   });
 };

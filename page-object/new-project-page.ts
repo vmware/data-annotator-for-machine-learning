@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
@@ -15,24 +15,17 @@ export class NewProjectPage extends CommonPage {
   UPLOAD_CSV_BTN = $(".clr-input-wrapper .btn.btn-sm.add-doc");
   CHOOSE_FILE_BTN = $('input[name="localFileFile"]');
   UPLOAD_CSV_OK_BTN = $(".modal-footer .btn.btn-primary");
-  SET_DATA_TAB = $('ul[role="tablist"] .nav-item:last-child');
-  LABELS_BTN = element(by.css("select[formcontrolname=selectLabels]"));
-  LABELS_LIST = element.all(
-    by.css("select[formcontrolname=selectLabels] option")
-  );
-  TEXT_BTN = element(by.css("select[formcontrolname=selectedText]"));
-  TEXT_LIST = element.all(
-    by.css("select[formcontrolname=selectedText] option")
-  );
+  SET_DATA_TAB = $("clr-wizard clr-datagrid");
+  WIZARD_SELECT_BTN = element(by.css("clr-wizard .clr-select-wrapper"));
+  WIZARD_SELECT_OPTIONS = element.all(by.css("clr-wizard select option"));
   TICKET_COLUMN_CHECKBOX_FOR_TEXT = element(
     by.css("clr-dg-row:nth-child(4) .clr-checkbox-wrapper label")
   );
-  SET_DATA_BTN = $(".setData .btn-primary.sureSet");
+  SET_DATA_BTN = $("clr-wizard-button:nth-child(4)");
   MAX_ANNOTATIONS = $("#maxAnnotations");
   ADD_NEW_LABLE = $(".labelsList .clr-input");
   ASSIGNEE = $("#assignee");
   CREATE_BTN = $('.content-area button[type="submit"]');
-  SET_DATA_SECTION = $("#clr-tab-content-0 .setData");
   CSV_NAME = $(".modal-content #datasetsName");
   MY_PROJECTS_TAB = element(by.css('.header-nav a[href="/projects"]'));
   PROJECT_TABULAR_CLASSIFICATION = element(
@@ -50,6 +43,9 @@ export class NewProjectPage extends CommonPage {
   SELECT_AL_CLASSIFIER = element(
     by.css("select[formcontrolname=selectedClassifier]")
   );
+  SELECT_AL_QUERY_STRATEGY = element(
+    by.css("select[formcontrolname=selectedqueryStrategy]")
+  );
   SELECT_AL_ENCODER = element(
     by.css("select[formcontrolname=selectedEncoder]")
   );
@@ -60,13 +56,17 @@ export class NewProjectPage extends CommonPage {
   ALLOW_MULTIPLE = element(by.css(".labelsList label[for=multipleLabel]"));
   TICKET_COLUMNS = element.all(by.css("clr-dg-row label"));
   NUMERIC_OPTION = element(by.css("clr-radio-wrapper label[for=numericLabel]"));
-  MUTIL_NUMERIC_OPTION = element(by.css("clr-radio-wrapper label[for=mutilNumericLabel]"));
+  MUTIL_NUMERIC_OPTION = element(
+    by.css("clr-radio-wrapper label[for=mutilNumericLabel]")
+  );
   TEXT_LABEL_TYPE_OPTION = element(
     by.css("clr-radio-wrapper label[for=textLabel]")
   );
   MIN_LABEL_INPUT = element(by.css("input[formcontrolname=min]"));
   MAX_LABEL_INPUT = element(by.css("input[formcontrolname=max]"));
-  MUTIL_LABEL_INPUT = element(by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]"));
+  MUTIL_LABEL_INPUT = element(
+    by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]")
+  );
   ADD_BTN = element(by.css(".add-btn"));
   SHOW_FILENAME_CHECKBOX = element(by.css("label[for=isShowFilename]"));
   IMAGE_LOADING = element(by.css("span .loadingSpan"));
@@ -85,6 +85,7 @@ export class NewProjectPage extends CommonPage {
     .all(by.css("div.popLabelsList div:last-child span"))
     .last();
   ADD_POP_LABLE = $(".labelsList .clr-input[name=addPopupLables]");
+  WIZARD_NEXT_BTN = $("clr-wizard-button:nth-child(3)");
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.MY_PROJECTS_TAB);
@@ -139,14 +140,13 @@ export class NewProjectPage extends CommonPage {
 
   async setData(type, startIndex?, endIndex?) {
     await FunctionUtil.elementVisibilityOf(this.SET_DATA_TAB);
-    await this.SET_DATA_TAB.click();
     if (type === "text") {
       await this.selectTextTicketColumn();
     } else if (type === "tabular" || type === "ner") {
       await this.selectMultipleTicketColumn(startIndex, endIndex);
     }
     await browser.waitForAngularEnabled(false);
-    await this.setDataLable(type);
+    await this.setDataLable();
     await this.waitForUploadloading();
   }
 
@@ -159,10 +159,6 @@ export class NewProjectPage extends CommonPage {
 
   async selectMultipleTicketColumn(startIndex, endIndex) {
     await FunctionUtil.elementVisibilityOf(this.SET_DATA_TAB);
-    await this.SET_DATA_TAB.click();
-    await FunctionUtil.elementVisibilityOf(
-      this.TICKET_COLUMN_CHECKBOX_FOR_TEXT
-    );
     this.TICKET_COLUMNS.then(async (column) => {
       for (let i = startIndex; i < endIndex; i++) {
         await column[i].click();
@@ -170,51 +166,41 @@ export class NewProjectPage extends CommonPage {
     });
   }
 
-  setDataLable(type?) {
+  setDataLable() {
     return browser
       .wait(
-        ExpectedConditions.visibilityOf(
-          type !== "ner" ? this.LABELS_BTN : this.TEXT_BTN
-        ),
+        ExpectedConditions.visibilityOf(this.WIZARD_SELECT_BTN),
         Constant.DEFAULT_TIME_OUT
       )
       .then(async () => {
-        if (type === "ner") {
-          await this.TEXT_BTN.click();
-          return this.TEXT_LIST;
-        } else {
-          await this.LABELS_BTN.click();
-          return this.LABELS_LIST;
-        }
+        await this.WIZARD_SELECT_BTN.click();
+        return this.WIZARD_SELECT_OPTIONS;
       })
       .then(async (list) => {
-        await FunctionUtil.elementVisibilityOf(list[1]);
-        await list[1].click();
-      })
-      .then(async () => {
-        this.setDataSubmit();
+        await FunctionUtil.elementVisibilityOf(list[0]);
+        await list[0].click();
       });
   }
 
   async selectLabels(labelIndex) {
-    await FunctionUtil.elementVisibilityOf(this.LABELS_BTN);
-    await this.LABELS_BTN.click();
-    await this.LABELS_LIST.get(labelIndex).click();
+    await FunctionUtil.elementVisibilityOf(this.WIZARD_SELECT_BTN);
+    await this.WIZARD_SELECT_BTN.click();
+    await this.WIZARD_SELECT_OPTIONS.get(labelIndex).click();
   }
 
   async setLabelValidation(labelColumn) {
     console.log("start to setLabelValidation...");
-    await FunctionUtil.elementVisibilityOf(this.LABELS_BTN);
+    await FunctionUtil.elementVisibilityOf(this.WIZARD_SELECT_BTN);
     await browser.waitForAngularEnabled(false);
-    await this.LABELS_BTN.click();
-    await FunctionUtil.elementVisibilityOf(this.LABELS_LIST.get(0));
-    await this.LABELS_LIST.then(async (options) => {
+    await this.WIZARD_SELECT_BTN.click();
+    await FunctionUtil.elementVisibilityOf(this.WIZARD_SELECT_OPTIONS.get(0));
+    await this.WIZARD_SELECT_OPTIONS.then(async (options) => {
       options.forEach(async (value, index) => {
-        await this.LABELS_LIST.get(index)
+        await this.WIZARD_SELECT_OPTIONS.get(index)
           .getText()
           .then(async (e) => {
             if (e.trim() === labelColumn) {
-              await this.LABELS_LIST.get(index).click();
+              await this.WIZARD_SELECT_OPTIONS.get(index).click();
             }
           });
       });
@@ -223,15 +209,14 @@ export class NewProjectPage extends CommonPage {
   }
 
   async setDataSubmit() {
+    console.log("log-start to click set_data btn");
+    await FunctionUtil.elementVisibilityOf($$("clr-wizard-button").last());
+    await FunctionUtil.elementVisibilityOf(this.SET_DATA_BTN);
     if (process.env.IN) {
-      console.log('start to show set_data btn');
       await browser.sleep(2000);
-      await FunctionUtil.elementVisibilityOf(this.SET_DATA_BTN);
-      await browser.actions().mouseMove(this.SET_DATA_BTN).perform();
     }
-    console.log('start to click set_data btn');
     await this.SET_DATA_BTN.click();
-    await ExpectedConditions.invisibilityOf($(".btn.uploadLoading"));
+    console.log("log-suceed to click set_data btn");
   }
 
   async clickOkBtn() {
@@ -317,6 +302,15 @@ export class NewProjectPage extends CommonPage {
       .click();
   }
 
+  async selectQueryStrategy(index) {
+    await FunctionUtil.elementVisibilityOf(this.SELECT_AL_QUERY_STRATEGY);
+    await this.SELECT_AL_QUERY_STRATEGY.click();
+    await element
+      .all(by.css("select[formcontrolname=selectedqueryStrategy] option"))
+      .get(index)
+      .click();
+  }
+
   async selectActiveLearningEncoder(alEncoderIndex) {
     await FunctionUtil.elementVisibilityOf(this.SELECT_AL_ENCODER);
     await this.SELECT_AL_ENCODER.click();
@@ -327,14 +321,14 @@ export class NewProjectPage extends CommonPage {
   }
 
   setAssignee(lable: string, annotator2?) {
-    console.log('start to setAssignee annotator');
+    console.log("start to setAssignee annotator");
     return browser
       .wait(
         ExpectedConditions.visibilityOf(this.ASSIGNEE),
         Constant.DEFAULT_TIME_OUT
       )
       .then(async () => {
-        console.log('succeed to visibilityOf annotator');
+        console.log("succeed to visibilityOf annotator");
         await this.ASSIGNEE.clear();
         await this.ASSIGNEE.sendKeys(Constant.username);
         await FunctionUtil.pressEnter();
@@ -355,11 +349,11 @@ export class NewProjectPage extends CommonPage {
   }
 
   async setAssignedTicket(value) {
-    console.log("start to setAssignedTicket...");
+    console.log("log-start to setAssignedTicket...");
     await this.ASSIGN_TICKET_INPUT.click();
     await await this.ASSIGN_TICKET_INPUT.sendKeys(protractor.Key.DOWN);
     await this.ASSIGN_TICKET_INPUT.sendKeys(protractor.Key.TAB);
-    console.log("succeed to setAssignedTicket...");
+    console.log("log-succeed to setAssignedTicket...");
   }
 
   clickCreateBtn() {
@@ -369,7 +363,7 @@ export class NewProjectPage extends CommonPage {
         Constant.DEFAULT_TIME_OUT
       )
       .then(async () => {
-         if (process.env.IN) {
+        if (process.env.IN) {
           await browser.sleep(5000);
           await FunctionUtil.elementVisibilityOf(this.CREATE_BTN);
         }
@@ -377,7 +371,7 @@ export class NewProjectPage extends CommonPage {
         await this.CREATE_BTN.click();
       })
       .then(async () => {
-        console.log('end to clickCreateBtn');
+        console.log("end to clickCreateBtn");
         await this.waitForUploadloading();
       });
   }
@@ -413,50 +407,66 @@ export class NewProjectPage extends CommonPage {
   }
 
   async deleteAnnotator() {
-    console.log("start to deleteAnnotator...");
+    console.log("log-start to deleteAnnotator...");
     await FunctionUtil.elementVisibilityOf(this.ASSIGN_TICKET_DELETE_ICON);
     await this.ASSIGN_TICKET_DELETE_ICON.click();
     await browser.waitForAngularEnabled(false);
-    console.log("succeed to deleteAnnotator...");
+    console.log("log-succeed to deleteAnnotator...");
   }
 
   async addMutilNumericLabel(label, min, max) {
     await this.MUTIL_NUMERIC_OPTION.click();
     await FunctionUtil.elementVisibilityOf(this.ADD_BTN);
-    for (let i= 0; i < 2; i++) {
+    for (let i = 0; i < 2; i++) {
       await this.ADD_BTN.click();
     }
     await this.setMutilNumericLabel(label, min, max);
   }
 
   async delMutilNumericLabel() {
-    console.log("start to delete MutilNumericLabel...");
-    element.all(by.css("div[formarrayname=mutilLabelArray] clr-icon[shape=times]")).each(async function(element, index) {
-      if (index < 2) {
-        await element.click();
-      }
-    });
-    console.log("succeed to delete MutilNumericLabel...");
+    console.log("log-start to delete MutilNumericLabel...");
+    element
+      .all(by.css("div[formarrayname=mutilLabelArray] clr-icon[shape=times]"))
+      .each(async function (element, index) {
+        if (index < 2) {
+          await element.click();
+        }
+      });
+    console.log("log-succeed to delete MutilNumericLabel...");
   }
 
   async setMutilNumericLabel(label, min, max) {
-    console.log("start to setMutilNumericLabel...");
+    console.log("log-start to setMutilNumericLabel...");
     await FunctionUtil.elementVisibilityOf(this.MUTIL_LABEL_INPUT);
-    element.all(by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]")).each(async function(element, index) {
-      await element.sendKeys(label + index);
-    });
-    element.all(by.css("div[formarrayname=mutilLabelArray] input[formcontrolname=minMutilVal]")).each(async function(element) {
-      await element.sendKeys(min);
-    });
-    element.all(by.css("div[formarrayname=mutilLabelArray] input[formcontrolname=maxMutilVal]")).each(async function(element) {
-      await element.sendKeys(max);
-    });
+    element
+      .all(by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]"))
+      .each(async function (element, index) {
+        await element.sendKeys(label + index);
+      });
+    element
+      .all(
+        by.css(
+          "div[formarrayname=mutilLabelArray] input[formcontrolname=minMutilVal]"
+        )
+      )
+      .each(async function (element) {
+        await element.sendKeys(min);
+      });
+    element
+      .all(
+        by.css(
+          "div[formarrayname=mutilLabelArray] input[formcontrolname=maxMutilVal]"
+        )
+      )
+      .each(async function (element) {
+        await element.sendKeys(max);
+      });
     await browser.waitForAngularEnabled(false);
-    console.log("succeed to setMutilNumericLabel...");
+    console.log("log-succeed to setMutilNumericLabel...");
   }
 
   async setPopLabel() {
-    console.log("start to setPopLabel...");
+    console.log("log-start to setPopLabel...");
     await FunctionUtil.elementVisibilityOf(this.PROJECT_NAME);
     await this.SHOW_POPUE_LABEL_CHECK.click();
     await FunctionUtil.operationSuspensionElements(
@@ -465,7 +475,22 @@ export class NewProjectPage extends CommonPage {
     );
     await browser.sleep(3000);
     await this.ADD_POP_LABLE.clear();
-    await this.ADD_POP_LABLE.sendKeys('Neutral');
-    console.log("end to setPopLabel...");
- }
+    await this.ADD_POP_LABLE.sendKeys("Neutral");
+    console.log("log-end to setPopLabel...");
+  }
+
+  async clickWizardNext() {
+    browser.sleep(2000);
+    console.log("log-start to clickWizardNext");
+    await FunctionUtil.elementVisibilityOf(this.WIZARD_NEXT_BTN);
+    await this.WIZARD_NEXT_BTN.click();
+    console.log("log-succeed to clickWizardNext");
+  }
+
+  async clickWizardCancel() {
+    console.log("log-start to clickWizardCancel");
+    let btn = $("clr-wizard-button[type='cancel']");
+    await FunctionUtil.elementVisibilityOf(btn);
+    await btn.click();
+  }
 }

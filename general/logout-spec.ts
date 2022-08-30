@@ -1,11 +1,12 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { browser, by, element, $, ExpectedConditions } from "protractor";
 import { FunctionUtil } from "../utils/function-util";
 
 describe("Log out service", () => {
+  let since = require("jasmine2-custom-message");
   let USERNAME_DROPDOWN = element(by.css("clr-dropdown"));
   let LOG_OUT = element(by.css("clr-dropdown-menu a"));
   let PROJECT_TAB = $('.header-nav a[href="/projects"]');

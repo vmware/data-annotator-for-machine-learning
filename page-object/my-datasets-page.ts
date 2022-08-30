@@ -1,22 +1,18 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { CommonPage } from "../general/commom-page";
-import { browser, by, element, $, ExpectedConditions } from "protractor";
+import { browser, by, element, $, ExpectedConditions, $$ } from "protractor";
 import { Constant } from "../general/constant";
 import { FunctionUtil } from "../utils/function-util";
 
 export class MyDatasetsPage extends CommonPage {
   DELETE_BTN = $('button[title="Delete Project"]');
   DELETE_DATASET_OK_BTN = $(".modal-footer .btn.btn-primary");
-  DATASETS_NAME_FILTER_BTN = element(
-    by.css(".datagrid-filter-toggle .is-solid")
-  );
+  DATASETS_NAME_FILTER_BTN = $$(".datagrid-filter-toggle");
   DATASETS_NAME_FILTER_INPUT = $('.datagrid-filter input[name="search"]');
-  CLOSE_FILTER_BTN = $(
-    '.datagrid-filter.clr-popover-content clr-icon[shape="close"]'
-  );
+  CLOSE_FILTER_BTN = $(".datagrid-filter.clr-popover-content cds-icon");
   MY_DATASETS_TAB = element(by.css('.header-nav a[href="/myDatasets"]'));
 
   async navigateTo() {
@@ -28,11 +24,11 @@ export class MyDatasetsPage extends CommonPage {
   filterDatasetstName(name: string) {
     return browser
       .wait(
-        ExpectedConditions.visibilityOf(this.DATASETS_NAME_FILTER_BTN),
+        ExpectedConditions.visibilityOf(this.DATASETS_NAME_FILTER_BTN.first()),
         Constant.DEFAULT_TIME_OUT
       )
       .then(() => {
-        this.DATASETS_NAME_FILTER_BTN.click();
+        this.DATASETS_NAME_FILTER_BTN.first().click();
         this.PROJECT_NAME_FILTER_INPUT.clear();
         this.PROJECT_NAME_FILTER_INPUT.sendKeys(name);
         this.CLOSE_FILTER_BTN.click();

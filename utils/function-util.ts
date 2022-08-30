@@ -182,10 +182,10 @@ export class FunctionUtil {
     ele: ElementFinder,
     operationEle: ElementFinder
   ) {
-    console.log("start hover to show the delete icon...");
+    console.log("log-start hover to show the delete icon...");
     await browser.actions().mouseMove(ele).perform();
     await FunctionUtil.click(operationEle);
-    console.log("succeed to click the delete icon...");
+    console.log("log-succeed to click the delete icon...");
   }
 
   public static async clear(str) {

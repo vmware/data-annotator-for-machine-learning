@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { LoginBussiness } from "../general/login-bussiness";
@@ -7,12 +7,15 @@ import { NewProjectPage } from "../page-object/new-project-page";
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
+import { FunctionUtil } from "../utils/function-util";
+
 const projectCreateData = require("../resources/project-create-page/test-data");
+const since = require("jasmine2-custom-message");
 
 describe("Create new project ", () => {
   const Task_Instruction = projectCreateData.TabularProject.Instruction;
   const New_Lable = projectCreateData.TabularProject.Labels.split(",");
-  const SET_DATA_SECTION = $('ul[role="tablist"] .nav-item:last-child');
+  const SET_DATA_SECTION = $("clr-wizard.clr-wizard");
   const PROJECT_TABULAR_CLASSIFICATION = element(
     by.css('clr-dropdown-menu a[href="/projects/create/tabular"]')
   );
@@ -23,7 +26,6 @@ describe("Create new project ", () => {
   let projectsPage: ProjecstPage;
   let New_CSV_Name: string;
   const CSV_Path = "/doc/upload-resource/text-test-data.csv";
-  let since = require("jasmine2-custom-message");
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
@@ -58,13 +60,24 @@ describe("Create new project ", () => {
       ExpectedConditions.visibilityOf(SET_DATA_SECTION),
       Constant.DEFAULT_TIME_OUT
     );
-    await newProjectPage.setData("tabular", 0, 3);
+    await newProjectPage.clickWizardNext();
+    await FunctionUtil.elementVisibilityOf(newProjectPage.WIZARD_SELECT_BTN);
+    await newProjectPage.setDataLable();
+    await newProjectPage.clickWizardNext();
+    await newProjectPage.selectMultipleTicketColumn(0, 4);
+    await newProjectPage.clickWizardNext();
+    await newProjectPage.setDataSubmit();
+    await browser.wait(
+      ExpectedConditions.invisibilityOf(SET_DATA_SECTION),
+      Constant.DEFAULT_TIME_OUT
+    );
     await newProjectPage.setMaxAnnotation(
       projectCreateData.TabularProject.maxAnnotation
     );
     await newProjectPage.shiftLabelType();
     await newProjectPage.setNewLable(New_Lable);
     await newProjectPage.selectActiveLearningModel(1);
+    await newProjectPage.selectQueryStrategy(0);
     await newProjectPage.selectActiveLearningEncoder(0);
     await newProjectPage.selectActiveLearningEncoder(1);
     await newProjectPage.setAssignee(Constant.username);

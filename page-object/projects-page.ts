@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { CommonPage } from "../general/commom-page";
@@ -30,14 +30,12 @@ export class ProjecstPage extends CommonPage {
   SILENCE_FLAGGED_TICKET_BTN = $(
     '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"]:last-child button:last-child'
   );
-  SHOW_LOG_DETAILS_BTN = $(
-    '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"]:nth-child(5) button.signpost-trigger'
-  );
+  SHOW_LOG_DETAILS_BTN = $$("button.signpost-trigger");
   RETURN_TO_ANNOTATOR_BTN = $(
     '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"]:last-child button'
   );
   EXPAND_CELL = $(
-    ".datagrid-host .datagrid-row:nth-child(2) clr-icon.datagrid-expandable-caret-icon"
+    ".datagrid-host .datagrid-row:nth-child(2) button.datagrid-expandable-caret-button"
   );
 
   async navigateTo() {
@@ -101,11 +99,11 @@ export class ProjecstPage extends CommonPage {
   }
 
   async logShowDetails() {
-    console.log("start to logShowDetails...");
-    await FunctionUtil.elementVisibilityOf(this.SHOW_LOG_DETAILS_BTN);
-    await browser.waitForAngularEnabled(false);
-    await this.SHOW_LOG_DETAILS_BTN.click();
-    console.log("succeed to logShowDetails...");
+    console.log("log-start to logShowDetails...");
+    await FunctionUtil.elementVisibilityOf(this.SHOW_LOG_DETAILS_BTN.first());
+    console.log("log-elementVisibilityOf(this.SHOW_LOG_DETAILS_BTN.first())");
+    await this.SHOW_LOG_DETAILS_BTN.first().click();
+    console.log("log-succeed to logShowDetails...");
   }
 
   async returnToAnnotatorBtn() {

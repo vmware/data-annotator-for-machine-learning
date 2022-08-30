@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import {
@@ -18,7 +18,7 @@ import { CommonPage } from "../general/commom-page";
 export class LoginPage extends CommonPage {
   SIGNIN_BTN = $(".header-actions .nav-link.nav-text");
   // BTN_Select = element(by.partialLinkText("Login with My VMware"));
-  BTN_Select = $$('.login-group a').last();
+  BTN_Select = $$(".login-group a").last();
   LOGIN_BTN = element(by.css("button[id=login-button]"));
   SINGNIN_BTN = element(by.partialButtonText("SIGN IN"));
   TYPE_SELECT = $('select[name="provider"]');
@@ -95,7 +95,10 @@ export class LoginPage extends CommonPage {
   }
 
   async clickLogInBtn() {
-    await FunctionUtil.elementVisibilityOf(this.LOGIN_BTN);
+    await browser.wait(
+      ExpectedConditions.visibilityOf(this.LOGIN_BTN),
+      Constant.DEFAULT_TIME_OUT
+    );
     await this.LOGIN_BTN.click();
   }
 
@@ -110,7 +113,7 @@ export class LoginPage extends CommonPage {
     await this.SIGN_UP_BTN.click();
   }
 
-  verifyLoggedUserNameDisplayed() {
+  async verifyLoggedUserNameDisplayed() {
     return browser
       .wait(
         ExpectedConditions.visibilityOf(this.LOGGED_USER_NAME),

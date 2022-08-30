@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2021 VMware, Inc.
+Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { LoginPage } from "../page-object/login-page";
@@ -45,11 +45,11 @@ describe("Service", () => {
       Constant.username,
       Constant.password
     );
-    await browser.waitForAngularEnabled(false);
-    await browser.sleep(5000);
     since("prompt should show up and content correct")
       .expect(loginPage.getPromptText())
       .not.toEqual("");
+    await browser.waitForAngularEnabled(false);
+    await browser.sleep(5000);
     done();
   });
 
