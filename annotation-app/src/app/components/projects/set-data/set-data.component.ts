@@ -112,7 +112,7 @@ export class SetDataComponent implements OnInit, OnChanges {
     let index = _.findIndex(this.checkboxColumns, function (o) {
       return o.name === data;
     });
-    !this.checkboxColumns[index][from];
+    this.checkboxColumns[index][from] = !this.checkboxColumns[index][from];
   }
 
   goBack(_e): void {

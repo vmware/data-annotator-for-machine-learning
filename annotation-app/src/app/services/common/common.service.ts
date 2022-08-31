@@ -4,7 +4,6 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 import { Injectable } from '@angular/core';
-import { resolve } from 'core-js/fn/promise';
 import * as _ from 'lodash';
 import { AvaService } from '../ava.service';
 
