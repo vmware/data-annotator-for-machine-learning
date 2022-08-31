@@ -110,24 +110,22 @@ SPDX-License-Identifier: Apache-2.0 -->
               <input
                 type="checkbox"
                 clrCheckbox
-                name="options"
+                name="checkbox1"
                 [ngClass]="{
                   'disabled-checkbox': column.checkboxDisabled
                 }"
                 [disabled]="column.checkboxDisabled"
-                [(ngModel)]="column.labelChecked"
-                (ngModelChange)="changeCheckbox(column.name, 'labelChecked')"
-                [ngModelOptions]="{ standalone: true }"
+                [checked]="column.labelChecked"
+                (change)="changeCheckbox(column.name, 'labelChecked')"
               />
             </clr-dg-cell>
             <clr-dg-cell class="ellipsis-datagrid">
               <input
                 type="checkbox"
                 clrCheckbox
-                name="options"
-                [(ngModel)]="column.helptextChecked"
-                (ngModelChange)="changeCheckbox(column.name, 'helptextChecked')"
-                [ngModelOptions]="{ standalone: true }"
+                name="checkbox2"
+                [checked]="column.helptextChecked"
+                (change)="changeCheckbox(column.name, 'helptextChecked')"
               />
             </clr-dg-cell>
           </clr-dg-row>
