@@ -444,15 +444,15 @@ export class UploadComponent implements OnInit {
     });
   }
 
-  cancelUpload() {
-    this.showAddNewDatasetDialog = false;
-    this.uploadGroup.get('localFile').reset();
-    this.inputFile = null;
-    this.uploadComplete = false;
-    this.uploadGroup.get('datasetsName').reset();
-    this.waitingTip = false;
-    this.nameExist = false;
-  }
+  // cancelUpload() {
+  //   this.showAddNewDatasetDialog = false;
+  //   this.uploadGroup.get('localFile').reset();
+  //   this.inputFile = null;
+  //   this.uploadComplete = false;
+  //   this.uploadGroup.get('datasetsName').reset();
+  //   this.waitingTip = false;
+  //   this.nameExist = false;
+  // }
 
   unzipImagesToS3() {
     this.s3Service.uploadToS3(this.inputFile, 'image', 'zip').then((e) => {

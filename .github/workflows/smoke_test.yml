@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2021 VMware, Inc.
+# Copyright 2019-2022 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -8,7 +8,7 @@ name: smoke_test
 #only trigger in master branch
 on:
   push:
-    branches: ['master']
+    branches: ["master"]
 
 jobs:
   smoke_test:
@@ -18,9 +18,9 @@ jobs:
       - name: Setup Node 16
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: "16"
 
-      - name: Checkout 
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -28,15 +28,15 @@ jobs:
       - name: set-up-mongodb
         uses: supercharge/mongodb-github-action@1.6.0
         with:
-          mongodb-version: '4.4'
+          mongodb-version: "4.4"
 
       - name: build-and-run-al
         working-directory: ./active-learning-service
         run: |
           pip install -r requirements.txt
           python -m spacy download en_core_web_md
-          python manage.py runserver localhost:8000 &      
-      
+          python manage.py runserver localhost:8000 &
+
       - name: build-and-run-service
         working-directory: ./annotation-service
         run: |
@@ -53,21 +53,21 @@ jobs:
           echo Curl Start login
           resp="$(curl -X POST -H "Content-Type: application/json" -d '{"email":"joeq@vmware.com","password":"password"}' http://localhost:3000/api/v1.0/login)"
           echo Curl End login
-          
+
           access_token=${resp:26:163}
-          
+
           echo container Start connect-active-learning-service 
           curl -X GET -H "Content-Type: application/json" -H "Authorization: ${access_token}" localhost:8000/health
-          echo container End connect-active-learning-service 
+          echo container End connect-active-learning-service
 
       - name: Checkout e2e-test branch
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: 'e2e-test'
-          path: 'e2e-test'
+          ref: "e2e-test"
+          path: "e2e-test"
 
-      - name: Build Annotation App 
+      - name: Build Annotation App
         working-directory: ./annotation-app
         run: |
           node --version
@@ -83,7 +83,7 @@ jobs:
           npm run webdriver
           npm run e2e-smoke
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
-          echo $str Smoke Test End $str 
+          echo $str Smoke Test End $str
 
       - name: keep the coverage output folder
         if: ${{ always() }}
@@ -102,15 +102,15 @@ jobs:
           retention-days: 60
 
   scan_annotation_app:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     needs: smoke_test
 
     #define variables to be used for SonarCloud scan
     env:
-      SONAR_ORG:  ${{ secrets.SONAR_ORG }}
+      SONAR_ORG: ${{ secrets.SONAR_ORG }}
 
     steps:
-      - name: Checkout 
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -119,8 +119,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          ref: 'devops'
-          path: 'devops'
+          ref: "devops"
+          path: "devops"
 
       - name: Download coverage-out artifact
         uses: actions/download-artifact@v2
@@ -140,7 +140,7 @@ jobs:
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan annotation-app
-        uses: sonarsource/sonarcloud-github-action@master  
+        uses: sonarsource/sonarcloud-github-action@master
         with:
           projectBaseDir: ./annotation-app
           args: >
@@ -152,8 +152,7 @@ jobs:
             -Dsonar.language=javascript
             -Dsonar.javascript.lcov.reportPaths=lcov.info
             -Dsonar.test.exclusions=**/node_modules/**/*,*.md,*.txt,*.yml
-            -Dsonar.coverage.exclusions=**/node_modules/**/*,*.md,*.txt,*.yml,**/src/main.ts,**/src/environments/*.ts,**/src/app/guards/sso.guard.ts,**/src/app/guards/auth.guard.ts,**/src/app/components/projects/supercollider.component.ts,**/src/app/components/admin,**/src/app/components/login,**/src/app/components/login/login.component.ts,**/src/app/components/footer/**/*,**/src/app/components/authentication/**/*,**/src/app/components/admin/admin.component.ts,**/src/app/shared/form-validators/dataset-validator.ts,**/src/app/shared/form-validators/form-validator-util.ts,**/src/app/services/common/email.service.ts,**/src/app/services/common/s3.service.ts,**/src/app/services/environments.service.ts,**/src/app/services/feedback.service.ts,**/src/app/services/user-auth.service.ts,**/src/app/pipes/full-name.pipe.ts,**/src/app/model/authentication.ts,**/src/app/model/incentives.ts,**/src/app/model/upload.ts,**/src/app/model/dataset.ts,**/src/app/core.module.ts,**/src/libs/modelChart.js,**/src/libs/feedback.js,**/src/app/components/widgets/**
-        env: 
+            -Dsonar.coverage.exclusions=**/node_modules/**/*,*.md,*.txt,*.yml,**/src/main.ts,**/src/environments/*.ts,**/src/app/guards/sso.guard.ts,**/src/app/guards/auth.guard.ts,**/src/app/components/projects/supercollider.component.ts,**/src/app/components/admin,**/src/app/components/login,**/src/app/components/login/login.component.ts,**/src/app/components/footer/**/*,**/src/app/components/authentication/**/*,**/src/app/components/admin/admin.component.ts,**/src/app/shared/form-validators/dataset-validator.ts,**/src/app/shared/form-validators/form-validator-util.ts,**/src/app/services/common/email.service.ts,**/src/app/services/common/s3.service.ts,**/src/app/services/common/tool.service.ts,**/src/app/services/environments.service.ts,**/src/app/services/feedback.service.ts,**/src/app/services/user-auth.service.ts,**/src/app/pipes/full-name.pipe.ts,**/src/app/model/authentication.ts,**/src/app/model/incentives.ts,**/src/app/model/upload.ts,**/src/app/model/dataset.ts,**/src/app/core.module.ts,**/src/libs/modelChart.js,**/src/libs/feedback.js,**/src/app/components/widgets/**,**/src/app/shared/components/assign-slack,**/src/app/model/**
+        env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.DATA_GITHUB_TOKEN }}
-
