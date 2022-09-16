@@ -40,10 +40,10 @@ describe("annotate project ...", () => {
     console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
     console.log("Project_Name_Text:::", Project_Name_Text);
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
-      await annotatePage.clickAnnotateStartBtn(project_name);
+      await annotatePage.clickAnnotateStartBtn();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-      console.log('start to get project info');
+      console.log("start to get project info");
       since("project info should show up and content correct")
         .expect(annotatePage.getProjectInfo())
         .toEqual({
@@ -52,7 +52,7 @@ describe("annotate project ...", () => {
           source: projectCreateData.TextProject.Source,
           instruction: projectCreateData.TextProject.Instruction,
         });
-      console.log('compare project info');
+      console.log("compare project info");
       await annotatePage.selectDisplay(1);
       await annotatePage.selectAnnoteLable();
       await annotatePage.waitForPageLoading();
@@ -93,7 +93,7 @@ describe("annotate project ...", () => {
       }
       done();
     } else {
-      done.fail("can not filter out the consitent project....");
+      done.fail("can not filter out the consistent project....");
     }
   });
 });

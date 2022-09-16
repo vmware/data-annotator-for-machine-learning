@@ -15,6 +15,7 @@ export class NewProjectPage extends CommonPage {
   UPLOAD_CSV_BTN = $(".clr-input-wrapper .btn.btn-sm.add-doc");
   CHOOSE_FILE_BTN = $('input[name="localFileFile"]');
   UPLOAD_CSV_OK_BTN = $(".modal-footer .btn.btn-primary");
+  UPLOAD_CSV_CANCEL_BTN = $(".modal-footer .btn.btn-outline");
   SET_DATA_TAB = $("clr-wizard clr-datagrid");
   WIZARD_SELECT_BTN = element(by.css("clr-wizard .clr-select-wrapper"));
   WIZARD_SELECT_OPTIONS = element.all(by.css("clr-wizard select option"));
@@ -59,6 +60,7 @@ export class NewProjectPage extends CommonPage {
   MUTIL_NUMERIC_OPTION = element(
     by.css("clr-radio-wrapper label[for=mutilNumericLabel]")
   );
+  TAXONOMY_OPTION = element(by.css("clr-radio-wrapper label[for=uploadLabel]"));
   TEXT_LABEL_TYPE_OPTION = element(
     by.css("clr-radio-wrapper label[for=textLabel]")
   );
@@ -68,6 +70,7 @@ export class NewProjectPage extends CommonPage {
     by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]")
   );
   ADD_BTN = element(by.css(".add-btn"));
+  UPLOAD_TAXONOMY_BTN = element(by.css(".labelsList .add-doc"));
   SHOW_FILENAME_CHECKBOX = element(by.css("label[for=isShowFilename]"));
   IMAGE_LOADING = element(by.css("span .loadingSpan"));
   ASSIGN_TICKET_INPUT = element(
@@ -78,6 +81,7 @@ export class NewProjectPage extends CommonPage {
     .last();
   DELETE_LABEL_ICON = element(by.css("clr-icon[shape=times]"));
   ASSIGN_TICKET_DELETE_ICON = element(by.css("ul li:last-child clr-icon"));
+  TREE_LABEL_ICON = element(by.css("clr-icon[shape=view-list]"));
   SHOW_POPUE_LABEL_CHECK = element(
     by.css("clr-checkbox-wrapper label[for=showPopLabels]")
   );
@@ -86,6 +90,11 @@ export class NewProjectPage extends CommonPage {
     .last();
   ADD_POP_LABLE = $(".labelsList .clr-input[name=addPopupLables]");
   WIZARD_NEXT_BTN = $("clr-wizard-button:nth-child(3)");
+  JSON_RADIO = element(by.css("clr-radio-wrapper label[for='json']"));
+  YAML_RADIO = element(by.css("clr-radio-wrapper label[for='yaml']"));
+  CLOSE_TREE_MODAL_BTN = element(
+    by.css("app-treeview-modal clr-icon[shape='close']")
+  );
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.MY_PROJECTS_TAB);
@@ -224,6 +233,11 @@ export class NewProjectPage extends CommonPage {
     await this.UPLOAD_CSV_OK_BTN.click();
   }
 
+  async clickCancelBtn() {
+    await FunctionUtil.elementVisibilityOf(this.UPLOAD_CSV_CANCEL_BTN);
+    await this.UPLOAD_CSV_CANCEL_BTN.click();
+  }
+
   setMaxAnnotation(maxAnnotation) {
     return browser
       .wait(
@@ -320,7 +334,7 @@ export class NewProjectPage extends CommonPage {
       .click();
   }
 
-  setAssignee(lable: string, annotator2?) {
+  setAssignee(annotator1, annotator2?) {
     console.log("start to setAssignee annotator");
     return browser
       .wait(
@@ -492,5 +506,31 @@ export class NewProjectPage extends CommonPage {
     let btn = $("clr-wizard-button[type='cancel']");
     await FunctionUtil.elementVisibilityOf(btn);
     await btn.click();
+  }
+
+  async uploadTaxonomyFile(path: string) {
+    await this.TAXONOMY_OPTION.click();
+    await FunctionUtil.elementVisibilityOf(this.UPLOAD_TAXONOMY_BTN);
+    await this.UPLOAD_TAXONOMY_BTN.click();
+    await FunctionUtil.elementVisibilityOf(this.CHOOSE_FILE_BTN);
+    await this.setLocalCSVPath(path);
+  }
+
+  async changeJsonYamlFormat() {
+    await FunctionUtil.elementVisibilityOf(this.YAML_RADIO);
+    console.log("log-change format to yaml");
+    await this.YAML_RADIO.click();
+    console.log("log-change back to json");
+    await FunctionUtil.elementVisibilityOf(this.JSON_RADIO);
+    await this.JSON_RADIO.click();
+  }
+
+  async toPreviewTreeLabel() {
+    await FunctionUtil.elementVisibilityOf(this.TREE_LABEL_ICON);
+    await this.TREE_LABEL_ICON.click();
+    console.log("log-open modal to preview tree label");
+    await FunctionUtil.elementVisibilityOf(this.CLOSE_TREE_MODAL_BTN);
+    await this.CLOSE_TREE_MODAL_BTN.click();
+    console.log("log-succeed toPreviewTreeLabel");
   }
 }

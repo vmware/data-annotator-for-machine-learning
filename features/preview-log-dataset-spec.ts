@@ -41,7 +41,7 @@ describe("start to preview my dataset page", () => {
       await browser.sleep(1000);
       await PREVIEW_CANCEL_BTN.click();
     } else {
-      console.log("can not filter out the consitent datasets....");
+      console.log("can not filter out the consistent datasets....");
     }
     done();
   });

@@ -9,7 +9,7 @@ import { DownloadSharePage } from "../page-object/download-share-page";
 import { CommonPage } from "../general/commom-page";
 import { FunctionUtil } from "../utils/function-util";
 
-describe("verify generate-download-share funtion", () => {
+describe("verify generate-download-share function", () => {
   const filename = "Export_text-test-data_";
   const logFileName = "Export_log-test-data_";
   const dirPath = require("path").join(__dirname, "../doc/download");

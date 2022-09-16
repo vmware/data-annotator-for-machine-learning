@@ -30,6 +30,9 @@ export class ProjecstPage extends CommonPage {
   SILENCE_FLAGGED_TICKET_BTN = $(
     '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"]:last-child button:last-child'
   );
+  MARK_FOR_REVIEW_BTN = $(
+    '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"]:last-child button:first-child'
+  );
   SHOW_LOG_DETAILS_BTN = $$("button.signpost-trigger");
   RETURN_TO_ANNOTATOR_BTN = $(
     '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"]:last-child button'
@@ -70,7 +73,7 @@ export class ProjecstPage extends CommonPage {
 
   async getChartRectHeight(rect) {
     return await rect.then(function (arr) {
-      console.log("rect-length:::", arr.length);
+      console.log("log-rect-length:::", arr.length);
       return arr[0].getAttribute("height");
     });
   }
@@ -107,17 +110,26 @@ export class ProjecstPage extends CommonPage {
   }
 
   async returnToAnnotatorBtn() {
-    console.log("start to returnToAnnotatorBtn...");
+    console.log("log-start to returnToAnnotatorBtn...");
     this.PROJECT_TABLE.scrollLeft = this.PROJECT_TABLE.scrollWidth;
     await FunctionUtil.elementVisibilityOf(this.RETURN_TO_ANNOTATOR_BTN);
     await this.RETURN_TO_ANNOTATOR_BTN.click();
-    console.log("succeed to returnToAnnotatorBtn...");
+    console.log("log-succeed to returnToAnnotatorBtn...");
   }
 
   async toExpandCell() {
-    console.log("start to toExpandCell...");
+    console.log("log-start to toExpandCell...");
     await FunctionUtil.elementVisibilityOf(this.EXPAND_CELL);
     await this.EXPAND_CELL.click();
-    console.log("succeed to toExpandCell...");
+    console.log("log-succeed to toExpandCell...");
+  }
+
+  async clickMarkForReviewBtn() {
+    this.PROJECT_TABLE.scrollLeft = this.PROJECT_TABLE.scrollWidth;
+    await FunctionUtil.elementVisibilityOf(this.MARK_FOR_REVIEW_BTN);
+    await browser.waitForAngularEnabled(false);
+    await this.MARK_FOR_REVIEW_BTN.click();
+    await browser.sleep(2000);
+    console.log("log-succeed to clickMarkForReviewBtn");
   }
 }

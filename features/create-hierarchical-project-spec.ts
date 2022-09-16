@@ -4,50 +4,51 @@ SPDX-License-Identifier: Apache-2.0
 */
 import { LoginBussiness } from "../general/login-bussiness";
 import { NewProjectPage } from "../page-object/new-project-page";
-import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
+import { browser, by, element, ExpectedConditions, $ } from "protractor";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
 import { FunctionUtil } from "../utils/function-util";
+import { DownloadSharePage } from "../page-object/download-share-page";
 const projectCreateData = require("../resources/project-create-page/test-data");
+const since = require("jasmine2-custom-message");
 
 describe("Create new project ", () => {
-  const Task_Instruction =
-    projectCreateData.TextMultipleLabelsProject.Instruction;
-  const New_Lable = projectCreateData.TextProject.Labels.split(",");
+  const Task_Instruction = projectCreateData.HierarchicalProject.Instruction;
+  const CSV_Path = "/doc/upload-resource/text-test-data.csv";
+  const LABEL_Path = "/doc/upload-resource/taxonomy_sample.json";
+  const LABEL_Path1 = "/doc/upload-resource/taxonomy_sample_samechilderr.json";
+  const LABEL_Path2 = "/doc/upload-resource/taxonomy_sample_commaerr.yaml";
   const SET_DATA_SECTION = $("clr-wizard.clr-wizard");
   const PROJECT_TEXT_CLASSIFICATION = element(
     by.css('clr-dropdown-menu a[href="/projects/create/text"]')
   );
+  const downloadSharePage: DownloadSharePage = new DownloadSharePage();
 
   let New_Project_Name: string;
+  let New_CSV_Name: string;
   let Serial_Num: string;
   let newProjectPage: NewProjectPage;
   let projectsPage: ProjecstPage;
-  let since = require("jasmine2-custom-message");
-  let New_CSV_Name: string;
-  const CSV_Path = "/doc/upload-resource/text-test-data.csv";
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
-    New_Project_Name = "e2e Test Project Text Multiple " + Serial_Num;
-    New_CSV_Name = "e2e Test Data Text " + Serial_Num;
+    New_Project_Name = "e2e Test Project Hierarchical " + Serial_Num;
+    New_CSV_Name = "e2e Test Data Hierarchical " + Serial_Num;
     LoginBussiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjecstPage();
-    console.log(
-      "log-start to create new text multiple labels project : " +
-        New_Project_Name
-    );
+    console.log("log-start to create new project : " + New_Project_Name);
   });
 
   afterAll(() => {
-    Constant.project_name_text_multiple = New_Project_Name;
+    Constant.project_name_hierarchical_label = New_Project_Name;
     console.log(
-      "log-project name after update: " + Constant.project_name_text_multiple
+      "hierarchical-project name after update: " +
+        Constant.project_name_hierarchical_label
     );
   });
 
-  it("Should create new text multiple labels project successfully.", async (done) => {
+  it("Should create new project successfully.", async (done) => {
     await newProjectPage.navigateTo();
     await browser.waitForAngular();
     await newProjectPage.clickNewProjectBtn(PROJECT_TEXT_CLASSIFICATION);
@@ -64,9 +65,10 @@ describe("Create new project ", () => {
     );
     await newProjectPage.clickWizardNext();
     await FunctionUtil.elementVisibilityOf(newProjectPage.WIZARD_SELECT_BTN);
+    // to select the no_label option
     await newProjectPage.setDataLable();
     await newProjectPage.clickWizardNext();
-    await newProjectPage.selectMultipleTicketColumn(0, 3);
+    await newProjectPage.selectMultipleTicketColumn(0, 1);
     await newProjectPage.clickWizardNext();
     await newProjectPage.setDataSubmit();
     await browser.wait(
@@ -74,10 +76,27 @@ describe("Create new project ", () => {
       Constant.DEFAULT_TIME_OUT
     );
     await newProjectPage.setMaxAnnotation(
-      projectCreateData.TextMultipleLabelsProject.maxAnnotation
+      projectCreateData.HierarchicalProject.maxAnnotation
     );
-    await newProjectPage.setNewLable(New_Lable);
-    await newProjectPage.allowMultiple();
+    // start to upload label file, with same child err
+    await newProjectPage.uploadTaxonomyFile(LABEL_Path1);
+    await newProjectPage.clickOkBtn();
+    await newProjectPage.clickCancelBtn();
+    // start to upload label file, with comma err
+    await newProjectPage.uploadTaxonomyFile(LABEL_Path2);
+    await newProjectPage.clickOkBtn();
+    await newProjectPage.clickCancelBtn();
+    // start to upload label file, with csv format
+    await newProjectPage.uploadTaxonomyFile(CSV_Path);
+    await newProjectPage.clickOkBtn();
+    await newProjectPage.clickCancelBtn();
+    // start to upload label file correctly
+    await newProjectPage.uploadTaxonomyFile(LABEL_Path);
+    await newProjectPage.changeJsonYamlFormat();
+    await newProjectPage.clickOkBtn();
+    await newProjectPage.toPreviewTreeLabel();
+
+    console.log("log-start to setAssignee annotator");
     await newProjectPage.setAssignee(Constant.username);
     await newProjectPage.clickCreateBtn();
     await projectsPage.waitForPageLoading();
@@ -91,23 +110,30 @@ describe("Create new project ", () => {
     let Project_Name_Text = await projectsPage.getCellText(0);
     if (Project_Name_Text !== "" && Project_Count_After_Filter > 0) {
       since("the project name should same as the user typed name")
-        .expect(projectsPage.getCellText(0))
+        .expect(await projectsPage.getCellText(0))
         .toBe(New_Project_Name);
       since("the data source should same as the user uploaded file")
-        .expect(projectsPage.getCellText(2))
-        .toBe(projectCreateData.TextMultipleLabelsProject.Source);
-      since("the annotar should be the logged user")
-        .expect(projectsPage.getAnnotatorCellText())
+        .expect(await projectsPage.getCellText(2))
+        .toBe(projectCreateData.HierarchicalProject.Source);
+      since("the annotator should be the logged user")
+        .expect(await projectsPage.getAnnotatorCellText())
         .toContain(Constant.username);
-      since("the labels should contain the user typed lable")
-        .expect(projectsPage.getCellText(5))
-        .toContain(New_Lable.join(","));
       since("should have 5 actions")
-        .expect(projectsPage.getActionsCount())
+        .expect(await projectsPage.getActionsCount())
         .toBe(5);
       done();
     } else {
       done.fail("can not filter out the consistent project....");
     }
+  });
+
+  it("Should share hierarchical project successful.", async (done) => {
+    await downloadSharePage.shareProject(New_Project_Name);
+    if (process.env.IN) {
+      expect(downloadSharePage.verifySharedStatus()).toEqual("folder");
+    } else {
+      expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
+    }
+    done();
   });
 });

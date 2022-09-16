@@ -85,5 +85,15 @@
     "labelColumn": "No Labels",
     "maxAnnotation": 3,
     "defaultEvenlyDistributedTickets": 26
+  },
+  "HierarchicalProject": {
+    "Instruction": "this is e2e test hierarchical project task instruction",
+    "Label": "test1,test2,test3",
+    "childLabels":"test1-1,test1-2,test1-3,test1-4",
+    "Source": "text-mutilNumberic-data.csv",
+    "ticketSessions": 52,
+    "labelColumn": "No Labels",
+    "maxAnnotation": 1,
+    "backPosition": { "x": 100, "y": 10 }
   }
 }

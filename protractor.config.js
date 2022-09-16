@@ -59,6 +59,11 @@ var conf = {
     "./features/annotate-project-mutil-numberic-spec.ts",
     "./features/edit-project-mutil-numberic-spec.ts",
 
+    "./features/create-hierarchical-project-spec.ts",
+    "./features/annotate-project-hierarchical-label-spec.ts",
+    "./features/review-project-hierarchical-label-spec.ts",
+    "./features/preview-hierarchical-project-spec.ts",
+
     "./features/faq-spec.ts",
     "./features/delete-projects-spec.ts",
     "./features/delete-datasets-spec.ts",

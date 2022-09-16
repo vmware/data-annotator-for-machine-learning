@@ -1,3 +1,7 @@
+/*
+Copyright 2019-2022 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
 import { LoginBussiness } from "../general/login-bussiness";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
@@ -40,7 +44,7 @@ describe("Enter projects tab...", () => {
       await browser.sleep(5000);
       await projectsPage.toExpandCell();
     } else {
-      done.fail("can not filter out the consitent project....");
+      done.fail("can not filter out the consistent project....");
     }
     done();
   });
