@@ -1,0 +1,18 @@
+# Copyright 2019-2022 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
+data:
+  - name: Products
+    children:
+      - name: vSphere.apple
+        children:
+          - name: vSphere1.1
+          - name: vSphere2
+          - name: vSphere3
+      - name: vMware
+        children:
+          - name: vMware1
+          - name: vMware2
+      - name: FS
+      - name: Stack
+  - name: Customer1
+  - name: Customer2

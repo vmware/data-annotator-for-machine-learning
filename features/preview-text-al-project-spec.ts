@@ -1,3 +1,7 @@
+/*
+Copyright 2019-2022 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
 import { LoginBussiness } from "../general/login-bussiness";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
@@ -37,7 +41,10 @@ describe("Enter projects tab...", () => {
     await projectsPage.navigateTo();
     console.log("filter project: projectsPage.navigateTo", project_name);
     await projectsPage.waitForGridLoading();
-    console.log("filter project: projectsPage.waitForGridLoading", project_name);
+    console.log(
+      "filter project: projectsPage.waitForGridLoading",
+      project_name
+    );
     await projectsPage.filterProjectName(project_name);
     console.log("filter project: projectsPage.filterProjectName", project_name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
@@ -62,15 +69,27 @@ describe("Enter projects tab...", () => {
       since("user chart tick should show up and have fullname correct")
         .expect(projectsPage.getChartTickText(USER_CHART_FIRST_TICK))
         .toContain(Constant.fullname);
+      // to double click user bar
+      console.log("log-start to double click user bar to zoom");
+      await browser
+        .actions()
+        .doubleClick(USER_CHART_FIRST_RECT.first())
+        .perform();
       since("category chart rect should show up and have height")
         .expect(projectsPage.getChartRectHeight(CATEGORY_CHART_FIRST_RECT))
         .toBeGreaterThan(0);
       since("category chart tick should show up and have label correct")
         .expect(projectCreateData.TextProject.Labels.split(","))
         .toContain(projectsPage.getChartTickText(CATEGORY_CHART_FIRST_TICK));
+      // to double click category bar
+      console.log("log-start to double click category bar to zoom");
+      await browser
+        .actions()
+        .doubleClick(CATEGORY_CHART_FIRST_RECT.first())
+        .perform();
       done();
     } else {
-      done.fail("can not filter out the consitent project....");
+      done.fail("can not filter out the consistent project....");
     }
   });
 

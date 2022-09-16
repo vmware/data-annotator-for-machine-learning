@@ -9,7 +9,6 @@ import { browser, $, $$, ExpectedConditions } from "protractor";
 import { FunctionUtil } from "../utils/function-util";
 
 describe("upload new dataset on myDatasets page..", () => {
-  
   let myDatasetsPage: MyDatasetsPage = new MyDatasetsPage();
   let SerialNum: string = new Date().getTime().toString().substring(0, 9);
   let New_CSV_Name: string = "e2e Test Data " + SerialNum;
@@ -59,11 +58,11 @@ describe("upload new dataset on myDatasets page..", () => {
         .toBe("text-test-data.csv");
       done();
     } else {
-      done.fail("can not filter out the consitent datasets....");
+      done.fail("can not filter out the consistent datasets....");
     }
   });
 
-  it('delete the new upload dataset', async () => {
+  it("delete the new upload dataset", async () => {
     console.log("datasetName : " + New_CSV_Name);
     await browser.sleep(2000);
     await myDatasetsPage.filterDatasetstName(New_CSV_Name);
@@ -72,10 +71,8 @@ describe("upload new dataset on myDatasets page..", () => {
       await browser.sleep(10000);
     }
     await myDatasetsPage.filterDatasetstName(New_CSV_Name);
-    const TABLE_LIST = $$('clr-dg-row');
+    const TABLE_LIST = $$("clr-dg-row");
     await browser.sleep(2000);
-    expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0)
+    expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0);
   });
-
-
 });

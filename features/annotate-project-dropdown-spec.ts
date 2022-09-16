@@ -44,7 +44,7 @@ describe("annotate project ...", () => {
       (Project_Name_Text !== "" && Project_Labels.split(",").length > 6) ||
       Project_Count_After_Filter > 0
     ) {
-      await annotatePage.clickAnnotateStartBtn(project_name);
+      await annotatePage.clickAnnotateStartBtn();
       await annotatePage.waitForPageLoading();
       await FunctionUtil.elementVisibilityOf(LabelTooltip);
       await browser.sleep(2000);
@@ -106,7 +106,7 @@ describe("annotate project ...", () => {
       done();
     } else {
       done.fail(
-        "can not filter out the consitent project with dropdown labels...."
+        "can not filter out the consistent project with dropdown labels...."
       );
     }
   });

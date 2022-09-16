@@ -5,27 +5,27 @@ SPDX-License-Identifier: Apache-2.0
 import { LoginBussiness } from "../general/login-bussiness";
 import { Constant } from "../general/constant";
 import { AnnotatePage } from "../page-object/annotate-page";
-import { browser, $, ExpectedConditions } from "protractor";
+import { browser } from "protractor";
 import { ProjecstPage } from "../page-object/projects-page";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
-describe("annotate mutil numberic project ...", () => {
+describe("annotate project ...", () => {
   let annotatePage: AnnotatePage;
   let projectsPage: ProjecstPage;
   let since = require("jasmine2-custom-message");
   let project_name: string;
 
   beforeAll(() => {
-    project_name = Constant.project_name_numberic_mutiple;
+    project_name = Constant.project_name_hierarchical_label;
     LoginBussiness.verifyLogin();
     annotatePage = new AnnotatePage();
     projectsPage = new ProjecstPage();
-    console.log("start to annotate mutil numberic project: " + project_name);
+    console.log("start to annotate project: " + project_name);
   });
 
-  it("Should annotate multiple numberic labels project successfully.", async (done) => {
+  it("Should annotate hierarchical labels project successfully.", async (done) => {
     if (process.env.IN) {
-      await browser.sleep(10000);
+      await browser.sleep(20000);
     }
     await annotatePage.navigateTo();
     await annotatePage.waitForGridLoading();
@@ -43,41 +43,40 @@ describe("annotate mutil numberic project ...", () => {
         .toEqual({
           name: project_name,
           owner: Constant.username,
-          source: projectCreateData.TextMutilNumbericProject.Source,
-          instruction: projectCreateData.TextMutilNumbericProject.Instruction,
+          source: projectCreateData.HierarchicalProject.Source,
+          instruction: projectCreateData.HierarchicalProject.Instruction,
         });
-      since("progress shoud show up and content correct")
+      since("progress should show up and content correct")
         .expect(annotatePage.getProgress())
         .toEqual({
           sessions: String(
-            projectCreateData.TextMutilNumbericProject.ticketSessions
+            projectCreateData.HierarchicalProject.ticketSessions
           ),
           annotations: "0",
         });
-      await annotatePage.selectMultipleNumbericLable(
-        projectCreateData.TextMutilNumbericProject.sliderValue
-      );
+      // to resize the text div and click expand tree label
+      // await annotatePage.toResizeTextArea(500);
+      await annotatePage.toExpandTree();
+      await annotatePage.selectHierarchicalLabel();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-      since("the progress annotations should increas 1")
+      since("the progress annotations should increase 1")
         .expect(annotatePage.getProgress())
         .toEqual({
           sessions: String(
-            projectCreateData.TextMutilNumbericProject.ticketSessions
+            projectCreateData.HierarchicalProject.ticketSessions
           ),
           annotations: "1",
         });
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(1);
-      console.log("start to skip this ticket and then historyback....");
+      console.log("log-start to skip this ticket and then history back....");
       await annotatePage.skipTicket();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
       await annotatePage.clickHistoryBack();
-      await annotatePage.setMultipleNumbericByInput(
-        projectCreateData.TextMutilNumbericProject.inputValue
-      );
+      await annotatePage.selectHierarchicalLabel();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
       since("the content should not be empty")
@@ -86,9 +85,9 @@ describe("annotate mutil numberic project ...", () => {
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(2);
-      console.log("skip and then historyback success....");
+      console.log("log-skip and then history back success....");
 
-      console.log("start to flag this ticket....");
+      console.log("log-start to flag this ticket....");
       await annotatePage.flagTicket();
       await annotatePage.waitForPageLoading();
       since("the content should not be empty")

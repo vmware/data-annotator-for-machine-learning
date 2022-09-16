@@ -28,11 +28,18 @@ export class AnnotatePage extends CommonPage {
   MULTIPLE_LABELS = element.all(by.css(".labelCheckbox label"));
   NUMERIC_LABEL_INPUT = element(by.css("input[id=example]"));
   SKIP_BTN = element(by.css("button.btn.btn-outline clr-icon[shape=ban]"));
+  PASS_BTN = element(
+    by.css("button.btn.btn-outline clr-icon[shape=checkbox-list]")
+  );
   NER_SELECTED_LABEL = element(by.css("button.btn.entitySelected"));
   NER_SECOND_LABEL = element(by.css(".questionContainer .label:nth-child(2)"));
   MAIN_TEXT = element(by.css("div.nerPassage span[id=mainText]"));
-  NER_SELECTED_MARK_TEXT = element(by.css("div.selectedSection div.spanSelected:first-child"));
-  NER_SELECTED_MARK_CLEAR = element(by.css("div.selectedSection div.spanSelected:first-child span.clear"));
+  NER_SELECTED_MARK_TEXT = element(
+    by.css("div.selectedSection div.spanSelected:first-child")
+  );
+  NER_SELECTED_MARK_CLEAR = element(
+    by.css("div.selectedSection div.spanSelected:first-child span.clear")
+  );
   NER_MARK = element.all(by.css("div.spanSelected"));
   BACK_BTN = element(by.css("button.btn.btn-outline clr-icon[shape=undo]"));
   NER_TICKET_AREA = element(by.css(".questionContainer .nerBox"));
@@ -64,9 +71,6 @@ export class AnnotatePage extends CommonPage {
       ".questionContainer .txtBox .txtRow0 clr-icon[shape=ellipsis-vertical]"
     )
   );
-  PASS_BTN = element(
-    by.css("button.btn.btn-outline clr-icon[shape=checkbox-list]")
-  );
   CANVAS = element(by.css("canvas"));
   IMAGE_LABEL = element.all(by.css("span.ant-tag")).get(0);
   IMAGE_LABEL2 = element.all(by.css("span.ant-tag")).get(2);
@@ -89,14 +93,19 @@ export class AnnotatePage extends CommonPage {
   LOG_SECOND_LABEL = element(by.buttonText("test2"));
   MULTIPLE_SLIDERS = element.all(by.css(".labelCheckbox ngx-slider"));
   SCORE_IPUT = element.all(by.css("input[id='scoreInput']"));
-  ALERT_TEXT = element(by.css('div.alert-text'));
+  ALERT_TEXT = element(by.css("div.alert-text"));
   INPUT_ERROR = element(by.css(".clr-error"));
-  NER_CLICK_SPAN1 = $('span[id=mainText] .spanMarked[data-label=test1]');
-  NER_CLICK_SPAN2 = $('span[id=mainText] .spanMarked[data-label=label1]');
-  POSITIVE_BTN = $('button[title=Positive]');
-  NEGATIVE_BTN = $('button[title=Negative]');
-  CLEAR_POPUP_WIN = $('div .clearPop');
-  DRAWER_BTN = $('div .drawer');
+  NER_CLICK_SPAN1 = $("span[id=mainText] .spanMarked[data-label=test1]");
+  NER_CLICK_SPAN2 = $("span[id=mainText] .spanMarked[data-label=label1]");
+  POSITIVE_BTN = $("button[title=Positive]");
+  NEGATIVE_BTN = $("button[title=Negative]");
+  CLEAR_POPUP_WIN = $("div .clearPop");
+  DRAWER_BTN = $("div .drawer");
+  EXPAND_TREE_TOGGLE = element(by.css("clr-toggle-wrapper label"));
+  HIERARCHICAL_LABEL_FIRST = element(
+    by.css("clr-tree-node .clr-treenode-checkbox label")
+  );
+  MODAL_OK_BTN = element(by.css(".modal-dialog .modal-content-wrapper button"));
 
   async navigateTo() {
     await browser.sleep(5000);
@@ -105,14 +114,14 @@ export class AnnotatePage extends CommonPage {
     await this.GAME_TAB.click();
   }
 
-  async clickAnnotateStartBtn(name: string) {
+  async clickAnnotateStartBtn() {
     this.PROJECT_TABLE.scrollLeft = this.PROJECT_TABLE.scrollWidth;
     await FunctionUtil.elementVisibilityOf(this.START_ANNOTATE);
     await browser.waitForAngularEnabled(false);
     await this.START_ANNOTATE.click();
   }
 
-  getProjectInfo() {
+  async getProjectInfo() {
     let infos = { name: "", owner: "", source: "", instruction: "" };
     return this.PROJECT_INFOS.then(async (list) => {
       infos.name = await list[0].getText();
@@ -124,7 +133,7 @@ export class AnnotatePage extends CommonPage {
     });
   }
 
-  getProgress() {
+  async getProgress() {
     let result = { sessions: "", annotations: "" };
     return this.PROJECT_INFOS.then(async (list) => {
       result.sessions = await list[8].getText();
@@ -145,24 +154,14 @@ export class AnnotatePage extends CommonPage {
   }
 
   async selectProjects(pname) {
-
     await FunctionUtil.click(this.PROJECT_SELECT);
-    await (await this.PROJECT_SELECT.$$("option")).forEach(async(value, index) =>{
-      if (await FunctionUtil.getValue(value) == pname) {
+    await (
+      await this.PROJECT_SELECT.$$("option")
+    ).forEach(async (value, index) => {
+      if ((await FunctionUtil.getValue(value)) == pname) {
         await FunctionUtil.click(value);
       }
-    })
-    // await this.PROJECT_SELECT_OPTIONS.then(async (options) => {
-    //   options.forEach(async (value, index) => {
-    //     await this.PROJECT_SELECT_OPTIONS.get(index)
-    //       .getText()
-    //       .then(async (e) => {
-    //         if (e === pname) {
-    //           await this.PROJECT_SELECT_OPTIONS.get(index).click();
-    //         }
-    //       });
-    //   });
-    // });
+    });
   }
 
   async selectAnnoteLable() {
@@ -214,20 +213,28 @@ export class AnnotatePage extends CommonPage {
         await this.annotateNer();
       } else {
         await FunctionUtil.elementVisibilityOf(this.MAIN_TEXT);
-        FunctionUtil.mouseDragMove(this.MAIN_TEXT, { x: 0, y: 0 }, { x: 100, y: 0 })
+        FunctionUtil.mouseDragMove(
+          this.MAIN_TEXT,
+          { x: 0, y: 0 },
+          { x: 100, y: 0 }
+        );
         await browser.sleep(1000);
         await browser.waitForAngularEnabled(false);
         await browser.sleep(2000);
         await FunctionUtil.elementVisibilityOf(this.NER_SECOND_LABEL);
         await this.NER_SECOND_LABEL.click();
         await browser.sleep(1000);
-        FunctionUtil.mouseDragMove(this.MAIN_TEXT, { x: 50, y: 0 }, { x: 150, y: 0 })
+        FunctionUtil.mouseDragMove(
+          this.MAIN_TEXT,
+          { x: 50, y: 0 },
+          { x: 150, y: 0 }
+        );
         await browser.waitForAngularEnabled(false);
         await browser.sleep(5000);
         await this.setPopupLabel();
         await this.clearPopupLabel();
         await browser.sleep(5000);
-        console.log('start to click submit');
+        console.log("start to click submit");
         await FunctionUtil.elementVisibilityOf(this.ANNOTATE_SUBMIT_BTN);
         await this.ANNOTATE_SUBMIT_BTN.click();
         console.log("finish ner annotate");
@@ -236,7 +243,7 @@ export class AnnotatePage extends CommonPage {
   };
 
   setPopupLabel = async () => {
-    console.log('start to set popup label');
+    console.log("start to set popup label");
     await FunctionUtil.elementVisibilityOf(this.NER_CLICK_SPAN1);
     await this.NER_CLICK_SPAN1.click();
     await browser.sleep(1000);
@@ -248,11 +255,11 @@ export class AnnotatePage extends CommonPage {
     await browser.sleep(1000);
     await FunctionUtil.elementVisibilityOf(this.NEGATIVE_BTN);
     await this.NEGATIVE_BTN.click();
-    console.log('end to set popup label');
-  }
+    console.log("end to set popup label");
+  };
 
-  clearPopupLabel =async () => {
-    console.log('start to set clear popupLabel');
+  clearPopupLabel = async () => {
+    console.log("start to set clear popupLabel");
     await browser.sleep(1000);
     await FunctionUtil.elementVisibilityOf(this.NER_CLICK_SPAN2);
     await this.NER_CLICK_SPAN2.click();
@@ -268,8 +275,8 @@ export class AnnotatePage extends CommonPage {
     await browser.sleep(1000);
     await FunctionUtil.elementVisibilityOf(this.DRAWER_BTN);
     await this.DRAWER_BTN.click();
-    console.log('end to set clear popupLabel');
-  }
+    console.log("end to set clear popupLabel");
+  };
 
   async logFilterByKeyword(filter) {
     console.log("start to logFilterByKeyword....");
@@ -388,11 +395,11 @@ export class AnnotatePage extends CommonPage {
 
   async removeAnnotatedNer() {
     await FunctionUtil.elementVisibilityOf(this.NER_SELECTED_MARK_TEXT);
-    await this.NER_SELECTED_MARK_TEXT.click();  
+    await this.NER_SELECTED_MARK_TEXT.click();
     await browser.sleep(2000);
     await browser.actions().mouseMove(this.NER_SELECTED_MARK_TEXT).perform();
     await FunctionUtil.elementVisibilityOf(this.NER_SELECTED_MARK_CLEAR);
-    await this.NER_SELECTED_MARK_CLEAR.click();  
+    await this.NER_SELECTED_MARK_CLEAR.click();
     await browser.waitForAngularEnabled(false);
     await this.backToPrevious();
     await FunctionUtil.elementVisibilityOf(this.ALERT_TEXT);
@@ -412,6 +419,12 @@ export class AnnotatePage extends CommonPage {
     await FunctionUtil.elementVisibilityOf(this.SKIP_BTN);
     await browser.waitForAngularEnabled(false);
     await this.SKIP_BTN.click();
+  }
+
+  async passTicket() {
+    await FunctionUtil.elementVisibilityOf(this.PASS_BTN);
+    await browser.waitForAngularEnabled(false);
+    await this.PASS_BTN.click();
   }
 
   async currentTicketContent() {
@@ -484,22 +497,10 @@ export class AnnotatePage extends CommonPage {
     await this.IMAGE_LABEL2.click();
     await browser.sleep(2000);
     await FunctionUtil.elementVisibilityOf(this.CANVAS);
-    await FunctionUtil.mouseDownToClick(
-      this.CANVAS,
-      { x: 30, y: 30 },
-    );
-    await FunctionUtil.mouseDownToClick(
-      this.CANVAS,
-      { x: 40, y: 40 },
-    );
-    await FunctionUtil.mouseDownToClick(
-      this.CANVAS,
-      { x: 20, y: 40 },
-    );
-    await FunctionUtil.mouseDownToClick(
-      this.CANVAS,
-      { x: 30, y: 30 },
-    );
+    await FunctionUtil.mouseDownToClick(this.CANVAS, { x: 30, y: 30 });
+    await FunctionUtil.mouseDownToClick(this.CANVAS, { x: 40, y: 40 });
+    await FunctionUtil.mouseDownToClick(this.CANVAS, { x: 20, y: 40 });
+    await FunctionUtil.mouseDownToClick(this.CANVAS, { x: 30, y: 30 });
     await browser.sleep(2000);
     await FunctionUtil.elementVisibilityOf(this.ANNOTATE_SUBMIT_BTN);
     await this.ANNOTATE_SUBMIT_BTN.click();
@@ -563,7 +564,10 @@ export class AnnotatePage extends CommonPage {
     });
     this.MULTIPLE_SLIDERS.then(async (sliders) => {
       sliders.forEach(async (slider) => {
-        await browser.actions().dragAndDrop(slider, { x: sliderValue, y: 0 }).perform(); 
+        await browser
+          .actions()
+          .dragAndDrop(slider, { x: sliderValue, y: 0 })
+          .perform();
       });
     });
     await browser.waitForAngularEnabled(false);
@@ -583,7 +587,7 @@ export class AnnotatePage extends CommonPage {
     });
     this.SCORE_IPUT.then(async (inputs) => {
       inputs.forEach(async (input) => {
-          await input.sendKeys(inputValue);
+        await input.sendKeys(inputValue);
       });
     });
     await browser.waitForAngularEnabled(false);
@@ -596,8 +600,8 @@ export class AnnotatePage extends CommonPage {
     await browser.sleep(2000);
     this.SCORE_IPUT.then(async (inputs) => {
       inputs.forEach(async (input) => {
-          await input.clear();
-          await input.sendKeys(inputValue);
+        await input.clear();
+        await input.sendKeys(inputValue);
       });
     });
     if (process.env.IN) {
@@ -605,5 +609,43 @@ export class AnnotatePage extends CommonPage {
       await browser.actions().mouseMove(this.ANNOTATE_SUBMIT_BTN).perform();
     }
     await this.ANNOTATE_SUBMIT_BTN.click();
+  }
+
+  async toExpandTree() {
+    await FunctionUtil.elementVisibilityOf(this.EXPAND_TREE_TOGGLE);
+    await this.EXPAND_TREE_TOGGLE.click();
+    console.log("log-succeed to expand tree");
+    await browser.sleep(1000);
+    await this.EXPAND_TREE_TOGGLE.click();
+    console.log("log-succeed to collapse tree");
+  }
+
+  // async toResizeTextArea(height) {
+  //   console.log("log-start toResizeTextArea");
+  //   browser.executeScript('$(".textBox").height(500)').then(function () {
+  //     $(".textBox")
+  //       .getSize()
+  //       .then(function (eleSize) {
+  //         console.log("log-textBox element size: " + eleSize);
+  //         expect(eleSize.height).toEqual(height);
+  //       });
+  //   });
+  // }
+
+  async selectHierarchicalLabel() {
+    await FunctionUtil.elementVisibilityOf(this.HIERARCHICAL_LABEL_FIRST);
+    await this.HIERARCHICAL_LABEL_FIRST.click();
+    await browser.waitForAngularEnabled(false);
+    await browser.sleep(1000);
+    await this.ANNOTATE_SUBMIT_BTN.click();
+  }
+
+  async clickModalOkBtn() {
+    await FunctionUtil.elementVisibilityOf(this.MODAL_OK_BTN);
+    console.log("log-the target btn is there");
+    await this.MODAL_OK_BTN.click();
+    console.log("log-succeed to click modal ok btn");
+    await browser.waitForAngularEnabled(false);
+    await browser.sleep(1000);
   }
 }

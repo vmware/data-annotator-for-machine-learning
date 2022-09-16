@@ -1,9 +1,14 @@
+/*
+Copyright 2019-2022 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
 import { LoginBussiness } from "../general/login-bussiness";
 import { NewProjectPage } from "../page-object/new-project-page";
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
 import { Constant } from "../general/constant";
 import { ProjecstPage } from "../page-object/projects-page";
 import { FunctionUtil } from "../utils/function-util";
+import { DownloadSharePage } from "../page-object/download-share-page";
 const projectCreateData = require("../resources/project-create-page/test-data");
 const since = require("jasmine2-custom-message");
 
@@ -18,6 +23,7 @@ describe("Create new project ", () => {
   const PROJECT_TEXT_CLASSIFICATION = element(
     by.css('clr-dropdown-menu a[href="/projects/create/text"]')
   );
+  const downloadSharePage: DownloadSharePage = new DownloadSharePage();
 
   let New_Project_Name: string;
   let New_CSV_Name: string;
@@ -113,7 +119,17 @@ describe("Create new project ", () => {
         .toBe(5);
       done();
     } else {
-      done.fail("can not filter out the consitent project....");
+      done.fail("can not filter out the consistent project....");
     }
+  });
+
+  it("Should share multi numeric project successful.", async (done) => {
+    await downloadSharePage.shareProject(New_Project_Name);
+    if (process.env.IN) {
+      expect(downloadSharePage.verifySharedStatus()).toEqual("folder");
+    } else {
+      expect(downloadSharePage.verifySharedStatus()).toEqual("folder-open");
+    }
+    done();
   });
 });

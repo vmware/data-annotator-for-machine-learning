@@ -109,7 +109,7 @@ describe("Create new project ", () => {
         .toBe(5);
       done();
     } else {
-      done.fail("can not filter out the consitent project....");
+      done.fail("can not filter out the consistent project....");
     }
   });
 });
