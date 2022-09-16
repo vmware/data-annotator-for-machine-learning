@@ -151,14 +151,6 @@ export class UploadLabelComponent implements OnInit {
     this.uploadSuccessEmitter.emit(result);
   }
 
-  cancelUpload() {
-    this.uploadGroup.get('localFile').reset();
-    this.inputFile = null;
-    this.uploadComplete = false;
-    this.uploadGroup.get('datasetsName').reset();
-    this.waitingTip = false;
-  }
-
   changeFileFormat(e) {
     this.uploadSet.fileFormat = e;
     this.checkLocalFile();
