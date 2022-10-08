@@ -1215,6 +1215,11 @@ export class CreateNewComponent implements OnInit {
   }
 
   receiveSlackAssign(e) {
+    if (e.slackList.length > 0) {
+      this.dsDialogFormValidationReset('assignee', undefined, null);
+    } else {
+      this.dsDialogFormValidationReset('assignee', undefined, DatasetValidator.required());
+    }
     this.slackList = e.slackList;
     this.loadingSlack = e.loadingSlack;
     this.inputSlackValidation = e.inputSlackValidation;
