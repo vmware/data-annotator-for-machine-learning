@@ -27,6 +27,14 @@ Core features include:
 
 <br>
 
+## Helpful links
+
+- [ATO 2021 talk](https://www.youtube.com/watch?v=n0WghXqCH5o)
+- [DAML medium article](https://medium.com/vmware-data-ml-blog/introducing-data-annotator-for-machine-learning-e8af2f19497a)
+- [User guide](https://github.com/vmware/data-annotator-for-machine-learning/wiki/DAML-User-Guide)
+- [Tutorial](https://github.com/vmware/data-annotator-for-machine-learning/wiki/Tutorial:-Using-DAML-to-Label-the-Sentiment-of--VMware-Reddit-and-Twitter-Comments)
+
+
 ## What is included
 
 DAML project includes three components:
