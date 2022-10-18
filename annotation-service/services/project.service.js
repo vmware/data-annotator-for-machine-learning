@@ -407,6 +407,20 @@ async function reduceHierarchicalUnselectedLabel(tickets) {
             await initHierarchicalLabelsCase(reducedCategory, "", "", labelsArray);
             input.reducedCategory = labelsArray;
         }
+        //support reviewInfo
+        if (ticket.reviewInfo.userInputs.length) {
+            const revewInputs = ticket.reviewInfo.userInputs;
+            for await(const input of revewInputs) {
+                if (input.problemCategory) {
+                    let jsonInput = JSON.stringify(input.problemCategory);
+                    let reducedCategory = JSON.parse(jsonInput);
+                    await prepareSelectedHierarchicalLabels(reducedCategory, false, true);
+                    let labelsArray = [];
+                    await initHierarchicalLabelsCase(reducedCategory, "", "", labelsArray);
+                    input.reducedCategory = labelsArray;
+                }
+            }
+        }
     }
 }
 
