@@ -252,7 +252,8 @@ async function prepareContents(srData, project, format) {
                 newCase[item] = [];
             });
 
-            await srs.userInputs.forEach(async item => {
+            const userInputDatas = await prepareUserInputs(srs);
+            await userInputDatas.forEach(async item => {
                 const pc = item.problemCategory.value;
                 const annLable = pc.rectanglelabels ? pc.rectanglelabels[0] : pc.polygonlabels[0];
 
@@ -283,7 +284,8 @@ async function prepareContents(srData, project, format) {
                 newCase[item] = [];
             });
 
-            await srs.userInputs.forEach(async item => {
+            const userInputDatas = await prepareUserInputs(srs);
+            await userInputDatas.forEach(async item => {
 
                 await item.problemCategory.forEach(async lb => {
                     //normal labels
@@ -315,8 +317,9 @@ async function prepareContents(srData, project, format) {
             await project.categoryList.split(",").forEach(item => {
                 newCase[item] = [];
             });
+            const userInputDatas = await prepareUserInputs(srs);
             // log project max annotation is 1
-            await srs.userInputs.forEach(async item => {
+            await userInputDatas.forEach(async item => {
 
                 newCase.freeText = item.logFreeText;
 
@@ -358,7 +361,8 @@ async function prepareContents(srData, project, format) {
                         labelCase[item] = 0;
                     });
                     // calculate labeld case number
-                    for await (const input of srs.userInputs) {
+                    const userInputDatas = await prepareUserInputs(srs);
+                    for await (const input of userInputDatas) {
                         const userInputLabel = input.problemCategory;
                         for (const i in pathsArray) {
                             const currentLable = _.get(userInputLabel, pathsArray[i]);
@@ -375,7 +379,8 @@ async function prepareContents(srData, project, format) {
                         labelCase[item] = 0;
                     });
                     // calculate labeld case number
-                    await srs.userInputs.forEach(async item => {
+                    const userInputDatas = await prepareUserInputs(srs);
+                    await userInputDatas.forEach(async item => {
                         await project.categoryList.split(",").forEach((labels) => {
                             if (item.problemCategory === labels) {
                                 newCase[labels] += 1;
@@ -384,8 +389,6 @@ async function prepareContents(srData, project, format) {
                         });
                     });
                 }
-
-
             } else {
                 //multi-numberica lables
                 if (project.isMultipleLabel) {
@@ -395,7 +398,8 @@ async function prepareContents(srData, project, format) {
                         const label = Object.keys(labels)[0];
                         newCase[label] = [];
                         // put labeld case 
-                        await srs.userInputs.forEach(async item => {
+                        const userInputDatas = await prepareUserInputs(srs);
+                        await userInputDatas.forEach(async item => {
                             if (item.problemCategory.label == label) {
                                 const value = item.problemCategory.value;
                                 newCase[label].push(value);
@@ -430,17 +434,30 @@ async function prepareContents(srData, project, format) {
         //4. regression project
         if (project.labelType == LABELTYPE.NUMERIC && !project.isMultipleLabel) {
             for (let index = 0; index < project.maxAnnotation; index++) {
-                if (srs.userInputs[index]) {
-                    newCase[`annotation_${index + 1}`] = srs.userInputs[index].problemCategory;
+                const userInputDatas = await prepareUserInputs(srs);
+                if (userInputDatas[index]) {
+                    newCase[`annotation_${index + 1}`] = userInputDatas[index].problemCategory;
                 } else {
                     newCase[`annotation_${index + 1}`] = "";
                 }
             }
         }
-
         cvsData.push(newCase);
     }
     return cvsData;
+}
+
+//take userInputs if project owner has been modified
+async function prepareUserInputs(ticket) {
+    let userInputDatas = ticket.userInputs;
+    if (ticket.reviewInfo.modified) {
+        userInputDatas = await ticket.reviewInfo.userInputs.filter(input => {
+            if(input.user == ticket.reviewInfo.user){
+                return input;
+            }
+        })
+    }
+    return userInputDatas;
 }
 
 async function prepareCsv(mp, format, onlyLabelled, user) {
@@ -834,6 +851,7 @@ module.exports = {
     saveProjectInfo,
     uploadFile,
     setData,
+    prepareUserInputs,
 }
 
 
