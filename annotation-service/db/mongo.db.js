@@ -78,18 +78,6 @@ async function findById(MODEL, conditions, columns) {
     });
 }
 
-async function updateByConditions(MODEL, conditions, doc) {
-    console.log(`[ DB ] begin updateByConditions`);
-    return MODEL.update(conditions, doc, function(error, result) {
-        if (error) {
-            console.error(`[ DB ] [ ERROR ] DB updateByConditions fail with: `, error);
-            throw error;
-        }
-        console.log(`[ DB ] updateByConditions succefully`);
-        return result;
-    });
-}
-
 async function updateManyByConditions(MODEL, conditions, doc, options) {
     console.log(`[ DB ] begin updateManyByConditions`);
     return MODEL.updateMany(conditions, doc, options, function(error, result) {
@@ -182,7 +170,6 @@ module.exports = {
     findOneByConditions,
     findOneAndUpdate,
     findById,
-    updateByConditions,
     updateManyByConditions,
     saveBySchema,
     insertMany,
