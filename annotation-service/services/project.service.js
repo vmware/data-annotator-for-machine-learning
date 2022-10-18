@@ -859,7 +859,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
 
         //update labeled tickets
         for (const key in editLb) {
-            let query = { projectName: project.projectName }
+            let query = { projectName: project.projectName, userInputsLength: {$gte: 1} }
             let update = {};
             let options = {};
             if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.LOG) {
@@ -867,19 +867,43 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
                 update = { $set: { "userInputs.0.problemCategory.$[elem].label": editLb[key] } };
                 options = { arrayFilters: [{ "elem.label": key }] };
                 await mongoDb.updateManyByConditions(model, query, update, options);
+                
+                //update reviewInfo
+                query["reviewInfo.userInputs.problemCategory.label"] = key;
+                update = { $set: { "reviewInfo.userInputs.$[].problemCategory.$[elem].label": editLb[key] } };
+                options = { arrayFilters: [{ "elem.label": key }] };
+                await mongoDb.updateManyByConditions(model, query, update, options);
             } else if (project.projectType == PROJECTTYPE.IMGAGE) {
-                query["userInputs.problemCategory.value.polygonlabels.0"] = key;
+                //update image polygon
                 update = { $set: { "userInputs.$[elem].problemCategory.value.polygonlabels.0": editLb[key] } };
                 options = { arrayFilters: [{ "elem.problemCategory.value.polygonlabels.0": key }] };
                 await mongoDb.updateManyByConditions(model, query, update, options);
 
-                query["userInputs.problemCategory.value.rectanglelabels.0"] = key;
+                //update image rectangle
                 update = { $set: { "userInputs.$[elem].problemCategory.value.rectanglelabels.0": editLb[key] } };
                 options = { arrayFilters: [{ "elem.problemCategory.value.rectanglelabels.0": key }] };
                 await mongoDb.updateManyByConditions(model, query, update, options);
+                
+                //update reviewInfo
+                query["reviewInfo.userInputs.problemCategory.value.polygonlabels"] = {$exists: true};
+                update = { $set: {"reviewInfo.userInputs.$[elem].problemCategory.value.polygonlabels.0": editLb[key]}};
+                options = { arrayFilters: [{ "elem.problemCategory.value.polygonlabels.0": key }] };
+                await mongoDb.updateManyByConditions(model, query, update, options);
+
+                query["reviewInfo.userInputs.problemCategory.value.rectanglelabels"] = {$exists: true};
+                update = { $set: { "reviewInfo.userInputs.$[elem].problemCategory.value.rectanglelabels.0": editLb[key]}};
+                options = { arrayFilters: [{ "elem.problemCategory.value.rectanglelabels.0": key }] };
+                await mongoDb.updateManyByConditions(model, query, update, options);
+
             } else if (project.projectType == PROJECTTYPE.TEXT || project.projectType == PROJECTTYPE.TABULAR) {
                 query["userInputs.problemCategory"] = key;
                 update = { $set: { "userInputs.$[elem].problemCategory": editLb[key] } };
+                options = { arrayFilters: [{ "elem.problemCategory": key }] };
+                await mongoDb.updateManyByConditions(model, query, update, options);
+                
+                //update reviewInfo
+                query["reviewInfo.userInputs.problemCategory"] = key;
+                update = { $set: { "reviewInfo.userInputs.$[elem].problemCategory": editLb[key] } };
                 options = { arrayFilters: [{ "elem.problemCategory": key }] };
                 await mongoDb.updateManyByConditions(model, query, update, options);
             }
