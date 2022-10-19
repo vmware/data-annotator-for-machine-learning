@@ -30,7 +30,7 @@ const readline = require('readline');
 const localFileSysService = require('./localFileSys.service');
 const _ = require("lodash");
 const config = require('../config/config');
-const { initHierarchicalLabelsCase } = require('./project.service');
+const { initHierarchicalLabelsCase,prepareUserInputs } = require('./project.service');
 
 async function createProject(req) {
     const findProjectName = { projectName: req.body.pname };
@@ -447,19 +447,6 @@ async function prepareContents(srData, project, format) {
     return cvsData;
 }
 
-//take userInputs if project owner has been modified
-async function prepareUserInputs(ticket) {
-    let userInputDatas = ticket.userInputs;
-    if (ticket.reviewInfo.modified) {
-        userInputDatas = await ticket.reviewInfo.userInputs.filter(input => {
-            if(input.user == ticket.reviewInfo.user){
-                return input;
-            }
-        })
-    }
-    return userInputDatas;
-}
-
 async function prepareCsv(mp, format, onlyLabelled, user) {
     console.log(`[ FILE ] Service prepareCsv`);
 
@@ -851,7 +838,6 @@ module.exports = {
     saveProjectInfo,
     uploadFile,
     setData,
-    prepareUserInputs,
 }
 
 

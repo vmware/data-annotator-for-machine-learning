@@ -319,13 +319,13 @@ async function matchUserInputsWithHierarchicalLabels(labels, tickets) {
             await matchUserInputsWithHierarchicalLabels(labels[i].children, tickets)
         } else {
             for (const ticket of tickets) {
-                for (const input of ticket.userInputs) {
+                const userInputDatas = await prepareUserInputs(ticket);
+                for (const input of userInputDatas) {
                     const inputLabels = input.problemCategory;
                     const currentLable = _.get(inputLabels, labels[i].path);
                     if (currentLable.name == labels[i].name && currentLable.enable == 1) {
                         labels[i].annotated += 1;
                     }
-
                 }
             }
         }
@@ -450,8 +450,7 @@ async function projectLeaderBoard(req) {
     //labels annotated
     console.log(`[ PROJECT ] Service query userInputs info`);
     const conditions = { projectName: proInfo.projectName, userInputsLength: { $gt: 0 } };
-    const srsUI = await mongoDb.findByConditions(mp.model, conditions, 'userInputs');
-
+    const srsUI = await mongoDb.findByConditions(mp.model, conditions, 'userInputs reviewInfo');
     console.log(`[ PROJECT ] Service sort out labels info`);
     if (labelType == LABELTYPE.HIERARCHICAL) {
         let lables = JSON.parse(proInfo.categoryList);
@@ -461,12 +460,13 @@ async function projectLeaderBoard(req) {
     }
     else if (labelType == LABELTYPE.NUMERIC) {
         if (proInfo.isMultipleLabel) {
-            JSON.parse(proInfo.categoryList).forEach(labels => {
+            await JSON.parse(proInfo.categoryList).forEach(async labels => {
                 const label = Object.keys(labels)[0];
                 let lb = { 'label': JSON.stringify(labels), annotated: 0 };
                 let currentLabelVaules = [];
-                srsUI.forEach(UIS => {
-                    UIS.userInputs.forEach(ui => {
+                await srsUI.forEach(async UIS => {
+                    const userInputDatas = await prepareUserInputs(UIS);
+                    await userInputDatas.forEach(ui => {
                         if (ui.problemCategory.label == label) {
                             let value = ui.problemCategory.value;
                             currentLabelVaules.push(value);
@@ -481,8 +481,9 @@ async function projectLeaderBoard(req) {
             let start = _.floor(proInfo.min);
             for (let i = 0; i < 6; i++) {
                 let lb = { 'label': start + '--' + _.floor(start + mid), annotated: 0 };
-                srsUI.forEach(UIS => {
-                    UIS.userInputs.forEach(ui => {
+                await srsUI.forEach(async UIS => {
+                    const userInputDatas = await prepareUserInputs(UIS);
+                    await userInputDatas.forEach(ui => {
                         if (_.round(Number(ui.problemCategory)) >= start && _.round(Number(ui.problemCategory)) <= _.floor(start + mid)) {
                             lb.annotated += 1;
                         };
@@ -493,10 +494,11 @@ async function projectLeaderBoard(req) {
             }
         }
     } else {
-        proInfo.categoryList.split(",").forEach(label => {
+        await proInfo.categoryList.split(",").forEach(async label => {
             let lb = { 'label': label, annotated: 0 };
-            srsUI.forEach(UIS => {
-                UIS.userInputs.forEach(ui => {
+            await srsUI.forEach(async UIS => {
+                const userInputDatas = await prepareUserInputs(UIS);
+                await userInputDatas.forEach(ui => {
                     if (proInfo.projectType == PROJECTTYPE.NER || proInfo.projectType == PROJECTTYPE.LOG) {
                         ui.problemCategory.forEach(ann => {
                             if (ann.label == label) {
@@ -526,6 +528,19 @@ async function projectLeaderBoard(req) {
     result.notLabeledYet = proInfo.totalCase - srsUI.length;
 
     return result;
+}
+
+//take userInputs if project owner has been modified
+async function prepareUserInputs(ticket) {
+    let userInputDatas = ticket.userInputs;
+    if (ticket.reviewInfo.modified) {
+        userInputDatas = await ticket.reviewInfo.userInputs.filter(input => {
+            if(input.user == ticket.reviewInfo.user){
+                return input;
+            }
+        })
+    }
+    return userInputDatas;
 }
 
 async function getReviewList(req) {
@@ -1050,5 +1065,5 @@ module.exports = {
     matchUserInputsWithHierarchicalLabels,
     initHierarchicalLabelsCase,
     reduceHierarchicalUnselectedLabel,
-
+    prepareUserInputs,
 }
