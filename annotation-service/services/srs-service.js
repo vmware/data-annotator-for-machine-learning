@@ -892,20 +892,38 @@ async function reviewTicket(req) {
 async function flagToReview(mp, tid) {
     const conditions = { _id: tid };
     const update = { $set: { "reviewInfo.review": true } };
-    await mongoDb.updateByConditions(mp.model, conditions, update);
+    await mongoDb.findOneAndUpdate(mp.model, conditions, update);
 }
 async function passReview(mp, tid, user) {
     const conditions = { _id: tid };
+    //record current user
+    const reviewTime = Date.now();
     const update = {
         $set: {
             "reviewInfo.review": false,
             "reviewInfo.reviewed": true,
+            "reviewInfo.passed": true,
             "reviewInfo.modified": false,
             "reviewInfo.user": user,
-            "reviewInfo.reviewedTime": Date.now()
+            "reviewInfo.reviewedTime": reviewTime
+        },
+        $pull: {
+            "reviewInfo.userInputs": { user: user }
         }
     };
-    await mongoDb.updateByConditions(mp.model, conditions, update);
+    await mongoDb.findOneAndUpdate(mp.model, conditions, update);
+    //record passed user
+    const modify = {
+        $push: {
+            "reviewInfo.userInputs": {
+                user: user,
+                timestamp: reviewTime
+            }
+        }
+    }
+    await mongoDb.findOneAndUpdate(mp.model, conditions, modify);
+
+
 }
 async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
     const projectType = mp.project.projectType;
@@ -914,23 +932,37 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
     const model = mp.model;
 
     const conditions = { _id: tid };
+    const reviewTime = Date.now();
     const update = {
         $set: {
             "reviewInfo.review": false,
+            "reviewInfo.passed": false,
             "reviewInfo.reviewed": true,
             "reviewInfo.modified": true,
             "reviewInfo.user": user,
-            "reviewInfo.reviewedTime": Date.now()
+            "reviewInfo.reviewedTime": reviewTime
+        },
+        $pull: {
+            "reviewInfo.userInputs": {user: user}
         }
-    };
+    }
+    await mongoDb.findOneAndUpdate(model, conditions, update);
+    
+    //update user reviewed details
+    let modify = {};
     //max-annotation=1
     if (projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.LOG) {
-        update.$set["userInputs.0.problemCategory"] = problemCategory;
+        reviewInfoInputs = {
+            problemCategory: problemCategory,
+            user: user,
+            timestamp: reviewTime
+        };
         if (projectType == PROJECTTYPE.LOG) {
-            update.$set["userInputs.0.logFreeText"] = logFreeText;
+            reviewInfoInputs.logFreeText = logFreeText;
         }
+        modify.$push = {"reviewInfo.userInputs": reviewInfoInputs}
+
     } else {
-        //max-annotation>1
         let userInputs = [];
         if (labelType == LABELTYPE.NUMERIC && isMultipleLabel) {
             problemCategory.forEach(lb => {
@@ -940,27 +972,27 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
                         value: Object.values(lb)[0]
                     },
                     user: user,
-                    timestamp: Date.now()
+                    timestamp: reviewTime
                 });
             });
         } else if (labelType == LABELTYPE.HIERARCHICAL) {
             userInputs.push({
                 problemCategory: problemCategory,
                 user: user,
-                timestamp: Date.now()
+                timestamp: reviewTime
             });
         } else {
             problemCategory.forEach(lb => {
                 userInputs.push({
                     problemCategory: lb,
                     user: user,
-                    timestamp: Date.now()
+                    timestamp: reviewTime
                 });
             });
         }
-        update.$set["userInputs"] = userInputs;
+        modify.$push = {"reviewInfo.userInputs": {$each: userInputs} };
     }
-    await mongoDb.updateByConditions(model, conditions, update);
+    await mongoDb.findOneAndUpdate(model, conditions, modify);
 }
 
 async function calculateReviewdCase(mp, tids, user) {

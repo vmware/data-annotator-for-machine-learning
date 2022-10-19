@@ -1,4 +1,5 @@
 .idea
+.DS_Store
 
 # annotation-app
 annotation-app/node_modules

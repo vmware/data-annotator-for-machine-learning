@@ -85,6 +85,8 @@ module.exports = {
     //import labelled dataset
     DATASET_IMPORT: "/datasets/import",
     DB_UPDATE_COLUMN_TYPE: "/db/update-column-type",
+    //migration reviewed tickets info
+    MIGRATION_REVIEW_INFO: "/migration/review-info",
 
     CONVERSATION_LIST: "/conversations-list"
 }

@@ -47,11 +47,13 @@ const srSchema = new mongoose.Schema({
     text_vector: { type: String },
     al_test: { type: Boolean },
     reviewInfo: {
-        user: { type: String },
-        reviewed: { type: Boolean, default: false },
+        userInputs: [],
         review: { type: Boolean, default: false },
+        reviewed: { type: Boolean, default: false },
+        modified: { type: Boolean, default: false },
+        passed: { type: Boolean, default: false },
+        user: { type: String },
         reviewedTime: { type: String },
-        modified: { type: Boolean, default: false }
     },
     ticketQuestions: { type: Object },
 }, { _id: true });
@@ -80,11 +82,13 @@ const imgSchema = new mongoose.Schema({
         users: []
     },
     reviewInfo: {
-        user: { type: String },
-        reviewed: { type: Boolean, default: false },
+        userInputs: [],
         review: { type: Boolean, default: false },
+        reviewed: { type: Boolean, default: false },
+        modified: { type: Boolean, default: false },
+        passed: { type: Boolean, default: false },
+        user: { type: String },
         reviewedTime: { type: String },
-        modified: { type: Boolean, default: false }
     }
 }, { _id: true });
 imgSchema.set("toJSON", { virtuals: true });
@@ -112,11 +116,13 @@ const logSchema = new mongoose.Schema({
         users: [],
     },
     reviewInfo: {
-        user: { type: String },
-        reviewed: { type: Boolean, default: false },
+        userInputs: [],
         review: { type: Boolean, default: false },
+        reviewed: { type: Boolean, default: false },
+        modified: { type: Boolean, default: false },
+        passed: { type: Boolean, default: false },
+        user: { type: String },
         reviewedTime: { type: String },
-        modified: { type: Boolean, default: false }
     }
 }, { _id: true });
 logSchema.set("toJSON", { virtuals: true });
