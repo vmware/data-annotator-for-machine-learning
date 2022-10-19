@@ -360,6 +360,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
             this.previewSrsHeader = ['FileName', 'FileContent'];
             for (let w = 0; w < res.length; w++) {
               this.resetLoguserInputs(res[w]);
+              this.resetLoguserInputs(res[w].reviewInfo, res[w].originalData);
               const file = this.resetLogOriginalData(res[w]);
               const flag = {
                 fileName: res[w].fileInfo.fileName,
@@ -905,13 +906,14 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     }
   }
 
-  resetLoguserInputs(sr) {
+  resetLoguserInputs(sr, originalData?) {
     if (!sr.MSG) {
+      let originalText = originalData ? originalData : sr.originalData;
       sr.userInputs.forEach((element) => {
-        element.problemCategory.forEach((element1) => {
-          for (const key in sr.originalData) {
+        element.problemCategory?.forEach((element1) => {
+          for (const key in originalText) {
             if (element1.line == key) {
-              element1.text = sr.originalData[key];
+              element1.text = originalText[key];
               break;
             }
           }
