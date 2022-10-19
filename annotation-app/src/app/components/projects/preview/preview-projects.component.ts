@@ -360,6 +360,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
             this.previewSrsHeader = ['FileName', 'FileContent'];
             for (let w = 0; w < res.length; w++) {
               this.resetLoguserInputs(res[w]);
+              this.resetLoguserInputs(res[w].reviewInfo, res[w].originalData);
               const file = this.resetLogOriginalData(res[w]);
               const flag = {
                 fileName: res[w].fileInfo.fileName,
@@ -407,77 +408,30 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
           setTimeout(() => {
             this.previewSrs = res;
             // console.log('this.previewSrs:::', this.previewSrs);
-            // console.log('oldRes:::', oldRes)
+            // console.log('oldRes:::', oldRes);
           }, 100);
 
           if (this.projectType == 'image') {
             this.previewSrs = res;
             setTimeout(() => {
-              const detailRowDom = this.el.nativeElement.querySelectorAll(
-                'clr-dg-row-detail.datagrid-row-detail',
-              );
-              if (detailRowDom && detailRowDom.length > 0) {
-                for (let a = 0; a < detailRowDom.length; a++) {
-                  detailRowDom[a].style.display = 'block';
-                  detailRowDom[a].style.position = 'absolute';
-                  detailRowDom[a].style.left = '-10000px';
-                  detailRowDom[a].style.width = '100%';
-                }
-              } else {
-                this.loading = false;
-              }
-
               for (let i = 0; i < this.previewSrs.length; i++) {
-                if (this.previewSrs[i].userInputs.length > 0) {
-                  const option = {
-                    dom: 'label-studio-' + i + '-0',
-                    imageRectLabelTemplate: this.imageRectLabelTemplate,
-                    imagePolyLabelTemplate: this.imagePolyLabelTemplate,
-                    url: this.env.config.enableAWSS3
-                      ? oldRes[i].originalData.location
-                      : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
-                          oldRes[i].originalData.location
-                        }&token=${
-                          JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token
-                            .access_token
-                        }`,
-                    historyCompletions: [
-                      { result: this.previewSrs[i].userInputs[0].problemCategory },
-                    ],
-                    annotationQuestion: this.imageHeader,
-                    from: 'preview',
-                  };
-                  // console.log('option:::', option)
-                  this.toCallStudio(option);
-                  const labelStudioDom = this.el.nativeElement.querySelector(
-                    'div.label-studio-' + i + '-0',
-                  );
-                  const imgDom = labelStudioDom.getElementsByTagName('img');
-                  const canvas = labelStudioDom.getElementsByTagName('canvas');
-
-                  const img = new Image();
-                  img.src = this.env.config.enableAWSS3
-                    ? oldRes[i].originalData.location
-                    : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
-                        oldRes[i].originalData.location
-                      }&token=${
-                        JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token
-                          .access_token
-                      }`;
-                  const m = this;
-                  img.onload = function () {
-                    for (let k = 0; k < imgDom.length; k++) {
-                      setTimeout(() => {
-                        if (canvas.length > 0) {
-                          canvas[0].style.width = imgDom[k].offsetWidth;
-                          canvas[0].style.height = imgDom[k].offsetHeight;
-                        }
-                        detailRowDom[i].style.display = 'none';
-                        detailRowDom[i].style.position = 'unset';
-                        m.loading = false;
-                      }, 0);
-                    }
-                  };
+                if (
+                  this.previewSrs[i].userInputs.length > 0 ||
+                  this.previewSrs[i].reviewInfo.userInputs.length > 0
+                ) {
+                  if (this.previewSrs[i].userInputs.length > 0) {
+                    this.addDomStyle(this.el.nativeElement.querySelector('.annotateDetail' + i));
+                    let dom = 'label-studio-' + i + '-0';
+                    this.loadImg(dom, oldRes[i], this.previewSrs[i], i);
+                  }
+                  if (
+                    this.previewSrs[i].reviewInfo.userInputs.length > 0 &&
+                    this.previewSrs[i].reviewInfo.userInputs[0].problemCategory
+                  ) {
+                    this.addDomStyle(this.el.nativeElement.querySelector('.reviewDetail' + i));
+                    let domReview = 'label-studio-review-' + i + '-0';
+                    this.loadImg(domReview, oldRes[i], this.previewSrs[i].reviewInfo, i);
+                  }
                 }
               }
             }, 0);
@@ -496,6 +450,63 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
         this.loading = false;
       },
     );
+  }
+
+  addDomStyle(dom) {
+    dom.style.display = 'block';
+    dom.style.position = 'absolute';
+    dom.style.left = '-10000px';
+    dom.style.width = '100%';
+  }
+
+  loadImg(dom, oldSr, previewSr, i) {
+    const m = this;
+    m.loading = true;
+    const option = {
+      dom,
+      imageRectLabelTemplate: this.imageRectLabelTemplate,
+      imagePolyLabelTemplate: this.imagePolyLabelTemplate,
+      url: this.env.config.enableAWSS3
+        ? oldSr.originalData.location
+        : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
+            oldSr.originalData.location
+          }&token=${
+            JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
+          }`,
+      historyCompletions: [{ result: previewSr.userInputs[0].problemCategory }],
+      annotationQuestion: this.imageHeader,
+      from: 'preview',
+    };
+    // console.log('option:::', option,optionReview)
+    this.toCallStudio(option);
+
+    const labelStudioDom = this.el.nativeElement.querySelector('div.' + dom);
+    const imgDom = labelStudioDom.getElementsByTagName('img');
+    const canvas = labelStudioDom.getElementsByTagName('canvas');
+
+    const img = new Image();
+    img.src = this.env.config.enableAWSS3
+      ? oldSr.originalData.location
+      : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
+          oldSr.originalData.location
+        }&token=${
+          JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
+        }`;
+    img.onload = function () {
+      for (let k = 0; k < imgDom.length; k++) {
+        setTimeout(() => {
+          if (canvas.length > 0) {
+            canvas[0].style.width = imgDom[k].width;
+            canvas[0].style.height = imgDom[k].height;
+          }
+          m.el.nativeElement.querySelector('.annotateDetail' + i).style.display = 'none';
+          m.el.nativeElement.querySelector('.annotateDetail' + i).style.position = 'unset';
+          m.el.nativeElement.querySelector('.reviewDetail' + i).style.display = 'none';
+          m.el.nativeElement.querySelector('.reviewDetail' + i).style.position = 'unset';
+          m.loading = false;
+        }, 10);
+      }
+    };
   }
 
   getALLFlag() {
@@ -696,7 +707,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     }
     if (param.tid.length > 0) {
       this.avaService.passTicket(param).subscribe((res) => {
-        console.log('modify-in-preview:::', res);
+        // console.log('modify-in-preview:::', res);
         this.getALLSrsParam.pageNumber = this.page;
         this.getALLSrsParam.limit = this.pageSize;
         this.getALLSrs();
@@ -749,42 +760,56 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
   toRenewPreviewSrs() {
     // to sort one user's data together
     for (let k = 0; k < this.previewSrs.length; k++) {
-      const userInputsNew = [];
-      let userList = [];
-      for (let w = 0; w < this.previewSrs[k].userInputs.length; w++) {
-        userList.push(this.previewSrs[k].userInputs[w].user);
-      }
+      this.toCombineProblemCategory(this.previewSrs[k]);
+      this.toCombineProblemCategory(this.previewSrs[k].reviewInfo);
+    }
+  }
 
-      userList = _.uniq(userList);
-      for (let i = 0; i < userList.length; i++) {
-        const labelList = [];
-        const param = {
-          problemCategory: labelList,
-          timestamp: '',
-          user: userList[i],
-          reducedCategory: [],
-        };
-        for (let j = 0; j < this.previewSrs[k].userInputs.length; j++) {
-          if (userList[i] == this.previewSrs[k].userInputs[j].user) {
-            if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
+  toCombineProblemCategory(item) {
+    const userInputsNew = [];
+    let userList = [];
+    for (let w = 0; w < item.userInputs.length; w++) {
+      userList.push(item.userInputs[w].user);
+    }
+
+    userList = _.uniq(userList);
+    for (let i = 0; i < userList.length; i++) {
+      const labelList = [];
+      const param = {
+        problemCategory: labelList,
+        timestamp: '',
+        user: userList[i],
+        reducedCategory: [],
+      };
+      for (let j = 0; j < item.userInputs.length; j++) {
+        if (userList[i] == item.userInputs[j].user) {
+          if (this.labelType === 'numericLabel' && this.isMultipleLabel) {
+            if (item.userInputs[j].problemCategory) {
               param.problemCategory.push(
-                this.previewSrs[k].userInputs[j].problemCategory.label +
+                item.userInputs[j].problemCategory.label +
                   '[' +
-                  this.previewSrs[k].userInputs[j].problemCategory.value +
+                  item.userInputs[j].problemCategory.value +
                   ']',
               );
             } else {
-              param.problemCategory.push(this.previewSrs[k].userInputs[j].problemCategory);
-              param.reducedCategory = this.previewSrs[k].userInputs[j].reducedCategory;
+              param.problemCategory = undefined;
             }
-            param.timestamp = this.previewSrs[k].userInputs[j].timestamp;
+          } else {
+            if (item.userInputs[j].problemCategory) {
+              param.problemCategory.push(item.userInputs[j].problemCategory);
+              param.reducedCategory = item.userInputs[j].reducedCategory;
+            } else {
+              param.problemCategory = undefined;
+              param.reducedCategory = undefined;
+            }
           }
+          param.timestamp = item.userInputs[j].timestamp;
         }
-
-        userInputsNew.push(param);
       }
-      this.previewSrs[k].userInputs = userInputsNew;
+
+      userInputsNew.push(param);
     }
+    item.userInputs = userInputsNew;
   }
 
   toCallStudio(option) {
@@ -881,13 +906,14 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     }
   }
 
-  resetLoguserInputs(sr) {
+  resetLoguserInputs(sr, originalData?) {
     if (!sr.MSG) {
+      let originalText = originalData ? originalData : sr.originalData;
       sr.userInputs.forEach((element) => {
-        element.problemCategory.forEach((element1) => {
-          for (const key in sr.originalData) {
+        element.problemCategory?.forEach((element1) => {
+          for (const key in originalText) {
             if (element1.line == key) {
-              element1.text = sr.originalData[key];
+              element1.text = originalText[key];
               break;
             }
           }

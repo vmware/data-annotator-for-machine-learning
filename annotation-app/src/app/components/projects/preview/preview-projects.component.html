@@ -192,6 +192,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px"
                   >Annotator
                 </clr-dg-column>
+                <!-- <clr-dg-column class="ellipsis-datagrid"
+                  >Reviewed Info
+                </clr-dg-column> -->
                 <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px"
                   >Action
                 </clr-dg-column>
@@ -321,6 +324,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                     >
                       <div *ngFor="let a of dataset.userInputs">{{ a.user }}</div>
                     </clr-dg-cell>
+                    <!-- <clr-dg-cell
+                      class="ellipsis-datagrid previewHeight"
+                    >
+                      <div>{{ dataset.reviewInfo.reviewedTime? (dataset.reviewInfo.reviewedTime | date: 'yyyy-MM-dd HH:mm:ss'):'None'}}
+                        <span *ngIf="dataset.reviewInfo.reviewedTime" class="reviewType">{{dataset.reviewInfo.modified?'Modified':'Passed'}}</span>
+                      </div>
+                    </clr-dg-cell> -->
                     <clr-dg-cell class="ellipsis-datagrid previewHeight" style="min-width: 250px">
                       <div class="clr-row">
                         <button
@@ -336,13 +346,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                       ngProjectAs="clr-dg-row-detail"
                       *ngIf="dataset.userInputsLength > 0 || dataset?.originalInputs > 0"
                     >
-                      <clr-dg-row-detail (clrIfExpanded)="(true)" style="margin-bottom: 1rem">
-                        <clr-datagrid>
+                      <clr-dg-row-detail class="annotateDetail{{ i }}" (clrIfExpanded)="(true)">
+                          <clr-datagrid>
                           <clr-dg-column>
-                            {{ dataset.reviewInfo.reviewedTime ? 'Reviewer' : 'Annotator' }}
+                            Annotator                          
                           </clr-dg-column>
                           <clr-dg-column>
-                            {{ dataset.reviewInfo.reviewedTime ? 'Review' : 'Annotate' }} Time
+                            Annotate Time
                           </clr-dg-column>
                           <clr-dg-column *ngIf="projectType === 'log'">
                             Log Freetext
@@ -353,7 +363,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               projectType == 'image' || projectType == 'ner' || projectType == 'log'
                             "
                           >
-                            {{ dataset?.originalInputs > 0 ? 'Original-Label' : ' Re-Label' }}
+                            Label
                           </clr-dg-column>
                           <clr-dg-column
                             *ngIf="
@@ -361,17 +371,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                             "
                             style="min-width: 20rem"
                           >
-                            Re-Label
+                            Label
                           </clr-dg-column>
                           <clr-dg-row *ngFor="let flag of dataset.userInputs; let j = index">
                             <clr-dg-cell style="word-break: break-all">
-                              {{ dataset.reviewInfo.user ? dataset.reviewInfo.user : flag.user }}
+                              {{ flag.user }}
                             </clr-dg-cell>
                             <clr-dg-cell>
-                              {{
-                                dataset.reviewInfo.reviewedTime
-                                  ? (dataset.reviewInfo.reviewedTime | date: 'yyyy-MM-dd HH:mm:ss')
-                                  : (flag.timestamp | date: 'yyyy-MM-dd HH:mm:ss')
+                              {{flag.timestamp | date: 'yyyy-MM-dd HH:mm:ss'
                               }}
                             </clr-dg-cell>
                             <clr-dg-cell
@@ -458,6 +465,134 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </clr-dg-row>
                         </clr-datagrid>
                       </clr-dg-row-detail>
+                      <clr-dg-row-detail class="reviewDetail{{ i }}" (clrIfExpanded)="(true)" style="margin-bottom: 1rem;">
+                      <!-- review data datagrid -->
+                      <clr-datagrid>
+                        <clr-dg-placeholder>No review data yet!</clr-dg-placeholder>
+                        <clr-dg-column>
+                          Reviewer                          
+                        </clr-dg-column>
+                        <clr-dg-column>
+                          Review Time
+                        </clr-dg-column>
+                        <clr-dg-column>
+                          Review Action
+                        </clr-dg-column>
+                        <clr-dg-column *ngIf="projectType === 'log'">
+                          Updated Log Freetext
+                        </clr-dg-column>
+                        <clr-dg-column
+                          class="studioCell"
+                          *ngIf="
+                            projectType == 'image' || projectType == 'ner' || projectType == 'log'
+                          "
+                        >
+                          Re-Label
+                        </clr-dg-column>
+                        <clr-dg-column
+                          *ngIf="
+                            projectType != 'ner' && projectType != 'image' && projectType != 'log'
+                          "
+                          style="min-width: 20rem"
+                        >
+                          Re-Label
+                        </clr-dg-column>
+                        <clr-dg-row *ngFor="let flag of dataset.reviewInfo.userInputs; let j = index">
+                          <clr-dg-cell style="word-break: break-all">
+                            {{ flag.user }}
+                          </clr-dg-cell>
+                          <clr-dg-cell>
+                            {{flag.timestamp | date: 'yyyy-MM-dd HH:mm:ss'
+                            }}
+                          </clr-dg-cell>
+                          <clr-dg-cell>
+                            {{flag.problemCategory?'Modify':'Pass'}}
+                          </clr-dg-cell>
+                          <clr-dg-cell
+                            *ngIf="projectType === 'log'"
+                            style="word-break: break-all"
+                          >
+                            {{ flag.logFreeText }}
+                          </clr-dg-cell>
+                          <clr-dg-cell
+                            *ngIf="
+                              projectType != 'ner' &&
+                              projectType != 'image' &&
+                              projectType != 'log' &&
+                              labelType !== 'HTL'
+                            "
+                            style="min-width: 20rem"
+                          >
+                            {{ flag.problemCategory }}
+                          </clr-dg-cell>
+                          <clr-dg-cell
+                            *ngIf="
+                              projectType != 'ner' &&
+                              projectType != 'image' &&
+                              projectType != 'log' &&
+                              labelType === 'HTL'
+                            "
+                            style="min-width: 20rem"
+                            class="disableTree"
+                          >
+                            <div
+                              class="tree-icon"
+                              (click)="clickTreeView(flag.problemCategory[0])"
+                              *ngIf="flag.problemCategory"
+                            >
+                              <clr-icon shape="view-list" title="tree view detail"></clr-icon>
+                              click the icon to review with tree label
+                            </div>
+                            <ul
+                              *ngFor="
+                                let selectedTreeLabel of flag.reducedCategory;
+                                let i = index
+                              "
+                            >
+                              <li>{{ selectedTreeLabel }}</li>
+                            </ul>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="projectType == 'ner'" class="studioCell">
+                            <clr-datagrid>
+                              <clr-dg-column *ngFor="let title of innerTable">
+                                {{ title }}
+                              </clr-dg-column>
+                              <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
+                                <clr-dg-cell>{{ innerCell.label }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.text }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.start }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.end }}</clr-dg-cell>
+                              </clr-dg-row>
+                            </clr-datagrid>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="projectType == 'log'" class="studioCell">
+                            <clr-datagrid *ngIf="flag.problemCategory">
+                              <clr-dg-column *ngFor="let title of innerTable">
+                                {{ title }}
+                              </clr-dg-column>
+                              <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
+                                <clr-dg-cell>{{ innerCell.line }}</clr-dg-cell>
+                                <clr-dg-cell style="word-break: break-all">
+                                  {{ innerCell.text }}</clr-dg-cell
+                                >
+                                <clr-dg-cell>{{ innerCell.label }}</clr-dg-cell>
+                                <clr-dg-cell style="word-break: break-all">
+                                  {{ innerCell.freeText }}</clr-dg-cell
+                                >
+                              </clr-dg-row>
+                            </clr-datagrid>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="projectType == 'image'" class="studioCell">
+                            <div
+                              class="label-studio-review-{{ i }}-{{ j }}"
+                              id="label-studio-review-{{ i }}-{{ j }}"
+                            >
+                              <!-- here is LSF image annotation -->
+                            </div>
+                          </clr-dg-cell>
+                        </clr-dg-row>
+                      </clr-datagrid>
+                    </clr-dg-row-detail>
                     </ng-container>
                   </clr-dg-row>
                 </ng-container>
@@ -624,10 +759,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     [clrDgLastPage]="totalPagesFlag"
                   >
                     <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">
-                      Tickets per page</clr-dg-page-size
+                      Records per page</clr-dg-page-size
                     >
                     {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of
-                    {{ pagination.totalItems }} Tickets
+                    {{ pagination.totalItems }} Records
                   </clr-dg-pagination>
                 </clr-dg-footer>
               </clr-datagrid>
