@@ -192,9 +192,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px"
                   >Annotator
                 </clr-dg-column>
-                <!-- <clr-dg-column class="ellipsis-datagrid"
-                  >Reviewed Info
-                </clr-dg-column> -->
                 <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px"
                   >Action
                 </clr-dg-column>
@@ -324,13 +321,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     >
                       <div *ngFor="let a of dataset.userInputs">{{ a.user }}</div>
                     </clr-dg-cell>
-                    <!-- <clr-dg-cell
-                      class="ellipsis-datagrid previewHeight"
-                    >
-                      <div>{{ dataset.reviewInfo.reviewedTime? (dataset.reviewInfo.reviewedTime | date: 'yyyy-MM-dd HH:mm:ss'):'None'}}
-                        <span *ngIf="dataset.reviewInfo.reviewedTime" class="reviewType">{{dataset.reviewInfo.modified?'Modified':'Passed'}}</span>
-                      </div>
-                    </clr-dg-cell> -->
                     <clr-dg-cell class="ellipsis-datagrid previewHeight" style="min-width: 250px">
                       <div class="clr-row">
                         <button
@@ -347,7 +337,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       *ngIf="dataset.userInputsLength > 0 || dataset?.originalInputs > 0"
                     >
                       <clr-dg-row-detail class="annotateDetail{{ i }}" (clrIfExpanded)="(true)">
-                          <clr-datagrid>
+                          <clr-datagrid *ngIf="dataset.userInputs.length>0">
                           <clr-dg-column>
                             Annotator                          
                           </clr-dg-column>
@@ -467,8 +457,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </clr-dg-row-detail>
                       <clr-dg-row-detail class="reviewDetail{{ i }}" (clrIfExpanded)="(true)" style="margin-bottom: 1rem;">
                       <!-- review data datagrid -->
-                      <clr-datagrid>
-                        <clr-dg-placeholder>No review data yet!</clr-dg-placeholder>
+                      <clr-datagrid *ngIf="dataset.reviewInfo.userInputs.length>0">
                         <clr-dg-column>
                           Reviewer                          
                         </clr-dg-column>
@@ -553,7 +542,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </ul>
                           </clr-dg-cell>
                           <clr-dg-cell *ngIf="projectType == 'ner'" class="studioCell">
-                            <clr-datagrid>
+                            <clr-datagrid *ngIf="flag.problemCategory">
                               <clr-dg-column *ngFor="let title of innerTable">
                                 {{ title }}
                               </clr-dg-column>
