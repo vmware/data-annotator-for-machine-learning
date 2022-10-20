@@ -18,7 +18,7 @@ describe("edit multil numberic project info on projects page..", () => {
   let editPage: EditPage;
   let commonPage: CommonPage;
   let PROMPT = $('span[class="alert-text"]');
-  let New_Lables = projectEditData.MutilNumbericProject.Labels.split(',');
+  let New_Lables = projectEditData.MutilNumbericProject.Labels.split(",");
   let MIN_VAL = projectEditData.MutilNumbericProject.MinVal;
   let MAX_VAL = projectEditData.MutilNumbericProject.MaxVal;
   let LABEL1_INPUT = element(by.css("input[placeholder='test1']"));
@@ -78,7 +78,9 @@ describe("edit multil numberic project info on projects page..", () => {
         projectEditData.MutilNumbericProject.Owner2,
         projectEditData.MutilNumbericProject.Owner3
       );
-      await editPage.deleteProjectOwner(projectEditData.MutilNumbericProject.Owner3);
+      await editPage.deleteProjectOwner(
+        projectEditData.MutilNumbericProject.Owner3
+      );
       await editPage.editProjectAnnotator(
         projectEditData.MutilNumbericProject.Email_Validation,
         projectEditData.MutilNumbericProject.Annotator
@@ -86,17 +88,23 @@ describe("edit multil numberic project info on projects page..", () => {
       await editPage.addMutilNumbericLabel(New_Lables, MIN_VAL, MAX_VAL);
       await editPage.editMutilNumbericThreshold(
         projectEditData.MutilNumbericProject.editMinVal_Err,
-        projectEditData.MutilNumbericProject.editMaxVal_Err,
+        projectEditData.MutilNumbericProject.editMaxVal_Err
       );
       await browser.sleep(5000);
       await editPage.editMutilNumbericThreshold(
         projectEditData.MutilNumbericProject.editMinVal,
-        projectEditData.MutilNumbericProject.editMaxVal,
+        projectEditData.MutilNumbericProject.editMaxVal
       );
-      await editPage.editMutilNumbericLabel(projectEditData.MutilNumbericProject.editLabel);
-      await editPage.deltMutilNumbericLabel(projectEditData.MutilNumbericProject.delIndex_err);
+      await editPage.editMutilNumbericLabel(
+        projectEditData.MutilNumbericProject.editLabel
+      );
+      await editPage.deltMutilNumbericLabel(
+        projectEditData.MutilNumbericProject.delIndex_err
+      );
       await browser.sleep(5000);
-      await editPage.deltMutilNumbericLabel(projectEditData.MutilNumbericProject.delIndex);
+      await editPage.deltMutilNumbericLabel(
+        projectEditData.MutilNumbericProject.delIndex
+      );
       await browser.sleep(5000);
       await editPage.clickEditSubmitButton();
       await browser.wait(
@@ -135,10 +143,12 @@ describe("edit multil numberic project info on projects page..", () => {
         .toEqual(Constant.project_name_numberic_mutiple);
       since("project owner should be 2 and content correct")
         .expect(New_Project_Owner)
-        .toEqual(Constant.username + "," + projectEditData.MutilNumbericProject.Owner2);
+        .toEqual(
+          Constant.username + "," + projectEditData.MutilNumbericProject.Owner2
+        );
       since("project annotator should be 6 and content correct")
         .expect(New_Project_Annotator.split("\n").length)
-        .toBeGreaterThan(10);
+        .toBeGreaterThan(6);
       since("project labels should be 3 and content correct")
         .expect(New_Project_Labels)
         .toEqual(projectEditData.MutilNumbericProject.after_edited_labels);
@@ -147,5 +157,4 @@ describe("edit multil numberic project info on projects page..", () => {
     }
     done();
   });
- 
 });
