@@ -1519,7 +1519,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.submitMessage = 'submit';
           this.fetchData();
         }
-        this.tipMessage = `The current label is diiferent from the original existing label, please do ${this.submitMessage} first.`;
+        this.tipMessage = `The current label is different from the original existing label, please do ${this.submitMessage} first.`;
       },
       (error) => {
         console.log(error);

@@ -720,7 +720,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <div
-            *ngIf="(projectType == 'text' || projectType == 'tabular') && startFrom === 'review'"
+            *ngIf="(projectType == 'text' || projectType == 'tabular') && startFrom === 'review' && moreReviewInfo.length>0"
             class="limit-height"
           >
             <h5 style="margin-top: 1rem">Annotator labeled results:</h5>
