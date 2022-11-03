@@ -4,7 +4,7 @@
   "description": "Angular-CLI starter for a Clarity project",
   "angular-cli": {},
   "scripts": {
-    "start": "ng serve --proxy-config proxy.conf.json",
+    "start": "ng serve --proxy-config proxy.conf.json --disable-host-check",
     "lint": "tslint \"src/**/*.ts\" -e \"src/polyfills.ts\" --force",
     "prettier": "npx prettier --write .",
     "build": "ng build"

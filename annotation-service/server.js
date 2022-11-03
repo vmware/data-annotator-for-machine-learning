@@ -15,7 +15,7 @@ const fs = require('fs')
 const { consumeSQSMessage } = require('./utils/sqs');
 const { regularNotification } = require('./utils/taskSchedule');
 const config = require('./config/config');
-const { API_VERSION } = require('./config/constant')
+const { API_VERSION, API_BASE_PATH } = require('./config/constant')
 
 // Get our API routes
 const authService = require('./services/auth.service');
@@ -50,12 +50,11 @@ app.use(function (req, res, next) {
 });
 
 // mannually set up swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(`${API_BASE_PATH}/api-docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Server health check
-app.get('/health', (req, res) => {
+app.get(`${API_BASE_PATH}/health`, (req, res) => {
   return res.status(200).json({ CODE: 200, MSG: "SUCCESS" });
-
 });
 
 process.on('uncaughtException', err => {
@@ -86,7 +85,7 @@ authService.authentication().then(data => {
 }).finally(() => {
   // Set our api routers
   routers.forEach(
-    api => app.use(`/api/${API_VERSION}`, require(`./routers/${api}`))
+    api => app.use(`${API_BASE_PATH}/api/${API_VERSION}`, require(`./routers/${api}`))
   );
   consumeSQSMessage();
   regularNotification();
