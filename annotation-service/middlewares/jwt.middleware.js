@@ -8,7 +8,7 @@
 const jwt = require('express-jwt');
 const config = require('../config/config');
 const JWTS = require('jsonwebtoken');
-const { API_VERSION, TOKEN_EXPIRE_TIME, TOKEN_ALGORITHM, TOKEN_SECRET_OR_PRIVATE_KEY } = require('../config/constant');
+const { API_VERSION, API_BASE_PATH, TOKEN_EXPIRE_TIME, TOKEN_ALGORITHM, TOKEN_SECRET_OR_PRIVATE_KEY} = require('../config/constant');
 const APIs = require('../resources/APIs');
 
 jwtTokenAuthrization = (data) => {
@@ -21,7 +21,7 @@ jwtTokenAuthrization = (data) => {
             requestProperty: 'auth',
         }).unless({
             path: [
-                `/api/${API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
+                `${API_BASE_PATH}/api/${API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
             ],
         });
     } else {
@@ -32,9 +32,9 @@ jwtTokenAuthrization = (data) => {
             requestProperty: 'auth',
         }).unless({
             path: [
-                `/api/${API_VERSION}${APIs.REGISTER}`,
-                `/api/${API_VERSION}${APIs.LOGIN}`,
-                `/api/${API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
+                `${API_BASE_PATH}/api/${API_VERSION}${APIs.REGISTER}`,
+                `${API_BASE_PATH}/api/${API_VERSION}${APIs.LOGIN}`,
+                `${API_BASE_PATH}/api/${API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
             ],
         });
     }

@@ -7,6 +7,7 @@
 
 module.exports = {
     API_VERSION: process.env.API_VERSION || 'v1.0',
+    API_BASE_PATH: process.env.API_BASE_PATH || '',
     USER_ROLE: process.env.USER_ROLE || 'Project Owner',
     ROLES:{
         ANNOTATOR: "Annotator",
