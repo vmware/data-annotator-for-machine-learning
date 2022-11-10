@@ -77,7 +77,7 @@ authService.authentication().then(data => {
 
   app.use(function (err, req, res, next) {
     if (err.name === 'UnauthorizedError') {
-      res.status(401).send({ MSG: "Invalid token" });
+      res.status(401).send({ CODE: 401, MSG: "Invalid token" });
     }
   });
 }).catch(error => {
