@@ -31,7 +31,7 @@ async function generateFile(req){
     let response = {};
     
     console.log(`[ SQS ] Service generateFile query file size and generate info`);
-    let project_check = await validator.checkProjectByconditions({ projectName: req.body.pname }, true);
+    let project_check = await validator.checkProjectByconditions({ _id: data.id }, true);
     const pro = project_check[0];
     const gen = pro.generateInfo;
 
