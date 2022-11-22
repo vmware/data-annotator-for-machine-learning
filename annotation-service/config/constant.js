@@ -7,6 +7,7 @@
 
 module.exports = {
     API_VERSION: process.env.API_VERSION || 'v1.0',
+    API_BASE_PATH: process.env.API_BASE_PATH || '',
     USER_ROLE: process.env.USER_ROLE || 'Project Owner',
     ROLES:{
         ANNOTATOR: "Annotator",
@@ -32,7 +33,7 @@ module.exports = {
     },
     PAGINATELIMIT: 5000,
     PAGINATETEXTLIMIT: 100,
-    FILESIZE: 1024*1024*5, //less than 5MB directly download
+    FILESIZE: 1024*1024*50, //less than 50MB directly download
     ACCESS_TIME_60: 60*60, //in seconds
     ACCESS_TIME_30: 60*30, //in seconds
     ACCESS_TIME_15: 60*15, //in seconds
