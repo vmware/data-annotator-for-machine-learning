@@ -4,14 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  * 
 ***/
-
+const MESSAGE = require('../config/code_msg');
 
 async function findByConditions(MODEL, conditions, columns, options) {
     console.log(`[ DB ] begin findByConditions`);
     return MODEL.find(conditions, columns, options, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findByConditions fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log(`[ DB ] findByConditions succefully`);
         return result;
@@ -23,7 +24,8 @@ async function findAndCountByConditions(MODEL, conditions, columns, options, fla
     return MODEL.find(conditions, columns, options, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findAndCountByConditions fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log(`[ DB ] findAndCountByConditions succefully`);
         return result;
@@ -34,7 +36,8 @@ async function findSortAndLimitByConditions(MODEL, conditions, columns, options,
     return MODEL.find(conditions, columns, options).sort(sort).limit(limit).exec().then(function(result, error) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findSortAndLimitByConditions fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log(`[ DB ] findSortAndLimitByConditions succefully`);
         return result;
@@ -46,7 +49,8 @@ async function findOneByConditions(MODEL, conditions, columns, options) {
     return MODEL.findOne(conditions, columns, options, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findOneByConditions fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log(`[ DB ] findOneByConditions succefully`);
         return result;
@@ -58,7 +62,8 @@ async function findOneAndUpdate(MODEL, conditions, update, options) {
     return MODEL.findOneAndUpdate(conditions, update, options).then(function(result, error) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findOneAndUpdate fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log(`[ DB ] findOneAndUpdate succefully`);
         return result;
@@ -71,7 +76,8 @@ async function findById(MODEL, conditions, columns) {
     return MODEL.findById(conditions, columns, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB findById fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log(`[ DB ] findById succefully`);
         return result;
@@ -83,7 +89,8 @@ async function updateManyByConditions(MODEL, conditions, doc, options) {
     return MODEL.updateMany(conditions, doc, options, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB updateManyByConditions fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log(`[ DB ] updateManyByConditions succefully`);
         return result;
@@ -96,7 +103,8 @@ async function saveBySchema(MODEL, schema) {
     return model.save().then(function(result,error){
         if(error){
             console.error('[ DB ] [ ERROR ] DB saveBySchema fail with: ', error );
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log('[ DB ] saveBySchema succefully');
         return result;
@@ -107,7 +115,8 @@ async function insertMany(MODEL, docs, options) {
     return MODEL.insertMany(docs, options, function(error, result){
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB insertMany fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
     });
 }
@@ -117,7 +126,8 @@ async function aggregateBySchema(MODEL, schema) {
     return MODEL.aggregate(schema, function(error, result) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB aggregateBySchema fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log(`[ DB ] aggregateBySchema succefully`);
         return result;
@@ -128,7 +138,8 @@ async function paginateQuery(MODEL, query, options) {
     return MODEL.paginate(query, options).then(function(result, error) {
         if (error) {
             console.error(`[ DB ] [ ERROR ] DB paginateQuery fail with: `, error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         return result;
     });
@@ -144,7 +155,8 @@ async function deleteOneByConditions(MODEL, conditions) {
     return MODEL.deleteOne(conditions, function(error, result) {
         if (error) {
             console.error('[ DB ] [ ERROR ] DB deleteItem fail with: ', error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log('[ DB ] deleteItem succefully');
         return result;
@@ -156,7 +168,8 @@ async function removeByConditions(MODEL, conditions) {
     return MODEL.remove(conditions, function(error, result) {
         if (error) {
             console.error('[ DB ] [ ERROR ] DB removeByConditions fail with: ', error);
-            throw error;
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
         }
         console.log('[ DB ] removeByConditions succefully');
         return result;

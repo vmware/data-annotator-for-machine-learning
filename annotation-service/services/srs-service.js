@@ -22,7 +22,7 @@ const logImporter = require('../utils/logImporter');
 const fileSystemUtils = require('../utils/fileSystem.utils');
 const config = require('../config/config');
 const { reduceHierarchicalUnselectedLabel, initHierarchicalLabelsCase } = require('./project.service');
-
+const MESSAGE = require('../config/code_msg');
 
 async function updateSrsUserInput(req, from) {
 
@@ -55,7 +55,7 @@ async function updateSrsUserInput(req, from) {
         for (const ticket of srs) {
             if (pro.maxAnnotation <= ticket.userInputsLength) {
                 console.log(`[ SRS ] Service concurrent operation ticket:${ticket._id} achieve maxAnnotation:${pro.maxAnnotation}`);
-                return { CODE: 3001, MSG: `ticket:${ticket._id} maxAnnotation is ${pro.maxAnnotation} already achieved` };
+                return {CODE: MESSAGE.VALIDATION_TK_MAX_ANNOTATION.CODE, MSG: MESSAGE.VALIDATION_TK_MAX_ANNOTATION.MSG.replace("${_id}",ticket._id).replace("${maxAnnotation}",pro.maxAnnotation)}
             }
         }
     }
@@ -70,14 +70,14 @@ async function updateSrsUserInput(req, from) {
                 const label = await labels.find(a => Object.keys(a)[0] == inputkey);
                 if (!label || !validator.isNumeric(inputValue) || inputValue < label[inputkey][0] || inputValue > label[inputkey][1]) {
                     console.log(lbI, label, labels);
-                    throw { CODE: 3001, MSG: `[ ERROR ] userInput[0].problemCategory` };
+                    throw MESSAGE.VALIDATION_TK_USER_INPUT_PC;
                 }
             }
         } else {
             const lableInput = req.body.userInput[0].problemCategory[0];
             console.log(`[ SRS ] Service validate numeric lable problemCategory=${lableInput}`);
             if (!validator.isNumeric(lableInput) || lableInput < pro.min || lableInput > pro.max) {
-                throw { CODE: 3001, MSG: `[ ERROR ] userInput[0].problemCategory` };
+                throw MESSAGE.VALIDATION_TK_USER_INPUT_PC;
             }
         }
     }
@@ -326,7 +326,7 @@ async function getOneSrs(req) {
         const skiped = await findSkippedCase(mp, user);
         if (!skiped.length) {
             console.log(`[ SRS ] Service all case has annotated`);
-            return { CODE: 5001, "MSG": "ANNOTATION DONE" };
+            return MESSAGE.ANNOTATE_DONE;
         } else {
             //show skipped before
             await removeSkippedCase(mp, user);
@@ -1073,7 +1073,7 @@ async function queryTicketsForReview(req) {
     if (!ticket[0]) {
         const skiped = await findSkippedCase(mp, user);
         if (!skiped.length) {
-            return { CODE: 5001, "MSG": "REVIEW DONE" };
+            return MESSAGE.ANNOTATE_DONE;
         } else {
             console.log(`[ SRS ] Service remove marked skipped case`);
             await removeSkippedCase(mp, user);

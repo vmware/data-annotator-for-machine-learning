@@ -14,6 +14,7 @@ const fileService = require('../services/file-service');
 const S3Utils = require('./s3');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel, SrModel } = require('../db/db-connect');
+const MESSAGE = require('../config/code_msg');
 
 async function importDataset(req) {
   console.log('[ IMPORT-DATASET ] Utils Start Import dataset ');
@@ -29,7 +30,7 @@ async function importDataset(req) {
 
   await fileService.saveProjectInfo(req, [], req.body.annotator);
 
-  return { CODE: 200, MSG: "SUCCESS" };
+  return MESSAGE.SUCCESS;
 }
 
 

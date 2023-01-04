@@ -8,6 +8,7 @@
 
 const axios = require('axios');
 const config = require('../config/config');
+const MESSAGE = require('../config/code_msg');
 
 let token;
 let expirationDate;
@@ -32,11 +33,8 @@ const generateEsp2NoeToken = async() => {
     }
 
     console.error('[ ESP-TOKEN ] [ ERROR ] Utils generateEsp2NoeToken: ', response.data);
-    const error = {
-        msg: 'Unable to get token from Auth service',
-        data: { statusText: response.statusText, data: response.data },
-    };
-    throw new Error(error.msg, error.data);
+    MESSAGE.VALIDATION_UNAUTH_TOKEN.DATA = [{ statusText: response.statusText, data: response.data }]
+    throw MESSAGE.VALIDATION_UNAUTH_TOKEN;
 };
 
 module.exports.getEsp2NoeToken = async() => {

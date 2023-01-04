@@ -11,7 +11,7 @@ const { ProjectModel, UserModel, InstanceModel } = require("../db/db-connect");
 const mongoDb = require("../db/mongo.db");
 const emailService = require('../services/email-service');
 const validator = require('./validator');
-
+const MESSAGE = require('../config/code_msg')
 var CronJob = require('cron').CronJob;
 
 
@@ -134,7 +134,7 @@ module.exports.regularNotificationSubscription = async (req) => {
   const notification = req.query.n;
  
   if(!user){
-    throw {CODE: 4001, MSG: "USER IS EMPTY"};
+    throw MESSAGE.VALIDATION_PERMITION;
   }
   
   if(projectName){

@@ -17,6 +17,7 @@ const { ProjectModel, UserModel, LogModel } = require('../db/db-connect');
 const { formatDate } = require('../utils/common.utils');
 const slackChat = require("./slack/slackChat.service");
 const { default: axios } = require("axios");
+const MESSAGE = require('../config/code_msg');
 
 async function getProjects(req) {
     console.log(`[ PROJECT ] Service getProjects query user role`);
@@ -42,7 +43,7 @@ async function getProjects(req) {
         project = "projectName shareDescription creator updatedDate totalCase projectCompleteCase userCompleteCase categoryList generateInfo downloadCount labelType min max projectType isMultipleLabel popUpLabels integration";
     } else {
         console.log(`[ PROJECT ] [ERROR] Service errors in ${email} or ${src}`);
-        throw { CODE: 1001, MSG: "ERROR ID or src" };
+        throw MESSAGE.VALIDATATION_PJ_ID_ROUTER;
     }
     if (req.query.projectType) {
         condition['projectType'] = req.query.projectType;
@@ -177,7 +178,7 @@ async function updateProject(req) {
     }
 
     if (!req.body.projectOwner.length) {
-        throw { CODE: 4001, MSG: "PROJECT OWNER CAN'T BE EMPTY" };
+        throw MESSAGE.VALIDATATION_PJ_OWNER;
     }
     for (const owner of req.body.projectOwner) {
         // update annotator role to prjectOwner
@@ -757,7 +758,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
                     const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == orgLB);
 
                     if (!originLBDB) {
-                        throw { CODE: 4006, MSG: "INPUT originLB ERROR" };
+                        throw MESSAGE.VALIDATATION_PJ_ORIGIN_LB;
                     }
                     const dbMin = originLBDB[orgLB][0];
                     const dbMax = originLBDB[orgLB][1];
@@ -775,14 +776,14 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
                     //find if edit label already exist
                     const editLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == editLB);
                     if (editLBDB && editLB != orgLB) {
-                        throw { CODE: 4006, MSG: "INPUT editLB already exist" };
+                        throw MESSAGE.VALIDATATION_PJ_EDIT_LB_EXIST;
                     }
 
                     if (dbMin != orgMin || dbMax != orgMax) {
-                        throw { CODE: 4006, MSG: "INPUT originLB min/max ERROR" };
+                        throw MESSAGE.VALIDATATION_PJ_ORIGIN_LB_MAX_MIN;
                     }
                     if (editMin >= editMax || editMin > dbMin || editMax < dbMax) {
-                        throw { CODE: 4006, MSG: "INPUT editLB min/max ERROR" };
+                        throw MESSAGE.VALIDATATION_PJ_EDIT_LB_MAX_MIN;
                     }
                     //add to edit list
                     editLBList.push([orgLB, editLB]);
@@ -798,7 +799,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
                     continue;
                 }
                 if (aLabel[addLB][0] > aLabel[addLB][1]) {
-                    throw { CODE: 4006, MSG: "INPUT addLabels min/max ERROR" };
+                    throw MESSAGE.VALIDATATION_PJ_ADD_LB_MAX_MIN;
                 }
                 originalLabels.push(aLabel);
             }
@@ -818,7 +819,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
         } else {
             if ((min != null || min != undefined || min != "") && (max != null || max != undefined || max != "")) {
                 if (min >= max || typeof min != "number" || typeof max != "number" || min > project.min || max < project.max) {
-                    throw { CODE: 4006, MSG: "INPUT MIN/MAX ERROR" };
+                    throw MESSAGE.VALIDATATION_PJ_MAX_MIN;
                 }
                 updateProject.$set['min'] = min;
                 updateProject.$set['max'] = max;
@@ -832,7 +833,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
             for (const key in editLabels) {
                 const index = originalLabels.indexOf(key);
                 if (index == -1) {
-                    throw { CODE: 4006, MSG: "INPUT EDITlABELS ERROR" };
+                    throw MESSAGE.VALIDATATION_PJ_EDIT_LB;
                 }
 
                 if (key != editLabels[key]) {
@@ -972,7 +973,7 @@ async function deleteProjectLables(label, _id, projectName, operation) {
         labelArray = categoryList.map(a => Object.keys(a)[0]);
     }
     if (!labelArray.includes(label)) {
-        throw { CODE: 4004, MSG: "LABEL NOT EXIST" };
+        throw MESSAGE.VALIDATATION_PJ_LB;
     }
 
     let conditions = { projectName: mp.project.projectName }
@@ -996,12 +997,14 @@ async function deleteProjectLables(label, _id, projectName, operation) {
 
     if (operation == OPERATION.QUERY) {
         if (tickets[0]) {
-            return { CODE: 400, MSG: "LABEL HAS BEEN ANNOTATED", DATA: [label] };
+            MESSAGE.VALIDATATION_PJ_LB_ANNOTATED.DATA = [label];
+            return MESSAGE.VALIDATATION_PJ_LB_ANNOTATED;
         }
-        return { CODE: 200, MSG: "LABEL CAN BE DELETE", DATA: [label] };
+        MESSAGE.VALIDATATION_PJ_LB_DEL.DATA = [label];
+        return MESSAGE.VALIDATATION_PJ_LB_DEL;
     } else {
         if (tickets[0]) {
-            throw { CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED" };
+            throw MESSAGE.VALIDATATION_PJ_LB_ANNOTATED;
         }
 
         const query = { projectName: mp.project.projectName }
@@ -1016,8 +1019,8 @@ async function deleteProjectLables(label, _id, projectName, operation) {
 
         const update = { $set: { "categoryList": labelArray } };
         await mongoDb.findOneAndUpdate(ProjectModel, query, update, options);
-
-        return { CODE: 200, MSG: "OK", LABELS: labelArray };
+        MESSAGE.SUCCESS.LABELS = labelArray
+        return MESSAGE.SUCCESS;
     }
 }
 
