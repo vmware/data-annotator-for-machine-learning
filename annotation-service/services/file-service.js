@@ -31,6 +31,7 @@ const localFileSysService = require('./localFileSys.service');
 const _ = require("lodash");
 const config = require('../config/config');
 const { initHierarchicalLabelsCase,prepareUserInputs } = require('./project.service');
+const MESSAGE = require("../config/code_msg");
 
 async function createProject(req) {
     const findProjectName = { projectName: req.body.pname };
@@ -636,7 +637,7 @@ async function uploadFile(req) {
     const fileType = fileSplit[fileSplit.length - 1];
 
     if (![FILETYPE.CSV, FILETYPE.ZIP, FILETYPE.TGZ].includes(fileType)) {
-        return { CODE: 3001, MSG: "FILE FORMAT NOT SUPPORTED" };
+        return MESSAGE.VALIDATION_DS_FILE_FORMAT;
     }
 
     const fileKey = `upload/${req.auth.email}/${Date.now()}_${req.file.originalname}`;
@@ -725,7 +726,7 @@ async function uploadFile(req) {
             stream.resume();
         }).on('error', err => {
             console.error("[ FILE ] [ ERROR ] Service swagger upload datasets error ->", err);
-            throw { CODE: 500, MSG: "SAVE DATASETS ERROR" }
+            throw MESSAGE.ERROR_DS_SAVE;
         }).on('finish', async () => {
             datasetInfo.body.format = DATASETTYPE.LOG;
             datasetInfo.body.topReview = topReview;
@@ -735,7 +736,7 @@ async function uploadFile(req) {
             await dataSetService.saveDataSetInfo(datasetInfo);
         });
     }
-    return { CODE: 200, MSG: "OK" };
+    return MESSAGE.SUCCESS;
 
 }
 
@@ -755,7 +756,7 @@ async function setData(req) {
     let removedCase = 0;
 
     if (columns.includes(label)) {
-        throw { CODE: 4008, MSG: "LABEL SHOULD NOT CONTAINS IN COLUMNS" };
+        throw MESSAGE.VALIDATATION_PJ_LABEL;
     }
 
     const headerRule = {
@@ -794,7 +795,7 @@ async function setData(req) {
 
     }, (err) => {
         console.error("[ FILE ] [ ERROR ] Service handle set-data", err);
-        throw { CODE: 500, MSG: "HANDLE DATA ERROR" }
+        throw MESSAGE.ERROR_TK_SETDATA;
     }, () => {
         if (totLbExLmt) {
             labels = [];

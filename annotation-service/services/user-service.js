@@ -11,6 +11,7 @@ const validator = require('../utils/validator');
 const config = require('../config/config');
 const mongoDb = require('../db/mongo.db');
 const { UserModel } = require('../db/db-connect');
+const MESSAGE = require('../config/code_msg');
 
 async function getAllusers(req) {
     await validator.checkUserRole(req.auth.email, ROLES.ADMIN);
@@ -24,7 +25,7 @@ async function saveUser(req) {
         await validator.checkUserRole(req.auth.email, ROLES.ADMIN);
     }else{
         if (!req.body.email || !req.body.password) {
-            throw{CODE: 401, MSG: "USERNAME OR PASSWORD IS EMPTY"}
+            throw MESSAGE.VALIDATION_UNAUTH;
         }
     }
     console.log('[ USER ] service saveUser find user if exist');
@@ -32,7 +33,7 @@ async function saveUser(req) {
     
     if (user) {
         if (!user.manul) {
-            throw{CODE: 4003, MSG: "USER ALREADY EXIST"}
+            throw MESSAGE.VALIDATION_USER_EXIST;
         }
         //user set by manul already
         const conditions = {_id: req.body.email};
@@ -187,7 +188,7 @@ async function queryUserById(uid){
 
 async function queryAndUpdateUser(email, userName){
     if (!email) {
-        throw{CODE: 4001, MSG: "email must not be empty"};
+        throw MESSAGE.VALIDATION_USER_EMAIL;
     }
     const user = await mongoDb.findById(UserModel, email);
     if (user) {

@@ -10,6 +10,7 @@ const axios = require('axios');
 const config = require('../../../config/config');
 const qs = require('qs');
 const { generateBasicToken } = require("../../../middlewares/jwt.middleware")
+const MESSAGE = require('../../../config/code_msg');
 
 let token;
 let expirationDate;
@@ -27,8 +28,10 @@ async function generateEspToken() {
         }
     }
     catch (error) {
-        console.error('[ ESP-TOKEN ] [ ERROR ] Utils generateEspToken: ', err);
-        throw new Error(error.msg, error.data);
+        console.error('[ ESP-TOKEN ] [ ERROR ] Utils generateEspToken: ', error);
+        MESSAGE.VALIDATION_UNAUTH_TOKEN.DATA = [error.data];
+        MESSAGE.VALIDATION_UNAUTH_TOKEN.MSG = error.msg;
+        throw MESSAGE.VALIDATION_UNAUTH_TOKEN;
     }
 }
 

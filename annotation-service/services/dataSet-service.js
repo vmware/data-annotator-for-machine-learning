@@ -17,6 +17,7 @@ const _ = require("lodash");
 const fs = require('fs');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel, DataSetModel } = require('../db/db-connect');
+const MESSAGE = require('../config/code_msg');
 
 async function saveDataSetInfo(req) {
 
@@ -45,7 +46,7 @@ async function saveDataSetInfo(req) {
         await localFileSysService.checkFileExistInLocalSys(folder, true);
         const exist = await localFileSysService.checkFileExistInLocalSys(location);
         if (exist) {
-            throw {CODE: 5001, MSG: "DATASET ALREADY EXIST"};
+            throw MESSAGE.VALIDATION_DS_EXIST;
         }
         await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
 

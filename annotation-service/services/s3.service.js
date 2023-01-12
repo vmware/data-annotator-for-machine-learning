@@ -13,13 +13,14 @@ const localFileSysService = require('./localFileSys.service');
 const { ACCESS_TIME_60, AWSRESOURCE } = require('../config/constant');
 const mongoDb = require('../db/mongo.db');
 const { UserModel } = require('../db/db-connect');
+const MESSAGE = require('../config/code_msg');
 
 
 async function prepareS3Configs(req) {
     console.log(`[ S3 ] Service prepareS3Configs user: `, req.auth.email);
     const user = await mongoDb.findById(UserModel, req.auth.email);
     if (!user) {
-        throw "unauthorized";
+        throw MESSAGE.VALIDATION_PERMITION;
     }
     console.log(`[ S3 ] Service check if is valid user`);
 

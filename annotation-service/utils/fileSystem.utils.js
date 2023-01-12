@@ -11,6 +11,7 @@ const localFileSysService = require('../services/localFileSys.service');
 const request = require('request');
 const S3Utils = require('./s3');
 const { S3OPERATIONS } = require('../config/constant');
+const MESSAGE = require('../config/code_msg')
 
 async function handleFileStream(fileLocation) {
 
@@ -27,7 +28,7 @@ async function handleFileStream(fileLocation) {
 
   }else{
 
-    throw {CODE:4007, MSG: "NO VALID FILE SYSTEM"};
+    throw MESSAGE.VALIDATION_FILE_SYS;
   
   }
 

@@ -15,7 +15,8 @@ const fs = require('fs')
 const { consumeSQSMessage } = require('./utils/sqs');
 const { regularNotification } = require('./utils/taskSchedule');
 const config = require('./config/config');
-const { API_VERSION, API_BASE_PATH } = require('./config/constant')
+const { API_VERSION, API_BASE_PATH } = require('./config/constant');
+const MESSAGE = require('./config/code_msg');
 
 // Get our API routes
 const authService = require('./services/auth.service');
@@ -54,7 +55,7 @@ app.use(`${API_BASE_PATH}/api-docs`, swaggerUi.serve, swaggerUi.setup(swaggerDoc
 
 // Server health check
 app.get(`${API_BASE_PATH}/health`, (req, res) => {
-  return res.status(200).json({ CODE: 200, MSG: "SUCCESS" });
+  return res.status(200).json(MESSAGE.SUCCESS);
 });
 
 process.on('uncaughtException', err => {
@@ -77,7 +78,7 @@ authService.authentication().then(data => {
 
   app.use(function (err, req, res, next) {
     if (err.name === 'UnauthorizedError') {
-      res.status(401).send({ CODE: 401, MSG: "Invalid token" });
+      res.status(401).send(MESSAGE.VALIDATION_PERMITION);
     }
   });
 }).catch(error => {
