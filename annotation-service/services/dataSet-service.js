@@ -24,13 +24,13 @@ async function saveDataSetInfo(req) {
     await validator.checkDataSet({ dataSetName: req.body.dsname }, false);
     
     const user = req.auth.email;
-    let location = req.body.location;
-    let fileKey = req.body.fileKey;
 
     let dataSet = {
         dataSetName: req.body.dsname,
         fileName: req.body.fileName,
         fileSize: req.body.fileSize,
+        fileKey: req.body.fileKey,
+        location: req.body.location,
         user: user,
         description: req.body.description,
         format: req.body.format,
@@ -41,14 +41,14 @@ async function saveDataSetInfo(req) {
     if (config.useLocalFileSys) {
 
         const folder = `./${FILEPATH.UPLOAD}/${user}`;
-        location = `${folder}/${req.file.originalname}`;
-        fileKey = process.cwd();
+        dataSet.location = `${folder}/${req.file.originalname}`;
+        dataSet.fileKey = process.cwd();
         await localFileSysService.checkFileExistInLocalSys(folder, true);
-        const exist = await localFileSysService.checkFileExistInLocalSys(location);
+        const exist = await localFileSysService.checkFileExistInLocalSys(dataSet.location);
         if (exist) {
             throw MESSAGE.VALIDATION_DS_EXIST;
         }
-        await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
+        await localFileSysService.saveFileToLocalSys(dataSet.location, req.file.buffer);
 
         if (typeof req.body.topReview == "string") {
             req.body.topReview = JSON.parse(req.body.topReview)
@@ -62,8 +62,7 @@ async function saveDataSetInfo(req) {
             const unzipFolder = `./${FILEPATH.UPLOAD}/${user}/${FILEPATH.UNZIPIMAGE}/${Date.now()}`;
             await localFileSysService.singleUnzipStreamToLocalSystem(req.file.buffer, unzipFolder, statusCheck);
             await new Promise((resolve) => statusCheck.on('done', (images)=>{ resolve(dataSet.images = images) }));
-            dataSet.fileKey = fileKey;
-            dataSet.location = location;
+ 
  
         }else{
             if (req.body.images) {
@@ -78,15 +77,11 @@ async function saveDataSetInfo(req) {
         console.log(`[ DATASET ] Service fileter no-Eglish data`);
         const reviews = { 'header': req.body.topReview.header, 'topRows': req.body.topReview.topRows };
 
-        dataSet.fileKey = fileKey;
         dataSet.hasHeader = req.body.hasHeader;
-        dataSet.location = location;
         dataSet.columnInfo = req.body.columnInfo;
         dataSet.topReview = reviews;
 
     }else if (req.body.format == DATASETTYPE.LOG) {
-        dataSet.fileKey = fileKey;
-        dataSet.location = location;
         dataSet.topReview = req.body.topReview;
         dataSet.totalRows = req.body.totalRows;
     }
