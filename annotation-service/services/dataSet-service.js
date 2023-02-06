@@ -228,7 +228,7 @@ async function signS3Url(req) {
     const dataSet = await mongoDb.findById(DataSetModel, ObjectId(req.query.dsid));
 
     console.log(`[ DATASET ] Service S3Utils.signedUrlByS3`);
-    return  await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, dataSet.location);
+    return S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, dataSet.location);
 }
 
 
