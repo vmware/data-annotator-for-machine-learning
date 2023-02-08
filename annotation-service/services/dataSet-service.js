@@ -7,7 +7,7 @@
 
 
 const S3Utils = require('../utils/s3');
-const {DATASETTYPE, S3OPERATIONS, FILEPATH} = require('../config/constant');
+const {DATASETTYPE, S3OPERATIONS, FILEPATH, OPERATION} = require('../config/constant');
 const ObjectId = require("mongodb").ObjectID;
 const validator = require('../utils/validator');
 const config = require('../config/config');
@@ -231,7 +231,41 @@ async function signS3Url(req) {
     return S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, dataSet.location);
 }
 
+async function updateDataset(req) {
 
+    console.log(`[ DATASET ] Service updateDataset`);
+    const dsid = req.body.dsid;
+    const operation = req.body.o;
+    const system = req.body.system;
+    const _id = req.body._id;
+
+    if (operation == OPERATION.ADD) {
+        update = { 
+            $push:  { 
+                dataSynchronize: {
+                    system: system,
+                    _id: _id
+                } 
+            }
+        }
+    }else if(operation == OPERATION.DELETE){
+        update = { 
+            $pull: { 
+                dataSynchronize: { 
+                    system: system,
+                    _id: _id
+                }
+            }
+        };
+    }else{
+        throw  MESSAGE.VALIDATATION_OPERATION;
+    }
+    
+    const conditions = {_id: ObjectId(dsid)};
+    const options = { new: true, upsert: true };
+    return mongoDb.findOneAndUpdate(DataSetModel, conditions, update, options);
+
+}
 
 module.exports = {
     saveDataSetInfo,
@@ -240,4 +274,5 @@ module.exports = {
     deleteDataSet,
     signS3Url,
     imageTopPreview,
+    updateDataset,
 }
