@@ -68,6 +68,7 @@ module.exports = {
     FILE_SIGN_URL: "/datasets/s3/signed-url",//no
     FILE_DATASET_SAVE: "/datasets", //swagger--
     FILE_DATASET_DELETE: "/datasets",//swagger
+    FILE_DATASET_UPDATE: "/datasets",
     FILE_DATASET_NAME_UNIQUE: "/datasets/names",//no
     FILE_SUPER_COLLIDER_QUERY: "/query-from-superCollider",// swagger
     FILE_SET_DATA: "/datasets/set-data",

@@ -114,7 +114,7 @@ async function findUserSendNotification(pro, today){
     uc.updateDate = uc.updateDate? uc.updateDate: uc.assignedDate;
     const updateTime = (today - uc.updateDate) / MILLISECOND_DAY;
     const overFinish = updateTime >= NOT_FINISH_DAY;
-    const userNotFinish = uc.assignedCase >= uc.completeCase;
+    const userNotFinish = uc.assignedCase > uc.completeCase;
     //send notification
     if(uc.completeCase && overFinish && userNotFinish){
       //send email
