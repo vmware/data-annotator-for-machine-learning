@@ -35,7 +35,8 @@ async function saveDataSetInfo(req) {
         description: req.body.description,
         format: req.body.format,
         createTime: Date.now(),
-        updateTime: Date.now()
+        updateTime: Date.now(),
+        dataSynchronize: req.body.dataSynchronize? req.body.dataSynchronize:[]
     };
     
     if (config.useLocalFileSys) {
