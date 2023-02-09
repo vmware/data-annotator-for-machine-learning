@@ -24,6 +24,8 @@ async function saveDataSetInfo(req) {
     await validator.checkDataSet({ dataSetName: req.body.dsname }, false);
     
     const user = req.auth.email;
+    let dataSynchronize = req.body.dataSynchronize? req.body.dataSynchronize: [];
+    dataSynchronize = typeof dataSynchronize == 'string'? JSON.parse(dataSynchronize): dataSynchronize;
 
     let dataSet = {
         dataSetName: req.body.dsname,
@@ -36,7 +38,7 @@ async function saveDataSetInfo(req) {
         format: req.body.format,
         createTime: Date.now(),
         updateTime: Date.now(),
-        dataSynchronize: req.body.dataSynchronize? req.body.dataSynchronize:[]
+        dataSynchronize: dataSynchronize
     };
     
     if (config.useLocalFileSys) {
