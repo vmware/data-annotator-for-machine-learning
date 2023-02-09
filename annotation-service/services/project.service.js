@@ -693,12 +693,14 @@ async function updateProjectLabels(req) {
     const addLabels = req.body.addLabels;
     const editLabels = req.body.editLabels;
     const deleteLabels = req.body.deleteLabels;
+    const min = req.body.min;
+    const max = req.body.max;
 
     for await (const label of deleteLabels) {
         await deleteProjectLables(label, _id);
     }
 
-    return editProjectLabels(_id, editLabels, addLabels);
+    return editProjectLabels(_id, editLabels, addLabels, min, max);
 }
 
 
