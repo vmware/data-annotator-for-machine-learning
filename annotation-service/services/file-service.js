@@ -102,7 +102,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
         regression = true;
     }
     let popUpLabels = [];
-    if (projectType == PROJECTTYPE.NER) {
+    if (projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA) {
         const plb = req.body.popUpLabels;
         popUpLabels = plb ? (typeof plb === 'string' ? JSON.parse(plb) : plb) : [];
     };
@@ -202,7 +202,7 @@ async function prepareHeaders(project, format) {
                 headerArray.push({ id: item, title: item });
             });
         }
-        if (project.projectType == PROJECTTYPE.NER) {
+        if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.QA) {
             //init pop-up label headers
             await project.popUpLabels.forEach(item => {
                 headerArray.push({ id: item, title: item });
@@ -270,7 +270,7 @@ async function prepareContents(srData, project, format) {
                 newCase[item] = newCase[item][0] ? JSON.stringify(newCase[item]) : [];
             });
 
-        } else if (project.projectType == PROJECTTYPE.NER) {
+        } else if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.QA) {
 
             // init selected data
             await project.selectedColumn.forEach(item => {

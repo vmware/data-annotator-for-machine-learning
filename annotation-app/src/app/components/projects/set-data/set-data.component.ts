@@ -63,11 +63,20 @@ export class SetDataComponent implements OnInit, OnChanges {
           },
         );
       }
-      this.clrSelectData = {
-        required: true,
-        options: [...['No Labels'], ...this.wizardData.csvHeaders],
-        labelText: 'Selected Label Column',
-      };
+     
+      if(this.wizardData.projectType === 'qa'){
+        this.clrSelectData = {
+          required: true,
+          options: ['Self Define Questions Later', ...this.wizardData.csvHeaders],
+          labelText: 'Selected Question Column',
+        };
+      }else{
+        this.clrSelectData = {
+          required: true,
+          options: [...['No Labels'], ...this.wizardData.csvHeaders],
+          labelText: 'Selected Label Column',
+        };
+      }
       this.selectDescription = this.wizardData.checkboxChecked;
     }
     this.selectedDropDownItem = this.wizardData.dropdownSelected;

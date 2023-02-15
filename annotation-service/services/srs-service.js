@@ -90,7 +90,7 @@ async function updateSrsUserInput(req, from) {
         let userInputs = []
         req.body.userInput.forEach(async ui => {
             if (ui.tid == ticket._id.toString()) {
-                if (pro.projectType == PROJECTTYPE.NER) {
+                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.QA) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
@@ -149,7 +149,7 @@ async function updateSrsUserInput(req, from) {
         let userInputs = []
         req.body.userInput.forEach(ui => {
             if (ui.tid == id) {
-                if (pro.projectType == PROJECTTYPE.NER) {
+                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.QA) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
@@ -192,6 +192,7 @@ async function updateSrsUserInput(req, from) {
         });
 
         let conditions = { _id: ObjectId(id) };
+        //regression project
         if (pro.regression && (pro.projectType == PROJECTTYPE.LOG || pro.projectType == PROJECTTYPE.NER)) {
             const updateSR = { $set: { userInputs: [] } };
             await mongoDb.findOneAndUpdate(mp.model, conditions, updateSR);
@@ -665,7 +666,7 @@ async function appendSrsData(req) {
         const totalCase = update.$inc.totalCase;
         await projectService.updateAssinedCase(queryProjectCondition, totalCase, true);
 
-    } else if (projectType == PROJECTTYPE.TEXT || projectType == PROJECTTYPE.TABULAR || projectType == PROJECTTYPE.NER) {
+    } else if (projectType == PROJECTTYPE.TEXT || projectType == PROJECTTYPE.TABULAR || projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA) {
         //validate pname and headers
         const originalHeaders = mp.project.selectedColumn;
         if (req.body.isFile) {
@@ -951,7 +952,7 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
     //update user reviewed details
     let modify = {};
     //max-annotation=1
-    if (projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.LOG) {
+    if (projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA || projectType == PROJECTTYPE.LOG) {
         reviewInfoInputs = {
             problemCategory: problemCategory,
             user: user,

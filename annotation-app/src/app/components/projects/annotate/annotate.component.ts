@@ -337,7 +337,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sr = this.resetTabularSrData(this.sr);
             this.toReadStorageSetting('display');
           }
-          if (this.projectType == 'ner') {
+          if (this.projectType == 'ner' || this.projectType == 'qa') {
             this.sr = this.resetNerSrData(this.sr);
             this.toShowExistingLabel();
           }
@@ -416,7 +416,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       ) {
         this.sortLabelForColor(this.categories);
       }
-      if (this.projectType == 'ner') {
+      if (this.projectType == 'ner' || this.projectType == 'qa') {
         this.nerLabelForColor(this.categories);
       }
       this.isShowDropDown = false;
@@ -424,6 +424,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.categories &&
         this.categories.length > 6 &&
         this.projectType != 'ner' &&
+        this.projectType != 'qa' &&
         this.projectType != 'image' &&
         this.projectType != 'log'
       ) {
@@ -621,6 +622,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       if (
         this.isMultipleLabel &&
         this.projectType !== 'ner' &&
+        this.projectType !== 'qa' &&
         this.projectType !== 'image' &&
         this.projectType !== 'log'
       ) {
@@ -638,7 +640,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           this.modifyChangeHistory(originalLabel);
         }
-      } else if (this.projectType == 'ner') {
+      } else if (this.projectType == 'ner' || this.projectType == 'qa') {
         this.modifyChangeHistory();
       } else if (this.projectType == 'image') {
         srUserInput.userInput[0].problemCategory = this.currentBoundingData;
@@ -700,7 +702,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       param['modify'] = false;
     } else {
       param['modify'] = true;
-      if (this.projectType === 'log' || this.projectType === 'ner') {
+      if (this.projectType === 'log' || this.projectType === 'ner' || this.projectType === 'qa') {
         param['problemCategory'] = this.spansList;
         param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
       } else if (this.isMultipleNumericLabel || this.isNumeric) {
@@ -824,6 +826,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       } else if (
         this.projectType === 'ner' ||
+        this.projectType === 'qa' ||
         this.projectType === 'log' ||
         this.projectType === 'image'
       ) {
@@ -853,7 +856,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               }
               const aa = this.annotationHistory[i].category.sort(
                 this.toolService.sortBy(
-                  this.projectType === 'ner'
+                  this.projectType === 'ner' || this.projectType === 'qa'
                     ? 'start'
                     : this.projectType === 'log'
                     ? 'line'
@@ -863,7 +866,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               );
               const bb = isCategory.sort(
                 this.toolService.sortBy(
-                  this.projectType === 'ner'
+                  this.projectType === 'ner' || this.projectType === 'qa'
                     ? 'start'
                     : this.projectType === 'log'
                     ? 'line'
@@ -875,7 +878,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               for (let n = 0; n < aa.length; n++) {
                 let aaString;
                 let bbString;
-                if (this.projectType === 'ner') {
+                if (this.projectType === 'ner' || this.projectType === 'qa') {
                   aaString = aa[n].text + aa[n].start + aa[n].end + aa[n].label;
                   bbString = bb[n].text + bb[n].start + bb[n].end + bb[n].label;
                 } else if (this.projectType === 'log') {
@@ -951,7 +954,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         activeClass: this.active,
         images: OldSr.images,
       };
-      if (this.projectType == 'ner' || this.projectType == 'image') {
+      if (this.projectType == 'ner' || this.projectType == 'qa' || this.projectType == 'image') {
         if (!this.env.config.enableAWSS3 && this.projectType === 'image') {
           OldSr.originalData.location = `${
             this.env.config.annotationService
@@ -1000,7 +1003,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
       this.sr = this.resetTabularSrData(this.sr);
     }
-    if (this.projectType == 'ner') {
+    if (this.projectType == 'ner' || this.projectType == 'qa') {
       this.sr = this.resetNerSrData(this.sr);
       if (from !== 'review' && from !== 'pass' && this.startFrom !== 'review') {
         this.toShowExistingLabel();
@@ -1079,12 +1082,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         (this.isMultipleLabel &&
           this.labelType !== 'HTL' &&
           this.projectType !== 'ner' &&
+          this.projectType !== 'qa' &&
           this.projectType !== 'image' &&
           this.projectType !== 'log')
       ) {
         const isCategory = this.categoryFunc();
         this.isActionErr(isCategory, null, 'skip');
-      } else if (this.projectType == 'ner') {
+      } else if (this.projectType == 'ner' || this.projectType == 'qa') {
         this.isSkipOrBack('skip');
       } else if (this.projectType == 'image') {
         this.isSkipOrBack('skip');
@@ -1217,7 +1221,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }`;
         }
         let category = [];
-        if (this.projectType === 'ner' || this.projectType === 'log') {
+        if (this.projectType === 'ner' || this.projectType === 'qa' || this.projectType === 'log') {
           category = this.spansList;
         } else if (this.startFrom === 'review' && this.isMultipleLabel && !this.isNumeric) {
           if (OldSr.userInputs && OldSr.userInputs.length > 0) {
@@ -1231,7 +1235,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         const addSkip = {
           srId: OldSr._id,
           historyDescription:
-            this.projectType === 'ner' || this.projectType === 'image'
+            this.projectType === 'ner' || this.projectType === 'qa' || this.projectType === 'image'
               ? [OldSr.originalData]
               : OldSr.originalData.slice(0, 10),
           type: 'skip',
@@ -1257,7 +1261,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
           this.sr = this.resetTabularSrData(this.sr);
         }
-        if (this.projectType == 'ner') {
+        if (this.projectType == 'ner' || this.projectType == 'qa') {
           this.sr = this.resetNerSrData(this.sr);
           this.toShowExistingLabel();
         }
@@ -1301,7 +1305,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.toFilterLog(this.filterList);
         }
         if (this.sr.userInputsLength > 0) {
-          if (this.projectType !== 'ner') {
+          if (this.projectType !== 'ner' && this.projectType !== 'qa') {
             this.categoryBackFunc();
           }
           if (this.projectType !== 'image') {
@@ -1322,7 +1326,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.numericInput.nativeElement.focus();
           }, 500);
         }
-        if (this.startFrom !== 'review' || this.projectType === 'ner') {
+        if (this.startFrom !== 'review' || this.projectType === 'ner' || this.projectType === 'qa') {
           this.clearUserInput();
         }
       },
@@ -1386,6 +1390,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.projectType !== 'image' &&
       this.projectType !== 'log' &&
       this.projectType !== 'ner' &&
+      this.projectType !== 'qa' &&
       this.renderFormat === 'html'
     ) {
       this.saveAnnotateSetting('display', this.renderFormat);
@@ -1407,7 +1412,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedEntityID = 0;
     this.reviewOrder = '';
     this.questionForm.get('questionGroup.reviewee').reset();
-    if (this.projectType !== 'image' && this.projectType !== 'ner' && this.projectType !== 'log') {
+    if (this.projectType !== 'image' && this.projectType !== 'ner' && this.projectType !== 'qa' && this.projectType !== 'log') {
       this.toReadStorageSetting('display');
     }
   }
@@ -1755,11 +1760,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         (this.isMultipleLabel &&
           this.labelType !== 'HTL' &&
           this.projectType !== 'ner' &&
+          this.projectType !== 'qa' &&
           this.projectType !== 'image' &&
           this.projectType !== 'log')
       ) {
         this.isActionErr(isCategory, id, 'history');
-      } else if (this.projectType == 'ner') {
+      } else if (this.projectType == 'ner' || this.projectType == 'qa') {
         this.isSkipOrBack('history', id);
       } else if (this.projectType == 'image') {
         this.isSkipOrBack('history', id, index);
@@ -1802,7 +1808,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     const isCategory = this.categoryFunc();
     let flag1;
     let flag2;
-    if (this.projectType == 'ner' || this.projectType == 'log') {
+    if (this.projectType == 'ner' || this.projectType == 'qa' || this.projectType == 'log') {
       flag1 =
         this.sr.userInputs &&
         this.sr.userInputs.length > 0 &&
@@ -1869,7 +1875,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.projectType !== 'text' && this.projectType !== 'tabular') {
           const aa = isCategory.sort(
             this.toolService.sortBy(
-              this.projectType === 'ner' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
+              this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
               'ascending',
             ),
           );
@@ -1878,14 +1884,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             bb = a.sort(this.toolService.sortBy('sort', 'ascending'));
           } else {
             bb = this.sr.userInputs[0].problemCategory.sort(
-              this.toolService.sortBy(this.projectType === 'ner' ? 'start' : 'line', 'ascending'),
+              this.toolService.sortBy(this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : 'line', 'ascending'),
             );
           }
 
           for (let i = 0; i < aa.length; i++) {
             let aaString;
             let bbString;
-            if (this.projectType === 'ner') {
+            if (this.projectType === 'ner' || this.projectType === 'qa') {
               const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
               const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
               aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
@@ -1949,12 +1955,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           (this.isMultipleLabel &&
             this.labelType !== 'HTL' &&
             this.projectType !== 'ner' &&
+            this.projectType !== 'qa' &&
             this.projectType !== 'image' &&
             this.projectType !== 'log')
         ) {
           this.isActionErr(isCategory, this.annotationPrevious[0].srId);
         } else if (
           this.projectType == 'ner' ||
+          this.projectType == 'qa' ||
           this.projectType == 'log' ||
           this.projectType == 'image'
         ) {
@@ -1985,7 +1993,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
                 const aa = this.annotationHistory[i].category.sort(
                   this.toolService.sortBy(
-                    this.projectType === 'ner'
+                    this.projectType === 'ner' || this.projectType === 'qa'
                       ? 'start'
                       : this.projectType === 'log'
                       ? 'line'
@@ -1995,7 +2003,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 );
                 const bb = isCategory.sort(
                   this.toolService.sortBy(
-                    this.projectType === 'ner'
+                    this.projectType === 'ner' || this.projectType === 'qa'
                       ? 'start'
                       : this.projectType === 'log'
                       ? 'line'
@@ -2006,7 +2014,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 for (let i = 0; i < aa.length; i++) {
                   let aaString;
                   let bbString;
-                  if (this.projectType === 'ner') {
+                  if (this.projectType === 'ner' || this.projectType === 'qa') {
                     const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
                     const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
                     aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
@@ -2119,7 +2127,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.getProgress();
           }
         }
-        if (this.projectType == 'ner') {
+        if (this.projectType == 'ner' || this.projectType == 'qa') {
           this.sr = this.resetNerSrData(this.sr);
           this.toShowExistingLabel();
         }
@@ -2301,6 +2309,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       !this.isMultipleLabel &&
       !this.isNumeric &&
       this.projectType !== 'ner' &&
+      this.projectType !== 'qa' &&
       this.projectType !== 'image'
     ) {
       if (this.questionForm.get('questionGroup.category').value) {
@@ -2311,6 +2320,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       (!this.isShowDropDown &&
         !this.isMultipleLabel &&
         this.projectType !== 'ner' &&
+        this.projectType !== 'qa' &&
         this.projectType !== 'image' &&
         this.projectType !== 'log') ||
       this.isNumeric
@@ -2348,12 +2358,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isMultipleLabel &&
       this.labelType !== 'HTL' &&
       this.projectType !== 'ner' &&
+      this.projectType !== 'qa' &&
       this.projectType !== 'image' &&
       this.projectType !== 'log'
     ) {
       category = this.multipleLabelList;
       return category;
-    } else if (this.projectType == 'ner') {
+    } else if (this.projectType == 'ner' || this.projectType == 'qa') {
       category = this.spansList;
       return category;
     } else if (this.projectType == 'log') {
@@ -2457,6 +2468,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       !this.isShowDropDown &&
       !this.isMultipleLabel &&
       this.projectType != 'ner' &&
+      this.projectType != 'qa' &&
       this.projectType !== 'image'
     ) {
       // to storage the ticket label
@@ -2529,6 +2541,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isMultipleLabel &&
       this.labelType !== 'HTL' &&
       this.projectType != 'ner' &&
+      this.projectType != 'qa' &&
       this.projectType !== 'image' &&
       this.projectType !== 'log'
     ) {
@@ -2610,7 +2623,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       !this.isShowDropDown &&
       !this.isNumeric &&
       this.isMultipleLabel &&
-      this.projectType == 'ner'
+      (this.projectType == 'ner'|| this.projectType == 'qa')
     ) {
       this.spansList = [];
       const annotations = this.sr.userInputs;
@@ -3086,7 +3099,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     }
-    if (this.projectType == 'ner') {
+    if (this.projectType == 'ner' || this.projectType == 'qa') {
       this.selectedEntityColor = e.target.style.color;
     }
   }
@@ -3133,6 +3146,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           const flag = [];
           if (
             this.projectType != 'ner' &&
+            this.projectType != 'qa' &&
             this.projectType != 'image' &&
             this.projectType != 'log'
           ) {
@@ -3200,7 +3214,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           if (responseSr.flag && responseSr.flag.silence) {
             this.silenceStatus = true;
           }
-          if (this.projectType === 'ner') {
+          if (this.projectType === 'ner' || this.projectType === 'qa') {
             this.resetNerSrData([responseSr]);
           }
           this.sr._id = responseSr._id;
@@ -4088,6 +4102,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.projectType !== 'image' &&
       this.projectType !== 'log' &&
       this.projectType !== 'ner' &&
+      this.projectType !== 'qa' &&
       this.renderFormat === 'html'
     ) {
       this.saveAnnotateSetting('display', this.renderFormat);

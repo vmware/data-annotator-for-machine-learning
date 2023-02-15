@@ -36,7 +36,7 @@ async function generateFile(req){
     const pro = project_check[0];
     const gen = pro.generateInfo;
 
-    if ((pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.IMGAGE) && data.format != FILEFORMAT.STANDARD){
+    if ((pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.QA || pro.projectType == PROJECTTYPE.IMGAGE) && data.format != FILEFORMAT.STANDARD){
         return MESSAGE.VALIDATATION_PJ_FORMAT;
     }
     

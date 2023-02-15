@@ -193,6 +193,8 @@ export class CreateNewComponent implements OnInit {
       annotationQuestion: [
         this.msg.type == 'ner'
           ? 'Label all entity types in the given text corpus.'
+          : this.msg.type == 'qa'
+          ? 'Label all answers in the given text corpus according to the question.'
           : this.dataset.annotationQuestion,
         DatasetValidator.required(),
       ],
@@ -304,7 +306,7 @@ export class CreateNewComponent implements OnInit {
             DatasetValidator.required(),
           );
         }
-        if (this.msg.type === 'ner' || this.msg.type === 'log') {
+        if (this.msg.type === 'ner' || this.msg.type === 'log' || this.msg.type === 'qa') {
           this.validNer();
         }
         if (this.msg.type === 'image') {
@@ -425,7 +427,7 @@ export class CreateNewComponent implements OnInit {
       if (this.labelType !== 'HTL') {
         formData.append(
           'isMultipleLabel',
-          this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log'
+          this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log' || this.msg.type == 'qa'
             ? true
             : this.dsDialogForm.value.multipleLabel,
         );
@@ -722,7 +724,9 @@ export class CreateNewComponent implements OnInit {
         this.dsDialogForm.get('totalRow').setValue(0);
         this.inputMsgTOWizard(
           false,
-          'Set data failed! Your selected label column has more than 50 different labels, please select one new label column that has less than or equal to 50 labels then to set date.',
+          this.projectType === 'qa'
+          ? 'Set data failed! Your selected question column has more than 50 different columns, please select one new question column that has less than or equal to 50 column then to set date.'
+          : 'Set data failed! Your selected label column has more than 50 different labels, please select one new label column that has less than or equal to 50 labels then to set date.',
         );
         return;
       }
@@ -758,10 +762,14 @@ export class CreateNewComponent implements OnInit {
       this.dsDialogForm.get('labels').setValue([...this.categoryList, ...this.checkboxChecked]);
     }
     this.toEvenlyDistributeTicket();
+    let overLimitAlert = 'Set data alert! Please be aware of that some label in your selected label column which has more than 50 characters has been truncated.'
+    if (this.projectType === 'qa') {
+      overLimitAlert = 'Set data alert! Please be aware of that some questions in your selected question column which has more than 50 characters has been truncated.'
+    }
     this.inputMsgTOWizard(
       true,
       this.overPerLabelLimit
-        ? 'Set data alert! Please be aware of that some label in your selected label column which has more than 50 characters has been truncated.'
+        ? overLimitAlert
         : null,
     );
   }
@@ -822,7 +830,7 @@ export class CreateNewComponent implements OnInit {
         flag = _.uniq(flag);
 
         // to check this is a totally numeric flag or not
-        const isNumeric = this.toCheckNumeric(flag) == 'no' ? false : true;
+        const isNumeric = (this.projectType === 'qa' || this.toCheckNumeric(flag) == 'no') ? false : true;
         this.totalCase = count;
         this.nonEnglish = invalidCount;
         this.dsDialogForm.get('totalRow').setValue(this.totalCase - this.nonEnglish);
@@ -920,7 +928,7 @@ export class CreateNewComponent implements OnInit {
 
   private getMyDatasets(params?: any) {
     const a =
-      this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'ner'
+      this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'ner' || this.projectType == 'qa'
         ? 'csv'
         : this.projectType == 'image'
         ? 'image'
@@ -1304,7 +1312,7 @@ export class CreateNewComponent implements OnInit {
 
   inputMsgTOWizard(code, msg?) {
     // to close wizard
-    if (this.projectType !== 'ner') {
+    if (this.projectType === 'text'|| this.projectType === 'tabular') {
       if (this.dropdownSelected === 'No Labels') {
         this.isShowLabelRadio = true;
       } else {

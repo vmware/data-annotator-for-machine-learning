@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
             <div
-              *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'"
+              *ngIf="projectType !== 'ner' && projectType !== 'qa' && projectType !== 'image' && projectType !== 'log'"
               class="clr-form-group form-group clr-row"
               style="margin-top: -0.5rem"
             >
@@ -100,6 +100,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               {{
                 projectInfo?.labelType == 'numericLabel' ||
                 projectInfo.projectType == 'ner' ||
+                projectInfo.projectType == 'qa' ||
                 projectInfo.isMultipleLabel ||
                 projectInfo.projectType == 'image' ||
                 projectInfo.projectType == 'log'
@@ -273,7 +274,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 >
                   <div *ngFor="let flag of item.historyDescription" class="historyText">
                     <div
-                      *ngIf="projectType == 'ner' || projectType == 'log'"
+                      *ngIf="projectType == 'ner' || projectType == 'qa' || projectType == 'log'"
                       title="{{ flag.text }}"
                     >
                       {{ flag.text }}
@@ -283,7 +284,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </div>
                     <div
                       *ngIf="
-                        projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'
+                        projectType !== 'ner' && projectType !== 'qa' && projectType !== 'image' && projectType !== 'log'
                       "
                       title="{{ flag.key + ':' + flag.value }}"
                     >
@@ -450,7 +451,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
 
           <div class="questionContainer">
-            <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'">
+            <div *ngIf="projectType !== 'ner' && projectType !== 'qa' && projectType !== 'image' && projectType !== 'log'">
               <div
                 class="textBox"
                 [ngStyle]="{
@@ -508,7 +509,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
             <!-- here is ner annotation content -->
-            <div *ngIf="projectType === 'ner'" class="nerBox">
+            <div *ngIf="projectType === 'ner' || projectType === 'qa'" class="nerBox">
               <div class="nerDisplayText">
                 <div *ngFor="let ticket of sr.ticketQuestions">
                   <p class="question-paragraph" style="word-break: break-word">
@@ -858,7 +859,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <!-- ner entity label -->
-          <div class="questionContainer" *ngIf="projectType == 'ner'">
+          <div class="questionContainer" *ngIf="projectType == 'ner' || projectType == 'qa'">
             <div>
               <button
                 *ngFor="let label of categories; let i = index"

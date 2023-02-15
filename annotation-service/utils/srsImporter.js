@@ -23,7 +23,7 @@ module.exports = {
     execute: async function (req, annotators) {
         const projectType = req.body.projectType;
         const source = req.body.source;
-        if ((projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER) || source == SOURCE.MODEL_FEEDBACK) {
+        if ((projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER && projectType != PROJECTTYPE.QA) || source == SOURCE.MODEL_FEEDBACK) {
             return;
         }
         const start = Date.now();

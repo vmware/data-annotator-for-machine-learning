@@ -61,6 +61,7 @@ module.exports = {
         NER: "ner",
         IMGAGE: "image",
         LOG:"log",
+        QA: "qa",
     },
     DOWNLOADSRC:{
         COMMUNITY: "community",

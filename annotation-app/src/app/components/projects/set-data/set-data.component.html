@@ -48,10 +48,16 @@ SPDX-License-Identifier: Apache-2.0 -->
     <ng-template clrPageTitle>{{
       wizardData.projectType === 'ner'
         ? 'Please select a single text column which you intend to present to annotators to annotate'
+        : wizardData.projectType === 'qa'
+        ? 'Please select the question column which you intend to labels from'
         : 'Please select the column which you intend to calculate labels from'
     }}</ng-template>
     <ng-template clrPageNavTitle>{{
-      wizardData.projectType === 'ner' ? 'Select Text Column' : 'Select Label Column'
+      wizardData.projectType === 'ner'
+      ? 'Select Text Column'
+      : wizardData.projectType === 'qa'
+      ? 'Select Question Column'
+      : 'Select Label Column'
     }}</ng-template>
     <form clrForm #formPageOne="ngForm">
       <app-clr-select
@@ -63,9 +69,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <!-- select text -->
   <clr-wizard-page
     (clrWizardPageOnLoad)="clrWizardPageOnLoad('page3')"
-    [clrWizardPageNextDisabled]="
-      wizardData.projectType === 'ner' ? false : selectDescription.length == 0
-    "
+    [clrWizardPageNextDisabled]="wizardData.projectType === 'ner' ? false : selectDescription.length == 0"
   >
     <ng-template clrPageTitle>{{
       wizardData.projectType === 'ner'
@@ -145,14 +149,14 @@ SPDX-License-Identifier: Apache-2.0 -->
     <ng-template clrPageNavTitle>
       <span
         *ngIf="
-          wizardData.projectType === 'ner' ? selectedDropDownItem : selectDescription.length > 0
+          wizardData.projectType === 'ner'? selectedDropDownItem : selectDescription.length > 0
         "
       >
         Set Data
       </span>
       <span
         *ngIf="
-          wizardData.projectType === 'ner' ? !selectedDropDownItem : selectDescription.length === 0
+          wizardData.projectType === 'ner'? !selectedDropDownItem : selectDescription.length === 0
         "
       >
         Not ready yet
@@ -178,7 +182,11 @@ SPDX-License-Identifier: Apache-2.0 -->
             </legend>
             <div class="clr-row">
               <label>{{
-                wizardData.projectType === 'ner' ? 'Select Text Column' : 'Select Label Column'
+                wizardData.projectType === 'ner'
+                ? 'Select Text Column' 
+                : this.wizardData.projectType === 'qa'
+                ? 'Select Question Column'
+                : 'Select Label Column'
               }}</label>
               <input
                 class="clr-input"
