@@ -695,9 +695,11 @@ async function updateProjectLabels(req) {
     const deleteLabels = req.body.deleteLabels;
     const min = req.body.min;
     const max = req.body.max;
-
-    for await (const label of deleteLabels) {
-        await deleteProjectLables(label, _id);
+    
+    if (deleteLabels) {
+        for await (const label of deleteLabels) {
+            await deleteProjectLables(label, _id);
+        }
     }
 
     return editProjectLabels(_id, editLabels, addLabels, min, max);
@@ -754,56 +756,60 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
             let originalLabels = JSON.parse(project.categoryList);
             let editLBList = [];
             //validate edit label data
-            for (const elabel of editLabels) {
-                if (elabel.edit) {
-                    const orgLB = Object.keys(elabel.originLB)[0];
-                    const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == orgLB);
-
-                    if (!originLBDB) {
-                        throw MESSAGE.VALIDATATION_PJ_ORIGIN_LB;
+            if (editLabels) {
+                for (const elabel of editLabels) {
+                    if (elabel.edit) {
+                        const orgLB = Object.keys(elabel.originLB)[0];
+                        const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == orgLB);
+    
+                        if (!originLBDB) {
+                            throw MESSAGE.VALIDATATION_PJ_ORIGIN_LB;
+                        }
+                        const dbMin = originLBDB[orgLB][0];
+                        const dbMax = originLBDB[orgLB][1];
+    
+                        const orgMin = elabel.originLB[orgLB][0];
+                        const orgMax = elabel.originLB[orgLB][1];
+    
+                        const editLB = Object.keys(elabel.editLB)[0];
+                        const editMin = elabel.editLB[editLB][0];
+                        const editMax = elabel.editLB[editLB][1];
+    
+                        if (editLB == orgLB && editMin == dbMin && editMax == dbMax) {
+                            continue;
+                        }
+                        //find if edit label already exist
+                        const editLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == editLB);
+                        if (editLBDB && editLB != orgLB) {
+                            throw MESSAGE.VALIDATATION_PJ_EDIT_LB_EXIST;
+                        }
+    
+                        if (dbMin != orgMin || dbMax != orgMax) {
+                            throw MESSAGE.VALIDATATION_PJ_ORIGIN_LB_MAX_MIN;
+                        }
+                        if (editMin >= editMax || editMin > dbMin || editMax < dbMax) {
+                            throw MESSAGE.VALIDATATION_PJ_EDIT_LB_MAX_MIN;
+                        }
+                        //add to edit list
+                        editLBList.push([orgLB, editLB]);
+                        originalLabels = await originalLabels.filter(ol => Object.keys(ol)[0] != orgLB);
+                        originalLabels.push(elabel.editLB);
                     }
-                    const dbMin = originLBDB[orgLB][0];
-                    const dbMax = originLBDB[orgLB][1];
-
-                    const orgMin = elabel.originLB[orgLB][0];
-                    const orgMax = elabel.originLB[orgLB][1];
-
-                    const editLB = Object.keys(elabel.editLB)[0];
-                    const editMin = elabel.editLB[editLB][0];
-                    const editMax = elabel.editLB[editLB][1];
-
-                    if (editLB == orgLB && editMin == dbMin && editMax == dbMax) {
-                        continue;
-                    }
-                    //find if edit label already exist
-                    const editLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == editLB);
-                    if (editLBDB && editLB != orgLB) {
-                        throw MESSAGE.VALIDATATION_PJ_EDIT_LB_EXIST;
-                    }
-
-                    if (dbMin != orgMin || dbMax != orgMax) {
-                        throw MESSAGE.VALIDATATION_PJ_ORIGIN_LB_MAX_MIN;
-                    }
-                    if (editMin >= editMax || editMin > dbMin || editMax < dbMax) {
-                        throw MESSAGE.VALIDATATION_PJ_EDIT_LB_MAX_MIN;
-                    }
-                    //add to edit list
-                    editLBList.push([orgLB, editLB]);
-                    originalLabels = await originalLabels.filter(ol => Object.keys(ol)[0] != orgLB);
-                    originalLabels.push(elabel.editLB);
                 }
             }
             //validate add label data
-            for (const aLabel of addLabels) {
-                const addLB = Object.keys(aLabel)[0];
-                const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == addLB);
-                if (originLBDB) {
-                    continue;
+            if (addLabels) {
+                for (const aLabel of addLabels) {
+                    const addLB = Object.keys(aLabel)[0];
+                    const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == addLB);
+                    if (originLBDB) {
+                        continue;
+                    }
+                    if (aLabel[addLB][0] > aLabel[addLB][1]) {
+                        throw MESSAGE.VALIDATATION_PJ_ADD_LB_MAX_MIN;
+                    }
+                    originalLabels.push(aLabel);
                 }
-                if (aLabel[addLB][0] > aLabel[addLB][1]) {
-                    throw MESSAGE.VALIDATATION_PJ_ADD_LB_MAX_MIN;
-                }
-                originalLabels.push(aLabel);
             }
             //update label
             updateProject.$set['categoryList'] = JSON.stringify(originalLabels);
