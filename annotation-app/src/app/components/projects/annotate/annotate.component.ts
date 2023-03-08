@@ -4280,11 +4280,35 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.editQuestionItem = i;
       return
     }
-    // let originalQuestions = JSON.parse(JSON.stringify(this.categories));
+    const originalQuestion = this.categories[i];
     this.categories[i] = editQuetion;
     this.nerLabelForColor(this.categories);
     this.editQuestionError = "";
-     
+    this.spansList.forEach(span => {
+      if(span.label == originalQuestion) {
+        span.label = editQuetion;
+      }
+    });
+    const mainText = document.getElementById('mainText');
+    this.updateMainTextLabel(mainText.childNodes, originalQuestion, editQuetion);
   }
 
+  updateMainTextLabel(nodes, label, newLabel){
+    //nodes have no childNodes it's the recursive exit condition
+    if (nodes.type == 3) {
+      if (nodes.title == label) {
+        nodes.setAttribute("title", newLabel)
+      }
+      return
+    }
+    // have childNodes and recursive update
+    for (const node of nodes) {
+      if (node.title == label) {
+        node.setAttribute("title", newLabel)
+      }
+      if (node.childNodes.length) {
+        this.updateMainTextLabel(node.childNodes, label, newLabel)
+      }
+    }
+  }
 }

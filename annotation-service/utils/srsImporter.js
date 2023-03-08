@@ -86,6 +86,9 @@ module.exports = {
                 if (projectType == PROJECTTYPE.QA) {
                     let questions = [];
                     for (const q of questionForText) {
+                        if (!q || q.trim() || !oneData[q]) {
+                            continue;
+                        }
                         for (const question of oneData[q].split("?")) {
                             if (question.trim()) {
                                 questions.push(question.trim()+"?");

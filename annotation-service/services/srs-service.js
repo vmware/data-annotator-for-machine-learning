@@ -619,7 +619,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
                 let questions = [];
                 let questionForText = req.body.questions;
                 for (const q of questionForText) {
-                    if (!q.trim()) {
+                    if (!q || !q.trim() || !oneData[q]) {
                         continue;
                     }
                     for (const question of oneData[q].split("?")) {

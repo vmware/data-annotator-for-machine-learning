@@ -463,7 +463,7 @@ export class CreateNewComponent implements OnInit {
       formData.append('isMultipleLabel', 'true');
     }
     if (this.projectType === 'qa') {
-      formData.append('questionForText', JSON.stringify([this.dropdownSelected]));
+      formData.append('questionForText', JSON.stringify(this.dropdownSelected? [this.dropdownSelected]: []));
     }
     return this.avaService.postDataset(formData);
   }
