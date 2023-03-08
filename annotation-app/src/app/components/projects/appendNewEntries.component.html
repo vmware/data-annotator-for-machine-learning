@@ -542,6 +542,48 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-datagrid>
             </div>
           </div>
+
+          <div class="form-group clr-row" *ngIf="showPreviewTable && projectType == 'qa'">
+            <div class="clr-col-12 clr-col-md-1">
+              <label>Questions column</label>
+            </div>
+            <div class="clr-input-wrapper clr-col-12 clr-col-md-5">
+              <div class="clr-select-wrapper" style="width: 100% !important">
+                <select
+                  style="width: 100% !important"
+                  id="select-basic"
+                  class="clr-select"
+                  formControlName="questions"
+                  (change)="selectedQuestions($event)"
+                  ><option
+                    *ngFor="let header of previewHeadDatas"
+                    [value]="header"
+                    >{{ header }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="clr-col-12 clr-col-md-6">
+              <clr-tooltip *ngIf="selectedQuestionError">
+                <clr-icon
+                  clrTooltipTrigger
+                  shape="error-standard"
+                  size="18"
+                  style="color: red"
+                  class="valid-tooltip"
+                ></clr-icon>
+                <clr-tooltip-content
+                  class="error-tooltip"
+                  clrPosition="bottom-right"
+                  clrSize="lg"
+                  *clrIfOpen
+                  ><span style="word-break: break-all">the column you have been selected as original text column</span>
+                </clr-tooltip-content>
+              </clr-tooltip>
+            </div>
+          </div>
+
+
           <div class="form-group clr-row">
             <div class="clr-col-12 clr-col-md-1">
               <button class="btn btn-primary btn-md" (click)="createNewCsv()">Publish</button>

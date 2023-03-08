@@ -63,11 +63,20 @@ export class SetDataComponent implements OnInit, OnChanges {
           },
         );
       }
-      this.clrSelectData = {
-        required: true,
-        options: [...['No Labels'], ...this.wizardData.csvHeaders],
-        labelText: 'Selected Label Column',
-      };
+     
+      if(this.wizardData.projectType === 'qa'){
+        this.clrSelectData = {
+          required: false,
+          options: [...this.wizardData.csvHeaders],
+          labelText: 'Select The Column',
+        };
+      }else{
+        this.clrSelectData = {
+          required: true,
+          options: [...['No Labels'], ...this.wizardData.csvHeaders],
+          labelText: 'Selected Label Column',
+        };
+      }
       this.selectDescription = this.wizardData.checkboxChecked;
     }
     this.selectedDropDownItem = this.wizardData.dropdownSelected;
@@ -85,7 +94,10 @@ export class SetDataComponent implements OnInit, OnChanges {
       this.isLoading = false;
     }
   }
-  onReceiveSelectedItem(e) {
+  onReciveSelectedText(e){    
+    this.selectDescription = [e]
+  }
+  onReceiveSelectedItem(e) {    
     this.selectedDropDownItem = e;
     let that = this;
     this.selectDescription = [];

@@ -500,7 +500,7 @@ async function projectLeaderBoard(req) {
             await srsUI.forEach(async UIS => {
                 const userInputDatas = await prepareUserInputs(UIS);
                 await userInputDatas.forEach(ui => {
-                    if (proInfo.projectType == PROJECTTYPE.NER || proInfo.projectType == PROJECTTYPE.LOG) {
+                    if (proInfo.projectType == PROJECTTYPE.NER || proInfo.projectType == PROJECTTYPE.QA || proInfo.projectType == PROJECTTYPE.LOG) {
                         ui.problemCategory.forEach(ann => {
                             if (ann.label == label) {
                                 lb.annotated += 1;
@@ -883,7 +883,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
 
         //update labeled tickets
         for (const key in editLb) {
-            if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.LOG) {
+            if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.QA || project.projectType == PROJECTTYPE.LOG) {
                 query = { 
                     projectName: project.projectName, 
                     userInputsLength: {$gte: 1},  
@@ -985,7 +985,7 @@ async function deleteProjectLables(label, _id, projectName, operation) {
     }
 
     let conditions = { projectName: mp.project.projectName }
-    if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.LOG) {
+    if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.QA || mp.project.projectType == PROJECTTYPE.LOG) {
         conditions["userInputs.problemCategory.label"] = label;
     } else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
         conditions = {

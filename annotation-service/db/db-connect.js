@@ -56,6 +56,7 @@ const srSchema = new mongoose.Schema({
         reviewedTime: { type: String },
     },
     ticketQuestions: { type: Object },
+    questionForText:{ type: Array, default: []}
 }, { _id: true });
 srSchema.set("toJSON", { virtuals: true });
 srSchema.index({ projectName: 1 });

@@ -92,6 +92,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   [(ngModel)]="format"
                   [disabled]="
                     msg.projectType == 'ner' ||
+                    msg.projectType == 'qa' ||
                     msg.projectType == 'image' ||
                     msg.labelType == 'numericLabel' ||
                     msg.projectType == 'log'
@@ -109,6 +110,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   [(ngModel)]="format"
                   [disabled]="
                     msg.projectType == 'ner' ||
+                    msg.projectType == 'qa' ||
                     msg.projectType == 'image' ||
                     msg.labelType == 'numericLabel' ||
                     msg.projectType == 'log'

@@ -37,17 +37,12 @@ SPDX-License-Identifier: Apache-2.0 -->
         </button>
         <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
           <label class="dropdown-header">Classification</label>
-          <a class="dropdown-item active" [routerLink]="['/projects/create/text']"
-            >Text Classification</a
-          >
+          <a class="dropdown-item active" [routerLink]="['/projects/create/text']">Text Classification</a>
           <a class="dropdown-item" [routerLink]="['/projects/create/tabular']">Tabular</a>
-          <a class="dropdown-item" [routerLink]="['/projects/create/ner']"
-            >Named Entity Recognition</a
-          >
-          <a class="dropdown-item" [routerLink]="['/projects/create/image']"
-            >Image Classification</a
-          >
+          <a class="dropdown-item" [routerLink]="['/projects/create/ner']">Named Entity Recognition</a>
+          <a class="dropdown-item" [routerLink]="['/projects/create/image']">Image Classification</a>
           <a class="dropdown-item" [routerLink]="['/projects/create/log']">Log Classification</a>
+          <a class="dropdown-item" [routerLink]="['/projects/create/qa']">Question Answer</a>
         </clr-dropdown-menu>
       </clr-dropdown>
     </div>

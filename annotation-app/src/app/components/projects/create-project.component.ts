@@ -193,6 +193,8 @@ export class CreateNewComponent implements OnInit {
       annotationQuestion: [
         this.msg.type == 'ner'
           ? 'Label all entity types in the given text corpus.'
+          : this.msg.type == 'qa'
+          ? 'Label all answers in the given text corpus according to the question.'
           : this.dataset.annotationQuestion,
         DatasetValidator.required(),
       ],
@@ -304,7 +306,7 @@ export class CreateNewComponent implements OnInit {
             DatasetValidator.required(),
           );
         }
-        if (this.msg.type === 'ner' || this.msg.type === 'log') {
+        if (this.msg.type === 'ner' || this.msg.type === 'log' || this.msg.type === 'qa') {
           this.validNer();
         }
         if (this.msg.type === 'image') {
@@ -425,7 +427,7 @@ export class CreateNewComponent implements OnInit {
       if (this.labelType !== 'HTL') {
         formData.append(
           'isMultipleLabel',
-          this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log'
+          this.msg.type == 'ner' || this.msg.type == 'image' || this.msg.type == 'log' || this.msg.type == 'qa'
             ? true
             : this.dsDialogForm.value.multipleLabel,
         );
@@ -459,6 +461,9 @@ export class CreateNewComponent implements OnInit {
     if (this.labelType === 'HTL') {
       formData.append('labels', JSON.stringify(this.treeLabels));
       formData.append('isMultipleLabel', 'true');
+    }
+    if (this.projectType === 'qa') {
+      formData.append('questionForText', JSON.stringify([this.dropdownSelected]));
     }
     return this.avaService.postDataset(formData);
   }
@@ -758,10 +763,11 @@ export class CreateNewComponent implements OnInit {
       this.dsDialogForm.get('labels').setValue([...this.categoryList, ...this.checkboxChecked]);
     }
     this.toEvenlyDistributeTicket();
+    let overLimitAlert = 'Set data alert! Please be aware of that some label in your selected label column which has more than 50 characters has been truncated.'
     this.inputMsgTOWizard(
       true,
       this.overPerLabelLimit
-        ? 'Set data alert! Please be aware of that some label in your selected label column which has more than 50 characters has been truncated.'
+        ? overLimitAlert
         : null,
     );
   }
@@ -773,9 +779,13 @@ export class CreateNewComponent implements OnInit {
     let indexArray = [];
     let textArray = this.checkboxChecked;
     let selectedLabelIndex = this.previewHeadDatas.indexOf(this.dropdownSelected);
+    
     if (this.projectType === 'ner') {
       selectedLabelIndex = -1;
       textArray = [this.dropdownSelected];
+    }
+    if (this.projectType === 'qa') {
+      selectedLabelIndex = -1;
     }
 
     for (let k = 0; k < textArray.length; k++) {
@@ -822,7 +832,7 @@ export class CreateNewComponent implements OnInit {
         flag = _.uniq(flag);
 
         // to check this is a totally numeric flag or not
-        const isNumeric = this.toCheckNumeric(flag) == 'no' ? false : true;
+        const isNumeric = (this.projectType === 'qa' || this.toCheckNumeric(flag) == 'no') ? false : true;
         this.totalCase = count;
         this.nonEnglish = invalidCount;
         this.dsDialogForm.get('totalRow').setValue(this.totalCase - this.nonEnglish);
@@ -920,7 +930,7 @@ export class CreateNewComponent implements OnInit {
 
   private getMyDatasets(params?: any) {
     const a =
-      this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'ner'
+      this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'ner' || this.projectType == 'qa'
         ? 'csv'
         : this.projectType == 'image'
         ? 'image'
@@ -1304,7 +1314,7 @@ export class CreateNewComponent implements OnInit {
 
   inputMsgTOWizard(code, msg?) {
     // to close wizard
-    if (this.projectType !== 'ner') {
+    if (this.projectType === 'text'|| this.projectType === 'tabular') {
       if (this.dropdownSelected === 'No Labels') {
         this.isShowLabelRadio = true;
       } else {

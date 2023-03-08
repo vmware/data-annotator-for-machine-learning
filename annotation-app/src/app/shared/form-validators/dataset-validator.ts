@@ -225,6 +225,8 @@ export class DatasetValidator {
         if (control.value.length < 1) {
           return { msg: { value: DatasetValidator.REQUIRED_FIELD_ENTITY } };
         }
+      }else if(type == 'qa'){
+        return null;
       } else {
         if (control.value.length < 2) {
           return { msg: { value: DatasetValidator.REQUIRED_FIELD_LABEL } };
