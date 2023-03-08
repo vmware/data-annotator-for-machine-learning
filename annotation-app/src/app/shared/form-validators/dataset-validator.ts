@@ -348,6 +348,7 @@ export class DatasetValidator {
       }
       if (
         projectType == 'ner' ||
+        projectType == 'qa' ||
         projectType == 'text' ||
         projectType == 'csv' ||
         projectType == 'tabular' ||
