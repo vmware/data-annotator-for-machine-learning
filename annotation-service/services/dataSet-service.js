@@ -160,7 +160,8 @@ async function imageTopPreview(datasets, singleData) {
 
 async function queryDataSetByDataSetName(req) {
     console.log(`[ DATASET ] Service queryDataSetByDataSetName`);
-    return mongoDb.findByConditions(DataSetModel, { dataSetName: req.query.dsname });
+    const datasets = await mongoDb.findByConditions(DataSetModel, { dataSetName: req.query.dsname });
+    return imageTopPreview(datasets);
 }
 
 async function deleteDataSet(req) {

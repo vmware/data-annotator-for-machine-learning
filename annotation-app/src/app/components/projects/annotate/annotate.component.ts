@@ -4311,6 +4311,4 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
   }
-
-
 }
