@@ -66,9 +66,9 @@ export class SetDataComponent implements OnInit, OnChanges {
      
       if(this.wizardData.projectType === 'qa'){
         this.clrSelectData = {
-          required: true,
-          options: ['Self Define Questions Later', ...this.wizardData.csvHeaders],
-          labelText: 'Selected Question Column',
+          required: false,
+          options: [...this.wizardData.csvHeaders],
+          labelText: 'Select The Column',
         };
       }else{
         this.clrSelectData = {
@@ -94,7 +94,10 @@ export class SetDataComponent implements OnInit, OnChanges {
       this.isLoading = false;
     }
   }
-  onReceiveSelectedItem(e) {
+  onReciveSelectedText(e){    
+    this.selectDescription = [e]
+  }
+  onReceiveSelectedItem(e) {    
     this.selectedDropDownItem = e;
     let that = this;
     this.selectDescription = [];

@@ -97,18 +97,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   regexErr = false;
   isDrawer = false;
   colorsRainbow = [
+    '#00ff7f',
     '#00ffff',
     '#ff00ff',
-    '#00ff7f',
     '#ff6347',
-    '#9B0D54',
     '#00bfff',
-    '#FF0000',
     '#ff69b4',
     '#7fffd4',
     '#ffd700',
     '#FBC1DA',
-    '#4D007A',
     '#ffdab9',
     '#adff2f',
     '#FFA500',
@@ -147,6 +144,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#ff7875',
     '#97d778',
     '#2F4F4F',
+    '#FF0000',
+    '#4D007A',
+    '#9B0D54',
   ];
 
   popLabelColors = [
@@ -205,6 +205,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   expandValue: boolean = false;
   expandName: string = 'Expand';
   textBoxResizedHeight: string;
+  inputQuestion: string = null;
+  inputQuestionError: string;
+  editQuestionError: string;
+  editQuestionItem: number;
+  deleteQuestionItem: number;
+
+
   sliderEvent() {
     if (this.numericOptions.step === 1) {
       if (parseInt(this.labelChoose) !== this.numericValue) {
@@ -298,6 +305,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         resoltionCode: '',
         resolution: '',
         userInputs: [],
+        questionForText: [],
       };
     }
     this.questionForm = this.formBuilder.group({});
@@ -338,6 +346,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.toReadStorageSetting('display');
           }
           if (this.projectType == 'ner' || this.projectType == 'qa') {
+            this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
             this.sr = this.resetNerSrData(this.sr);
             this.toShowExistingLabel();
           }
@@ -416,7 +425,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       ) {
         this.sortLabelForColor(this.categories);
       }
-      if (this.projectType == 'ner' || this.projectType == 'qa') {
+      if (this.projectType == 'ner') {
         this.nerLabelForColor(this.categories);
       }
       this.isShowDropDown = false;
@@ -640,8 +649,11 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           this.modifyChangeHistory(originalLabel);
         }
-      } else if (this.projectType == 'ner' || this.projectType == 'qa') {
+      } else if (this.projectType == 'ner') {
         this.modifyChangeHistory();
+      }else if(this.projectType == 'qa'){
+        this.modifyChangeHistory();
+        srUserInput.userInput[0]['questionForText'] = this.categories;
       } else if (this.projectType == 'image') {
         srUserInput.userInput[0].problemCategory = this.currentBoundingData;
         this.sr.images = this.currentBoundingData;
@@ -704,7 +716,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       param['modify'] = true;
       if (this.projectType === 'log' || this.projectType === 'ner' || this.projectType === 'qa') {
         param['problemCategory'] = this.spansList;
-        param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
+        if (this.projectType === 'log') {
+          param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
+        }
+        if (this.projectType === 'qa') {
+          param['questionForText'] = this.categories;
+        }
+        
       } else if (this.isMultipleNumericLabel || this.isNumeric) {
         if (this.moreReviewInfo.length !== 0 && this.categoryFunc().length === 0) {
           param['modify'] = false;
@@ -922,6 +940,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.error = 'All cases have been completely annotated.';
           return;
         }
+        
+        if(this.projectType == 'qa'){
+          this.getQuestionListAndSetQuestionColors(newSr.questionForText);
+          this.selectedEntityID = 0;
+        }
+        
         this.submitAndHistory(newSr);
       },
       (error) => {
@@ -1005,6 +1029,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     if (this.projectType == 'ner' || this.projectType == 'qa') {
       this.sr = this.resetNerSrData(this.sr);
+      this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
       if (from !== 'review' && from !== 'pass' && this.startFrom !== 'review') {
         this.toShowExistingLabel();
       }
@@ -1264,6 +1289,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.projectType == 'ner' || this.projectType == 'qa') {
           this.sr = this.resetNerSrData(this.sr);
           this.toShowExistingLabel();
+          this.getQuestionListAndSetQuestionColors(this.sr.questionForText)
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
@@ -1948,6 +1974,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.silenceStatus = false;
       this.clrErrorTip = false;
       const isCategory = this.categoryFunc();
+
       if (isCategory.length > 0) {
         if (
           this.isNumeric ||
@@ -2130,6 +2157,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.projectType == 'ner' || this.projectType == 'qa') {
           this.sr = this.resetNerSrData(this.sr);
           this.toShowExistingLabel();
+          this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
@@ -2911,7 +2939,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.createSpans(normedRange, selectedEntityID, element);
   }
 
-  onMouseUp() {
+  onMouseUp(e) {
+    this.currentSelectedQuestion();
     this.handleScroll();
     var selectedRanges = this.captureDocSelection();
     if (selectedRanges.length === 0) return;
@@ -2966,7 +2995,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const lastSpan = spans[spans.length - 1];
-    lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
+    lastSpan.setAttribute('data-label', this.projectType == 'qa'? "": this.categories[selectedEntityID]);
+    lastSpan.setAttribute('title', this.categories[selectedEntityID]);
     if (this.isShowPopLabel) {
       lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans));
     }
@@ -3067,7 +3097,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clickClearMark(event, data) {
-    this.spansList.forEach((ele, index) => {
+    this.spansList.forEach((ele, index) => {      
       if (ele.spans == data.spans) {
         this.spansList.splice(index, 1);
       }
@@ -3083,7 +3113,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.actionError = null;
   }
 
-  onSelectingEntity(e, data, index) {
+  onSelectingEntity(e, data, index) {        
     e.preventDefault();
     this.selectedEntityID = index;
     if (this.projectType == 'log') {
@@ -3216,11 +3246,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           if (this.projectType === 'ner' || this.projectType === 'qa') {
             this.resetNerSrData([responseSr]);
+            this.getQuestionListAndSetQuestionColors(responseSr.questionForText);
           }
           this.sr._id = responseSr._id;
           this.sr.originalData = responseSr.originalData;
           this.sr.flag = responseSr.flag;
           this.sr.userInputs = responseSr.userInputs;
+          this.sr.questionForText = responseSr.questionForText;
+          
           if (!this.sr.userInputs.length && this.labelType === 'HTL') {
             this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
           }
@@ -4158,4 +4191,100 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       observer.observe(target, config);
     }
   }
+
+  onAddQuestion(e, inputting?){
+    
+    let question = e.target.value.trim();
+
+    if (this.categories.includes(question)) {
+      this.clrErrorTip = true;
+      this.inputQuestionError = `The question already exists at index ${this.categories.indexOf(question) + 1}`;
+      return
+    }
+    //when inputting clear error message
+    if (!question || inputting) {
+      this.clrErrorTip = false;
+      this.inputQuestionError = null;
+      return
+    }
+    //and questiong to list and get question label color
+    this.categories.push(question);
+    this.nerLabelForColor(this.categories);
+    this.inputQuestion = null;
+
+  }
+
+  onMouseEnter(e, i, question){
+    e.target.style['border-bottom-style'] = 'dashed';
+    e.target.style['border-bottom-color'] = this.getLabelColor(question);
+    this.deleteQuestionItem = i;
+  }
+  
+  onMouseLeave(e, i){
+    e.target.style['border-style'] = 'none';
+    this.deleteQuestionItem = -1;
+  }
+  
+  deleteQuestion(i){
+
+    this.spansList.forEach((ele, index) => {
+      if (ele.label == this.categories[i]) {
+        removeSpans(ele.spans);
+      }
+    });
+    this.spansList = this.spansList.filter((ele, index) => {
+      if (ele.label != this.categories[i]) {
+        return ele;
+      }
+    });
+    this.categories.splice(i, 1);
+
+  }
+
+  currentSelectedQuestion(){
+    if (this.projectType != 'qa') return;
+    if (!this.categories.length){
+      this.clrErrorTip = true;
+      this.inputQuestionError = `Please add the question first`;
+      throw new Error(this.inputQuestionError);
+    }
+    
+    let selectedQuestion;
+    this.el.nativeElement.querySelectorAll('.questionRadio').forEach(ele => {
+        if (ele.checked) {
+          selectedQuestion = ele.value;
+        }
+    });
+
+    this.selectedEntityID = this.categories.indexOf(selectedQuestion)
+    return selectedQuestion;
+  }
+
+  getQuestionListAndSetQuestionColors(questionForText){
+    if (this.projectType != 'qa') return;
+
+    this.categories = questionForText? questionForText: [];
+    this.nerLabelForColor(this.categories);
+  }
+
+  editQuestion(e, i){
+    this.editQuestionItem = -1;
+    let editQuetion = e.target.value.trim()
+    if (!editQuetion) {
+      this.editQuestionError = `question is empty`;
+      this.editQuestionItem = i;
+      return
+    }
+    if (this.categories.includes(editQuetion)) {
+      this.editQuestionError = `The question already exists at index ${this.categories.indexOf(editQuetion) + 1}`;
+      this.editQuestionItem = i;
+      return
+    }
+    // let originalQuestions = JSON.parse(JSON.stringify(this.categories));
+    this.categories[i] = editQuetion;
+    this.nerLabelForColor(this.categories);
+    this.editQuestionError = "";
+     
+  }
+
 }

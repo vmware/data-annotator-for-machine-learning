@@ -955,3 +955,12 @@ label .label-leftBoard {
     pointer-events: none;
   }
 }
+
+.circle {
+  width: 2em;
+  height: 100%;
+  border-radius: 50%;
+  display:"inline-block";
+  margin-left: 1em;
+  margin-right: 0.5em;
+}

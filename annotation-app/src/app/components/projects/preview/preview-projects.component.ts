@@ -189,6 +189,8 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
     this.innerTable =
       this.projectType == 'ner'
         ? ['Entity', 'Text', 'Start_idx', 'End_idx']
+        : this.projectType == 'qa'
+        ? ['Question', 'Answer', 'Start_idx', 'End_idx']
         : ['LineNumber', 'LineContent', 'Label', 'FreeText'];
     setTimeout(() => {
       this.getALLSrs();
@@ -394,7 +396,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
               res[k].originalData = cellContent[k];
             }
           }
-          if (this.projectType == 'ner') {
+          if (this.projectType == 'ner' || this.projectType == 'qa') {
             res.forEach((element) => {
               if (
                 element.userInputs.length > 0 &&
@@ -438,7 +440,7 @@ export class previewProjectsComponent implements OnInit, AfterViewInit {
           } else {
             this.loading = false;
           }
-          if (this.isMultipleLabel && this.projectType != 'ner' && this.projectType != 'log') {
+          if (this.isMultipleLabel && this.projectType != 'ner' && this.projectType != 'qa' && this.projectType != 'log') {
             this.previewSrs = res;
             this.toRenewPreviewSrs();
           }

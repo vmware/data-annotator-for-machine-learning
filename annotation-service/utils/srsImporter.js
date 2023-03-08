@@ -34,6 +34,9 @@ module.exports = {
         let selectedColumn = req.body.selectDescription;
         selectedColumn = (typeof selectedColumn === 'string' ? JSON.parse(selectedColumn) : selectedColumn);
         const user = req.auth.email;
+        let questionForText = req.body.questionForText? req.body.questionForText: [];
+        questionForText = (typeof questionForText === 'string' ? JSON.parse(questionForText): questionForText);
+
 
         let totalCase = 0;
         let docs = [];
@@ -80,7 +83,17 @@ module.exports = {
                     userInputsLength: 0,
                     originalData: select,
                 };
-
+                if (projectType == PROJECTTYPE.QA) {
+                    let questions = [];
+                    for (const q of questionForText) {
+                        for (const question of oneData[q].split("?")) {
+                            if (question.trim()) {
+                                questions.push(question.trim()+"?");
+                            }
+                        }
+                    }
+                    sechema.questionForText = questions;
+                }
                 //support ner quesion anwser column display
                 if (projectType == PROJECTTYPE.NER && req.body.ticketQuestions.length) {
                     let ticketQuestions = {};

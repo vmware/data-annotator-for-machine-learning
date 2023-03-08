@@ -384,12 +384,9 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-
-          <div class="form-group clr-row" style="margin-top: 1rem">
+          <div *ngIf="projectType !== 'qa'" class="form-group clr-row" style="margin-top: 1rem">
             <div class="clr-col-12 clr-col-md-1"></div>
-            <label for="labels" class="label-tooltip clr-col-12 clr-col-md-2"
-              >{{msg.type=='qa'? "Questions": "Labels"}}<span>*</span></label
-            >
+            <label for="labels" class="label-tooltip clr-col-12 clr-col-md-2">Labels<span>*</span></label>
 
             <div class="clr-col-12 clr-col-md-8 labelsList">
               <div
@@ -483,8 +480,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                   (mouseenter)="overLabels(i, 'new')"
                   (mouseleave)="outLabels(i, 'new')"
                   [ngClass]="activeNew == i ? 'overLabels' : ''"
-                  >{{ label
-                  }}<clr-icon
+                  >{{ label}}
+                  <clr-icon
                     shape="times"
                     *ngIf="activeNew == i"
                     style="position: absolute; right: 0.1rem"
@@ -498,7 +495,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   #labels
                   id="labels"  
                   clrInput
-                  placeholder="{{projectType === 'qa'? 'Add New Question Here': 'Add New Label Here'}}"
+                  placeholder="Add New Label Here"
                   name="addNewLabel"
                   class="clr-input"
                   (keyup.enter)="onEnterLabel(labels.value)"
@@ -1080,6 +1077,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               isMultipleLabel ||
               isMutilNumericLabel ||
               msg.type == 'ner' ||
+              msg.type == 'qa' ||
               msg.type == 'log' ||
               isUploadLabel
             "

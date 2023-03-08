@@ -542,15 +542,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                       (mouseenter)="mouseenterMark($event, spanText)"
                       (mouseleave)="mouseleaveMark($event, spanText)"
                     >
-                      <span (click)="clickShowMark($event, spanText)" class="selectText">{{
-                        spanText.text
-                      }}</span>
+                      <span 
+                        (click)="clickShowMark($event, spanText)" 
+                        class="selectText"
+                        title="{{ spanText.label }}"
+                        >{{spanText.text}}
+                      </span>
                       <span
                         class="entity"
                         [style.color]="getLabelColor(spanText.label)"
                         title="{{ spanText.label | uppercase }}"
-                        >{{ spanText.label }}</span
-                      >
+                        >{{ projectType == 'qa'? "" :spanText.label }}
+                      </span>
                       <span
                         *ngIf="isShowPopLabel && spanText.popUpLabel"
                         class="entity"
@@ -859,7 +862,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <!-- ner entity label -->
-          <div class="questionContainer" *ngIf="projectType == 'ner' || projectType == 'qa'">
+          <div class="questionContainer" *ngIf="projectType == 'ner'">
             <div>
               <button
                 *ngFor="let label of categories; let i = index"
@@ -877,6 +880,65 @@ SPDX-License-Identifier: Apache-2.0 -->
                 {{ label }}
               </button>
               &nbsp; &nbsp;
+            </div>
+          </div>
+          
+          <div class="questionContainer" *ngIf="projectType == 'qa'">
+            <div
+              class="clr-control-container clr-error"
+              style="margin-top: 1rem"
+              [ngClass]="{ 'clr-error': clrErrorTip }"
+            >
+              <div class="clr-input-wrapper">
+                <input 
+                  type="text" 
+                  id="inputQuestion" 
+                  class="clr-input"
+                  placeholder="Add New The Question Here" 
+                  (keyup.enter)="onAddQuestion($event)"
+                  (blur)="onAddQuestion($event)"
+                  (keyup)="onAddQuestion($event, true)"
+                  name="inputQuestion"
+                  [(ngModel)]="inputQuestion"
+                  [ngModelOptions]="{ standalone: true }"
+                  style="width:30em"
+                />
+                <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+              </div>
+              <span class="clr-subtext">{{inputQuestionError}}</span>
+            </div>
+            
+
+            <div *ngFor="let item of categories; let index=index" style="display: flex;" class="clr-row clr-control-container clr-error"
+              (mouseenter)="onMouseEnter($event, index, item)"
+              (mouseleave)="onMouseLeave($event)"
+              [ngClass]="{ 'clr-error': editQuestionError }"
+              >
+              <label class="circle" [style.background-color]="getLabelColor(item)">&nbsp;&nbsp;<b>{{index+1}}</b></label>
+              <clr-radio-wrapper class="clr-col-10">
+                <input type="radio" clrRadio name="questionRadio"  class="questionRadio"
+                  value="{{item}}" 
+                  (change)="onSelectingEntity($event, index, index)"
+                  [attr.checked]="index == 0?'checked': null "
+                />
+                <label (change)="editQuestion($event, index)">
+                    <textarea
+                      type="text" 
+                      value="{{categories[index]}}" 
+                      style="width:max-content;" 
+                      style="border:none; width: 100%;"
+                      [disabled]="editQuestionError && editQuestionItem != index"
+                    >
+                  </textarea>
+                </label>
+              </clr-radio-wrapper>
+              <clr-icon class="clr-col-1"
+                  shape="trash"
+                  *ngIf="deleteQuestionItem === index"
+                  (click)="deleteQuestion(index)"
+              ></clr-icon>
+              <clr-icon *ngIf="editQuestionItem === index" class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
+              <span *ngIf="editQuestionItem === index" class="clr-subtext">{{editQuestionError}}</span>
             </div>
           </div>
           <!-- multiple checkbox labels -->
@@ -1065,7 +1127,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                 multipleLabelList.length == 0 &&
                 spansList.length == 0 &&
                 currentBoundingData.length == 0 &&
-                !isNumeric
+                !isNumeric ||
+                editQuestionError
               "
               title="{{
                 multipleLabelList.length > 0 ||

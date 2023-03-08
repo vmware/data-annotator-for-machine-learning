@@ -105,7 +105,7 @@ export class EditProjectComponent implements OnInit {
     this.msg = JSON.parse(JSON.stringify(this.msgInEdit));
     const al = this.msg.al;
     this.previousProjectName = this.msg.projectName;
-    this.showLabel = !(this.msg.integration.source && this.msg.integration.externalId[0]);
+    this.showLabel = !(this.msg.integration.source && this.msg.integration.externalId[0] || this.msg.projectType == 'qa');
     this.inputProjectName = this.msg.projectName;
     this.inputTaskInstruction = this.msg.taskInstructions;
     this.inputfrequency = al.frequency ? al.frequency : null;

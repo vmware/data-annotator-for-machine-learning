@@ -197,7 +197,10 @@ async function prepareHeaders(project, format) {
             await labelsArray.forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
-        } else {
+        } else if(project.projectType == PROJECTTYPE.QA){
+            headerArray.push({ id: 'Questions', title: 'Questions' });
+            headerArray.push({ id: 'Answers', title: 'Answers' });
+        }else {
             await project.categoryList.split(",").forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
@@ -270,7 +273,7 @@ async function prepareContents(srData, project, format) {
                 newCase[item] = newCase[item][0] ? JSON.stringify(newCase[item]) : [];
             });
 
-        } else if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.QA) {
+        } else if (project.projectType == PROJECTTYPE.NER) {
 
             // init selected data
             await project.selectedColumn.forEach(item => {
@@ -311,7 +314,53 @@ async function prepareContents(srData, project, format) {
             await project.popUpLabels.forEach(item => {
                 newCase[item] = newCase[item][0] ? JSON.stringify(newCase[item]) : [];
             });
-        } else if (project.projectType == PROJECTTYPE.LOG) {
+        } else if(project.projectType == PROJECTTYPE.QA){
+            // init selected data
+            await project.selectedColumn.forEach(item => {
+                newCase[item] = (srs.originalData)[item];
+            });
+            // init questions cloumn
+            let questionForText = srs.questionForText;
+            // init pop-up lables
+            await project.popUpLabels.forEach(item => {
+                newCase[item] = [];
+            });
+
+            const userInputDatas = await prepareUserInputs(srs);
+            if (srs.reviewInfo.modified) {
+                questionForText = userInputDatas[0].questionForText;
+            }
+            // init answer cloumn
+            let Answers = {};
+            await questionForText.forEach(question =>{
+                Answers[question] = [];
+            });
+
+            await userInputDatas.forEach(async item => {
+                await item.problemCategory.forEach(async lb => {
+                    //answers cloumn data
+                    await questionForText.forEach((label) => {
+                        if (lb.label === label) {
+                            Answers[label].push({ [lb.text]: [lb.start, lb.end] })
+                        }
+                    });
+                    //popup lablels
+                    await project.popUpLabels.forEach(label => {
+                        if (lb.popUpLabel === label) {
+                            newCase[label].push({ [lb.text]: [lb.start, lb.end] })
+                        }
+                    });
+                });
+            });
+            //add questions column
+            newCase['Questions'] = await JSON.stringify(questionForText);
+            //add answers cloumn
+            newCase['Answers'] = await JSON.stringify(Answers);
+            //change annotations pop-up labels to a string array
+            await project.popUpLabels.forEach(item => {
+                newCase[item] = newCase[item][0] ? JSON.stringify(newCase[item]) : [];
+            });
+        }else if (project.projectType == PROJECTTYPE.LOG) {
             // init log classification fileName
             newCase.fileName = srs.fileInfo.fileName;
 

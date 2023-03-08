@@ -60,6 +60,7 @@ export class AppendNewEntriesComponent implements OnInit {
   ticketQuestions: any = [];
   categoryList: any;
   regression: any;
+  selectedQuestionError: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -118,6 +119,7 @@ export class AppendNewEntriesComponent implements OnInit {
       totalRow: [0, DatasetValidator.validRow()],
       selectLabels: [''],
       ticketQuestions: [''],
+      questions: [''],
     });
   }
 
@@ -145,7 +147,10 @@ export class AppendNewEntriesComponent implements OnInit {
           for (let i = 0; i < this.sampleData.length; i++) {
             flag = { key: this.sampleData[i].key, value: '', format: true };
             this.newAddedData.push(flag);
-            this.originalHead.push(this.sampleData[i].key);
+            if (this.projectType == 'qa' && this.sampleData[i].key == 'questions') {
+              continue;
+            }
+            this.originalHead.push(this.sampleData[i].key);  
           }
           this.newAddedData = [this.newAddedData];
           this.loading = false;
@@ -287,7 +292,7 @@ export class AppendNewEntriesComponent implements OnInit {
 
   private getMyDatasets() {
     const a =
-      this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'ner'
+      this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'ner' || this.projectType == 'qa'
         ? 'csv'
         : this.projectType == 'image'
         ? 'image'
@@ -571,6 +576,9 @@ export class AppendNewEntriesComponent implements OnInit {
           appendParams['ticketQuestions'] = this.uploadGroup.get('ticketQuestions').value;
           appendParams['selectLabels'] = this.uploadGroup.get('selectLabels').value;
         }
+        if (this.projectType === 'qa') {
+          appendParams['questions'] = [this.uploadGroup.get('questions').value];
+        }
         this.appendSrs(appendParams);
       } else {
         if (this.env.config.enableAWSS3) {
@@ -692,6 +700,9 @@ export class AppendNewEntriesComponent implements OnInit {
           appendParams['ticketQuestions'] = this.uploadGroup.get('ticketQuestions').value;
           appendParams['selectLabels'] = this.uploadGroup.get('selectLabels').value;
         }
+        if (this.projectType === 'qa') {
+          appendParams['questions'] = [this.uploadGroup.get('questions').value];
+        }
         this.appendSrs(appendParams);
       },
       (error) => {
@@ -738,6 +749,7 @@ export class AppendNewEntriesComponent implements OnInit {
     } else if (
       this.projectType == 'text' ||
       this.projectType == 'tabular' ||
+      this.projectType == 'qa' ||
       this.projectType == 'ner'
     ) {
       formData.append('hasHeader', 'yes');
@@ -925,4 +937,15 @@ export class AppendNewEntriesComponent implements OnInit {
     }
     this.uploadGroup.get('ticketQuestions').setValue(this.ticketQuestions);
   }
+  
+  selectedQuestions(e){
+    let header = e.target.value;
+    if (this.originalHead.includes(header)) {
+      this.selectedQuestionError = true;
+      this.uploadGroup.get('questions').setErrors({invalid: true})
+      return
+    }
+    this.selectedQuestionError = false;
+  }
+
 }

@@ -462,6 +462,9 @@ export class CreateNewComponent implements OnInit {
       formData.append('labels', JSON.stringify(this.treeLabels));
       formData.append('isMultipleLabel', 'true');
     }
+    if (this.projectType === 'qa') {
+      formData.append('questionForText', JSON.stringify([this.dropdownSelected]));
+    }
     return this.avaService.postDataset(formData);
   }
 
@@ -724,9 +727,7 @@ export class CreateNewComponent implements OnInit {
         this.dsDialogForm.get('totalRow').setValue(0);
         this.inputMsgTOWizard(
           false,
-          this.projectType === 'qa'
-          ? 'Set data failed! Your selected question column has more than 50 different columns, please select one new question column that has less than or equal to 50 column then to set date.'
-          : 'Set data failed! Your selected label column has more than 50 different labels, please select one new label column that has less than or equal to 50 labels then to set date.',
+          'Set data failed! Your selected label column has more than 50 different labels, please select one new label column that has less than or equal to 50 labels then to set date.',
         );
         return;
       }
@@ -763,9 +764,6 @@ export class CreateNewComponent implements OnInit {
     }
     this.toEvenlyDistributeTicket();
     let overLimitAlert = 'Set data alert! Please be aware of that some label in your selected label column which has more than 50 characters has been truncated.'
-    if (this.projectType === 'qa') {
-      overLimitAlert = 'Set data alert! Please be aware of that some questions in your selected question column which has more than 50 characters has been truncated.'
-    }
     this.inputMsgTOWizard(
       true,
       this.overPerLabelLimit
@@ -781,9 +779,13 @@ export class CreateNewComponent implements OnInit {
     let indexArray = [];
     let textArray = this.checkboxChecked;
     let selectedLabelIndex = this.previewHeadDatas.indexOf(this.dropdownSelected);
+    
     if (this.projectType === 'ner') {
       selectedLabelIndex = -1;
       textArray = [this.dropdownSelected];
+    }
+    if (this.projectType === 'qa') {
+      selectedLabelIndex = -1;
     }
 
     for (let k = 0; k < textArray.length; k++) {
