@@ -331,31 +331,32 @@ async function prepareContents(srData, project, format) {
                 questionForText = userInputDatas[0].questionForText;
             }
             // init answer cloumn
-            let Answers = {};
-            await questionForText.forEach(question =>{
-                Answers[question] = [];
-            });
-
-            await userInputDatas.forEach(async item => {
-                await item.problemCategory.forEach(async lb => {
-                    //answers cloumn data
-                    await questionForText.forEach((label) => {
-                        if (lb.label === label) {
-                            Answers[label].push({ [lb.text]: [lb.start, lb.end] })
-                        }
-                    });
-                    //popup lablels
-                    await project.popUpLabels.forEach(label => {
+            let answersList = [];
+            for await(const item of userInputDatas) {
+                //answers cloumn data
+                for await(const question of questionForText) {
+                    let answer = {question: question, answers: []};
+                    for await(const lb of item.problemCategory) {
+                        if (lb.label === question) {            
+                            answer['answers'].push([lb.text, lb.start, lb.end]);
+                        } 
+                    }
+                    await answersList.push(answer);
+                }
+                
+                //popup lablels
+                for await(const label of project.popUpLabels) {
+                    for await(const lb of item.problemCategory) {
                         if (lb.popUpLabel === label) {
-                            newCase[label].push({ [lb.text]: [lb.start, lb.end] })
+                            newCase[label].push([lb.text, lb.start, lb.end])
                         }
-                    });
-                });
-            });
+                    }
+                }
+            }
             //add questions column
             newCase['Questions'] = await JSON.stringify(questionForText);
             //add answers cloumn
-            newCase['Answers'] = await JSON.stringify(Answers);
+            newCase['Answers'] = await JSON.stringify(answersList);
             //change annotations pop-up labels to a string array
             await project.popUpLabels.forEach(item => {
                 newCase[item] = newCase[item][0] ? JSON.stringify(newCase[item]) : [];
