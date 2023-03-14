@@ -72,6 +72,14 @@ async function checkAnnotator(uid) {
     }
 }
 
+async function checkAdmin(uid) {
+
+    const user = await mongoDb.findById(UserModel, uid);
+    if (ROLES.ADMIN != user.role) {
+        throw MESSAGE.VALIDATION_PERMITION;
+    }
+}
+
 async function checkDataSet(conditions, checkExsit) {
     const ds = await mongoDb.findByConditions(DataSetModel, conditions);
     if (checkExsit) {
@@ -164,5 +172,6 @@ module.exports = {
     checkDataSetInUse,
     checkJsonFormat,
     validateBool,
-
+    checkAdmin,
+    
 };
