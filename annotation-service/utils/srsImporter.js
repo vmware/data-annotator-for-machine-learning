@@ -8,7 +8,7 @@
 
 const csv = require('csvtojson');
 const config = require("../config/config");
-const { PAGINATELIMIT, PROJECTTYPE, ENCODE, SOURCE } = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, ENCODE, SOURCE, OPERATION } = require("../config/constant");
 const emailService = require('../services/email-service');
 const axios = require("axios");
 const fileSystemUtils = require('./fileSystem.utils');
@@ -16,7 +16,7 @@ const mongoDb = require('../db/mongo.db');
 const { ProjectModel, SrModel } = require('../db/db-connect');
 const slackChat = require("../services/slack/slackChat.service");
 const { formatDate } = require('./common.utils');
-
+const {updateDatasetProjectInfo} = require('../services/dataSet-service');
 
 
 module.exports = {
@@ -157,6 +157,8 @@ module.exports = {
                 };
                 console.log(`[ SRS ] Utils update totalCase:`, totalCase);
                 await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
+
+                await updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD);
 
                 console.log(`[ SRS ] Utils srsImporter.execute end: within:[ ${(Date.now() - start) / 1000}s ] `);
 

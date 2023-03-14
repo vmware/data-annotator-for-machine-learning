@@ -18,6 +18,7 @@ const fs = require('fs');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel, DataSetModel } = require('../db/db-connect');
 const MESSAGE = require('../config/code_msg');
+const {updateProjectDatasetInfo} = require('./project.service');
 
 async function saveDataSetInfo(req) {
 
@@ -38,7 +39,9 @@ async function saveDataSetInfo(req) {
         format: req.body.format,
         createTime: Date.now(),
         updateTime: Date.now(),
-        dataSynchronize: dataSynchronize
+        dataSynchronize: dataSynchronize,
+        totalRows: req.body.totalRows,
+        totalColumns: req.body.totalColumns? req.body.totalColumns: 0,
     };
     
     if (config.useLocalFileSys) {
@@ -86,7 +89,6 @@ async function saveDataSetInfo(req) {
 
     }else if (req.body.format == DATASETTYPE.LOG) {
         dataSet.topReview = req.body.topReview;
-        dataSet.totalRows = req.body.totalRows;
     }
     
     let conditions = { dataSetName: req.body.dsname };
@@ -219,7 +221,9 @@ async function deleteDataSet(req) {
         }
 
     }
-
+    for (const projectName of ds[0].projects) {
+        await updateProjectDatasetInfo(projectName, ds[0].dataSetName, OPERATION.DELETE);
+    }
     console.log(`[ DATASET ] Service deleteDataSet.removeDataSet`);
     await mongoDb.removeByConditions(DataSetModel, { dataSetName: ds[0].dataSetName });
     
@@ -271,6 +275,25 @@ async function updateDataset(req) {
 
 }
 
+async function updateDatasetProjectInfo(datasetName, projectName, operation) {
+
+    const condistion = {datasetName: datasetName};
+    const options = { new: true, upsert: true };
+    let update = {};
+
+    if (OPERATION.ADD == operation) {
+        update["$push.projects"] = projectName;
+    }else if (OPERATION.DELETE == operation) {
+        update["$pull.projects"] = projectName;
+    }else{
+        throw  MESSAGE.VALIDATATION_OPERATION;
+    }
+    
+    console.log(`[ DATASET ] Service updateDatasetProjectInfo`);
+    return mongoDb.findOneAndUpdate(DataSetModel, condistion, update, options);
+    
+}
+
 module.exports = {
     saveDataSetInfo,
     queryDataSetByUser,
@@ -279,4 +302,5 @@ module.exports = {
     signS3Url,
     imageTopPreview,
     updateDataset,
+    updateDatasetProjectInfo,
 }

@@ -16,6 +16,7 @@ module.exports = {
     USER_DELETE: "/users", //swagger
     USER_ROLE_EDIT: "/users", //swagger
     USER_ROLE: "/users/roles", //swagger
+    USER_DASHBOARD: "/users/dashboard", //swagger
     FILE_DATASET_QUERY: "/users/datasets",//swagger
     PROJECT_LIST_ANNOTATOR: "/users/projects/names", // no
 

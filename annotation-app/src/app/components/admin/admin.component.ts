@@ -244,7 +244,7 @@ export class AdminComponent implements OnInit {
           role: this.optionsSet,
           name: str.replace(str[0], str[0].toUpperCase()),
         };
-        this.avaService.saveUser(this.userRoleInfo).subscribe(
+        this.avaService.saveUser([this.userRoleInfo]).subscribe(
           (res) => {
             this.loading = false;
             this.createUserDialog = false;

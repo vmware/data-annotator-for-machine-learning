@@ -9,7 +9,7 @@
 const srsImporter = require("../utils/srsImporter");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
-const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH, QUERYORDER, ANNOTATION_QUESTION, TICKET_DESCRIPTION, SOURCE, QUERY_STRATEGY, ESTIMATOR } = require("../config/constant");
+const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH, QUERYORDER, ANNOTATION_QUESTION, TICKET_DESCRIPTION, SOURCE, QUERY_STRATEGY, ESTIMATOR, OPERATION } = require("../config/constant");
 const fs = require('fs');
 const ObjectId = require("mongodb").ObjectID;
 const moment = require('moment');
@@ -127,7 +127,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
         assignmentLogic: req.body.assignmentLogic ? req.body.assignmentLogic : QUERYORDER.RANDOM,
         annotator: annotators,
         dataSource: req.body.fileName ? req.body.fileName : "",
-        selectedDataset: [req.body.selectedDataset ? req.body.selectedDataset : ""],
+        selectedDataset: req.body.selectedDataset ? [req.body.selectedDataset] : [],
         selectedColumn: selectedColumn,
         annotationQuestion: req.body.annotationQuestion ? req.body.annotationQuestion : ANNOTATION_QUESTION,
         fileSize: req.body.fileSize ? req.body.fileSize : 1,
@@ -156,7 +156,6 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
     const conditions = { projectName: req.body.pname };
     const update = { $set: project };
     const options = { new: true, upsert: true };
-
 
     return mongoDb.findOneAndUpdate(ProjectModel, conditions, update, options)
 }

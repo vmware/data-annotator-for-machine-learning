@@ -69,6 +69,18 @@ router.get(APIs.USER_ROLE, (req, res) => {
     });
 });
 
+/* PUTCH USER update dashboard */
+router.patch(APIs.USER_DASHBOARD, (req, res) => {
+    console.log(`[ USER ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+    userService.saveUserDashboard(req).then(response => {
+        console.log(`[ USER ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+        res.status(200).json(response);
+    }).catch(error => {
+        console.log(`[ USER ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+        res.status(500).send(error);
+    });
+});
+
 /* Get user Rank */
 router.get(APIs.USER_RANK, (req, res) => {
     console.log(`[ USER ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
