@@ -6,7 +6,7 @@
 ***/
 
 
-const { PAGINATELIMIT, PROJECTTYPE, FILEPATH } = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, FILEPATH, OPERATION } = require("../config/constant");
 const { ImgModel, DataSetModel } = require("../db/db-connect");
 const emailService = require('../services/email-service');
 const mongoDb = require('../db/mongo.db');
@@ -14,6 +14,7 @@ const validator = require("./validator");
 const { ObjectId } = require("mongodb");
 const config = require("../config/config");
 const localFileSysService = require('../services/localFileSys.service');
+const {updateDatasetProjectInfo} = require('../services/dataSet-service');
 
 async function execute(req, sendEmail, annotators) {
 
@@ -57,7 +58,7 @@ async function execute(req, sendEmail, annotators) {
     }
     emailService.sendEmailToAnnotator(param).catch(err => console.error(`[ IMAGE ][ ERROR ] send email:`, err));
   }
-
+  await updateDatasetProjectInfo(selectedDataset, req.body.pname, OPERATION.ADD)
   console.log(`[ IMAGE ] Utils imgImporter.execute end: `, Date.now());
 
 }

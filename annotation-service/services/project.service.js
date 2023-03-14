@@ -18,6 +18,7 @@ const { formatDate } = require('../utils/common.utils');
 const slackChat = require("./slack/slackChat.service");
 const { default: axios } = require("axios");
 const MESSAGE = require('../config/code_msg');
+const dataSetService = require('./dataSet-service')
 
 async function getProjects(req) {
     console.log(`[ PROJECT ] Service getProjects query user role`);
@@ -129,9 +130,12 @@ async function deleteProject(req) {
         };
         await axios.delete(url, reqConfig);
     }
-
+    
+    for (const dsName of mp.project.selectedDataset) {
+        await dataSetService.updateDatasetProjectInfo(dsName, mp.project.projectName, OPERATION.DELETE);
+    }
     console.log(`[ PROJECT ] Service delete project`, conditions);
-    await mongoDb.deleteOneByConditions(ProjectModel, conditions);
+    return mongoDb.deleteOneByConditions(ProjectModel, conditions);
 
 }
 async function updateProject(req) {
@@ -1049,7 +1053,22 @@ async function getProjectsTextTabular(email) {
     return mongoDb.findByConditions(ProjectModel, condition, project, options);
 }
 
+async function updateProjectDatasetInfo(projectName, datasetName, operation) {
+    const condistion = {projectName: projectName};
+    const options = { new: true, upsert: true };
+    let update = {};
 
+    if (OPERATION.ADD == operation) {
+        update["$push.selectedDataset"] = datasetName;
+    }else if (OPERATION.DELETE == operation) {
+        update["$pull.selectedDataset"] = datasetName;
+    }else{
+        throw  MESSAGE.VALIDATATION_OPERATION;
+    }
+    
+    console.log(`[ DATASET ] Service updateDatasetProjectInfo`);
+    return mongoDb.findOneAndUpdate(ProjectModel, condistion, update, options);
+}
 
 
 module.exports = {
@@ -1077,4 +1096,5 @@ module.exports = {
     initHierarchicalLabelsCase,
     reduceHierarchicalUnselectedLabel,
     prepareUserInputs,
+    updateProjectDatasetInfo,
 }

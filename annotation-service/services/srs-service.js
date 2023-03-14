@@ -9,7 +9,7 @@
 const ObjectId = require("mongodb").ObjectID;
 const projectService = require('./project.service');
 const validator = require('../utils/validator');
-const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDER } = require("../config/constant");
+const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDER, OPERATION } = require("../config/constant");
 const csv = require('csvtojson');
 const alService = require('./activelearning.service');
 const _ = require("lodash");
@@ -23,6 +23,7 @@ const fileSystemUtils = require('../utils/fileSystem.utils');
 const config = require('../config/config');
 const { reduceHierarchicalUnselectedLabel, initHierarchicalLabelsCase } = require('./project.service');
 const MESSAGE = require('../config/code_msg');
+const dataSetService = require('./dataSet-service')
 
 async function updateSrsUserInput(req, from) {
 
@@ -656,7 +657,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
                 $push: { selectedDataset: req.body.selectedDataset }
             };
             await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
-
+            await dataSetService.updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD);
             await projectService.updateAssinedCase(conditions, caseNum, true);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
         } catch (error) {
@@ -710,7 +711,7 @@ async function appendSrsData(req) {
         //validate pname and headers
         const originalHeaders = mp.project.selectedColumn;
         if (req.body.isFile) {
-            //file append            
+            //file append
             await appendSrsDataByCSVFile(req, originalHeaders, project);
             console.log(`[ SRS ] Service append tickets by CSV file done`);
         } else {

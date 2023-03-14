@@ -6,7 +6,7 @@
 ***/
 
 
-const { PAGINATETEXTLIMIT, PROJECTTYPE, FILETYPE, APPENDSR, DATASETTYPE } = require("../config/constant");
+const { PAGINATETEXTLIMIT, PROJECTTYPE, FILETYPE, APPENDSR, DATASETTYPE, OPERATION } = require("../config/constant");
 const { LogModel, ProjectModel } = require("../db/db-connect");
 const emailService = require('../services/email-service');
 const mongoDb = require('../db/mongo.db');
@@ -16,6 +16,7 @@ const readline = require('readline');
 const unzip = require('unzip-stream');
 const fileSystemUtils = require('./fileSystem.utils');
 const projectService = require('../services/project.service');
+const {updateDatasetProjectInfo} = require('../services/dataSet-service');
 
 async function execute(req, sendEmail, annotators, append) {
 
@@ -134,7 +135,9 @@ async function execute(req, sendEmail, annotators, append) {
 
       await projectService.updateAssinedCase(condition, totalCase, true);
     }
-
+    
+    await updateDatasetProjectInfo(selectedDataset, projectName, OPERATION.ADD);
+    
     await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
 
     if (sendEmail && annotators.length > 0) {
