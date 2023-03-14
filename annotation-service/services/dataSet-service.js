@@ -7,7 +7,7 @@
 
 
 const S3Utils = require('../utils/s3');
-const {DATASETTYPE, S3OPERATIONS, FILEPATH, OPERATION} = require('../config/constant');
+const {DATASETTYPE, S3OPERATIONS, FILEPATH, OPERATION, SRCS} = require('../config/constant');
 const ObjectId = require("mongodb").ObjectID;
 const validator = require('../utils/validator');
 const config = require('../config/config');
@@ -19,6 +19,8 @@ const mongoDb = require('../db/mongo.db');
 const { ProjectModel, DataSetModel } = require('../db/db-connect');
 const MESSAGE = require('../config/code_msg');
 const {updateProjectDatasetInfo} = require('./project.service');
+const {queryUserById} = require('./user-service');
+
 
 async function saveDataSetInfo(req) {
 
@@ -102,9 +104,15 @@ async function saveDataSetInfo(req) {
 }
 
 async function queryDataSetByUser(req) {
-    console.log(`[ DATASET ] Service queryDataSetByUser`);
-    const condition = { user: req.auth.email };
+    
+    const user = req.auth.email;
     const format = req.query.format;
+    const src = req.query.src;
+    const dsid = req.query.dsid;
+    
+    //query current user's dataset
+    let condition = { user: user };
+    //query by format
     if (format) {
         if (format == DATASETTYPE.CSV) {
             condition.$or = [
@@ -115,11 +123,19 @@ async function queryDataSetByUser(req) {
             condition.format = format;
         }
     }
-    const datasets = await mongoDb.findByConditions(DataSetModel, condition);
-    if (datasets && (!format || format == DATASETTYPE.IMGAGE) ) {
-        return imageTopPreview(datasets);
+    //query single dataset
+    if (dsid) {
+        condition = { _id: dsid };
     }
-    return datasets;
+    //admin query all dataset
+    if (src == SRCS.ADMIN) {
+        await validator.checkAdmin(user)
+        condition = {};
+    }
+    
+    console.log(`[ DATASET ] Service queryDataSetByUser`);
+    const datasets = await mongoDb.findByConditions(DataSetModel, condition);
+    return imageTopPreview(datasets);
     
 }
 
