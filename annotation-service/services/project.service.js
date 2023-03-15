@@ -18,7 +18,6 @@ const { formatDate } = require('../utils/common.utils');
 const slackChat = require("./slack/slackChat.service");
 const { default: axios } = require("axios");
 const MESSAGE = require('../config/code_msg');
-const dataSetService = require('./dataSet-service')
 
 async function getProjects(req) {
     console.log(`[ PROJECT ] Service getProjects query user role`);
@@ -132,7 +131,8 @@ async function deleteProject(req) {
     }
     
     for (const dsName of mp.project.selectedDataset) {
-        await dataSetService.updateDatasetProjectInfo(dsName, mp.project.projectName, OPERATION.DELETE);
+        //to solve the circle dependence
+        await require('./dataSet-service').updateDatasetProjectInfo(dsName, mp.project.projectName, OPERATION.DELETE);
     }
     console.log(`[ PROJECT ] Service delete project`, conditions);
     return mongoDb.deleteOneByConditions(ProjectModel, conditions);
@@ -1066,7 +1066,7 @@ async function updateProjectDatasetInfo(projectName, datasetName, operation) {
         throw  MESSAGE.VALIDATATION_OPERATION;
     }
     
-    console.log(`[ DATASET ] Service updateDatasetProjectInfo`);
+    console.log(`[ DATASET ] Service updateProjectDatasetInfo`);
     return mongoDb.findOneAndUpdate(ProjectModel, condistion, update, options);
 }
 
