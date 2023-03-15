@@ -1059,9 +1059,9 @@ async function updateProjectDatasetInfo(projectName, datasetName, operation) {
     let update = {};
 
     if (OPERATION.ADD == operation) {
-        update["$push.selectedDataset"] = datasetName;
+        update = { $push: { selectedDataset: datasetName } };
     }else if (OPERATION.DELETE == operation) {
-        update["$pull.selectedDataset"] = datasetName;
+        update = { $pull: { selectedDataset: datasetName } };
     }else{
         throw  MESSAGE.VALIDATATION_OPERATION;
     }
