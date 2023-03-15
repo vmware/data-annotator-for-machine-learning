@@ -18,7 +18,6 @@ const fs = require('fs');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel, DataSetModel } = require('../db/db-connect');
 const MESSAGE = require('../config/code_msg');
-const {updateProjectDatasetInfo} = require('./project.service');
 const {queryUserById} = require('./user-service');
 
 
@@ -238,7 +237,7 @@ async function deleteDataSet(req) {
 
     }
     for (const projectName of ds[0].projects) {
-        await updateProjectDatasetInfo(projectName, ds[0].dataSetName, OPERATION.DELETE);
+        await require('./project.service').updateProjectDatasetInfo(projectName, ds[0].dataSetName, OPERATION.DELETE);
     }
     console.log(`[ DATASET ] Service deleteDataSet.removeDataSet`);
     await mongoDb.removeByConditions(DataSetModel, { dataSetName: ds[0].dataSetName });
@@ -291,9 +290,9 @@ async function updateDataset(req) {
 
 }
 
-async function updateDatasetProjectInfo(datasetName, projectName, operation) {
+async function updateDatasetProjectInfo(dataSetName, projectName, operation) {
 
-    const condistion = {datasetName: datasetName};
+    const condistion = {dataSetName: dataSetName};
     const options = { new: true, upsert: true };
     let update = {};
 
