@@ -72,13 +72,15 @@ SPDX-License-Identifier: Apache-2.0 -->
     [clrWizardPageNextDisabled]="wizardData.projectType === 'ner' ? false : selectDescription.length == 0"
   >
     <ng-template clrPageNavTitle>
-      {{ wizardData.projectType === 'ner' ? 'Select Helpful Column' : 'Select Text Column' }}
+      {{ wizardData.projectType === 'ner' ? 'Select Helpful Column' : wizardData.projectType === 'qa'? 'Select Column':'Select Text Column' }}
     </ng-template>
     
     <ng-template clrPageTitle>
       {{
         wizardData.projectType === 'ner'
         ? 'Select the columns to present to annotators about the existing labels (optional) or helpful text (optional)'
+        : wizardData.projectType === 'qa'
+        ? 'Select the question column and text column to present to annotators'
         : 'Select the columns to present to annotators'
       }}
     </ng-template>
@@ -88,6 +90,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       <div *ngIf="wizardData.projectType === 'qa'">
         <app-clr-select
           [data]="clrSelectData" 
+          (valueChange)="onReciveSelectedText($event)">
+        </app-clr-select>
+        <app-clr-select
+          [data]="clrSelectData2" 
           (valueChange)="onReciveSelectedText($event)">
         </app-clr-select>
       </div>
