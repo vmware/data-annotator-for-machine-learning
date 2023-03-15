@@ -393,7 +393,11 @@ export class CreateNewComponent implements OnInit {
     );
     formData.append(
       'selectLabels',
-      this.msg.type === 'ner' ? JSON.stringify(this.checkboxChecked) : this.dropdownSelected,
+      this.msg.type === 'ner' 
+        ? JSON.stringify(this.checkboxChecked)
+        : this.msg.type === 'qa' 
+        ? JSON.stringify([])
+        : this.dropdownSelected,
     );
 
     formData.append('ticketQuestions', JSON.stringify(this.helpfulText));

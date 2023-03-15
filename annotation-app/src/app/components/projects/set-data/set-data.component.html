@@ -42,21 +42,18 @@ SPDX-License-Identifier: Apache-2.0 -->
   </clr-wizard-page>
   <!-- select label -->
   <clr-wizard-page
-    [clrWizardPageNextDisabled]="(wizardData.projectType !== 'qa' && !selectedDropDownItem) || !formPageOne.valid"
+    *ngIf="wizardData.projectType != 'qa'"
+    [clrWizardPageNextDisabled]="!selectedDropDownItem || !formPageOne.valid"
     (clrWizardPageOnLoad)="clrWizardPageOnLoad('page2')"
   >
     <ng-template clrPageTitle>{{
       wizardData.projectType === 'ner'
         ? 'Please select a single text column which you intend to present to annotators to annotate'
-        : wizardData.projectType === 'qa'
-        ? 'Please select the question column which you intend to labels from'
         : 'Please select the column which you intend to calculate labels from'
     }}</ng-template>
     <ng-template clrPageNavTitle>{{
       wizardData.projectType === 'ner'
       ? 'Select Text Column'
-      : wizardData.projectType === 'qa'
-      ? 'Select Question Column'
       : 'Select Label Column'
     }}</ng-template>
     <form clrForm #formPageOne="ngForm">
@@ -90,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <div *ngIf="wizardData.projectType === 'qa'">
         <app-clr-select
           [data]="clrSelectData" 
-          (valueChange)="onReciveSelectedText($event)">
+          (valueChange)="onReceiveSelectedItem($event)">
         </app-clr-select>
         <app-clr-select
           [data]="clrSelectData2" 
