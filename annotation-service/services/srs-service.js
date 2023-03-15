@@ -23,7 +23,7 @@ const fileSystemUtils = require('../utils/fileSystem.utils');
 const config = require('../config/config');
 const { reduceHierarchicalUnselectedLabel, initHierarchicalLabelsCase } = require('./project.service');
 const MESSAGE = require('../config/code_msg');
-const dataSetService = require('./dataSet-service')
+const {updateDatasetProjectInfo} = require('./dataSet-service')
 
 async function updateSrsUserInput(req, from) {
 
@@ -657,7 +657,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
                 $push: { selectedDataset: req.body.selectedDataset }
             };
             await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
-            await dataSetService.updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD);
+            await updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD);
             await projectService.updateAssinedCase(conditions, caseNum, true);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
         } catch (error) {
