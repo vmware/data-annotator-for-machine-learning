@@ -58,7 +58,7 @@ async function execute(req, sendEmail, annotators) {
     }
     emailService.sendEmailToAnnotator(param).catch(err => console.error(`[ IMAGE ][ ERROR ] send email:`, err));
   }
-  await updateDatasetProjectInfo(selectedDataset, req.body.pname, OPERATION.ADD)
+  await updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD)
   console.log(`[ IMAGE ] Utils imgImporter.execute end: `, Date.now());
 
 }

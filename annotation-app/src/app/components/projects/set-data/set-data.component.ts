@@ -34,6 +34,7 @@ export class SetDataComponent implements OnInit, OnChanges {
   selectDescription = [];
   checkboxColumns = [];
   clrSelectData = {};
+  clrSelectData2 = {};
   isLoading: boolean;
   formDatagrid: any;
 
@@ -68,7 +69,12 @@ export class SetDataComponent implements OnInit, OnChanges {
         this.clrSelectData = {
           required: false,
           options: [...this.wizardData.csvHeaders],
-          labelText: 'Select The Column',
+          labelText: 'Select Question Column',
+        };
+        this.clrSelectData2 = {
+          required: true,
+          options: [...this.wizardData.csvHeaders],
+          labelText: 'Select Text Column',
         };
       }else{
         this.clrSelectData = {

@@ -2818,6 +2818,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       selection = window.getSelection();
 
     if (selection.isCollapsed) return [];
+    selection = this.extendWordSelection(selection);
     const mySelf = document.getElementsByClassName('nerPassage')[0];
 
     for (i = 0; i < selection.rangeCount; i++) {
@@ -2868,6 +2869,38 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     selection.removeAllRanges();
 
     return ranges;
+  }
+
+  extendWordSelection(selection){
+    if (this.projectType != 'qa') {
+      return selection;
+    }
+
+    let range = document.createRange();
+    range.setStart(selection.anchorNode, selection.anchorOffset);
+    range.setEnd(selection.focusNode, selection.focusOffset);
+    let backwards = range.collapsed;
+    range.detach();
+
+    // modify() works on the focus of the selection
+    let endNode = selection.focusNode;
+    let endOffset = selection.focusOffset;
+    selection.collapse(selection.anchorNode, selection.anchorOffset);
+    
+    let direction = [];
+    if (backwards) {
+        direction = ['backward', 'forward'];
+    } else {
+        direction = ['forward', 'backward'];
+    }
+
+    selection.modify("move", direction[0], "character");
+    selection.modify("move", direction[1], "word");
+    selection.extend(endNode, endOffset);
+    selection.modify("extend", direction[1], "character");
+    selection.modify("extend", direction[0], "word");
+
+    return selection;
   }
 
   initNerPassage(element, selectedEntityID0) {
