@@ -181,7 +181,11 @@ async function prepareHeaders(project, format) {
     } else if (project.projectType == PROJECTTYPE.LOG) {
         headerArray.push({ id: "fileName", title: "fileName" });
         headerArray.push({ id: "freeText", title: "freeText" });
-    } else {
+    } else if(project.projectType == PROJECTTYPE.QA){
+        headerArray.push({ id: 'context', title: 'context' });
+        headerArray.push({ id: 'question', title: 'question' });
+        headerArray.push({ id: 'answers', title: 'answers' });
+    }else {
         await project.selectedColumn.forEach(item => {
             headerArray.push({ id: item, title: item });
         });
@@ -196,10 +200,7 @@ async function prepareHeaders(project, format) {
             await labelsArray.forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
-        } else if(project.projectType == PROJECTTYPE.QA){
-            headerArray.push({ id: 'Questions', title: 'Questions' });
-            headerArray.push({ id: 'Answers', title: 'Answers' });
-        }else {
+        } else if(project.projectType != PROJECTTYPE.QA){
             await project.categoryList.split(",").forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
@@ -314,52 +315,34 @@ async function prepareContents(srData, project, format) {
                 newCase[item] = newCase[item][0] ? JSON.stringify(newCase[item]) : [];
             });
         } else if(project.projectType == PROJECTTYPE.QA){
-            // init selected data
-            await project.selectedColumn.forEach(item => {
-                newCase[item] = (srs.originalData)[item];
-            });
+            // take user input or reviewed info
+            const userInputDatas = await prepareUserInputs(srs);
             // init questions cloumn
             let questionForText = srs.questionForText;
-            // init pop-up lables
-            await project.popUpLabels.forEach(item => {
-                newCase[item] = [];
-            });
-
-            const userInputDatas = await prepareUserInputs(srs);
             if (srs.reviewInfo.modified) {
                 questionForText = userInputDatas[0].questionForText;
             }
             // init answer cloumn
-            let answersList = [];
             for await(const item of userInputDatas) {
-                //answers cloumn data
                 for await(const question of questionForText) {
-                    let answer = {question: question, answers: []};
+                    let answers = {text: [], answer_start: []};
                     for await(const lb of item.problemCategory) {
                         if (lb.label === question) {            
-                            answer['answers'].push([lb.text, lb.start, lb.end]);
-                        } 
-                    }
-                    await answersList.push(answer);
-                }
-                
-                //popup lablels
-                for await(const label of project.popUpLabels) {
-                    for await(const lb of item.problemCategory) {
-                        if (lb.popUpLabel === label) {
-                            newCase[label].push([lb.text, lb.start, lb.end])
+                            answers['text'].push(lb.text);
+                            answers['answer_start'].push(lb.start);
                         }
+                    }
+                    // current question has answer
+                    if (answers.text.length) {
+                        cvsData.push({
+                            context: Object.values(srs.originalData)[0],
+                            question: question,
+                            answers: JSON.stringify(answers)
+                        });
                     }
                 }
             }
-            //add questions column
-            newCase['Questions'] = await JSON.stringify(questionForText);
-            //add answers cloumn
-            newCase['Answers'] = await JSON.stringify(answersList);
-            //change annotations pop-up labels to a string array
-            await project.popUpLabels.forEach(item => {
-                newCase[item] = newCase[item][0] ? JSON.stringify(newCase[item]) : [];
-            });
+            
         }else if (project.projectType == PROJECTTYPE.LOG) {
             // init log classification fileName
             newCase.fileName = srs.fileInfo.fileName;
@@ -492,7 +475,9 @@ async function prepareContents(srData, project, format) {
                 }
             }
         }
-        cvsData.push(newCase);
+        if (project.projectType != PROJECTTYPE.QA) {
+            cvsData.push(newCase);
+        }
     }
     return cvsData;
 }
