@@ -894,14 +894,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                   type="text" 
                   id="inputQuestion" 
                   class="clr-input"
-                  placeholder="Add New The Question Here" 
+                  placeholder="Add new question here then press the Enter key to save the question" 
                   (keyup.enter)="onAddQuestion($event)"
                   (blur)="onAddQuestion($event)"
                   (keyup)="onAddQuestion($event, true)"
                   name="inputQuestion"
                   [(ngModel)]="inputQuestion"
                   [ngModelOptions]="{ standalone: true }"
-                  style="width:30em"
+                  style="width:40em"
                 />
                 <clr-icon class="clr-validate-icon" shape="exclamation-circle"></clr-icon>
               </div>
