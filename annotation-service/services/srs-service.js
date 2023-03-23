@@ -654,7 +654,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
             const update = {
                 $set: { appendSr: APPENDSR.DONE, updatedDate: Date.now() },
                 $inc: { totalCase: caseNum },
-                $push: { selectedDataset: req.body.selectedDataset }
+                $addToSet: { selectedDataset: req.body.selectedDataset }
             };
             await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
             await updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD);
@@ -690,7 +690,7 @@ async function appendSrsData(req) {
         if (req.body.isFile == true || req.body.isFile == 'true') {
             //file append
             await imgImporter.execute(req, false);
-            update.$push = { selectedDataset: dataset };
+            update.$addToSet = { selectedDataset: dataset };
             update.$inc = { totalCase: datasets[0].images.length };
 
         } else {

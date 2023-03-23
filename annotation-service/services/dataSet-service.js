@@ -290,22 +290,26 @@ async function updateDataset(req) {
 
 }
 
-async function updateDatasetProjectInfo(dataSetName, projectName, operation) {
+async function updateDatasetProjectInfo(dataSetName, projectName, operation, newProjectName) {
 
-    const condistion = {dataSetName: dataSetName};
+    const condition = {dataSetName: dataSetName};
     const options = { new: true, upsert: true };
     let update = {};
 
     if (OPERATION.ADD == operation) {
-        update = { $push: { projects: projectName } }
+        update = { $addToSet: { projects: projectName } }
     }else if (OPERATION.DELETE == operation) {
         update = { $pull: { projects: projectName } }
+    }else if (OPERATION.UPDATE == operation) {
+        condition['projects'] = projectName
+        update = { $set: {"projects.$": newProjectName} }
+        
     }else{
         throw  MESSAGE.VALIDATATION_OPERATION;
     }
     
     console.log(`[ DATASET ] Service updateDatasetProjectInfo`);
-    return mongoDb.findOneAndUpdate(DataSetModel, condistion, update, options);
+    return mongoDb.findOneAndUpdate(DataSetModel, condition, update, options);
     
 }
 
