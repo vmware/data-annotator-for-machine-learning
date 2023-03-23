@@ -131,7 +131,7 @@ async function execute(req, sendEmail, annotators, append) {
     if (append) {
 
       update.$set = { appendSr: APPENDSR.DONE };
-      update.$push = { selectedDataset: selectedDataset };
+      update.$addToSet = { selectedDataset: selectedDataset };
 
       await projectService.updateAssinedCase(condition, totalCase, true);
     }

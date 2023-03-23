@@ -151,6 +151,11 @@ async function updateProject(req) {
         const srsCondition = { projectName: req.body.previousPname };
         const srsDoc = { projectName: req.body.pname };
         await mongoDb.updateManyByConditions(mp.model, srsCondition, srsDoc);
+        //update dataset maped projectName
+        for (const dsName of _.union(mp.project.selectedDataset)) {
+            await require('./dataSet-service').updateDatasetProjectInfo(dsName, req.body.previousPname, OPERATION.UPDATE, req.body.pname);
+        }
+        
     }
 
     const projectInfo = mp.project;
@@ -1054,20 +1059,20 @@ async function getProjectsTextTabular(email) {
 }
 
 async function updateProjectDatasetInfo(projectName, datasetName, operation) {
-    const condistion = {projectName: projectName};
+    const condition = {projectName: projectName};
     const options = { new: true, upsert: true };
     let update = {};
 
     if (OPERATION.ADD == operation) {
-        update = { $push: { selectedDataset: datasetName } };
+        update = { $addToSet: { selectedDataset: datasetName } };
     }else if (OPERATION.DELETE == operation) {
         update = { $pull: { selectedDataset: datasetName } };
     }else{
         throw  MESSAGE.VALIDATATION_OPERATION;
     }
     
-    console.log(`[ DATASET ] Service updateProjectDatasetInfo`);
-    return mongoDb.findOneAndUpdate(ProjectModel, condistion, update, options);
+    console.log(`[ DATASET ] Service updateProjectDatasetInfo`, update);
+    return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
 }
 
 
