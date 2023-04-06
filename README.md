@@ -34,6 +34,14 @@ Core features include:
 - [User guide](https://github.com/vmware/data-annotator-for-machine-learning/wiki/DAML-User-Guide)
 - [Tutorial](https://github.com/vmware/data-annotator-for-machine-learning/wiki/Tutorial:-Using-DAML-to-Label-the-Sentiment-of--VMware-Reddit-and-Twitter-Comments)
 
+## DAML upgrade
+
+- DAML upgrade to v3.0.0 that mainly raise UI/UX to a higher standard
+  - [DAML v3.0.0 release note](https://github.com/vmware/data-annotator-for-machine-learning/releases/tag/v2.1.0). The latest code saved in branch master.
+  - [DAML versions older than v3.0.0 releases](https://github.com/vmware/data-annotator-for-machine-learning/releases). The last version v2.1.0 (which still keep our old UI style) before v3.0.0 is saved in branch DAML-v2.1.0.
+- As for DAML UI upgrade, our e2e code also updated
+  - The latest e2e code saved in branch e2e-test.
+  - The old UI e2e code saved in branch DAML-v2.1.0-e2e.
 
 ## What is included
 
