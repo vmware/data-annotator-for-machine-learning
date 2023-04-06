@@ -1,9 +1,9 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
-import { CommonPage } from "./commom-page";
-import { ProjecstPage } from "../page-object/projects-page";
+import { CommonPage } from "./common-page";
+import { ProjectsPage } from "../page-object/projects-page";
 import { MyDatasetsPage } from "../page-object/my-datasets-page";
 import { browser, ExpectedConditions, by } from "protractor";
 import { Constant } from "./constant";
@@ -12,7 +12,7 @@ import { FunctionUtil } from "../utils/function-util";
 export class CommonUtils extends CommonPage {
   static DEFAULT_TIME_OUT = 100 * 1000;
   static commonPage: CommonPage = new CommonPage();
-  static projcetsPage: ProjecstPage = new ProjecstPage();
+  static projcetsPage: ProjectsPage = new ProjectsPage();
   static myDatasetsPage: MyDatasetsPage = new MyDatasetsPage();
 
   static async deleteFunction(name: string) {
@@ -71,7 +71,7 @@ export class CommonUtils extends CommonPage {
         ),
         this.DEFAULT_TIME_OUT
       );
-      await this.myDatasetsPage.filterDatasetstName(myDatasetsName);
+      await this.myDatasetsPage.filterDatasetName(myDatasetsName);
       let filtered_MyDatasets_Count =
         await this.myDatasetsPage.getTableLength();
       if (filtered_MyDatasets_Count > 0) {
@@ -82,23 +82,30 @@ export class CommonUtils extends CommonPage {
     }
   }
 
-  static async deleteDataGrid(DELETE_BTN, DELETE_DATASET_OK_BTN) {
+  static async deleteDataGrid(
+    ACTION_ICONS,
+    ACTION_BUTTONS,
+    DELETE_DATA_OK_BTN?
+  ) {
     return browser
       .wait(
-        ExpectedConditions.visibilityOf(DELETE_BTN),
+        ExpectedConditions.visibilityOf(ACTION_ICONS),
         Constant.DEFAULT_TIME_OUT
       )
       .then(() => {
-        DELETE_BTN.click();
+        FunctionUtil.click(ACTION_ICONS);
+      })
+      .then(() => {
+        FunctionUtil.click(ACTION_BUTTONS);
       })
       .then(() => {
         return browser.wait(
-          ExpectedConditions.visibilityOf(DELETE_DATASET_OK_BTN),
+          ExpectedConditions.visibilityOf(DELETE_DATA_OK_BTN),
           Constant.DEFAULT_TIME_OUT
         );
       })
       .then(() => {
-        DELETE_DATASET_OK_BTN.click();
+        FunctionUtil.click(DELETE_DATA_OK_BTN);
       })
       .then(() => {
         browser.sleep(3000);

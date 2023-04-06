@@ -1,10 +1,10 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
 import { Constant } from "../general/constant";
-import { CommonPage } from "../general/commom-page";
+import { CommonPage } from "../general/common-page";
 import { FunctionUtil } from "../utils/function-util";
 import { protractor } from "protractor/built/ptor";
 
@@ -13,7 +13,9 @@ export class NewProjectPage extends CommonPage {
   PROJECT_NAME = $("#projectName");
   TASK_INSTRUCTION = $("#taskInstruction");
   UPLOAD_CSV_BTN = $(".clr-input-wrapper .btn.btn-sm.add-doc");
-  CHOOSE_FILE_BTN = $('input[name="localFileFile"]');
+  CHOOSE_FILE_BTN = $('input[name="localFile"]');
+
+  CHOOSE_FILE_LABEL = $('label[for="localFile"]');
   UPLOAD_CSV_OK_BTN = $(".modal-footer .btn.btn-primary");
   UPLOAD_CSV_CANCEL_BTN = $(".modal-footer .btn.btn-outline");
   SET_DATA_TAB = $("clr-wizard clr-datagrid");
@@ -24,11 +26,18 @@ export class NewProjectPage extends CommonPage {
   );
   SET_DATA_BTN = $("clr-wizard-button:nth-child(4)");
   MAX_ANNOTATIONS = $("#maxAnnotations");
-  ADD_NEW_LABLE = $(".labelsList .clr-input");
-  ASSIGNEE = $("#assignee");
-  CREATE_BTN = $('.content-area button[type="submit"]');
+  ADD_NEW_LABEL = $$(
+    ".clr-input-wrapper input[placeholder='Enter Text Label Here']"
+  );
+  ASSIGNEE = $$("#inputEmail");
+  TICKETS_INPUT = $('input[placeholder="Number of tickets assigned"]');
+  CREATE_BTN = $("clr-wizard-button[type=finish]");
   CSV_NAME = $(".modal-content #datasetsName");
-  MY_PROJECTS_TAB = element(by.css('.header-nav a[href="/projects"]'));
+  LABELING_TASK_NAV = $("clr-vertical-nav-group:nth-child(2)");
+  CREATE_LABELING_TASK__NAV = element(
+    by.css('.nav-group-children a[href="/loop/project/create"]')
+  );
+  MY_PROJECTS_TAB = element(by.css('a[href="/loop/project/create"]'));
   PROJECT_TABULAR_CLASSIFICATION = element(
     by.css('clr-dropdown-menu a[href="/projects/create/tabular"]')
   );
@@ -44,6 +53,7 @@ export class NewProjectPage extends CommonPage {
   SELECT_AL_CLASSIFIER = element(
     by.css("select[formcontrolname=selectedClassifier]")
   );
+  SELECT_PROJECT_TYPE = element(by.css("select[formcontrolname=projectType]"));
   SELECT_AL_QUERY_STRATEGY = element(
     by.css("select[formcontrolname=selectedqueryStrategy]")
   );
@@ -56,50 +66,78 @@ export class NewProjectPage extends CommonPage {
   );
   ALLOW_MULTIPLE = element(by.css(".labelsList label[for=multipleLabel]"));
   TICKET_COLUMNS = element.all(by.css("clr-dg-row label"));
-  NUMERIC_OPTION = element(by.css("clr-radio-wrapper label[for=numericLabel]"));
-  MUTIL_NUMERIC_OPTION = element(
+  NUMERIC_OPTION = element(by.css("label[for=numericLabel]"));
+  TAXONOMY_OPTION = element(by.css("clr-radio-wrapper label[for=uploadLabel]"));
+  TEXT_LABEL_TYPE_OPTION = element(by.css("label[for=textLabel]"));
+  MIN_LABEL_INPUT = element(by.css("input[placeholder='Enter minimum value']"));
+  MAX_LABEL_INPUT = element(by.css("input[placeholder='Enter maximum value']"));
+  MULTI_LABEL_INPUT = element(
     by.css("clr-radio-wrapper label[for=mutilNumericLabel]")
   );
-  TAXONOMY_OPTION = element(by.css("clr-radio-wrapper label[for=uploadLabel]"));
-  TEXT_LABEL_TYPE_OPTION = element(
-    by.css("clr-radio-wrapper label[for=textLabel]")
+  UPLOAD_TAXONOMY_BTN = element(
+    by.css("clr-radio-wrapper label[for=uploadLabel]")
   );
-  MIN_LABEL_INPUT = element(by.css("input[formcontrolname=min]"));
-  MAX_LABEL_INPUT = element(by.css("input[formcontrolname=max]"));
-  MUTIL_LABEL_INPUT = element(
-    by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]")
-  );
-  ADD_BTN = element(by.css(".add-btn"));
-  UPLOAD_TAXONOMY_BTN = element(by.css(".labelsList .add-doc"));
   SHOW_FILENAME_CHECKBOX = element(by.css("label[for=isShowFilename]"));
   IMAGE_LOADING = element(by.css("span .loadingSpan"));
-  ASSIGN_TICKET_INPUT = element(
-    by.css("ul li:first-child input.assignTicketNumber")
+  ASSIGN_TICKET_INPUT = element.all(
+    by.css('input[placeholder="Number of tickets assigned"]')
   );
   DELETE_LABEL = element
     .all(by.css("div.labelsList div:last-child span"))
     .last();
   DELETE_LABEL_ICON = element(by.css("clr-icon[shape=times]"));
   ASSIGN_TICKET_DELETE_ICON = element(by.css("ul li:last-child clr-icon"));
-  TREE_LABEL_ICON = element(by.css("clr-icon[shape=view-list]"));
-  SHOW_POPUE_LABEL_CHECK = element(
-    by.css("clr-checkbox-wrapper label[for=showPopLabels]")
-  );
+  SHOW_POP_LABEL_CHECK = element(by.css("label[for=y]"));
   DELETE_POP_LABEL = element
-    .all(by.css("div.popLabelsList div:last-child span"))
+    .all(
+      by.css(
+        "#clr-wizard-page-4 > div:nth-child(5) > div > div:nth-child(3) > div > div > cds-icon"
+      )
+    )
     .last();
-  ADD_POP_LABLE = $(".labelsList .clr-input[name=addPopupLables]");
-  WIZARD_NEXT_BTN = $("clr-wizard-button:nth-child(3)");
+  ADD_POP_LABEL = $("label[for=y]");
+  // WIZARD_NEXT_BTN = $("clr-wizard-button:nth-child(3)");
   JSON_RADIO = element(by.css("clr-radio-wrapper label[for='json']"));
   YAML_RADIO = element(by.css("clr-radio-wrapper label[for='yaml']"));
   CLOSE_TREE_MODAL_BTN = element(
     by.css("app-treeview-modal clr-icon[shape='close']")
   );
+  WIZARD_NEXT_BTN = element(by.css("clr-wizard-button[type=next]"));
+  WIZARD_CANCEL_BTN = element(by.buttonText("Back"));
+
+  YES_RADIO = element(by.css("clr-radio-wrapper label[for=yes]"));
+  ICON_PLUS = element.all(by.css("button cds-icon[shape=plus]"));
+
+  LABEL_SELECTOR = element(by.css(".clr-select-wrapper:last-child"));
+  LABEL_SELECTOR_OPTIONS = element.all(
+    by.css(".clr-select-wrapper:last-child select option")
+  );
+  SELECT_COLUMN_DATA_GRID = element(
+    by.css(".clr-col-12.clr-col-md-9 clr-datagrid")
+  );
+  LABEL_TRASH_ICONS = element.all(by.css("div > cds-icon.labelTrash"));
+  EMAIL_TRASH_ICONS = element.all(
+    by.css("#clr-wizard-page-5 cds-icon[shape=trash]")
+  );
+
+  SLACK_TRASH_ICONS = element.all(by.css("div > cds-icon.slackTrash"));
+
+  SURE_BTN = element(by.css(".clr-wizard-btn--primary"));
+  TAXONOMY_FILE_ERROR = element(by.css("cds-icon[shape=error-standard]"));
+  TAXONOMY_FILE_CANCEL = element(by.css("cds-icon[shape=window-close]"));
+  TREE_TOGGLE = element(by.css(".clr-toggle-wrapper"));
+  ADD_LABEL_BTN = element(
+    by.css("#clr-wizard-page-4 .btn.btn-sm.btn-link cds-icon[shape=plus]")
+  );
 
   async navigateTo() {
-    await FunctionUtil.elementVisibilityOf(this.MY_PROJECTS_TAB);
+    console.log("log-go to labeling task");
+    await FunctionUtil.elementVisibilityOf(this.LABELING_TASK_NAV);
     await browser.waitForAngularEnabled(false);
-    await this.MY_PROJECTS_TAB.click();
+    await this.LABELING_TASK_NAV.click();
+    await FunctionUtil.elementVisibilityOf(this.CREATE_LABELING_TASK__NAV);
+    await browser.waitForAngularEnabled(false);
+    await this.CREATE_LABELING_TASK__NAV.click();
   }
 
   async clickNewProjectBtn(projectType) {
@@ -131,6 +169,15 @@ export class NewProjectPage extends CommonPage {
     await this.TASK_INSTRUCTION.sendKeys(instruction);
   }
 
+  async selectProjectType(index) {
+    await FunctionUtil.elementVisibilityOf(this.SELECT_PROJECT_TYPE);
+    await this.SELECT_PROJECT_TYPE.click();
+    await element
+      .all(by.css("select[formcontrolname=projectType] option"))
+      .get(index)
+      .click();
+  }
+
   clickUploadCSVBtn() {
     return browser
       .wait(
@@ -147,18 +194,6 @@ export class NewProjectPage extends CommonPage {
     this.CHOOSE_FILE_BTN.sendKeys(path);
   }
 
-  async setData(type, startIndex?, endIndex?) {
-    await FunctionUtil.elementVisibilityOf(this.SET_DATA_TAB);
-    if (type === "text") {
-      await this.selectTextTicketColumn();
-    } else if (type === "tabular" || type === "ner") {
-      await this.selectMultipleTicketColumn(startIndex, endIndex);
-    }
-    await browser.waitForAngularEnabled(false);
-    await this.setDataLable();
-    await this.waitForUploadloading();
-  }
-
   async selectTextTicketColumn() {
     await FunctionUtil.elementVisibilityOf(
       this.TICKET_COLUMN_CHECKBOX_FOR_TEXT
@@ -167,7 +202,7 @@ export class NewProjectPage extends CommonPage {
   }
 
   async selectMultipleTicketColumn(startIndex, endIndex) {
-    await FunctionUtil.elementVisibilityOf(this.SET_DATA_TAB);
+    await FunctionUtil.elementVisibilityOf(this.SELECT_COLUMN_DATA_GRID);
     this.TICKET_COLUMNS.then(async (column) => {
       for (let i = startIndex; i < endIndex; i++) {
         await column[i].click();
@@ -175,26 +210,10 @@ export class NewProjectPage extends CommonPage {
     });
   }
 
-  setDataLable() {
-    return browser
-      .wait(
-        ExpectedConditions.visibilityOf(this.WIZARD_SELECT_BTN),
-        Constant.DEFAULT_TIME_OUT
-      )
-      .then(async () => {
-        await this.WIZARD_SELECT_BTN.click();
-        return this.WIZARD_SELECT_OPTIONS;
-      })
-      .then(async (list) => {
-        await FunctionUtil.elementVisibilityOf(list[0]);
-        await list[0].click();
-      });
-  }
-
   async selectLabels(labelIndex) {
-    await FunctionUtil.elementVisibilityOf(this.WIZARD_SELECT_BTN);
-    await this.WIZARD_SELECT_BTN.click();
-    await this.WIZARD_SELECT_OPTIONS.get(labelIndex).click();
+    await FunctionUtil.elementVisibilityOf(this.LABEL_SELECTOR);
+    await this.LABEL_SELECTOR.click();
+    await this.LABEL_SELECTOR_OPTIONS.get(labelIndex).click();
   }
 
   async setLabelValidation(labelColumn) {
@@ -217,17 +236,6 @@ export class NewProjectPage extends CommonPage {
     console.log("succeed to setLabelValidation...");
   }
 
-  async setDataSubmit() {
-    console.log("log-start to click set_data btn");
-    await FunctionUtil.elementVisibilityOf($$("clr-wizard-button").last());
-    await FunctionUtil.elementVisibilityOf(this.SET_DATA_BTN);
-    if (process.env.IN) {
-      await browser.sleep(2000);
-    }
-    await this.SET_DATA_BTN.click();
-    console.log("log-suceed to click set_data btn");
-  }
-
   async clickOkBtn() {
     await FunctionUtil.elementVisibilityOf(this.UPLOAD_CSV_OK_BTN);
     await this.UPLOAD_CSV_OK_BTN.click();
@@ -236,6 +244,11 @@ export class NewProjectPage extends CommonPage {
   async clickCancelBtn() {
     await FunctionUtil.elementVisibilityOf(this.UPLOAD_CSV_CANCEL_BTN);
     await this.UPLOAD_CSV_CANCEL_BTN.click();
+  }
+
+  async cancelTaxonomyFile() {
+    await FunctionUtil.elementVisibilityOf(this.TAXONOMY_FILE_CANCEL);
+    await this.TAXONOMY_FILE_CANCEL.click();
   }
 
   setMaxAnnotation(maxAnnotation) {
@@ -250,61 +263,95 @@ export class NewProjectPage extends CommonPage {
       });
   }
 
-  setNewLable(lable: any) {
+  setNewLabel(label: any) {
     return browser
       .wait(
-        ExpectedConditions.visibilityOf(this.ADD_NEW_LABLE),
+        ExpectedConditions.visibilityOf(this.ICON_PLUS.get(1)),
         Constant.DEFAULT_TIME_OUT
       )
       .then(async () => {
-        await this.ADD_NEW_LABLE.clear();
-        lable.forEach(async (element) => {
-          await this.ADD_NEW_LABLE.sendKeys(element);
-          await FunctionUtil.pressEnter();
+        // await this.ADD_NEW_LABEL.clear();
+        label.forEach(async (element, index) => {
+          await this.ICON_PLUS.get(1).click();
+          await this.ADD_NEW_LABEL.get(index + 1).sendKeys(element);
+          await browser.sleep(1000);
         });
       });
   }
 
-  async setDuplicateLable(duplicateLabel) {
-    await FunctionUtil.elementVisibilityOf(this.ADD_NEW_LABLE);
-    await this.ADD_NEW_LABLE.clear();
-    await this.ADD_NEW_LABLE.sendKeys(duplicateLabel);
-    await this.ADD_NEW_LABLE.sendKeys(protractor.Key.TAB);
-    await browser.sleep(1000);
-    await this.ADD_NEW_LABLE.clear();
+  setMultiLabels(labels) {
+    return browser
+      .wait(
+        ExpectedConditions.visibilityOf(this.ICON_PLUS.get(1)),
+        Constant.DEFAULT_TIME_OUT
+      )
+      .then(async () => {
+        // await this.ADD_NEW_LABEL.clear();
+        labels.forEach(async (element, index) => {
+          await this.ADD_NEW_LABEL.get(index).sendKeys(element);
+          await browser.sleep(1000);
+        });
+      });
   }
 
-  async deleteLable(deleteLabel) {
-    await FunctionUtil.elementVisibilityOf(this.ADD_NEW_LABLE);
-    await this.ADD_NEW_LABLE.clear();
-    await this.ADD_NEW_LABLE.sendKeys(deleteLabel);
-    await FunctionUtil.pressEnter();
+  setNerExistingLabelNewLabel(label: any) {
+    return browser
+      .wait(
+        ExpectedConditions.visibilityOf(this.ICON_PLUS.get(1)),
+        Constant.DEFAULT_TIME_OUT
+      )
+      .then(async () => {
+        label.forEach(async (element) => {
+          await this.ADD_NEW_LABEL.last().sendKeys(element);
+          await browser.sleep(1000);
+        });
+      });
+  }
+
+  async setDuplicateLabel(duplicateLabel) {
+    await this.ICON_PLUS.get(1).click();
+    await FunctionUtil.elementVisibilityOf(this.ADD_NEW_LABEL.last());
+    await this.ADD_NEW_LABEL.last().sendKeys(duplicateLabel);
+    await browser.sleep(1000);
+    await this.LABEL_TRASH_ICONS.last().click();
+  }
+
+  async deleteLabel(deleteLabel) {
+    await this.ICON_PLUS.get(1).click();
+    await FunctionUtil.elementVisibilityOf(this.ADD_NEW_LABEL.last());
+    // await this.ADD_NEW_LABEL.clear();
+    await this.ADD_NEW_LABEL.last().sendKeys(deleteLabel);
+    // await FunctionUtil.pressEnter();
     await browser.sleep(3000);
-    await FunctionUtil.operationSuspensionElements(
-      this.DELETE_LABEL,
-      this.DELETE_LABEL_ICON
-    );
+    await FunctionUtil.click(this.LABEL_TRASH_ICONS.last());
   }
 
   async setNumericLabel(min, max) {
+    console.log("log-start to set numeric label.");
+    await FunctionUtil.elementVisibilityOf(this.NUMERIC_OPTION);
     await this.NUMERIC_OPTION.click();
     await FunctionUtil.elementVisibilityOf(this.MIN_LABEL_INPUT);
     await this.MIN_LABEL_INPUT.sendKeys(min);
     await this.MAX_LABEL_INPUT.sendKeys(max);
     await browser.waitForAngularEnabled(false);
+    console.log("log-end to set numeric label.");
   }
 
   async allowMultiple() {
-    await FunctionUtil.elementVisibilityOf(this.ALLOW_MULTIPLE);
-    await this.ALLOW_MULTIPLE.click();
+    await FunctionUtil.elementVisibilityOf(this.ADD_POP_LABEL);
+    await this.ADD_POP_LABEL.click();
     await browser.waitForAngularEnabled(false);
   }
 
   async shiftLabelType() {
+    console.log("log-start to shift label type.");
+    await FunctionUtil.elementVisibilityOf(this.NUMERIC_OPTION);
     await this.NUMERIC_OPTION.click();
     await FunctionUtil.elementVisibilityOf(this.MIN_LABEL_INPUT);
+    await FunctionUtil.elementVisibilityOf(this.TEXT_LABEL_TYPE_OPTION);
     await this.TEXT_LABEL_TYPE_OPTION.click();
-    await FunctionUtil.elementVisibilityOf(this.ADD_NEW_LABLE);
+    await FunctionUtil.elementVisibilityOf(this.ADD_NEW_LABEL.get(1));
+    console.log("log-end to shift label type.");
   }
 
   async selectActiveLearningModel(alModelIndex) {
@@ -335,38 +382,46 @@ export class NewProjectPage extends CommonPage {
   }
 
   setAssignee(annotator1, annotator2?) {
-    console.log("start to setAssignee annotator");
+    console.log("log-start to setAssignee annotator");
     return browser
       .wait(
-        ExpectedConditions.visibilityOf(this.ASSIGNEE),
+        ExpectedConditions.visibilityOf(this.ASSIGNEE.first()),
         Constant.DEFAULT_TIME_OUT
       )
       .then(async () => {
-        console.log("succeed to visibilityOf annotator");
-        await this.ASSIGNEE.clear();
-        await this.ASSIGNEE.sendKeys(Constant.username);
-        await FunctionUtil.pressEnter();
+        console.log("log-succeed to visibility of annotator");
+        // await this.ASSIGNEE.clear();
+        await this.ASSIGNEE.first().sendKeys(annotator1);
+        await FunctionUtil.elementVisibilityOf(this.TICKETS_INPUT);
+        if (Number(this.TICKETS_INPUT.getText()) > 40) {
+          await this.TICKETS_INPUT.clear();
+          await this.TICKETS_INPUT.sendKeys(40);
+        }
+        await browser.sleep(1000);
+        // await FunctionUtil.pressEnter();
         if (annotator2) {
-          await this.ASSIGNEE.sendKeys(annotator2);
-          await FunctionUtil.pressEnter();
+          await this.ICON_PLUS.last().click();
+          await this.ASSIGNEE.last().sendKeys(annotator2);
+          // await FunctionUtil.pressEnter();
         }
       });
   }
 
   async setDuplicateAnnotator(annotator) {
-    await FunctionUtil.elementVisibilityOf(this.ASSIGNEE);
-    await this.ASSIGNEE.clear();
-    await this.ASSIGNEE.sendKeys(annotator);
-    await FunctionUtil.pressEnter();
+    await this.ICON_PLUS.last().click();
+    // await this.ASSIGNEE.clear();
+    await this.ASSIGNEE.last().sendKeys(annotator);
+    // await FunctionUtil.pressEnter();
     await browser.sleep(1000);
-    await this.ASSIGNEE.clear();
+    // await this.ASSIGNEE.last().clear();
+    await this.EMAIL_TRASH_ICONS.last().click();
   }
 
   async setAssignedTicket(value) {
     console.log("log-start to setAssignedTicket...");
-    await this.ASSIGN_TICKET_INPUT.click();
-    await await this.ASSIGN_TICKET_INPUT.sendKeys(protractor.Key.DOWN);
-    await this.ASSIGN_TICKET_INPUT.sendKeys(protractor.Key.TAB);
+    await this.ASSIGN_TICKET_INPUT.first().click();
+    await this.ASSIGN_TICKET_INPUT.first().sendKeys(protractor.Key.DOWN);
+    await this.ASSIGN_TICKET_INPUT.first().sendKeys(protractor.Key.TAB);
     console.log("log-succeed to setAssignedTicket...");
   }
 
@@ -377,20 +432,19 @@ export class NewProjectPage extends CommonPage {
         Constant.DEFAULT_TIME_OUT
       )
       .then(async () => {
-        if (process.env.IN) {
-          await browser.sleep(5000);
-          await FunctionUtil.elementVisibilityOf(this.CREATE_BTN);
-        }
-
+        // if (process.env.IN) {
+        //   await browser.sleep(5000);
+        //   await FunctionUtil.elementVisibilityOf(this.CREATE_BTN);
+        // }
         await this.CREATE_BTN.click();
       })
       .then(async () => {
-        console.log("end to clickCreateBtn");
-        await this.waitForUploadloading();
+        console.log("log-succeed to clickCreateBtn");
+        // await this.waitForUploadloading();
       });
   }
 
-  async selectExistingFile(dsname) {
+  async selectExistingFile(dsName) {
     await FunctionUtil.elementVisibilityOf(this.FILE_SELECT);
     await browser.waitForAngularEnabled(false);
     await this.FILE_SELECT.click();
@@ -400,7 +454,7 @@ export class NewProjectPage extends CommonPage {
         await this.FILE_SELECT_OPTION.get(index)
           .getText()
           .then(async (e) => {
-            if (e === dsname) {
+            if (e === dsName) {
               await this.FILE_SELECT_OPTION.get(index).click();
             }
           });
@@ -409,8 +463,8 @@ export class NewProjectPage extends CommonPage {
   }
 
   async isShowFilename() {
-    await FunctionUtil.elementVisibilityOf(this.SHOW_FILENAME_CHECKBOX);
-    await this.SHOW_FILENAME_CHECKBOX.click();
+    await FunctionUtil.elementVisibilityOf(this.YES_RADIO);
+    await this.YES_RADIO.click();
   }
 
   async imageLoaded() {
@@ -422,74 +476,69 @@ export class NewProjectPage extends CommonPage {
 
   async deleteAnnotator() {
     console.log("log-start to deleteAnnotator...");
-    await FunctionUtil.elementVisibilityOf(this.ASSIGN_TICKET_DELETE_ICON);
-    await this.ASSIGN_TICKET_DELETE_ICON.click();
+    await FunctionUtil.click(this.EMAIL_TRASH_ICONS.last());
     await browser.waitForAngularEnabled(false);
     console.log("log-succeed to deleteAnnotator...");
   }
 
-  async addMutilNumericLabel(label, min, max) {
-    await this.MUTIL_NUMERIC_OPTION.click();
-    await FunctionUtil.elementVisibilityOf(this.ADD_BTN);
+  async addMultiNumericLabel(label, min, max) {
+    await FunctionUtil.elementVisibilityOf(this.ADD_LABEL_BTN);
     for (let i = 0; i < 2; i++) {
-      await this.ADD_BTN.click();
+      await this.ADD_LABEL_BTN.click();
     }
-    await this.setMutilNumericLabel(label, min, max);
+    await this.setMultiNumericLabel(label, min, max);
   }
 
-  async delMutilNumericLabel() {
-    console.log("log-start to delete MutilNumericLabel...");
+  async delMultiNumericLabel() {
+    console.log("log-start to delete MultiNumericLabel...");
     element
-      .all(by.css("div[formarrayname=mutilLabelArray] clr-icon[shape=times]"))
-      .each(async function (element, index) {
+      .all(by.css("cds-icon[shape=trash]"))
+      .each(async function (element, index: any) {
         if (index < 2) {
-          await element.click();
+          await element?.click();
         }
       });
-    console.log("log-succeed to delete MutilNumericLabel...");
+    console.log("log-succeed to delete MultiNumericLabel...");
   }
 
-  async setMutilNumericLabel(label, min, max) {
-    console.log("log-start to setMutilNumericLabel...");
-    await FunctionUtil.elementVisibilityOf(this.MUTIL_LABEL_INPUT);
+  async setMultiNumericLabel(label, min, max) {
+    console.log("log-start to setMultiNumericLabel...");
+    await FunctionUtil.elementVisibilityOf(this.MULTI_LABEL_INPUT);
     element
-      .all(by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]"))
+      .all(by.css("#clr-wizard-page-4 input[type=text]"))
       .each(async function (element, index) {
-        await element.sendKeys(label + index);
+        await element?.sendKeys(label + index);
       });
     element
       .all(
-        by.css(
-          "div[formarrayname=mutilLabelArray] input[formcontrolname=minMutilVal]"
-        )
+        by.css("#clr-wizard-page-4 input[placeholder='Enter minimum value']")
       )
       .each(async function (element) {
-        await element.sendKeys(min);
+        await element?.sendKeys(min);
       });
     element
       .all(
-        by.css(
-          "div[formarrayname=mutilLabelArray] input[formcontrolname=maxMutilVal]"
-        )
+        by.css("#clr-wizard-page-4 input[placeholder='Enter maximum value']")
       )
       .each(async function (element) {
-        await element.sendKeys(max);
+        await element?.sendKeys(max);
       });
     await browser.waitForAngularEnabled(false);
-    console.log("log-succeed to setMutilNumericLabel...");
+    console.log("log-succeed to setMultiNumericLabel...");
   }
 
   async setPopLabel() {
+    await browser.sleep(5000);
     console.log("log-start to setPopLabel...");
-    await FunctionUtil.elementVisibilityOf(this.PROJECT_NAME);
-    await this.SHOW_POPUE_LABEL_CHECK.click();
+    await this.SHOW_POP_LABEL_CHECK.click();
     await FunctionUtil.operationSuspensionElements(
       this.DELETE_POP_LABEL,
-      this.DELETE_LABEL_ICON
+      this.DELETE_POP_LABEL
     );
-    await browser.sleep(3000);
-    await this.ADD_POP_LABLE.clear();
-    await this.ADD_POP_LABLE.sendKeys("Neutral");
+    await browser.sleep(2000);
+    await this.ICON_PLUS.get(2).click();
+    await this.ADD_NEW_LABEL.last().clear();
+    await this.ADD_NEW_LABEL.last().sendKeys("Neutral");
     console.log("log-end to setPopLabel...");
   }
 
@@ -506,31 +555,49 @@ export class NewProjectPage extends CommonPage {
     let btn = $("clr-wizard-button[type='cancel']");
     await FunctionUtil.elementVisibilityOf(btn);
     await btn.click();
+    console.log("log-succeed to clickWizardCancel");
+  }
+
+  async clickWizardBack() {
+    browser.sleep(500);
+    console.log("log-start to clickWizardBack");
+    await FunctionUtil.elementVisibilityOf(this.WIZARD_CANCEL_BTN);
+    await this.WIZARD_CANCEL_BTN.click();
+    console.log("log-succeed to clickWizardBack");
   }
 
   async uploadTaxonomyFile(path: string) {
-    await this.TAXONOMY_OPTION.click();
-    await FunctionUtil.elementVisibilityOf(this.UPLOAD_TAXONOMY_BTN);
-    await this.UPLOAD_TAXONOMY_BTN.click();
-    await FunctionUtil.elementVisibilityOf(this.CHOOSE_FILE_BTN);
+    await FunctionUtil.elementVisibilityOf(this.CHOOSE_FILE_LABEL);
     await this.setLocalCSVPath(path);
   }
 
-  async changeJsonYamlFormat() {
-    await FunctionUtil.elementVisibilityOf(this.YAML_RADIO);
-    console.log("log-change format to yaml");
-    await this.YAML_RADIO.click();
+  async changeYamlToJSON() {
     console.log("log-change back to json");
     await FunctionUtil.elementVisibilityOf(this.JSON_RADIO);
     await this.JSON_RADIO.click();
   }
 
+  async changeJsonToYaml() {
+    console.log("log-change format to yaml");
+    await FunctionUtil.elementVisibilityOf(this.YAML_RADIO);
+    await this.YAML_RADIO.click();
+  }
+
   async toPreviewTreeLabel() {
-    await FunctionUtil.elementVisibilityOf(this.TREE_LABEL_ICON);
-    await this.TREE_LABEL_ICON.click();
-    console.log("log-open modal to preview tree label");
-    await FunctionUtil.elementVisibilityOf(this.CLOSE_TREE_MODAL_BTN);
-    await this.CLOSE_TREE_MODAL_BTN.click();
+    console.log("log-start toPreviewTreeLabel");
+    await FunctionUtil.elementVisibilityOf(this.TREE_TOGGLE);
+    await this.TREE_TOGGLE.click();
     console.log("log-succeed toPreviewTreeLabel");
+  }
+
+  async clickNextBtn() {
+    await FunctionUtil.elementVisibilityOf(this.WIZARD_NEXT_BTN);
+    await this.WIZARD_NEXT_BTN.click();
+    console.log("log-go to next page");
+  }
+
+  async clickSureBtn() {
+    await FunctionUtil.elementVisibilityOf(this.SURE_BTN);
+    await this.SURE_BTN.click();
   }
 }

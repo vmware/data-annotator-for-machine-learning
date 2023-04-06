@@ -1,30 +1,32 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
-import { LoginBussiness } from "../general/login-bussiness";
+import { LoginBusiness } from "../general/login-business";
 import { MyDatasetsPage } from "../page-object/my-datasets-page";
 import { Constant } from "../general/constant";
-import { CommonPage } from "../general/commom-page";
+import { CommonPage } from "../general/common-page";
 import { browser, by, element } from "protractor";
+import { DownloadSharePage } from "../page-object/download-share-page";
+import { FunctionUtil } from "../utils/function-util";
 
-describe("start to preview my dataset page", () => {
+describe("Spec- start to preview my dataset page", () => {
   let myDatasetsName: string;
   let myDatasetsPage: MyDatasetsPage;
   let since = require("jasmine2-custom-message");
   let commonPage: CommonPage;
-  let PREVIEW_CANCEL_BTN = element(
-    by.css("div.modal-footer button.btn[type=button]")
-  );
+  let downloadSharePage: DownloadSharePage;
+  let PREVIEW_CANCEL_BTN = element(by.css("cds-icon[shape=arrow]"));
 
   beforeAll(() => {
-    LoginBussiness.verifyLogin();
+    LoginBusiness.verifyLogin();
     myDatasetsPage = new MyDatasetsPage();
     commonPage = new CommonPage();
+    downloadSharePage = new DownloadSharePage();
   });
 
   it("Should change the page value successfully.", async (done) => {
-    await myDatasetsPage.navigateTo();
+    await myDatasetsPage.navigateToDatasetsList();
     await myDatasetsPage.waitForPageLoading();
     await commonPage.changePageValue(2);
     done();
@@ -32,14 +34,14 @@ describe("start to preview my dataset page", () => {
 
   it("Should not delete image dataset successfully without delete the related image project.", async (done) => {
     myDatasetsName = Constant.dataset_name_image;
-    await myDatasetsPage.filterDatasetstName(myDatasetsName);
+    await myDatasetsPage.filterDatasetName(myDatasetsName);
     let Datasets_Count_After_Filter = await myDatasetsPage.getTableLength();
     if (Datasets_Count_After_Filter > 0) {
-      console.log("----------start to delete image dataset----------");
-      await commonPage.DELETE_DATASET_BTN.click();
+      console.log("log-start to delete image dataset");
+      await commonPage.clickActionBtn(1);
       await browser.sleep(1000);
       await commonPage.DELETE_PROJECT_CANCEL_BTN.click();
-      await commonPage.DELETE_DATASET_BTN.click();
+      await commonPage.clickActionBtn(1);
       await browser.sleep(1000);
       await commonPage.DELETE_PROJECT_OK_BTN.click();
       await browser.sleep(1000);
@@ -48,24 +50,31 @@ describe("start to preview my dataset page", () => {
         .toContain("Delete dataset failed");
       await browser.sleep(1000);
     } else {
-      console.log("can not filter out the consistent datasets....");
+      console.log("log-can not filter out the consistent datasets....");
     }
     done();
   });
 
   it("Should preview image dataset successfully.", async (done) => {
     myDatasetsName = Constant.dataset_name_image;
-    await myDatasetsPage.navigateTo();
+    await myDatasetsPage.navigateToDatasetsList();
     await myDatasetsPage.waitForPageLoading();
-    await myDatasetsPage.filterDatasetstName(myDatasetsName);
+    await myDatasetsPage.filterDatasetName(myDatasetsName);
     let Datasets_Count_After_Filter = await myDatasetsPage.getTableLength();
     if (Datasets_Count_After_Filter > 0) {
-      console.log("----------start to preview image dataset----------");
+      console.log("log-start to preview image dataset");
+      await commonPage.clickActionBtn(0);
+      await browser.sleep(1000);
+      await FunctionUtil.elementVisibilityOf(
+        downloadSharePage.MODAL_CANCEL_BTN
+      );
+      await downloadSharePage.MODAL_CANCEL_BTN.click();
+      await browser.sleep(1000);
       await commonPage.clickGridFirstCell();
       await browser.sleep(1000);
       await PREVIEW_CANCEL_BTN.click();
     } else {
-      console.log("can not filter out the consistent datasets....");
+      console.log("log-can not filter out the consistent datasets....");
     }
     done();
   });

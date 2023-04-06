@@ -1,9 +1,9 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import { CommonPage } from "../general/commom-page";
+import { CommonPage } from "../general/common-page";
 import { Constant } from "../general/constant";
 import { browser, $, ExpectedConditions, element, by } from "protractor";
 import { FunctionUtil } from "../utils/function-util";
@@ -20,9 +20,18 @@ export class DownloadSharePage extends CommonPage {
 
   fs = require("fs");
 
-  async clickdownloadProject() {
+  async clickDownloadProject() {
     await FunctionUtil.click(this.DOWNLOAD_BTN);
     await browser.sleep(2000);
+  }
+
+  async clickLabelingTask() {
+    await FunctionUtil.click(this.DATASET_LABELING_TASK_LINK);
+    await browser.sleep(2000);
+  }
+
+  async getTaskLength() {
+    return this.DATASET_LABELING_TASK_LINK_ALL.count();
   }
 
   async clickGenerateNewDataset() {
@@ -35,7 +44,7 @@ export class DownloadSharePage extends CommonPage {
     await browser.sleep(3000);
   }
 
-  async downloadPrject() {
+  async downloadProject() {
     await FunctionUtil.elementVisibilityOf(this.DOWNLOAD_PROJECT_BTN);
     await FunctionUtil.click(this.DOWNLOAD_PROJECT_BTN);
     await browser.wait(
@@ -83,37 +92,37 @@ export class DownloadSharePage extends CommonPage {
     return FunctionUtil.sendText(this.SHARE_INFO, info);
   }
 
-  SHARE_OK = element(by.buttonText("OK"));
   async shareProject(projectName) {
     await this.filterProjectName(projectName);
-    if ((await this.verifySharedStatus()) == "folder") {
-      await this.clickShareBtn();
-      await FunctionUtil.elementVisibilityOf(this.MODAL_CANCEL_BTN);
-      await this.MODAL_CANCEL_BTN.click();
-      await this.clickShareBtn();
-      await this.inputShareInfo("e2e test share project");
-      await browser.sleep(5000);
-      await FunctionUtil.click(this.SHARE_OK);
-      await ExpectedConditions.invisibilityOf(this.MODAL_CANCEL_BTN);
-    }
+    await this.waitForGridLoading();
+    await browser.sleep(1000);
+    await this.clickActionBtn(2);
+    await FunctionUtil.elementVisibilityOf(this.MODAL_CANCEL_BTN);
+    await this.MODAL_CANCEL_BTN.click();
+    await this.waitForGridLoading();
+    await browser.sleep(1000);
+    await this.clickActionBtn(2);
+    await this.inputShareInfo("e2e test share project");
+    await browser.sleep(5000);
+    await FunctionUtil.click(element(by.buttonText("OK")));
+    await ExpectedConditions.invisibilityOf(this.MODAL_CANCEL_BTN);
   }
 
   async unshareProject() {
-    if ((await this.verifySharedStatus()) == "folder-open") {
-      await this.clickShareBtn();
-      await FunctionUtil.elementVisibilityOf(this.MODAL_CANCEL_BTN);
-      await this.MODAL_CANCEL_BTN.click();
-      await this.clickShareBtn();
-      await FunctionUtil.elementVisibilityOf(this.MODAL_OK_BTN);
-      await this.MODAL_OK_BTN.click();
-    }
+    await this.clickActionBtn(2);
+    await FunctionUtil.elementVisibilityOf(this.MODAL_CANCEL_BTN);
+    await this.MODAL_CANCEL_BTN.click();
+    await this.waitForGridLoading();
+    await browser.sleep(1000);
+    await this.clickActionBtn(2);
+    await FunctionUtil.elementVisibilityOf(this.MODAL_OK_BTN);
+    await this.MODAL_OK_BTN.click();
   }
 
   async verifySharedStatus() {
-    return FunctionUtil.getAttribute(
-      this.SHARE_BTN.$("clr-icon:nth-child(1)"),
-      "shape"
-    );
+    await FunctionUtil.elementVisibilityOf(this.ACTION_ICONS.first());
+    await FunctionUtil.click(this.ACTION_ICONS.first());
+    return FunctionUtil.getElementText(this.ACTION_BUTTONS.get(2));
   }
 
   getDownloadFileName(filename: string) {

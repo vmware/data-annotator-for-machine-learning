@@ -1,19 +1,17 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
-import { LoginBussiness } from "../general/login-bussiness";
+import { LoginBusiness } from "../general/login-business";
 import { Constant } from "../general/constant";
-import { ProjecstPage } from "../page-object/projects-page";
-import { browser, by, element, $, $$ } from "protractor";
+import { ProjectsPage } from "../page-object/projects-page";
+import { browser, by, element, $ } from "protractor";
 const projectCreateData = require("../resources/project-create-page/test-data");
-import { CommonPage } from "../general/commom-page";
 import { NewProjectPage } from "../page-object/new-project-page";
 import { FunctionUtil } from "../utils/function-util";
 
-describe("Enter projects tab...", () => {
-  let projectsPage: ProjecstPage;
-  let commonPage: CommonPage;
+describe("Spec - Enter projects tab...", () => {
+  let projectsPage: ProjectsPage;
   let newProjectPage: NewProjectPage;
   let since = require("jasmine2-custom-message");
   let project_name: string;
@@ -25,9 +23,8 @@ describe("Enter projects tab...", () => {
   );
 
   beforeAll(() => {
-    LoginBussiness.verifyLogin();
-    projectsPage = new ProjecstPage();
-    commonPage = new CommonPage();
+    LoginBusiness.verifyLogin();
+    projectsPage = new ProjectsPage();
     newProjectPage = new NewProjectPage();
   });
 
@@ -43,14 +40,18 @@ describe("Enter projects tab...", () => {
       Project_Count_After_Filter
     );
     let Project_Name_Text = await projectsPage.getCellText(0);
-    console.log("Project_Name_Text:::", Project_Name_Text);
+    console.log("log-Project_Name_Text:::", Project_Name_Text);
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
       await projectsPage.clickGridFirstCell();
-      await projectsPage.waitForCategoryChartLoading();
+      await projectsPage.waitForLoading();
       if (process.env.IN) {
         await browser.sleep(20000);
       }
+      await browser.sleep(1000);
+      await projectsPage.clickProjectPreviewTabs(2);
       console.log("log-finish chart loading and sleeping");
+      await projectsPage.clickCategoryBtn();
+      await browser.sleep(1000);
       since("category chart rect should show up and have height")
         .expect(
           await projectsPage.getChartRectHeight(CATEGORY_CHART_FIRST_RECT)
@@ -102,43 +103,20 @@ describe("Enter projects tab...", () => {
   });
 
   it("Should preview hierarchical project's latest data and mark for review successful", async (done) => {
-    let tableLength = await projectsPage.getTableLength();
+    await projectsPage.clickProjectPreviewTabs(1);
+    await projectsPage.waitForGridLoading();
+    await browser.sleep(5000);
+    let tableLength = await projectsPage.getAnnotationTableLength();
     console.log("log-tableLength:::", tableLength);
     if (tableLength > 1) {
       console.log("log-start to show the first row's detail");
       await projectsPage.toExpandCell();
-      await newProjectPage.toPreviewTreeLabel();
+      await projectsPage.toPreviewTreeLabel();
       console.log("log-start to click btn mark for review");
       await projectsPage.clickMarkForReviewBtn();
       done();
     } else {
       done.fail("the table is empty no data there");
     }
-  });
-
-  it("Should jump to community tab and click tree label successful.", async (done) => {
-    await FunctionUtil.click($('.header-nav a[href="/datasets"]'));
-    await projectsPage.waitForGridLoading();
-    await projectsPage.filterProjectName(
-      Constant.project_name_hierarchical_label
-    );
-    console.log("log-start to click the hierarchical label in datagrid cell");
-    await FunctionUtil.elementVisibilityOf(
-      $(
-        ".datagrid-host .datagrid-row:nth-child(2) clr-dg-cell:nth-of-type(9) div clr-icon"
-      )
-    );
-    await FunctionUtil.click(
-      $(
-        ".datagrid-host .datagrid-row:nth-child(2) clr-dg-cell:nth-of-type(9) div"
-      )
-    );
-    console.log("log-tree modal should opened");
-    await FunctionUtil.elementVisibilityOf(
-      $("app-treeview-modal clr-icon[shape='close']")
-    );
-    await FunctionUtil.click($("app-treeview-modal clr-icon[shape='close']"));
-    console.log("log-succeed to close tree modal");
-    done();
   });
 });

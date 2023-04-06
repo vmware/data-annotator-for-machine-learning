@@ -1,13 +1,13 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
-import { CommonPage } from "../general/commom-page";
+import { CommonPage } from "../general/common-page";
 import { browser, by, element, $, $$, ExpectedConditions } from "protractor";
 import { Constant } from "../general/constant";
 import { FunctionUtil } from "../utils/function-util";
 
-export class ProjecstPage extends CommonPage {
+export class ProjectsPage extends CommonPage {
   ANNOTATOR_CELL = $(
     '.datagrid-host .datagrid-row:nth-child(2) clr-dg-cell[role="gridcell"] .ng-star-inserted >div'
   );
@@ -17,8 +17,9 @@ export class ProjecstPage extends CommonPage {
   DATASETS_OK_BTN = $(
     '.modal-content button[class="btn btn-primary ng-star-inserted"]'
   );
-  MY_PROJECTS_TAB = element(by.css('.header-nav a[href="/projects"]'));
-  LATEST_DATA_TAB_FLAG = element(
+  // MY_PROJECTS_TAB = element(by.css('.header-nav a[href="/projects"]'));
+  NAV_TASK_LIST = element(by.css('a[href="/loop/project/list"]'));
+  LATEST_DATA_TAB_FLAG = element.all(
     by.css("ul[role=tablist] li:last-child button")
   );
   TABLE_TOTAL_ITEMS = element(
@@ -41,22 +42,31 @@ export class ProjecstPage extends CommonPage {
     ".datagrid-host .datagrid-row:nth-child(2) button.datagrid-expandable-caret-button"
   );
 
+  PROJECT_PREVIEW_TABS = element.all(by.css("clr-tabs ul li"));
+  CATEGORY_BTN = element(by.css(".radio.btn label[for=btn-demo-radio-2]"));
+
   async navigateTo() {
-    await FunctionUtil.elementVisibilityOf(this.MY_PROJECTS_TAB);
+    await FunctionUtil.elementVisibilityOf(this.NAV_TASK_LIST);
     await browser.waitForAngularEnabled(false);
-    await this.MY_PROJECTS_TAB.click();
+    await this.NAV_TASK_LIST.click();
+  }
+
+  async clickProjectPreviewTabs(index) {
+    await FunctionUtil.elementVisibilityOf(
+      this.PROJECT_PREVIEW_TABS.get(index)
+    );
+    await browser.waitForAngularEnabled(false);
+    await this.PROJECT_PREVIEW_TABS.get(index).click();
   }
 
   async navigateToFlagTab() {
-    await FunctionUtil.elementVisibilityOf(this.LATEST_DATA_TAB_FLAG);
-    await browser.waitForAngularEnabled(false);
-    await this.LATEST_DATA_TAB_FLAG.click();
+    await FunctionUtil.click(this.LATEST_DATA_TAB_FLAG.last());
   }
 
   async waitForUserChartLoading() {
     return browser.wait(
       ExpectedConditions.invisibilityOf(
-        element.all(by.css(".categoryChart .spinner")).first()
+        element(by.css(".categoryChart .spinner"))
       ),
       Constant.DEFAULT_TIME_OUT
     );
@@ -65,7 +75,7 @@ export class ProjecstPage extends CommonPage {
   async waitForCategoryChartLoading() {
     return browser.wait(
       ExpectedConditions.invisibilityOf(
-        element.all(by.css(".categoryChart .spinner")).last()
+        element(by.css(".categoryChart .spinner"))
       ),
       Constant.DEFAULT_TIME_OUT
     );
@@ -131,5 +141,11 @@ export class ProjecstPage extends CommonPage {
     await this.MARK_FOR_REVIEW_BTN.click();
     await browser.sleep(2000);
     console.log("log-succeed to clickMarkForReviewBtn");
+  }
+
+  async clickCategoryBtn() {
+    await FunctionUtil.elementVisibilityOf(this.CATEGORY_BTN);
+    await browser.waitForAngularEnabled(false);
+    await this.CATEGORY_BTN.click();
   }
 }

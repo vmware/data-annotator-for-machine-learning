@@ -1,15 +1,15 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
-import { LoginBussiness } from "../general/login-bussiness";
+import { LoginBusiness } from "../general/login-business";
 import { NewProjectPage } from "../page-object/new-project-page";
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
 import { Constant } from "../general/constant";
-import { ProjecstPage } from "../page-object/projects-page";
+import { ProjectsPage } from "../page-object/projects-page";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
-describe("Create new project ", () => {
+describe("Spec - create new project log", () => {
   const Task_Instruction = projectCreateData.LogProject.Instruction;
   const PROJECT_NER_CLASSIFICATION = element(
     by.css('clr-dropdown-menu a[href="/projects/create/log"]')
@@ -20,7 +20,7 @@ describe("Create new project ", () => {
   let New_CSV_Name: string;
   let Serial_Num: string;
   let newProjectPage: NewProjectPage;
-  let projectsPage: ProjecstPage;
+  let projectsPage: ProjectsPage;
   let since = require("jasmine2-custom-message");
 
   beforeAll(() => {
@@ -29,36 +29,49 @@ describe("Create new project ", () => {
     New_CSV_Name = "e2e Test Data Log" + Serial_Num;
     Constant.project_name_log = New_Project_Name;
     Constant.dataset_name_log = New_CSV_Name;
-    LoginBussiness.verifyLogin();
+    LoginBusiness.verifyLogin();
     newProjectPage = new NewProjectPage();
-    projectsPage = new ProjecstPage();
-    console.log("start to create log project : " + New_Project_Name);
+    projectsPage = new ProjectsPage();
+    console.log("log-start to create log project : " + New_Project_Name);
   });
 
   afterAll(() => {
     Constant.project_name_log = New_Project_Name;
     Constant.dataset_name_log = New_CSV_Name;
-    console.log("project name after update: " + Constant.project_name_log);
+    console.log("log-project name after update: " + Constant.project_name_log);
   });
 
-  it("Should create log project successfully.", async (done) => {
+  it("Should succeed to create project log", async (done) => {
     await newProjectPage.navigateTo();
     await browser.waitForAngular();
-    await newProjectPage.clickNewProjectBtn(PROJECT_NER_CLASSIFICATION);
-    await newProjectPage.uploadCSV(New_CSV_Name, CSV_Path);
-    await newProjectPage.navigateTo();
-    await browser.waitForAngular();
-    await newProjectPage.clickNewProjectBtn(PROJECT_NER_CLASSIFICATION);
+    // await newProjectPage.clickNewProjectBtn(PROJECT_NER_CLASSIFICATION);
+    // await newProjectPage.uploadCSV(New_CSV_Name, CSV_Path);
+    // await newProjectPage.navigateTo();
+    // await browser.waitForAngular();
+    // await newProjectPage.clickNewProjectBtn(PROJECT_NER_CLASSIFICATION);
     await newProjectPage.setProjectName(New_Project_Name);
+    await newProjectPage.selectProjectType(4);
     await newProjectPage.setTaskInstruction(Task_Instruction);
-    await newProjectPage.selectExistingFile(Constant.dataset_name_log);
+    await newProjectPage.clickNextBtn();
+    await newProjectPage.uploadCSVWithModalAndCancel();
+    await browser.sleep(1000);
+    await newProjectPage.uploadCSVWithModal(New_CSV_Name, CSV_Path);
+
+    // await newProjectPage.selectExistingFile(Constant.dataset_name_log);
     await newProjectPage.isShowFilename();
-    await newProjectPage.setNewLable(
+    await browser.sleep(1000);
+    await newProjectPage.clickNextBtn();
+
+    await newProjectPage.setNewLabel(
       projectCreateData.LogProject.Labels.split(",")
     );
+    await newProjectPage.clickNextBtn();
+
     await newProjectPage.setAssignee(Constant.username);
+    await newProjectPage.clickNextBtn();
+
     await newProjectPage.clickCreateBtn();
-    await projectsPage.waitForPageLoading();
+    // await projectsPage.waitForPageLoading();
     await browser.wait(
       ExpectedConditions.visibilityOf(
         $(".datagrid-host .datagrid-row:nth-child(2)")
@@ -67,22 +80,20 @@ describe("Create new project ", () => {
     await projectsPage.filterProjectName(New_Project_Name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
     let Project_Name_Text = await projectsPage.getCellText(0);
+    let Project_Data_Source = await projectsPage.getCellText(5);
     if (Project_Name_Text !== "" && Project_Count_After_Filter > 0) {
+      console.log(
+        "log-cell source vs data source:",
+        Project_Data_Source,
+        "---",
+        projectCreateData.LogProject.Source
+      );
       since("the project name should same as the user typed name")
         .expect(projectsPage.getCellText(0))
         .toBe(New_Project_Name);
       since("the data source should same as the user uploaded file")
-        .expect(projectsPage.getCellText(2))
+        .expect(Project_Data_Source)
         .toBe(projectCreateData.LogProject.Source);
-      since("the annotar should be the logged user")
-        .expect(projectsPage.getAnnotatorCellText())
-        .toContain(Constant.username);
-      since("the labels should contain the user typed lable")
-        .expect(projectsPage.getCellText(5))
-        .toContain(projectCreateData.LogProject.Labels);
-      since("should have 4 actions")
-        .expect(projectsPage.getActionsCount())
-        .toBe(5);
       done();
     } else {
       done.fail("can not filter out the consistent project....");

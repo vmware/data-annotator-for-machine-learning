@@ -28,7 +28,6 @@
     "ticketSessions": 52,
     "maxAnnotation": 1
   },
-
   "TabularProject": {
     "Instruction": "this is e2e test tabular project task instruction",
     "Labels": "test1,test2",
@@ -37,7 +36,6 @@
     "labelColumn": "No Labels",
     "maxAnnotation": 1
   },
-
   "NerLabelsExistingProject": {
     "Instruction": "this is e2e test ner labels existing project task instruction",
     "existingLabels": "label1",
@@ -64,36 +62,55 @@
     "Labels": "test1,test2",
     "Source": "image-test-data.zip",
     "ticketSessions": 5,
-    "firstStart": { "x": 30, "y": 30 },
-    "firstEnd": { "x": 40, "y": 40 },
-    "secondStart": { "x": 50, "y": 30 },
-    "secondEnd": { "x": 60, "y": 40 },
-    "deletePosition": { "x": 35, "y": 35 }
+    "firstStart": {
+      "x": 30,
+      "y": 30
+    },
+    "firstEnd": {
+      "x": 40,
+      "y": 40
+    },
+    "secondStart": {
+      "x": 50,
+      "y": 30
+    },
+    "secondEnd": {
+      "x": 60,
+      "y": 40
+    },
+    "deletePosition": {
+      "x": 35,
+      "y": 35
+    }
   },
-  "TextMutilNumbericProject": {
-    "Instruction": "this is e2e test mutil numberic project task instruction",
+  "TextMultiNumericProject": {
+    "Instruction": "this is e2e test multi numeric project task instruction",
     "Label": "label-test",
     "MinVal": 1,
     "MaxVal": 10,
     "sliderValue": 4,
     "inputValue": 4.5,
-    "Source": "text-mutilNumberic-data.csv",
+    "Source": "text-multiNumeric-data.csv",
     "ticketSessions": 52,
     "assignedTickets": 10,
     "duplicateLabelColumn": "Description",
     "categoryLabelColumn": "GSS_Problem_Category__c",
     "labelColumn": "No Labels",
     "maxAnnotation": 3,
-    "defaultEvenlyDistributedTickets": 26
+    "defaultEvenlyDistributedTickets": 26,
+    "reviewSliderValue": 7
   },
   "HierarchicalProject": {
     "Instruction": "this is e2e test hierarchical project task instruction",
     "Label": "test1,test2,test3",
-    "childLabels":"test1-1,test1-2,test1-3,test1-4",
-    "Source": "text-mutilNumberic-data.csv",
+    "childLabels": "test1-1,test1-2,test1-3,test1-4",
+    "Source": "text-test-data.csv",
     "ticketSessions": 52,
     "labelColumn": "No Labels",
     "maxAnnotation": 1,
-    "backPosition": { "x": 100, "y": 10 }
+    "backPosition": {
+      "x": 100,
+      "y": 10
+    }
   }
 }

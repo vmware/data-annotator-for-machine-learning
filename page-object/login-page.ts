@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import {
@@ -13,11 +13,10 @@ import {
 } from "protractor";
 import { Constant } from "../general/constant";
 import { FunctionUtil } from "../utils/function-util";
-import { CommonPage } from "../general/commom-page";
+import { CommonPage } from "../general/common-page";
 
 export class LoginPage extends CommonPage {
   SIGNIN_BTN = $(".header-actions .nav-link.nav-text");
-  // BTN_Select = element(by.partialLinkText("Login with My VMware"));
   BTN_Select = $$(".login-group a").last();
   LOGIN_BTN = element(by.css("button[id=login-button]"));
   SINGNIN_BTN = element(by.partialButtonText("SIGN IN"));
@@ -30,7 +29,7 @@ export class LoginPage extends CommonPage {
   FIRST_NAME = element(by.css('input[formcontrolname="firstname"]'));
   LAST_NAME = element(by.css('input[formcontrolname="lastname"]'));
   SIGN_UP_BTN = element(by.css('button[type="submit"]'));
-  HOME_LINK = element(by.css('a[href="/home"]'));
+  HOME_LINK = element(by.css('a[href="/loop/home"]'));
   ERR_ALERT = element(by.css("div.login-group div.error"));
 
   async navigateTo() {
@@ -45,7 +44,7 @@ export class LoginPage extends CommonPage {
       })
       .then(() => {
         browser.waitForAngularEnabled(false);
-        this.SIGNIN_BTN.click();
+        FunctionUtil.click(this.SIGNIN_BTN);
       });
   }
 
@@ -86,11 +85,13 @@ export class LoginPage extends CommonPage {
 
   async setUsername(username: string) {
     await FunctionUtil.elementVisibilityOf(this.USER_NAME);
+    await this.USER_NAME.clear();
     await this.USER_NAME.sendKeys(username);
   }
 
   async setPassword(password: string) {
     await FunctionUtil.elementVisibilityOf(this.PASSWORD);
+    await this.PASSWORD.clear();
     await this.PASSWORD.sendKeys(password);
   }
 
@@ -99,7 +100,7 @@ export class LoginPage extends CommonPage {
       ExpectedConditions.visibilityOf(this.LOGIN_BTN),
       Constant.DEFAULT_TIME_OUT
     );
-    await this.LOGIN_BTN.click();
+    await FunctionUtil.click(this.LOGIN_BTN);
   }
 
   async clickSingnInBtn() {

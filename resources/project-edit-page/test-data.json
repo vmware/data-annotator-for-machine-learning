@@ -31,11 +31,11 @@
     "Labels": "0--200"
   },
 
-  "MutilNumbericProject": {
+  "MultiNumericProject": {
     "Email_Validation": "test2@@@@qq.com",
     "Owner2": "test2@vmware.com",
     "Owner3": "test3@vmware.com",
-    "Annotator": "test2@vmware.com,test3@vmware.com,test4@vmware.com,test5@vmware.com,test6@vmware.com",
+    "Annotator": "test2@vmware.com",
     "Labels": "label-test4, label-test5",
     "MinVal": 1,
     "MaxVal": 10,

@@ -1,12 +1,12 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { browser } from "protractor";
 import { LoginPage } from "../page-object/login-page";
-import { Constant } from "../general/constant";
+import { Constant } from "./constant";
 
-export class LoginBussiness {
+export class LoginBusiness {
   page: LoginPage = new LoginPage();
 
   navigateToLoginPage() {
@@ -14,8 +14,8 @@ export class LoginBussiness {
       this.page.navigateTo();
     });
   }
-  
-  async loginWithMyVM(username, password){
+
+  async loginWithMyVM(username, password) {
     await this.page.setUsername(username);
     await this.page.setPassword(password);
     await this.page.clickSingnInBtn();
@@ -23,7 +23,7 @@ export class LoginBussiness {
     await expect(await this.page.getLoggedUserName()).toBe(username);
     Constant.login = true;
   }
-  
+
   login(username, password) {
     return this.page
       .setUsername(username)
@@ -34,7 +34,7 @@ export class LoginBussiness {
         this.page.clickLogInBtn();
       })
       .then(() => {
-        console.log("log-start to verifyLoggedUserNameDisplayed")
+        console.log("log-start to verifyLoggedUserNameDisplayed");
         return this.page.verifyLoggedUserNameDisplayed();
       })
       .then(
@@ -57,13 +57,13 @@ export class LoginBussiness {
         return browser.getCurrentUrl();
       })
       .then((currenturl) => {
-        console.log("baseUrl:" + currenturl);
+        console.log("log-baseUrl:" + currenturl);
       });
   }
 
   static verifyLogin() {
     if (Constant.login == false) {
-      let loginBusiness = new LoginBussiness();
+      let loginBusiness = new LoginBusiness();
       loginBusiness.navigateToLoginPage().then(() => {
         loginBusiness.login(Constant.username, Constant.password);
       });
@@ -81,10 +81,9 @@ export class LoginBussiness {
     await this.page.setUsername(username);
     await this.page.setPassword(password);
     await browser.waitForAngularEnabled(false);
-    // await this.page.clickSignUpBtn();
     await browser.sleep(5000);
     await this.page.clickSignUpBtn();
-    console.log('log-succed to signup')
+    console.log("log-succeed to signup");
   }
 
   async logValidation(username, password) {

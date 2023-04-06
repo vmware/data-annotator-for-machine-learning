@@ -1,13 +1,13 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
-import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
+import { browser, $, $$ } from "protractor";
 import { FunctionUtil } from "../utils/function-util";
 
-describe("Make sure faq page can normally display ", () => {
+describe("Spec - make sure faq page can normally display ", () => {
   let since = require("jasmine2-custom-message");
-  const FAQ_TAB = $('.header-nav a[href="/faq"]');
+  const FAQ_TAB = $('.bottomHelpLink a[href="/loop/faq"]');
   const PANEL = $$("clr-accordion-panel");
 
   it("Should faq page display successfully.", async (done) => {

@@ -1,61 +1,70 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { Constant } from "../general/constant";
-import { browser, $, ExpectedConditions, by, element, Key } from "protractor";
+import { browser, $, ExpectedConditions, by, element, $$ } from "protractor";
 import { FunctionUtil } from "../utils/function-util";
-import { CommonPage } from "../general/commom-page";
+import { CommonPage } from "../general/common-page";
 import { protractor } from "protractor/built/ptor";
 
-export class EditPage {
+export class EditPage extends CommonPage {
   PROJECT_TABLE = $(".datagrid-host .datagrid");
-  ADMIN_TAB = element(by.css('.header-nav a[href="/admin"]'));
+  LABELING_TASK_LIST = element(by.css('a[href="/loop/project/list"]'));
   EDIT_PROJECT_OK_BTN = $(".modal-footer .btn.btn-primary");
   EDIT_PROJECT_CANCEL_BTN = $(".modal-footer .btn.btn-outline");
   NEW_LABEL_INPUT = element(by.css('input[name="addNewLabel"]'));
   PROJECT_NAME_INPUT = element(by.css("input[id=projectName]"));
   TASK_INSTRUCTION_TEXT = element(by.css("textarea[id=taskInstruction]"));
   PROJECT_OWNER_INPUT = element(by.css("input[id=projectOwner]"));
-  PROJECT_ANNOTATOR_INPUT = element(by.css("input[id=assignee]"));
+  PROJECT_EMAIL_INPUT = element.all(by.css("input[id=inputEmail]"));
   AL_THRESHOLD_INPUT = element(by.css("input[id=trigger]"));
   AL_FREQUENCY_INPUT = element(by.css("input[id=frequency]"));
-  DELETE_LABEL_ICON = element(by.css("clr-icon.deleteIcon"));
+  DELETE_LABEL_ICON = element(by.css("cds-icon.deleteIcon"));
   SHOW_FILE_NAME_RADIO = element(by.css("clr-radio-wrapper label[for='no']"));
   ASSIGNMENT_LOGIC_RADIO = element(
     by.css("clr-radio-wrapper label[for='sequential']")
   );
-  ASSIGN_TICKET_INPUT = element(
-    by.css("ul li:first-child input.assignTicketNumber")
+  ASSIGN_TICKET_INPUT = element.all(
+    by.css("input[title='Number of tickets assigned']")
   );
-  ASSIGN_TICKET_DELETE_ICON = element(by.css("ul li:last-child clr-icon"));
+  DELETE_ICON_TRASH = element.all(by.css("cds-icon[shape='trash']"));
   DELETE_OK_BTN = element.all(by.css(".modal-footer .btn.btn-primary")).last();
   DELETE_CANCEL_BTN = element
     .all(by.css(".modal-footer .btn.btn-outline"))
     .last();
   NUMERIC_MIN_LABEL_INPUT = element(by.css("input[id=min]"));
   NUMERIC_MAX_LABEL_INPUT = element(by.css("input[id=max]"));
-  OWNER_DELETE_ICON = element(by.css("ul li:last-child clr-icon"));
-  ADD_BTN = element(by.css(".btn.btn-icon.add-btn"));
-  MUTIL_LABEL_INPUT = element(
+
+  MULTI_LABEL_INPUT = element(
     by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]")
   );
+  ADMIN_TAB = element(by.css("ul li:nth-child(2) button"));
+  ADD_NEW_OWNER = element(
+    by.css("label[for=projectOwner]+div cds-icon[shape=plus]")
+  );
+  OWNER_INPUT_2 = element(
+    by.css("label[for=projectOwner]+div>div:nth-child(2) input")
+  );
+  OWNER_DELETE_ICON = element(
+    by.css("label[for=projectOwner]+div>div:nth-child(2) cds-icon")
+  );
+
+  ANNOTATOR_INPUT_2 = element(
+    by.css(
+      "label[for=assignee]+div>div:nth-child(2)>div>div:nth-child(2) input[type=text]"
+    )
+  );
+  ADD_LABEL_BTN = element(
+    by.css("div[formarrayname='mutilLabelArray'] button")
+  );
+  TRASH_ICON = element.all(by.css("cds-icon[shape='trash']"));
+  ICON_PLUS = element.all(by.css("button cds-icon[shape=plus]"));
 
   async navigateTo() {
-    await FunctionUtil.elementVisibilityOf(this.ADMIN_TAB);
+    await FunctionUtil.elementVisibilityOf(this.LABELING_TASK_LIST);
     await browser.waitForAngularEnabled(false);
-    await this.ADMIN_TAB.click();
-  }
-
-  async clickEditButton() {
-    this.PROJECT_TABLE.scrollLeft = this.PROJECT_TABLE.scrollWidth;
-    await browser.wait(
-      ExpectedConditions.visibilityOf($('button[title="Edit Project"]')),
-      Constant.DEFAULT_TIME_OUT
-    );
-    await browser.waitForAngularEnabled(false);
-    await $('button[title="Edit Project"]').click();
-    await FunctionUtil.elementVisibilityOf(this.EDIT_PROJECT_OK_BTN);
+    await this.LABELING_TASK_LIST.click();
   }
 
   async editProjectName(name) {
@@ -93,26 +102,51 @@ export class EditPage {
     await browser.waitForAngularEnabled(false);
   }
 
-  async editProjectOwner(email_validation, owner2, owner3) {
-    await FunctionUtil.elementVisibilityOf(this.PROJECT_OWNER_INPUT);
-    await this.PROJECT_OWNER_INPUT.click();
-    await this.PROJECT_OWNER_INPUT.sendKeys(email_validation);
+  async editMultiNumericOwner(email_validation, owner2, owner3) {
+    await FunctionUtil.elementVisibilityOf(this.ADD_NEW_OWNER);
+    await this.ADD_NEW_OWNER.click();
+    await this.OWNER_INPUT_2.sendKeys(email_validation);
     await browser.sleep(1000);
-    await FunctionUtil.pressEnter();
-    await this.PROJECT_OWNER_INPUT.clear();
-    await this.PROJECT_OWNER_INPUT.sendKeys(Constant.username);
+
+    await this.OWNER_INPUT_2.clear();
+    await this.OWNER_INPUT_2.sendKeys(Constant.username || "");
     await browser.sleep(1000);
-    await this.PROJECT_OWNER_INPUT.clear();
-    await this.PROJECT_OWNER_INPUT.sendKeys(owner2);
-    await FunctionUtil.pressEnter();
+
+    await this.OWNER_INPUT_2.clear();
+    await this.OWNER_INPUT_2.sendKeys(owner2);
+
     await browser.sleep(1000);
-    await this.PROJECT_OWNER_INPUT.clear();
-    await this.PROJECT_OWNER_INPUT.sendKeys(owner3);
-    await FunctionUtil.pressEnter();
+    await this.OWNER_INPUT_2.clear();
+    await this.OWNER_INPUT_2.sendKeys(owner3);
     await browser.waitForAngularEnabled(false);
+    console.log("log-succeed to editProjectOwner");
+  }
+
+  async editProjectOwner(email_validation, owner2, owner3) {
+    await FunctionUtil.click(this.ICON_PLUS.first());
+    await this.PROJECT_EMAIL_INPUT.get(1).click();
+    await this.PROJECT_EMAIL_INPUT.get(1).sendKeys(email_validation);
+    await browser.sleep(1000);
+    await this.PROJECT_EMAIL_INPUT.get(1).clear();
+    await this.PROJECT_EMAIL_INPUT.get(1).sendKeys(Constant.username || "");
+    await browser.sleep(1000);
+    await this.PROJECT_EMAIL_INPUT.get(1).clear();
+    await this.PROJECT_EMAIL_INPUT.get(1).sendKeys(owner2);
+    await browser.sleep(1000);
+    await FunctionUtil.click(this.ICON_PLUS.first());
+    await this.PROJECT_EMAIL_INPUT.get(2).sendKeys(owner3);
+    await browser.waitForAngularEnabled(false);
+    console.log("log-succeed to editProjectOwner");
   }
 
   async deleteProjectOwner(owner) {
+    console.log("log-start to delete project owner...");
+    await FunctionUtil.click(this.TRASH_ICON.get(2));
+    await browser.waitForAngularEnabled(false);
+    console.log("log-succeed to delete project owner...");
+  }
+
+  async deleteMultiProjectOwner() {
     console.log("log-start to delete project owner...");
     await FunctionUtil.elementVisibilityOf(this.OWNER_DELETE_ICON);
     await this.OWNER_DELETE_ICON.click();
@@ -120,42 +154,57 @@ export class EditPage {
     console.log("log-succeed to delete project owner...");
   }
 
+  async editMultiNumberAnnotator(email_validation, annotator) {
+    await FunctionUtil.elementVisibilityOf(this.ANNOTATOR_INPUT_2);
+    await this.ANNOTATOR_INPUT_2.click();
+    await this.ANNOTATOR_INPUT_2.sendKeys(email_validation);
+    await browser.sleep(1000);
+
+    await this.ANNOTATOR_INPUT_2.clear();
+    await this.ANNOTATOR_INPUT_2.sendKeys(Constant.username || "");
+    await browser.sleep(1000);
+
+    await this.ANNOTATOR_INPUT_2.clear();
+    await this.ANNOTATOR_INPUT_2.sendKeys(annotator);
+    await browser.sleep(1000);
+    await browser.waitForAngularEnabled(false);
+  }
+
   async editProjectAnnotator(email_validation, annotator) {
-    await FunctionUtil.elementVisibilityOf(this.PROJECT_ANNOTATOR_INPUT);
-    await this.PROJECT_ANNOTATOR_INPUT.click();
-    await this.PROJECT_ANNOTATOR_INPUT.sendKeys(email_validation);
+    await FunctionUtil.click(this.PROJECT_EMAIL_INPUT.last());
+    await this.PROJECT_EMAIL_INPUT.last().sendKeys(email_validation);
     await browser.sleep(1000);
-    await FunctionUtil.pressEnter();
-    await this.PROJECT_ANNOTATOR_INPUT.clear();
-    await this.PROJECT_ANNOTATOR_INPUT.sendKeys(Constant.username);
+    await this.PROJECT_EMAIL_INPUT.last().clear();
+    await this.PROJECT_EMAIL_INPUT.last().sendKeys(Constant.username || "");
     await browser.sleep(1000);
-    await this.PROJECT_ANNOTATOR_INPUT.clear();
+    await this.PROJECT_EMAIL_INPUT.last().clear();
+    await this.TRASH_ICON.last().click();
     let flag = annotator.split(",");
     console.log("log-annotators:", flag);
     flag.forEach(async (element) => {
-      await this.PROJECT_ANNOTATOR_INPUT.sendKeys(element);
-      await FunctionUtil.pressEnter();
+      await this.ICON_PLUS.last().click();
+      await this.PROJECT_EMAIL_INPUT.last().sendKeys(element);
+      await browser.sleep(2000);
     });
     await browser.waitForAngularEnabled(false);
   }
 
   async editAssignedTickets(annotator, max) {
     console.log("log-start to editAssignedTickets...");
-    await FunctionUtil.elementVisibilityOf(this.PROJECT_ANNOTATOR_INPUT);
-    await this.PROJECT_ANNOTATOR_INPUT.click();
-    await this.PROJECT_ANNOTATOR_INPUT.sendKeys(annotator);
+    await FunctionUtil.elementVisibilityOf(this.PROJECT_EMAIL_INPUT.last());
+    await this.PROJECT_EMAIL_INPUT.last().click();
+    await this.PROJECT_EMAIL_INPUT.last().sendKeys(annotator);
     await browser.sleep(1000);
-    await FunctionUtil.pressEnter();
-    await this.ASSIGN_TICKET_INPUT.click();
-    await this.ASSIGN_TICKET_INPUT.sendKeys(max);
-    await this.ASSIGN_TICKET_INPUT.sendKeys(protractor.Key.TAB);
+    await this.ASSIGN_TICKET_INPUT.last().click();
+    await this.ASSIGN_TICKET_INPUT.last().sendKeys(max);
+    await this.ASSIGN_TICKET_INPUT.last().sendKeys(protractor.Key.TAB);
     await FunctionUtil.acceptAlertPopup();
     console.log("log-succeed to acceptAlertPopup from sendKeys(max)");
-    await this.ASSIGN_TICKET_INPUT.click();
-    await this.ASSIGN_TICKET_INPUT.clear();
-    await this.ASSIGN_TICKET_INPUT.click();
-    await this.ASSIGN_TICKET_INPUT.sendKeys(-1);
-    await this.ASSIGN_TICKET_INPUT.sendKeys(protractor.Key.TAB);
+    await this.ASSIGN_TICKET_INPUT.last().click();
+    await this.ASSIGN_TICKET_INPUT.last().clear();
+    await this.ASSIGN_TICKET_INPUT.last().click();
+    await this.ASSIGN_TICKET_INPUT.last().sendKeys(-1);
+    await this.ASSIGN_TICKET_INPUT.last().sendKeys(protractor.Key.TAB);
     console.log("log-succeed to ASSIGN_TICKET_INPUT.clear()");
     await FunctionUtil.acceptAlertPopup();
     await browser.sleep(1000);
@@ -183,11 +232,10 @@ export class EditPage {
   }
 
   async deleteAnnotator() {
-    console.log("start to deleteAnnotator...");
-    // await FunctionUtil.elementVisibilityOf(this.ASSIGN_TICKET_DELETE_ICON);
-    await this.ASSIGN_TICKET_DELETE_ICON.click();
+    console.log("log-start to deleteAnnotator...");
+    await this.DELETE_ICON_TRASH.last().click();
     await browser.waitForAngularEnabled(false);
-    console.log("succeed to deleteAnnotator...");
+    console.log("log-succeed to deleteAnnotator...");
   }
 
   async editALProjectThreshold(threshold, threshold_err, validation_string) {
@@ -220,7 +268,7 @@ export class EditPage {
     await FunctionUtil.elementVisibilityOf(this.NEW_LABEL_INPUT);
     await this.NEW_LABEL_INPUT.clear();
     label.forEach(async (element) => {
-      console.log(element);
+      console.log("log-added label is " + element);
       await this.NEW_LABEL_INPUT.sendKeys(element);
       await FunctionUtil.pressEnter();
     });
@@ -258,12 +306,12 @@ export class EditPage {
     // windows and linux need use control
     // await label.sendKeys(Key.CONTROL, "a");
     // await label.sendKeys(value);
-    let backspaceSeries = '';
-    for (var i = 5; i >0; --i) {
-        backspaceSeries += protractor.Key.BACK_SPACE;
+    let backspaceSeries = "";
+    for (var i = 5; i > 0; --i) {
+      backspaceSeries += protractor.Key.BACK_SPACE;
     }
-    await label.sendKeys(backspaceSeries+value);
-    console.log("log-start to editLabel sendvalue test3...");
+    await label.sendKeys(backspaceSeries + value);
+    console.log("log-start to editLabel send value test3...");
     await browser.waitForAngularEnabled(false);
     console.log("log-succeed to editLabel...");
   }
@@ -289,22 +337,22 @@ export class EditPage {
     );
   }
 
-  async addMutilNumbericLabel(labels: any, min, max) {
-    await FunctionUtil.elementVisibilityOf(this.ADD_BTN);
+  async addMultiNumericLabel(labels: any, min, max) {
+    await FunctionUtil.elementVisibilityOf(this.ADD_LABEL_BTN);
     for (let i = 0; i < labels.length; i++) {
-      await this.ADD_BTN.click();
+      await this.ADD_LABEL_BTN.click();
     }
-    await this.setMutilNumericLabel(labels, min, max);
+    await this.setMultiNumericLabel(labels, min, max);
   }
 
-  async setMutilNumericLabel(label, min, max) {
-    console.log("start to setMutilNumericLabel...", label);
-    await FunctionUtil.elementVisibilityOf(this.MUTIL_LABEL_INPUT);
+  async setMultiNumericLabel(label, min, max) {
+    console.log("log-start to setMultiNumericLabel...", label);
+    await FunctionUtil.elementVisibilityOf(this.MULTI_LABEL_INPUT);
     element
       .all(by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]"))
-      .each(async function (element, index) {
+      .each(async function (element, index: any) {
         if (index > 1) {
-          await element.sendKeys(label[index - 2]);
+          await element?.sendKeys(label[index - 2]);
         }
       });
     element
@@ -313,9 +361,39 @@ export class EditPage {
           "div[formarrayname=mutilLabelArray] input[formcontrolname=minMutilVal]"
         )
       )
-      .each(async function (element, index) {
+      .each(async function (element, index: any) {
         if (index > 1) {
-          await element.sendKeys(min);
+          await element?.sendKeys(min);
+        }
+      });
+    element
+      .all(
+        by.css(
+          "div[formarrayname=mutilLabelArray] input[formcontrolname=maxMutilVal]"
+        )
+      )
+      .each(async function (element, index: any) {
+        if (index > 1) {
+          await element?.sendKeys(max);
+        }
+      });
+    await browser.waitForAngularEnabled(false);
+    console.log("log-succeed to setMultiNumericLabel...");
+  }
+
+  async editMultiNumericThreshold(min, max) {
+    console.log("log-start to editMultiNumericThreshold...");
+    await FunctionUtil.elementVisibilityOf(this.MULTI_LABEL_INPUT);
+    element
+      .all(
+        by.css(
+          "div[formarrayname=mutilLabelArray] input[formcontrolname=minMutilVal]"
+        )
+      )
+      .each(async function (element, index) {
+        if (index === 0) {
+          await element?.clear();
+          await element?.sendKeys(min);
         }
       });
     element
@@ -325,68 +403,38 @@ export class EditPage {
         )
       )
       .each(async function (element, index) {
-        if (index > 1) {
-          await element.sendKeys(max);
+        if (index === 0) {
+          await element?.clear();
+          await element?.sendKeys(max);
         }
       });
     await browser.waitForAngularEnabled(false);
-    console.log("succeed to setMutilNumericLabel...");
+    console.log("log-succeed to editMultiNumericThreshold...");
   }
 
-  async editMutilNumbericThreshold(min, max) {
-    console.log("start to editMutilNumbericThreshold...");
-    await FunctionUtil.elementVisibilityOf(this.MUTIL_LABEL_INPUT);
-    element
-      .all(
-        by.css(
-          "div[formarrayname=mutilLabelArray] input[formcontrolname=minMutilVal]"
-        )
-      )
-      .each(async function (element, index) {
-        if (index === 0) {
-          await element.clear();
-          await element.sendKeys(min);
-        }
-      });
-    element
-      .all(
-        by.css(
-          "div[formarrayname=mutilLabelArray] input[formcontrolname=maxMutilVal]"
-        )
-      )
-      .each(async function (element, index) {
-        if (index === 0) {
-          await element.clear();
-          await element.sendKeys(max);
-        }
-      });
-    await browser.waitForAngularEnabled(false);
-    console.log("succeed to editMutilNumbericThreshold...");
-  }
-
-  async editMutilNumbericLabel(label) {
-    console.log("start to editMutilNumbericThreshold...");
-    await FunctionUtil.elementVisibilityOf(this.MUTIL_LABEL_INPUT);
+  async editMultiNumericLabel(label) {
+    console.log("log-start to editMultiNumericThreshold...");
+    await FunctionUtil.elementVisibilityOf(this.MULTI_LABEL_INPUT);
     element
       .all(by.css("div[formarrayname=mutilLabelArray] input[id=multiLabels]"))
       .each(async function (element, index) {
         if (index === 0) {
-          await element.clear();
-          await element.sendKeys(label);
+          await element?.clear();
+          await element?.sendKeys(label);
         }
       });
   }
 
-  async deltMutilNumbericLabel(delIndex: number) {
-    console.log("start to deltMutilNumbericLabel...");
+  async deleteMultiNumericLabel(delIndex: number) {
+    console.log("log-start to deleteMultiNumericLabel...");
     element
-      .all(by.css("div[formarrayname=mutilLabelArray] clr-icon[shape=times]"))
+      .all(by.css("div[formarrayname=mutilLabelArray] cds-icon[shape=times]"))
       .each(async function (element, index) {
         if (index === delIndex) {
-          await element.click();
+          await element?.click();
         }
       });
     await browser.sleep(2000);
-    console.log("succeed to deltMutilNumbericLabel...");
+    console.log("log-succeed to deleteMultiNumericLabel...");
   }
 }

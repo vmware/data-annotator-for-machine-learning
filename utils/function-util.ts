@@ -1,3 +1,8 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
 import {
   ElementFinder,
   ExpectedConditions,
@@ -11,6 +16,19 @@ import {
 
 export class FunctionUtil {
   private static DEFAULT_TIME_OUT = 60 * 1000;
+
+  public static async clickByText(ele, text: string) {
+    ele.then(function (eles) {
+      for (let i = 0; i < eles.length; i++) {
+        eles[i].getText().then(function (textInner) {
+          if (textInner === text) {
+            eles[i].click();
+            return;
+          }
+        });
+      }
+    });
+  }
 
   public static async selectFromListByIndex(
     ele: ElementFinder,
@@ -61,7 +79,7 @@ export class FunctionUtil {
     value: string
   ): Promise<void> {
     const rows = element.all(by.css('clr-dg-row[role="rowgroup"]'));
-    return rows.each(async (row) => {
+    return rows.each(async (row: any) => {
       const cells = row.$$("clr-dg-cell");
       const txt = await cells.get(0).getText();
       if (txt === value) {
@@ -80,7 +98,7 @@ export class FunctionUtil {
     value: string
   ) {
     const rows = element.all(by.css('clr-dg-row[role="rowgroup"]'));
-    return rows.each(async (row) => {
+    return rows.each(async (row: any) => {
       const cells = row.$$("clr-dg-cell");
       const txt = await cells.get(0).getText();
       if (txt === value) {
@@ -96,7 +114,7 @@ export class FunctionUtil {
   }
   public static async clickFilterInFilterManageByValue(value: string) {
     const rows = element.all(by.css(".slide a"));
-    return rows.each(async (row) => {
+    return rows.each(async (row: any) => {
       const txt = await row.getText();
       if (txt === value) {
         await row.click();

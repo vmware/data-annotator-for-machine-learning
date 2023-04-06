@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 export let Constant = {
@@ -7,7 +7,7 @@ export let Constant = {
   login: false,
   project_name: "e2e Test Project",
   project_name_text_al: "",
-  project_name_numberic_mutiple: "",
+  project_name_numeric_multiple: "",
   project_name_text_multiple: "",
   project_name_tabular_numeric: "",
   project_name_tabular_al: "",
@@ -33,4 +33,5 @@ export let Constant = {
   fullname_owner: "Test Hub",
   password_owner: "Abcd1234@",
   task_instruction_log: "This is a e2e test project",
+  sign_up_exist_user_tip: "USER ALREADY EXIST",
 };

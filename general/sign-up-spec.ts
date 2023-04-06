@@ -1,24 +1,23 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { LoginPage } from "../page-object/login-page";
-import { LoginBussiness } from "./login-bussiness";
+import { LoginBusiness } from "./login-business";
 import { browser, element, by } from "protractor";
 import { Constant } from "./constant";
 import { FunctionUtil } from "../utils/function-util";
 
-describe("Service", () => {
+describe("Sign up spec", () => {
   let loginPage: LoginPage;
-  let loginBusiness: LoginBussiness;
+  let loginBusiness: LoginBusiness;
   let since = require("jasmine2-custom-message");
   let SIGN_IN = element(by.css("a.signup"));
-  let PROJECT_TAB = element(by.css('.header-nav a[href="/projects"]'));
-  let HEADER_TABS = element.all(by.css("div.header-nav a.nav-link"));
+  let LOGGED_USER_NAME = element(by.css(".nav-text.dropdown-toggle"));
 
   beforeAll((done) => {
     loginPage = new LoginPage();
-    loginBusiness = new LoginBussiness();
+    loginBusiness = new LoginBusiness();
     browser
       .sleep(1000)
       .then(() => {
@@ -30,7 +29,7 @@ describe("Service", () => {
       });
   });
 
-  it("Sign up with normal owner user successfully", async (done) => {
+  it("Should sign up with normal user successfully", async (done) => {
     await loginBusiness.signUp(
       Constant.firstname_owner,
       Constant.lastname_owner,
@@ -40,22 +39,25 @@ describe("Service", () => {
     since("prompt should show up and content correct")
       .expect(loginPage.getPromptText())
       .not.toEqual("");
+    if ((await loginPage.getPromptText()) == Constant.sign_up_exist_user_tip) {
+      await FunctionUtil.elementVisibilityOf(SIGN_IN);
+      await FunctionUtil.click(SIGN_IN);
+      await browser.sleep(3000);
+      await FunctionUtil.elementVisibilityOf(
+        element(by.css("button[id=login-button]"))
+      );
+    }
     await browser.sleep(5000);
     done();
   });
 
-  it("Should login with normal owner user successfully", async (done) => {
-    await FunctionUtil.elementVisibilityOf(SIGN_IN);
-    await SIGN_IN.click();
-    await browser.sleep(3000);
-    await SIGN_IN.click();
-    await FunctionUtil.elementVisibilityOf(element(by.css("button[id=login-button]")));
+  it("Should login with normal user successfully", async (done) => {
     await loginBusiness.login(Constant.username_owner, Constant.password_owner);
-    console.log("log-succeed to verify login")
-    await FunctionUtil.elementVisibilityOf(PROJECT_TAB);
-    since("After owner log in there should only have 5 tabs in header")
-      .expect(await FunctionUtil.getElementsNum(HEADER_TABS))
-      .toEqual(5);
-      done();
+    console.log("log-succeed to verify login");
+    await FunctionUtil.elementVisibilityOf(LOGGED_USER_NAME);
+    since("After owner log in there should display user email in header right")
+      .expect(loginPage.getLoggedUserName())
+      .toBe(Constant.username_owner);
+    done();
   });
 });

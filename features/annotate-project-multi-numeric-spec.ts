@@ -7,30 +7,29 @@ import { Constant } from "../general/constant";
 import { AnnotatePage } from "../page-object/annotate-page";
 import { browser } from "protractor";
 import { ProjectsPage } from "../page-object/projects-page";
-import { FunctionUtil } from "../utils/function-util";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
-describe("Spec - annotate project ...", () => {
+describe("Spec - annotate multi numeric project ...", () => {
   let annotatePage: AnnotatePage;
   let projectsPage: ProjectsPage;
   let since = require("jasmine2-custom-message");
   let project_name: string;
 
   beforeAll(() => {
-    project_name = Constant.project_name_tabular_numeric;
+    project_name = Constant.project_name_numeric_multiple;
     LoginBusiness.verifyLogin();
     annotatePage = new AnnotatePage();
     projectsPage = new ProjectsPage();
-    console.log("log-start to annotate project: " + project_name);
+    console.log("log-start to annotate multi numeric project: " + project_name);
   });
 
-  it("Should annotate tabular numeric labels project successfully.", async (done) => {
+  it("Should annotate multiple numeric labels project successfully.", async (done) => {
     if (process.env.IN) {
-      await browser.sleep(20000);
+      await browser.sleep(10000);
     }
     await annotatePage.navigateTo();
-    await projectsPage.refreshLabelingTask();
     await annotatePage.waitForGridLoading();
+    await projectsPage.refreshLabelingTask();
     await annotatePage.filterProjectName(project_name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
     let Project_Name_Text = await projectsPage.getCellText(0);
@@ -38,7 +37,7 @@ describe("Spec - annotate project ...", () => {
       "log-Project_Count_After_Filter:::",
       Project_Count_After_Filter
     );
-    console.log("Project_Name_Text:::", Project_Name_Text);
+    console.log("log-Project_Name_Text:::", Project_Name_Text);
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
       await annotatePage.clickTaskName();
       await annotatePage.waitForPageLoading();
@@ -49,23 +48,22 @@ describe("Spec - annotate project ...", () => {
           name: "Name:  " + project_name,
           owner: "Owner:  " + Constant.username,
           source:
-            "Source:  " + projectCreateData.TabularNumericLabelsProject.Source,
+            "Source:  " + projectCreateData.TextMultiNumericProject.Source,
           instruction:
             "Instruction:  " +
-            projectCreateData.TabularNumericLabelsProject.Instruction,
+            projectCreateData.TextMultiNumericProject.Instruction,
         });
       since("progress should show up and content correct")
         .expect(annotatePage.getProgress())
         .toEqual({
           sessions:
             "Total Items:  " +
-            String(
-              projectCreateData.TabularNumericLabelsProject.ticketSessions
-            ),
+            String(projectCreateData.TextMultiNumericProject.ticketSessions),
           annotations: "Labeled Items:  " + "0",
         });
-
-      await annotatePage.inputNumericLabel();
+      await annotatePage.selectMultipleNumericLabel(
+        projectCreateData.TextMultiNumericProject.sliderValue
+      );
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
       since("the progress annotations should increase 1")
@@ -73,17 +71,20 @@ describe("Spec - annotate project ...", () => {
         .toEqual({
           sessions:
             "Total Items:  " +
-            String(
-              projectCreateData.TabularNumericLabelsProject.ticketSessions
-            ),
+            String(projectCreateData.TextMultiNumericProject.ticketSessions),
           annotations: "Labeled Items:  " + "1",
         });
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(1);
-
-      console.log("log-start to skip this ticket....");
+      console.log("log-start to skip this ticket and then history back....");
       await annotatePage.skipTicket();
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
+      await annotatePage.clickHistoryBack();
+      await annotatePage.setMultipleNumericByInput(
+        projectCreateData.TextMultiNumericProject.inputValue
+      );
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
       since("the content should not be empty")
@@ -92,15 +93,7 @@ describe("Spec - annotate project ...", () => {
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(2);
-      console.log("log-skip success....");
-
-      await annotatePage.inputNumericLabelNotSubmit(6);
-      await browser.sleep(1000);
-      await annotatePage.skipTicket();
-      await browser.sleep(1000);
-      await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
-      await annotatePage.waitForPageLoading();
-      await browser.sleep(2000);
+      console.log("log-skip and then history back success....");
 
       console.log("log-start to flag this ticket....");
       await annotatePage.flagTicket();
@@ -108,7 +101,7 @@ describe("Spec - annotate project ...", () => {
       since("the content should not be empty")
         .expect(annotatePage.currentTicketContent())
         .not.toEqual("");
-      console.log("flag success....");
+      console.log("log-flag success....");
 
       done();
     } else {
@@ -116,7 +109,7 @@ describe("Spec - annotate project ...", () => {
     }
   });
 
-  it("Should review numeric project successfully.", async (done) => {
+  it("Should review multiple numeric labels project successfully.", async (done) => {
     if (process.env.IN) {
       await browser.sleep(10000);
     }
@@ -134,20 +127,12 @@ describe("Spec - annotate project ...", () => {
       await annotatePage.clickReviewBtn();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-      await annotatePage.inputNumericLabelNotSubmit(7);
+      await annotatePage.selectMultipleNumericLabelNotSubmit(
+        projectCreateData.TextMultiNumericProject.reviewSliderValue
+      );
       await browser.sleep(1000);
       await annotatePage.skipTicket();
-      await browser.sleep(1000);
-      await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
-      await annotatePage.waitForPageLoading();
-      await browser.sleep(2000);
-      await annotatePage.inputNumericLabelNotSubmit(7);
-      await annotatePage.backToPrevious();
-      await browser.sleep(1000);
-      await annotatePage.skipTicket();
-      await browser.sleep(1000);
-      await annotatePage.passLog();
-      done();
+      await done();
     } else {
       done.fail("can not filter out the consistent project....");
     }

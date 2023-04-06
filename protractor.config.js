@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 // Protractor configuration file, see link for more information
@@ -18,68 +18,63 @@ var conf = {
     "./features/clear-old-e2e-projects-datasets-spec.ts",
     "./features/upload-new-dataset-and-delete-spec.ts",
 
-    "./features/creat-log-project-spec.ts",
+    "./features/create-project-log-spec.ts",
     "./features/annotate-project-log-spec.ts",
     "./features/append-project-log-spec.ts",
-    "./features/edit-log-project-spec.ts",
-    "./features/preview-log-project-spec.ts",
-    "./features/preview-log-dataset-spec.ts",
+    "./features/edit-project-log-spec.ts",
+    "./features/preview-project-log-spec.ts",
     "./features/download-share-log-spec.ts",
 
-    "./features/creat-text-project-spec.ts",
+    "./features/create-project-text-spec.ts",
     "./features/annotate-project-buttons-spec.ts",
     "./features/append-project-spec.ts",
     "./features/edit-text-al-project-spec.ts",
     "./features/annotate-project-dropdown-spec.ts",
     "./features/preview-text-al-project-spec.ts",
-    "./features/preview-text-dataset-spec.ts",
 
-    "./features/creat-tabular-project-spec.ts",
-    "./features/creat-tabular-numeric-project-spec.ts",
+    "./features/create-tabular-project-spec.ts",
+    "./features/create-tabular-numeric-project-spec.ts",
     "./features/annotate-project-tabular-numeric-spec.ts",
     "./features/edit-tabular-numeric-project-spec.ts",
-    "./features/download-share-numeric-spec.ts",
 
-    "./features/creat-text-multiple-project-spec.ts",
+    "./features/create-text-multiple-project-spec.ts",
     "./features/annotate-project-multiple-spec.ts",
     "./features/download-share-text-multiple-spec.ts",
 
-    "./features/creat-ner-labels-existing-project-spec.ts",
+    "./features/create-ner-labels-existing-project-spec.ts",
     "./features/annotate-project-ner-labels-existing-spec.ts",
     "./features/append-ner-project-spec.ts",
     "./features/preview-ner-project-spec.ts",
 
-    "./features/creat-image-project-spec.ts",
+    "./features/create-image-project-spec.ts",
     "./features/annotate-project-image-spec.ts",
     "./features/append-project-image-spec.ts",
     "./features/preview-image-project-spec.ts",
     "./features/preview-image-dataset-spec.ts",
 
-    "./features/create-mutil-numberic-project-spec.ts",
-    "./features/annotate-project-mutil-numberic-spec.ts",
-    "./features/edit-project-mutil-numberic-spec.ts",
+    "./features/create-multi-numeric-project-spec.ts",
+    "./features/annotate-project-multi-numeric-spec.ts",
+    "./features/edit-project-multi-numeric-spec.ts",
 
     "./features/create-hierarchical-project-spec.ts",
     "./features/annotate-project-hierarchical-label-spec.ts",
     "./features/review-project-hierarchical-label-spec.ts",
     "./features/preview-hierarchical-project-spec.ts",
+    "./features/share-hierarchical-project-spec.ts",
 
     "./features/faq-spec.ts",
-    "./features/delete-projects-spec.ts",
-    "./features/delete-datasets-spec.ts",
   ],
-
   specsConstOut: [
-    "./general/sign-up-external-spec.ts",
+    "./general/sign-up-spec.ts",
     "./general/logout-spec.ts",
-    "./general/login-external-spec.ts",
+    "./general/login-spec.ts",
+    "./general/permission-spec.ts"
   ],
   specsConstIn: [
     "./general/login-spec.ts",
   ],
-
   poc_specs: [
-    "./general/login-external-spec.ts",
+    "./general/login-spec.ts",
     "./features/clear-old-e2e-projects-datasets-spec.ts",
   ],
   specsAll: [],
@@ -87,8 +82,7 @@ var conf = {
 
 exports.config = {
   allScriptsTimeout: 20000, //first page loading time
-  // specs: conf.poc_specs,
-  specs: process.env.IN ? conf.specsConstIn.concat(conf.ci_specs) : conf.specsConstOut.concat(conf.ci_specs),
+  specs: conf.specsConstOut.concat(conf.ci_specs),
   capabilities: {
     browserName: "chrome",
     chromeOptions: {

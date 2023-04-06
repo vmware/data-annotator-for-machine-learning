@@ -1,21 +1,21 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
-import { LoginBussiness } from "../general/login-bussiness";
+import { LoginBusiness } from "../general/login-business";
 import { Constant } from "../general/constant";
-import { ProjecstPage } from "../page-object/projects-page";
+import { ProjectsPage } from "../page-object/projects-page";
 import { browser } from "protractor";
-import { CommonPage } from "../general/commom-page";
+import { CommonPage } from "../general/common-page";
 
-describe("Enter projects tab...", () => {
-  let projectsPage: ProjecstPage;
+describe("Spec - enter projects tab...", () => {
+  let projectsPage: ProjectsPage;
   let commonPage: CommonPage;
   let project_name: string;
 
   beforeAll(() => {
-    LoginBussiness.verifyLogin();
-    projectsPage = new ProjecstPage();
+    LoginBusiness.verifyLogin();
+    projectsPage = new ProjectsPage();
     commonPage = new CommonPage();
   });
 
@@ -36,10 +36,16 @@ describe("Enter projects tab...", () => {
     await projectsPage.filterProjectName(project_name);
     let Project_Count_After_Filter = await projectsPage.getTableLength();
     let Project_Name_Text = await projectsPage.getCellText(0);
-    console.log("Project_Count_After_Filter:::", Project_Count_After_Filter);
-    console.log("Project_Name_Text:::", Project_Name_Text);
+    console.log(
+      "log-Project_Count_After_Filter:::",
+      Project_Count_After_Filter
+    );
+    console.log("log-Project_Name_Text:::", Project_Name_Text);
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
       await projectsPage.clickGridFirstCell();
+      await projectsPage.waitForGridLoading();
+      await browser.sleep(2000);
+      await projectsPage.clickProjectPreviewTabs(1);
       await projectsPage.waitForGridLoading();
       await browser.sleep(5000);
       await projectsPage.toExpandCell();
