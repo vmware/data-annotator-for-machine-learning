@@ -18,7 +18,7 @@ const FormData = require('form-data');
 const localFileSysService = require('./localFileSys.service');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel, SrModel } = require('../db/db-connect');
-
+const MESSAGE = require("../config/code_msg");
 
 async function generateLabelledCaseAsCSV(pid, user){
     
@@ -106,7 +106,7 @@ async function SyncLabelledCaseToInstaML(req){
     console.log(`[ INTEGRATION ] Service delete tep csv file`);
     await localFileSysService.deleteFileFromLocalSys(fileLocation);
 
-    return { CODE: 0000, MSG: "SUCCESS" };
+    return MESSAGE.SUCCESS;;
 
 }
 

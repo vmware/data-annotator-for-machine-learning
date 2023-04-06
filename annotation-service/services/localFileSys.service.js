@@ -14,13 +14,14 @@ const path = require('path');
 const mkdirp = require('mkdirp');
 const userService = require('../services/user-service');
 const {ROLES} = require('../config/constant');
+const MESSAGE = require('../config/code_msg');
 
 async function saveFileToLocalSys(filePath, file){
 
   console.log(`[ LOCAL-FILE-SYSTEM ] SERVICE saveFileToLocalSys ${filePath}`);
   filePath = path.resolve(filePath);
   fs.writeFile(filePath, file, (err) => {
-    if (err) throw {CODE: 5001, MSG: `SAVE FILE ERROR ${err}`};
+    if (err) throw {CODE: MESSAGE.ERROR_DS_SAVE.CODE, MSG: MESSAGE.ERROR_DS_SAVE.MSG + err};
   });
 
 }
@@ -53,12 +54,12 @@ async function checkFileExistInLocalSys(filePath, createDir, thowError, checkFil
     fs.mkdirSync(filePath, {recursive: true});
   }
   if (!exist && thowError) {
-    throw {CODE: 5002, MSG: `DIRECTORY OR FILE NOT EXIST`};
+    throw MESSAGE.VALIDATION_DS_PATH;
   }
   if (exist && thowError && checkFile) {
     const stat = fs.lstatSync(filePath);
     if (!stat.isFile()) {
-      throw {CODE: 5002, MSG: `INVALIDE FILE`};
+      throw MESSAGE.VALIDATION_DS_FILE;
     }
   }
   return exist;
@@ -86,7 +87,7 @@ async function checkFilePermission(user, filePath) {
     return;
   }
   if (filePath.indexOf(user) == -1) {
-    throw {CODE: 4001, MSG: "PERMISSION DENIED"};
+    throw MESSAGE.VALIDATION_PERMITION;
   }
 }
 

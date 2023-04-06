@@ -11,6 +11,7 @@ const config = require('../config/config');
 const { generateBasicToken } = require('../middlewares/jwt.middleware');
 const userService = require('./user-service');
 const https = require('https');
+const MESSAGE = require('../config/code_msg')
 
 let publicKey;
 
@@ -48,7 +49,7 @@ async function authentication() {
 
 async function login(req) {
     if (!req.body.email || !req.body.password) {
-        throw { CODE: 401, MSG: "USERNAME OR PASSWORD IS EMPTY" };
+        throw MESSAGE.VALIDATION_UNAUTH;
     }
     let user;
     if (req.body.ldap) {
@@ -73,17 +74,17 @@ async function refreshToken(req) {
 async function basicLogin(req) {
     const user = await userService.queryUserById(req.body.email);
     if (!user) {
-        throw { CODE: 401, MSG: "USERNAME OR PASSWORD IS INVALID" };
+        throw MESSAGE.VALIDATION_UNAUTH;
     }
     if (user.password != Buffer.from(req.body.password).toString("base64")) {
-        throw { CODE: 401, MSG: "USERNAME OR PASSWORD IS INVALID" };
+        throw MESSAGE.VALIDATION_UNAUTH;
     }
     return user;
 }
 
 async function authenticateWithLDAP(req) {
     if (!config.loginWithLDAP) {
-        throw { CODE: 4002, MSG: "MISSING THE LDAP AUTHORIZATION LINK" };
+        throw MESSAGE.VALIDATION_LDAP;
     }
     const userBtoa = Buffer.from(`${req.body.email}:${req.body.password}`).toString('base64');
     const requestOptions = {
@@ -95,14 +96,15 @@ async function authenticateWithLDAP(req) {
     try {
         resp = await axios.request(requestOptions);
         if (resp.status != 200) {
-            throw { CODE: 401, MSG: "USERNAME OR PASSWORD IS INVALID" };
+            throw MESSAGE.VALIDATION_UNAUTH;
         }
         const email = resp.data.emailAddress ? resp.data.emailAddress : resp.data.email;
         const userName = resp.data.userName ? resp.data.userName : resp.data.fullName;
         return userService.queryAndUpdateUser(email, userName);
 
     } catch (error) {
-        throw { CODE: error.code, MSG: error.message };
+        MESSAGE.ERROR.DATA = [{ CODE: error.code, MSG: error.message }]
+        throw MESSAGE.ERROR;
     }
 }
 

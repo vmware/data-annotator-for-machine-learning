@@ -18,6 +18,7 @@ const localFileSysService = require('./localFileSys.service');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel } = require('../db/db-connect');
 const validator = require('../utils/validator');
+const MESSAGE = require('../config/code_msg');
 
 async function generateFile(req){
     
@@ -35,8 +36,8 @@ async function generateFile(req){
     const pro = project_check[0];
     const gen = pro.generateInfo;
 
-    if ((pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.IMGAGE) && data.format != FILEFORMAT.STANDARD){
-        return {CODE: 4001, MSG: "ERROR FORMAT"};
+    if ((pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.QA || pro.projectType == PROJECTTYPE.IMGAGE) && data.format != FILEFORMAT.STANDARD){
+        return MESSAGE.VALIDATATION_PJ_FORMAT;
     }
     
     if (config.useLocalFileSys) {

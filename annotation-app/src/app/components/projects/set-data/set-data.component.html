@@ -42,6 +42,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   </clr-wizard-page>
   <!-- select label -->
   <clr-wizard-page
+    *ngIf="wizardData.projectType != 'qa'"
     [clrWizardPageNextDisabled]="!selectedDropDownItem || !formPageOne.valid"
     (clrWizardPageOnLoad)="clrWizardPageOnLoad('page2')"
   >
@@ -51,7 +52,9 @@ SPDX-License-Identifier: Apache-2.0 -->
         : 'Please select the column which you intend to calculate labels from'
     }}</ng-template>
     <ng-template clrPageNavTitle>{{
-      wizardData.projectType === 'ner' ? 'Select Text Column' : 'Select Label Column'
+      wizardData.projectType === 'ner'
+      ? 'Select Text Column'
+      : 'Select Label Column'
     }}</ng-template>
     <form clrForm #formPageOne="ngForm">
       <app-clr-select
@@ -63,23 +66,39 @@ SPDX-License-Identifier: Apache-2.0 -->
   <!-- select text -->
   <clr-wizard-page
     (clrWizardPageOnLoad)="clrWizardPageOnLoad('page3')"
-    [clrWizardPageNextDisabled]="
-      wizardData.projectType === 'ner' ? false : selectDescription.length == 0
-    "
+    [clrWizardPageNextDisabled]="wizardData.projectType === 'ner' ? false : selectDescription.length == 0"
   >
-    <ng-template clrPageTitle>{{
-      wizardData.projectType === 'ner'
+    <ng-template clrPageNavTitle>
+      {{ wizardData.projectType === 'ner' ? 'Select Helpful Column' : wizardData.projectType === 'qa'? 'Select Column':'Select Text Column' }}
+    </ng-template>
+    
+    <ng-template clrPageTitle>
+      {{
+        wizardData.projectType === 'ner'
         ? 'Select the columns to present to annotators about the existing labels (optional) or helpful text (optional)'
+        : wizardData.projectType === 'qa'
+        ? 'Select the question column and text column to present to annotators'
         : 'Select the columns to present to annotators'
-    }}</ng-template>
-    <ng-template clrPageNavTitle>{{
-      wizardData.projectType === 'ner' ? 'Select Helpful Column' : 'Select Text Column'
-    }}</ng-template>
+      }}
+    </ng-template>
+
     <form clrForm #formPageTwo="ngForm">
+      
+      <div *ngIf="wizardData.projectType === 'qa'">
+        <app-clr-select
+          [data]="clrSelectData" 
+          (valueChange)="onReceiveSelectedItem($event)">
+        </app-clr-select>
+        <app-clr-select
+          [data]="clrSelectData2" 
+          (valueChange)="onReciveSelectedText($event)">
+        </app-clr-select>
+      </div>
+
       <div class="checkboxDatagrid">
         <clr-datagrid
           class="previewTable"
-          *ngIf="wizardData.projectType != 'ner'"
+          *ngIf="wizardData.projectType != 'ner' && wizardData.projectType != 'qa'"
           [(clrDgSelected)]="selectDescription"
         >
           <clr-dg-column class="ellipsis-datagrid" style="color: #000; margin-left: 5px"
@@ -145,14 +164,14 @@ SPDX-License-Identifier: Apache-2.0 -->
     <ng-template clrPageNavTitle>
       <span
         *ngIf="
-          wizardData.projectType === 'ner' ? selectedDropDownItem : selectDescription.length > 0
+          wizardData.projectType === 'ner'? selectedDropDownItem : selectDescription.length > 0
         "
       >
         Set Data
       </span>
       <span
         *ngIf="
-          wizardData.projectType === 'ner' ? !selectedDropDownItem : selectDescription.length === 0
+          wizardData.projectType === 'ner'? !selectedDropDownItem : selectDescription.length === 0
         "
       >
         Not ready yet
@@ -178,7 +197,11 @@ SPDX-License-Identifier: Apache-2.0 -->
             </legend>
             <div class="clr-row">
               <label>{{
-                wizardData.projectType === 'ner' ? 'Select Text Column' : 'Select Label Column'
+                wizardData.projectType === 'ner'
+                ? 'Select Text Column' 
+                : this.wizardData.projectType === 'qa'
+                ? 'Select Question Column'
+                : 'Select Label Column'
               }}</label>
               <input
                 class="clr-input"
@@ -191,6 +214,13 @@ SPDX-License-Identifier: Apache-2.0 -->
               <label>{{
                 wizardData.projectType === 'ner' ? 'Select Helpful Column' : 'Select Text Column'
               }}</label>
+              <input
+                *ngIf="this.wizardData.projectType === 'qa'"
+                class="clr-input"
+                type="text"
+                name="selectDescription"
+                [(ngModel)]="selectDescription[0]"
+              />
             </div>
           </fieldset>
         </form>

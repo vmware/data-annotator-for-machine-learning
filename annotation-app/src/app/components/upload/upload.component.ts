@@ -94,7 +94,7 @@ export class UploadComponent implements OnInit {
     } else if (this.msg.page == 'create') {
       if (this.msg.type == 'tabular') {
         this.uploadSet.fileFormat = 'tabular';
-      } else if (this.msg.type == 'text' || this.msg.type == 'ner') {
+      } else if (this.msg.type == 'text' || this.msg.type == 'ner' || this.msg.type == 'qa') {
         this.uploadSet.fileFormat = 'csv';
       } else if (this.msg.type == 'image') {
         this.uploadSet.fileFormat = 'image';

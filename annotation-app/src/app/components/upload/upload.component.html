@@ -138,7 +138,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <clr-radio-wrapper
                   style="margin-right: 0.5rem"
                   *ngIf="
-                    ((msg.type == 'text' || msg.type == 'ner') && msg.page == 'create') ||
+                    ((msg.type == 'text' || msg.type == 'ner' || msg.type == 'qa') && msg.page == 'create') ||
                     msg.page == 'datasets'
                   "
                 >

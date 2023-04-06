@@ -97,18 +97,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   regexErr = false;
   isDrawer = false;
   colorsRainbow = [
+    '#00ff7f',
     '#00ffff',
     '#ff00ff',
-    '#00ff7f',
     '#ff6347',
-    '#9B0D54',
     '#00bfff',
-    '#FF0000',
     '#ff69b4',
     '#7fffd4',
     '#ffd700',
     '#FBC1DA',
-    '#4D007A',
     '#ffdab9',
     '#adff2f',
     '#FFA500',
@@ -147,6 +144,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     '#ff7875',
     '#97d778',
     '#2F4F4F',
+    '#FF0000',
+    '#4D007A',
+    '#9B0D54',
   ];
 
   popLabelColors = [
@@ -205,6 +205,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   expandValue: boolean = false;
   expandName: string = 'Expand';
   textBoxResizedHeight: string;
+  inputQuestion: string = null;
+  inputQuestionError: string;
+  editQuestionError: string;
+  editQuestionItem: number;
+  deleteQuestionItem: number;
+
+
   sliderEvent() {
     if (this.numericOptions.step === 1) {
       if (parseInt(this.labelChoose) !== this.numericValue) {
@@ -298,6 +305,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         resoltionCode: '',
         resolution: '',
         userInputs: [],
+        questionForText: [],
       };
     }
     this.questionForm = this.formBuilder.group({});
@@ -337,7 +345,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.sr = this.resetTabularSrData(this.sr);
             this.toReadStorageSetting('display');
           }
-          if (this.projectType == 'ner') {
+          if (this.projectType == 'ner' || this.projectType == 'qa') {
+            this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
             this.sr = this.resetNerSrData(this.sr);
             this.toShowExistingLabel();
           }
@@ -424,6 +433,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         this.categories &&
         this.categories.length > 6 &&
         this.projectType != 'ner' &&
+        this.projectType != 'qa' &&
         this.projectType != 'image' &&
         this.projectType != 'log'
       ) {
@@ -621,6 +631,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       if (
         this.isMultipleLabel &&
         this.projectType !== 'ner' &&
+        this.projectType !== 'qa' &&
         this.projectType !== 'image' &&
         this.projectType !== 'log'
       ) {
@@ -640,6 +651,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       } else if (this.projectType == 'ner') {
         this.modifyChangeHistory();
+      }else if(this.projectType == 'qa'){
+        this.modifyChangeHistory();
+        srUserInput.userInput[0]['questionForText'] = this.categories;
       } else if (this.projectType == 'image') {
         srUserInput.userInput[0].problemCategory = this.currentBoundingData;
         this.sr.images = this.currentBoundingData;
@@ -700,9 +714,15 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       param['modify'] = false;
     } else {
       param['modify'] = true;
-      if (this.projectType === 'log' || this.projectType === 'ner') {
+      if (this.projectType === 'log' || this.projectType === 'ner' || this.projectType === 'qa') {
         param['problemCategory'] = this.spansList;
-        param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
+        if (this.projectType === 'log') {
+          param['logFreeText'] = this.questionForm.get('questionGroup.logFreeText').value;
+        }
+        if (this.projectType === 'qa') {
+          param['questionForText'] = this.categories;
+        }
+        
       } else if (this.isMultipleNumericLabel || this.isNumeric) {
         if (this.moreReviewInfo.length !== 0 && this.categoryFunc().length === 0) {
           param['modify'] = false;
@@ -824,6 +844,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       } else if (
         this.projectType === 'ner' ||
+        this.projectType === 'qa' ||
         this.projectType === 'log' ||
         this.projectType === 'image'
       ) {
@@ -853,7 +874,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               }
               const aa = this.annotationHistory[i].category.sort(
                 this.toolService.sortBy(
-                  this.projectType === 'ner'
+                  this.projectType === 'ner' || this.projectType === 'qa'
                     ? 'start'
                     : this.projectType === 'log'
                     ? 'line'
@@ -863,7 +884,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               );
               const bb = isCategory.sort(
                 this.toolService.sortBy(
-                  this.projectType === 'ner'
+                  this.projectType === 'ner' || this.projectType === 'qa'
                     ? 'start'
                     : this.projectType === 'log'
                     ? 'line'
@@ -875,7 +896,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
               for (let n = 0; n < aa.length; n++) {
                 let aaString;
                 let bbString;
-                if (this.projectType === 'ner') {
+                if (this.projectType === 'ner' || this.projectType === 'qa') {
                   aaString = aa[n].text + aa[n].start + aa[n].end + aa[n].label;
                   bbString = bb[n].text + bb[n].start + bb[n].end + bb[n].label;
                 } else if (this.projectType === 'log') {
@@ -919,6 +940,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.error = 'All cases have been completely annotated.';
           return;
         }
+        
+        if(this.projectType == 'qa'){
+          this.getQuestionListAndSetQuestionColors(newSr.questionForText);
+          this.selectedEntityID = 0;
+        }
+        
         this.submitAndHistory(newSr);
       },
       (error) => {
@@ -951,7 +978,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         activeClass: this.active,
         images: OldSr.images,
       };
-      if (this.projectType == 'ner' || this.projectType == 'image') {
+      if (this.projectType == 'ner' || this.projectType == 'qa' || this.projectType == 'image') {
         if (!this.env.config.enableAWSS3 && this.projectType === 'image') {
           OldSr.originalData.location = `${
             this.env.config.annotationService
@@ -1000,8 +1027,9 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     ) {
       this.sr = this.resetTabularSrData(this.sr);
     }
-    if (this.projectType == 'ner') {
+    if (this.projectType == 'ner' || this.projectType == 'qa') {
       this.sr = this.resetNerSrData(this.sr);
+      this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
       if (from !== 'review' && from !== 'pass' && this.startFrom !== 'review') {
         this.toShowExistingLabel();
       }
@@ -1079,12 +1107,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         (this.isMultipleLabel &&
           this.labelType !== 'HTL' &&
           this.projectType !== 'ner' &&
+          this.projectType !== 'qa' &&
           this.projectType !== 'image' &&
           this.projectType !== 'log')
       ) {
         const isCategory = this.categoryFunc();
         this.isActionErr(isCategory, null, 'skip');
-      } else if (this.projectType == 'ner') {
+      } else if (this.projectType == 'ner' || this.projectType == 'qa') {
         this.isSkipOrBack('skip');
       } else if (this.projectType == 'image') {
         this.isSkipOrBack('skip');
@@ -1217,7 +1246,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           }`;
         }
         let category = [];
-        if (this.projectType === 'ner' || this.projectType === 'log') {
+        if (this.projectType === 'ner' || this.projectType === 'qa' || this.projectType === 'log') {
           category = this.spansList;
         } else if (this.startFrom === 'review' && this.isMultipleLabel && !this.isNumeric) {
           if (OldSr.userInputs && OldSr.userInputs.length > 0) {
@@ -1231,7 +1260,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         const addSkip = {
           srId: OldSr._id,
           historyDescription:
-            this.projectType === 'ner' || this.projectType === 'image'
+            this.projectType === 'ner' || this.projectType === 'qa' || this.projectType === 'image'
               ? [OldSr.originalData]
               : OldSr.originalData.slice(0, 10),
           type: 'skip',
@@ -1257,9 +1286,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         ) {
           this.sr = this.resetTabularSrData(this.sr);
         }
-        if (this.projectType == 'ner') {
+        if (this.projectType == 'ner' || this.projectType == 'qa') {
           this.sr = this.resetNerSrData(this.sr);
           this.toShowExistingLabel();
+          this.getQuestionListAndSetQuestionColors(this.sr.questionForText)
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
@@ -1301,7 +1331,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           this.toFilterLog(this.filterList);
         }
         if (this.sr.userInputsLength > 0) {
-          if (this.projectType !== 'ner') {
+          if (this.projectType !== 'ner' && this.projectType !== 'qa') {
             this.categoryBackFunc();
           }
           if (this.projectType !== 'image') {
@@ -1322,7 +1352,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.numericInput.nativeElement.focus();
           }, 500);
         }
-        if (this.startFrom !== 'review' || this.projectType === 'ner') {
+        if (this.startFrom !== 'review' || this.projectType === 'ner' || this.projectType === 'qa') {
           this.clearUserInput();
         }
       },
@@ -1386,6 +1416,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.projectType !== 'image' &&
       this.projectType !== 'log' &&
       this.projectType !== 'ner' &&
+      this.projectType !== 'qa' &&
       this.renderFormat === 'html'
     ) {
       this.saveAnnotateSetting('display', this.renderFormat);
@@ -1407,7 +1438,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedEntityID = 0;
     this.reviewOrder = '';
     this.questionForm.get('questionGroup.reviewee').reset();
-    if (this.projectType !== 'image' && this.projectType !== 'ner' && this.projectType !== 'log') {
+    if (this.projectType !== 'image' && this.projectType !== 'ner' && this.projectType !== 'qa' && this.projectType !== 'log') {
       this.toReadStorageSetting('display');
     }
   }
@@ -1755,11 +1786,12 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         (this.isMultipleLabel &&
           this.labelType !== 'HTL' &&
           this.projectType !== 'ner' &&
+          this.projectType !== 'qa' &&
           this.projectType !== 'image' &&
           this.projectType !== 'log')
       ) {
         this.isActionErr(isCategory, id, 'history');
-      } else if (this.projectType == 'ner') {
+      } else if (this.projectType == 'ner' || this.projectType == 'qa') {
         this.isSkipOrBack('history', id);
       } else if (this.projectType == 'image') {
         this.isSkipOrBack('history', id, index);
@@ -1802,7 +1834,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     const isCategory = this.categoryFunc();
     let flag1;
     let flag2;
-    if (this.projectType == 'ner' || this.projectType == 'log') {
+    if (this.projectType == 'ner' || this.projectType == 'qa' || this.projectType == 'log') {
       flag1 =
         this.sr.userInputs &&
         this.sr.userInputs.length > 0 &&
@@ -1869,7 +1901,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.projectType !== 'text' && this.projectType !== 'tabular') {
           const aa = isCategory.sort(
             this.toolService.sortBy(
-              this.projectType === 'ner' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
+              this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
               'ascending',
             ),
           );
@@ -1878,14 +1910,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             bb = a.sort(this.toolService.sortBy('sort', 'ascending'));
           } else {
             bb = this.sr.userInputs[0].problemCategory.sort(
-              this.toolService.sortBy(this.projectType === 'ner' ? 'start' : 'line', 'ascending'),
+              this.toolService.sortBy(this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : 'line', 'ascending'),
             );
           }
 
           for (let i = 0; i < aa.length; i++) {
             let aaString;
             let bbString;
-            if (this.projectType === 'ner') {
+            if (this.projectType === 'ner' || this.projectType === 'qa') {
               const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
               const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
               aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
@@ -1942,6 +1974,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.silenceStatus = false;
       this.clrErrorTip = false;
       const isCategory = this.categoryFunc();
+
       if (isCategory.length > 0) {
         if (
           this.isNumeric ||
@@ -1949,12 +1982,14 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           (this.isMultipleLabel &&
             this.labelType !== 'HTL' &&
             this.projectType !== 'ner' &&
+            this.projectType !== 'qa' &&
             this.projectType !== 'image' &&
             this.projectType !== 'log')
         ) {
           this.isActionErr(isCategory, this.annotationPrevious[0].srId);
         } else if (
           this.projectType == 'ner' ||
+          this.projectType == 'qa' ||
           this.projectType == 'log' ||
           this.projectType == 'image'
         ) {
@@ -1985,7 +2020,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 }
                 const aa = this.annotationHistory[i].category.sort(
                   this.toolService.sortBy(
-                    this.projectType === 'ner'
+                    this.projectType === 'ner' || this.projectType === 'qa'
                       ? 'start'
                       : this.projectType === 'log'
                       ? 'line'
@@ -1995,7 +2030,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 );
                 const bb = isCategory.sort(
                   this.toolService.sortBy(
-                    this.projectType === 'ner'
+                    this.projectType === 'ner' || this.projectType === 'qa'
                       ? 'start'
                       : this.projectType === 'log'
                       ? 'line'
@@ -2006,7 +2041,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
                 for (let i = 0; i < aa.length; i++) {
                   let aaString;
                   let bbString;
-                  if (this.projectType === 'ner') {
+                  if (this.projectType === 'ner' || this.projectType === 'qa') {
                     const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
                     const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
                     aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
@@ -2119,9 +2154,10 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
             this.getProgress();
           }
         }
-        if (this.projectType == 'ner') {
+        if (this.projectType == 'ner' || this.projectType == 'qa') {
           this.sr = this.resetNerSrData(this.sr);
           this.toShowExistingLabel();
+          this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
@@ -2301,6 +2337,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       !this.isMultipleLabel &&
       !this.isNumeric &&
       this.projectType !== 'ner' &&
+      this.projectType !== 'qa' &&
       this.projectType !== 'image'
     ) {
       if (this.questionForm.get('questionGroup.category').value) {
@@ -2311,6 +2348,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       (!this.isShowDropDown &&
         !this.isMultipleLabel &&
         this.projectType !== 'ner' &&
+        this.projectType !== 'qa' &&
         this.projectType !== 'image' &&
         this.projectType !== 'log') ||
       this.isNumeric
@@ -2348,12 +2386,13 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isMultipleLabel &&
       this.labelType !== 'HTL' &&
       this.projectType !== 'ner' &&
+      this.projectType !== 'qa' &&
       this.projectType !== 'image' &&
       this.projectType !== 'log'
     ) {
       category = this.multipleLabelList;
       return category;
-    } else if (this.projectType == 'ner') {
+    } else if (this.projectType == 'ner' || this.projectType == 'qa') {
       category = this.spansList;
       return category;
     } else if (this.projectType == 'log') {
@@ -2457,6 +2496,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       !this.isShowDropDown &&
       !this.isMultipleLabel &&
       this.projectType != 'ner' &&
+      this.projectType != 'qa' &&
       this.projectType !== 'image'
     ) {
       // to storage the ticket label
@@ -2529,6 +2569,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isMultipleLabel &&
       this.labelType !== 'HTL' &&
       this.projectType != 'ner' &&
+      this.projectType != 'qa' &&
       this.projectType !== 'image' &&
       this.projectType !== 'log'
     ) {
@@ -2610,7 +2651,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       !this.isShowDropDown &&
       !this.isNumeric &&
       this.isMultipleLabel &&
-      this.projectType == 'ner'
+      (this.projectType == 'ner'|| this.projectType == 'qa')
     ) {
       this.spansList = [];
       const annotations = this.sr.userInputs;
@@ -2777,6 +2818,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       selection = window.getSelection();
 
     if (selection.isCollapsed) return [];
+    selection = this.extendWordSelection(selection);
     const mySelf = document.getElementsByClassName('nerPassage')[0];
 
     for (i = 0; i < selection.rangeCount; i++) {
@@ -2827,6 +2869,38 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     selection.removeAllRanges();
 
     return ranges;
+  }
+
+  extendWordSelection(selection){
+    if (this.projectType != 'qa') {
+      return selection;
+    }
+
+    let range = document.createRange();
+    range.setStart(selection.anchorNode, selection.anchorOffset);
+    range.setEnd(selection.focusNode, selection.focusOffset);
+    let backwards = range.collapsed;
+    range.detach();
+
+    // modify() works on the focus of the selection
+    let endNode = selection.focusNode;
+    let endOffset = selection.focusOffset;
+    selection.collapse(selection.anchorNode, selection.anchorOffset);
+    
+    let direction = [];
+    if (backwards) {
+        direction = ['backward', 'forward'];
+    } else {
+        direction = ['forward', 'backward'];
+    }
+
+    selection.modify("move", direction[0], "character");
+    selection.modify("move", direction[1], "word");
+    selection.extend(endNode, endOffset);
+    selection.modify("extend", direction[1], "character");
+    selection.modify("extend", direction[0], "word");
+
+    return selection;
   }
 
   initNerPassage(element, selectedEntityID0) {
@@ -2898,7 +2972,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.createSpans(normedRange, selectedEntityID, element);
   }
 
-  onMouseUp() {
+  onMouseUp(e) {
+    this.currentSelectedQuestion();
     this.handleScroll();
     var selectedRanges = this.captureDocSelection();
     if (selectedRanges.length === 0) return;
@@ -2953,7 +3028,8 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const lastSpan = spans[spans.length - 1];
-    lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
+    lastSpan.setAttribute('data-label', this.projectType == 'qa'? "": this.categories[selectedEntityID]);
+    lastSpan.setAttribute('title', this.categories[selectedEntityID]);
     if (this.isShowPopLabel) {
       lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans));
     }
@@ -3054,7 +3130,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clickClearMark(event, data) {
-    this.spansList.forEach((ele, index) => {
+    this.spansList.forEach((ele, index) => {      
       if (ele.spans == data.spans) {
         this.spansList.splice(index, 1);
       }
@@ -3070,7 +3146,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
     this.actionError = null;
   }
 
-  onSelectingEntity(e, data, index) {
+  onSelectingEntity(e, data, index) {        
     e.preventDefault();
     this.selectedEntityID = index;
     if (this.projectType == 'log') {
@@ -3086,7 +3162,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     }
-    if (this.projectType == 'ner') {
+    if (this.projectType == 'ner' || this.projectType == 'qa') {
       this.selectedEntityColor = e.target.style.color;
     }
   }
@@ -3133,6 +3209,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           const flag = [];
           if (
             this.projectType != 'ner' &&
+            this.projectType != 'qa' &&
             this.projectType != 'image' &&
             this.projectType != 'log'
           ) {
@@ -3200,13 +3277,16 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
           if (responseSr.flag && responseSr.flag.silence) {
             this.silenceStatus = true;
           }
-          if (this.projectType === 'ner') {
+          if (this.projectType === 'ner' || this.projectType === 'qa') {
             this.resetNerSrData([responseSr]);
+            this.getQuestionListAndSetQuestionColors(responseSr.questionForText);
           }
           this.sr._id = responseSr._id;
           this.sr.originalData = responseSr.originalData;
           this.sr.flag = responseSr.flag;
           this.sr.userInputs = responseSr.userInputs;
+          this.sr.questionForText = responseSr.questionForText;
+          
           if (!this.sr.userInputs.length && this.labelType === 'HTL') {
             this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
           }
@@ -4088,6 +4168,7 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       this.projectType !== 'image' &&
       this.projectType !== 'log' &&
       this.projectType !== 'ner' &&
+      this.projectType !== 'qa' &&
       this.renderFormat === 'html'
     ) {
       this.saveAnnotateSetting('display', this.renderFormat);
@@ -4141,6 +4222,126 @@ export class AnnotateComponent implements OnInit, AfterViewInit, OnDestroy {
       };
       const observer = new MutationObserver(callback);
       observer.observe(target, config);
+    }
+  }
+
+  onAddQuestion(e, inputting?){
+    
+    let question = e.target.value.trim();
+
+    if (this.categories.includes(question)) {
+      this.clrErrorTip = true;
+      this.inputQuestionError = `The question already exists at index ${this.categories.indexOf(question) + 1}`;
+      return
+    }
+    //when inputting clear error message
+    if (!question || inputting) {
+      this.clrErrorTip = false;
+      this.inputQuestionError = null;
+      return
+    }
+    //and questiong to list and get question label color
+    this.categories.push(question);
+    this.nerLabelForColor(this.categories);
+    this.inputQuestion = null;
+
+  }
+
+  onMouseEnter(e, i, question){
+    e.target.style['border-bottom-style'] = 'dashed';
+    e.target.style['border-bottom-color'] = this.getLabelColor(question);
+    this.deleteQuestionItem = i;
+  }
+  
+  onMouseLeave(e, i){
+    e.target.style['border-style'] = 'none';
+    this.deleteQuestionItem = -1;
+  }
+  
+  deleteQuestion(i){
+
+    this.spansList.forEach((ele, index) => {
+      if (ele.label == this.categories[i]) {
+        removeSpans(ele.spans);
+      }
+    });
+    this.spansList = this.spansList.filter((ele, index) => {
+      if (ele.label != this.categories[i]) {
+        return ele;
+      }
+    });
+    this.categories.splice(i, 1);
+
+  }
+
+  currentSelectedQuestion(){
+    if (this.projectType != 'qa') return;
+    if (!this.categories.length){
+      this.clrErrorTip = true;
+      this.inputQuestionError = `Please add the question first`;
+      throw new Error(this.inputQuestionError);
+    }
+    
+    let selectedQuestion;
+    this.el.nativeElement.querySelectorAll('.questionRadio').forEach(ele => {
+        if (ele.checked) {
+          selectedQuestion = ele.value;
+        }
+    });
+
+    this.selectedEntityID = this.categories.indexOf(selectedQuestion)
+    return selectedQuestion;
+  }
+
+  getQuestionListAndSetQuestionColors(questionForText){
+    if (this.projectType != 'qa') return;
+
+    this.categories = questionForText? questionForText: [];
+    this.nerLabelForColor(this.categories);
+  }
+
+  editQuestion(e, i){
+    this.editQuestionItem = -1;
+    let editQuetion = e.target.value.trim()
+    if (!editQuetion) {
+      this.editQuestionError = `question is empty`;
+      this.editQuestionItem = i;
+      return
+    }
+    if (this.categories.includes(editQuetion)) {
+      this.editQuestionError = `The question already exists at index ${this.categories.indexOf(editQuetion) + 1}`;
+      this.editQuestionItem = i;
+      return
+    }
+    const originalQuestion = this.categories[i];
+    this.categories[i] = editQuetion;
+    this.nerLabelForColor(this.categories);
+    this.editQuestionError = "";
+    this.spansList.forEach(span => {
+      if(span.label == originalQuestion) {
+        span.label = editQuetion;
+      }
+    });
+    const mainText = document.getElementById('mainText');
+    this.updateMainTextLabel(mainText.childNodes, originalQuestion, editQuetion);
+  }
+
+  updateMainTextLabel(nodes, label, newLabel){
+    //nodes have no childNodes it's the recursive exit condition
+    if (nodes.type == 3) {
+      if (nodes.title == label) {
+        nodes.setAttribute("title", newLabel)
+      }
+      return
+    }
+    // have childNodes and recursive update
+    for (const node of nodes) {
+      if (node.title == label) {
+        node.setAttribute("title", newLabel)
+      }
+      if (node.childNodes.length) {
+        this.updateMainTextLabel(node.childNodes, label, newLabel)
+      }
     }
   }
 }

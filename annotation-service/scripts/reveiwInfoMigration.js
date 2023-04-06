@@ -10,6 +10,7 @@ const ObjectId = require("mongodb").ObjectID;
 const { getModelProject } = require("../utils/mongoModel.utils");
 const { ProjectModel, UserModel, LogModel, SrModel, ImgModel } = require("../db/db-connect");
 const { model } = require("mongoose");
+const MESSAGE = require('../config/code_msg');
 
 async function migrationAllTicketsReviewInfo(req) {
     
@@ -66,7 +67,7 @@ async function migrationAllTicketsReviewInfo(req) {
     const end = new Date(Date.now());
     console.log(`MIGRATION DONE ${now.toLocaleTimeString()}, use time: ${(end-now)/1000} 's` );
 
-    return {code: 200, MSG: "migration success"}
+    return MESSAGE.SUCCESS;
 }
 
 

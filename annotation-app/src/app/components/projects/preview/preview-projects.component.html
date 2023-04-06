@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
     </div>
-    <div class="clr-col-5">
+    <div class="clr-col-5" *ngIf="projectType != 'qa'">
       <h4 *ngIf="labelType != 'numericLabel'"># Annotations Per Category</h4>
       <h4 *ngIf="labelType == 'numericLabel'"># Annotations Per Value Range</h4>
       <div class="topBoardBox categoryChart">
@@ -350,14 +350,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <clr-dg-column
                             class="studioCell"
                             *ngIf="
-                              projectType == 'image' || projectType == 'ner' || projectType == 'log'
+                              projectType == 'image' || projectType == 'ner' || projectType == 'qa' || projectType == 'log'
                             "
                           >
                             Label
                           </clr-dg-column>
                           <clr-dg-column
                             *ngIf="
-                              projectType != 'ner' && projectType != 'image' && projectType != 'log'
+                              projectType != 'ner' && projectType != 'qa' && projectType != 'image' && projectType != 'log'
                             "
                             style="min-width: 20rem"
                           >
@@ -368,18 +368,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                               {{ flag.user }}
                             </clr-dg-cell>
                             <clr-dg-cell>
-                              {{flag.timestamp | date: 'yyyy-MM-dd HH:mm:ss'
-                              }}
+                              {{flag.timestamp | date: 'yyyy-MM-dd HH:mm:ss'}}
                             </clr-dg-cell>
                             <clr-dg-cell
                               *ngIf="projectType === 'log'"
                               style="word-break: break-all"
-                            >
-                              {{ flag.logFreeText }}
+                            >{{ flag.logFreeText }}
                             </clr-dg-cell>
                             <clr-dg-cell
                               *ngIf="
                                 projectType != 'ner' &&
+                                projectType != 'qa' &&
                                 projectType != 'image' &&
                                 projectType != 'log' &&
                                 labelType !== 'HTL'
@@ -391,6 +390,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <clr-dg-cell
                               *ngIf="
                                 projectType != 'ner' &&
+                                projectType != 'qa' &&
                                 projectType != 'image' &&
                                 projectType != 'log' &&
                                 labelType === 'HTL'
@@ -414,7 +414,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <li>{{ selectedTreeLabel }}</li>
                               </ul>
                             </clr-dg-cell>
-                            <clr-dg-cell *ngIf="projectType == 'ner'" class="studioCell">
+                            <clr-dg-cell *ngIf="projectType == 'ner' || projectType == 'qa'" class="studioCell">
                               <clr-datagrid>
                                 <clr-dg-column *ngFor="let title of innerTable">
                                   {{ title }}
@@ -473,14 +473,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <clr-dg-column
                           class="studioCell"
                           *ngIf="
-                            projectType == 'image' || projectType == 'ner' || projectType == 'log'
+                            projectType == 'image' || projectType == 'ner' || projectType == 'qa' || projectType == 'log'
                           "
                         >
                           Re-Label
                         </clr-dg-column>
                         <clr-dg-column
                           *ngIf="
-                            projectType != 'ner' && projectType != 'image' && projectType != 'log'
+                            projectType != 'ner' && projectType != 'qa' && projectType != 'image' && projectType != 'log'
                           "
                           style="min-width: 20rem"
                         >
@@ -506,6 +506,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <clr-dg-cell
                             *ngIf="
                               projectType != 'ner' &&
+                              projectType != 'qa' &&
                               projectType != 'image' &&
                               projectType != 'log' &&
                               labelType !== 'HTL'
@@ -517,6 +518,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <clr-dg-cell
                             *ngIf="
                               projectType != 'ner' &&
+                              projectType != 'qa' &&
                               projectType != 'image' &&
                               projectType != 'log' &&
                               labelType === 'HTL'
@@ -541,7 +543,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <li>{{ selectedTreeLabel }}</li>
                             </ul>
                           </clr-dg-cell>
-                          <clr-dg-cell *ngIf="projectType == 'ner'" class="studioCell">
+                          <clr-dg-cell *ngIf="projectType == 'ner' || projectType == 'qa'" class="studioCell">
                             <clr-datagrid *ngIf="flag.problemCategory">
                               <clr-dg-column *ngFor="let title of innerTable">
                                 {{ title }}

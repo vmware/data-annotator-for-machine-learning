@@ -19,6 +19,7 @@ export interface SR {
   userInputsLength?: number;
   fileInfo?: any;
   ticketQuestions?: any;
+  questionForText: any;
 }
 export interface UserInput {
   problemCategory: any;

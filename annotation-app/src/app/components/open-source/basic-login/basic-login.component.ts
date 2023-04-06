@@ -140,7 +140,7 @@ export class BasicLoginComponent implements OnInit {
         password: this.dsForm.get('password').value,
         uname: fullName.join(' '),
       };
-      this.avaService.register(param).subscribe(
+      this.avaService.register([param]).subscribe(
         (res) => {
           this.registerSuccess = 'Sign Up Complete!';
           this.loading = false;

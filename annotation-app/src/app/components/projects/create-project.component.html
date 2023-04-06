@@ -161,7 +161,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </button>
                 <button
                   *ngIf="
-                    (msg.type == 'text' || msg.type == 'tabular' || msg.type == 'ner') &&
+                    (msg.type == 'text' || msg.type == 'tabular' || msg.type == 'ner' || msg.type == 'qa') &&
                     dsDialogForm.get('selectedDataset').value
                   "
                   class="btn btn-sm add-doc"
@@ -384,12 +384,9 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-tooltip-content>
             </clr-tooltip>
           </div>
-
-          <div class="form-group clr-row" style="margin-top: 1rem">
+          <div *ngIf="projectType !== 'qa'" class="form-group clr-row" style="margin-top: 1rem">
             <div class="clr-col-12 clr-col-md-1"></div>
-            <label for="labels" class="label-tooltip clr-col-12 clr-col-md-2"
-              >Labels<span>*</span></label
-            >
+            <label for="labels" class="label-tooltip clr-col-12 clr-col-md-2">Labels<span>*</span></label>
 
             <div class="clr-col-12 clr-col-md-8 labelsList">
               <div
@@ -483,8 +480,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                   (mouseenter)="overLabels(i, 'new')"
                   (mouseleave)="outLabels(i, 'new')"
                   [ngClass]="activeNew == i ? 'overLabels' : ''"
-                  >{{ label
-                  }}<clr-icon
+                  >{{ label}}
+                  <clr-icon
                     shape="times"
                     *ngIf="activeNew == i"
                     style="position: absolute; right: 0.1rem"
@@ -496,8 +493,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 
                 <input
                   #labels
-                  id="labels"
-                  maxlength="50"
+                  id="labels"  
                   clrInput
                   placeholder="Add New Label Here"
                   name="addNewLabel"
@@ -505,10 +501,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   (keyup.enter)="onEnterLabel(labels.value)"
                   (blur)="labelsBlur($event)"
                   (keyup)="onLabelKeydown($event)"
+                  [attr.maxlength]="50"
                   [disabled]="categoryList.length > 49"
                 />
                 <div
-                  *ngIf="msg.type != 'ner' && msg.type != 'image' && msg.type != 'log'"
+                  *ngIf="msg.type != 'ner' && msg.type != 'image' && msg.type != 'log' && msg.type != 'qa'"
                   class="clr-checkbox-wrapper"
                   style="margin-top: 0.5rem"
                 >
@@ -845,8 +842,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                   (change)="clickPopLabel($event)"
                 />
                 <label for="showPopLabels"
-                  >Add Secondary Labels
-                  <clr-tooltip>
+                  >{{msg.type=='qa'? "Add Answer Category": "Add Secondary Labels"}}
+                  <clr-tooltip *ngIf="projectType === 'ner'">
                     <clr-icon
                       clrTooltipTrigger
                       shape="info-circle"
@@ -865,7 +862,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
 
-          <div class="form-group clr-row" *ngIf="projectType === 'ner' && showPopLabel">
+          <div class="form-group clr-row" *ngIf="(projectType === 'ner') && showPopLabel">
             <div class="clr-col-12 clr-col-md-1"></div>
             <label for="PopupLables" class="label-tooltip clr-col-12 clr-col-md-2"
               >Secondary Labels
@@ -1080,6 +1077,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               isMultipleLabel ||
               isMutilNumericLabel ||
               msg.type == 'ner' ||
+              msg.type == 'qa' ||
               msg.type == 'log' ||
               isUploadLabel
             "

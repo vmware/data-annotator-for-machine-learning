@@ -8,7 +8,7 @@
 
 const csv = require('csvtojson');
 const config = require("../config/config");
-const { PAGINATELIMIT, PROJECTTYPE, ENCODE, SOURCE } = require("../config/constant");
+const { PAGINATELIMIT, PROJECTTYPE, ENCODE, SOURCE, OPERATION } = require("../config/constant");
 const emailService = require('../services/email-service');
 const axios = require("axios");
 const fileSystemUtils = require('./fileSystem.utils');
@@ -16,14 +16,14 @@ const mongoDb = require('../db/mongo.db');
 const { ProjectModel, SrModel } = require('../db/db-connect');
 const slackChat = require("../services/slack/slackChat.service");
 const { formatDate } = require('./common.utils');
-
+const {updateDatasetProjectInfo} = require('../services/dataSet-service');
 
 
 module.exports = {
     execute: async function (req, annotators) {
         const projectType = req.body.projectType;
         const source = req.body.source;
-        if ((projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER) || source == SOURCE.MODEL_FEEDBACK) {
+        if ((projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER && projectType != PROJECTTYPE.QA) || source == SOURCE.MODEL_FEEDBACK) {
             return;
         }
         const start = Date.now();
@@ -34,6 +34,9 @@ module.exports = {
         let selectedColumn = req.body.selectDescription;
         selectedColumn = (typeof selectedColumn === 'string' ? JSON.parse(selectedColumn) : selectedColumn);
         const user = req.auth.email;
+        let questionForText = req.body.questionForText? req.body.questionForText: [];
+        questionForText = (typeof questionForText === 'string' ? JSON.parse(questionForText): questionForText);
+
 
         let totalCase = 0;
         let docs = [];
@@ -80,7 +83,20 @@ module.exports = {
                     userInputsLength: 0,
                     originalData: select,
                 };
-
+                if (projectType == PROJECTTYPE.QA) {
+                    let questions = [];
+                    for (const q of questionForText) {
+                        if (!q || !q.trim() || !oneData[q]) {
+                            continue;
+                        }
+                        for (const question of oneData[q].split("?")) {
+                            if (question.trim()) {
+                                questions.push(question.trim()+"?");
+                            }
+                        }
+                    }
+                    sechema.questionForText = questions;
+                }
                 //support ner quesion anwser column display
                 if (projectType == PROJECTTYPE.NER && req.body.ticketQuestions.length) {
                     let ticketQuestions = {};
@@ -141,6 +157,8 @@ module.exports = {
                 };
                 console.log(`[ SRS ] Utils update totalCase:`, totalCase);
                 await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
+
+                await updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD);
 
                 console.log(`[ SRS ] Utils srsImporter.execute end: within:[ ${(Date.now() - start) / 1000}s ] `);
 

@@ -17,6 +17,7 @@ const { ProjectModel, UserModel, LogModel } = require('../db/db-connect');
 const { formatDate } = require('../utils/common.utils');
 const slackChat = require("./slack/slackChat.service");
 const { default: axios } = require("axios");
+const MESSAGE = require('../config/code_msg');
 
 async function getProjects(req) {
     console.log(`[ PROJECT ] Service getProjects query user role`);
@@ -42,7 +43,7 @@ async function getProjects(req) {
         project = "projectName shareDescription creator updatedDate totalCase projectCompleteCase userCompleteCase categoryList generateInfo downloadCount labelType min max projectType isMultipleLabel popUpLabels integration";
     } else {
         console.log(`[ PROJECT ] [ERROR] Service errors in ${email} or ${src}`);
-        throw { CODE: 1001, MSG: "ERROR ID or src" };
+        throw MESSAGE.VALIDATATION_PJ_ID_ROUTER;
     }
     if (req.query.projectType) {
         condition['projectType'] = req.query.projectType;
@@ -128,9 +129,13 @@ async function deleteProject(req) {
         };
         await axios.delete(url, reqConfig);
     }
-
+    
+    for (const dsName of mp.project.selectedDataset) {
+        //to solve the circle dependence
+        await require('./dataSet-service').updateDatasetProjectInfo(dsName, mp.project.projectName, OPERATION.DELETE);
+    }
     console.log(`[ PROJECT ] Service delete project`, conditions);
-    await mongoDb.deleteOneByConditions(ProjectModel, conditions);
+    return mongoDb.deleteOneByConditions(ProjectModel, conditions);
 
 }
 async function updateProject(req) {
@@ -146,6 +151,11 @@ async function updateProject(req) {
         const srsCondition = { projectName: req.body.previousPname };
         const srsDoc = { projectName: req.body.pname };
         await mongoDb.updateManyByConditions(mp.model, srsCondition, srsDoc);
+        //update dataset maped projectName
+        for (const dsName of _.union(mp.project.selectedDataset)) {
+            await require('./dataSet-service').updateDatasetProjectInfo(dsName, req.body.previousPname, OPERATION.UPDATE, req.body.pname);
+        }
+        
     }
 
     const projectInfo = mp.project;
@@ -177,7 +187,7 @@ async function updateProject(req) {
     }
 
     if (!req.body.projectOwner.length) {
-        throw { CODE: 4001, MSG: "PROJECT OWNER CAN'T BE EMPTY" };
+        throw MESSAGE.VALIDATATION_PJ_OWNER;
     }
     for (const owner of req.body.projectOwner) {
         // update annotator role to prjectOwner
@@ -499,7 +509,7 @@ async function projectLeaderBoard(req) {
             await srsUI.forEach(async UIS => {
                 const userInputDatas = await prepareUserInputs(UIS);
                 await userInputDatas.forEach(ui => {
-                    if (proInfo.projectType == PROJECTTYPE.NER || proInfo.projectType == PROJECTTYPE.LOG) {
+                    if (proInfo.projectType == PROJECTTYPE.NER || proInfo.projectType == PROJECTTYPE.QA || proInfo.projectType == PROJECTTYPE.LOG) {
                         ui.problemCategory.forEach(ann => {
                             if (ann.label == label) {
                                 lb.annotated += 1;
@@ -692,12 +702,16 @@ async function updateProjectLabels(req) {
     const addLabels = req.body.addLabels;
     const editLabels = req.body.editLabels;
     const deleteLabels = req.body.deleteLabels;
-
-    for await (const label of deleteLabels) {
-        await deleteProjectLables(label, _id);
+    const min = req.body.min;
+    const max = req.body.max;
+    
+    if (deleteLabels) {
+        for await (const label of deleteLabels) {
+            await deleteProjectLables(label, _id);
+        }
     }
 
-    return editProjectLabels(_id, editLabels, addLabels);
+    return editProjectLabels(_id, editLabels, addLabels, min, max);
 }
 
 
@@ -751,56 +765,60 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
             let originalLabels = JSON.parse(project.categoryList);
             let editLBList = [];
             //validate edit label data
-            for (const elabel of editLabels) {
-                if (elabel.edit) {
-                    const orgLB = Object.keys(elabel.originLB)[0];
-                    const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == orgLB);
-
-                    if (!originLBDB) {
-                        throw { CODE: 4006, MSG: "INPUT originLB ERROR" };
+            if (editLabels) {
+                for (const elabel of editLabels) {
+                    if (elabel.edit) {
+                        const orgLB = Object.keys(elabel.originLB)[0];
+                        const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == orgLB);
+    
+                        if (!originLBDB) {
+                            throw MESSAGE.VALIDATATION_PJ_ORIGIN_LB;
+                        }
+                        const dbMin = originLBDB[orgLB][0];
+                        const dbMax = originLBDB[orgLB][1];
+    
+                        const orgMin = elabel.originLB[orgLB][0];
+                        const orgMax = elabel.originLB[orgLB][1];
+    
+                        const editLB = Object.keys(elabel.editLB)[0];
+                        const editMin = elabel.editLB[editLB][0];
+                        const editMax = elabel.editLB[editLB][1];
+    
+                        if (editLB == orgLB && editMin == dbMin && editMax == dbMax) {
+                            continue;
+                        }
+                        //find if edit label already exist
+                        const editLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == editLB);
+                        if (editLBDB && editLB != orgLB) {
+                            throw MESSAGE.VALIDATATION_PJ_EDIT_LB_EXIST;
+                        }
+    
+                        if (dbMin != orgMin || dbMax != orgMax) {
+                            throw MESSAGE.VALIDATATION_PJ_ORIGIN_LB_MAX_MIN;
+                        }
+                        if (editMin >= editMax || editMin > dbMin || editMax < dbMax) {
+                            throw MESSAGE.VALIDATATION_PJ_EDIT_LB_MAX_MIN;
+                        }
+                        //add to edit list
+                        editLBList.push([orgLB, editLB]);
+                        originalLabels = await originalLabels.filter(ol => Object.keys(ol)[0] != orgLB);
+                        originalLabels.push(elabel.editLB);
                     }
-                    const dbMin = originLBDB[orgLB][0];
-                    const dbMax = originLBDB[orgLB][1];
-
-                    const orgMin = elabel.originLB[orgLB][0];
-                    const orgMax = elabel.originLB[orgLB][1];
-
-                    const editLB = Object.keys(elabel.editLB)[0];
-                    const editMin = elabel.editLB[editLB][0];
-                    const editMax = elabel.editLB[editLB][1];
-
-                    if (editLB == orgLB && editMin == dbMin && editMax == dbMax) {
-                        continue;
-                    }
-                    //find if edit label already exist
-                    const editLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == editLB);
-                    if (editLBDB && editLB != orgLB) {
-                        throw { CODE: 4006, MSG: "INPUT editLB already exist" };
-                    }
-
-                    if (dbMin != orgMin || dbMax != orgMax) {
-                        throw { CODE: 4006, MSG: "INPUT originLB min/max ERROR" };
-                    }
-                    if (editMin >= editMax || editMin > dbMin || editMax < dbMax) {
-                        throw { CODE: 4006, MSG: "INPUT editLB min/max ERROR" };
-                    }
-                    //add to edit list
-                    editLBList.push([orgLB, editLB]);
-                    originalLabels = await originalLabels.filter(ol => Object.keys(ol)[0] != orgLB);
-                    originalLabels.push(elabel.editLB);
                 }
             }
             //validate add label data
-            for (const aLabel of addLabels) {
-                const addLB = Object.keys(aLabel)[0];
-                const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == addLB);
-                if (originLBDB) {
-                    continue;
+            if (addLabels) {
+                for (const aLabel of addLabels) {
+                    const addLB = Object.keys(aLabel)[0];
+                    const originLBDB = await originalLabels.find(ol => Object.keys(ol)[0] == addLB);
+                    if (originLBDB) {
+                        continue;
+                    }
+                    if (aLabel[addLB][0] > aLabel[addLB][1]) {
+                        throw MESSAGE.VALIDATATION_PJ_ADD_LB_MAX_MIN;
+                    }
+                    originalLabels.push(aLabel);
                 }
-                if (aLabel[addLB][0] > aLabel[addLB][1]) {
-                    throw { CODE: 4006, MSG: "INPUT addLabels min/max ERROR" };
-                }
-                originalLabels.push(aLabel);
             }
             //update label
             updateProject.$set['categoryList'] = JSON.stringify(originalLabels);
@@ -818,7 +836,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
         } else {
             if ((min != null || min != undefined || min != "") && (max != null || max != undefined || max != "")) {
                 if (min >= max || typeof min != "number" || typeof max != "number" || min > project.min || max < project.max) {
-                    throw { CODE: 4006, MSG: "INPUT MIN/MAX ERROR" };
+                    throw MESSAGE.VALIDATATION_PJ_MAX_MIN;
                 }
                 updateProject.$set['min'] = min;
                 updateProject.$set['max'] = max;
@@ -832,7 +850,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
             for (const key in editLabels) {
                 const index = originalLabels.indexOf(key);
                 if (index == -1) {
-                    throw { CODE: 4006, MSG: "INPUT EDITlABELS ERROR" };
+                    throw MESSAGE.VALIDATATION_PJ_EDIT_LB;
                 }
 
                 if (key != editLabels[key]) {
@@ -874,7 +892,7 @@ async function editProjectLabels(pid, editLabels, addLabels, min, max) {
 
         //update labeled tickets
         for (const key in editLb) {
-            if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.LOG) {
+            if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.QA || project.projectType == PROJECTTYPE.LOG) {
                 query = { 
                     projectName: project.projectName, 
                     userInputsLength: {$gte: 1},  
@@ -972,11 +990,11 @@ async function deleteProjectLables(label, _id, projectName, operation) {
         labelArray = categoryList.map(a => Object.keys(a)[0]);
     }
     if (!labelArray.includes(label)) {
-        throw { CODE: 4004, MSG: "LABEL NOT EXIST" };
+        throw MESSAGE.VALIDATATION_PJ_LB;
     }
 
     let conditions = { projectName: mp.project.projectName }
-    if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.LOG) {
+    if (mp.project.projectType == PROJECTTYPE.NER || mp.project.projectType == PROJECTTYPE.QA || mp.project.projectType == PROJECTTYPE.LOG) {
         conditions["userInputs.problemCategory.label"] = label;
     } else if (mp.project.projectType == PROJECTTYPE.IMGAGE) {
         conditions = {
@@ -996,12 +1014,14 @@ async function deleteProjectLables(label, _id, projectName, operation) {
 
     if (operation == OPERATION.QUERY) {
         if (tickets[0]) {
-            return { CODE: 400, MSG: "LABEL HAS BEEN ANNOTATED", DATA: [label] };
+            MESSAGE.VALIDATATION_PJ_LB_ANNOTATED.DATA = [label];
+            return MESSAGE.VALIDATATION_PJ_LB_ANNOTATED;
         }
-        return { CODE: 200, MSG: "LABEL CAN BE DELETE", DATA: [label] };
+        MESSAGE.VALIDATATION_PJ_LB_DEL.DATA = [label];
+        return MESSAGE.VALIDATATION_PJ_LB_DEL;
     } else {
         if (tickets[0]) {
-            throw { CODE: 4005, MSG: "LABEL HAS BEEN ANNOTATED" };
+            throw MESSAGE.VALIDATATION_PJ_LB_ANNOTATED;
         }
 
         const query = { projectName: mp.project.projectName }
@@ -1016,8 +1036,8 @@ async function deleteProjectLables(label, _id, projectName, operation) {
 
         const update = { $set: { "categoryList": labelArray } };
         await mongoDb.findOneAndUpdate(ProjectModel, query, update, options);
-
-        return { CODE: 200, MSG: "OK", LABELS: labelArray };
+        MESSAGE.SUCCESS.LABELS = labelArray
+        return MESSAGE.SUCCESS;
     }
 }
 
@@ -1038,7 +1058,22 @@ async function getProjectsTextTabular(email) {
     return mongoDb.findByConditions(ProjectModel, condition, project, options);
 }
 
+async function updateProjectDatasetInfo(projectName, datasetName, operation) {
+    const condition = {projectName: projectName};
+    const options = { new: true, upsert: true };
+    let update = {};
 
+    if (OPERATION.ADD == operation) {
+        update = { $addToSet: { selectedDataset: datasetName } };
+    }else if (OPERATION.DELETE == operation) {
+        update = { $pull: { selectedDataset: datasetName } };
+    }else{
+        throw  MESSAGE.VALIDATATION_OPERATION;
+    }
+    
+    console.log(`[ DATASET ] Service updateProjectDatasetInfo`, update);
+    return mongoDb.findOneAndUpdate(ProjectModel, condition, update, options);
+}
 
 
 module.exports = {
@@ -1066,4 +1101,5 @@ module.exports = {
     initHierarchicalLabelsCase,
     reduceHierarchicalUnselectedLabel,
     prepareUserInputs,
+    updateProjectDatasetInfo,
 }

@@ -9,7 +9,7 @@
 const srsImporter = require("../utils/srsImporter");
 const createCsvWriter = require("csv-writer").createObjectCsvWriter;
 const CSVArrayWriter = require("csv-writer").createArrayCsvWriter;
-const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH, QUERYORDER, ANNOTATION_QUESTION, TICKET_DESCRIPTION, SOURCE, QUERY_STRATEGY, ESTIMATOR } = require("../config/constant");
+const { GENERATESTATUS, PAGINATETEXTLIMIT, PAGINATELIMIT, FILEFORMAT, LABELTYPE, PROJECTTYPE, S3OPERATIONS, FILETYPE, DATASETTYPE, FILEPATH, QUERYORDER, ANNOTATION_QUESTION, TICKET_DESCRIPTION, SOURCE, QUERY_STRATEGY, ESTIMATOR, OPERATION } = require("../config/constant");
 const fs = require('fs');
 const ObjectId = require("mongodb").ObjectID;
 const moment = require('moment');
@@ -31,6 +31,7 @@ const localFileSysService = require('./localFileSys.service');
 const _ = require("lodash");
 const config = require('../config/config');
 const { initHierarchicalLabelsCase,prepareUserInputs } = require('./project.service');
+const MESSAGE = require("../config/code_msg");
 
 async function createProject(req) {
     const findProjectName = { projectName: req.body.pname };
@@ -101,7 +102,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
         regression = true;
     }
     let popUpLabels = [];
-    if (projectType == PROJECTTYPE.NER) {
+    if (projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA) {
         const plb = req.body.popUpLabels;
         popUpLabels = plb ? (typeof plb === 'string' ? JSON.parse(plb) : plb) : [];
     };
@@ -126,7 +127,7 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
         assignmentLogic: req.body.assignmentLogic ? req.body.assignmentLogic : QUERYORDER.RANDOM,
         annotator: annotators,
         dataSource: req.body.fileName ? req.body.fileName : "",
-        selectedDataset: [req.body.selectedDataset ? req.body.selectedDataset : ""],
+        selectedDataset: req.body.selectedDataset ? [req.body.selectedDataset] : [],
         selectedColumn: selectedColumn,
         annotationQuestion: req.body.annotationQuestion ? req.body.annotationQuestion : ANNOTATION_QUESTION,
         fileSize: req.body.fileSize ? req.body.fileSize : 1,
@@ -156,7 +157,6 @@ async function saveProjectInfo(req, userCompleteCase, annotators) {
     const update = { $set: project };
     const options = { new: true, upsert: true };
 
-
     return mongoDb.findOneAndUpdate(ProjectModel, conditions, update, options)
 }
 
@@ -181,7 +181,11 @@ async function prepareHeaders(project, format) {
     } else if (project.projectType == PROJECTTYPE.LOG) {
         headerArray.push({ id: "fileName", title: "fileName" });
         headerArray.push({ id: "freeText", title: "freeText" });
-    } else {
+    } else if(project.projectType == PROJECTTYPE.QA){
+        headerArray.push({ id: 'context', title: 'context' });
+        headerArray.push({ id: 'question', title: 'question' });
+        headerArray.push({ id: 'answers', title: 'answers' });
+    }else {
         await project.selectedColumn.forEach(item => {
             headerArray.push({ id: item, title: item });
         });
@@ -196,12 +200,12 @@ async function prepareHeaders(project, format) {
             await labelsArray.forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
-        } else {
+        } else if(project.projectType != PROJECTTYPE.QA){
             await project.categoryList.split(",").forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
         }
-        if (project.projectType == PROJECTTYPE.NER) {
+        if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.QA) {
             //init pop-up label headers
             await project.popUpLabels.forEach(item => {
                 headerArray.push({ id: item, title: item });
@@ -310,7 +314,36 @@ async function prepareContents(srData, project, format) {
             await project.popUpLabels.forEach(item => {
                 newCase[item] = newCase[item][0] ? JSON.stringify(newCase[item]) : [];
             });
-        } else if (project.projectType == PROJECTTYPE.LOG) {
+        } else if(project.projectType == PROJECTTYPE.QA){
+            // take user input or reviewed info
+            const userInputDatas = await prepareUserInputs(srs);
+            // init questions cloumn
+            let questionForText = srs.questionForText;
+            if (srs.reviewInfo.modified) {
+                questionForText = userInputDatas[0].questionForText;
+            }
+            // init answer cloumn
+            for await(const item of userInputDatas) {
+                for await(const question of questionForText) {
+                    let answers = {text: [], answer_start: []};
+                    for await(const lb of item.problemCategory) {
+                        if (lb.label === question) {            
+                            answers['text'].push(lb.text);
+                            answers['answer_start'].push(lb.start);
+                        }
+                    }
+                    // current question has answer
+                    if (answers.text.length) {
+                        cvsData.push({
+                            context: Object.values(srs.originalData)[0],
+                            question: question,
+                            answers: JSON.stringify(answers)
+                        });
+                    }
+                }
+            }
+            
+        }else if (project.projectType == PROJECTTYPE.LOG) {
             // init log classification fileName
             newCase.fileName = srs.fileInfo.fileName;
 
@@ -442,7 +475,9 @@ async function prepareContents(srData, project, format) {
                 }
             }
         }
-        cvsData.push(newCase);
+        if (project.projectType != PROJECTTYPE.QA) {
+            cvsData.push(newCase);
+        }
     }
     return cvsData;
 }
@@ -636,7 +671,7 @@ async function uploadFile(req) {
     const fileType = fileSplit[fileSplit.length - 1];
 
     if (![FILETYPE.CSV, FILETYPE.ZIP, FILETYPE.TGZ].includes(fileType)) {
-        return { CODE: 3001, MSG: "FILE FORMAT NOT SUPPORTED" };
+        return MESSAGE.VALIDATION_DS_FILE_FORMAT;
     }
 
     const fileKey = `upload/${req.auth.email}/${Date.now()}_${req.file.originalname}`;
@@ -725,7 +760,7 @@ async function uploadFile(req) {
             stream.resume();
         }).on('error', err => {
             console.error("[ FILE ] [ ERROR ] Service swagger upload datasets error ->", err);
-            throw { CODE: 500, MSG: "SAVE DATASETS ERROR" }
+            throw MESSAGE.ERROR_DS_SAVE;
         }).on('finish', async () => {
             datasetInfo.body.format = DATASETTYPE.LOG;
             datasetInfo.body.topReview = topReview;
@@ -735,7 +770,7 @@ async function uploadFile(req) {
             await dataSetService.saveDataSetInfo(datasetInfo);
         });
     }
-    return { CODE: 200, MSG: "OK" };
+    return MESSAGE.SUCCESS;
 
 }
 
@@ -755,7 +790,7 @@ async function setData(req) {
     let removedCase = 0;
 
     if (columns.includes(label)) {
-        throw { CODE: 4008, MSG: "LABEL SHOULD NOT CONTAINS IN COLUMNS" };
+        throw MESSAGE.VALIDATATION_PJ_LABEL;
     }
 
     const headerRule = {
@@ -794,7 +829,7 @@ async function setData(req) {
 
     }, (err) => {
         console.error("[ FILE ] [ ERROR ] Service handle set-data", err);
-        throw { CODE: 500, MSG: "HANDLE DATA ERROR" }
+        throw MESSAGE.ERROR_TK_SETDATA;
     }, () => {
         if (totLbExLmt) {
             labels = [];

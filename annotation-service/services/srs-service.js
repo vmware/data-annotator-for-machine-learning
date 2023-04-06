@@ -9,7 +9,7 @@
 const ObjectId = require("mongodb").ObjectID;
 const projectService = require('./project.service');
 const validator = require('../utils/validator');
-const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDER } = require("../config/constant");
+const { PAGINATELIMIT, APPENDSR, LABELTYPE, PROJECTTYPE, S3OPERATIONS, QUERYORDER, OPERATION } = require("../config/constant");
 const csv = require('csvtojson');
 const alService = require('./activelearning.service');
 const _ = require("lodash");
@@ -22,7 +22,8 @@ const logImporter = require('../utils/logImporter');
 const fileSystemUtils = require('../utils/fileSystem.utils');
 const config = require('../config/config');
 const { reduceHierarchicalUnselectedLabel, initHierarchicalLabelsCase } = require('./project.service');
-
+const MESSAGE = require('../config/code_msg');
+const {updateDatasetProjectInfo} = require('./dataSet-service')
 
 async function updateSrsUserInput(req, from) {
 
@@ -55,7 +56,7 @@ async function updateSrsUserInput(req, from) {
         for (const ticket of srs) {
             if (pro.maxAnnotation <= ticket.userInputsLength) {
                 console.log(`[ SRS ] Service concurrent operation ticket:${ticket._id} achieve maxAnnotation:${pro.maxAnnotation}`);
-                return { CODE: 3001, MSG: `ticket:${ticket._id} maxAnnotation is ${pro.maxAnnotation} already achieved` };
+                return {CODE: MESSAGE.VALIDATION_TK_MAX_ANNOTATION.CODE, MSG: MESSAGE.VALIDATION_TK_MAX_ANNOTATION.MSG.replace("${_id}",ticket._id).replace("${maxAnnotation}",pro.maxAnnotation)}
             }
         }
     }
@@ -70,14 +71,14 @@ async function updateSrsUserInput(req, from) {
                 const label = await labels.find(a => Object.keys(a)[0] == inputkey);
                 if (!label || !validator.isNumeric(inputValue) || inputValue < label[inputkey][0] || inputValue > label[inputkey][1]) {
                     console.log(lbI, label, labels);
-                    throw { CODE: 3001, MSG: `[ ERROR ] userInput[0].problemCategory` };
+                    throw MESSAGE.VALIDATION_TK_USER_INPUT_PC;
                 }
             }
         } else {
             const lableInput = req.body.userInput[0].problemCategory[0];
             console.log(`[ SRS ] Service validate numeric lable problemCategory=${lableInput}`);
             if (!validator.isNumeric(lableInput) || lableInput < pro.min || lableInput > pro.max) {
-                throw { CODE: 3001, MSG: `[ ERROR ] userInput[0].problemCategory` };
+                throw MESSAGE.VALIDATION_TK_USER_INPUT_PC;
             }
         }
     }
@@ -87,15 +88,19 @@ async function updateSrsUserInput(req, from) {
     let reEditSrIds = [];
     usrSr.forEach(async ticket => {
         reEditSrIds.push(ticket._id.toString());
-        let userInputs = []
+        let userInputs = [];
+        let questionForText = [];
         req.body.userInput.forEach(async ui => {
             if (ui.tid == ticket._id.toString()) {
-                if (pro.projectType == PROJECTTYPE.NER) {
+                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.QA) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
                     });
+                    if (pro.projectType == PROJECTTYPE.QA) {
+                        questionForText = ui.questionForText;
+                    }
                 } else if (pro.projectType == PROJECTTYPE.LOG) {
                     userInputs.push({
                         logFreeText: ui.logFreeText,
@@ -137,6 +142,10 @@ async function updateSrsUserInput(req, from) {
         await mongoDb.findOneAndUpdate(mp.model, conditions, update);
 
         update1 = { $push: { userInputs: { $each: userInputs } } }
+        //save user definde question
+        if (pro.projectType == PROJECTTYPE.QA) {
+            update1.$set = {questionForText: questionForText}
+        }
         await mongoDb.findOneAndUpdate(mp.model, conditions, update1);
     });
 
@@ -146,15 +155,19 @@ async function updateSrsUserInput(req, from) {
     // for add new
     addSrIds.forEach(async id => {
         console.log(`[ SRS ] Service add new annotation to ticket=${id.toString()}`);
-        let userInputs = []
+        let userInputs = [];
+        let questionForText = [];
         req.body.userInput.forEach(ui => {
             if (ui.tid == id) {
-                if (pro.projectType == PROJECTTYPE.NER) {
+                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.QA) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
                     });
+                    if (pro.projectType == PROJECTTYPE.QA) {
+                        questionForText = ui.questionForText;
+                    }
                 } else if (pro.projectType == PROJECTTYPE.LOG) {
                     userInputs.push({
                         logFreeText: ui.logFreeText,
@@ -192,11 +205,16 @@ async function updateSrsUserInput(req, from) {
         });
 
         let conditions = { _id: ObjectId(id) };
+        //regression project
         if (pro.regression && (pro.projectType == PROJECTTYPE.LOG || pro.projectType == PROJECTTYPE.NER)) {
             const updateSR = { $set: { userInputs: [] } };
             await mongoDb.findOneAndUpdate(mp.model, conditions, updateSR);
         }
         let update = { $push: { userInputs: { $each: userInputs } }, $inc: { userInputsLength: 1 } };
+        //save user definde question
+        if (pro.projectType == PROJECTTYPE.QA) {
+            update.$set = {questionForText: questionForText}
+        }
         const options = { new: true };
         const srsData = await mongoDb.findOneAndUpdate(mp.model, conditions, update, options);
 
@@ -251,10 +269,11 @@ async function getOneSrs(req) {
 
     let limitation = req.query.limit ? Number.parseInt(req.query.limit) : 1;
 
-    const filterFileds = { _id: 1, originalData: 1, flag: 1, skip: 1, ticketDescription: 1 };
+    const filterFileds = { _id: 1, originalData: 1, flag: 1, skip: 1, ticketDescription: 1};
     //aws documentdb don't support exa. ilterFileds.userInputs = null;
-    if (project.projectType == PROJECTTYPE.NER) {
+    if (project.projectType == PROJECTTYPE.NER || project.projectType == PROJECTTYPE.QA) {
         filterFileds.ticketQuestions = 1;
+        filterFileds.questionForText = 1;
         if (project.regression) { filterFileds.userInputs = 1 }
     }
     if (project.projectType == PROJECTTYPE.LOG) {
@@ -326,7 +345,7 @@ async function getOneSrs(req) {
         const skiped = await findSkippedCase(mp, user);
         if (!skiped.length) {
             console.log(`[ SRS ] Service all case has annotated`);
-            return { CODE: 5001, "MSG": "ANNOTATION DONE" };
+            return MESSAGE.ANNOTATE_DONE;
         } else {
             //show skipped before
             await removeSkippedCase(mp, user);
@@ -484,7 +503,7 @@ async function skipOne(req) {
 
 }
 
-async function appendSrsDataByForms(req, originalHeaders) {
+async function appendSrsDataByForms(req, originalHeaders, projectType) {
 
     console.log(`[ SRS ] Service appendSrsDataByForms start prepare data `);
 
@@ -502,6 +521,15 @@ async function appendSrsDataByForms(req, originalHeaders) {
                 userInputsLength: 0,
                 originalData: srJson
             };
+            if (projectType == PROJECTTYPE.QA) {
+                let questionForText = [];
+                for (const q of srJson['questions'].split("?")) {
+                    if (q.trim()) {
+                        questionForText.push(q.trim() + "?");
+                    }
+                }
+                sechema['questionForText'] = questionForText;
+            }
             docs.push(sechema);
             caseNum++;
         }
@@ -588,6 +616,20 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
                     }
                     sechema.userInputs = [{ problemCategory: problemCategory }];
                 }
+            }else if(project.projectType == PROJECTTYPE.QA){
+                let questions = [];
+                let questionForText = req.body.questions;
+                for (const q of questionForText) {
+                    if (!q || !q.trim() || !oneData[q]) {
+                        continue;
+                    }
+                    for (const question of oneData[q].split("?")) {
+                        if (question.trim()) {
+                            questions.push(question.trim()+"?");
+                        }
+                    }
+                }
+                sechema.questionForText = questions;
             }
 
             docs.push(sechema);
@@ -612,10 +654,10 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
             const update = {
                 $set: { appendSr: APPENDSR.DONE, updatedDate: Date.now() },
                 $inc: { totalCase: caseNum },
-                $push: { selectedDataset: req.body.selectedDataset }
+                $addToSet: { selectedDataset: req.body.selectedDataset }
             };
             await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
-
+            await updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD);
             await projectService.updateAssinedCase(conditions, caseNum, true);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
         } catch (error) {
@@ -648,7 +690,7 @@ async function appendSrsData(req) {
         if (req.body.isFile == true || req.body.isFile == 'true') {
             //file append
             await imgImporter.execute(req, false);
-            update.$push = { selectedDataset: dataset };
+            update.$addToSet = { selectedDataset: dataset };
             update.$inc = { totalCase: datasets[0].images.length };
 
         } else {
@@ -665,15 +707,15 @@ async function appendSrsData(req) {
         const totalCase = update.$inc.totalCase;
         await projectService.updateAssinedCase(queryProjectCondition, totalCase, true);
 
-    } else if (projectType == PROJECTTYPE.TEXT || projectType == PROJECTTYPE.TABULAR || projectType == PROJECTTYPE.NER) {
+    } else if (projectType == PROJECTTYPE.TEXT || projectType == PROJECTTYPE.TABULAR || projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA) {
         //validate pname and headers
         const originalHeaders = mp.project.selectedColumn;
         if (req.body.isFile) {
-            //file append            
+            //file append
             await appendSrsDataByCSVFile(req, originalHeaders, project);
             console.log(`[ SRS ] Service append tickets by CSV file done`);
         } else {
-            await appendSrsDataByForms(req, originalHeaders);
+            await appendSrsDataByForms(req, originalHeaders, projectType);
             console.log(`[ SRS ] Service append tickets data forms  done`);
         }
 
@@ -712,6 +754,9 @@ async function sampleSr(req) {
         data.sampleSr = sr[0];
     } else {
         data.sampleSr = sr[0].originalData;
+        if(mp.project.projectType == PROJECTTYPE.QA){
+            data.sampleSr['questions'] = sr[0].questionForText;
+        }
     }
 
     return data;
@@ -875,15 +920,20 @@ async function reviewTicket(req) {
 
     const tid = ObjectId(req.body.tid);
     const pid = req.body.pid;
+    const problemCategory = req.body.problemCategory;
+    const logFreeText = req.body.logFreeText;
+    const questionForText = req.body.questionForText;
+    const review = req.body.review;
+    const modify = req.body.modify;
 
     const mp = await getModelProject({ _id: ObjectId(pid) });
 
-    if (await validator.checkRequired(req.body.review)) {
+    if (await validator.checkRequired(review)) {
         await flagToReview(mp, tid);
-    } else if (await validator.checkRequired(req.body.modify)) {
+    } else if (await validator.checkRequired(modify)) {
         await calculateReviewdCase(mp, [tid], user);
-        await modifyReview(mp, tid, user, req.body.problemCategory, req.body.logFreeText);
-    } else if (!await validator.checkRequired(req.body.modify)) {
+        await modifyReview(mp, tid, user, problemCategory, logFreeText, questionForText);
+    } else if (!await validator.checkRequired(modify)) {
         await calculateReviewdCase(mp, [tid], user);
         await passReview(mp, tid, user);
     }
@@ -925,7 +975,7 @@ async function passReview(mp, tid, user) {
 
 
 }
-async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
+async function modifyReview(mp, tid, user, problemCategory, logFreeText, questionForText) {
     const projectType = mp.project.projectType;
     const isMultipleLabel = mp.project.isMultipleLabel;
     const labelType = mp.project.labelType;
@@ -951,7 +1001,7 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
     //update user reviewed details
     let modify = {};
     //max-annotation=1
-    if (projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.LOG) {
+    if (projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA || projectType == PROJECTTYPE.LOG) {
         reviewInfoInputs = {
             problemCategory: problemCategory,
             user: user,
@@ -959,6 +1009,9 @@ async function modifyReview(mp, tid, user, problemCategory, logFreeText) {
         };
         if (projectType == PROJECTTYPE.LOG) {
             reviewInfoInputs.logFreeText = logFreeText;
+        }
+        if (projectType == PROJECTTYPE.QA) {
+            reviewInfoInputs.questionForText = questionForText;
         }
         modify.$push = {"reviewInfo.userInputs": reviewInfoInputs}
 
@@ -1073,7 +1126,7 @@ async function queryTicketsForReview(req) {
     if (!ticket[0]) {
         const skiped = await findSkippedCase(mp, user);
         if (!skiped.length) {
-            return { CODE: 5001, "MSG": "REVIEW DONE" };
+            return MESSAGE.ANNOTATE_DONE;
         } else {
             console.log(`[ SRS ] Service remove marked skipped case`);
             await removeSkippedCase(mp, user);
