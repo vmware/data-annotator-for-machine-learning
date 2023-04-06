@@ -1,0 +1,56 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.sectionDivision {
+    margin-top: 1rem;
+}
+
+.divisionLine {
+    border-bottom: 1px solid rgb(197, 197, 197);
+    margin-top: 2rem;
+}
+
+.divisionWidth {
+    width: 99.7%;
+    margin-left: 0;
+}
+
+
+
+.radioRow {
+    margin-left: unset;
+    margin-right: unset;
+    margin-top: 1rem;
+
+    .clr-radio-wrapper input[type=radio]+label::before {
+        left: unset;
+        right: 0;
+    }
+
+    .clr-radio-wrapper {
+        padding: 0.5rem 0.5rem 0.5rem;
+        border-radius: 5px;
+        box-shadow: 1px 1px 4px 2px #e9e9e9;
+        width: 49%;
+
+        label {
+            padding-left: unset;
+            // （51，120，179）
+        }
+    }
+
+    .clr-radio-wrapper:hover {
+        box-shadow: 1px 1px 5px 1px rgb(128 168 196)
+    }
+
+    .selectedRadio {
+        border: 1px solid rgb(0, 104, 150);
+    }
+}
+
+.disabledRadio {
+    opacity: 0.4;
+    pointer-events: none;
+}

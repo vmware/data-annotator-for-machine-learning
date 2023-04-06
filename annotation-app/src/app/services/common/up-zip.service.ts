@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -9,7 +9,7 @@ import * as JSZip from 'jszip';
 import * as Pako from 'pako';
 import untar from 'js-untar';
 import { Papa } from 'ngx-papaparse';
-import { ToolService } from 'app/services/common/tool.service';
+import { ToolService } from 'src/app/services/common/tool.service';
 
 @Injectable()
 export class UnZipService {
@@ -38,9 +38,7 @@ export class UnZipService {
                 e.content = res;
                 e.size = e._data.uncompressedSize;
               },
-              function error(e) {
-                console.log('error:::', e);
-              },
+              function error(e) {},
             );
         });
         const res = { previewExample, exampleEntries: example };
@@ -61,7 +59,6 @@ export class UnZipService {
         const inflator = new Pako.Inflate();
         inflator.push(result);
         if (inflator.err) {
-          console.log('inflator-err:::', inflator.msg);
         }
         const output = inflator.result;
         untar(output.buffer).then((extractedFiles) => {
@@ -147,14 +144,13 @@ export class UnZipService {
     }
   }
 
-  parseCSVChunk(file, header, download, originalHead, previewContentDatas) {
+  parseCSVChunk(file, header, download, originalHead?, previewContentDatas?, readTopRow?) {
     let count = 0;
     let invalidCount = 0;
     const indexArray = [];
-    let previewHeadDatas;
-    // for (let item of originalHead) {
-    //   indexArray.push(previewHeadDatas.indexOf(item));
-    // }
+    let previewHeadDatas = [];
+    let chunkIndex = 0;
+    let topReview = [];
     return new Promise<any>((resolve, reject) => {
       this.papa.parse(file, {
         header,
@@ -162,19 +158,26 @@ export class UnZipService {
         dynamicTyping: true,
         skipEmptyLines: true,
         worker: true,
-        error: (error) => {
-          console.log('parse_error: ', error);
-        },
+        error: (error) => {},
 
         chunk: (results, parser) => {
+          chunkIndex++;
+
           const chunkData = results.data;
           const newArray = [];
           let previewData = [];
           count += chunkData.length;
           previewData = chunkData;
-          previewHeadDatas = _.keys(previewData[0]);
 
-          if (previewContentDatas.length < 5) {
+          if (header) {
+            previewHeadDatas = _.keys(previewData[0]);
+          } else {
+            for (let i = 0; i < previewData[0].length; i++) {
+              previewHeadDatas.push('Header' + i);
+            }
+          }
+
+          if ((previewContentDatas && previewContentDatas.length < 5) || (readTopRow && chunkIndex === 1)) {
             for (let i = 0; i < previewData.length; i++) {
               if (
                 !(

@@ -1,0 +1,30 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="container">
+  <div class="clr-row pageTitle">
+    <div>
+      <h2 class="h2Title">Labeling Tasks Lists</h2>
+    </div>
+    <div>
+      <div title="Refresh Table" class="refreshBtn" (click)="reload()">
+        <cds-icon shape="refresh"></cds-icon> &nbsp;REFRESH
+      </div>
+      <button class="btn btn-primary" routerLink="/loop/project/create">Create New Labeling Task</button>
+    </div>
+  </div>
+  <clr-tabs>
+    <clr-tab>
+      <button clrTabLink id="link1" (click)="clickTaskTab('annotate')">My Labeling Task</button>
+      <clr-tab-content id="content1" *clrIfActive="true">
+        <app-task-datagrid [msgToTaskList]="msg"></app-task-datagrid>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab *ngIf="user.role === 'Power User'">
+      <button clrTabLink (click)="clickTaskTab('admin')">Power User Labeling Task</button>
+      <clr-tab-content *clrIfActive>
+        <app-task-datagrid [msgToTaskList]="msg"></app-task-datagrid>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>

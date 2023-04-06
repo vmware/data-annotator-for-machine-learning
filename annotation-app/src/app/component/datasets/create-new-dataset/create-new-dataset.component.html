@@ -1,0 +1,220 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<form [formGroup]="uploadGroup">
+  <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ errorMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <!-- input dataset name part -->
+  <div class="clr-row sectionDivision">
+    <label for="datasetsName" class="label-tooltip clr-col-12 clr-col-md-2"
+      >Dataset Name<span style="color: red">*</span></label
+    >
+    <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+      <input
+        id="datasetsName"
+        type="text"
+        formControlName="datasetsName"
+        class="clr-input"
+        style="width: 100%"
+        (ngModelChange)="this.userInputQueryUpdate.next($event)"
+      />
+    </div>
+    <div class="clr-col-12 clr-col-md-1">
+      <clr-tooltip *ngIf="uploadGroup.get('datasetsName').errors && uploadGroup.get('datasetsName').touched">
+        <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+        </cds-icon>
+        <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+          <span>{{ uploadGroup.get('datasetsName').errors.msg.value }}</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
+      <clr-tooltip *ngIf="nameExist">
+        <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+        </cds-icon>
+        <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+          <span>This name already exists!</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
+    </div>
+  </div>
+  <div class="clr-row divisionWidth">
+    <div class="clr-col-12 clr-col-md-10 divisionLine"></div>
+  </div>
+  <!-- select data type part -->
+  <div class="sectionDivision">
+    <h4>Select a Data Type</h4>
+    <div class="clr-row">
+      <div class="clr-col-10">
+        <div class="clr-row radioRow clr-justify-content-between">
+          <div
+            class="clr-radio-wrapper clr-col-md-auto"
+            [ngClass]="uploadSet.fileFormat == 'csv' ? 'selectedRadio' : ''"
+          >
+            <input
+              type="radio"
+              id="csv"
+              name="fileFormat"
+              value="csv"
+              class="clr-radio"
+              formControlName="fileFormat"
+              (ngModelChange)="changeFileFormat($event)"
+            />
+            <label
+              for="csv"
+              [ngClass]="
+                (msgMfe === 'inst' && uploadSet.fileFormat !== 'csv') ||
+                (msg?.page === 'createLabelingTask' && uploadSet.fileFormat !== 'csv')
+                  ? 'disabledRadio'
+                  : ''
+              "
+            >
+              <cds-icon style="margin-right: 0.3rem" shape="text"> </cds-icon>
+              Text
+              <p>Upload a CSV with a minimum of 2 columns containing the label and the text.</p>
+            </label>
+          </div>
+          <div
+            class="clr-radio-wrapper clr-col-md-auto"
+            [ngClass]="uploadSet.fileFormat == 'tabular' ? 'selectedRadio' : ''"
+          >
+            <input
+              type="radio"
+              id="tabular"
+              name="fileFormat"
+              value="tabular"
+              class="clr-radio"
+              formControlName="fileFormat"
+              (ngModelChange)="changeFileFormat($event)"
+            />
+            <label
+              for="tabular"
+              [ngClass]="
+                (msgMfe === 'inst' && uploadSet.fileFormat !== 'tabular') ||
+                (msg?.page === 'createLabelingTask' && uploadSet.fileFormat !== 'tabular')
+                  ? 'disabledRadio'
+                  : ''
+              "
+            >
+              <cds-icon style="margin-right: 0.3rem" shape="table"> </cds-icon>
+              Tabular
+              <p>Upload a CSV with a minimum of 2 columns containing the label and the text.</p>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="clr-row">
+      <div class="clr-col-10">
+        <div class="clr-row radioRow clr-justify-content-between">
+          <div
+            class="clr-radio-wrapper clr-col-md-auto"
+            [ngClass]="uploadSet.fileFormat == 'image' ? 'selectedRadio' : ''"
+          >
+            <input
+              type="radio"
+              id="image"
+              name="fileFormat"
+              value="image"
+              class="clr-radio"
+              formControlName="fileFormat"
+              (ngModelChange)="changeFileFormat($event)"
+            />
+            <label
+              for="image"
+              [ngClass]="
+                (msgMfe === 'inst' && uploadSet.fileFormat !== 'image') ||
+                (msg?.page === 'createLabelingTask' && uploadSet.fileFormat !== 'image')
+                  ? 'disabledRadio'
+                  : ''
+              "
+            >
+              <cds-icon style="margin-right: 0.3rem" shape="image"> </cds-icon>
+              Image
+              <p>Upload a zip file containing your images dataset with or without subfolders.</p>
+            </label>
+          </div>
+          <div
+            *ngIf="!(msgMfe === 'inst')"
+            class="clr-radio-wrapper clr-col-md-auto"
+            [ngClass]="uploadSet.fileFormat == 'txt' ? 'selectedRadio' : ''"
+          >
+            <input
+              type="radio"
+              id="txt"
+              name="fileFormat"
+              value="txt"
+              class="clr-radio"
+              formControlName="fileFormat"
+              (ngModelChange)="changeFileFormat($event)"
+            />
+            <label
+              for="txt"
+              [ngClass]="msg?.page === 'createLabelingTask' && uploadSet.fileFormat !== 'txt' ? 'disabledRadio' : ''"
+            >
+              <cds-icon style="margin-right: 0.3rem" shape="bundle"> </cds-icon>
+              Txt
+              <p>Upload a zip or a tgz file containing your txt dataset with or without subfolders.</p>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="clr-row divisionWidth">
+    <div class="clr-col-12 clr-col-md-10 divisionLine"></div>
+  </div>
+  <!-- select data source -->
+  <div class="sectionDivision">
+    <h4>Select a Data Source</h4>
+    <div class="clr-row">
+      <div class="clr-col-11">
+        <app-upload-file [msg]="msg" (outFile)="receiveFile($event)"></app-upload-file>
+        <div
+          *ngIf="uploadSet.fileFormat == 'csv' || uploadSet.fileFormat == 'tabular'"
+          class="clr-row"
+          style="margin-top: 1rem"
+        >
+          <label for="hasHeader" class="label-tooltip clr-col-12 clr-col-md-3"
+            >Dataset Header<span style="color: red">*</span></label
+          >
+          <div class="clr-col-12 clr-col-md-9" style="margin-top: 0.1rem">
+            <label>
+              <clr-radio-wrapper style="margin-right: 0.5rem">
+                <input
+                  type="radio"
+                  clrRadio
+                  class="clr-radio"
+                  formControlName="hasHeader"
+                  value="yes"
+                  id="yes"
+                  name="hasHeader"
+                  checked
+                />
+                <label for="yes">&nbsp;Yes</label>
+              </clr-radio-wrapper>
+              <clr-radio-wrapper>
+                <input
+                  type="radio"
+                  clrRadio
+                  class="clr-radio"
+                  formControlName="hasHeader"
+                  value="no"
+                  id="no"
+                  name="hasHeader"
+                />
+                <label for="no">&nbsp;No</label>
+              </clr-radio-wrapper>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="clr-row divisionWidth">
+    <div class="clr-col-12 clr-col-md-10 divisionLine"></div>
+  </div>
+</form>

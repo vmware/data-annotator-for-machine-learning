@@ -1,0 +1,153 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="modal footerLeft">
+  <div class="modal-dialog" role="dialog" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button aria-label="Close" class="close" type="button">
+          <cds-icon shape="close" (click)="onCloseDownloadDialog()"></cds-icon>
+        </button>
+        <h3 class="modal-title">Download Datasets</h3>
+      </div>
+
+      <div class="modal-body" style="max-height: 10rem !important; padding-bottom: 1rem">
+        <div *ngIf="msg">
+          <span
+            >This {{ msg?.selectedDownloadFile }} generated on
+            {{ msg?.generateDoneTime | date : 'yyyy-MM-dd HH:mm:ss' }}.</span
+          >
+          <span *ngIf="msg?.latestAnnotationTime > msg?.generateDoneTime">
+            For the latest dataset download please generate the latest dataset first.</span
+          >
+          <span *ngIf="msg?.labelType != 'numericLabel'"
+            >The last generate format is
+            <span style="font-weight: bold">{{ msg?.format == 'topLabel' ? 'top label' : msg?.format }}</span>
+            .</span
+          >
+          <!-- <div> -->
+          <span *ngIf="msg?.projectType == 'log'">
+            <a href="javascript://" (click)="downloadOriginal(msg?.originalDataSets)">
+              Click to download this project's original datasets.</a
+            >
+            <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-right" style="position: absolute">
+              <cds-icon shape="info-circle" class="is-solid" style="color: #0077b8" size="20"></cds-icon>
+              <span class="tooltip-content"
+                >Will download all the related original .zip/.tgz files except for the individual txt file uploaded
+                through manually quick append way.</span
+              >
+            </a>
+          </span>
+          <!-- </div> -->
+
+          <!-- <div style="margin-left: 0.1rem;" *ngIf="msg?.labelType!='numericLabel'"> -->
+          <div style="margin-left: 0.1rem">
+            <clr-radio-container clrInline>
+              <label style="font-size: 0.6rem"
+                >Please choose a format before generate new dataset
+                <a role="tooltip" aria-haspopup="true" class="tooltip tooltip-lg tooltip-right">
+                  <cds-icon shape="info-circle" class="is-solid" style="color: #0077b8" size="20"></cds-icon>
+                  <span class="tooltip-content">
+                    * Standard: count of each label. <br />
+                    * Top: top label only. <br />
+                    * Probablistic: ratio of label relative to total.
+                  </span>
+                </a>
+              </label>
+              <clr-radio-wrapper style="margin-top: 0.5rem">
+                <input type="radio" clrRadio name="options" required value="standard" [(ngModel)]="format" />
+                <label>Standard</label>
+              </clr-radio-wrapper>
+              <clr-radio-wrapper style="margin-top: 0.5rem">
+                <input
+                  type="radio"
+                  clrRadio
+                  name="options"
+                  required
+                  value="topLabel"
+                  [(ngModel)]="format"
+                  [disabled]="
+                    msg.projectType == 'ner' ||
+                    msg.projectType == 'image' ||
+                    msg.labelType == 'numericLabel' ||
+                    msg.projectType == 'log'
+                  "
+                />
+                <label>Top Label</label>
+              </clr-radio-wrapper>
+              <clr-radio-wrapper style="margin-top: 0.5rem">
+                <input
+                  type="radio"
+                  clrRadio
+                  name="options"
+                  required
+                  value="probabilistic"
+                  [(ngModel)]="format"
+                  [disabled]="
+                    msg.projectType == 'ner' ||
+                    msg.projectType == 'image' ||
+                    msg.labelType == 'numericLabel' ||
+                    msg.projectType == 'log'
+                  "
+                />
+                <label>Probabilistic</label>
+              </clr-radio-wrapper>
+            </clr-radio-container>
+            <div class="clr-checkbox-wrapper removeEntry">
+              <input
+                type="checkbox"
+                id="removeUnlabel"
+                name="checkbox-basic"
+                value="removeUnlabel"
+                class="clr-checkbox"
+                (click)="removeUnlabel($event)"
+                checked
+              />
+              <label for="removeUnlabel">Remove all unlabelled entries.</label>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="msg == null || msg == undefined" style="text-align: center">
+          <span class="spinner spinner-md"> Loading... </span>
+        </div>
+      </div>
+      <div class="modal-footer" style="margin-top: -1rem">
+        <div *ngIf="msg">
+          <button
+            *ngIf="!loadingGenerate"
+            type="button"
+            class="btn btn-outline"
+            (click)="generateProject()"
+            style="margin-left: 0.2rem"
+          >
+            GENERATE NEW DATASET
+          </button>
+          <button *ngIf="loadingGenerate" type="button" class="btn uploadLoading">
+            <clr-spinner
+              style="min-height: 0.75rem; min-width: 0.75rem; height: 0.75rem; width: 0.75rem; margin-top: 0.09rem"
+              clrAssertive
+              >loading</clr-spinner
+            >
+          </button>
+          <button
+            *ngIf="!loadingDownload"
+            type="button"
+            class="btn btn-primary"
+            style="margin-left: 4px"
+            (click)="downloadProject(msg?.downloadUrl)"
+          >
+            DOWNLOAD
+          </button>
+          <button *ngIf="loadingDownload" type="button" class="btn uploadLoading">
+            <clr-spinner
+              style="min-height: 0.75rem; min-width: 0.75rem; height: 0.75rem; width: 0.75rem; margin-top: 0.09rem"
+              clrAssertive
+              >loading</clr-spinner
+            >
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" aria-hidden="true"></div>

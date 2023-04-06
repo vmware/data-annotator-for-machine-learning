@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -11,7 +11,7 @@ export class FormValidatorUtil {
       formElement.markAsTouched();
     } else if (formElement instanceof FormGroup) {
       Object.keys(formElement.controls).forEach((key) => {
-        this.markControlsAsTouched(formElement.get(key));
+        this.markControlsAsTouched(formElement.get(key)!);
       });
     } else if (formElement instanceof FormArray) {
       formElement.controls.forEach((control) => {

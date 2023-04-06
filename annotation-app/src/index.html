@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2022 VMware, Inc.
+<!-- Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <!DOCTYPE html>
@@ -8,58 +8,13 @@ SPDX-License-Identifier: Apache-2.0 -->
     <title></title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico?v=2" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link href="https://unpkg.com/label-studio@0.8.0/build/static/css/main.css" rel="stylesheet" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/bumbeishvili/d3-tip-for-v6@4/d3-tip.min.css"
-    />
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="https://unpkg.com/label-studio@0.8.0/build/static/js/main.js"></script>
   </head>
 
-  <body style="overflow: hidden">
-    <app-root>
-      <style type="text/css">
-        #pre-clarity {
-          background-color: #002538;
-          bottom: 0px;
-          left: 0px;
-          position: fixed;
-          right: 0px;
-          top: 0px;
-          z-index: 999999;
-        }
-
-        #pre-clarity div.messaging {
-          left: 0px;
-          margin-top: -37px;
-          position: absolute;
-          right: 0px;
-          text-align: center;
-          top: 50%;
-        }
-
-        #pre-clarity h1 {
-          color: #fafafa;
-          font-size: 24px;
-          line-height: 35px;
-          margin: 0px 0px 20px 0px;
-          text-transform: inherit;
-          font-weight: 400;
-          font-family: 'Helvetica Neue', Arial, sans-serif;
-          opacity: 0.65;
-        }
-      </style>
-
-      <div id="pre-clarity">
-        <div class="messaging">
-          <h1 id="helloWords">
-            <img src="./assets/images/flask.svg" alt="" style="margin-right: 0.5rem" />
-            Loading...
-          </h1>
-        </div>
-      </div>
-    </app-root>
+  <body>
+    <mf-dev-platform></mf-dev-platform>
   </body>
 </html>

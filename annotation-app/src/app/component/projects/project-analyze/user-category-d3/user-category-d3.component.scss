@@ -1,0 +1,32 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.topBoardBox {
+    height: 15rem;
+    background-color: white;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+    position: relative;
+}
+
+.topBoard {
+    padding: unset;
+}
+
+.floatRight {
+    text-align: right;
+    margin-top: 1.2rem;
+    display: block;
+    margin-right: unset;
+
+}
+
+.loadingD3 {
+    text-align: center;
+    padding-top: 5rem;
+    position: absolute;
+    transform: translate(-50%);
+    left: 50%;
+}

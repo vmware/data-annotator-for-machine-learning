@@ -1,0 +1,361 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="container">
+  <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ errorMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ infoMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <div class="clr-row pageTitle">
+    <div>
+      <h2 class="h2Title">Datasets List</h2>
+    </div>
+    <div>
+      <div title="Refresh Table" class="refreshBtn" (click)="reload()">
+        <cds-icon shape="refresh"></cds-icon> &nbsp;REFRESH
+      </div>
+      <button class="btn btn-primary" (click)="onAddingDataset()">Create New Dataset</button>
+    </div>
+  </div>
+  <clr-tabs>
+    <clr-tab>
+      <button clrTabLink id="link1" (click)="clickTab(1)">My Datasets ({{ totalItems }})</button>
+      <clr-tab-content id="content1" *clrIfActive="true">
+        <clr-datagrid [clrDgLoading]="loading" class="gridHeight">
+          <clr-dg-placeholder>We couldn't find any dataset for you!</clr-dg-placeholder>
+          <clr-dg-column [clrDgField]="'dataSetName'" class="ellipsis-datagrid">Dataset Name </clr-dg-column>
+          <clr-dg-column [clrDgField]="'format'" class="ellipsis-datagrid">Type</clr-dg-column>
+
+          <clr-dg-column [clrDgField]="'fileName'" class="ellipsis-datagrid">Data Source </clr-dg-column>
+          <clr-dg-column [clrDgField]="'projects'" class="ellipsis-datagrid" style="max-width: 25vw"
+            >Labeling Task
+          </clr-dg-column>
+          <clr-dg-column [clrDgField]="'createTime'" class="ellipsis-datagrid">Create On</clr-dg-column>
+          <clr-dg-column [clrDgField]="'updateTime'" class="ellipsis-datagrid">Last Updated On</clr-dg-column>
+          <ng-container>
+            <clr-dg-row *clrDgItems="let dataset of datasets; let i = index" [clrDgItem]="dataset">
+              <clr-dg-action-overflow>
+                <button class="action-item" (click)="toShowPreview(dataset)">Preview</button>
+                <button class="action-item" (click)="deleteDataset(dataset)">Delete</button>
+              </clr-dg-action-overflow>
+              <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{ dataset.dataSetName }}">
+                <a (click)="toDatasetAnalyze(dataset)">{{ dataset.dataSetName }}</a>
+              </clr-dg-cell>
+              <clr-dg-cell>
+                <cds-icon
+                  style="margin-right: 0.3rem"
+                  shape="{{
+                    dataset.format === 'csv'
+                      ? 'text'
+                      : dataset.format === 'txt'
+                      ? 'bundle'
+                      : dataset.format === 'image'
+                      ? 'image'
+                      : dataset.format === 'tabular'
+                      ? 'table'
+                      : 'unknown-status'
+                  }}"
+                >
+                </cds-icon>
+                {{ dataset.format }}
+              </clr-dg-cell>
+              <clr-dg-cell class="cellWordBreak" title="{{ dataset.fileName }}">
+                {{ dataset.fileName }}
+              </clr-dg-cell>
+              <clr-dg-cell style="max-width: 25vw" class="ellipsisMore" title="{{ dataset.projects }}">
+                <div>
+                  <div>
+                    <a
+                      [ngClass]="{ openMore: dataset.isShowHide }"
+                      *ngFor="let project of dataset.labelingTasks; let j = index"
+                      (click)="clickLabelingTask(j, dataset, project.pname)"
+                      >{{ project.pname
+                      }}<span *ngIf="project.isShowLoading" class="spinner spinner-sm"> Loading... </span></a
+                    >
+                  </div>
+                  <div *ngIf="dataset.projects?.length > 1" (click)="clickMore(dataset.id)">
+                    {{ !dataset.isShowHide ? '+' + dataset.projects?.length + ' more' : '- hide' }}
+                  </div>
+                </div>
+              </clr-dg-cell>
+              <clr-dg-cell>{{ dataset.createTime | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+              <clr-dg-cell>{{ dataset.updateTime | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+            </clr-dg-row>
+          </ng-container>
+          <clr-dg-footer>
+            <clr-dg-pagination #pagination [clrDgPageSize]="10">
+              <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Dataset per page</clr-dg-page-size>
+              {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Datasets
+            </clr-dg-pagination>
+          </clr-dg-footer>
+        </clr-datagrid>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab>
+      <button clrTabLink (click)="clickTab(2)">Community Datasets ({{ totalItemsCommunity }})</button>
+      <clr-tab-content *clrIfActive>
+        <clr-datagrid [clrDgLoading]="loadingCommunity" class="gridHeight">
+          <clr-dg-placeholder>We couldn't find any dataset here!</clr-dg-placeholder>
+          <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid">Project Name </clr-dg-column>
+          <clr-dg-column [clrDgField]="'projectType'" class="ellipsis-datagrid">
+            <ng-container *clrDgHideableColumn="{ hidden: false }">Project Type</ng-container>
+          </clr-dg-column>
+          <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid">
+            <ng-container *clrDgHideableColumn="{ hidden: true }">Project Creator</ng-container>
+          </clr-dg-column>
+          <clr-dg-column [clrDgField]="'shareDescription'" class="ellipsis-datagrid">Description </clr-dg-column>
+          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">
+            <ng-container *clrDgHideableColumn="{ hidden: true }">Updated Date</ng-container>
+          </clr-dg-column>
+          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">
+            <ng-container *clrDgHideableColumn="{ hidden: true }"> Generate Updated Date</ng-container>
+          </clr-dg-column>
+          <clr-dg-column [clrDgField]="'totalCase'" class="ellipsis-datagrid">Entries No.</clr-dg-column>
+          <clr-dg-column [clrDgField]="'completeCase'" class="ellipsis-datagrid">Annotations No. </clr-dg-column>
+          <clr-dg-column [clrDgField]="'dataset.categoryList.length'" class="ellipsis-datagrid"
+            >Labels No.
+          </clr-dg-column>
+          <clr-dg-column [clrDgField]="'categoryList'" class="ellipsis-datagrid labels colwidth">Labels </clr-dg-column>
+          <clr-dg-column [clrDgField]="'completeCase'" class="ellipsis-datagrid">Downloads</clr-dg-column>
+          <clr-dg-column class="column-action">Action</clr-dg-column>
+
+          <ng-container>
+            <clr-dg-row *clrDgItems="let dataset of communityDatasets" [clrDgItem]="dataset">
+              <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{ dataset.projectName }}">
+                {{ dataset.projectName }}
+              </clr-dg-cell>
+              <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{ dataset.projectType }}">
+                <cds-icon
+                  style="margin-right: 0.3rem"
+                  shape="{{
+                    dataset.projectType === 'text'
+                      ? 'text'
+                      : dataset.projectType === 'log'
+                      ? 'bundle'
+                      : dataset.projectType === 'image'
+                      ? 'image'
+                      : dataset.projectType === 'tabular'
+                      ? 'table'
+                      : dataset.projectType === 'ner'
+                      ? 'bars'
+                      : 'unknown-status'
+                  }}"
+                >
+                </cds-icon>
+                {{ dataset.projectType }}
+              </clr-dg-cell>
+              <clr-dg-cell class="cellWordBreak" title="{{ dataset.creator }}">{{ dataset.creator }} </clr-dg-cell>
+              <clr-dg-cell class="cellWordBreak" title="{{ dataset.shareDescription }}">
+                {{ dataset.shareDescription }}
+              </clr-dg-cell>
+              <clr-dg-cell>{{ dataset.updatedDate | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+              <clr-dg-cell *ngIf="dataset.generateInfo.updateTime">
+                {{ dataset.generateInfo.updateTime | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell
+              >
+              <clr-dg-cell *ngIf="!dataset.generateInfo.updateTime">--</clr-dg-cell>
+              <clr-dg-cell>{{ dataset.totalCase }}</clr-dg-cell>
+              <clr-dg-cell>{{ dataset.completeCase }}</clr-dg-cell>
+              <clr-dg-cell>{{ dataset.labelCount }}</clr-dg-cell>
+              <clr-dg-cell class="colwidth disableTree" *ngIf="dataset.labelType === 'HTL'">
+                <div style="cursor: pointer" (click)="clickTreeView(dataset.categoryList)">
+                  <cds-icon shape="view-list" title="tree view detail"></cds-icon> click the icon to review with tree
+                  label
+                </div>
+              </clr-dg-cell>
+              <clr-dg-cell
+                *ngIf="dataset.labelType !== 'HTL'"
+                class="cellWordBreak colwidth"
+                title="{{
+                  dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
+                    ? dataset.min + '--' + dataset.max
+                    : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
+                    ? dataset.mutilNumbericLabels
+                    : dataset.categoryList
+                }}"
+              >
+                {{
+                  dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
+                    ? dataset.min + '--' + dataset.max
+                    : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
+                    ? dataset.mutilNumbericLabels
+                    : dataset.categoryList
+                }}</clr-dg-cell
+              >
+              <clr-dg-cell>{{ dataset.downloadCount ? dataset.downloadCount.community : 0 }}</clr-dg-cell>
+
+              <clr-dg-cell>
+                <button
+                  *ngIf="dataset.generateInfo?.status == 'pending'"
+                  type="button"
+                  class="btn btn-icon actionClass"
+                  (click)="selectedDataset = dataset; generateProject(selectedDataset)"
+                  role="tooltip"
+                  aria-haspopup="true"
+                  title="Download Project"
+                >
+                  <cds-icon shape="download"></cds-icon>
+                </button>
+                <button
+                  *ngIf="dataset.generateInfo?.status == 'prepare' || dataset.generateInfo?.status == 'generating'"
+                  type="button"
+                  class="btn btn-icon actionClass"
+                  role="tooltip"
+                  aria-haspopup="true"
+                  title="Download Processing"
+                  style="cursor: not-allowed"
+                >
+                  <clr-spinner clrSmall>loading</clr-spinner>
+                </button>
+                <button
+                  *ngIf="dataset.generateInfo?.status == 'done'"
+                  type="button"
+                  class="btn btn-icon actionClass btn-success greenBtn"
+                  (click)="selectedDataset = dataset; clickDownload(selectedDataset)"
+                  role="tooltip"
+                  aria-haspopup="true"
+                  title="Download Project"
+                >
+                  <cds-icon shape="download"></cds-icon>
+                </button>
+              </clr-dg-cell>
+            </clr-dg-row>
+          </ng-container>
+          <clr-dg-footer>
+            <clr-dg-column-toggle>
+              <clr-dg-column-toggle-title>Column List</clr-dg-column-toggle-title>
+              <clr-dg-column-toggle-button>Select All Button</clr-dg-column-toggle-button>
+            </clr-dg-column-toggle>
+            <clr-dg-pagination #pagination [clrDgPageSize]="10">
+              <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Dataset per page</clr-dg-page-size>
+              {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Datasets
+            </clr-dg-pagination>
+          </clr-dg-footer>
+        </clr-datagrid>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab *ngIf="user.role === 'Power User'">
+      <button clrTabLink (click)="clickTab(3)">Power User Datasets ({{ totalItemsPower }})</button>
+      <clr-tab-content *clrIfActive>
+        <clr-datagrid [clrDgLoading]="loadingPower" class="gridHeight">
+          <clr-dg-placeholder>We couldn't find any dataset for you!</clr-dg-placeholder>
+          <clr-dg-column [clrDgField]="'dataSetName'" class="ellipsis-datagrid">Dataset Name </clr-dg-column>
+          <clr-dg-column [clrDgField]="'user'" class="ellipsis-datagrid">Creator </clr-dg-column>
+          <clr-dg-column [clrDgField]="'format'" class="ellipsis-datagrid">Type</clr-dg-column>
+          <clr-dg-column [clrDgField]="'fileName'" class="ellipsis-datagrid">Data Source </clr-dg-column>
+          <clr-dg-column [clrDgField]="'projects'" class="ellipsis-datagrid" style="max-width: 25vw"
+            >Labeling Task
+          </clr-dg-column>
+          <clr-dg-column [clrDgField]="'createTime'" class="ellipsis-datagrid">Create On</clr-dg-column>
+          <clr-dg-column [clrDgField]="'updateTime'" class="ellipsis-datagrid">Last Updated On</clr-dg-column>
+
+          <ng-container>
+            <clr-dg-row *clrDgItems="let dataset of allDatasets; let i = index" [clrDgItem]="dataset">
+              <clr-dg-action-overflow>
+                <button class="action-item" (click)="toShowPreview(dataset)">Preview</button>
+                <button class="action-item" (click)="deleteDataset(dataset)">Delete</button>
+              </clr-dg-action-overflow>
+              <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{ dataset.dataSetName }}">
+                <a (click)="toDatasetAnalyze(dataset)">{{ dataset.dataSetName }}</a>
+              </clr-dg-cell>
+              <clr-dg-cell class="cellWordBreak" title="{{ dataset.user }}">
+                {{ dataset.user }}
+              </clr-dg-cell>
+              <clr-dg-cell>
+                <cds-icon
+                  style="margin-right: 0.3rem"
+                  shape="{{
+                    dataset.format === 'csv'
+                      ? 'text'
+                      : dataset.format === 'txt'
+                      ? 'bundle'
+                      : dataset.format === 'image'
+                      ? 'image'
+                      : dataset.format === 'tabular'
+                      ? 'table'
+                      : 'unknown-status'
+                  }}"
+                >
+                </cds-icon>
+                {{ dataset.format }}
+              </clr-dg-cell>
+              <clr-dg-cell class="cellWordBreak" title="{{ dataset.fileName }}">
+                {{ dataset.fileName }}
+              </clr-dg-cell>
+              <clr-dg-cell style="max-width: 25vw" class="ellipsisMore" title="{{ dataset.projects }}">
+                <div>
+                  <div>
+                    <a
+                      [ngClass]="{ openMore: dataset.isShowHide }"
+                      *ngFor="let project of dataset.labelingTasks; let j = index"
+                      (click)="clickLabelingTask(j, dataset, project.pname)"
+                      >{{ project.pname
+                      }}<span *ngIf="project.isShowLoading" class="spinner spinner-sm"> Loading... </span>
+                    </a>
+                  </div>
+                  <div *ngIf="dataset.projects?.length > 1" (click)="clickMore(dataset.id)">
+                    {{ !dataset.isShowHide ? '+' + dataset.projects?.length + ' more' : '- hide' }}
+                  </div>
+                </div>
+              </clr-dg-cell>
+              <clr-dg-cell>{{ dataset.createTime | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+              <clr-dg-cell>{{ dataset.updateTime | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+            </clr-dg-row>
+          </ng-container>
+          <clr-dg-footer>
+            <clr-dg-pagination
+              #pagination
+              [clrDgPageSize]="pageSizePower"
+              [clrDgTotalItems]="totalItemsPower"
+              [(clrDgPage)]="pagePower"
+            >
+              <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Dataset per page</clr-dg-page-size>
+              {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Datasets
+            </clr-dg-pagination>
+          </clr-dg-footer>
+        </clr-datagrid>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>
+
+<app-modal-datagrid
+  *ngIf="previewDatasetDialog"
+  [msgPreview]="msgPreview"
+  (onClosePreviewDialog)="receiveClosePreview($event)"
+></app-modal-datagrid>
+
+<app-modal-confirm
+  *ngIf="deleteDatasetDialog"
+  [msg]="msgDelete"
+  (cancelBtn)="receiveCloseDelete($event)"
+  (okBtn)="receiveDeleteOkBtn($event)"
+></app-modal-confirm>
+
+<app-download
+  *ngIf="showDownloadDatasets"
+  [msg]="msg"
+  (onCloseDownloadDialog)="receiveCloseDownloadInfo($event)"
+  (generateDownloadProject)="receiveGenerateInfo($event)"
+>
+</app-download>
+
+<app-generate
+  *ngIf="showGenerateDatasets"
+  [msg]="msgGenerate"
+  (onCloseGenerateDialog)="receiveCloseGenerateInfo($event)"
+  (refreshProject)="receiveGenerateInfo($event)"
+>
+</app-generate>
+
+<app-treeview-modal *ngIf="showTreeView" (onCloseTreeDialog)="onCloseTreeDialog()" [treeData]="treeData">
+</app-treeview-modal>

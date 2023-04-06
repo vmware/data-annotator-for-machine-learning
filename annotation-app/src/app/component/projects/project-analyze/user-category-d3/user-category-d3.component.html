@@ -1,0 +1,57 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="clr-row clr-justify-content-between">
+  <div class="clr-col-7">
+    <h4>Number of Assigned Labels</h4>
+  </div>
+  <div class="clr-col-5 btn-group floatRight btn-sm">
+    <div class="radio btn">
+      <input type="radio" name="btn-group-demo-radios" id="btn-demo-radio-1" checked />
+      <label for="btn-demo-radio-1" (click)="shiftBtnRadio('user')">User</label>
+    </div>
+    <div class="radio btn" style="margin-right: 0.7rem">
+      <input type="radio" name="btn-group-demo-radios" id="btn-demo-radio-2" />
+      <label for="btn-demo-radio-2" (click)="shiftBtnRadio('category')">Category</label>
+    </div>
+  </div>
+</div>
+<div *ngIf="isUserD3" class="clr-col topBoard">
+  <h5># Annotations Per User</h5>
+  <div class="topBoardBox categoryChart">
+    <div *ngIf="loadingD3" class="loadingD3">
+      <span class="spinner spinner-md"> Loading... </span>
+    </div>
+    <div *ngIf="noAnnotation" style="text-align: center; padding-top: 5rem">
+      <span style="color: grey"> <cds-icon shape="info-standard"></cds-icon>&nbsp;&nbsp; NO ANNOTATION </span>
+    </div>
+    <div class="row clr-row" style="width: 102%">
+      <div
+        #userChart
+        class="userChartBar"
+        style="display: inline-block; margin: auto; width: 100%; overflow: hidden"
+        id="userChart"
+      ></div>
+    </div>
+  </div>
+</div>
+<div *ngIf="!isUserD3" class="clr-col topBoard">
+  <h5 *ngIf="msg.labelType != 'numericLabel'"># Annotations Per Category</h5>
+  <h5 *ngIf="msg.labelType == 'numericLabel'"># Annotations Per Value Range</h5>
+  <div class="topBoardBox categoryChart">
+    <div *ngIf="loadingD3" class="loadingD3">
+      <span class="spinner spinner-md"> Loading... </span>
+    </div>
+    <div *ngIf="noAnnotation" style="text-align: center; padding-top: 5rem">
+      <span style="color: grey"> <cds-icon shape="info-standard"></cds-icon>&nbsp;&nbsp; NO ANNOTATION </span>
+    </div>
+    <div class="row clr-row" style="width: 102%">
+      <div
+        #categoryChart
+        class="categoryChartBar"
+        style="display: inline-block; margin: auto; width: 100%; overflow: hidden"
+        id="categoryChart"
+      ></div>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -31,11 +31,6 @@ export class DatasetUtil {
       maxAnnotations: 1,
       annotationDisplayName: 'Passage',
       labels: [],
-      popLabels: [
-        { name: 'Positive', value: 'Positive' },
-        { name: 'Negative', value: 'Negative' },
-        { name: 'Neutral', value: 'Neutral' },
-      ],
       assigmentLogic: 'random',
       assignee: [],
       localFile: null,
@@ -49,11 +44,12 @@ export class DatasetUtil {
       },
       min: null,
       max: null,
-      multipleLabel: null,
+      multipleLabel: 'n',
       selectedText: null,
-      isShowFilename: false,
+      isShowFilename: 'no',
       selectedDisplayColumn: [],
       slack: [],
+      projectType: 'text',
     };
   }
 
@@ -85,7 +81,6 @@ export interface DatasetData {
   description: string;
   maxAnnotations: number;
   labels: any;
-  popLabels: any;
   assigmentLogic: string;
   assignee: any;
   localFile: any;
@@ -97,11 +92,12 @@ export interface DatasetData {
   annotationDisplayName: string;
   min: any;
   max: any;
-  multipleLabel: boolean;
+  multipleLabel: string;
   selectedText: string;
-  isShowFilename: boolean;
+  isShowFilename: string;
   selectedDisplayColumn: any[];
   slack: any;
+  projectType: string;
 }
 
 export interface DatasetFile {

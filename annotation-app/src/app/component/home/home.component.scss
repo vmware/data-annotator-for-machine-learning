@@ -1,0 +1,207 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+button {
+    width: 180px;
+    margin-top: 20px;
+}
+
+button.get-started {
+    margin-bottom: 30px;
+    float: left;
+}
+
+.incentives h1 {
+    text-align: center;
+}
+
+.incentives .incentive-goals {
+    text-align: right;
+}
+
+.incentives p {
+    margin-top: 2px;
+}
+
+.incentives p.first {
+    margin-top: 24px;
+}
+
+.ava-img {
+    margin-bottom: 30px;
+}
+
+.results {
+    margin-top: 50px;
+}
+
+table.table.table-noborder {
+    margin-top: 5px;
+}
+
+.slogan h1 {
+    margin-bottom: 0px;
+}
+
+.slogan h4 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.slogan img {
+    margin-bottom: 0px;
+}
+
+.slogan {
+    margin-bottom: 60px;
+}
+
+.card-padding {
+    padding: 18px;
+
+    .card {
+        min-height: 9.2rem;
+    }
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.card .card-block {
+    min-height: 9.2rem;
+    padding: 10px 10px 10px 10px;
+}
+
+.card h4 {
+    margin-top: 0px;
+    margin-left: 10px;
+}
+
+.card-icon {
+    width: 64px;
+    margin: 15px auto;
+    display: flex;
+    justify-content: center;
+    /* align horizontal */
+    align-items: center;
+    /* align vertical */
+    color: #0077b8;
+}
+
+.sample {
+    border: 1px solid #9e9e9e;
+    padding: 1rem 1rem;
+}
+
+.progressBar {
+    margin-top: 1rem;
+
+    .white {
+        border: 1px solid #9e9e9e;
+        height: 22px;
+        width: 150px;
+        background-color: white;
+        float: left;
+
+        .green {
+            background-color: #2e8500;
+            height: 100%;
+            width: 50%;
+        }
+    }
+
+    .progressText {
+        float: right;
+    }
+}
+
+.annotateBtn {
+    .annotate {
+        width: 75px;
+        padding: 5px 5px 5px 5px;
+        text-align: center;
+        line-height: 24px;
+        font-weight: bold;
+        margin-top: 1.2rem;
+    }
+
+    .neutral {
+        background-color: #ff9900;
+        color: black;
+    }
+
+    .positive {
+        background-color: #2e8500;
+        color: white;
+    }
+
+    .negative {
+        background-color: #cf2a27;
+        color: white;
+    }
+}
+
+.skipBtn {
+    .skip {
+        width: 75px;
+        padding: 5px 5px 5px 5px;
+        text-align: center;
+        line-height: 24px;
+        font-weight: bold;
+        margin-top: 2.2rem;
+        background-color: #cccccc;
+        color: black;
+    }
+}
+
+.bulletpoint {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    clear: both;
+
+    .circleBox {
+        display: flex;
+        align-items: center;
+    }
+
+    .circle {
+        background-color: #0077b8;
+        width: 5rem;
+        height: 5rem;
+        line-height: 5rem;
+        text-align: center;
+        border-radius: 50%;
+    }
+
+    .cycleBox {
+        flex: 1 1 20%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .text {
+        text-align: center;
+        font-size: 12px;
+    }
+}
+
+
+.alert {
+    margin-bottom: 1rem;
+}
+
+.lightbulbIcon {
+    color: white;
+    width: 4rem;
+    height: 4rem;
+}
+
+.video {
+    background-color: #fafafa;
+    box-shadow: 0px 0px 3px 0px #999;
+}

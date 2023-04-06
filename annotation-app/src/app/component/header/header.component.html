@@ -1,0 +1,33 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<header class="header header-6">
+  <div class="branding">
+    <a href="javascript://" [routerLink]="['/loop-home']" class="nav-link">
+      <cds-icon shape="flask" solid class="flaskIcon"></cds-icon>
+      <span class="title">{{ env.config.serviceTitle }}</span>
+    </a>
+  </div>
+  <div class="header-actions">
+    <a *ngIf="!loggedUser" (click)="login()" class="nav-link nav-text" style="cursor: pointer"> Sign In </a>
+    <clr-dropdown *ngIf="loggedUser">
+      <button class="nav-text" clrDropdownTrigger aria-label="open user profile">
+        {{ loggedUser.user.email }}
+        <cds-icon shape="angle" direction="down"></cds-icon>
+      </button>
+      <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right" style="z-index: 1100">
+        <a (click)="logOut()" clrDropdownItem>Log out</a>
+      </clr-dropdown-menu>
+    </clr-dropdown>
+  </div>
+</header>
+<div *ngIf="errMessage" class="alert alert-app-level alert-danger error" role="alert">
+  <div class="alert-items">
+    <div class="alert-item static">
+      <div class="alert-icon-wrapper">
+        <cds-icon class="alert-icon" shape="exclamation-circle"></cds-icon>
+      </div>
+      <div class="alert-text">Message: {{ errMessage }}</div>
+    </div>
+  </div>
+</div>
