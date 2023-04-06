@@ -37,7 +37,7 @@ Core features include:
 ## DAML upgrade
 
 - DAML upgrade to v3.0.0 that mainly raise UI/UX to a higher standard
-  - [DAML v3.0.0 release note](https://github.com/vmware/data-annotator-for-machine-learning/releases/tag/v2.1.0). The latest code saved in branch master.
+  - [DAML v3.0.0 release note](https://github.com/vmware/data-annotator-for-machine-learning/releases/tag/v3.0.0). The latest code saved in branch master.
   - [DAML versions older than v3.0.0 releases](https://github.com/vmware/data-annotator-for-machine-learning/releases). The last version v2.1.0 (which still keep our old UI style) before v3.0.0 is saved in branch DAML-v2.1.0.
 - As for DAML UI upgrade, our e2e code also updated
   - The latest e2e code saved in branch e2e-test.
