@@ -1,0 +1,552 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div *ngIf="msg.labelType != 'numericLabel' && !msg.isMultipleLabel">
+  <div>
+    <h4>Model Performance</h4>
+    <p style="margin-bottom: 1rem">
+      {{ env.config.serviceTitle }} uses active learning to increase annotation performance by intelligently querying
+      you to label the most informative instances. The goal of active learning is to reduce the need to label examples
+      that the model already learned and are confident about. Learn more about
+      <a href="https://en.wikipedia.org/wiki/Active_learning_(machine_learning)">active learning</a>.
+    </p>
+  </div>
+  <div class="clr-col-12" style="padding-left: unset">
+    <div class="modelChartBox" style="position: relative">
+      <div *ngIf="loadingModelD3" style="padding-top: 5rem; position: absolute; left: 45%">
+        <span class="spinner spinner-lg"> Loading... </span>
+      </div>
+      <div *ngIf="noModel" style="text-align: center; line-height: 20rem">
+        <span style="color: grey"> <cds-icon shape="info-standard"></cds-icon>&nbsp;&nbsp; NO MODEL YET </span>
+      </div>
+
+      <div #modelChart class="modelChartBar" id="modelChart"></div>
+    </div>
+  </div>
+</div>
+<div class="clr-row">
+  <div class="clr-col">
+    <h4 style="margin-bottom: 1rem">Assigned Labels Data</h4>
+    <clr-tabs>
+      <clr-tab>
+        <button clrTabLink id="link1">Annotation</button>
+        <clr-tab-content id="content1" *clrIfActive="msg.labelType == 'numericLabel'">
+          <div *ngIf="msg.projectType === 'log'" style="margin-top: 0.5rem">
+            <div class="btn-group btn-primary btn-icon">
+              <button class="btn" (click)="modify(data, 'multiple')">
+                <cds-icon shape="note" title="To modify the annotated tickets" style="margin-right: 0.3rem"></cds-icon
+                >MARK ALL FOR REVIEW
+              </button>
+            </div>
+          </div>
+          <div style="margin-bottom: 2rem">
+            <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)" *ngIf="!firstLoadTable">
+              <clr-dg-column *ngIf="msg.projectType === 'log'" class="ellipsis-datagrid" style="max-width: 90px">
+                <clr-checkbox-wrapper>
+                  <input
+                    type="checkbox"
+                    clrCheckbox
+                    name="option"
+                    class="selectAll"
+                    (change)="selectionLogsChanged($event, 'multiple')"
+                    [(ngModel)]="selectAllStatus"
+                  />
+                </clr-checkbox-wrapper>
+              </clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid" style="max-width: 90px">Index</clr-dg-column>
+              <clr-dg-column *ngFor="let header of previewSrsHeader" class="ellipsis-datagrid">
+                {{ header }}
+                <clr-dg-filter *ngIf="header == 'FileName'" [clrDgFilter]="myFilter">
+                  <my-filter #myFilter (filter)="receiveFilename($event)"></my-filter>
+                </clr-dg-filter>
+              </clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid" style="max-width: 90px"> Annotations No. </clr-dg-column>
+
+              <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px">Annotator </clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px">Action </clr-dg-column>
+              <ng-container>
+                <clr-dg-row *ngFor="let dataset of previewSrs; let i = index" [clrDgItem]="dataset">
+                  <clr-dg-cell
+                    *ngIf="dataset.projectType == 'log'"
+                    class="ellipsis-datagrid previewHeight"
+                    style="max-width: 90px"
+                  >
+                    <clr-checkbox-wrapper>
+                      <input
+                        type="checkbox"
+                        clrCheckbox
+                        name="options"
+                        [(ngModel)]="dataset.selected"
+                        (ngModelChange)="selectionLogsChanged($event, 'single', dataset)"
+                        [disabled]="dataset.userInputsLength <= 0 || dataset.reviewInfo.review"
+                        [ngClass]="{
+                          'disabled-checkbox': dataset.userInputsLength <= 0 || dataset.reviewInfo.review
+                        }"
+                      />
+                    </clr-checkbox-wrapper>
+                  </clr-dg-cell>
+                  <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width: 90px">
+                    {{ i + 1 }}
+                  </clr-dg-cell>
+                  <ng-container *ngIf="dataset.projectType !== 'log'">
+                    <clr-dg-cell
+                      *ngFor="let content of dataset.originalData"
+                      class="previewHeight ellipsis-datagrid"
+                      style="
+                        word-break: break-all;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 4;
+                        overflow: hidden;
+                      "
+                      title="{{ content }}"
+                    >
+                      {{ content }}
+                    </clr-dg-cell>
+                  </ng-container>
+                  <clr-dg-cell
+                    *ngIf="dataset.projectType == 'log'"
+                    class="previewHeight ellipsis-datagrid"
+                    style="
+                      word-break: break-all;
+                      display: -webkit-box;
+                      -webkit-box-orient: vertical;
+                      -webkit-line-clamp: 5;
+                      overflow: hidden;
+                    "
+                    title="{{ dataset.originalData.fileName }}"
+                  >
+                    {{ dataset.originalData.fileName }}
+                  </clr-dg-cell>
+                  <clr-dg-cell
+                    *ngIf="dataset.projectType == 'log'"
+                    class="previewHeight ellipsis-datagrid"
+                    title="{{ dataset.originalData.filePreview }}"
+                    style="word-break: break-all; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden"
+                  >
+                    {{ dataset.originalData.filePreview | SliceTextPipe }}
+                    <div class="signpost-triggers-wrapper">
+                      <div class="signpost-trigger-demo">
+                        <div class="signpost-item">
+                          <div class="trigger-item">
+                            <clr-signpost>
+                              <button class="btn btn-sm btn-link btnOutline" clrSignpostTrigger>show details</button>
+                              <clr-signpost-content [clrPosition]="'right-bottom'" *clrIfOpen>
+                                <p><strong>Txt FileContent:</strong></p>
+                                <p *ngFor="let log of dataset.originalData.fileContent">
+                                  <span style="margin-right: 0.5rem">{{ log.index }}</span>
+                                  <span
+                                    *ngIf="log.label"
+                                    class="labelInFilecontent"
+                                    [ngStyle]="{
+                                      'background-color': log.backgroundColorLabel,
+                                      'font-weight': log.backgroundColorLabel ? 700 : 400
+                                    }"
+                                    >{{ log.label }}</span
+                                  >
+                                  <span
+                                    [ngStyle]="{
+                                      'background-color': log.backgroundColorText,
+                                      'font-weight': log.backgroundColorText ? 700 : 400,
+                                      color: log.backgroundColorText ? 'black' : 'currentColor',
+                                      'padding-left': log.backgroundColorText ? '0.3rem' : 'unset'
+                                    }"
+                                    >{{ log.text }}</span
+                                  >
+                                </p>
+                              </clr-signpost-content>
+                            </clr-signpost>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </clr-dg-cell>
+                  <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width: 90px">
+                    {{ dataset.userInputsLength }}
+                  </clr-dg-cell>
+
+                  <clr-dg-cell
+                    *ngIf="dataset.userInputsLength <= 0"
+                    class="ellipsis-datagrid previewHeight"
+                    style="min-width: 250px"
+                  >
+                    None
+                  </clr-dg-cell>
+                  <clr-dg-cell
+                    *ngIf="dataset.userInputsLength > 0"
+                    class="ellipsis-datagrid previewHeight"
+                    style="min-width: 250px"
+                  >
+                    <div *ngFor="let a of dataset.userInputs">{{ a.user }}</div>
+                  </clr-dg-cell>
+                  <clr-dg-cell class="ellipsis-datagrid previewHeight" style="min-width: 250px">
+                    <div class="clr-row">
+                      <button
+                        class="btn btn-sm"
+                        [disabled]="dataset.userInputsLength <= 0 || dataset.reviewInfo.review"
+                        (click)="modify(dataset, 'single')"
+                      >
+                        mark for review
+                      </button>
+                    </div>
+                  </clr-dg-cell>
+                  <ng-container
+                    ngProjectAs="clr-dg-row-detail"
+                    *ngIf="dataset.userInputsLength > 0 || dataset?.originalInputs > 0"
+                  >
+                    <clr-dg-row-detail class="annotateDetail{{ i }}" (clrIfExpanded)="(true)">
+                      <clr-datagrid *ngIf="dataset.userInputs.length > 0">
+                        <clr-dg-column> Annotator </clr-dg-column>
+                        <clr-dg-column> Annotate Time </clr-dg-column>
+                        <clr-dg-column *ngIf="msg.projectType === 'log'"> Log Freetext </clr-dg-column>
+                        <clr-dg-column
+                          class="studioCell"
+                          *ngIf="msg.projectType == 'image' || msg.projectType == 'ner' || msg.projectType == 'log'"
+                        >
+                          Label
+                        </clr-dg-column>
+                        <clr-dg-column
+                          *ngIf="msg.projectType != 'ner' && msg.projectType != 'image' && msg.projectType != 'log'"
+                          style="min-width: 20rem"
+                        >
+                          Label
+                        </clr-dg-column>
+                        <clr-dg-row *ngFor="let flag of dataset.userInputs; let j = index">
+                          <clr-dg-cell style="word-break: break-all">
+                            {{ flag.user }}
+                          </clr-dg-cell>
+                          <clr-dg-cell>
+                            {{ flag.timestamp | date : 'yyyy-MM-dd HH:mm:ss' }}
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="msg.projectType === 'log'" style="word-break: break-all">
+                            {{ flag.logFreeText }}
+                          </clr-dg-cell>
+                          <clr-dg-cell
+                            *ngIf="
+                              msg.projectType != 'ner' &&
+                              msg.projectType != 'image' &&
+                              msg.projectType != 'log' &&
+                              msg.labelType !== 'HTL'
+                            "
+                            style="min-width: 20rem"
+                          >
+                            {{ flag.problemCategory }}
+                          </clr-dg-cell>
+                          <clr-dg-cell
+                            *ngIf="
+                              msg.projectType != 'ner' &&
+                              msg.projectType != 'image' &&
+                              msg.projectType != 'log' &&
+                              msg.labelType === 'HTL'
+                            "
+                            style="min-width: 20rem"
+                            class="disableTree"
+                          >
+                            <div class="tree-icon" (click)="clickTreeView(flag.problemCategory[0])">
+                              <cds-icon shape="view-list" title="tree view detail"> </cds-icon>
+                              click the icon to review with tree label
+                            </div>
+                            <ul *ngFor="let selectedTreeLabel of flag.reducedCategory; let i = index">
+                              <li>{{ selectedTreeLabel }}</li>
+                            </ul>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="msg.projectType == 'ner'" class="studioCell">
+                            <clr-datagrid>
+                              <clr-dg-column *ngFor="let title of innerTable">
+                                {{ title }}
+                              </clr-dg-column>
+                              <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
+                                <clr-dg-cell>{{ innerCell.label }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.text }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.start }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.end }}</clr-dg-cell>
+                              </clr-dg-row>
+                            </clr-datagrid>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="msg.projectType == 'log'" class="studioCell">
+                            <clr-datagrid>
+                              <clr-dg-column *ngFor="let title of innerTable">
+                                {{ title }}
+                              </clr-dg-column>
+                              <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
+                                <clr-dg-cell>{{ innerCell.line }}</clr-dg-cell>
+                                <clr-dg-cell style="word-break: break-all"> {{ innerCell.text }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.label }}</clr-dg-cell>
+                                <clr-dg-cell style="word-break: break-all"> {{ innerCell.freeText }}</clr-dg-cell>
+                              </clr-dg-row>
+                            </clr-datagrid>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="msg.projectType == 'image'" class="studioCell">
+                            <div class="label-studio-{{ i }}-{{ j }}" id="label-studio-{{ i }}-{{ j }}">
+                              <!-- here is LSF image annotation -->
+                            </div>
+                          </clr-dg-cell>
+                        </clr-dg-row>
+                      </clr-datagrid>
+                    </clr-dg-row-detail>
+                    <clr-dg-row-detail class="reviewDetail{{ i }}" (clrIfExpanded)="(true)" style="margin-bottom: 1rem">
+                      <!-- review data datagrid -->
+                      <clr-datagrid *ngIf="dataset.reviewInfo.userInputs.length > 0">
+                        <clr-dg-column> Reviewer </clr-dg-column>
+                        <clr-dg-column> Review Time </clr-dg-column>
+                        <clr-dg-column> Review Action </clr-dg-column>
+                        <clr-dg-column *ngIf="msg.projectType === 'log'"> Updated Log Freetext </clr-dg-column>
+                        <clr-dg-column
+                          class="studioCell"
+                          *ngIf="msg.projectType == 'image' || msg.projectType == 'ner' || msg.projectType == 'log'"
+                        >
+                          Re-Label
+                        </clr-dg-column>
+                        <clr-dg-column
+                          *ngIf="msg.projectType != 'ner' && msg.projectType != 'image' && msg.projectType != 'log'"
+                          style="min-width: 20rem"
+                        >
+                          Re-Label
+                        </clr-dg-column>
+                        <clr-dg-row *ngFor="let flag of dataset.reviewInfo.userInputs; let j = index">
+                          <clr-dg-cell style="word-break: break-all">
+                            {{ flag.user }}
+                          </clr-dg-cell>
+                          <clr-dg-cell>
+                            {{ flag.timestamp | date : 'yyyy-MM-dd HH:mm:ss' }}
+                          </clr-dg-cell>
+                          <clr-dg-cell>
+                            {{ flag.problemCategory ? 'Modify' : 'Pass' }}
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="msg.projectType === 'log'" style="word-break: break-all">
+                            {{ flag.logFreeText }}
+                          </clr-dg-cell>
+                          <clr-dg-cell
+                            *ngIf="
+                              msg.projectType != 'ner' &&
+                              msg.projectType != 'image' &&
+                              msg.projectType != 'log' &&
+                              msg.labelType !== 'HTL'
+                            "
+                            style="min-width: 20rem"
+                          >
+                            {{ flag.problemCategory }}
+                          </clr-dg-cell>
+                          <clr-dg-cell
+                            *ngIf="
+                              msg.projectType != 'ner' &&
+                              msg.projectType != 'image' &&
+                              msg.projectType != 'log' &&
+                              msg.labelType === 'HTL'
+                            "
+                            style="min-width: 20rem"
+                            class="disableTree"
+                          >
+                            <div
+                              class="tree-icon"
+                              (click)="clickTreeView(flag.problemCategory[0])"
+                              *ngIf="flag.problemCategory"
+                            >
+                              <cds-icon shape="view-list" title="tree view detail"> </cds-icon>
+                              click the icon to review with tree label
+                            </div>
+                            <ul *ngFor="let selectedTreeLabel of flag.reducedCategory; let i = index">
+                              <li>{{ selectedTreeLabel }}</li>
+                            </ul>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="msg.projectType == 'ner'" class="studioCell">
+                            <clr-datagrid *ngIf="flag.problemCategory">
+                              <clr-dg-column *ngFor="let title of innerTable">
+                                {{ title }}
+                              </clr-dg-column>
+                              <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
+                                <clr-dg-cell>{{ innerCell.label }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.text }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.start }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.end }}</clr-dg-cell>
+                              </clr-dg-row>
+                            </clr-datagrid>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="msg.projectType == 'log'" class="studioCell">
+                            <clr-datagrid *ngIf="flag.problemCategory">
+                              <clr-dg-column *ngFor="let title of innerTable">
+                                {{ title }}
+                              </clr-dg-column>
+                              <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
+                                <clr-dg-cell>{{ innerCell.line }}</clr-dg-cell>
+                                <clr-dg-cell style="word-break: break-all"> {{ innerCell.text }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.label }}</clr-dg-cell>
+                                <clr-dg-cell style="word-break: break-all"> {{ innerCell.freeText }}</clr-dg-cell>
+                              </clr-dg-row>
+                            </clr-datagrid>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="msg.projectType == 'image'" class="studioCell">
+                            <div class="label-studio-review-{{ i }}-{{ j }}" id="label-studio-review-{{ i }}-{{ j }}">
+                              <!-- here is LSF image annotation -->
+                            </div>
+                          </clr-dg-cell>
+                        </clr-dg-row>
+                      </clr-datagrid>
+                    </clr-dg-row-detail>
+                  </ng-container>
+                </clr-dg-row>
+              </ng-container>
+
+              <clr-dg-footer>
+                <clr-dg-pagination
+                  #pagination
+                  [(clrDgPageSize)]="pageSize"
+                  [clrDgTotalItems]="totalItems"
+                  [(clrDgPage)]="page"
+                  [clrDgLastPage]="totalPages"
+                >
+                  <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]"> Records per page</clr-dg-page-size>
+                  {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Records
+                </clr-dg-pagination>
+              </clr-dg-footer>
+            </clr-datagrid>
+          </div>
+          <div *ngIf="firstLoadTable" class="annotationLoading">
+            <span class="spinner spinner-md" style="margin-top: 3rem; margin-bottom: -0.6rem"> Loading... </span>
+            <span class="loadingSpan"> Loading Annotation Data, Please Wait... </span>
+          </div>
+        </clr-tab-content>
+      </clr-tab>
+      <clr-tab>
+        <button clrTabLink (click)="clickFlagTab()">Flag</button>
+        <clr-tab-content *clrIfActive>
+          <div style="margin-top: 0.5rem">
+            <div class="btn-group btn-primary btn-icon">
+              <button class="btn btn-danger" (click)="delete(data, 'multiple')">
+                <cds-icon shape="trash" title="Delete"></cds-icon>Delete
+              </button>
+              <button class="btn" (click)="silence(data, 'multiple')">
+                <cds-icon shape="tags" title="Silence"></cds-icon>Silence
+              </button>
+            </div>
+          </div>
+          <div style="margin-bottom: 2rem">
+            <clr-datagrid
+              #dataGirdFlag
+              [clrDgLoading]="loadingFlag"
+              (clrDgRefresh)="refreshFlag($event)"
+              *ngIf="!firstLoadFlag"
+              [(clrDgSelected)]="selected"
+              (clrDgSelectedChange)="selectionChanged($event)"
+            >
+              <clr-dg-placeholder>There has no flag ticket!</clr-dg-placeholder>
+              <clr-dg-column class="ellipsis-datagrid" style="max-width: 90px">Index</clr-dg-column>
+              <clr-dg-column
+                *ngFor="let header of previewFlagHeader"
+                class="ellipsis-datagrid"
+                style="max-width: 650px; width: 200px"
+              >
+                {{ header }}</clr-dg-column
+              >
+              <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px">Flag User </clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid" style="max-width: 250px; min-width: 180px">
+                Action</clr-dg-column
+              >
+
+              <ng-container>
+                <clr-dg-row
+                  *ngFor="let dataset of previewFlagContent; let i = index"
+                  [clrDgItem]="dataset"
+                  style="padding-bottom: 2rem"
+                >
+                  <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width: 90px">
+                    {{ i + 1 }}
+                  </clr-dg-cell>
+                  <ng-container *ngIf="dataset.projectType !== 'log'">
+                    <clr-dg-cell
+                      *ngFor="let content of dataset.originalData"
+                      class="previewHeight ellipsis-datagrid"
+                      style="
+                        word-break: break-all;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 5;
+                        overflow: hidden;
+                        max-width: 650px;
+                        width: 200px;
+                      "
+                      title="{{ content }}"
+                    >
+                      {{ content }}
+                    </clr-dg-cell>
+                  </ng-container>
+                  <clr-dg-cell
+                    *ngIf="dataset.projectType == 'log'"
+                    class="previewHeight ellipsis-datagrid"
+                    style="
+                      word-break: break-all;
+                      display: -webkit-box;
+                      -webkit-box-orient: vertical;
+                      -webkit-line-clamp: 5;
+                      overflow: hidden;
+                      max-width: 650px;
+                    "
+                    title="{{ dataset.originalData.fileName }}"
+                  >
+                    {{ dataset.originalData.fileName }}
+                  </clr-dg-cell>
+                  <clr-dg-cell
+                    *ngIf="dataset.projectType == 'log'"
+                    class="previewHeight ellipsis-datagrid"
+                    style="word-break: break-all; max-width: 650px"
+                  >
+                    {{ dataset.originalData.filePreview }}
+                    <div class="signpost-triggers-wrapper">
+                      <div class="signpost-trigger-demo">
+                        <div class="signpost-item">
+                          <div class="trigger-item">
+                            <clr-signpost>
+                              <button class="btn btn-sm btn-link btnOutline" clrSignpostTrigger>show details</button>
+                              <clr-signpost-content [clrPosition]="'right-bottom'" *clrIfOpen>
+                                <p><strong>Txt FileContent:</strong></p>
+                                <p *ngFor="let log of dataset.originalData.fileContent">
+                                  <span style="margin-right: 0.5rem">{{ log.index }}</span>
+                                  <span>{{ log.text }}</span>
+                                </p>
+                              </clr-signpost-content>
+                            </clr-signpost>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </clr-dg-cell>
+                  <clr-dg-cell class="ellipsis-datagrid previewHeight" style="min-width: 250px">
+                    <div *ngFor="let a of dataset.flag">{{ a }}</div>
+                  </clr-dg-cell>
+                  <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width: 250px; min-width: 180px">
+                    <div class="clr-row">
+                      <button class="btn btn-sm" (click)="delete(dataset, 'single')">Delete</button>
+                      <button class="btn btn-sm" (click)="silence(dataset, 'single')">Silence</button>
+                    </div>
+                  </clr-dg-cell>
+                </clr-dg-row>
+              </ng-container>
+
+              <clr-dg-footer>
+                <clr-dg-pagination
+                  #pagination
+                  [(clrDgPageSize)]="pageSizeFlag"
+                  [clrDgTotalItems]="totalItemsFlag"
+                  [(clrDgPage)]="pageFlag"
+                  [clrDgLastPage]="totalPagesFlag"
+                >
+                  <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]"> Records per page</clr-dg-page-size>
+                  {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Records
+                </clr-dg-pagination>
+              </clr-dg-footer>
+            </clr-datagrid>
+          </div>
+          <div *ngIf="firstLoadFlag" class="annotationLoading">
+            <span class="spinner spinner-md" style="margin-top: 3rem; margin-bottom: -0.6rem"> Loading... </span>
+            <span class="loadingSpan"> Loading Flag Tickets, Please Wait... </span>
+          </div>
+        </clr-tab-content>
+      </clr-tab>
+    </clr-tabs>
+  </div>
+</div>
+<app-treeview-modal
+  *ngIf="showTreeView"
+  (onCloseTreeDialog)="onCloseTreeDialog()"
+  [treeData]="treeData"
+></app-treeview-modal>

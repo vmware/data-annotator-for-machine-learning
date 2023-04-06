@@ -1,12 +1,14 @@
-<!-- Copyright 2019-2022 VMware, Inc.
+<!-- Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
-<clr-main-container>
+<div class="main-container">
   <app-header></app-header>
   <div class="content-container">
+    <div>
+      <app-sidenav></app-sidenav>
+    </div>
     <div class="content-area">
       <router-outlet></router-outlet>
     </div>
   </div>
-  <app-footer></app-footer>
-</clr-main-container>
+</div>

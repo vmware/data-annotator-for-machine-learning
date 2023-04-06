@@ -1,0 +1,45 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<clr-vertical-nav [clrVerticalNavCollapsible]="navCollapsible">
+  <clr-vertical-nav-group routerLinkActive="active">
+    <cds-icon shape="data-cluster" clrVerticalNavIcon></cds-icon>
+    Datasets
+    <clr-vertical-nav-group-children>
+      <a clrVerticalNavLink routerLink="/loop/datasets/list" routerLinkActive="active"> Datasets List </a>
+      <a clrVerticalNavLink routerLink="/loop/datasets/create" routerLinkActive="active"> Create New Dataset </a>
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+  <clr-vertical-nav-group routerLinkActive="active">
+    <cds-icon shape="tags" clrVerticalNavIcon></cds-icon>
+    Labeling Tasks
+    <clr-vertical-nav-group-children>
+      <a clrVerticalNavLink routerLink="/loop/project/list" routerLinkActive="active"> Labeling Tasks List </a>
+      <a clrVerticalNavLink routerLink="/loop/project/create" routerLinkActive="active"> Create New Labeling Task </a>
+    </clr-vertical-nav-group-children>
+  </clr-vertical-nav-group>
+  <div *ngIf="userRole === 'Power User'">
+    <a clrVerticalNavLink routerLink="/loop/permissions/users" routerLinkActive="active">
+      <cds-icon clrVerticalNavIcon shape="users"></cds-icon>
+      Permissions
+    </a>
+  </div>
+  <div class="bottomHelpLink">
+    <a clrVerticalNavLink routerLinkActive="active" href="mailto:example@example.com" target="_blank">
+      <cds-icon shape="happy-face" clrVerticalNavIcon></cds-icon>
+      Feedback
+    </a>
+    <a clrVerticalNavLink routerLinkActive="active" routerLink="/loop/faq">
+      <cds-icon shape="help" clrVerticalNavIcon></cds-icon>
+      Help
+    </a>
+    <!-- <a clrVerticalNavLink routerLinkActive="active" routerLink="./credit">
+      <cds-icon shape="info-standard" clrVerticalNavIcon></cds-icon>
+      About Us
+    </a>-->
+    <!-- <a clrVerticalNavLink routerLinkActive="active" target="_blank" href="https://vmware.slack.com/archives/C03RWQY9B42">
+      <cds-icon shape="envelope" clrVerticalNavIcon></cds-icon>
+      Contact Us
+    </a> -->
+  </div>
+</clr-vertical-nav>

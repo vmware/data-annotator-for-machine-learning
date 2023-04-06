@@ -1,0 +1,57 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="modal" *ngIf="previewDatasetDialog">
+  <div class="modal-dialog" role="dialog" aria-hidden="true" style="width: 80vw">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button aria-label="Close" class="close" type="button" (click)="onClosePreviewDialog()">
+          <cds-icon shape="close"></cds-icon>
+        </button>
+        <h3 class="modal-title">Preview Dataset</h3>
+      </div>
+      <div class="modal-body" *ngIf="topRowContent.length > 0">
+        <div class="clr-row">
+          <div class="clr-col-12 clr-col-md-2" style="font-weight: bold">Dataset Name:</div>
+          <div class="clr-col-12 clr-col-md-10">{{ msgPreview.dataSetName }}</div>
+        </div>
+        <div style="margin-top: 1rem">
+          <clr-datagrid style="max-height: 50vh">
+            <clr-dg-column *ngFor="let itemHeader of topRowHeader">{{ itemHeader }}</clr-dg-column>
+            <ng-container *ngIf="msgPreview.format !== 'image' && msgPreview.format !== 'txt'">
+              <clr-dg-row *ngFor="let previewCont of topRowContent">
+                <clr-dg-cell *ngFor="let item of previewCont">{{ item }}</clr-dg-cell>
+              </clr-dg-row>
+            </ng-container>
+
+            <ng-container *ngIf="msgPreview.format == 'image'">
+              <clr-dg-row *ngFor="let previewCont of topRowContent">
+                <clr-dg-cell>{{ previewCont._id }}</clr-dg-cell>
+                <clr-dg-cell>{{ previewCont.fileName }}</clr-dg-cell>
+                <clr-dg-cell>{{ previewCont.fileSize }}</clr-dg-cell>
+                <clr-dg-cell
+                  ><img src="{{ previewCont.location }}" alt="" style="max-width: 15rem; max-height: 15rem"
+                /></clr-dg-cell>
+              </clr-dg-row>
+            </ng-container>
+
+            <ng-container *ngIf="msgPreview.format == 'txt'">
+              <clr-dg-row *ngFor="let previewCont of topRowContent">
+                <clr-dg-cell>{{ previewCont.fileName }}</clr-dg-cell>
+                <clr-dg-cell>{{ previewCont.fileContent }}</clr-dg-cell>
+              </clr-dg-row>
+            </ng-container>
+          </clr-datagrid>
+        </div>
+      </div>
+      <div class="modal-body" *ngIf="topRowContent.length == 0" style="text-align: center">
+        <span class="spinner spinner-xl"> Loading... </span>
+        <div>Loading Data, Please Wait...</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" (click)="onClosePreviewDialog()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" aria-hidden="true"></div>

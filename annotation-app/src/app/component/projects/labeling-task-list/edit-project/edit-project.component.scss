@@ -1,0 +1,144 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.prev-info {
+  margin-top: 2rem;
+}
+
+.modal-dialog input[type='text'] {
+  width: 100% !important;
+  margin-bottom: 0px;
+}
+
+ul li {
+  list-style-type: none;
+}
+
+.modal-footer .btn {
+  margin: 0 1.5rem 0 -1rem;
+}
+
+.uploadLoading {
+  background-color: rgba(0, 119, 184, 0.2);
+  border-color: rgba(0, 119, 184, 0.2);
+  padding-top: 0.2rem;
+}
+
+.labelBox {
+  border: 1px solid #999;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  min-height: 5rem;
+  padding: 0.5rem;
+  white-space: unset;
+  max-height: unset;
+
+  .label {
+    position: relative;
+    padding: 0 0.8rem 1px;
+    margin-top: 0.3rem;
+    border-radius: unset;
+    border: unset;
+    padding-left: unset;
+
+    ::ng-deep .clr-form-control {
+      margin-top: unset;
+    }
+  }
+}
+
+.overLabels {
+  // background-color: #dddddd;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.activeEditLabel {
+  background-color: white;
+  opacity: 1;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.deleteIcon {
+  margin: 0;
+  padding: 0;
+  color: black;
+  position: absolute;
+  right: 0.2rem;
+}
+
+.editInput {
+  margin: initial;
+  // border-bottom: unset;
+  border-bottom: 1px solid;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.numeric .clr-input {
+  border-radius: 6px 6px 0 0;
+  height: 2rem !important;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+  background-color: white;
+}
+
+.completeTicketNumber {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.form input {
+  width: 120px;
+}
+
+.add-btn {
+  padding: 0.1rem 0.2rem;
+  height: 1rem;
+  line-height: 0.7rem;
+  min-width: 1.5rem;
+}
+
+.scoreErr {
+  float: left;
+  margin-top: -0.7rem;
+}
+
+.assignee-input {
+  max-height: unset !important;
+
+  ul {
+    margin-bottom: 0;
+  }
+}
+
+::ng-deep app-assign-slack.slack-assign {
+  label {
+    margin-left: -4rem;
+  }
+
+  .clr-input-wrapper {
+    margin-left: 7.1rem;
+
+    input.clr-input {
+      width: 92.5% !important;
+    }
+  }
+
+  .tooltip {
+    clr-tooltip {
+      margin-left: -3rem;
+    }
+
+    span.spinner {
+      margin-left: -3rem;
+    }
+  }
+}

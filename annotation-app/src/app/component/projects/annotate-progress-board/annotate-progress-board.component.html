@@ -1,0 +1,210 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div>
+  <h5>{{ msg?.from === 'review' ? 'Review' : 'Annotation' }} Progress</h5>
+  <div class="left-project-info fontSizeSmall">
+    <clr-progress-bar
+      title="{{
+        msg?.from === 'review'
+          ? 'Reviewed
+        tickets / Total Items'
+          : 'Labeled Items / Assigned Items'
+      }}"
+      clrValue="{{ msg?.percentage }}"
+      clrLabeled
+      clrDisplayval="{{ msg?.percentage }}%"
+    >
+    </clr-progress-bar>
+    <div style="margin-top: 0.5rem; padding-bottom: unset">
+      <cds-icon shape="circle" solid size="xs" style="color: rgb(0, 104, 150)"></cds-icon>
+      {{
+        msg?.from === 'review'
+          ? 'Reviewed
+            tickets'
+          : 'Labeled Items'
+      }}:&nbsp;&nbsp;{{ msg?.progressInfo?.completeCase }}
+    </div>
+    <div *ngIf="msg.from !== 'review'">
+      <cds-icon shape="circle" solid size="xs" style="color: rgb(229, 229, 299)"></cds-icon>
+      Assigned Items:&nbsp;&nbsp;{{ msg?.progressInfo?.assignedCase }}
+    </div>
+    <div>
+      <cds-icon shape="circle" solid size="xs" style="color: rgb(229, 229, 299)"></cds-icon>
+      Total Items:&nbsp;&nbsp;{{ msg?.progressInfo?.totalCase }}
+    </div>
+  </div>
+</div>
+<div *ngIf="msg?.from === 'review'">
+  <h5>Annotator Review Progress</h5>
+  <div class="left-project-info fontSizeSmall clr-row" style="margin-left: unset">
+    <label for="name" class="label-leftBoard">Reviewee:</label>&nbsp;&nbsp;
+    <div class="clr-select-wrapper" style="width: 70%">
+      <input *ngIf="reviewOrder === 'most_uncertain'" class="clr-input" style="width: 100%" type="text" disabled />
+      <select
+        *ngIf="reviewOrder !== 'most_uncertain'"
+        style="width: 100%"
+        (ngModelChange)="onSelectingReviewee($event)"
+        [ngModel]="reviewee"
+      >
+        <option value=""></option>
+        <option *ngFor="let item of msg?.projectInfo?.userCompleteCase" [value]="item.user">
+          {{ item.user }}
+        </option>
+      </select>
+    </div>
+  </div>
+  <div class="left-project-info fontSizeSmall clr-row" style="margin-left: unset">
+    <label class="label-leftBoard" style="margin-right: 0.5rem">Review Assignment Logic: </label>
+    <div class="clr-row" style="margin-left: unset">
+      <label class="md-check format">
+        <clr-radio-wrapper
+          *ngIf="msg?.projectInfo?.maxAnnotation > 1 && msg?.projectInfo?.labelType !== 'numericLabel'"
+          (click)="clickUncertain($event)"
+        >
+          <input
+            type="radio"
+            clrRadio
+            class="clr-radio"
+            value="most_uncertain"
+            id="most_uncertain"
+            name="reviewOrder"
+            [(ngModel)]="reviewOrder"
+            [ngModelOptions]="{ standalone: true }"
+            (change)="changeReviewOrder($event)"
+          />
+          <label for="uncertain">Uncertain</label>
+        </clr-radio-wrapper>
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            class="clr-radio"
+            value="random"
+            id="random"
+            name="reviewOrder"
+            [(ngModel)]="reviewOrder"
+            [ngModelOptions]="{ standalone: true }"
+            (change)="changeReviewOrder($event)"
+          />
+          <label for="random">Random</label>
+        </clr-radio-wrapper>
+        <clr-radio-wrapper>
+          <input
+            type="radio"
+            clrRadio
+            class="clr-radio"
+            value="sequential"
+            id="sequential"
+            name="reviewOrder"
+            [(ngModel)]="reviewOrder"
+            [ngModelOptions]="{ standalone: true }"
+            (change)="changeReviewOrder($event)"
+          />
+          <label for="sequential">Sequential</label>
+        </clr-radio-wrapper>
+      </label>
+    </div>
+  </div>
+  <div class="left-project-info fontSizeSmall">
+    <label style="margin-bottom: 0.5rem; display: block">Annotator reviewed progress:</label>
+    <div class="clr-row" style="margin-bottom: 0.3rem" *ngFor="let item of msg?.progressInfo?.userCompleteCase">
+      <label class="clr-col-3 keepAllWord" title="{{ item.fullName }}">{{ item.fullName }}</label>
+      <div class="clr-col">
+        <clr-progress-bar
+          title="Annotation progress: (annotated tickets / assigned tickets)%"
+          clrValue="{{ (item.completeCase / (item.assignedCase == 0 ? 1 : item.assignedCase)) * 100 }}"
+          clrLabeled
+          clrDisplayval="{{
+            (item.completeCase / (item.assignedCase == 0 ? 1 : item.assignedCase)) * 100 | mathRoundPipe
+          }}%"
+        >
+        </clr-progress-bar>
+        <clr-progress-bar
+          title="Review progress: reviewed tickets / annotated tickets"
+          clrValue="{{ (item.reviewed / item.completeCase) * 100 }}"
+          clrSuccess
+          clrLabeled
+          clrDisplayval="{{ item.reviewed }}/{{ item.completeCase }}"
+        >
+        </clr-progress-bar>
+      </div>
+    </div>
+  </div>
+</div>
+<div>
+  <h5>Task Details</h5>
+  <div class="left-project-info fontSizeSmall">
+    <div class="ellipsis" style="margin-top: 0.5rem; padding-bottom: unset" title="{{ msg?.projectInfo.projectName }}">
+      Name:&nbsp;&nbsp;{{ msg?.projectInfo.projectName }}
+    </div>
+    <div class="ellipsis" title="{{ msg?.projectInfo.creator }}">Owner:&nbsp;&nbsp;{{ msg?.projectInfo.creator }}</div>
+    <div class="ellipsis" title="{{ msg?.projectInfo.dataSource }}">
+      Source:&nbsp;&nbsp;{{ msg?.projectInfo.dataSource }}
+    </div>
+    <div>Create Date:&nbsp;&nbsp;{{ msg?.projectInfo.createdDate | date : 'yyyy-MM-dd HH:mm:ss' }}</div>
+    <div>Assignment Logic:&nbsp;&nbsp;{{ msg?.projectInfo.assignmentLogic }}</div>
+    <div>Max Annotation:&nbsp;&nbsp;{{ msg?.projectInfo.maxAnnotation }}</div>
+    <div class="ellipsis" title="{{ msg?.projectInfo.taskInstructions }}">
+      Instruction:&nbsp;&nbsp;{{ msg?.projectInfo.taskInstructions }}
+    </div>
+  </div>
+</div>
+<div>
+  <h5>History</h5>
+  <div class="left-project-info">
+    <div class="historyBox fontSizeSmall">
+      <div *ngFor="let item of msg?.history; let i = index" style="position: relative">
+        <div
+          [ngClass]="{ selectedHistory: item.srId === msg.sr._id }"
+          class="clr-row historyPosition"
+          (click)="historyBack(i, item.srId)"
+        >
+          <div *ngFor="let flag of item.historyDescription" class="historyText">
+            <div
+              *ngIf="msg.projectInfo.projectType == 'ner' || msg.projectInfo.projectType == 'log'"
+              title="{{ flag.text }}"
+            >
+              {{ flag.text }}
+            </div>
+            <div *ngIf="msg.projectInfo.projectType == 'image'" title="{{ flag.fileName }}">
+              {{ flag.fileName }}
+            </div>
+            <div
+              *ngIf="
+                msg.projectInfo.projectType !== 'ner' &&
+                msg.projectInfo.projectType !== 'image' &&
+                msg.projectInfo.projectType !== 'log'
+              "
+              title="{{ flag.key + ':' + flag.value }}"
+            >
+              {{ flag.key + ':' + flag.value }}
+            </div>
+          </div>
+        </div>
+        <cds-icon
+          *ngIf="item.type === 'submit'"
+          class="historyIcon"
+          shape="success-standard"
+          size="xs"
+          style="color: rgb(49, 120, 27); width: 12px; height: 12px"
+        ></cds-icon>
+        <cds-icon
+          *ngIf="item.type === 'skip'"
+          class="historyIcon"
+          shape="ban"
+          size="xs"
+          style="width: 12px; height: 12px"
+        ></cds-icon>
+        <cds-icon
+          *ngIf="item.type === 'pass'"
+          class="historyIcon"
+          shape="check"
+          size="xs"
+          style="color: rgb(0, 104, 150); height: 12px; width: 12px"
+        >
+        </cds-icon>
+      </div>
+    </div>
+  </div>
+</div>

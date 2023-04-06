@@ -1,0 +1,1004 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.h2Title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 85%;
+    font-size: 2em;
+    padding-top: 0.2rem;
+}
+
+
+
+cds-icon[shape="arrow"] {
+    transform: rotate(-90deg);
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+
+
+.properties {
+    border-bottom: 1px solid rgb(197, 197, 197);
+    padding-bottom: 2rem;
+}
+
+.annotateBorder {
+    border-right: 1px solid rgb(197, 197, 197);
+    padding-right: 1.5rem;
+}
+
+.projectDetailLeft {
+    min-height: 100vh;
+    position: relative
+}
+
+.createEntrance {
+    padding-left: 1.5rem;
+
+    p {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    div {
+        padding-bottom: 1rem;
+    }
+
+}
+
+
+button.category {
+    margin-top: 20px;
+}
+
+.actions {
+    border-top: 1px solid rgb(189, 189, 189);
+    margin-top: 3rem;
+}
+
+.actions button {
+    margin-top: 2rem;
+    max-width: fit-content;
+}
+
+.actions button.submit {
+    width: 100px;
+}
+
+.user-text-input {
+    margin-top: 50px;
+}
+
+.points {
+    text-align: right;
+}
+
+.select {
+    margin-top: 20px;
+    width: 200px;
+}
+
+.user-text-input h4 {
+    margin-bottom: 10px;
+    margin-top: 0px;
+}
+
+label.label-tooltip {
+    background-color: #007cbb;
+    width: 100px !important;
+    color: white !important;
+    padding: 6px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-right: 10px;
+    margin-left: 7px;
+}
+
+button.btn.btn-outline {
+    max-width: 600px;
+    text-transform: none;
+}
+
+.questionContainer {
+    background-color: white;
+    padding: 15px;
+    margin-top: 1rem;
+}
+
+.questionContainer p {
+    margin-top: 0px;
+}
+
+.required {
+    font-size: 15px;
+}
+
+.required.asteristic {
+    color: red;
+    margin-right: 5px !important;
+    margin-left: 10px !important;
+}
+
+.question-paragraph {
+    color: black !important;
+}
+
+.category {
+    margin-left: unset;
+    padding-left: unset;
+}
+
+.category clr-signpost.signpost {
+    margin-left: -10px;
+    margin-right: 5px;
+}
+
+.category clr-signpost-content.signpost-content {
+    max-width: 600px;
+}
+
+.category clr-signpost li span {
+    font-weight: bold;
+}
+
+h4 clr-signpost-content.signpost-content {
+    font-size: 0.54167rem !important;
+    font-weight: 400 !important;
+    color: #565656 !important;
+    margin-top: 5px !important;
+}
+
+h4 clr-signpost-content.signpost-content p {
+    font-size: 0.54167rem !important;
+    font-weight: 400 !important;
+    color: #565656 !important;
+    margin-top: 5px !important;
+}
+
+::ng-deep .user-text-input .signpost-content-body {
+    max-height: 13rem;
+}
+
+.form-group {
+    margin: 15px 0;
+}
+
+label .label-leftBoard {
+    width: 100px !important;
+    color: #000 !important;
+    padding: 6px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-right: 10px;
+    margin-left: 7px;
+}
+
+.line {
+    height: 1px;
+    border: 1px solid #e8e8e8;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+
+
+.instructionBox {
+    max-height: 5rem;
+    overflow-y: auto;
+    word-break: break-all;
+}
+
+
+
+
+
+
+.labels {
+    font-size: unset;
+    font-weight: bold;
+    height: 1.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.yellow {
+    color: black;
+    cursor: pointer;
+    border: 3px solid #efd603;
+    background-color: white;
+}
+
+.red {
+    color: black;
+    cursor: pointer;
+    border: 3px solid #ff681c;
+    background-color: white;
+}
+
+.green {
+    color: black;
+    cursor: pointer;
+    border: 3px solid #60b515;
+    background-color: white;
+}
+
+.blue {
+    color: black;
+    cursor: pointer;
+    border: 3px solid #00bfa9;
+    background-color: white;
+}
+
+.purple {
+    color: black;
+    cursor: pointer;
+    border: 3px solid #6870c4;
+    background-color: white;
+}
+
+.orange {
+    color: black;
+    cursor: pointer;
+    border: 3px solid #ff9c32;
+    background-color: white;
+}
+
+.label0:hover {
+    background-color: rgba(96, 181, 21, 0.1);
+    cursor: pointer;
+}
+
+.label1:hover {
+    background-color: rgba(255, 104, 28, 0.1);
+    cursor: pointer;
+}
+
+.label2:hover {
+    background-color: rgba(239, 214, 3, 0.1);
+    cursor: pointer;
+}
+
+.label3:hover {
+    background-color: rgba(0, 191, 169, 0.1);
+    cursor: pointer;
+}
+
+.label4:hover {
+    background-color: rgba(104, 112, 196, 0.1);
+    cursor: pointer;
+}
+
+.label5:hover {
+    background-color: rgba(255, 156, 50, 0.1);
+    cursor: pointer;
+}
+
+.clickActive0 {
+    background-color: #60b515;
+    border: 3px solid #60b515;
+    color: black;
+    pointer-events: none;
+}
+
+.clickActive1 {
+    background-color: #ff681c;
+    border: 3px solid #ff681c;
+    color: black;
+    pointer-events: none;
+}
+
+.clickActive2 {
+    background-color: #efd603;
+    border: 3px solid #efd603;
+    color: black;
+    pointer-events: none;
+}
+
+.clickActive3 {
+    background-color: #00bfa9;
+    border: 3px solid #00bfa9;
+    color: black;
+    pointer-events: none;
+}
+
+.clickActive4 {
+    background-color: #6870c4;
+    border: 3px solid #6870c4;
+    color: black;
+    pointer-events: none;
+}
+
+.clickActive5 {
+    background-color: #ff9c32;
+    border: 3px solid #ff9c32;
+    color: black;
+    pointer-events: none;
+}
+
+// .ticketColumn {
+//     font-weight: bold;
+// }
+
+::ng-deep .modal-footer-annotate .btn {
+    margin-right: 0.5rem !important;
+}
+
+.loadingSpan {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    color: grey;
+    opacity: 0.65;
+    font-size: 0.7rem;
+}
+
+// ::ng-deep .originalH2 .tooltip .tooltip-content.tooltip-right::before,
+// .tooltip.tooltip-right>.tooltip-content::before {
+//     border-top-color: #eee;
+//     border-right-color: #eee;
+// }
+.createEntrance {
+    ::ng-deep .progress>progress {
+        width: 96%;
+    }
+}
+
+
+.labelCheckbox {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-bottom: 0.3rem;
+    padding: 5px;
+    margin-left: unset;
+    margin-right: unset;
+}
+
+.nerBox {
+    word-break: break-all;
+}
+
+.nerSpan {
+    padding-left: 0.25rem;
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+.nerSpan::selection {
+    background-color: #ffe184;
+}
+
+.markSelected {
+    background-color: #ffe184;
+    padding: 0.25em 0.4em 0.25em 0;
+    font-weight: bold;
+    color: black;
+    user-select: none;
+    line-height: 1.3rem;
+    margin-right: 0.15rem;
+    margin-left: 0.3rem;
+    position: relative;
+}
+
+.spanSelected {
+    color: black;
+    line-height: 1.3rem;
+    position: relative;
+    width: fit-content;
+    margin-top: 0.5rem;
+}
+
+::ng-deep .spanMarked {
+    cursor: pointer;
+}
+
+::ng-deep .spanMarked::after {
+    content: attr(data-label);
+    color: black;
+    font-weight: 700;
+    font-size: 10px;
+    vertical-align: super;
+}
+
+::ng-deep .spanMarked .spanMarked {
+    padding: 1px;
+}
+
+.entity {
+    color: #0077b8;
+    font-size: 0.77em;
+    margin-left: 8px;
+    text-transform: uppercase;
+    vertical-align: middle;
+    word-break: keep-all;
+    white-space: nowrap;
+    font-weight: 900;
+    font-family: 'Roboto Condensed', 'Arial Narrow', sans-serif;
+    display: inline-block;
+    max-width: 70px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.clear {
+    position: absolute;
+    margin-top: -0.1rem;
+    background-color: transparent;
+    color: transparent;
+    width: 14px;
+    height: 14px;
+    text-align: center;
+    line-height: 11px;
+    user-select: none;
+    border-radius: 50%;
+    font-size: 1.5em;
+    transition: opacity 0.1s ease;
+    z-index: 1000;
+}
+
+.invalidAlert {
+    position: absolute;
+    top: -0.9rem;
+    width: -webkit-fill-available;
+    width: -moz-available;
+}
+
+.entityLabel {
+    font-size: unset;
+    font-weight: bold;
+    height: 1.5rem;
+    outline: unset;
+    color: #0077b8;
+    border: 2px solid #0077b8;
+    margin: 0.3rem 0.2rem;
+}
+
+.entityLabel:active {
+    box-shadow: 0 2px 0 0 inset;
+    color: #0077b8;
+}
+
+.entityLabel:hover {
+    background-color: rgba(88, 63, 207, 0.06);
+}
+
+.entitySelected {
+    color: white;
+    border: 2px solid;
+    outline: unset;
+    margin: 0.3rem 0.2rem;
+}
+
+::ng-deep .ant-tag {
+    height: 1.5rem !important;
+    min-width: 3rem;
+    font-size: initial;
+    text-align: center;
+    line-height: 1.5rem;
+    border-radius: 4px;
+    font-weight: bold;
+    border-left-width: 5px !important;
+}
+
+.panel button {
+    line-height: 0.5rem;
+    min-width: unset;
+    border: unset;
+    outline: unset;
+}
+
+.rectSelected {
+    background-color: #e0f0f6;
+}
+
+.rectUnselected {
+    background-color: transparent;
+}
+
+.wordShow {
+    white-space: break-spaces;
+    word-break: break-all;
+}
+
+.txtBox {
+    overflow: auto;
+    padding-bottom: 3rem;
+    height: 18rem;
+    resize: vertical;
+}
+
+::ng-deep .textBox {
+    overflow: auto;
+    max-height: 50vh;
+    padding-bottom: 0.5rem;
+    resize: vertical;
+}
+
+.txtRow {
+    margin-top: 0.5rem !important;
+    margin-left: -2.5rem;
+    word-break: keep-all;
+    white-space: nowrap;
+}
+
+.txtRowWrap {
+    margin-top: 0.5rem !important;
+    margin-left: -2.5rem;
+    word-break: break-all;
+}
+
+.txtRow ::selection {
+    background-color: #ffe184;
+    color: currentColor;
+}
+
+.txtRow:hover {
+    cursor: pointer;
+}
+
+.rowIndex {
+    margin-right: 1.5rem;
+    color: #cccccc;
+    position: relative;
+    margin-top: 0.5rem !important;
+}
+
+.selectedRowIndex {
+    margin-right: 1rem;
+    background-color: #0077b8;
+    border-radius: 4px;
+    padding-right: 3px;
+    padding-left: 5px;
+    color: white;
+}
+
+.selectedTxtRow {
+    padding: 0.25em 0.4em 0.25em 0.25em;
+    font-weight: bold;
+    color: black;
+    user-select: none;
+    line-height: 1.3rem;
+    margin-right: 0.15rem;
+    position: relative;
+}
+
+.txtEntityLabel {
+    font-size: unset;
+    font-weight: bold;
+    height: 1.5rem;
+    outline: unset;
+    color: white;
+    padding: 0.25em 0.4em 0.25em 0.25em;
+    position: relative;
+}
+
+::ng-deep .clearTxt {
+    user-select: none;
+    transition: opacity 0.1s ease;
+    position: absolute;
+    left: -0.4rem;
+    top: -0.4rem;
+    background-color: transparent;
+    color: transparent;
+    font-weight: 900;
+    border-radius: 50%;
+    text-align: center;
+    width: 0.8em;
+    height: 0.8em;
+    line-height: 0.8em;
+    font-size: 1.5em;
+}
+
+.log-textarea {
+    width: 100%;
+    margin-top: 0.5rem;
+    border-color: #ccc;
+}
+
+.logEntityLabel {
+    font-size: unset;
+    font-weight: bold;
+    height: 1.5rem;
+    outline: unset;
+    margin: 0.3rem 0.2rem;
+    color: #000000d9;
+    border: 3px solid transparent;
+}
+
+.logEntitySelected {
+    color: white;
+    outline: unset;
+    margin: 0.3rem 0.2rem;
+    border: 3px solid transparent;
+}
+
+::ng-deep .logEntitySelected:hover {
+    color: #000000d9 !important;
+    border-bottom-width: 5px;
+}
+
+.logCategories {
+    border-radius: 0.1rem;
+}
+
+.logCategories:hover {
+    background-color: transparent !important;
+    box-shadow: 2px 2px 4px 1px #9a9a9a !important;
+}
+
+.filterLog {
+    margin-bottom: 1rem;
+}
+
+.filterSelect {
+    width: 100%;
+    border: 1px solid;
+    border-radius: 3px;
+    padding-left: 0.3rem;
+    outline: unset;
+}
+
+.filterSelect:hover {
+    border: 1px solid #0077b8;
+    color: #0077b8;
+    background-color: rgba(0, 119, 184, 0.1);
+}
+
+.filterSelect::selection {
+    width: 100%;
+    border: 1px solid #0077b8;
+    color: #0077b8;
+}
+
+.filterText {
+    width: 100%;
+    margin-left: -0.7rem;
+    margin-top: -0.1rem;
+}
+
+.filterBox {
+    min-height: 1rem;
+    background-color: white;
+    border-radius: 3px;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    padding: 7px 7px;
+}
+
+.filterLabel {
+    box-shadow: 1px 1px 3px 0px #9a9a9a;
+    border-color: #9a9a9a;
+    color: #9a9a9a;
+}
+
+.overLabels {
+    background-color: rgb(238, 238, 238, 0.5);
+    cursor: pointer;
+}
+
+::ng-deep .high-light {
+    background: yellow;
+}
+
+.regexErr {
+    margin-left: -0.6rem;
+    color: red;
+}
+
+.isDrawer {
+    width: 0px !important;
+    overflow: hidden;
+}
+
+.showTag {
+    border-radius: 3px;
+    color: #ccc;
+    border: 1px solid #ccc;
+    border-right: unset;
+    text-align: center;
+    line-height: 21px;
+
+}
+
+.showTag:hover {
+    color: #ccc;
+
+    // background: linear-gradient(to left, #0077b8, transparent 70%);
+    .drawer {
+        height: 23px !important;
+        width: 23px !important;
+    }
+}
+
+.hideTag {
+    border-radius: 3px;
+    color: #ccc;
+    border: 1px solid #ccc;
+    border-right: unset;
+    text-align: center;
+    line-height: 21px;
+}
+
+.hideTag:hover {
+    color: #ccc;
+
+    .drawer {
+        height: 23px !important;
+        width: 23px !important;
+    }
+}
+
+.keepAllWord {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.selectedHistory {
+    background-color: #e1f1f6;
+    border-radius: 4px;
+}
+
+::ng-deep .ng-select.ng-select-focused .ng-select-container:after {
+    border-color: #0092d1 !important;
+}
+
+::ng-deep .ng-select .ng-select-container:after {
+    bottom: 0.3rem;
+}
+
+::ng-deep .ng-select .ng-select-container {
+    margin-top: -1rem;
+    margin-left: -0.7rem;
+}
+
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected {
+    color: currentColor !important;
+}
+
+::ng-deep .ng-dropdown-panel.ng-select-bottom {
+    margin-top: -0.3rem;
+    margin-left: -0.7rem;
+}
+
+::ng-deep .ng-select.ng-select-single .ng-select-container .ng-value-container .ng-value {
+    margin-top: 0.6rem;
+    white-space: normal !important;
+    word-break: break-all;
+}
+
+::ng-deep .ng-select .ng-select-container .ng-value-container {
+    align-items: stretch;
+    padding: 0.4375em 0;
+    border-top: 0em;
+}
+
+::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+    line-height: 0.8rem;
+    white-space: normal !important;
+    word-break: break-all;
+    margin-bottom: 0.3rem;
+}
+
+.editBar {
+    box-shadow: 0 7px 6px -9px #999;
+    margin-top: -1rem;
+    padding-bottom: 0.5rem;
+}
+
+.nerDisplayText {
+    box-shadow: 0 7px 6px -9px #999;
+    margin-bottom: 0.5rem;
+}
+
+.wrap {
+    padding: 0.1rem 0.2rem;
+    height: 1rem;
+    line-height: 0.8rem;
+    min-width: 1.5rem;
+    outline-width: 0px;
+}
+
+.noWrap {
+    padding: 0.1rem 0.2rem;
+    height: 1rem;
+    line-height: 0.8rem;
+    min-width: 1.5rem;
+    margin-top: -0.3rem;
+    background-color: #0077b8;
+    color: white !important;
+
+    cds-icon {
+        color: white !important;
+    }
+}
+
+.modalHide {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 88;
+    margin-left: -1rem;
+    margin-top: -1rem;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+}
+
+.singleFreetext {
+    position: relative;
+    margin-left: -0.5rem;
+    z-index: 99999999999999;
+    width: -webkit-fill-available;
+}
+
+.hasText {
+    color: #0077b8;
+}
+
+.noText {
+    color: #dddddd;
+}
+
+.scoreSlider {
+    display: inline-block;
+    width: 200px;
+    margin-left: 1rem;
+}
+
+.scoreInput {
+    display: inline-block;
+    width: 200px;
+    margin-left: 1rem;
+    vertical-align: middle;
+    line-height: 1rem;
+    height: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.multiple-label {
+    word-break: break-all;
+}
+
+.multiple-checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.annotateLabel {
+    padding: 10px;
+    border: 1px solid #e8e8e8;
+    max-width: 30%;
+}
+
+.selectText {
+    max-width: 8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.resultTip {
+    color: #6e7781;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+}
+
+.nerContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.nerPassage {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e8e8e8;
+    margin-right: 1rem;
+    word-break: break-word;
+}
+
+.selectedSection {
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
+.result {
+    display: flex;
+    flex-direction: row;
+    color: #1890ff;
+    font-weight: 500;
+}
+
+.result::before,
+.result::after {
+    content: '';
+    flex: 1 1;
+    border-bottom: 1px dashed #e5dede;
+    margin: auto 0.3rem;
+}
+
+.popLabels {
+    display: none;
+}
+
+.popDialog {
+    display: none;
+    background: #fff;
+    position: absolute;
+    z-index: 100;
+    border: 1px solid #ebeef5;
+    box-shadow: 1px 1px 2px 0px rgba(192, 196, 204, 1), -1px -1px 2px 0px rgba(192, 196, 204, 1);
+
+    &-arrow {
+        width: 0;
+        height: 0;
+        border: 14px solid transparent;
+        border-top-color: rgba(192, 196, 204, 0.7);
+        position: relative;
+        top: 54px;
+        left: 24px;
+    }
+
+    &-insideArrow {
+        width: 0;
+        height: 0;
+        border: 12px solid transparent;
+        border-top-color: #fff;
+        position: relative;
+        top: 24px;
+        left: 25px;
+    }
+}
+
+.clearPop {
+    float: right;
+    padding-right: 0.3rem;
+    font-size: 1rem;
+    color: #b3a9a9cc;
+    cursor: pointer;
+}
+
+.limit-height clr-datagrid {
+    max-height: 10rem;
+}
+
+.clr-select-wrapper::after {
+    right: 0.02rem;
+}
+
+.disableTree {
+    ::ng-deep .clr-checkbox-wrapper .clr-control-label {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    ::ng-deep .clr-checkbox-wrapper input[type='checkbox'] {
+        pointer-events: none;
+    }
+}
+
+
+.displayFormat {
+    width: fit-content;
+    position: absolute;
+    right: 0;
+    top: -0.2rem;
+}
+
+.refreshBtn {
+    display: inline-block;
+    margin-right: 2rem;
+}

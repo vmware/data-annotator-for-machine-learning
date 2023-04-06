@@ -1,12 +1,12 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
 import { Injectable } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 
-declare let gtag: (parameterA, parameterB, parameterC) => void;
+declare let gtag: (parameterA: any, parameterB: any, parameterC: any) => void;
 
 @Injectable({
   providedIn: 'root',
@@ -16,13 +16,11 @@ export class EnvironmentsService {
   private env: any;
   private nodeEnvironment: string;
   constructor(public router: Router) {
-    console.log('APP_CONFIG：', this.configuration);
+    // console.log('APP_CONFIG：', this.configuration);
     this.nodeEnvironment =
-      this.configuration === '' || this.configuration.startsWith('$')
-        ? ''
-        : `.${this.configuration}`;
+      this.configuration === '' || this.configuration.startsWith('$') ? '' : `.${this.configuration}`;
     this.env = require('../../environments/environment' + this.nodeEnvironment);
-    console.log('Environment:', this.nodeEnvironment);
+    // console.log('Environment:', this.nodeEnvironment);
     // Global site tag (gtag.js) - Google Analytics Start
     if (this.configuration == 'prod' && this.env.environment.googleTrackId) {
       this.router.events.subscribe((event) => {
@@ -37,21 +35,5 @@ export class EnvironmentsService {
 
   get config() {
     return this.env.environment;
-  }
-
-  get isDevMode(): boolean {
-    return this.nodeEnvironment === '';
-  }
-
-  get isTestingMode(): boolean {
-    return this.nodeEnvironment === '.test';
-  }
-
-  get isStgMode(): boolean {
-    return this.nodeEnvironment === '.stg';
-  }
-
-  get isProdMode(): boolean {
-    return this.nodeEnvironment === '.prod';
   }
 }

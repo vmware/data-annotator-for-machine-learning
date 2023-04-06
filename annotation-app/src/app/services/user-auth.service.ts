@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -8,17 +8,10 @@ import { Location } from '@angular/common';
 import { EnvironmentsService } from './environments.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
-// import 'rxjs/Rx';
-import { tap } from 'rxjs/operators';
+import { tap, finalize } from 'rxjs/operators';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import {
-  AuthRequestToken,
-  AuthResponseToken,
-  AuthUser,
-  SessionStatus,
-  AuthUtil,
-} from '../model/authentication';
-import { finalize } from 'rxjs/operators';
+import { AuthRequestToken, AuthResponseToken, AuthUser, SessionStatus, AuthUtil } from '../model/authentication';
+import { ApiService } from './api.service';
 
 @Injectable()
 export class UserAuthService {
@@ -32,19 +25,20 @@ export class UserAuthService {
     private location: Location,
     private http: HttpClient,
     private env: EnvironmentsService,
+    private apiService: ApiService,
   ) {
-    this.jwtHelper = new JwtHelperService();
-    this.autoRefreshToken(); // autoRefresh validates if the stored token is still valid
-    const status: SessionStatus = this.loggedUser()
-      ? SessionStatus.AUTHENTICATED
-      : SessionStatus.NOT_AUTHENTICATED;
-    this.sessionLifetimeSubject = new BehaviorSubject<SessionStatus>(status);
-    window.addEventListener('storage', this.storageEventListener.bind(this));
-    this.userSubject = new BehaviorSubject<AuthUser>(this.loggedUser());
+    if (!this.env.config.embedded) {
+      this.jwtHelper = new JwtHelperService();
+      this.autoRefreshToken(); // autoRefresh validates if the stored token is still valid
+      const status: SessionStatus = this.loggedUser() ? SessionStatus.AUTHENTICATED : SessionStatus.NOT_AUTHENTICATED;
+      this.sessionLifetimeSubject = new BehaviorSubject<SessionStatus>(status);
+      window.addEventListener('storage', this.storageEventListener.bind(this));
+      this.userSubject = new BehaviorSubject<AuthUser>(this.loggedUser());
+    }
   }
 
   private storageEventListener(event: StorageEvent) {
-    if (event.storageArea === localStorage && event.key === this.env.config.serviceTitle) {
+    if (event.storageArea === localStorage && event.key === this.env.config.sessionKey) {
       if (event.newValue) {
         const authUser: AuthUser = JSON.parse(event.newValue);
         this.userSubject.next(authUser);
@@ -54,16 +48,24 @@ export class UserAuthService {
     }
   }
 
-  public addUserToStorage(user: AuthUser, persistent: boolean) {
-    if (persistent) {
-      localStorage.setItem(this.env.config.serviceTitle, JSON.stringify(user));
-    } else {
-      sessionStorage.setItem(this.env.config.serviceTitle, JSON.stringify(user));
-    }
+  public addUserToStorage(user: AuthUser) {
+    localStorage.setItem(this.env.config.sessionKey, JSON.stringify(user));
+    this.apiService.getUserRole().subscribe(
+      (userInfo) => {
+        if (userInfo) {
+          user.user.role = userInfo.role === 'Admin' ? 'Power User' : 'User';
+          localStorage.setItem(this.env.config.sessionKey, JSON.stringify(user));
+          this.userSubject.next(user);
+        }
+      },
+      (err) => {
+        this.logout();
+      },
+    );
   }
 
   public loggedUser(): AuthUser {
-    const storedUser = localStorage.getItem(this.env.config.serviceTitle);
+    const storedUser = localStorage.getItem(this.env.config.sessionKey);
     if (storedUser) {
       const user = JSON.parse(storedUser);
       if (AuthUtil.isValidUser(user)) {
@@ -91,16 +93,13 @@ export class UserAuthService {
 
   public clearSession(): void {
     this.userSubject.next(null);
-    localStorage.removeItem(this.env.config.serviceTitle);
-    sessionStorage.removeItem(this.env.config.serviceTitle);
+    localStorage.removeItem(this.env.config.sessionKey);
   }
 
   redirectToLogin() {
     const redirectUrl =
       window.location.origin +
-      this.location.prepareExternalUrl(
-        this.env.config.redirectUrl ? this.env.config.redirectUrl : '/home',
-      );
+      this.location.prepareExternalUrl(this.env.config.redirectUrl ? this.env.config.redirectUrl : '/home');
     window.location.href = `${this.env.config.authUrl}/authorize?response_type=code&client_id=${this.env.config.CLIENT_ID}&redirect_uri=${redirectUrl}&state=${this.env.config.STATE}&bypass_uri_check=true`;
   }
 
@@ -115,63 +114,42 @@ export class UserAuthService {
     return this.getAuthToken(authReqToken);
   }
 
-  getAccessToken() {
-    const session = this.currentSession.getValue();
-    return session ? session.access_token : null;
-  }
-
-  clearCurrentSession() {
-    localStorage.removeItem(this.env.config.serviceTitle);
-    this.currentSession.next(null);
-  }
-
-  isCurrentSessionExpired() {
-    const currentToken = this.getAccessToken();
-    if (!currentToken) {
-      return true;
-    } else {
-      return this.jwtHelper.isTokenExpired(currentToken);
-    }
-  }
-
   public logout(): void {
-    if (this.env.config.logoutUrl) {
-      if (this.loggedUser()) {
-        if (this.env.config.production) {
-          this.http
-            .post(`${this.env.config.logoutUrl}`, null, {
-              headers: new HttpHeaders().append(
-                'Authorization',
-                this.loggedUser().token.access_token,
-              ),
-            })
-            .pipe(
-              finalize(() => {
-                this.clearSession();
-                this.redirectToHome();
-              }),
-            )
-            .subscribe();
-        } else {
-          this.clearSession();
-          const redirectUrl =
-            window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl);
-          window.location.href = `${this.env.config.logoutUrl}?client_id=${this.env.config.CLIENT_ID}&redirect_uri=${redirectUrl}&state=${this.env.config.STATE}`;
+    if (!this.env.config.embedded) {
+      if (this.env.config.logoutUrl) {
+        if (this.loggedUser()) {
+          if (this.env.config.production) {
+            this.http
+              .post(`${this.env.config.logoutUrl}`, null, {
+                headers: new HttpHeaders().append('Authorization', this.loggedUser().token.access_token),
+              })
+              .pipe(
+                finalize(() => {
+                  this.clearSession();
+                  this.redirectToHome();
+                }),
+              )
+              .subscribe();
+          } else {
+            this.clearSession();
+            const redirectUrl = window.location.origin + this.location.prepareExternalUrl(this.env.config.redirectUrl);
+            window.location.href = `${this.env.config.logoutUrl}?client_id=${this.env.config.CLIENT_ID}&redirect_uri=${redirectUrl}&state=${this.env.config.STATE}`;
+          }
+          this.sessionLifetimeSubject.next(SessionStatus.NOT_AUTHENTICATED);
+          if (this.tokenExpirationTimer) {
+            clearTimeout(this.tokenExpirationTimer);
+          }
+          this.tokenExpirationTimer = null;
         }
+      } else {
         this.sessionLifetimeSubject.next(SessionStatus.NOT_AUTHENTICATED);
         if (this.tokenExpirationTimer) {
           clearTimeout(this.tokenExpirationTimer);
         }
         this.tokenExpirationTimer = null;
+        this.clearSession();
+        this.redirectToHome();
       }
-    } else {
-      this.sessionLifetimeSubject.next(SessionStatus.NOT_AUTHENTICATED);
-      if (this.tokenExpirationTimer) {
-        clearTimeout(this.tokenExpirationTimer);
-      }
-      this.tokenExpirationTimer = null;
-      this.clearSession();
-      this.redirectToHome();
     }
   }
 
@@ -198,14 +176,10 @@ export class UserAuthService {
     if (this.loggedUser()) {
       let expirationMilliseconds;
       if (this.env.config.tokenUrl) {
-        const expirationDate: Date = this.jwtHelper.getTokenExpirationDate(
-          this.loggedUser().token.access_token,
-        );
-        expirationMilliseconds =
-          new Date(expirationDate).getTime() - new Date().getTime() - 20 * 1000;
+        const expirationDate: Date = this.jwtHelper.getTokenExpirationDate(this.loggedUser().token.access_token);
+        expirationMilliseconds = new Date(expirationDate).getTime() - new Date().getTime() - 20 * 1000;
       } else {
-        expirationMilliseconds =
-          this.loggedUser().token.expires_time * 1000 - new Date().getTime() - 60 * 1000;
+        expirationMilliseconds = this.loggedUser().token.expires_time * 1000 - new Date().getTime() - 60 * 1000;
       }
       this.tokenExpirationTimer = setTimeout(() => {
         this.refreshToken();
@@ -219,13 +193,10 @@ export class UserAuthService {
         (authResponse) => {
           const decodedToken = this.jwtHelper.decodeToken(authResponse.access_token);
           const user: AuthUser = {
-            email: decodedToken.email,
-            name: decodedToken.name,
-            fullName: decodedToken.name,
-            provider: decodedToken.provider,
+            user: decodedToken,
             token: authResponse,
           };
-          this.addUserToStorage(user, true);
+          this.addUserToStorage(user);
           this.userSubject.next(user);
           this.sessionLifetimeSubject.next(SessionStatus.AUTHENTICATED);
           this.autoRefreshToken();
@@ -245,9 +216,9 @@ export class UserAuthService {
       })
       .subscribe(
         (res) => {
-          const storedUser = JSON.parse(localStorage.getItem(this.env.config.serviceTitle));
+          const storedUser = JSON.parse(localStorage.getItem(this.env.config.sessionKey));
           storedUser.token = res;
-          localStorage.setItem(this.env.config.serviceTitle, JSON.stringify(storedUser));
+          localStorage.setItem(this.env.config.sessionKey, JSON.stringify(storedUser));
           this.autoRefreshToken();
         },
         (err) => {

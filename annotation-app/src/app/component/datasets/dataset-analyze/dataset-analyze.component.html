@@ -1,0 +1,207 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="container">
+  <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ errorMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ infoMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <clr-alert *ngIf="initData && initData.modelName" [clrAlertType]="'success'">
+    <clr-alert-item>
+      <span class="alert-text">
+        Model has been created. View it by clicking <a href="/inst/models/list">here.</a>
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <div class="clr-row">
+    <div class="clr-col-10">
+      <div class="clr-row" style="margin-left: unset">
+        <cds-icon shape="arrow" routerLink="/loop/datasets/list"></cds-icon>
+        <div class="h2Title" title="{{ dataset.dataSetName }}">
+          {{ dataset.dataSetName }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <clr-tabs>
+    <clr-tab>
+      <button clrTabLink id="link1">Analyze</button>
+      <clr-tab-content id="content1" *clrIfActive="true">
+        <div class="clr-row">
+          <div
+            class="clr-col-7"
+            style="border-right: 1px solid rgb(197, 197, 197); padding-right: 1.5rem; height: 100vh"
+          >
+            <div class="properties">
+              <h4>Properties</h4>
+              <div class="clr-row clr-justify-content-start">
+                <div class="clr-col-6">
+                  <h6>Created On</h6>
+                  <span>{{ dataset.createTime | date : 'yyyy-MM-dd HH:mm:ss' }}</span>
+                </div>
+                <div class="clr-col-6">
+                  <h6>Dataset Format</h6>
+                  <span>{{ dataset.format }}</span>
+                </div>
+              </div>
+              <div class="clr-row clr-justify-content-start">
+                <div class="clr-col-6">
+                  <h6>Total {{ dataset.format !== 'image' && dataset.format !== 'txt' ? 'Rows' : 'Items' }}</h6>
+                  <span *ngIf="dataset.format !== 'image'">{{ dataset.totalRows }}</span>
+                  <span *ngIf="dataset.format == 'image'">{{
+                    dataset.totalRows ? dataset.totalRows : dataset.images.length
+                  }}</span>
+                </div>
+                <div *ngIf="dataset.format !== 'image' && dataset.format !== 'txt'" class="clr-col-6">
+                  <h6>Total Columns</h6>
+                  <span>{{ dataset.totalColumns }}</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4>Preview</h4>
+              <clr-datagrid [clrDgLoading]="loadingPreviewData">
+                <clr-dg-column *ngFor="let itemHeader of topRowHeader">{{ itemHeader }}</clr-dg-column>
+                <ng-container *ngIf="dataset.format !== 'image' && dataset.format !== 'txt'">
+                  <clr-dg-row *ngFor="let previewCont of topRowContent">
+                    <clr-dg-cell *ngFor="let item of previewCont">{{ item }}</clr-dg-cell>
+                  </clr-dg-row>
+                </ng-container>
+
+                <ng-container *ngIf="dataset.format == 'image'">
+                  <clr-dg-row *ngFor="let previewCont of topRowContent">
+                    <clr-dg-cell
+                      ><img src="{{ previewCont.location }}" alt="" style="max-width: 15rem; max-height: 15rem"
+                    /></clr-dg-cell>
+                    <clr-dg-cell>{{ previewCont.fileName }}</clr-dg-cell>
+                    <clr-dg-cell>{{ previewCont.fileSize }}</clr-dg-cell>
+                    <clr-dg-cell>{{ previewCont._id }}</clr-dg-cell>
+                  </clr-dg-row>
+                </ng-container>
+
+                <ng-container *ngIf="dataset.format == 'txt'">
+                  <clr-dg-row *ngFor="let previewCont of topRowContent">
+                    <clr-dg-cell>{{ previewCont.fileName }}</clr-dg-cell>
+                    <clr-dg-cell>{{ previewCont.fileContent }}</clr-dg-cell>
+                  </clr-dg-row>
+                </ng-container>
+              </clr-datagrid>
+            </div>
+          </div>
+          <div class="clr-col-5 createEntrance">
+            <div style="border-bottom: 1px solid rgb(197, 197, 197)">
+              <h6>Creating a labeling Task</h6>
+              <p>You can assign team members to annotate your data and create an annotation set.</p>
+              <clr-dropdown>
+                <button class="btn btn-primary" clrDropdownTrigger>
+                  Create Labeling Task
+                  <cds-icon shape="angle" direction="down"></cds-icon>
+                </button>
+                <clr-dropdown-menu *clrIfOpen clrPosition="bottom-left">
+                  <label class="dropdown-header">Classification</label>
+                  <a
+                    *ngIf="dataset.format === 'csv' || dataset.format === 'tabular'"
+                    class="dropdown-item active"
+                    (click)="createLabelingTask('text')"
+                    >Text Classification</a
+                  >
+                  <a
+                    *ngIf="dataset.format === 'csv' || dataset.format === 'tabular'"
+                    class="dropdown-item"
+                    (click)="createLabelingTask('tabular')"
+                    >Tabular</a
+                  >
+                  <a
+                    *ngIf="dataset.format === 'csv' || dataset.format === 'tabular'"
+                    class="dropdown-item"
+                    (click)="createLabelingTask('ner')"
+                    >Named Entity Recognition</a
+                  >
+                  <a *ngIf="dataset.format === 'image'" class="dropdown-item" (click)="createLabelingTask('image')"
+                    >Image Classification</a
+                  >
+                  <a *ngIf="dataset.format === 'txt'" class="dropdown-item" (click)="createLabelingTask('log')"
+                    >Log Classification</a
+                  >
+                </clr-dropdown-menu>
+              </clr-dropdown>
+            </div>
+            <div *ngIf="!(dataset.format === 'txt') && env.config.embedded">
+              <cds-icon
+                *ngIf="initData?.modelName"
+                shape="success-standard"
+                status="success"
+                solid="true"
+                style="margin-right: 0.2rem"
+              ></cds-icon>
+              <h6 style="display: inline-block">Creating a Model via InstaML</h6>
+              <p *ngIf="initData?.modelName" style="color: #565656; font-size: 13px">
+                Model has been created.View it by clicking <a href="/inst/models/list">here.</a>
+              </p>
+              <p *ngIf="!initData?.modelName">
+                Use this dataset and annotation set to build fully automated, accurate and ready-to-deploy machine
+                learning models in minutes.
+              </p>
+              <p *ngIf="!dataset.location && dataset.format === 'image'">
+                This dataset unavailable for Instaml.The image file to create instaml must be uploaded with zip package
+                and folder.
+              </p>
+              <clr-dropdown *ngIf="!initData?.modelName">
+                <button
+                  class="btn btn-primary"
+                  [attr.disabled]="!dataset.location && dataset.format === 'image' ? true : null"
+                  clrDropdownTrigger
+                >
+                  Create Automl Model
+                  <cds-icon shape="angle" direction="down"></cds-icon>
+                </button>
+                <clr-dropdown-menu *clrIfOpen clrPosition="bottom-left">
+                  <label class="dropdown-header">Classification</label>
+                  <a
+                    *ngIf="dataset.format === 'csv'"
+                    class="dropdown-item active"
+                    (click)="createModel('Classification')"
+                    >Text Classification</a
+                  >
+                  <a
+                    *ngIf="dataset.format === 'csv'"
+                    class="dropdown-item"
+                    (click)="createModel('Multi Label Text Classification')"
+                    >Multi Label Text Classification</a
+                  >
+                  <a *ngIf="dataset.format === 'tabular'" class="dropdown-item" (click)="createModel('Tabular')"
+                    >Tabular</a
+                  >
+                  <a
+                    *ngIf="dataset.format === 'image'"
+                    class="dropdown-item"
+                    (click)="createModel('Image Classification')"
+                    >Image Classification</a
+                  >
+                </clr-dropdown-menu>
+              </clr-dropdown>
+            </div>
+            <div *ngIf="env.config.embedded">
+              <h6>Creating a Model via InstaML Hub</h6>
+              <p>
+                Research and build interactive machine learning models via the supported IDEs(Jupyter, R Studio and VS
+                Code).
+              </p>
+              <button class="btn btn-primary" (click)="useHub()">Use Data in InstaML Hub</button>
+            </div>
+          </div>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>

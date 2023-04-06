@@ -1,0 +1,63 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.left-project-info {
+  margin-top: 0.5rem;
+}
+
+h5 {
+  font-weight: bold;
+}
+
+.historyBox {
+  max-height: 11rem;
+  overflow: auto;
+  height: 11rem;
+  padding-right: 1rem;
+}
+
+.fontSizeSmall {
+  font-size: 0.9em;
+}
+
+.historyText {
+  overflow: hidden;
+  min-width: 0;
+  text-align: left;
+  white-space: nowrap;
+  padding-right: 1rem;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.historyPosition:hover {
+  background-color: #ececec;
+  border-radius: 4px;
+
+  .historyIcon {
+    color: #0077b8;
+  }
+}
+
+.historyIcon {
+  position: absolute;
+  top: 0.3rem;
+}
+
+.historyPosition {
+  position: relative;
+  padding-right: 1rem;
+  padding-left: 1.5rem;
+}
+
+.ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.selectedHistory {
+  background-color: #e1f1f6 !important;
+  border-radius: 4px !important;
+}

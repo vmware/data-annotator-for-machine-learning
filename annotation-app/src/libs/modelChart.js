@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -17,7 +17,7 @@ function modelChart(options) {
   threshold = options.threshold;
   estimator = options.estimator;
   (samplingStrategy = options.samplingStrategy),
-    (model_margin = { top: 50, right: 300, bottom: 10, left: 40 });
+    (model_margin = { top: 50, right: 250, bottom: 10, left: 40 });
   data = options.data;
   data = Object.assign(
     data.map(({ index, accuracy }) => ({ name: index, value: +accuracy })),
@@ -94,55 +94,72 @@ function modelChart(options) {
   // Handmade legend
   svg
     .append('circle')
-    .attr('cx', model_width - model_margin.right - 80)
+    .attr('cx', model_width - model_margin.right - 10)
     .attr('cy', 100)
     .attr('r', 4)
     .style('fill', 'steelblue');
   svg
     .append('circle')
-    .attr('cx', model_width - model_margin.right - 80)
-    .attr('cy', 130)
-    .attr('r', 4)
-    .style('fill', 'steelblue');
-  svg
-    .append('circle')
-    .attr('cx', model_width - model_margin.right - 80)
+    .attr('cx', model_width - model_margin.right - 10)
     .attr('cy', 160)
     .attr('r', 4)
     .style('fill', 'steelblue');
   svg
     .append('circle')
-    .attr('cx', model_width - model_margin.right - 80)
-    .attr('cy', 190)
+    .attr('cx', model_width - model_margin.right - 10)
+    .attr('cy', 220)
+    .attr('r', 4)
+    .style('fill', 'steelblue');
+  svg
+    .append('circle')
+    .attr('cx', model_width - model_margin.right - 10)
+    .attr('cy', 250)
     .attr('r', 4)
     .style('fill', 'steelblue');
 
   svg
     .append('text')
-    .attr('x', model_width - model_margin.right - 70)
+    .attr('x', model_width - model_margin.right)
     .attr('y', 100)
-    .text('Estimator: ' + estimator)
+    .text('Estimator: ')
     .style('font-size', '12px')
     .attr('alignment-baseline', 'middle');
-  // svg.append("text").attr("x", model_width - model_margin.right + 40).attr("y", 115).text(estimator).style("font-size", "12px").attr("alignment-baseline", "middle")
+
   svg
     .append('text')
-    .attr('x', model_width - model_margin.right - 70)
+    .attr('x', model_width - model_margin.right)
     .attr('y', 130)
-    .text('Sampling Strategy: ' + samplingStrategy)
+    .text(estimator)
     .style('font-size', '12px')
     .attr('alignment-baseline', 'middle');
+
   svg
     .append('text')
-    .attr('x', model_width - model_margin.right - 70)
+    .attr('x', model_width - model_margin.right)
     .attr('y', 160)
+    .text('Sampling Strategy: ')
+    .style('font-size', '12px')
+    .attr('alignment-baseline', 'middle');
+
+  svg
+    .append('text')
+    .attr('x', model_width - model_margin.right)
+    .attr('y', 190)
+    .text(samplingStrategy)
+    .style('font-size', '12px')
+    .attr('alignment-baseline', 'middle');
+
+  svg
+    .append('text')
+    .attr('x', model_width - model_margin.right)
+    .attr('y', 220)
     .text('Threshold: ' + threshold)
     .style('font-size', '12px')
     .attr('alignment-baseline', 'middle');
   svg
     .append('text')
-    .attr('x', model_width - model_margin.right - 70)
-    .attr('y', 190)
+    .attr('x', model_width - model_margin.right)
+    .attr('y', 250)
     .text('Frequency: ' + frequency)
     .style('font-size', '12px')
     .attr('alignment-baseline', 'middle');

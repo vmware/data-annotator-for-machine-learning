@@ -1,0 +1,95 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<form [formGroup]="uploadFile">
+  <div class="clr-row">
+    <div class="clr-col-11">
+      <div *ngIf="files?.length === 0" class="uploadBox" appDnd (fileDropped)="onFileDropped($event)">
+        <div>
+          <input
+            type="file"
+            name="localFile"
+            [accept]="
+              msg.page == 'datasets'
+                ? '.zip,.ZIP,.csv,.CSV,.tgz,.TGZ'
+                : msg.type == 'image'
+                ? '.zip,.ZIP'
+                : msg.type == 'log' || msg.type == 'txt'
+                ? '.zip,.ZIP,.tgz,.TGZ'
+                : msg.type == 'json'
+                ? '.json,.JSON'
+                : msg.type == 'yaml'
+                ? '.yaml,.yml'
+                : '.csv,.CSV'
+            "
+            (change)="fileBrowseHandler($event.target.files)"
+          />
+          <cds-icon style="margin-right: 0.3rem" shape="upload-cloud"> </cds-icon>
+          Drop a file to upload, or
+          <label for="localFile">browser </label>.
+        </div>
+      </div>
+      <div
+        *ngIf="files?.length > 0"
+        class="progressBlock"
+        [ngClass]="msg.page === 'defineLabels' ? 'progressFile' : ''"
+      >
+        <div class="progress-block">
+          <div class="file-icon">
+            <cds-icon shape="file" style="width: 2rem; height: 2rem"></cds-icon>
+          </div>
+          <div class="progress-group">
+            <div class="clr-row">
+              <div class="clr-col-6 text-left" style="color: #a4a4a4">
+                {{ files[0]?.name }}
+              </div>
+              <div class="clr-col-6 text-right delete" (click)="deleteFile(0)">
+                <cds-icon shape="window-close"></cds-icon>
+              </div>
+            </div>
+            <clr-progress-bar clrValue="{{ files[0]?.progress }}" clrLabeled clrDisplayval="{{ files[0]?.progress }}%">
+            </clr-progress-bar>
+            <div class="clr-row">
+              <div class="clr-col-6 text-left" style="color: #a4a4a4">
+                {{ formatBytes(files[0]?.size) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="clr-row clr-col-1"
+      [ngStyle]="{ 'margin-top': '1rem', 'line-height': files?.length == 0 ? '3rem' : '4rem' }"
+    >
+      <clr-tooltip *ngIf="uploadFile.get('localFile').errors && uploadFile.get('localFile').invalid">
+        <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+        </cds-icon>
+        <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+          <span>{{ uploadFile.get('localFile').errors.msg.value }}</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
+      <clr-tooltip *ngIf="errorMessage">
+        <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+        </cds-icon>
+        <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+          <span>{{ errorMessage }}</span>
+        </clr-tooltip-content>
+      </clr-tooltip>
+    </div>
+  </div>
+  <div class="clr-row">
+    <div *ngIf="msg.page != 'defineLabels'" class="clr-col-11" style="margin-top: 1.2rem">
+      <p class="uploadInfo">Only .csv(UTF-8) file type is supported for text and tabular classification.</p>
+      <p class="uploadInfo">
+        Only .zip file type is supported for images. Please compress your images into a .zip folder and then upload it.
+      </p>
+      <p class="uploadInfo">
+        Only .zip and .tgz file type is supported for log. Please compress your txt files and then upload it.
+      </p>
+    </div>
+    <div *ngIf="msg.page === 'defineLabels'" class="clr-col-11" style="margin-top: 1.2rem">
+      <p class="uploadInfo">Only json and yaml file type is supported for uploading labels.</p>
+    </div>
+  </div>
+</form>

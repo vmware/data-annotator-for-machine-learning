@@ -1,25 +1,14 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import { Component, OnInit } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { EnvironmentsService } from './services/environments.service';
+import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
+  selector: 'mf-loop',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
-  constructor(private titleService: Title, private env: EnvironmentsService) {}
-
-  ngOnInit() {
-    this.getTitleInfo();
-  }
-
-  getTitleInfo() {
-    this.titleService.setTitle(this.env.config.serviceTitle);
-  }
+export class AppComponent {
+  title = 'annotation-app';
 }

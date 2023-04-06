@@ -1,0 +1,106 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="login-wrapper">
+  <form class="login" [formGroup]="dsForm" autocomplete="off">
+    <section class="title">
+      <h3 class="welcome">Welcome to</h3>
+      {{ env.config.serviceTitle }}
+      <h5 class="hint">Use your account to sign in or create one now</h5>
+    </section>
+    <div class="login-group">
+      <clr-select-container *ngIf="!this.isClickSignup">
+        <label class="clr-sr-only">User Role</label>
+        <select clrSelect name="loginType" (change)="selectedUserType($event)">
+          <option value="normal">Registered user login</option>
+          <option value="ldap">Login with LDAP</option>
+        </select>
+      </clr-select-container>
+      <clr-input-container *ngIf="isClickSignup">
+        <label class="clr-sr-only">Firstname</label>
+        <input type="text" name="firstname" clrInput placeholder="First Name" formControlName="firstname" />
+        <clr-control-error *ngIf="dsForm.get('firstname').errors && dsForm.get('firstname').touched">
+          {{ dsForm.get('firstname').errors.msg.value }}</clr-control-error
+        >
+      </clr-input-container>
+      <clr-input-container *ngIf="isClickSignup">
+        <label class="clr-sr-only">Lastname</label>
+        <input type="text" name="lastname" clrInput placeholder="Last Name" formControlName="lastname" />
+        <clr-control-error *ngIf="dsForm.get('lastname').errors && dsForm.get('lastname').touched">
+          {{ dsForm.get('lastname').errors.msg.value }}</clr-control-error
+        >
+      </clr-input-container>
+      <clr-input-container>
+        <label class="clr-sr-only">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          clrInput
+          placeholder="Email Address"
+          formControlName="username"
+        />
+        <clr-control-helper *ngIf="isClickSignup" class="helperText"
+          >Email address will be used to send project email.
+        </clr-control-helper>
+        <clr-control-error *ngIf="dsForm.get('username').errors && dsForm.get('username').touched">
+          {{ dsForm.get('username').errors.msg.value }}</clr-control-error
+        >
+      </clr-input-container>
+      <clr-password-container>
+        <label class="clr-sr-only">Password</label>
+        <input type="password" name="password" clrPassword placeholder="Password" formControlName="password" />
+        <clr-control-error *ngIf="dsForm.get('password').errors && dsForm.get('password').touched">
+          {{ dsForm.get('password').errors.msg.value }}</clr-control-error
+        >
+      </clr-password-container>
+
+      <div *ngIf="error" class="error active">Invalid user name or password</div>
+      <clr-alert *ngIf="registerSuccess" [clrAlertType]="'success'" (clrAlertClosedChange)="registerSuccess = ''">
+        <clr-alert-item>
+          <span class="alert-text">
+            {{ registerSuccess }}
+          </span>
+        </clr-alert-item>
+      </clr-alert>
+      <clr-alert *ngIf="registerFailed" [clrAlertType]="'danger'" (clrAlertClosedChange)="registerFailed = ''">
+        <clr-alert-item>
+          <span class="alert-text">
+            {{ registerFailed }}
+          </span>
+        </clr-alert-item>
+      </clr-alert>
+      <button
+        *ngIf="!loading && !isClickSignup"
+        style="margin-top: 1rem"
+        type="submit"
+        class="btn btn-primary"
+        id="login-button"
+        (click)="clickLog()"
+      >
+        log in
+      </button>
+      <button
+        *ngIf="!loading && isClickSignup"
+        style="margin-top: 1rem"
+        type="submit"
+        class="btn btn-primary"
+        (click)="clickSign()"
+      >
+        sign up
+      </button>
+      <button *ngIf="loading" style="margin-top: 1rem" type="button" class="btn loading">
+        <clr-spinner
+          style="min-height: 0.75rem; min-width: 0.75rem; height: 0.75rem; width: 0.75rem; margin-top: 0.33rem"
+          clrAssertive
+          >loading</clr-spinner
+        >
+      </button>
+
+      <a *ngIf="!isClickSignup && !isLadp" href="javascript://" class="signup" (click)="clickSignup()"
+        >Sign up for a new account</a
+      >
+      <a *ngIf="isClickSignup" href="javascript://" class="signup" (click)="clickSignin()">Sign in</a>
+    </div>
+  </form>
+</div>

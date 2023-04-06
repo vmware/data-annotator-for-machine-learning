@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
@@ -10,12 +10,12 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'my-filter',
   templateUrl: './datagridFilter.component.html',
-  styleUrls: ['./datagridFilter.component.scss'],
+  styles: [],
 })
 export class MyFilter implements ClrDatagridFilterInterface<any> {
-  @Input() filterMsg: boolean;
+  @Input() filterMsg?: boolean;
   @Output() filter = new EventEmitter();
-  @ViewChild('filenameFilterEl') filenameFilterEl: ElementRef;
+  @ViewChild('filenameFilterEl') filenameFilterEl?: ElementRef;
 
   filename: string = '';
   filenameFilter = new Subject<string>();
@@ -32,7 +32,7 @@ export class MyFilter implements ClrDatagridFilterInterface<any> {
     return !(this.filename.trim().length == 0);
   }
 
-  accepts(any) {
+  accepts() {
     return true;
   }
 }

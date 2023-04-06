@@ -1,11 +1,9 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
 import { Injectable, Renderer2, RendererFactory2 } from '@angular/core';
-
-// import 'rxjs/Rx';
 
 @Injectable()
 export class GetElementService {
@@ -137,10 +135,7 @@ export class GetElementService {
       if (replaceHtml) {
         originalText = replaceHtml;
       }
-      replaceHtml = originalText.replace(
-        new RegExp(data, 'g'),
-        '<span class="high-light">' + data + '</span>',
-      );
+      replaceHtml = originalText.replace(new RegExp(data, 'g'), '<span class="high-light">' + data + '</span>');
     });
     setTimeout((_) => {
       if (matchElement && matchElement[0]) {
