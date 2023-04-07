@@ -2,13 +2,14 @@
 
 The project includes three components:
 
-- [**_annotation-app_**](./annotation-app): Angular application built with [Angular v11](https://angular.io/docs)
+- [**_annotation-app_**](./annotation-app): Angular application built with [Angular v14](https://angular.io/docs)
 - [**_annotation-service_**](./annotation-service): Backend services built with [Node](https://nodejs.org/en/), [mongodb](https://www.mongodb.com/download-center/community), [express](https://www.npmjs.com/package/express)
 - [**_active-learning-service_**](./active-learning-service): Django application providing active learning api built with [Python](https://www.python.org/downloads/) and [Django](https://www.djangoproject.com/) and [modAL](https://modal-python.readthedocs.io/en/latest/#) library for pool-based uncertainty sampling to rank the unlabelled data
 
 ## Tools used
 
 Building requires:
+
 - [Node.js 16](https://nodejs.org/en/)
 - [mongodb 3.5](https://www.mongodb.com/download-center/community)
 - [Python >=3.6, Python<=3.9](https://www.python.org/downloads/)
@@ -43,7 +44,7 @@ export const environment: Env = {
   // This section is required
   production: false,
   // Annotation service url
-  annotationService: "http://localhost:3000", 
+  annotationService: "http://localhost:3000",
 };
 ```
 
@@ -88,6 +89,7 @@ const sysEnv = process.env.SYS_ENV || "os";
 - If you are an organization user and want to deploy code to the server, we recommend you use AWS components, saving datasets to S3. You need to set the following required variables and some optional variables in [active-learning-service/config/app_os.py](./active-learning-service/config/app_os.py) file to run the active-learning-service.
 
 You need to set following required variables if you deploy the service in the server.
+
 ```python
 app = {
     # Mongodb url and collection name
@@ -126,4 +128,5 @@ $ python manage.py runserver localhost:8000
 ```
 
 ## How to use
+
 Open `http://localhost:4200` with your browser, now you can use full of the DAML application functions.
