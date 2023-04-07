@@ -29,7 +29,7 @@ export class LoginPage extends CommonPage {
   FIRST_NAME = element(by.css('input[formcontrolname="firstname"]'));
   LAST_NAME = element(by.css('input[formcontrolname="lastname"]'));
   SIGN_UP_BTN = element(by.css('button[type="submit"]'));
-  HOME_LINK = element(by.css('a[href="/loop/home"]'));
+  HOME_LINK = element(by.css('a[href="/loop-home"]'));
   ERR_ALERT = element(by.css("div.login-group div.error"));
 
   async navigateTo() {
