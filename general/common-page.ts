@@ -80,14 +80,13 @@ export class CommonPage {
   );
   ACTION_BUTTONS = element.all(by.css(".datagrid-action-overflow button"));
   CLR_TABS = element.all(by.css("clr-tabs ul li"));
-  TABLE_COLUMN_HIDE = element(by.css('cds-icon[shape="view-columns"]'));
+  TABLE_COLUMN_HIDE = element(by.css(".column-switch-wrapper button"));
   REFRESH_BTN = element(by.css(".clr-row.pageTitle div:nth-child(2) div"));
   ANNOTATION_Table_LISTS = $$(
     ".datagrid-host:nth-child(1) .datagrid-scrolling-cells"
   );
   CLOSE_TREE_PREVIEW_BTN = element(by.css(".modal-dialog .close"));
   TREE_ICON = element(by.css(".tree-icon:nth-child(1)"));
-  LIST_VIEW_COLUMN_ICON = $('cds-icon[shape="view-columns"]');
   SWITCH_COLUMN_LIST = element.all(by.css(".switch-content li"));
   DATASET_LABELING_TASK_LINK = element(
     by.css(".ellipsisMore > div > div:nth-child(1) > a:nth-child(1)")
@@ -420,8 +419,8 @@ export class CommonPage {
 
   async clickSwitchListColumn(index, index2?) {
     console.log("log-start to click switch column list");
-    await FunctionUtil.elementVisibilityOf(this.LIST_VIEW_COLUMN_ICON);
-    await this.LIST_VIEW_COLUMN_ICON.click();
+    await FunctionUtil.elementVisibilityOf(this.TABLE_COLUMN_HIDE);
+    await this.TABLE_COLUMN_HIDE.click();
     await browser.sleep(1000);
     await FunctionUtil.elementVisibilityOf(this.SWITCH_COLUMN_LIST.get(index));
     await browser.waitForAngularEnabled(false);
