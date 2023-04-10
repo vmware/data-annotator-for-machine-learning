@@ -193,4 +193,15 @@ router.get(APIs.FILE_DATASET_FILE_UNIQUE, (req, res) => {
     });
 });
 
+router.patch(APIs.FILE_DATASET_UPDATE, (req, res) => {
+    console.log(`[ FILE ] [ ACCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+    dataSetService.updateDataset(req).then((response) => {
+        console.log(`[ FILE ] [ SUCCESS ] Router ${req.originalUrl} ${req.auth.email}`);
+        res.status(200).json(response);
+    }).catch(error => {
+        console.error(`[ FILE ] [ ERROR ] Router ${req.originalUrl} ${req.auth.email}`, error);
+        res.status(500).send(error);
+    });
+});
+
 module.exports = router;

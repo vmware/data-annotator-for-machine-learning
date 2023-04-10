@@ -1,0 +1,78 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="clr-row">
+  <div class="clr-col-1"></div>
+  <div class="clr-col-10">
+    <div class="title">
+      <h3>Frequently Asked Questions:</h3>
+    </div>
+    <clr-accordion [clrAccordionMultiPanel]="true">
+      <clr-accordion-panel [clrAccordionPanelOpen]="true">
+        <clr-accordion-title
+          ><span>Q&nbsp;:</span>What types of projects are supported by {{ env.config.serviceTitle }}?
+        </clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded
+          ><span>A&nbsp;:</span>Text annotation projects where a label should be selected based on a text description
+          and any additional attributes. Tabular annotation projects where a label should be selected based on a large
+          set of attributes. Image annotation projects where allow you to customise the label of the 'Add new label
+          here' input on Labels field. Log annotation projects where allow you to customise the label of the 'Add new
+          label here' input on Labels field.</clr-accordion-content
+        >
+      </clr-accordion-panel>
+
+      <clr-accordion-panel>
+        <clr-accordion-title
+          ><span>Q&nbsp;:</span> What is the size limit for a {{ env.config.serviceTitle }} dataset?
+        </clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded
+          ><span>A&nbsp;:</span> Files up to 100MB can be uploaded while creating a new project. Files up to 500MB can
+          be uploaded through the “My Datasets” tab and used to create a new project.
+          <em *ngIf="env.config.authUrl" style="font-style: normal"
+            >If you have GB size datasets, we can support this through a backend script. Please contact
+            {{ env.config.contactEmail }} or {{ env.config.contactSlack }}.</em
+          >
+        </clr-accordion-content>
+      </clr-accordion-panel>
+
+      <clr-accordion-panel>
+        <clr-accordion-title
+          ><span>Q&nbsp;:</span> What is the format for downloading annotated data?
+        </clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded
+          ><span>A&nbsp;:</span> Each label type is captured as a new column in the export CSV. Each row contains the
+          number of annotations for a label type.</clr-accordion-content
+        >
+      </clr-accordion-panel>
+
+      <clr-accordion-panel>
+        <clr-accordion-title
+          ><span>Q&nbsp;:</span> When will you support more other annotation tasks?
+        </clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded
+          ><span>A&nbsp;:</span> This is on the {{ env.config.serviceTitle }} roadmap.
+        </clr-accordion-content>
+      </clr-accordion-panel>
+      <clr-accordion-panel>
+        <clr-accordion-title
+          ><span>Q&nbsp;:</span> What is active learning and how is it being used?
+        </clr-accordion-title>
+        <clr-accordion-content *clrIfExpanded
+          ><span>A&nbsp;:</span> Once your project has 50 or more labels, {{ env.config.serviceTitle }} trains an active
+          learning (link to:
+          <a href="https://www.datacamp.com/community/tutorials/active-learning"
+            >https://www.datacamp.com/community/tutorials/active-learning</a
+          >
+          ) model on this data. The resulting model runs predictions on the remaining unlabelled set and returns the
+          most uncertain examples for annotators to label. An active learning model continuously queries the "best" and
+          more informative examples for annotators to label without duplicating effort. For example, if there are 100
+          tweets with a sad face emoji, the model may learn from just a few examples that a sad face emoji "
+          <cds-icon shape="sad-face" class="is-solid" style="color: #edb200"> </cds-icon> " in your examples is
+          indicative of "negative" sentiment and that it will not benefit from seeing more examples (thus annotators
+          will not need to label it). Rather, it will query for other tweets without sad face emojis.
+        </clr-accordion-content>
+      </clr-accordion-panel>
+    </clr-accordion>
+  </div>
+  <div class="clr-col-1"></div>
+</div>

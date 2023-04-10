@@ -1,0 +1,1312 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<clr-wizard
+  #wizard
+  [ngClass]="{ createProjectWizardPage: !isPop, createProjectWizard: isPop }"
+  [(clrWizardOpen)]="wizardOpen"
+  [clrWizardClosable]="false"
+  (clrWizardOnCancel)="doCancel()"
+>
+  <clr-wizard-title>Create Labeling Task</clr-wizard-title>
+  <clr-wizard-button *ngIf="!loading" type="cancel">Cancel</clr-wizard-button>
+  <clr-wizard-button *ngIf="!loading" type="previous">Back</clr-wizard-button>
+  <clr-wizard-button type="next">Next</clr-wizard-button>
+  <clr-wizard-button *ngIf="!loading" type="finish" (click)="toCreate()"
+    ><span> Sure to Create Labeling Task </span></clr-wizard-button
+  >
+  <clr-wizard-button *ngIf="loading" type="finish" class="loadingCreate">
+    <clr-spinner clrInline></clr-spinner>&nbsp;&nbsp;
+    <span style="color: rgb(0, 104, 150)">Start to Creating...</span>
+  </clr-wizard-button>
+  <div class="clr-row" style="padding-left: 1rem; margin-top: 0.5rem">
+    <div class="clr-col-11">
+      <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage = ''">
+        <clr-alert-item>
+          <span class="alert-text">
+            {{ errorMessage }}
+          </span>
+        </clr-alert-item>
+      </clr-alert>
+      <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+        <clr-alert-item>
+          <span class="alert-text">
+            {{ infoMessage }}
+          </span>
+        </clr-alert-item>
+      </clr-alert>
+    </div>
+  </div>
+
+  <clr-wizard-page [clrWizardPageNextDisabled]="!(dsDialogForm.get('projectName').value && !nameExist)">
+    <ng-template clrPageTitle>Basic Details</ng-template>
+    <div [formGroup]="dsDialogForm">
+      <div class="clr-row formField">
+        <label for="projectName" class="label-tooltip clr-col-12 clr-col-md-2">Task Name<span>*</span></label>
+        <div class="clr-input-wrapper clr-col-12 clr-col-md-9">
+          <input
+            id="projectName"
+            type="text"
+            formControlName="projectName"
+            (blur)="inputProjectBlur($event)"
+            class="clr-input"
+          />
+        </div>
+        <div class="clr-col-12 clr-col-md-1">
+          <clr-tooltip *ngIf="dsDialogForm.get('projectName').errors && dsDialogForm.get('projectName').touched">
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="xs" *clrIfOpen>
+              <span>{{ dsDialogForm.get('projectName').errors.msg.value }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+          <clr-tooltip *ngIf="nameExist">
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="xs" *clrIfOpen>
+              <span>This name already exists</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+      <div class="clr-row formField">
+        <label for="projectType" class="label-tooltip clr-col-12 clr-col-md-2">Task Type<span>*</span></label>
+        <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
+          <select id="select-basic" class="clr-select" formControlName="projectType" (change)="changeProjectType()">
+            <option value="text">Text Classification</option>
+            <option value="tabular">Tabular Classification</option>
+            <option value="ner">Named Entity Recognition</option>
+            <option value="image">Image Classification</option>
+            <option value="log">Log Classification</option>
+          </select>
+        </div>
+        <div class="clr-col-12 clr-col-md-1">
+          <clr-tooltip *ngIf="dsDialogForm.get('projectType').errors && dsDialogForm.get('projectType').touched">
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="xs" *clrIfOpen>
+              <span>{{ dsDialogForm.get('projectType').errors.msg.value }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+      <div class="clr-row formField">
+        <label for="taskInstruction" class="label-tooltip clr-col-12 clr-col-md-2">Task Instruction</label>
+        <div class="clr-textarea-wrapper clr-col-12 clr-col-md-9">
+          <textarea
+            id="taskInstruction"
+            formControlName="taskInstruction"
+            rows="5"
+            class="clr-textarea"
+            (keydown)="onKeydown($event)"
+          ></textarea>
+        </div>
+      </div>
+      <div class="clr-row formField">
+        <label for="annotationDisplayName" class="label-tooltip clr-col-12 clr-col-md-2"
+          >Annotation Display Name
+          <clr-tooltip>
+            <cds-icon clrTooltipTrigger shape="info-circle" size="20" aria-label="Uniq tooltip 5"> </cds-icon>
+            <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+              &nbsp;<span class="tooltip-content"
+                >This information is to inform annotators what data they are labeling.
+              </span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </label>
+        <div class="clr-textarea-wrapper clr-col-12 clr-col-md-9">
+          <textarea
+            id="annotationDisplayName"
+            formControlName="annotationDisplayName"
+            class="clr-textarea"
+            (keydown)="onKeydown($event)"
+          ></textarea>
+        </div>
+        <div class="clr-col-12 clr-col-md-1">
+          <clr-tooltip
+            *ngIf="
+              dsDialogForm.get('annotationDisplayName').errors && dsDialogForm.get('annotationDisplayName').touched
+            "
+          >
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="xs" *clrIfOpen>
+              <span>{{ dsDialogForm.get('annotationDisplayName').errors.msg.value }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+      <div class="clr-row formField">
+        <label for="annotationQuestion" class="label-tooltip clr-col-12 clr-col-md-2"
+          >Annotation Question
+          <clr-tooltip>
+            <cds-icon clrTooltipTrigger shape="info-circle" size="20" aria-label="Uniq tooltip 5"> </cds-icon>
+            <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+              &nbsp;<span class="tooltip-content"
+                >This information is inform the annotator how to label, you can update the annotation question or use
+                the default otherwise.
+              </span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </label>
+        <div class="clr-textarea-wrapper clr-col-12 clr-col-md-9">
+          <textarea
+            id="annotationQuestion"
+            formControlName="annotationQuestion"
+            class="clr-textarea"
+            (keydown)="onKeydown($event)"
+          ></textarea>
+        </div>
+        <div class="clr-col-12 clr-col-md-1">
+          <clr-tooltip
+            *ngIf="dsDialogForm.get('annotationQuestion').errors && dsDialogForm.get('annotationQuestion').touched"
+          >
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="xs" *clrIfOpen>
+              <span>{{ dsDialogForm.get('annotationQuestion').errors.msg.value }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+    </div>
+  </clr-wizard-page>
+  <clr-wizard-page
+    [id]="2"
+    (clrWizardPageOnLoad)="clrWizardPageOnLoad($event)"
+    [clrWizardPageNextDisabled]="!dsDialogForm.get('selectedDataset').value"
+  >
+    <ng-template clrPageTitle>Preview Data</ng-template>
+    <div [formGroup]="dsDialogForm" style="max-height: 67vh; overflow: auto">
+      <div class="clr-row formField">
+        <label for="selectedDataset" class="label-tooltip clr-col-12 clr-col-md-2">Select Dataset<span>*</span></label>
+        <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
+          <select
+            id="select-basic"
+            class="clr-select"
+            formControlName="selectedDataset"
+            (change)="selectedDatasets($event)"
+          >
+            <option *ngFor="let uploadDataset of datasetsList" [value]="uploadDataset.dataSetName">
+              {{ uploadDataset.dataSetName }}
+            </option>
+          </select>
+        </div>
+        <div class="clr-col-12 clr-col-md-1">
+          <clr-tooltip
+            *ngIf="dsDialogForm.get('selectedDataset').errors && dsDialogForm.get('selectedDataset').touched"
+          >
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="xs" *clrIfOpen>
+              <span>{{ dsDialogForm.get('selectedDataset').errors.msg.value }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+      <!-- create new dataset btn -->
+      <div class="clr-row formField" style="margin-top: -1.5rem">
+        <div class="clr-col-12 clr-col-md-2"></div>
+        <div class="clr-col-12 clr-col-md-8">
+          <button class="btn btn-sm" (click)="createNewDataset()"><cds-icon shape="plus"></cds-icon>Create New</button>
+        </div>
+      </div>
+      <!-- preview dataset datagrid -->
+      <div *ngIf="dsDialogForm.get('selectedDataset').value" class="clr-row formField">
+        <div class="clr-col-2"></div>
+        <div class="clr-col-9">
+          <clr-datagrid
+            [clrDgLoading]="datasetInfo.loadingPreviewData"
+            *ngIf="dsDialogForm.get('projectType').value != 'image' && dsDialogForm.get('projectType').value != 'log'"
+          >
+            <clr-dg-column *ngFor="let itemHeader of previewHeadDatas">{{ itemHeader }}</clr-dg-column>
+            <ng-container>
+              <clr-dg-row *ngFor="let previewCont of previewContentDatas">
+                <clr-dg-cell *ngFor="let item of previewCont">{{ item }}</clr-dg-cell>
+              </clr-dg-row>
+            </ng-container>
+          </clr-datagrid>
+          <clr-datagrid
+            [clrDgLoading]="datasetInfo.loadingPreviewData"
+            *ngIf="dsDialogForm.get('projectType').value == 'image'"
+          >
+            <clr-dg-column *ngFor="let itemHeader of previewHeadDatas">{{ itemHeader }}</clr-dg-column>
+            <ng-container>
+              <clr-dg-row *ngFor="let previewCont of previewContentDatas">
+                <clr-dg-cell
+                  ><img src="{{ previewCont.location }}" alt="" style="max-width: 15rem; max-height: 15rem"
+                /></clr-dg-cell>
+                <clr-dg-cell>{{ previewCont.fileName }}</clr-dg-cell>
+
+                <clr-dg-cell>{{ previewCont.fileSize }}</clr-dg-cell>
+                <clr-dg-cell>{{ previewCont._id }}</clr-dg-cell>
+              </clr-dg-row>
+            </ng-container>
+          </clr-datagrid>
+          <clr-datagrid
+            [clrDgLoading]="datasetInfo.loadingPreviewData"
+            *ngIf="dsDialogForm.get('projectType').value == 'log'"
+          >
+            <clr-dg-column *ngFor="let itemHeader of previewHeadDatas">{{ itemHeader }} </clr-dg-column>
+            <ng-container>
+              <clr-dg-row *ngFor="let previewCont of previewContentDatas">
+                <clr-dg-cell>{{ previewCont.fileName }}</clr-dg-cell>
+                <clr-dg-cell>{{ previewCont.fileContent }}</clr-dg-cell>
+              </clr-dg-row>
+            </ng-container>
+          </clr-datagrid>
+        </div>
+      </div>
+      <!-- log type enable to radio to show file name -->
+      <div
+        *ngIf="dsDialogForm.get('selectedDataset').value && dsDialogForm.get('projectType').value === 'log'"
+        class="clr-row formField"
+      >
+        <label for="isShowFilename" class="label-tooltip clr-col-12 clr-col-md-2"
+          >Show Filename<clr-tooltip>
+            <cds-icon clrTooltipTrigger shape="info-circle" size="20" aria-label="Uniq tooltip 5"> </cds-icon>
+            <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+              &nbsp;<span class="tooltip-content">Show file name to annotator in annotate page. </span>
+            </clr-tooltip-content>
+          </clr-tooltip></label
+        >
+        <div class="clr-col-12 clr-col-md-9">
+          <label>
+            <clr-radio-wrapper style="margin-right: 0.5rem">
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                formControlName="isShowFilename"
+                value="yes"
+                id="yes"
+                name="isShowFilename"
+                checked
+              />
+              <label for="yes">&nbsp;Yes</label>
+            </clr-radio-wrapper>
+            <clr-radio-wrapper>
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                formControlName="isShowFilename"
+                value="no"
+                id="no"
+                name="isShowFilename"
+              />
+              <label for="no" style="margin-top: -1rem">&nbsp;No</label>
+            </clr-radio-wrapper>
+          </label>
+        </div>
+      </div>
+    </div>
+  </clr-wizard-page>
+  <!-- select label and text column -->
+  <clr-wizard-page
+    [id]="3"
+    *ngIf="dsDialogForm.get('projectType').value !== 'image' && dsDialogForm.get('projectType').value !== 'log'"
+    (clrWizardPageCustomButton)="doCustomClick($event)"
+    [clrWizardPageNextDisabled]="
+      dsDialogForm.get('projectType').value === 'ner'
+        ? !dropdownSelected
+        : !(dropdownSelected && selectDescription.length > 0)
+    "
+  >
+    <ng-template clrPageTitle>Set Data</ng-template>
+    <div [formGroup]="dsDialogForm" style="max-height: 67vh; overflow: auto">
+      <!-- select dropdownSelected -->
+      <div class="clr-row formField">
+        <label class="label-tooltip clr-col-12 clr-col-md-2"
+          >{{
+            dsDialogForm.get('projectType').value === 'ner'
+              ? 'Select Text Column'
+              : 'Select
+              Label Column'
+          }}<span>*</span></label
+        >
+        <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
+          <select
+            id="select-basic"
+            class="clr-select"
+            [(ngModel)]="dropdownSelected"
+            (change)="selectedItem(dropdownSelected)"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option *ngIf="dsDialogForm.get('projectType').value != 'ner'" value="No Labels">No Labels</option>
+            <option *ngFor="let item of previewHeadDatas" [value]="item">
+              {{ item }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <!-- checkbox selected -->
+      <div *ngIf="dropdownSelected" class="clr-row formField">
+        <label class="label-tooltip clr-col-12 clr-col-md-2"
+          >{{
+            dsDialogForm.get('projectType').value === 'ner'
+              ? 'Select the columns to present to annotators about the existing labels (optional) or helpful text (optional)'
+              : 'Select the columns to present to annotators about the text'
+          }}<span *ngIf="dsDialogForm.get('projectType').value !== 'ner'">*</span></label
+        >
+        <div class="clr-col-12 clr-col-md-9">
+          <clr-datagrid
+            #selectDescriptionDatagrid
+            *ngIf="dsDialogForm.get('projectType').value != 'ner'"
+            [(clrDgSelected)]="selectDescription"
+            (clrDgSelectedChange)="selectDescriptionChanged($event)"
+          >
+            <clr-dg-column class="ellipsis-datagrid" style="color: #000; margin-left: 5px">Column Name</clr-dg-column>
+
+            <clr-dg-row *clrDgItems="let column of checkboxColumns; let i = index" [clrDgItem]="column">
+              <clr-dg-cell class="ellipsis-datagrid" style="color: #000; margin-left: 5px">{{ column }}</clr-dg-cell>
+            </clr-dg-row>
+          </clr-datagrid>
+          <clr-datagrid *ngIf="dsDialogForm.get('projectType').value === 'ner'">
+            <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
+            <clr-dg-column class="ellipsis-datagrid">Existing Labels</clr-dg-column>
+            <clr-dg-column class="ellipsis-datagrid">Helpful Text</clr-dg-column>
+            <clr-dg-row *clrDgItems="let column of checkboxColumns; let i = index" [clrDgItem]="column">
+              <clr-dg-cell class="ellipsis-datagrid" style="color: #000; word-break: break-all">{{
+                column.name
+              }}</clr-dg-cell>
+              <clr-dg-cell class="ellipsis-datagrid">
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  name="checkbox1"
+                  [ngClass]="{
+                    'disabled-checkbox': column.checkboxDisabled
+                  }"
+                  [disabled]="column.checkboxDisabled"
+                  [checked]="column.labelChecked"
+                  (change)="changeCheckbox(column.name, 'labelChecked')"
+                />
+              </clr-dg-cell>
+              <clr-dg-cell class="ellipsis-datagrid">
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  name="checkbox2"
+                  [checked]="column.helptextChecked"
+                  (change)="changeCheckbox(column.name, 'helptextChecked')"
+                />
+              </clr-dg-cell>
+            </clr-dg-row>
+          </clr-datagrid>
+        </div>
+      </div>
+    </div>
+    <ng-template clrPageButtons>
+      <clr-wizard-button *ngIf="!(loading$ | async)" [type]="'custom-previous'">Back</clr-wizard-button>
+      <clr-wizard-button
+        *ngIf="dsDialogForm.get('totalRow').value < 1 && !(loading$ | async)"
+        [type]="'custom-next'"
+        (click)="loading$.next(true)"
+      >
+        Sure Set
+      </clr-wizard-button>
+      <clr-wizard-button
+        *ngIf="dsDialogForm.get('totalRow').value < 1 && loading$ | async"
+        [type]="'custom-next'"
+        class="sureSetLoading"
+      >
+        <clr-spinner clrInline></clr-spinner>&nbsp;&nbsp;
+        <span style="color: rgb(0, 104, 150)">Data processing for large datasets may take up to 60 seconds...</span>
+      </clr-wizard-button>
+      <clr-wizard-button *ngIf="dsDialogForm.get('totalRow').value > 0" [type]="'custom-next'">Next</clr-wizard-button>
+    </ng-template>
+  </clr-wizard-page>
+  <clr-wizard-page
+    [id]="4"
+    [clrWizardPageNextDisabled]="clrWizardPageNextDisabled.page4"
+    (clrWizardPageOnLoad)="clrWizardPageOnLoad($event)"
+  >
+    <ng-template clrPageTitle>Define Labels</ng-template>
+    <div class="clr-row formField labelType">
+      <label class="label-tooltip clr-col-12 clr-col-md-2">Label Type</label>
+      <div class="clr-col-12 clr-col-md-10" style="padding-left: unset">
+        <label>
+          <clr-radio-wrapper>
+            <input
+              type="radio"
+              clrRadio
+              class="clr-radio"
+              value="textLabel"
+              id="textLabel"
+              name="labelType"
+              [checked]="!isNumeric"
+              (change)="changeLabelType($event)"
+              [disabled]="isNumeric"
+            />
+            <label for="textLabel">&nbsp;Text Label</label>
+          </clr-radio-wrapper>
+          &nbsp; &nbsp;
+          <clr-radio-wrapper>
+            <input
+              type="radio"
+              clrRadio
+              class="clr-radio"
+              value="numericLabel"
+              id="numericLabel"
+              name="labelType"
+              (change)="changeLabelType($event)"
+              [disabled]="!isNumeric && dropdownSelected !== 'No Labels'"
+              [checked]="isNumeric"
+            />
+            <label for="numericLabel">&nbsp;Numeric Label</label>
+          </clr-radio-wrapper>
+          &nbsp; &nbsp;
+          <clr-radio-wrapper>
+            <input
+              type="radio"
+              clrRadio
+              class="clr-radio"
+              value="mutilNumericLabel"
+              id="mutilNumericLabel"
+              name="labelType"
+              (change)="changeLabelType($event)"
+              [disabled]="!(this.dropdownSelected === 'No Labels')"
+            />
+            <label for="mutilNumericLabel">&nbsp;Multiple Numerical Label</label>
+          </clr-radio-wrapper>
+          &nbsp; &nbsp;
+          <clr-radio-wrapper>
+            <input
+              type="radio"
+              clrRadio
+              class="clr-radio"
+              value="uploadLabel"
+              id="uploadLabel"
+              name="labelType"
+              (change)="changeLabelType($event)"
+              [disabled]="!(this.dropdownSelected === 'No Labels')"
+            />
+            <label for="uploadLabel">&nbsp;Upload Taxonomy File</label>
+          </clr-radio-wrapper>
+        </label>
+      </div>
+    </div>
+    <div *ngIf="!isUploadLabel" class="clr-row formField">
+      <label class="label-tooltip clr-col-12 clr-col-md-2">Add Labels</label>
+      <div class="clr-col-12 clr-col-md-10">
+        <div class="clr-row" *ngFor="let label of categoryListInfo; let i = index" style="margin-bottom: 1rem">
+          <div
+            class="clr-control-container clr-col-12 clr-col-md-10"
+            [ngClass]="label.setLableErrMessage || label.setNumberErrMessage ? 'clr-error' : ''"
+          >
+            <div class="clr-row">
+              <div class="clr-input-wrapper" *ngIf="!isShowNumeric || isMutilNumericLabel" style="margin-right: 1rem">
+                <input
+                  type="text"
+                  class="clr-input"
+                  placeholder="Enter Text Label Here"
+                  [(ngModel)]="label.name"
+                  (ngModelChange)="inputLabelUpdate(categoryListInfo, i)"
+                />
+              </div>
+              <div class="clr-input-wrapper" *ngIf="isShowNumeric || isMutilNumericLabel" style="margin-right: 0.5rem">
+                <input
+                  type="number"
+                  class="clr-input"
+                  placeholder="Enter minimum value"
+                  [(ngModel)]="label.min"
+                  (ngModelChange)="inputMinUpdate(i)"
+                />
+              </div>
+              <div *ngIf="isShowNumeric || isMutilNumericLabel" style="margin-right: 0.5rem">-</div>
+              <div class="clr-input-wrapper" *ngIf="isShowNumeric || isMutilNumericLabel">
+                <input
+                  type="number"
+                  class="clr-input"
+                  placeholder="Enter maximum value"
+                  [(ngModel)]="label.max"
+                  (ngModelChange)="inputMaxUpdate(i)"
+                />
+              </div>
+
+              <cds-icon
+                *ngIf="!isShowNumeric"
+                class="labelTrash"
+                shape="trash"
+                [ngStyle]="{
+                  color:
+                    (categoryListInfo.length > 2 &&
+                      (dsDialogForm.get('projectType').value === 'tabular' ||
+                        dsDialogForm.get('projectType').value === 'text')) ||
+                    (categoryListInfo.length > 1 &&
+                      dsDialogForm.get('projectType').value !== 'tabular' &&
+                      dsDialogForm.get('projectType').value !== 'text')
+                      ? 'rgb(190, 26, 17)'
+                      : '#999',
+                  cursor:
+                    (categoryListInfo.length > 2 &&
+                      (dsDialogForm.get('projectType').value === 'tabular' ||
+                        dsDialogForm.get('projectType').value === 'text')) ||
+                    (categoryListInfo.length > 1 &&
+                      dsDialogForm.get('projectType').value !== 'tabular' &&
+                      dsDialogForm.get('projectType').value !== 'text')
+                      ? 'pointer '
+                      : 'not-allowed'
+                }"
+                (click)="deleteLabelRow(i)"
+              >
+              </cds-icon>
+              <a
+                href="/"
+                role="tooltip"
+                aria-haspopup="true"
+                class="tooltip tooltip-right"
+                style="margin-left: 0.5rem; margin-top: 0.25rem"
+              >
+                <cds-icon
+                  *ngIf="label.setLableErrMessage"
+                  class="clr-validate-icon exclamation-circle"
+                  shape="exclamation-circle"
+                ></cds-icon>
+                <span class="tooltip-content">{{ label.setLableErrMessage }}</span>
+              </a>
+              <a
+                *ngIf="label.setNumberErrMessage"
+                href="/"
+                role="tooltip"
+                aria-haspopup="true"
+                class="tooltip tooltip-right"
+                style="margin-left: 0.5rem; margin-top: 0.25rem"
+              >
+                <cds-icon class="clr-validate-icon exclamation-circle" shape="exclamation-circle"></cds-icon>
+                <span class="tooltip-content">{{ label.setNumberErrMessage }}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="isUploadLabel" class="clr-row formField">
+      <label class="label-tooltip clr-col-12 clr-col-md-2">Sample File</label>
+      <div class="clr-col-12 clr-col-md-10" style="padding-left: unset">
+        <a *ngIf="msgUploadFile.type !== 'yaml'" href="../../assets/files/taxonomy_sample.json" download
+          >taxonomy_sample.json</a
+        >
+        <a *ngIf="msgUploadFile.type === 'yaml'" href="../../assets/files/taxonomy_sample.yaml" download
+          >taxonomy_sample.yaml</a
+        >
+      </div>
+    </div>
+    <div *ngIf="isUploadLabel">
+      <div class="clr-row formField">
+        <label class="label-tooltip clr-col-12 clr-col-md-2">File Format</label>
+        <div class="clr-col-12 clr-col-md-9" style="padding-left: unset">
+          <label>
+            <clr-radio-wrapper style="margin-right: 0.5rem">
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                value="json"
+                id="json"
+                [(ngModel)]="msgUploadFile.type"
+                (ngModelChange)="changeLabelFileFormat($event)"
+                checked
+              />
+              <label for="json">&nbsp;Json</label>
+            </clr-radio-wrapper>
+            <clr-radio-wrapper>
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                value="yaml"
+                id="yaml"
+                [(ngModel)]="msgUploadFile.type"
+                (ngModelChange)="changeLabelFileFormat($event)"
+              />
+              <label for="yaml" style="margin-top: -1rem">&nbsp;Yaml</label>
+            </clr-radio-wrapper>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="isUploadLabel" class="clr-row formField">
+      <label class="label-tooltip clr-col-12 clr-col-md-2">Select Taxonomy File</label>
+      <div class="clr-col-12 clr-col-md-9" style="padding-left: unset; margin-top: -0.6rem">
+        <app-upload-file #uploadFile [msg]="msgUploadFile" (outFile)="receiveFile($event)"> </app-upload-file>
+        <div class="labelTree disableTree" *ngIf="treeLabels?.length > 0">
+          <clr-toggle-wrapper>
+            <input type="checkbox" clrToggle name="expand" (change)="labelExpandChanged($event)" />
+            <label style="font-weight: 500">{{ isExpandLabelTree ? 'Collapse' : 'Expand' }}</label>
+          </clr-toggle-wrapper>
+          <clr-tree>
+            <clr-tree-node
+              [clrExpanded]="isExpandLabelTree"
+              *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
+              [clrSelected]="label.enable"
+              title="{{ label.name }}"
+            >
+              {{ label.name }}
+            </clr-tree-node>
+          </clr-tree>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="!isShowNumeric && !isUploadLabel" class="clr-row formField" style="margin-top: -2rem">
+      <label class="label-tooltip clr-col-12 clr-col-md-2"></label>
+      <div class="clr-col-12 clr-col-md-9" style="padding-left: unset">
+        <button
+          class="btn btn-sm btn-link"
+          style="padding: unset"
+          (click)="createNewLabelRow(categoryListInfo)"
+          [disabled]="categoryListInfo.length > 49"
+        >
+          <cds-icon shape="plus" style="margin-right: 0.5rem"></cds-icon>Add New Label
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="dsDialogForm.get('projectType').value === 'ner'" class="clr-row formField">
+      <label class="label-tooltip clr-col-12 clr-col-md-2"
+        >Add Secondary Labels
+        <clr-tooltip>
+          <cds-icon clrTooltipTrigger shape="info-circle" size="20" aria-label="Uniq tooltip 5"></cds-icon>
+          <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+            &nbsp;<span class="tooltip-content"
+              >The secondary label contains information about the main label such as its sentiment etc.
+            </span>
+          </clr-tooltip-content>
+        </clr-tooltip>
+      </label>
+      <div class="clr-col-12 clr-col-md-9" style="padding-left: unset">
+        <label>
+          <clr-radio-wrapper style="margin-right: 0.5rem">
+            <input
+              type="radio"
+              clrRadio
+              class="clr-radio"
+              value="y"
+              id="y"
+              name="showPopLabel"
+              (change)="clickPopLabel()"
+            />
+            <label for="y">&nbsp;Yes</label>
+          </clr-radio-wrapper>
+          <clr-radio-wrapper>
+            <input
+              type="radio"
+              clrRadio
+              class="clr-radio"
+              value="n"
+              id="n"
+              name="showPopLabel"
+              checked
+              (change)="clickPopLabel()"
+            />
+            <label for="n" style="margin-top: -1rem">&nbsp;No</label>
+          </clr-radio-wrapper>
+        </label>
+      </div>
+    </div>
+    <div *ngIf="dsDialogForm.get('projectType').value === 'ner' && showPopLabel" class="clr-row formField">
+      <label class="label-tooltip clr-col-12 clr-col-md-2">Secondary Labels</label>
+      <div class="clr-col-12 clr-col-md-10">
+        <div class="clr-row" *ngFor="let label of popLabelList; let i = index" style="margin-bottom: 1rem">
+          <div
+            class="clr-control-container clr-col-12 clr-col-md-10"
+            [ngClass]="label.setLableErrMessage ? 'clr-error' : ''"
+          >
+            <div class="clr-row">
+              <div class="clr-input-wrapper" style="margin-right: 1rem">
+                <input
+                  type="text"
+                  class="clr-input"
+                  placeholder="Enter Text Label Here"
+                  [(ngModel)]="label.name"
+                  (ngModelChange)="inputSecondaryLabelUpdate(popLabelList, i)"
+                />
+              </div>
+
+              <cds-icon
+                style="margin-left: 0.5rem; margin-top: 0.5rem"
+                shape="trash"
+                [ngStyle]="{
+                  color: popLabelList.length > 2 ? 'rgb(190, 26, 17)' : '#999',
+                  cursor: popLabelList.length > 2 ? 'pointer ' : 'not-allowed'
+                }"
+                (click)="deleteSecondaryLabelRow(i)"
+              >
+              </cds-icon>
+              <a
+                href="/"
+                role="tooltip"
+                aria-haspopup="true"
+                class="tooltip tooltip-right"
+                style="margin-left: 0.5rem; margin-top: 0.25rem"
+              >
+                <cds-icon
+                  *ngIf="label.setLableErrMessage"
+                  class="clr-validate-icon exclamation-circle"
+                  shape="exclamation-circle"
+                ></cds-icon>
+                <span class="tooltip-content">{{ label.setLableErrMessage }}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <button
+          class="btn btn-sm btn-link"
+          style="padding: unset; margin-left: -0.7rem"
+          (click)="createSecondaryLabelRow(popLabelList)"
+          [disabled]="popLabelList.length > 49"
+        >
+          <cds-icon shape="plus" style="margin-right: 0.5rem"></cds-icon>Add New Label
+        </button>
+      </div>
+    </div>
+    <div
+      [formGroup]="dsDialogForm"
+      *ngIf="
+        !isShowNumeric &&
+        !isMutilNumericLabel &&
+        !isUploadLabel &&
+        this.dsDialogForm.get('projectType').value !== 'log' &&
+        this.dsDialogForm.get('projectType').value !== 'image' &&
+        this.dsDialogForm.get('projectType').value !== 'ner'
+      "
+    >
+      <div class="clr-row formField">
+        <label class="label-tooltip clr-col-12 clr-col-md-2" for="multipleLabel">Allow Multiple Label Selections</label>
+        <div class="clr-col-12 clr-col-md-3" style="padding-left: unset">
+          <label>
+            <clr-radio-wrapper style="margin-right: 0.5rem">
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                formControlName="multipleLabel"
+                value="y"
+                id="y"
+                name="multipleLabel"
+                (change)="changeMultipleLabel()"
+              />
+              <label for="y">&nbsp;Yes</label>
+            </clr-radio-wrapper>
+            <clr-radio-wrapper>
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                formControlName="multipleLabel"
+                value="n"
+                id="n"
+                name="multipleLabel"
+                (change)="changeMultipleLabel()"
+                checked
+              />
+              <label for="n" style="margin-top: -1rem">&nbsp;No</label>
+            </clr-radio-wrapper>
+          </label>
+        </div>
+      </div>
+    </div>
+  </clr-wizard-page>
+
+  <clr-wizard-page
+    [id]="5"
+    [clrWizardPageNextDisabled]="clrWizardPageNextDisabled.page5"
+    (clrWizardPageOnLoad)="clrWizardPageOnLoad($event)"
+    [clrWizardPagePreventDefaultNext]="dsDialogForm.get('projectType').value === 'image' ? true : false"
+  >
+    <ng-template clrPageTitle>Assign Team Members</ng-template>
+    <div [formGroup]="dsDialogForm">
+      <!-- total row -->
+      <div class="clr-row formField">
+        <label for="totalRow" class="label-tooltip clr-col-12 clr-col-md-2">{{
+          dsDialogForm.get('projectType').value === 'image'
+            ? 'Total Items'
+            : 'Total
+        Rows'
+        }}</label>
+        <div class="clr-col-12 clr-col-md-5" style="padding-left: unset">
+          <input
+            style="width: auto !important"
+            id="totalRow"
+            type="text"
+            formControlName="totalRow"
+            class="clr-input"
+            readonly
+          />
+          <!-- <span *ngIf="nonEnglish !== 0"
+            >(The total case number is {{ totalCase }}, and removed {{ nonEnglish }} NON-ASCII cases)</span
+          > -->
+        </div>
+      </div>
+      <!-- maxAnnotations -->
+      <div class="clr-row formField">
+        <label for="maxAnnotations" class="label-tooltip clr-col-12 clr-col-md-2"
+          >Max Annotations Per Case<span>*</span>
+          <clr-tooltip>
+            <cds-icon clrTooltipTrigger shape="info-circle" size="20" aria-label="Uniq tooltip 5"></cds-icon>
+            <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+              &nbsp;<span class="tooltip-content"
+                >Please enter a limit of the number of annotations permitted for each individual case across all
+                annotators</span
+              >
+            </clr-tooltip-content>
+          </clr-tooltip></label
+        >
+        <div class="clr-col-12 clr-col-md-10" style="padding-left: unset">
+          <div class="clr-row">
+            <div class="clr-col-4">
+              <input
+                style="width: 100%"
+                id="maxAnnotations"
+                type="number"
+                min="1"
+                formControlName="maxAnnotations"
+                class="clr-input maxAnnotations"
+                (change)="changeMaxAnnotations()"
+                [attr.disabled]="
+                  dsDialogForm.get('projectType').value == 'text' || dsDialogForm.get('projectType').value == 'tabular'
+                    ? null
+                    : 'disabled'
+                "
+              />
+            </div>
+            <clr-tooltip
+              *ngIf="dsDialogForm.get('maxAnnotations').errors && dsDialogForm.get('maxAnnotations').touched"
+            >
+              <cds-icon
+                clrTooltipTrigger
+                shape="error-standard"
+                size="18"
+                style="color: 'rgb(190, 26, 17)'"
+                class="valid-tooltip"
+              >
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>{{ dsDialogForm.get('maxAnnotations').errors.msg.value }}</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </div>
+        </div>
+      </div>
+      <div class="clr-row formField">
+        <label class="label-tooltip clr-col-12 clr-col-md-2">Add Assignees via <span>*</span> </label>
+        <div class="clr-col-12 clr-col-md-3" style="padding-left: unset">
+          <clr-checkbox-container style="margin-top: 0.2rem !important">
+            <clr-checkbox-wrapper *ngFor="let item of assignType; let i = index">
+              <input
+                type="checkbox"
+                clrCheckbox
+                name="item.name"
+                value="item.value"
+                [(ngModel)]="item.checked"
+                (ngModelChange)="changeAssignType($event, i)"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="
+                  !(
+                    env.config.enableSlack &&
+                    !isShowNumeric &&
+                    !isUploadLabel &&
+                    (dsDialogForm.get('projectType').value === 'tabular' ||
+                      dsDialogForm.get('projectType').value === 'text') &&
+                    !isMutilNumericLabel &&
+                    dsDialogForm.get('multipleLabel').value !== 'y'
+                  )
+                "
+              />
+              <label>{{ item.name }}</label>
+            </clr-checkbox-wrapper>
+          </clr-checkbox-container>
+        </div>
+        <div class="clr-col-12 clr-col-md-3">
+          <clr-tooltip
+            *ngIf="!assignType[0].checked && !assignType[1].checked"
+            style="margin-left: 0.5rem; margin-top: 0.25rem"
+          >
+            <cds-icon
+              clrTooltipTrigger
+              shape="error-standard"
+              size="18"
+              style="color: 'rgb(190, 26, 17)'"
+              class="valid-tooltip"
+            >
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+              <span>Please enable at least one assign via !</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+      <div *ngIf="assignType[0].checked" class="clr-row formField">
+        <label class="label-tooltip clr-col-12 clr-col-md-2">Email ID</label>
+        <div class="clr-col-12 clr-col-md-10">
+          <div class="clr-row" *ngFor="let user of assigneeList; let i = index" style="margin-bottom: 1rem">
+            <div
+              class="clr-control-container clr-col-12 clr-col-md-12"
+              [ngClass]="user.setUserErrMessage || user.emailReg ? 'clr-error' : ''"
+            >
+              <div class="clr-row" style="margin-left: -1.1rem">
+                <div class="clr-input-wrapper clr-col-4">
+                  <input
+                    id="inputEmail"
+                    type="text"
+                    class="clr-input"
+                    placeholder="Type email here"
+                    [(ngModel)]="user.email"
+                    (ngModelChange)="inputUserNameUpdate(assigneeList, i)"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                </div>
+                <div style="margin-right: 0.5rem; margin-left: 0.5rem">-</div>
+                <div class="clr-input-wrapper clr-col-4">
+                  <input
+                    type="number"
+                    class="clr-input"
+                    placeholder="Number of tickets assigned"
+                    [disabled]="!(user.email && !user.setUserErrMessage && !user.emailReg)"
+                    [(ngModel)]="user.assignedCase"
+                    (blur)="inputTicketsUpdate(user)"
+                    style="width: 100%"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                </div>
+                <div>
+                  <cds-icon
+                    class="emailTrash"
+                    shape="trash"
+                    [ngStyle]="{
+                      color: assigneeList.length > 1 ? 'rgb(190, 26, 17)' : '#999',
+                      cursor: assigneeList.length > 1 ? 'pointer ' : 'not-allowed'
+                    }"
+                    (click)="deleteUserRow(i)"
+                  >
+                  </cds-icon>
+                </div>
+                <clr-tooltip *ngIf="user.setUserErrMessage" style="margin-left: 0.5rem; margin-top: 0.25rem">
+                  <cds-icon
+                    clrTooltipTrigger
+                    shape="error-standard"
+                    size="18"
+                    style="color: 'rgb(190, 26, 17)'"
+                    class="valid-tooltip"
+                  >
+                  </cds-icon>
+                  <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                    <span>{{ user.setUserErrMessage }}</span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+                <clr-tooltip *ngIf="user.emailReg" style="margin-left: 0.5rem; margin-top: 0.25rem">
+                  <cds-icon
+                    clrTooltipTrigger
+                    shape="error-standard"
+                    size="18"
+                    style="color: 'rgb(190, 26, 17)'"
+                    class="valid-tooltip"
+                  >
+                  </cds-icon>
+                  <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                    <span>{{ user.emailReg }}</span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-link" style="padding: unset; margin-left: -0.7rem" (click)="createEmailRow()">
+            <cds-icon shape="plus" style="margin-right: 0.5rem"></cds-icon>Add New
+          </button>
+        </div>
+      </div>
+      <div *ngIf="assignType[1].checked" class="clr-row formField">
+        <label class="label-tooltip clr-col-12 clr-col-md-2"
+          >Slack ID<clr-tooltip>
+            <cds-icon clrTooltipTrigger shape="info-circle" size="20" aria-label="Uniq tooltip 5"></cds-icon>
+            <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+              &nbsp;<span class="tooltip-content"
+                >Important, if you want to notice the target slack channel after this project is created successfully
+                please make sure invite {{ env.config.slackAppName }} bot to the target channel first. Type "/invite @{{
+                  env.config.slackAppName
+                }}" and send in the target channel. And for the slack id, please go to slack channel's 'About' tab and
+                scroll down to the bottom to get it.
+              </span>
+            </clr-tooltip-content>
+          </clr-tooltip></label
+        >
+        <div class="clr-col-12 clr-col-md-10">
+          <div class="clr-row" *ngFor="let item of slackList; let i = index" style="margin-bottom: 1rem">
+            <div
+              class="clr-control-container clr-col-12 clr-col-md-12"
+              [ngClass]="item.setErrMessage ? 'clr-error' : ''"
+            >
+              <div class="clr-row" style="margin-left: -1.1rem">
+                <div class="clr-input-wrapper clr-col-4">
+                  <input
+                    id="slackID"
+                    type="text"
+                    class="clr-input"
+                    placeholder="Type slack ID here"
+                    [(ngModel)]="item.slackId"
+                    (blur)="inputSlackUpdate(slackList, i)"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                </div>
+                <div style="margin-right: 0.5rem; margin-left: 0.5rem">-</div>
+                <div class="clr-input-wrapper clr-col-4">
+                  <input
+                    type="text"
+                    class="clr-input"
+                    placeholder="Slack Name"
+                    [(ngModel)]="item.slackName"
+                    disabled
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                </div>
+
+                <div>
+                  <cds-icon
+                    class="slackTrash"
+                    shape="trash"
+                    [ngStyle]="{
+                      color: slackList.length > 1 ? 'rgb(190, 26, 17)' : '#999',
+                      cursor: slackList.length > 1 ? 'pointer ' : 'not-allowed'
+                    }"
+                    (click)="deleteSlackRow(i)"
+                  >
+                  </cds-icon>
+                </div>
+                <!-- loading to search whether this is a valid id -->
+                <div *ngIf="item.loadingSlack" class="slackLoading">
+                  <span style="position: unset; margin-left: 0.5rem; margin-top: 0.55rem" class="spinner spinner-sm">
+                    Loading...
+                  </span>
+                </div>
+                <clr-tooltip *ngIf="item.setErrMessage" style="margin-left: 0.5rem; margin-top: 0.25rem">
+                  <cds-icon
+                    clrTooltipTrigger
+                    shape="error-standard"
+                    size="18"
+                    style="color: 'rgb(190, 26, 17)'"
+                    class="valid-tooltip"
+                  >
+                  </cds-icon>
+                  <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                    <span>{{ item.setErrMessage }}</span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+                <clr-tooltip
+                  *ngIf="!item.loadingSlack && item.inputSlackValidation"
+                  style="margin-left: 0.5rem; margin-top: 0.25rem"
+                >
+                  <cds-icon
+                    clrTooltipTrigger
+                    shape="error-standard"
+                    size="18"
+                    style="color: 'rgb(190, 26, 17)'"
+                    class="valid-tooltip"
+                  >
+                  </cds-icon>
+                  <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                    <span>{{ item.inputSlackValidation }}</span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-link" style="padding: unset; margin-left: -0.7rem" (click)="createSlackRow()">
+            <cds-icon shape="plus" style="margin-right: 0.5rem"></cds-icon>Add New
+          </button>
+        </div>
+      </div>
+    </div>
+  </clr-wizard-page>
+  <clr-wizard-page
+    *ngIf="dsDialogForm.get('projectType').value !== 'image'"
+    [id]="6"
+    [clrWizardPageNextDisabled]="
+      isShowNumeric ||
+      dsDialogForm.get('multipleLabel').value === 'y' ||
+      isMutilNumericLabel ||
+      isUploadLabel ||
+      dsDialogForm.get('projectType').value === 'log' ||
+      dsDialogForm.get('projectType').value === 'image' ||
+      dsDialogForm.get('projectType').value === 'ner'
+        ? false
+        : clrWizardPageNextDisabled.page6
+    "
+    (clrWizardPageOnLoad)="clrWizardPageOnLoad($event)"
+    [clrWizardPagePreventDefaultNext]="true"
+  >
+    <ng-template clrPageTitle>Annotation Strategy</ng-template>
+    <div [formGroup]="dsDialogForm">
+      <div
+        class="clr-row formField"
+        *ngIf="
+          !isShowNumeric &&
+          dsDialogForm.get('multipleLabel').value !== 'y' &&
+          (dsDialogForm.get('projectType').value === 'tabular' || dsDialogForm.get('projectType').value === 'text') &&
+          !isMutilNumericLabel &&
+          !isUploadLabel
+        "
+      >
+        <label for="selectedClassifier" class="label-tooltip clr-col-12 clr-col-md-2"
+          >Active Learning Model<span>*</span></label
+        >
+        <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
+          <select
+            id="select-basic"
+            class="clr-select"
+            formControlName="selectedClassifier"
+            (change)="changeClassifier()"
+          >
+            <option *ngFor="let item of classifier" [value]="item.value">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="clr-col-12 clr-col-md-1">
+          <clr-tooltip
+            *ngIf="dsDialogForm.get('selectedClassifier').errors && dsDialogForm.get('selectedClassifier').touched"
+          >
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="xs" *clrIfOpen>
+              <span>{{ dsDialogForm.get('selectedClassifier').errors.msg.value }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+      <div
+        class="clr-row formField"
+        *ngIf="
+          !isShowNumeric &&
+          dsDialogForm.get('multipleLabel').value !== 'y' &&
+          (dsDialogForm.get('projectType').value === 'tabular' || dsDialogForm.get('projectType').value === 'text') &&
+          !isMutilNumericLabel &&
+          !isUploadLabel
+        "
+      >
+        <label for="selectedqueryStrategy" class="label-tooltip clr-col-12 clr-col-md-2"
+          >Query Strategy<span>*</span>
+          <a
+            href="https://modal-python.readthedocs.io/en/latest/"
+            target="_blank"
+            rel="noopener"
+            role="tooltip"
+            aria-haspopup="true"
+            class="tooltip tooltip-right"
+          >
+            <cds-icon shape="info-circle" size="20"></cds-icon>
+            <span class="tooltip-content">For more details please click the tooltip to see modal query strategy</span>
+          </a></label
+        >
+        <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
+          <select
+            id="select-basic"
+            class="clr-select"
+            formControlName="selectedqueryStrategy"
+            (change)="changeQueryStrategy()"
+          >
+            <option *ngFor="let item of queryStrategyBase" [value]="item.value">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="clr-col-12 clr-col-md-1">
+          <clr-tooltip
+            *ngIf="
+              dsDialogForm.get('selectedqueryStrategy').errors && dsDialogForm.get('selectedqueryStrategy').touched
+            "
+          >
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="xs" *clrIfOpen>
+              <span>{{ dsDialogForm.get('selectedqueryStrategy').errors.msg.value }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+      <div
+        class="clr-row formField"
+        *ngIf="
+          !isShowNumeric &&
+          dsDialogForm.get('projectType').value === 'tabular' &&
+          dsDialogForm.get('multipleLabel').value !== 'y' &&
+          !isMutilNumericLabel &&
+          !isUploadLabel
+        "
+      >
+        <label for="selectedEncoder" class="label-tooltip clr-col-12 clr-col-md-2"
+          >Active Learning Encoder
+          <span>*</span>
+        </label>
+        <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
+          <select id="select-basic" class="clr-select" formControlName="selectedEncoder" (click)="changeEncoder()">
+            <option *ngFor="let item of encoder" [value]="item.value">
+              {{ item.name }}
+            </option>
+          </select>
+        </div>
+        <div class="clr-col-12 clr-col-md-1">
+          <clr-tooltip
+            *ngIf="dsDialogForm.get('selectedEncoder').errors && dsDialogForm.get('selectedEncoder').touched"
+          >
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="xs" *clrIfOpen>
+              <span>{{ dsDialogForm.get('selectedEncoder').errors.msg.value }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+      <div
+        *ngIf="
+          isShowNumeric ||
+          dsDialogForm.get('multipleLabel').value === 'y' ||
+          isMutilNumericLabel ||
+          isUploadLabel ||
+          dsDialogForm.get('projectType').value === 'log' ||
+          dsDialogForm.get('projectType').value === 'image' ||
+          dsDialogForm.get('projectType').value === 'ner'
+        "
+        class="clr-row formField"
+      >
+        <label for="assignmentLogic" class="label-tooltip clr-col-12 clr-col-md-2">Assignment Logic </label>
+        <div class="clr-col-12 clr-col-md-9" style="padding-left: unset">
+          <label>
+            <clr-radio-wrapper style="margin-right: 0.5rem">
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                formControlName="assignmentLogic"
+                value="random"
+                id="random"
+                name="assignmentLogic"
+                checked
+              />
+              <label for="random">&nbsp;Random</label>
+            </clr-radio-wrapper>
+            <clr-radio-wrapper>
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                formControlName="assignmentLogic"
+                value="sequential"
+                id="sequential"
+                name="assignmentLogic"
+              />
+              <label for="sequential" style="margin-top: -1rem">&nbsp;Sequential</label>
+            </clr-radio-wrapper>
+          </label>
+        </div>
+      </div>
+    </div>
+  </clr-wizard-page>
+</clr-wizard>
+
+<app-create-new-dataset-modal
+  *ngIf="msgCreateProjectPage?.showModal"
+  [msgCreateProjectPage]="msgCreateProjectPage"
+  (uploadModalInfo)="uploadModalInfo($event)"
+  (onCloseUploadModal)="onCloseUploadModal($event)"
+></app-create-new-dataset-modal>

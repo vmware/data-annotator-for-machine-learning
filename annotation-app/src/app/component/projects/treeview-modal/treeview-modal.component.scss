@@ -1,0 +1,14 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+.disableTree {
+  ::ng-deep .clr-checkbox-wrapper .clr-control-label {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  ::ng-deep .clr-checkbox-wrapper input[type='checkbox'] {
+    pointer-events: none;
+  }
+}

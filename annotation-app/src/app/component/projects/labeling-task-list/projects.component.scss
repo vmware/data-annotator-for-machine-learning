@@ -1,0 +1,30 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.pageTitle {
+    margin-left: 0.2rem;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.h2Title {
+    margin-top: unset;
+}
+
+.floatRight {
+    float: right;
+    margin-right: unset !important;
+}
+
+.refreshBtn {
+    display: inline-block;
+    margin-right: 2rem;
+    color: #0079b8;
+    font-weight: 600;
+    font-size: 0.7rem;
+    font-style: normal;
+    cursor: pointer;
+}

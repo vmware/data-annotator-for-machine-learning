@@ -1,11 +1,11 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { EnvironmentsService } from 'app/services/environments.service';
+import { EnvironmentsService } from 'src/app/services/environments.service';
 
 @Injectable()
 export class DownloadService {
@@ -20,10 +20,8 @@ export class DownloadService {
       document.body.appendChild(iframe);
       iframe.src = this.env.config.enableAWSS3
         ? url
-        : `${
-            this.env.config.annotationService
-          }/api/v1.0/datasets/download-from-local-system?file=${url}&token=${
-            JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
+        : `${this.env.config.annotationService}/api/v1.0/datasets/download-from-local-system?file=${url}&token=${
+            JSON.parse(localStorage.getItem(this.env.config.sessionKey)).token.access_token
           }`;
     });
   }
@@ -35,7 +33,7 @@ export class DownloadService {
       window.location.href = `${
         this.env.config.annotationService
       }/api/v1.0/datasets/download-from-local-system?file=${url}&token=${
-        JSON.parse(localStorage.getItem(this.env.config.serviceTitle)).token.access_token
+        JSON.parse(localStorage.getItem(this.env.config.sessionKey)).token.access_token
       }`;
     }
   }

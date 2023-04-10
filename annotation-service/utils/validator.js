@@ -10,6 +10,7 @@
 const { ROLES, SPECAILCHARTOSTRING } = require('../config/constant');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel, DataSetModel, UserModel } = require('../db/db-connect');
+const MESSAGE = require('../config/code_msg');
 
 function isASCII(str) {
     return /^[\x00-\xFF\u2013-\u2122]*$/.test(str);
@@ -23,11 +24,11 @@ async function checkProjectByconditions(conditions, checkExsit) {
     const pro = await mongoDb.findByConditions(ProjectModel, conditions);
     if (checkExsit) {
         if (!pro[0]) {
-            throw { CODE: 4001, MSG: "NO PROJECT FOUND" };
+            throw MESSAGE.VALIDATATION_PJ_EMPTY;
         }
     } else {
         if (pro[0]) {
-            throw { CODE: 4002, MSG: "PROJECT EXIST" };
+            throw MESSAGE.VALIDATATION_PJ_EXIST;
         }
     }
     return pro;
@@ -36,13 +37,12 @@ async function checkProjectByconditions(conditions, checkExsit) {
 
 async function checkAppendTicketsHeaders(appendHeaders, originalHeaders) {
 
-    const errRes = { CODE: 4005, MSG: "ERROR INPUT TICKET'S HEADERS" };
     if (appendHeaders.length < originalHeaders.length) {
-        throw errRes;
+        throw MESSAGE.VALIDATION_TK_HEADEARS;
     }
     originalHeaders.forEach(header => {
         if (!appendHeaders.includes(header)) {
-            throw errRes;
+            throw MESSAGE.VALIDATION_TK_HEADEARS;
         }
     });
 }
@@ -51,7 +51,7 @@ async function checkUser(uid, checkExsit) {
 
     const user = await mongoDb.findById(UserModel, uid);
     if (checkExsit && !user) {
-        throw { CODE: 4001, MSG: "ACCESS DENIED" }
+        throw MESSAGE.VALIDATION_ACCESS;
     }
     return user;
 }
@@ -60,7 +60,7 @@ async function checkUserRole(uid, checkRole) {
 
     const user = await mongoDb.findById(UserModel, uid);
     if (checkRole != user.role) {
-        throw { CODE: 4001, MSG: "ACCESS DENIED" }
+        throw MESSAGE.VALIDATION_ACCESS;
     }
 }
 
@@ -68,7 +68,15 @@ async function checkAnnotator(uid) {
 
     const user = await mongoDb.findById(UserModel, uid);
     if (ROLES.ANNOTATOR == user.role) {
-        throw { CODE: 4001, MSG: "ACCESS DENIED" }
+        throw MESSAGE.VALIDATION_ACCESS;
+    }
+}
+
+async function checkAdmin(uid) {
+
+    const user = await mongoDb.findById(UserModel, uid);
+    if (ROLES.ADMIN != user.role) {
+        throw MESSAGE.VALIDATION_PERMITION;
     }
 }
 
@@ -76,11 +84,11 @@ async function checkDataSet(conditions, checkExsit) {
     const ds = await mongoDb.findByConditions(DataSetModel, conditions);
     if (checkExsit) {
         if (!ds[0]) {
-            throw { CODE: 4001, MSG: "NO DATASET FOUND" };
+            throw MESSAGE.VALIDATION_DS_EMPTY;
         }
     } else {
         if (ds[0]) {
-            throw { CODE: 4002, MSG: "DATASET EXIST" };
+            throw MESSAGE.VALIDATION_DS_EXIST;
         }
     }
     return ds;
@@ -112,7 +120,7 @@ async function checkRequired(parameters) {
 
 async function validateRequired(parameters) {
     if (!await checkRequired(parameters)) {
-        throw { 4003: "input field invalid" }
+        throw MESSAGE.VALIDATATION_INPUT;
     }
 }
 
@@ -122,7 +130,7 @@ async function checkDataSetInUse(dataSetName, throwError) {
     console.log(pro)
     if (pro[0] && throwError) {
         const pnames = await pro.reduce((pnameString, curr) => pnameString ? `${pnameString},${curr.projectName}` : curr.projectName, "");
-        throw { CODE: 4001, MSG: `DATA-SET USING BY: [${pnames}], PLEASE REMOVE THE PROJECTS FIRST.` };
+        throw { CODE: MESSAGE.VALIDATION_DS_USING.CODE, MSG: MESSAGE.VALIDATION_DS_USING.MSG.replace('${pnames}', pnames) };
     }
     return pro;
 }
@@ -164,5 +172,6 @@ module.exports = {
     checkDataSetInUse,
     checkJsonFormat,
     validateBool,
-
+    checkAdmin,
+    
 };

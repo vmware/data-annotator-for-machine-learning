@@ -1,0 +1,41 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+.modelChartBox {
+    border-radius: 8px;
+    background-color: white;
+    height: 20rem;
+    margin-bottom: 3rem;
+}
+
+.studioCell {
+    width: 35rem !important;
+}
+
+.annotationLoading {
+    background-color: white;
+    border-radius: 8px;
+    min-height: 9rem;
+    text-align: center;
+}
+
+.loadingSpan {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    color: grey;
+    opacity: 0.65;
+    font-size: 0.7rem;
+}
+
+.previewHeight {
+    height: 3.4rem !important;
+}
+
+.btnOutline {
+    margin-top: 0.3rem;
+    padding-left: unset;
+    outline-color: transparent;
+}

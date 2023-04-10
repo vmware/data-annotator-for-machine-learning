@@ -1,0 +1,185 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="container">
+  <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ errorMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ infoMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <div class="clr-row">
+    <div class="clr-col-10">
+      <h2 class="h2Title">Permissions</h2>
+    </div>
+    <div *ngIf="env.config.authUrl" class="clr-col-2">
+      <button
+        class="btn btn-primary floatRight"
+        (click)="createUserDialog = true; deleteDatasetDialog = false; selectedUser()"
+      >
+        Add Collaborators
+      </button>
+    </div>
+  </div>
+  <div>
+    <clr-datagrid [clrDgLoading]="loading" class="gridHeight">
+      <clr-dg-placeholder>We couldn't find any info for you!</clr-dg-placeholder>
+      <clr-dg-column *ngIf="!env.config.hubService" [clrDgField]="'fullName'" class="ellipsis-datagrid"
+        >Name
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'email'" class="ellipsis-datagrid">Email </clr-dg-column>
+      <clr-dg-column [clrDgField]="'role'" class="ellipsis-datagrid">Role </clr-dg-column>
+      <clr-dg-column *ngIf="!env.config.hubService" [clrDgField]="'createdDate'" class="ellipsis-datagrid"
+        >Role Create Date</clr-dg-column
+      >
+      <clr-dg-column class="ellipsis-datagrid">Actions</clr-dg-column>
+
+      <ng-container>
+        <clr-dg-row *clrDgItems="let dataset of datasets" [clrDgItem]="dataset">
+          <clr-dg-cell *ngIf="!env.config.hubService" class="ellipsis-datagrid">
+            {{ dataset.fullName }}
+          </clr-dg-cell>
+          <clr-dg-cell class="ellipsis-datagrid">
+            {{ dataset.email }}
+          </clr-dg-cell>
+          <clr-dg-cell *ngIf="!env.config.hubService" style="word-break: break-all">{{
+            dataset.role === 'Admin' ? 'Power User' : 'User'
+          }}</clr-dg-cell>
+          <clr-dg-cell *ngIf="env.config.hubService" style="word-break: break-all">{{ dataset.role }}</clr-dg-cell>
+          <clr-dg-cell *ngIf="!env.config.hubService">{{
+            dataset.createdDate | date : 'yyyy-MM-dd HH:mm:ss'
+          }}</clr-dg-cell>
+          <clr-dg-cell>
+            <button
+              type="button"
+              class="btn btn-sm actionClass"
+              (click)="deleteDatasetDialog = false; selectedUser(dataset)"
+              role="tooltip"
+              aria-haspopup="true"
+              title="Edit User"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm actionClass"
+              (click)="clickDeleteUserBtn(dataset)"
+              role="tooltip"
+              aria-haspopup="true"
+              title="{{ env.config.hubService && env.config.embedded ? 'Reset Role to User' : 'Delete the User' }}"
+            >
+              {{ env.config.hubService && env.config.embedded ? 'Reset' : 'Delete' }}
+            </button>
+          </clr-dg-cell>
+        </clr-dg-row>
+      </ng-container>
+      <clr-dg-footer>
+        <clr-dg-pagination #pagination [clrDgPageSize]="10">
+          <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Collaborators per page</clr-dg-page-size>
+          {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Collaborators
+        </clr-dg-pagination>
+      </clr-dg-footer>
+    </clr-datagrid>
+  </div>
+</div>
+
+<!-- popup dialog - create user dialog-->
+<clr-modal
+  [(clrModalOpen)]="createUserDialog"
+  *ngIf="createUserDialog"
+  [clrModalSize]="'md'"
+  class="editModal"
+  [clrModalClosable]="false"
+>
+  <h3 class="modal-title">{{ editUser?.email ? 'Edit Collaborator' : 'Add Collaborator' }}</h3>
+  <div class="modal-body">
+    <div class="prev-info clr-row">
+      <label for="userName" class="label-tooltip clr-col-12 clr-col-md-2">Email ID</label>
+      <div class="clr-col-12 clr-col-md-10">
+        <div class="clr-row" *ngFor="let user of collaborators; let i = index" style="margin-bottom: 1rem">
+          <div
+            class="clr-control-container clr-col-12 clr-col-md-6"
+            [ngClass]="user.setUserErrMessage ? 'clr-error' : ''"
+          >
+            <div class="clr-input-wrapper">
+              <input
+                id="userName"
+                type="text"
+                class="clr-input"
+                placeholder="Type email here"
+                [(ngModel)]="user.email"
+                (ngModelChange)="this.inputUserNameUpdate(i)"
+                [disabled]="editUser.email"
+              />
+              <cds-icon *ngIf="user.setUserErrMessage" class="clr-validate-icon" shape="exclamation-circle"></cds-icon>
+            </div>
+            <span class="clr-subtext">{{ user.setUserErrMessage }}</span>
+          </div>
+
+          <div class="clr-select-wrapper clr-col-12 clr-col-md-4">
+            <select
+              style="width: 100% !important"
+              id="select-basic"
+              class="clr-select"
+              [(ngModel)]="user.role"
+              (ngModelChange)="changeSetRadio($event, i)"
+            >
+              <option value="Power User">Power User</option>
+              <option *ngIf="env.config.hubService" value="Supervisor">Supervisor</option>
+              <option *ngIf="env.config.hubService" value="Developer">Developer</option>
+              <option value="User">User</option>
+            </select>
+          </div>
+          <div *ngIf="!editUser.email">
+            <cds-icon
+              shape="trash"
+              [ngStyle]="{
+                color: collaborators.length > 1 ? 'red' : '#999',
+                cursor: collaborators.length > 1 ? 'pointer ' : 'not-allowed'
+              }"
+              (click)="deleteUserRow(i)"
+            >
+            </cds-icon>
+          </div>
+          <clr-tooltip *ngIf="setUserErrMessage">
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+              <span>{{ setUserErrMessage }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+      </div>
+    </div>
+    <div class="clr-row" *ngIf="!editUser.email">
+      <label class="clr-col-2"></label>
+      <button
+        class="btn btn-outline-primary btn-sm"
+        style="margin-top: 0.5rem; margin-left: 0.5rem"
+        (click)="addNewRow()"
+      >
+        <cds-icon shape="plus"></cds-icon>
+        ADD New
+      </button>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="close()">Cancel</button>
+    <button [clrLoading]="loadingBtn" type="button" class="btn btn-primary" (click)="saveRoleCreate()">OK</button>
+  </div>
+</clr-modal>
+
+<app-modal-confirm
+  *ngIf="deleteDatasetDialog"
+  [msg]="msgDelete"
+  (cancelBtn)="receiveCloseDelete($event)"
+  (okBtn)="receiveDeleteOkBtn($event)"
+></app-modal-confirm>

@@ -1,0 +1,979 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="container">
+  <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ errorMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ infoMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <div class="clr-row" style="justify-content: space-between; align-items: baseline">
+    <div class="clr-col-6" style="position: relative; padding-top: 0.6rem">
+      <div class="clr-row" style="margin-left: unset">
+        <cds-icon shape="arrow" (click)="onEndGame()"></cds-icon>
+        <div class="h2Title" title="{{ selectParam }}">
+          {{ selectParam }}
+        </div>
+      </div>
+    </div>
+    <div class="clr-form-group form-group clr-col-4 clr-align-self-end" style="position: relative">
+      <form
+        *ngIf="
+          projectType !== 'ner' &&
+          projectType !== 'image' &&
+          projectType !== 'log' &&
+          isAllowedAnnotate &&
+          currentTabIndex == 1
+        "
+        [formGroup]="questionForm"
+        class="displayFormat"
+      >
+        <label class="label-leftBoard">Display </label>&nbsp;&nbsp;&nbsp;
+        <div class="clr-select-wrapper">
+          <select formControlName="renderFormat" (change)="changeRenderFormat($event)">
+            <option value="md">Text</option>
+            <option value="html">Render Markdown</option>
+          </select>
+        </div>
+      </form>
+    </div>
+    <div>
+      <button [clrLoading]="loadingViewData" class="btn btn-outline" (click)="toDatasetAnalyze()">View Dataset</button>
+    </div>
+  </div>
+  <clr-tabs>
+    <clr-tab *ngIf="isAllowedAnnotate || startFrom == 'review'">
+      <button clrTabLink id="link1" (click)="clickTab(1)">Assign</button>
+      <clr-tab-content id="content1" *clrIfActive="isAllowedAnnotate && currentTabIndex === 1">
+        <div class="clr-row">
+          <div
+            [ngClass]="{ 'clr-col-7': !isDrawer, 'clr-col-12': isDrawer, annotateBorder: !isDrawer }"
+            class="projectDetailLeft"
+          >
+            <form
+              [formGroup]="questionForm"
+              (ngSubmit)="onSubmit()"
+              (keydown.enter)="$event.preventDefault()"
+              novalidate
+            >
+              <div *ngIf="loading" style="text-align: center">
+                <div class="row">
+                  <span class="spinner" style="margin-top: 5rem; margin-bottom: -1rem"> Loading... </span>
+                  <span class="loadingSpan"> Loading Data, Please Wait... </span>
+                </div>
+              </div>
+              <div *ngIf="!loading && !sr.MSG && !error">
+                <div style="position: relative">
+                  <clr-alert
+                    *ngIf="maxAnnotationError"
+                    [clrAlertType]="'info'"
+                    (clrAlertClosedChange)="maxAnnotationError = ''"
+                    class="invalidAlert"
+                  >
+                    <div class="alert-item">
+                      <span class="alert-text">{{ maxAnnotationError }}</span>
+                    </div>
+                  </clr-alert>
+                </div>
+                <div>
+                  <h3 style="word-break: break-all">{{ projectInfo?.ticketDescription }}</h3>
+                  <span>Please read the item below and assign the most suitable label to it.</span>
+                  <div style="position: absolute; top: 1.5rem; right: 0rem">
+                    <div class="showTag" *ngIf="!isDrawer" (click)="detailDrawer()">
+                      <cds-icon shape="angle" class="drawer" size="sm" style="transform: rotate(90deg)"> </cds-icon>
+                    </div>
+                    <div class="hideTag" *ngIf="isDrawer" (click)="detailDrawer()">
+                      <cds-icon shape="angle" class="drawer" size="sm" style="transform: rotate(-90deg)"> </cds-icon>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- log type to show the filename -->
+                <div
+                  *ngIf="projectType === 'log' && startFrom !== 'review' && projectInfo.isShowFilename"
+                  style="margin-top: 0.5rem"
+                >
+                  <div class="clr-row" style="margin-bottom: 0.7rem">
+                    <div class="clr-col-2">File Name</div>
+                    <div class="clr-col-10">
+                      <div style="margin-left: -0.5rem; word-break: break-all">
+                        <span>{{ currentLogFile }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- to search the filename -->
+                <div *ngIf="projectType === 'log' && startFrom === 'review'" style="margin-top: 0.5rem">
+                  <div class="clr-row">
+                    <div class="clr-col-2" style="margin-top: -0.15rem">File Name</div>
+                    <div class="clr-col-10">
+                      <ng-select
+                        [items]="logFiles"
+                        bindLabel="fileName"
+                        bindValue="index"
+                        [(ngModel)]="selectedFile"
+                        [ngModelOptions]="{ standalone: true }"
+                        [searchable]="true"
+                        [readonly]="fasle"
+                        [markFirst]="true"
+                        [clearable]="false"
+                        [virtualScroll]="true"
+                        notFoundText="No file found"
+                        (change)="getTargetFile($event)"
+                        (blur)="blurFilename()"
+                        (focus)="focusFilename($event)"
+                      >
+                        <ng-option *ngFor="let logFile of logFiles" [value]="logFile.index">
+                          {{ logFile.fileName }}
+                        </ng-option>
+                      </ng-select>
+                    </div>
+                  </div>
+                </div>
+                <!-- to filter the log -->
+                <div *ngIf="projectType === 'log'" style="margin-top: 0.5rem">
+                  <div class="clr-row filterLog">
+                    <div class="clr-form-control clr-col-2" style="margin-top: 0rem">
+                      <select class="filterSelect" (change)="updateFilterSelect($event)">
+                        <option value="keyword">Keyword</option>
+                        <option value="regex">Regex</option>
+                      </select>
+                    </div>
+
+                    <div class="clr-control-container clr-col-10 filterInput">
+                      <div class="clr-input-wrapper">
+                        <input
+                          #filters
+                          autocomplete="off"
+                          type="text"
+                          [placeholder]="
+                            filterType == 'keyword'
+                              ? 'Type keyword to filter, for example, abc .'
+                              : 'Type custom regex rule to filter, for example, /[A-Z]/'
+                          "
+                          class="clr-input filterText"
+                          formControlName="filterText"
+                          (keyup.enter)="onEnterFilter(filters)"
+                          (blur)="blurFilter($event)"
+                          (ngModelChange)="updateFilterText($event)"
+                        />
+                      </div>
+                      <span *ngIf="regexErr" class="clr-subtext regexErr">Wrong format!</span>
+                    </div>
+                  </div>
+                  <div *ngIf="filterList.length > 0" class="filterBox">
+                    <span
+                      *ngFor="let filter of filterList; let i = index"
+                      class="label filterLabel"
+                      (click)="deleteFilter(i)"
+                      (mouseenter)="overFilter(i)"
+                      (mouseleave)="outFilter(i)"
+                      [ngClass]="active == i ? 'overLabels' : ''"
+                      >{{ filter.filterText
+                      }}<cds-icon
+                        shape="times"
+                        *ngIf="active == i"
+                        (click)="deleteFilter(i)"
+                        style="margin-left: 0.5rem"
+                      >
+                      </cds-icon>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="questionContainer">
+                  <div style="margin-bottom: 2rem; font-size: 1.3em">
+                    <span style="font-weight: bold; color: black; margin-right: 0.5rem">
+                      Item ( {{ progressInfo?.completeCase }} of {{ progressInfo?.totalCase }} )
+                    </span>
+                    <span
+                      *ngIf="!silenceStatus"
+                      style="color: rgb(0, 115, 175); cursor: pointer"
+                      (click)="flagTicket()"
+                    >
+                      <cds-icon size="md" shape="flag"> </cds-icon>
+                      FLAG
+                    </span>
+                    <span *ngIf="silenceStatus" style="color: red">
+                      <cds-icon size="md" shape="flag" solid> </cds-icon>
+                      FLAGGED
+                    </span>
+                  </div>
+                  <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'">
+                    <div
+                      class="textBox"
+                      [ngStyle]="{
+                        height: textBoxResizedHeight
+                      }"
+                      (mousedown)="resizeBox()"
+                      (onmousedown)="resizeBox()"
+                    >
+                      <div *ngFor="let ticket of sr.originalData">
+                        <p class="question-paragraph" style="word-break: break-word; white-space: pre-wrap">
+                          <span class="ticketColumn">{{ ticket.key }}</span>
+                          <span>:&nbsp;&nbsp;</span>
+                          <span
+                            *ngIf="renderFormat !== 'md'"
+                            [innerHtml]="ticket.html"
+                            style="white-space: nowrap"
+                          ></span>
+                          <span *ngIf="renderFormat === 'md'">{{ ticket.value }}</span>
+                        </p>
+                        <br />
+                      </div>
+                    </div>
+                  </div>
+                  <div *ngIf="projectType === 'image'">
+                    <div class="panel" style="margin-bottom: 1rem; margin-top: 0.5rem">
+                      <button
+                        [ngClass]="{ rectSelected: rectSelected, rectUnselected: !rectSelected }"
+                        class="btn btn-outline"
+                        type="button"
+                        (click)="onRects()"
+                      >
+                        <img src="../../../../assets/images/rect.svg" alt="" />
+                      </button>
+                      <button
+                        [ngClass]="{ rectSelected: !rectSelected, rectUnselected: rectSelected }"
+                        name="onPolygonBtn"
+                        class="btn btn-outline"
+                        type="button"
+                        (click)="onPolygon()"
+                      >
+                        <img src="../../../../assets/images/polygon.svg" alt="" />
+                      </button>
+                      <button class="btn btn-outline" type="button" (click)="deletePolygon()">
+                        <img src="../../../../assets/images/trash.svg" alt="" />
+                      </button>
+                      <button class="btn btn-outline" type="button" (click)="deleteAllPolygon()">
+                        <img src="../../../../assets/images/refresh.svg" alt="" />
+                      </button>
+                    </div>
+                    <div id="label-studio">
+                      <!-- here is LSF image annotation -->
+                    </div>
+                  </div>
+                  <!-- here is ner annotation content -->
+                  <div *ngIf="projectType === 'ner'" class="nerBox">
+                    <div class="nerDisplayText">
+                      <div *ngFor="let ticket of sr.ticketQuestions">
+                        <p class="question-paragraph" style="word-break: break-word">
+                          <span class="ticketColumn">{{ ticket.key }}</span>
+                          <span>:&nbsp;&nbsp;</span>
+                          <span>{{ ticket.value }}</span>
+                        </p>
+                        <br />
+                      </div>
+                    </div>
+                    <div class="nerContent">
+                      <div class="nerPassage" (mouseup)="onMouseUp($event)">
+                        <span id="mainText">{{ sr?.originalData?.text }}</span>
+                      </div>
+                      <div class="annotateLabel">
+                        <div style="font-weight: 500">Tips:</div>
+                        <ul class="resultTip">
+                          <li>
+                            When mouse over or click the selected text will highlight the labeled text on the passage.
+                          </li>
+                          <li *ngIf="isShowPopLabel">Click labeled text to see the secondary labels.</li>
+                        </ul>
+                        <div class="result">Results</div>
+                        <div *ngIf="spansList.length === 0">Nothing selected</div>
+                        <div class="selectedSection">
+                          <div
+                            *ngFor="let spanText of spansList"
+                            class="spanSelected"
+                            (mouseenter)="mouseenterMark($event, spanText)"
+                            (mouseleave)="mouseleaveMark($event, spanText)"
+                          >
+                            <span (click)="clickShowMark($event, spanText)" class="selectText">{{
+                              spanText.text
+                            }}</span>
+                            <span
+                              class="entity"
+                              [style.color]="getLabelColor(spanText.label)"
+                              title="{{ spanText.label | uppercase }}"
+                              >{{ spanText.label }}</span
+                            >
+                            <span
+                              *ngIf="isShowPopLabel && spanText.popUpLabel"
+                              class="entity"
+                              [style.color]="spanText.popLabelColor"
+                              title="{{ spanText.popUpLabel | uppercase }}"
+                              >{{ spanText.popUpLabel }}</span
+                            >
+                            <span class="clear" (click)="clickClearMark($event, spanText)">×</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- here is log annotation content -->
+                  <div *ngIf="projectType === 'log'">
+                    <div class="editBar">
+                      <button
+                        type="button"
+                        class="btn btn-icon"
+                        [ngClass]="{ wrap: !wrapText, noWrap: wrapText }"
+                        role="tooltip"
+                        aria-haspopup="true"
+                        title="Wrap Text"
+                        (click)="toWrapText()"
+                      >
+                        <cds-icon
+                          aria-hidden="true"
+                          shape="child-arrow"
+                          style="transform: rotateY(180deg); margin-top: -0.08rem"
+                        ></cds-icon>
+                        wrap
+                      </button>
+                    </div>
+                    <div class="txtBox" *ngIf="filterList.length <= 0">
+                      <div
+                        *ngFor="let ticket of sr.originalData; let i = index"
+                        id="c-{{ i }}"
+                        class="clr-row txtRow{{ i }}"
+                        title="{{
+                          ticket.freeText
+                            ? ticket.freeText
+                            : '( Optional ) you can click the ellipsis-vertical after the index to add freeText for this line after annotation.'
+                        }}"
+                      >
+                        <div class=" clr-col-1 logIndex{{ i }} rowIndex">
+                          <div class="signpost-item">
+                            <div class="trigger-item">
+                              <clr-signpost>
+                                <div clrSignpostTrigger>
+                                  {{ i + 1 }}
+                                  <cds-icon
+                                    shape="ellipsis-vertical"
+                                    size="sm"
+                                    style="margin-left: -0.2rem"
+                                    class="freeTextIcon{{ i }}"
+                                    [ngClass]="{ hasText: ticket.freeText, noText: !ticket.freeText }"
+                                  >
+                                  </cds-icon>
+                                </div>
+
+                                <clr-signpost-content [clrPosition]="'right-bottom'" *clrIfOpen>
+                                  <input
+                                    type="text"
+                                    id="basic"
+                                    placeholder="Enter free text here"
+                                    [disabled]="!ticket.annotate"
+                                    class="clr-input singleFreetext freeTextInput{{ i }}"
+                                    autocomplete="off"
+                                    [ngModelOptions]="{ standalone: true }"
+                                    [(ngModel)]="ticket.freeText"
+                                    (ngModelChange)="updateFreeText($event, i)"
+                                  />
+                                </clr-signpost-content>
+                              </clr-signpost>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="clr-col-10"
+                          [ngClass]="{ txtRow: !wrapText, txtRowWrap: wrapText }"
+                          (mousedown)="onMouseDownTxt(ticket, i)"
+                          (mouseup)="onMouseUpTxt(ticket, i, 'current')"
+                        >
+                          <span class="txtRowEntity{{ i }}"></span>
+                          <span class="logLine-{{ ticket.line }} txtRowContent{{ i }} ">
+                            {{ ticket.text }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="txtBox" *ngIf="filterList.length > 0">
+                      <div
+                        *ngFor="let ticket of sr.originalData; let i = index"
+                        id="c-{{ ticket.index }}"
+                        class="clr-row txtRow{{ ticket.index }}"
+                        title="{{
+                          ticket.freeText
+                            ? ticket.freeText
+                            : '( Optional ) you can click the ellipsis-vertical after the index to add freeText for this line after annotation.'
+                        }}"
+                      >
+                        <div *ngIf="ticket.filter" class=" clr-col-1 logIndex{{ ticket.index }} rowIndex">
+                          <div class="signpost-item">
+                            <div class="trigger-item">
+                              <clr-signpost>
+                                <div clrSignpostTrigger>
+                                  {{ ticket.index + 1 }}
+                                  <cds-icon
+                                    shape="ellipsis-vertical"
+                                    size="sm"
+                                    style="margin-left: -0.2rem"
+                                    class="freeTextIcon{{ ticket.index }}"
+                                    [ngClass]="{ hasText: ticket.freeText, noText: !ticket.freeText }"
+                                  >
+                                  </cds-icon>
+                                </div>
+
+                                <clr-signpost-content [clrPosition]="'right-bottom'" *clrIfOpen>
+                                  <input
+                                    type="text"
+                                    id="basic"
+                                    placeholder="Enter free text here"
+                                    [disabled]="!ticket.annotate"
+                                    class="clr-input singleFreetext freeTextInput{{ ticket.index }}"
+                                    autocomplete="off"
+                                    [ngModelOptions]="{ standalone: true }"
+                                    [(ngModel)]="ticket.freeText"
+                                    (ngModelChange)="updateFreeText($event, ticket.index)"
+                                  />
+                                </clr-signpost-content>
+                              </clr-signpost>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          *ngIf="ticket.filter"
+                          class="clr-col-10"
+                          [ngClass]="{ txtRow: !wrapText, txtRowWrap: wrapText }"
+                          (mousedown)="onMouseDownTxt(ticket, ticket.index)"
+                          (mouseup)="onMouseUpTxt(ticket, ticket.index, 'current')"
+                        >
+                          <span class="txtRowEntity{{ ticket.index }}"></span>
+                          <span class="logLine-{{ ticket.line }} txtRowContent{{ ticket.index }} ">
+                            {{ ticket.text }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="clr-row" *ngIf="projectType !== 'image'">
+                    <h4 style="margin-top: 2rem; margin-left: 0.5rem; margin-bottom: 1rem; font-weight: bold">
+                      {{ projectInfo?.annotationQuestion }}
+                    </h4>
+                  </div>
+                  <!-- 6 colorful labels -->
+                  <div
+                    *ngIf="
+                      !isShowDropDown &&
+                      !isNumeric &&
+                      !isMultipleLabel &&
+                      !isMultipleNumericLabel &&
+                      (projectType == 'text' || projectType == 'tabular')
+                    "
+                  >
+                    <div>
+                      <button
+                        *ngFor="let label of categories; let i = index"
+                        class="btn labels label label{{ i }} submit cleanColor"
+                        style="margin: 0.3rem 0.2rem"
+                        type="submit"
+                        (click)="onSelectingCategory(label, i)"
+                        title="{{ label }}"
+                        [ngClass]="
+                          active == i && i == 0
+                            ? 'clickActive0'
+                            : active == i && i == 1
+                            ? 'clickActive1'
+                            : active == i && i == 2
+                            ? 'clickActive2'
+                            : active == i && i == 3
+                            ? 'clickActive3'
+                            : active == i && i == 4
+                            ? 'clickActive4'
+                            : active == i && i == 5
+                            ? 'clickActive5'
+                            : {
+                                green: i == 0,
+                                red: i == 1,
+                                yellow: i == 2,
+                                blue: i == 3,
+                                purple: i == 4,
+                                orange: i == 5
+                              }
+                        "
+                      >
+                        {{ label }}
+                      </button>
+                      &nbsp; &nbsp;
+                    </div>
+                  </div>
+                  <!-- dropdown labels -->
+                  <div
+                    class="clr-form-group category clr-row"
+                    *ngIf="isShowDropDown && !isMultipleLabel"
+                    (change)="onSelectingDropDown($event)"
+                  >
+                    <label for="category">Labels<span class="required asteristic">*</span></label>
+                    <div class="clr-select-wrapper" style="min-width: 20%">
+                      <select formControlName="category" (click)="dropDownSubmit()" style="min-width: 100%">
+                        <option *ngFor="let category of categories" [value]="category">
+                          {{ category }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                  <!-- numeric labels input -->
+                  <div *ngIf="isNumeric && !isMultipleLabel" class="clr-row">
+                    <div class="clr-control-container clr-col-3" style="margin-top: 0.5rem">
+                      <ngx-slider
+                        [(value)]="numericValue"
+                        [options]="numericOptions"
+                        (valueChange)="sliderEvent()"
+                      ></ngx-slider>
+                    </div>
+                    <div
+                      class="clr-control-container clr-col-3"
+                      style="margin-top: 1rem"
+                      [ngClass]="{ 'clr-error': clrErrorTip }"
+                    >
+                      <div class="clr-input-wrapper">
+                        <input
+                          #numericInput
+                          autocomplete="off"
+                          type="text"
+                          id="example"
+                          placeholder="Input value here and press enter"
+                          class="clr-input"
+                          style="width: 90%"
+                          (keyup.enter)="enterNumeric($event)"
+                          (keyup)="enterNumericUp($event)"
+                          [(ngModel)]="labelChoose"
+                          [ngModelOptions]="{ standalone: true }"
+                        />
+                        <cds-icon class="clr-validate-icon" shape="exclamation-circle"></cds-icon>
+                      </div>
+                      <span class="clr-subtext">{{ numericMessage }}</span>
+                    </div>
+                  </div>
+                  <!-- ner entity label -->
+                  <div *ngIf="projectType == 'ner'">
+                    <div>
+                      <button
+                        *ngFor="let label of categories; let i = index"
+                        class="btn labels label entityLabel"
+                        [style.color]="i == selectedEntityID ? 'white' : getLabelColor(label)"
+                        [style.border-color]="getLabelColor(label)"
+                        [style.background-color]="i == selectedEntityID ? getLabelColor(label) : ''"
+                        [ngClass]="{
+                          entitySelected: i == selectedEntityID,
+                          entityLabel: i !== selectedEntityID
+                        }"
+                        (click)="onSelectingEntity($event, label, i)"
+                        title="{{ label }}"
+                      >
+                        {{ label }}
+                      </button>
+                      &nbsp; &nbsp;
+                    </div>
+                  </div>
+                  <!-- multiple checkbox labels -->
+                  <div
+                    *ngIf="
+                      isMultipleLabel &&
+                      !isMultipleNumericLabel &&
+                      (projectType == 'text' || projectType == 'tabular') &&
+                      labelType !== 'HTL'
+                    "
+                  >
+                    <div class="clr-form-control" style="margin-top: 0">
+                      <div class="clr-control-container" style="width: 100%">
+                        <div
+                          class="clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
+                          *ngFor="let label of categories; let i = index"
+                        >
+                          <input
+                            type="checkbox"
+                            id="{{ label }}"
+                            name="checkbox"
+                            value="{{ label }}"
+                            class="clr-checkbox"
+                            (click)="selectLabel($event, i)"
+                          />
+                          <label title="{{ label }}" for="{{ label }}" class="clr-control-label">{{ label }}</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- multiple numeric checkbox labels -->
+                  <div
+                    *ngIf="
+                      isMultipleNumericLabel &&
+                      (projectType == 'text' || projectType == 'tabular') &&
+                      labelType !== 'HTL'
+                    "
+                  >
+                    <div class="clr-form-control" style="margin-top: 0">
+                      <div class="clr-control-container" style="width: 100%">
+                        <div
+                          class="clr-row clr-checkbox-wrapper labelCheckbox multiLabel{{ i }}"
+                          *ngFor="let score of scores; let i = index"
+                        >
+                          <div class="multiple-checkbox clr-control-container clr-col">
+                            <input
+                              type="checkbox"
+                              id="{{ score.label }}"
+                              name="checkbox"
+                              value="{{ score.label }}"
+                              class="clr-checkbox"
+                              (click)="selectLabel($event, i)"
+                            />
+                            <label
+                              for="{{ score.label }}"
+                              class="clr-control-label multiple-label"
+                              title="{{ score.label }}"
+                              >{{ score.label }}</label
+                            >
+                          </div>
+                          <div class="scoreSlider clr-control-container clr-col">
+                            <ngx-slider
+                              [(value)]="scores[i].scoreValue"
+                              [options]="scores[i].scoreOptions"
+                              (valueChange)="scoreSliderEvent(i)"
+                            >
+                            </ngx-slider>
+                          </div>
+                          <div
+                            class="scoreInput clr-control-container clr-col"
+                            [ngClass]="{ 'clr-error': scores[i].clrErrorTip }"
+                          >
+                            <div class="clr-input-wrapper">
+                              <input
+                                #scoreInput
+                                autocomplete="off"
+                                type="text"
+                                id="scoreInput"
+                                placeholder="Input value here and press enter"
+                                class="clr-input"
+                                style="width: 90%"
+                                (keyup)="enterScoreUp($event, i)"
+                                [(ngModel)]="scores[i].scoreInputValue"
+                                [ngModelOptions]="{ standalone: true }"
+                              />
+                              <cds-icon class="clr-validate-icon" shape="exclamation-circle"> </cds-icon>
+                            </div>
+                            <span class="clr-subtext">{{ scoreMessage[i] }}</span>
+                          </div>
+                          <div class="clr-control-container clr-col"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- txt log labels -->
+                  <div *ngIf="projectType == 'log'">
+                    <div>
+                      <button
+                        *ngFor="let item of logCategories; let i = index"
+                        class="logCategories logCategories{{ i }} btn labels label logEntityLabel"
+                        type="button"
+                        [ngClass]="{
+                          logEntitySelected: i == selectedEntityID,
+                          logEntityLabel: i !== selectedEntityID
+                        }"
+                        [ngStyle]="{
+                          'border-left-color': item.color,
+                          'background-color': i == selectedEntityID ? item.color : '',
+                          'border-left-width': '6px',
+                          'box-shadow': '1px 1px 3px 0px ' + '#9A9A9A'
+                        }"
+                        (click)="onSelectingEntity($event, label, i)"
+                        title="{{ item.label }}"
+                      >
+                        {{ item.label }}
+                      </button>
+                      &nbsp; &nbsp;
+                    </div>
+                    <div class="clr-textarea-wrapper clr-col-12" style="padding-left: 0.3rem">
+                      <textarea
+                        class="clr-textarea log-textarea"
+                        formControlName="logFreeText"
+                        placeholder="( Optional ) Please provide more details about the log above."
+                        rows="1"
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div *ngIf="labelType === 'HTL' && (projectType == 'text' || projectType == 'tabular')">
+                    <clr-toggle-wrapper>
+                      <input type="checkbox" clrToggle name="expand" (change)="ExpandChanged($event)" />
+                      <label style="font-weight: 500">{{ expandName }}</label>
+                    </clr-toggle-wrapper>
+                    <clr-tree>
+                      <clr-tree-node
+                        [clrExpanded]="expandValue"
+                        *clrRecursiveFor="let label of treeLabels; getChildren: getChildren"
+                        [clrSelected]="label.enable"
+                        (clrSelectedChange)="changeSelectedlabel(label, $event)"
+                        title="{{ label.name }}"
+                      >
+                        {{ label.name }}
+                      </clr-tree-node>
+                    </clr-tree>
+                  </div>
+                  <div class="actions">
+                    <div
+                      *ngIf="actionError"
+                      class="alert alert-info alert-md"
+                      role="alert"
+                      style="margin-top: 1.5rem; margin-bottom: -2rem"
+                    >
+                      <div class="alert-items">
+                        <div class="alert-item static">
+                          <div class="alert-icon-wrapper">
+                            <cds-icon class="alert-icon" shape="info-circle"></cds-icon>
+                          </div>
+                          <div class="alert-text">{{ actionError }}</div>
+                        </div>
+                      </div>
+                      <button type="button" class="close" aria-label="Close" style="margin-top: 0px !important">
+                        <cds-icon aria-hidden="true" shape="close" (click)="actionError = null"> </cds-icon>
+                      </button>
+                    </div>
+                    <div
+                      class="clr-row clr-justify-content-between"
+                      style="margin-left: unset; margin-top: 1rem; margin-bottom: 2rem; margin-right: unset"
+                    >
+                      <button class="clr-col btn btn-link" type="button" (click)="isBack()">
+                        <cds-icon shape="angle" style="transform: rotate(-90deg)"></cds-icon>
+                        PREVIOUS ITEM
+                      </button>
+
+                      <button
+                        class="clr-col btn btn-link"
+                        type="button"
+                        (click)="onSkipGame()"
+                        [disabled]="disabledSkip"
+                      >
+                        <cds-icon shape="ban"></cds-icon>
+                        SKIP ITEM
+                      </button>
+                      <button
+                        *ngIf="startFrom === 'review'"
+                        class="clr-col btn btn-link"
+                        type="button"
+                        (click)="pass()"
+                      >
+                        <cds-icon shape="checkbox-list"></cds-icon>
+                        PASS ITEM
+                      </button>
+                      <button
+                        *ngIf="
+                          startFrom == 'review' &&
+                          ((projectType !== 'text' && projectType !== 'tabular') ||
+                            isMultipleNumericLabel ||
+                            isNumeric ||
+                            isMultipleLabel)
+                        "
+                        [disabled]="
+                          selectedTreeLabels.length == 0 &&
+                          multipleLabelList.length == 0 &&
+                          spansList.length == 0 &&
+                          currentBoundingData.length == 0 &&
+                          !isNumeric
+                        "
+                        class="clr-col btn btn-link submit"
+                        type="submit"
+                        title="MODIFY ITEM"
+                      >
+                        NEXT ITEM
+                        <cds-icon shape="angle" style="transform: rotate(90deg)"></cds-icon>
+                      </button>
+                      <button
+                        *ngIf="
+                          startFrom !== 'review' &&
+                          ((projectType !== 'text' && projectType !== 'tabular') ||
+                            isMultipleNumericLabel ||
+                            isNumeric ||
+                            isMultipleLabel)
+                        "
+                        class="clr-col btn btn-link submit"
+                        type="submit"
+                        [disabled]="
+                          selectedTreeLabels.length == 0 &&
+                          multipleLabelList.length == 0 &&
+                          spansList.length == 0 &&
+                          currentBoundingData.length == 0 &&
+                          !isNumeric
+                        "
+                        title="{{
+                          multipleLabelList.length > 0 || spansList.length > 0 || currentBoundingData.length > 0
+                            ? ''
+                            : 'You can only submit after annotating'
+                        }}"
+                      >
+                        NEXT ITEM
+                        <cds-icon shape="angle" style="transform: rotate(90deg)"></cds-icon>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- to show it when there has no data -->
+              <div *ngIf="(sr.MSG || error) && !loading" style="margin-top: 1rem">
+                <div class="alert alert-info" role="alert">
+                  <div class="alert-items">
+                    <div class="alert-item static">
+                      <div class="alert-icon-wrapper">
+                        <cds-icon class="alert-icon" shape="info-circle"></cds-icon>
+                      </div>
+                      <span class="alert-text">{{ error }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- to show annotators' job -->
+              <div
+                *ngIf="
+                  (projectType == 'text' || projectType == 'tabular') &&
+                  startFrom === 'review' &&
+                  moreReviewInfo.length > 0
+                "
+                class="limit-height"
+              >
+                <h5 style="margin-top: 1rem">Annotator labeled results:</h5>
+                <clr-datagrid *ngIf="labelType !== 'HTL'">
+                  <clr-dg-column>Annotator</clr-dg-column>
+                  <clr-dg-column>Label</clr-dg-column>
+                  <clr-dg-column>Time</clr-dg-column>
+                  <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
+                    <clr-dg-cell>{{ reviewInfo.annotator }}</clr-dg-cell>
+                    <clr-dg-cell>{{ reviewInfo.annotationInfo }}</clr-dg-cell>
+                    <clr-dg-cell>{{ reviewInfo.time | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+                  </clr-dg-row>
+                  <clr-dg-footer>{{ moreReviewInfo.length }} annotation info</clr-dg-footer>
+                </clr-datagrid>
+                <clr-datagrid *ngIf="labelType === 'HTL'">
+                  <clr-dg-column>Annotator</clr-dg-column>
+                  <clr-dg-column>Label</clr-dg-column>
+                  <clr-dg-column>Time</clr-dg-column>
+                  <clr-dg-row *ngFor="let reviewInfo of moreReviewInfo">
+                    <clr-dg-cell>{{ reviewInfo.annotator }}</clr-dg-cell>
+                    <clr-dg-cell class="disableTree">
+                      <div class="tree-icon" (click)="clickTreeView(reviewInfo.annotationInfo)">
+                        <cds-icon shape="view-list" title="tree view detail"></cds-icon> click the icon to review with
+                        tree label
+                      </div>
+                      <ul *ngFor="let selectedTreeLabel of reviewInfo.reducedCategory; let i = index">
+                        <li>{{ selectedTreeLabel }}</li>
+                      </ul>
+                    </clr-dg-cell>
+                    <clr-dg-cell>{{ reviewInfo.time | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+                  </clr-dg-row>
+                  <clr-dg-footer>{{ moreReviewInfo.length }} annotation info</clr-dg-footer>
+                </clr-datagrid>
+              </div>
+            </form>
+          </div>
+          <div class="createEntrance" [ngClass]="{ 'clr-col-5': !isDrawer, isDrawer: isDrawer }">
+            <app-annotate-progress-board
+              [msg]="annotateProgressMsg"
+              (outClickHistory)="receiveOutClickHistory($event)"
+              (outClickReviewOrder)="receiveOutClickReviewOrder($event)"
+              (outSelectReviewee)="receiveOutSelectReviewee($event)"
+            >
+            </app-annotate-progress-board>
+          </div>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab *ngIf="user.role !== 'Annotator'">
+      <button clrTabLink (click)="clickTab(2)">Analyze</button>
+      <clr-tab-content *clrIfActive>
+        <div class="clr-row">
+          <div
+            [ngClass]="{ 'clr-col-7': !isDrawer, 'clr-col-12': isDrawer, annotateBorder: !isDrawer }"
+            class="projectDetailLeft"
+          >
+            <app-latest-annotation-data [msg]="msgLatestData"></app-latest-annotation-data>
+            <div style="position: absolute; top: 1.5rem; right: 0rem">
+              <div class="showTag" *ngIf="!isDrawer" (click)="detailDrawer()">
+                <cds-icon shape="angle" class="drawer" size="sm" style="transform: rotate(90deg)"> </cds-icon>
+              </div>
+              <div class="hideTag" *ngIf="isDrawer" (click)="detailDrawer()">
+                <cds-icon shape="angle" class="drawer" size="sm" style="transform: rotate(-90deg)"> </cds-icon>
+              </div>
+            </div>
+          </div>
+          <div class="createEntrance" [ngClass]="{ 'clr-col-5': !isDrawer, isDrawer: isDrawer }">
+            <app-annotate-progress-board [msg]="annotateProgressMsg" (outClickHistory)="receiveOutClickHistory($event)">
+            </app-annotate-progress-board>
+          </div>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab *ngIf="user.role !== 'Annotator'">
+      <button clrTabLink (click)="clickTab(3)">Stats</button>
+      <clr-tab-content *clrIfActive>
+        <div class="clr-row">
+          <div
+            [ngClass]="{ 'clr-col-7': !isDrawer, 'clr-col-12': isDrawer, annotateBorder: !isDrawer }"
+            class="projectDetailLeft"
+          >
+            <app-user-category-d3 [msg]="msgUserCategoryData"></app-user-category-d3>
+            <div style="position: absolute; top: 1.2rem; right: 0rem">
+              <div class="showTag" *ngIf="!isDrawer" (click)="detailDrawer()">
+                <cds-icon shape="angle" class="drawer" size="sm" style="transform: rotate(90deg)"> </cds-icon>
+              </div>
+              <div class="hideTag" *ngIf="isDrawer" (click)="detailDrawer()">
+                <cds-icon shape="angle" class="drawer" size="sm" style="transform: rotate(-90deg)"> </cds-icon>
+              </div>
+            </div>
+          </div>
+          <div class="createEntrance" [ngClass]="{ 'clr-col-5': !isDrawer, isDrawer: isDrawer }">
+            <app-annotate-progress-board [msg]="annotateProgressMsg" (outClickHistory)="receiveOutClickHistory($event)">
+            </app-annotate-progress-board>
+          </div>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab *ngIf="user.role !== 'Annotator'">
+      <button clrTabLink (click)="clickTab(4)">Add New Entries</button>
+      <clr-tab-content *clrIfActive>
+        <div class="clr-row">
+          <div class="clr-col-12">
+            <app-append [msg]="msgAppend"></app-append>
+          </div>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
+</div>
+<div class="popDialog" id="popDialog">
+  <div class="clearPop" (click)="clearPopDialog()">×</div>
+  <div style="display: inline-table; padding-top: 1rem; padding-left: 0.5rem">
+    <button
+      *ngFor="let poplabel of popLabels; let i = index"
+      type="button"
+      class="btn btn-sm"
+      [style.background-color]="popLabelColors[i]"
+      [style.border-color]="popLabelColors[i]"
+      style="color: white"
+      [title]="poplabel"
+      (click)="clickPopLabel($event, poplabel, popLabelColors[i])"
+    >
+      {{ poplabel }}
+    </button>
+  </div>
+  <div class="popDialog-arrow"></div>
+  <div class="popDialog-insideArrow"></div>
+</div>
+<app-treeview-modal *ngIf="showTreeView" (onCloseTreeDialog)="onCloseTreeDialog()" [treeData]="treeData">
+</app-treeview-modal>
+
+<clr-modal [(clrModalOpen)]="isEndingGameDialog" [clrModalClosable]="false">
+  <h3 class="modal-title">Are you sure you want to exit?</h3>
+  <div class="modal-body">
+    <p *ngIf="labelChoose != '' || questionForm.get('category').value">You already provide a label.</p>
+  </div>
+  <div class="modal-footer modal-footer-annotate">
+    <button class="btn btn-outline" type="button" (click)="isEndingGameDialog = false">No</button>
+    <button type="button" class="btn btn-primary" (click)="outOfPage()" routerLinkActive="active">Yes</button>
+  </div>
+</clr-modal>

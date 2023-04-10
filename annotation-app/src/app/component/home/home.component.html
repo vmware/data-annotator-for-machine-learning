@@ -1,0 +1,256 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="clr-row">
+  <div class="clr-col-1"></div>
+  <div class="clr-col-10">
+    <div *ngIf="!unsubscribe && isUnsubscribe" class="alert alert-danger" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <cds-icon class="alert-icon" shape="exclamation-circle"></cds-icon>
+          </div>
+          <span class="alert-text"> Failed to unsubscribe from reminder emails about annotation jobs.</span>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="unsubscribe && isUnsubscribe" class="alert alert-success" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <cds-icon class="alert-icon" shape="check-circle"></cds-icon>
+          </div>
+          <span class="alert-text"> Succeed to unsubscribe from reminder emails about annotation jobs. </span>
+        </div>
+      </div>
+    </div>
+
+    <h1 style="margin-bottom: 2rem">{{ env.config.serviceTitle }}</h1>
+    <h3>What is {{ env.config.serviceTitle }}?</h3>
+    <p>
+      {{ env.config.serviceTitle }} helps data science teams facilitate the creation and management of annotations for
+      your machine learning project.
+    </p>
+    <p>
+      Tutorials and Kaggle challenges provide clean labeled data and score on model performance. This is often not the
+      case in the real world where “real data” requires much more than modeling. In addition to data pre-processing,
+      successful ML projects often require annotating a lot of data.
+    </p>
+    <p>
+      {{ env.config.serviceTitle }} streamlines the entire annotation process so you can centrally create, manage and
+      administer annotation projects. No more sharing confusing large spreadsheets and bugging annotators over
+      Slack/Email.
+    </p>
+    <p>Image, text, tabular and logs are supported.</p>
+    <button
+      class="btn btn-primary get-started"
+      type="button"
+      [routerLink]="['/loop/project/list']"
+      routerLinkActive="active"
+    >
+      Get Started
+    </button>
+  </div>
+  <div class="clr-col-1"></div>
+</div>
+
+<div class="clr-row">
+  <div class="clr-col-1"></div>
+  <div class="clr-col-10">
+    <div class="clr-row">
+      <div class="clr-col-lg-4 clr-col-12 card-padding">
+        <div class="card">
+          <div class="card-block">
+            <div class="card-text">
+              <div class="card-icon">
+                <cds-icon shape="bolt" size="42"></cds-icon>
+              </div>
+              <div class="card-title">Create New Projects in Minutes</div>
+              <div>
+                Upload any columnar data in a CSV, write instructions to ensure no ambiguity in labelling decisions,
+                assign the annotation task across VMware
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="clr-col-lg-4 clr-col-12 card-padding">
+        <div class="card">
+          <div class="card-block">
+            <div class="card-text">
+              <div class="card-icon">
+                <cds-icon shape="rack-server" size="42"></cds-icon>
+              </div>
+              <div class="card-title">Track Annotation Progress</div>
+              <div>
+                Progress is continually updated to get a 360 overview of your annotation project with leaderboards
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="clr-col-lg-4 clr-col-12 card-padding">
+        <div class="card">
+          <div class="card-block">
+            <div class="card-text">
+              <div class="card-icon">
+                <cds-icon shape="success-standard" size="42"></cds-icon>
+              </div>
+              <div class="card-title">Export Improved Data</div>
+              <div>
+                Export your annotations at any time to continuously validate the quality of your data or refine
+                instructions
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="clr-col-1"></div>
+</div>
+
+<div class="clr-row" style="margin-top: 2rem; margin-bottom: 2rem">
+  <div class="clr-col-1"></div>
+  <div class="clr-col-10">
+    <h3 style="text-align: center">Simple Interface for Annotators</h3>
+    <div class="clr-row" style="margin-top: 2rem">
+      <div class="clr-col-4">
+        <div>Steve's Sentiment Project</div>
+        <div style="margin-top: 0.6rem">
+          <span style="font-weight: bold">Task:</span>
+          Given a customer ticket, assign a label of negative, positive, or neutral.
+        </div>
+        <div style="margin-top: 0.6rem">
+          <div style="font-weight: bold">Instructions:</div>
+          Positive: for tickets with praise or good feedback<br />
+          Negative: for tickets that show dissatisfaction<br />
+          Neutral: for tickets with neither negative or positive terminology
+        </div>
+        <div class="progressBar">
+          <div class="white">
+            <div class="green"></div>
+          </div>
+          <div class="progressText">22/48&nbsp;completed</div>
+        </div>
+      </div>
+      <div class="clr-col-8">
+        <div class="sample">
+          VMware vSphere® uses virtualization to transform individual data centers into aggregated computing
+          infrastructures that include CPU, storage, and networking resources. NSX and vSAN are critical components in
+          the full SDDC vision
+        </div>
+        <div class="annotateBtn clr-row">
+          <div class="clr-col-3"></div>
+          <div class="clr-col-2">
+            <div class="annotate positive">Positive</div>
+          </div>
+          <div class="clr-col-2">
+            <div class="annotate negative">Negative</div>
+          </div>
+          <div class="clr-col-2">
+            <div class="annotate neutral">Neutral</div>
+          </div>
+          <div class="clr-col-3"></div>
+        </div>
+        <div class="skipBtn clr-row">
+          <div class="clr-col-7"></div>
+          <div class="clr-col-5">
+            <div class="clr-row">
+              <div class="clr-col-4">
+                <div class="skip">Skip</div>
+              </div>
+              <div class="clr-col-4">
+                <div class="skip">Previous</div>
+              </div>
+              <div class="clr-col-4">
+                <div class="skip">Exit</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="clr-col-1"></div>
+</div>
+
+<div class="clr-row" style="margin-top: 2rem; margin-bottom: 2rem">
+  <div class="clr-col-1"></div>
+  <div class="clr-col-10">
+    <h3 style="text-align: center">ML Assistance</h3>
+
+    <div class="clr-row bulletpoint">
+      <div class="clr-col-2 circleBox">
+        <div class="circle">
+          <cds-icon shape="lightbulb" class="lightbulbIcon"></cds-icon>
+        </div>
+      </div>
+      <div class="clr-row clr-col-10 boxLine">
+        <div class="clr-col-7" style="flex: 1 1 50%; margin-left: 1rem; color: pink">
+          <div>
+            <p>Active Learning selects superior data points to create a good decision boundary</p>
+            <p>Improve ML models with less annotated data</p>
+            <p></p>
+          </div>
+        </div>
+        <div class="clr-col-5 cycleBox">
+          <div>
+            <div class="clr-row">
+              <div style="width: 25%; position: relative; padding-top: 15px; padding-left: 20px">
+                <img
+                  src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjAwIDIwMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiMwMDc3Yjg7fQo8L3N0eWxlPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjAwLjQ2LDg1LjMxbC03Ni42LDQ0LjUxbC0xLjI4LTI2LjExYzAsMC01MC4wNy0wLjg2LTkyLjAxLDQ1Ljc5bC0yOS4xLTIzLjExYzAsMCwzOS4zNy01NS4yMSwxMjEuNTQtNTkuOTEKCVYzNi41MkwyMDAuNDYsODUuMzF6Ii8+Cjwvc3ZnPgo="
+                  alt=""
+                  style="transform: rotate(-25deg)"
+                />
+              </div>
+              <div class="text" style="width: 40%">Calculate Accuracy</div>
+              <div style="width: 25%; position: relative; padding-top: 15px; padding-right: 20px">
+                <img
+                  src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjAwIDIwMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiMwMDc3Yjg7fQo8L3N0eWxlPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjAwLjQ2LDg1LjMxbC03Ni42LDQ0LjUxbC0xLjI4LTI2LjExYzAsMC01MC4wNy0wLjg2LTkyLjAxLDQ1Ljc5bC0yOS4xLTIzLjExYzAsMCwzOS4zNy01NS4yMSwxMjEuNTQtNTkuOTEKCVYzNi41MkwyMDAuNDYsODUuMzF6Ii8+Cjwvc3ZnPgo="
+                  alt=""
+                  style="transform: rotate(52deg)"
+                />
+              </div>
+            </div>
+            <div class="clr-row">
+              <div class="text" style="width: 25%">Train Model</div>
+              <div class="text" style="width: 40%"></div>
+              <div class="text" style="width: 25%">Measure Uncertainty</div>
+            </div>
+            <div class="clr-row">
+              <div style="width: 25%; position: relative; padding-left: 20px; padding-bottom: 15px">
+                <img
+                  src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjAwIDIwMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiMwMDc3Yjg7fQo8L3N0eWxlPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjAwLjQ2LDg1LjMxbC03Ni42LDQ0LjUxbC0xLjI4LTI2LjExYzAsMC01MC4wNy0wLjg2LTkyLjAxLDQ1Ljc5bC0yOS4xLTIzLjExYzAsMCwzOS4zNy01NS4yMSwxMjEuNTQtNTkuOTEKCVYzNi41MkwyMDAuNDYsODUuMzF6Ii8+Cjwvc3ZnPgo="
+                  alt=""
+                  style="transform: rotate(238deg)"
+                />
+              </div>
+              <div class="text" style="width: 40%">Query Annotators</div>
+              <div style="width: 25%; position: relative; padding-right: 20px; padding-bottom: 15px">
+                <img
+                  src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjAwIDIwMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiMwMDc3Yjg7fQo8L3N0eWxlPgo8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjAwLjQ2LDg1LjMxbC03Ni42LDQ0LjUxbC0xLjI4LTI2LjExYzAsMC01MC4wNy0wLjg2LTkyLjAxLDQ1Ljc5bC0yOS4xLTIzLjExYzAsMCwzOS4zNy01NS4yMSwxMjEuNTQtNTkuOTEKCVYzNi41MkwyMDAuNDYsODUuMzF6Ii8+Cjwvc3ZnPgo="
+                  alt=""
+                  style="transform: rotate(154deg)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="clr-col-1"></div>
+</div>
+<div *ngIf="env.config.videoSrc" class="clr-row" style="margin-top: 2rem; margin-bottom: 2rem">
+  <div class="clr-col-1"></div>
+  <div class="clr-col-10">
+    <h3 style="text-align: center">Demo</h3>
+    <div class="video" style="margin-top: 2rem">
+      <video src="{{ env.config.videoSrc }}" style="width: 100%" controls poster="assets/images/demo.png"></video>
+    </div>
+  </div>
+  <div class="clr-col-1"></div>
+</div>

@@ -1,11 +1,11 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { EnvironmentsService } from 'app/services/environments.service';
+import { EnvironmentsService } from 'src/app/services/environments.service';
 import { Console } from 'console';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class ToolService {
     if (c && c.length == 4) {
       c = '#' + [c[1], c[1], c[2], c[2], c[3], c[3]].join('');
     }
-    c = '0x' + c.substring(1);
+    c = '0x' + c?.substring(1);
     return 'rgb(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(',') + ',0.4)';
   }
 
@@ -41,11 +41,7 @@ export class ToolService {
   toRegEmail(emails) {
     if (this.env.config.authUrl) {
       for (let i = 0; i < emails.length; i++) {
-        if (
-          !/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/.test(
-            emails[i].trim(),
-          )
-        ) {
+        if (!/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/.test(emails[i].trim())) {
           return false;
         }
       }

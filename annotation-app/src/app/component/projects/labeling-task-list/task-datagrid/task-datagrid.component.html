@@ -1,0 +1,316 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="container">
+  <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ errorMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+    <clr-alert-item>
+      <span class="alert-text">
+        {{ infoMessage }}
+      </span>
+    </clr-alert-item>
+  </clr-alert>
+  <div>
+    <clr-datagrid [clrDgLoading]="loading" class="gridHeight">
+      <clr-dg-placeholder>We couldn't find any project for you!</clr-dg-placeholder>
+      <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid">Task Name </clr-dg-column>
+      <clr-dg-column [clrDgField]="'projectType'" class="ellipsis-datagrid">
+        <ng-container *clrDgHideableColumn="{ hidden: false }">Type</ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'creator'" class="ellipsis-datagrid">
+        <ng-container *clrDgHideableColumn="{ hidden: true }">Task Owner</ng-container>
+      </clr-dg-column>
+      <clr-dg-column class="ellipsis-datagrid">Status</clr-dg-column>
+      <clr-dg-column class="ellipsis-datagrid">Annotation Progress</clr-dg-column>
+      <clr-dg-column [clrDgField]="'dataSource'" class="ellipsis-datagrid">Data Source </clr-dg-column>
+      <clr-dg-column [clrDgField]="'totalCase'" class="ellipsis-datagrid">Items </clr-dg-column>
+      <clr-dg-column [clrDgField]="'annotator'" class="ellipsis-datagrid">Labelers</clr-dg-column>
+      <clr-dg-column [clrDgField]="'maxAnnotation'" class="ellipsis-datagrid">
+        <ng-container *clrDgHideableColumn="{ hidden: true }">Max Annotation</ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'assignmentLogic'" class="ellipsis-datagrid">
+        <ng-container *clrDgHideableColumn="{ hidden: true }">Assignment Logic</ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'categoryList'" class="ellipsis-datagrid">
+        <ng-container *clrDgHideableColumn="{ hidden: true }">Labels</ng-container>
+      </clr-dg-column>
+      <clr-dg-column [clrDgField]="'createdDate'" class="ellipsis-datagrid">Create On</clr-dg-column>
+      <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">Last Updated On</clr-dg-column>
+
+      <ng-container>
+        <clr-dg-row *clrDgItems="let dataset of projects; let i = index" [clrDgItem]="dataset">
+          <clr-dg-action-overflow>
+            <button
+              class="action-item"
+              [disabled]="
+                dataset.totalCase == 0 ||
+                !dataset.disableReview ||
+                dataset.projectCompleteCase == 0 ||
+                !dataset.allowOwnerReview
+              "
+              (click)="toAnalyze(dataset, 'review')"
+            >
+              Review
+            </button>
+            <button
+              class="action-item"
+              [disabled]="dataset.totalCase == 0 || user.role === 'Annotator'"
+              (click)="editProjectDialog = true; deleteDatasetDialog = false; showProjectEdit(dataset)"
+            >
+              Edit
+            </button>
+            <button class="action-item" (click)="share(dataset)" [disabled]="user.role === 'Annotator'">
+              {{ dataset.shareStatus ? 'Unshare' : 'Share' }}
+            </button>
+            <button
+              class="action-item"
+              *ngIf="dataset.generateInfo?.status == 'pending'"
+              (click)="selectedDataset = dataset; generateProject(selectedDataset)"
+              [disabled]="dataset.totalCase == 0 || user.role === 'Annotator'"
+            >
+              Download
+            </button>
+            <button
+              *ngIf="dataset.generateInfo?.status == 'prepare' || dataset.generateInfo?.status == 'generating'"
+              class="action-item"
+            >
+              Downloading
+            </button>
+            <button
+              *ngIf="dataset.generateInfo?.status == 'done'"
+              class="action-item"
+              (click)="selectedDataset = dataset; clickDownload(selectedDataset)"
+              [disabled]="dataset.totalCase == 0 || user.role === 'Annotator'"
+            >
+              Download
+            </button>
+            <button class="action-item" (click)="delete(dataset)" [disabled]="user.role === 'Annotator'">Delete</button>
+          </clr-dg-action-overflow>
+          <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{ dataset.projectName }}">
+            <a (click)="toAnalyze(dataset, 'annotate')" [ngClass]="dataset.totalCase == 0 ? 'pnameLink' : ''">{{
+              dataset.projectName
+            }}</a>
+          </clr-dg-cell>
+          <clr-dg-cell>
+            <cds-icon
+              style="margin-right: 0.3rem"
+              shape="{{
+                dataset.projectType === 'text'
+                  ? 'text'
+                  : dataset.projectType === 'log'
+                  ? 'bundle'
+                  : dataset.projectType === 'image'
+                  ? 'image'
+                  : dataset.projectType === 'tabular'
+                  ? 'table'
+                  : dataset.projectType === 'ner'
+                  ? 'bars'
+                  : 'unknown-status'
+              }}"
+            >
+            </cds-icon>
+            {{ dataset.projectType }}
+          </clr-dg-cell>
+          <clr-dg-cell class="annotatorCell" title="{{ dataset.creator }}"
+            ><span class="annotatorSpan" *ngIf="dataset.firstLetterOwner.length > 0" title="{{ dataset.creator[0] }}">{{
+              dataset.firstLetterOwner[0]
+            }}</span
+            ><span class="annotatorSpan" *ngIf="dataset.firstLetterOwner.length > 1" title="{{ dataset.creator[1] }}">{{
+              dataset.firstLetterOwner[1]
+            }}</span
+            ><span class="annotatorSpan" *ngIf="dataset.creator.length > 2">+3</span></clr-dg-cell
+          >
+          <clr-dg-cell
+            [ngStyle]="{
+              color:
+                dataset.projectCompleteCase === 0
+                  ? 'rgb(246,98,153)'
+                  : dataset.projectCompleteCase === dataset.totalCase
+                  ? 'rgb(85,152,45)'
+                  : 'rgb(255,144,58)'
+            }"
+          >
+            {{
+              dataset.projectCompleteCase === 0
+                ? 'Pending'
+                : dataset.projectCompleteCase === dataset.totalCase
+                ? 'Completed'
+                : 'In
+                        Progress'
+            }}</clr-dg-cell
+          >
+          <clr-dg-cell>
+            <div class="progress-static">
+              <clr-progress-bar
+                *ngIf="dataset.progress === 100 && dataset.projectCompleteCase != 0"
+                clrValue="100"
+                title="{{ dataset.projectCompleteCase }}/{{ dataset.totalCase }}"
+                clrSuccess
+              >
+              </clr-progress-bar>
+              <clr-progress-bar
+                *ngIf="dataset.progress === 100 && dataset.projectCompleteCase == 0"
+                clrValue="0"
+                title="{{ dataset.projectCompleteCase }}/{{ dataset.totalCase }}"
+              >
+              </clr-progress-bar>
+              <clr-progress-bar
+                *ngIf="dataset.progress !== 100"
+                clrValue="{{ dataset.progress }}"
+                title="{{ dataset.projectCompleteCase }}/{{ dataset.totalCase }}"
+              >
+              </clr-progress-bar>
+            </div>
+          </clr-dg-cell>
+
+          <clr-dg-cell class="cellWordBreak" title="{{ dataset.dataSource }}">
+            {{ dataset.dataSource }}
+          </clr-dg-cell>
+          <clr-dg-cell> {{ dataset.totalCase }}</clr-dg-cell>
+          <clr-dg-cell class="annotatorCell" title="{{ dataset.annotator }}"
+            ><span class="annotatorSpan" *ngIf="dataset.firstLetter.length > 0" title="{{ dataset.annotator[0] }}">{{
+              dataset.firstLetter[0]
+            }}</span
+            ><span class="annotatorSpan" *ngIf="dataset.firstLetter.length > 1" title="{{ dataset.annotator[1] }}">{{
+              dataset.firstLetter[1]
+            }}</span
+            ><span class="annotatorSpan" *ngIf="dataset.annotator.length > 2">+3</span></clr-dg-cell
+          >
+          <clr-dg-cell> {{ dataset.maxAnnotation }}</clr-dg-cell>
+          <clr-dg-cell> {{ dataset.assignmentLogic }}</clr-dg-cell>
+          <clr-dg-cell *ngIf="dataset.labelType === 'HTL'" class="disableTree">
+            <div style="cursor: pointer" (click)="clickTreeView(dataset.categoryList)">
+              <cds-icon shape="view-list" title="tree view detail"></cds-icon> click the icon to review with tree label
+            </div>
+          </clr-dg-cell>
+          <clr-dg-cell
+            *ngIf="dataset.labelType !== 'HTL'"
+            class="cellWordBreak"
+            title="{{
+              dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
+                ? dataset.min + '--' + dataset.max
+                : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
+                ? dataset.mutilNumbericLabels
+                : dataset.categoryList
+            }}"
+          >
+            {{
+              dataset.labelType == 'numericLabel' && !dataset.isMultipleLabel
+                ? dataset.min + '--' + dataset.max
+                : dataset.labelType == 'numericLabel' && dataset.isMultipleLabel
+                ? dataset.mutilNumbericLabels
+                : dataset.categoryList
+            }}</clr-dg-cell
+          >
+          <clr-dg-cell>{{ dataset.createdDate | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+          <clr-dg-cell>{{ dataset.updatedDate | date : 'yyyy-MM-dd HH:mm:ss' }}</clr-dg-cell>
+        </clr-dg-row>
+      </ng-container>
+      <clr-dg-footer>
+        <clr-dg-column-toggle>
+          <clr-dg-column-toggle-title>Column List</clr-dg-column-toggle-title>
+          <clr-dg-column-toggle-button>Select All Button</clr-dg-column-toggle-button>
+        </clr-dg-column-toggle>
+        <clr-dg-pagination #pagination [clrDgPageSize]="10">
+          <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Project per page</clr-dg-page-size>
+          {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Projects
+        </clr-dg-pagination>
+      </clr-dg-footer>
+    </clr-datagrid>
+  </div>
+</div>
+
+<app-treeview-modal *ngIf="showTreeView" (onCloseTreeDialog)="onCloseTreeDialog()" [treeData]="treeData">
+</app-treeview-modal>
+
+<app-modal-confirm
+  *ngIf="deleteDatasetDialog"
+  [msg]="msgDelete"
+  (cancelBtn)="receiveCloseDelete($event)"
+  (okBtn)="receiveDeleteOkBtn($event)"
+></app-modal-confirm>
+
+<app-modal-confirm
+  *ngIf="toStopShare"
+  [msg]="msgShare"
+  (cancelBtn)="receiveCloseShare($event)"
+  (okBtn)="receiveOkBtnShare($event)"
+></app-modal-confirm>
+
+<!-- popup dialog - confirmation to share dataset -->
+<clr-modal [(clrModalOpen)]="toShare" [clrModalClosable]="false">
+  <h3 class="modal-title">Share Datasets</h3>
+  <div class="modal-body">
+    <div class="clr-row">
+      <label for="description" class="label-tooltip clr-col-12 clr-col-md-3">Description</label>
+      <div class="clr-textarea-wrapper clr-col-12 clr-col-md-9">
+        <textarea
+          id="description"
+          class="clr-textarea"
+          style="width: 100% !important"
+          placeholder="Please describe what this dataset is for?"
+          [(ngModel)]="inputDescription"
+        ></textarea>
+      </div>
+    </div>
+    <div class="clr-row">
+      <p class="shareTip clr-col-12 clr-col-md-11">
+        Note: Thanks for sharing the annotated data to the {{ env.config.serviceTitle }} Community Datasets for other
+        {{ env.config.provider }} teams to use. And, at anytime you can un-share to make this dataset private.
+      </p>
+    </div>
+    <div *ngIf="!inputDescription" class="alert alert-danger" role="alert">
+      <div class="alert-items">
+        <div class="alert-item static">
+          <div class="alert-icon-wrapper">
+            <cds-icon class="alert-icon" shape="exclamation-circle"></cds-icon>
+          </div>
+          <span class="alert-text"> Please give a description before share. </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="receiveCloseShare()">Cancel</button>
+    <button *ngIf="!shareDataComplete" type="button" class="btn btn-primary" (click)="receiveOkBtnShare()">OK</button>
+    <button *ngIf="shareDataComplete" type="button" class="btn">
+      <clr-spinner
+        clrAssertive
+        style="min-height: 0.75rem; min-width: 0.75rem; height: 0.75rem; width: 0.75rem; margin-top: 0.5rem"
+        >loading
+      </clr-spinner>
+    </button>
+  </div>
+</clr-modal>
+
+<app-download
+  *ngIf="showDownloadDatasets"
+  [msg]="msg"
+  (onCloseDownloadDialog)="receiveCloseDownloadInfo($event)"
+  (generateDownloadProject)="receiveGenerateInfo($event)"
+>
+</app-download>
+
+<app-generate
+  *ngIf="showGenerateDatasets"
+  [msg]="msgGenerate"
+  (onCloseGenerateDialog)="receiveCloseGenerateInfo($event)"
+  (refreshProject)="receiveGenerateInfo($event)"
+>
+</app-generate>
+
+<!-- popup dialog - edit project  -->
+<app-edit-project
+  *ngIf="editProjectDialog"
+  [msgInEdit]="msgEdit"
+  (onCloseEditDialog)="receiveCloseEdit($event)"
+  (onSubmitEdit)="receiveSubmitEdit($event)"
+  (onDeleteLabel)="receiveDeleteLabel($event)"
+>
+</app-edit-project>

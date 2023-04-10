@@ -1,0 +1,31 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.title {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+::ng-deep .clr-accordion-header-button {
+  height: 2.5rem;
+}
+
+::ng-deep .clr-accordion-inner-content {
+  padding: 0.8rem 1.5rem !important;
+}
+
+::ng-deep .clr-accordion-content {
+  border: unset !important;
+}
+
+::ng-deep .clr-accordion-header {
+  border: unset !important;
+  border-bottom: 1px solid #ededed !important;
+}
+
+span {
+  font-size: 0.7rem;
+  padding-right: 0.3rem;
+}

@@ -1,0 +1,425 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div>
+  <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage = ''">
+    <div class="alert-item">
+      <span class="alert-text">{{ errorMessage }}</span>
+    </div>
+  </clr-alert>
+  <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+    <div class="alert-item">
+      <span class="alert-text">{{ infoMessage }}</span>
+    </div>
+  </clr-alert>
+</div>
+<div class="clr-row clr-justify-content-between">
+  <div class="clr-col-8">
+    <h4>{{ isQuick ? 'Quick Add' : 'Upload File' }}</h4>
+    <span *ngIf="!isQuick"
+      >Before you upload, make sure your new file contains the same original headers. Then choose a data source.</span
+    >
+  </div>
+  <div class="clr-col-4 btn-group floatRight btn-sm">
+    <div class="radio btn">
+      <input type="radio" name="btn-group-demo-radios" id="btn-demo-radio-1" checked />
+      <label for="btn-demo-radio-1" (click)="shiftBtnRadio('quick')">Quick Add</label>
+    </div>
+    <div class="radio btn">
+      <input type="radio" name="btn-group-demo-radios" id="btn-demo-radio-2" />
+      <label for="btn-demo-radio-2" (click)="shiftBtnRadio('upload')">Upload File</label>
+    </div>
+  </div>
+</div>
+<div class="clr-row">
+  <div class="clr-col-9">
+    <div *ngIf="msg.projectType !== 'image' && msg.projectType !== 'log'" class="btn-link">
+      <button class="btn" style="padding-left: unset" (click)="clickExample()">
+        View Example <cds-icon [ngClass]="!isShowExample ? 'exampleAngle' : ''" shape="angle"> </cds-icon>
+      </button>
+    </div>
+    <clr-datagrid *ngIf="isShowExample" [clrDgLoading]="loading">
+      <clr-dg-column style="max-width: 90px">S. No.</clr-dg-column>
+      <clr-dg-column *ngFor="let header of sampleData">{{ header.key }}</clr-dg-column>
+      <clr-dg-row>
+        <clr-dg-cell style="max-width: 90px">1</clr-dg-cell>
+        <clr-dg-cell *ngFor="let content of sampleData" style="padding-left: 0.8rem">
+          {{ content.value }}
+        </clr-dg-cell>
+      </clr-dg-row>
+    </clr-datagrid>
+    <div *ngIf="isQuick" class="datagridBox">
+      <clr-datagrid *ngIf="msg.projectType !== 'image' && msg.projectType !== 'log'" [clrDgLoading]="loading">
+        <clr-dg-column style="max-width: 90px">S. No.</clr-dg-column>
+        <clr-dg-column *ngFor="let header of sampleData">{{ header.key }}</clr-dg-column>
+        <clr-dg-column style="max-width: 90px">Action</clr-dg-column>
+        <clr-dg-row *ngFor="let content of newAddedData; let a = index">
+          <clr-dg-cell style="max-width: 90px">{{ a + 1 }}</clr-dg-cell>
+          <clr-dg-cell *ngFor="let b of content">
+            <textarea
+              class="editableCell"
+              name=""
+              id="{{ a }}_{{ b.key }}"
+              [(ngModel)]="b.value"
+              (keyup)="inputDescription($event, a, b.key)"
+            ></textarea>
+            <div *ngIf="b.format == false" style="color: red">Wrong Format!</div>
+          </clr-dg-cell>
+          <clr-dg-cell style="max-width: 90px">
+            <button
+              type="button"
+              class="btn btn-link actionClass"
+              role="tooltip"
+              aria-haspopup="true"
+              title="Delete"
+              (click)="deleteRow($event, a)"
+            >
+              <cds-icon aria-hidden="true" shape="trash"></cds-icon>
+            </button>
+          </clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+      <clr-datagrid *ngIf="msg.projectType == 'image'" [clrDgLoading]="loading">
+        <clr-dg-column>#</clr-dg-column>
+        <clr-dg-column>Image</clr-dg-column>
+        <clr-dg-column>Image Name</clr-dg-column>
+        <clr-dg-column>Image Size (KB)</clr-dg-column>
+        <clr-dg-row *ngFor="let content of newAddedData; let a = index">
+          <clr-dg-cell>{{ a + 1 }}</clr-dg-cell>
+          <clr-dg-cell>
+            <div class="uploadImage" (mouseenter)="enterImage(a)" (mouseleave)="leaveImage(a)">
+              <div class="imageHoverCover">
+                <img src="{{ content.src }}" alt="" class="imagePreview image{{ a }}" />
+                <div class="labelBox labelBox{{ a }}">
+                  <label class="label labelUpload" style="top: 6rem" (click)="deleteRow($event, a)">
+                    <span>
+                      <cds-icon size="18" shape="trash" style="margin-right: 0.2rem"> </cds-icon>
+                      DELETE
+                    </span>
+                  </label>
+                  <label class="label labelUpload" for="uploadImage{{ a }}" style="top: 8rem">
+                    <span>
+                      <cds-icon size="18" shape="upload" style="margin-right: 0.2rem"> </cds-icon>
+                      UPLOAD
+                    </span>
+                  </label>
+                  <input
+                    id="uploadImage{{ a }}"
+                    style="display: none"
+                    accept=".png,.jpg,.jpeg,.tif,.bmp"
+                    type="file"
+                    (change)="onImageChange($event, a)"
+                  />
+                </div>
+              </div>
+            </div>
+            <div *ngIf="content.format == false" style="color: red">Wrong Format!</div>
+          </clr-dg-cell>
+          <clr-dg-cell style="word-break: break-all">{{ content.name }}</clr-dg-cell>
+          <clr-dg-cell>{{ content.sizeInkb }}</clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+      <clr-datagrid *ngIf="msg.projectType == 'log'" [clrDgLoading]="loading">
+        <clr-dg-column>#</clr-dg-column>
+        <clr-dg-column>File Name</clr-dg-column>
+        <clr-dg-column>File Size (KB)</clr-dg-column>
+        <clr-dg-column>File Content</clr-dg-column>
+        <clr-dg-column>Action</clr-dg-column>
+        <clr-dg-row *ngFor="let content of newAddedData; let a = index">
+          <clr-dg-cell>{{ a + 1 }}</clr-dg-cell>
+          <clr-dg-cell style="word-break: break-all">{{ content.name }}</clr-dg-cell>
+          <clr-dg-cell>{{ content.sizeInkb }}</clr-dg-cell>
+          <clr-dg-cell
+            title="{{ content.fileContent }}"
+            style="
+              min-width: 400px;
+              margin-bottom: 0.5rem;
+              padding-bottom: unset;
+              word-break: break-all;
+              display: -webkit-box;
+              -webkit-box-orient: vertical;
+              -webkit-line-clamp: 20;
+              overflow: hidden;
+            "
+          >
+            {{ content.fileContent }}</clr-dg-cell
+          >
+          <clr-dg-cell>
+            <button
+              type="button"
+              class="btn btn-link actionClass"
+              role="tooltip"
+              aria-haspopup="true"
+              title="Click to Upload"
+            >
+              <div>
+                <label class="label labelUpload txtUpload" for="uploadTxt{{ a }}" style="top: 8rem">
+                  <span>
+                    <cds-icon size="16" shape="upload" style="color: #0077b8; margin-bottom: 0.1rem"> </cds-icon>
+                  </span>
+                </label>
+                <input
+                  id="uploadTxt{{ a }}"
+                  style="display: none"
+                  accept=".txt,.TXT"
+                  type="file"
+                  (change)="onTxtChange($event, a)"
+                />
+              </div>
+            </button>
+            <button
+              type="button"
+              class="btn btn-link actionClass"
+              role="tooltip"
+              aria-haspopup="true"
+              title="Delete"
+              (click)="deleteRow($event, a)"
+            >
+              <cds-icon aria-hidden="true" shape="trash"></cds-icon>
+            </button>
+            <div *ngIf="content.format == false && !content.unique" style="color: red">Wrong Format!</div>
+            <div *ngIf="content.format == false && content.unique" style="color: red">Same File!</div>
+          </clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+      <button class="btn btn-outline-primary btn-md" style="margin-top: 1rem" (click)="addNewRow()">
+        ADD New Entry
+      </button>
+    </div>
+    <div *ngIf="isQuick">
+      <button *ngIf="!loadingPublish" class="btn btn-primary btn-md" style="margin-top: 2rem" (click)="createNewRow()">
+        Publish
+      </button>
+      <button *ngIf="loadingPublish" type="button" class="btn uploadLoading" style="margin-top: 2rem">
+        <clr-spinner
+          style="min-height: 0.75rem; min-width: 0.75rem; height: 0.75rem; width: 0.75rem; margin-top: 0.09rem"
+          clrAssertive
+          >loading</clr-spinner
+        >
+      </button>
+    </div>
+
+    <div *ngIf="!isQuick" class="uploadBox">
+      <form class="addCsv" [formGroup]="uploadGroup" autocomplete="off">
+        <div class="form-group clr-row">
+          <label for="datasetsName" class="label-tooltip clr-col-2">File Name <span style="color: red">*</span> </label>
+          <div class="clr-input-wrapper clr-col-9">
+            <input
+              id="datasetsName"
+              type="text"
+              formControlName="datasetsName"
+              class="clr-input"
+              (ngModelChange)="changeDatasetName($event)"
+            />
+          </div>
+          <div class="clr-col-1">
+            <clr-tooltip *ngIf="uploadGroup.get('datasetsName').errors && uploadGroup.get('datasetsName').touched">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                <span>{{ uploadGroup.get('datasetsName').errors.msg.value }}</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+            <clr-tooltip *ngIf="nameExist">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>This name already exists.</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </div>
+        </div>
+        <div class="form-group clr-row" style="margin-top: 2rem">
+          <label for="localFile" class="label-tooltip clr-col-2">Select File </label>
+          <div class="clr-input-wrapper clr-col-9 uploadSelect">
+            <div class="clr-select-wrapper" style="width: 100% !important">
+              <select
+                style="width: 100% !important"
+                id="select-basic"
+                class="clr-select"
+                formControlName="selectedDataset"
+                (change)="selectedDatasets($event, uploadFile)"
+              >
+                <option *ngFor="let uploadDataset of datasetsList" [value]="uploadDataset.dataSetName">
+                  {{ uploadDataset.dataSetName }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="clr-col-1">
+            <clr-tooltip *ngIf="fixHeader.length > 0">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span style="word-break: break-all"
+                  >File headers are not matching, you lost header&nbsp;"{{ fixHeader }}"</span
+                >
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </div>
+        </div>
+        <div class="clr-row">
+          <div class="clr-col-2"></div>
+          <div class="clr-col-10" style="max-width: 82%">
+            <app-upload-file #uploadFile [msg]="msgUploadFile" (outFile)="receiveFile($event)"> </app-upload-file>
+          </div>
+        </div>
+        <div class="form-group clr-row" *ngIf="showPreviewTable" style="margin-top: 1rem">
+          <label class="label-tooltip clr-col-2">
+            <div>Preview Data</div>
+          </label>
+          <div class="preview clr-col-9">
+            <div *ngIf="!loadPreviewTable" class="previewTable">
+              <table
+                aria-describedby="previewTable"
+                class="table"
+                style="margin-top: 0rem !important; border-collapse: collapse !important"
+              >
+                <thead>
+                  <tr>
+                    <th
+                      id="itemHeader"
+                      class="left"
+                      *ngFor="let itemHeader of previewHeadDatas"
+                      style="vertical-align: baseline; border: 1px solid #ccc"
+                    >
+                      {{ itemHeader }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody *ngIf="msg.projectType !== 'image' && msg.projectType !== 'log'">
+                  <tr *ngFor="let previewCont of previewContentDatas">
+                    <td class="left" *ngFor="let item of previewCont">{{ item }}</td>
+                  </tr>
+                </tbody>
+                <tbody *ngIf="msg.projectType == 'image'">
+                  <tr *ngFor="let previewCont of previewContentDatas">
+                    <td class="left">{{ previewCont._id }}</td>
+                    <td class="left">{{ previewCont.fileName }}</td>
+                    <td class="left">{{ previewCont.fileSize }}</td>
+                    <td class="left">
+                      <img [src]="previewCont.location" alt="" style="max-width: 15rem; max-height: 15rem" />
+                    </td>
+                  </tr>
+                </tbody>
+                <tbody *ngIf="msg.projectType == 'log'">
+                  <tr *ngFor="let previewCont of previewContentDatas">
+                    <td class="left">{{ previewCont.name }}</td>
+                    <td
+                      class="left"
+                      style="
+                        margin-bottom: 0.5rem;
+                        padding-bottom: unset;
+                        word-break: break-all;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 20;
+                        overflow: hidden;
+                      "
+                      title="{{ previewCont.content }}"
+                    >
+                      {{ previewCont.content }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div *ngIf="loadPreviewTable" class="tableLoading">
+              <span class="spinner spinner-md" style="margin-top: 3rem; margin-bottom: -0.6rem"> Loading... </span>
+              <span class="loadingSpan"> Loading Data, Please Wait... </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group clr-row" style="margin-top: 2rem" *ngIf="showPreviewTable || msg.projectType == 'image'">
+          <div class="clr-col-2">
+            <label for="totalRow" class="label-tooltip"
+              >Total {{ msg.projectType == 'image' ? 'Items' : 'Rows' }}</label
+            >
+          </div>
+          <div class="clr-input-wrapper clr-col-9">
+            <input
+              style="width: auto !important"
+              id="totalRow"
+              type="text"
+              formControlName="totalRow"
+              class="clr-input"
+              readonly
+            />
+            <span *ngIf="nonEnglish !== 0"
+              >(The total case number is {{ totalCase }}, and will remove {{ nonEnglish }} NON-ASCII cases)</span
+            >
+          </div>
+          <clr-tooltip *ngIf="uploadGroup.get('totalRow').errors && uploadGroup.get('totalRow').touched">
+            <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+            </cds-icon>
+            <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+              <span>{{ uploadGroup.get('totalRow').errors.msg.value }}</span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </div>
+        <div class="form-group clr-row" style="margin-top: 2rem" *ngIf="showPreviewTable && msg.projectType == 'ner'">
+          <div class="clr-col-2"></div>
+          <div class="clr-col-9">
+            Select the columns to present to annotators about the existing labels (existing labels must be the same as
+            the existing labels created for the project) or helpful text (optional)
+            <clr-datagrid>
+              <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid">Existing Labels</clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid">Helpful Text</clr-dg-column>
+              <clr-dg-row *clrDgItems="let column of columnInfo; let i = index" [clrDgItem]="column">
+                <clr-dg-cell
+                  class="ellipsis-datagrid labelOriginal label{{ i }}"
+                  style="color: #000; word-break: break-all"
+                  >{{ column.name }}</clr-dg-cell
+                >
+                <clr-dg-cell class="ellipsis-datagrid labelOriginal label{{ i }}">
+                  <input
+                    type="checkbox"
+                    clrCheckbox
+                    name="options"
+                    [ngClass]="{
+                      'disabled-checkbox': column.labelSelectedDisable
+                    }"
+                    [disabled]="column.labelSelectedDisable"
+                    [(ngModel)]="column.labelSelected"
+                    (ngModelChange)="changeLabelSelect($event, column.name)"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                </clr-dg-cell>
+                <clr-dg-cell class="ellipsis-datagrid labelOriginal label{{ i }}">
+                  <input
+                    type="checkbox"
+                    clrCheckbox
+                    name="options"
+                    [ngClass]="{
+                      'disabled-checkbox': column.textSelectedDisable
+                    }"
+                    [disabled]="column.textSelectedDisable"
+                    [(ngModel)]="column.textSelected"
+                    (ngModelChange)="changeTextSelect($event, column.name)"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                </clr-dg-cell>
+              </clr-dg-row>
+            </clr-datagrid>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div *ngIf="!isQuick" class="clr-row">
+      <div class="clr-col-12 clr-col-md-1">
+        <button *ngIf="!loadingPublish" class="btn btn-primary btn-md" (click)="createNewCsv()">Publish</button>
+        <button *ngIf="loadingPublish" type="button" class="btn uploadLoading" style="height: 2rem">
+          <clr-spinner
+            style="min-height: 0.75rem; min-width: 0.75rem; height: 0.75rem; width: 0.75rem; margin-top: 0.09rem"
+            clrAssertive
+            clrInline
+          ></clr-spinner
+          ><span style="padding-left: 0.5rem">Adding large dataset takes some time, please wait...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="clr-col-2"></div>
+</div>

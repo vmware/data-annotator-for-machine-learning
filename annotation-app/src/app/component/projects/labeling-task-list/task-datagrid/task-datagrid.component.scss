@@ -1,0 +1,114 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.h2Title {
+    margin-top: unset;
+}
+
+.floatRight {
+    float: right;
+    margin-right: unset !important;
+}
+
+clr-dg-cell {
+    a {
+        cursor: pointer;
+        text-decoration: underline;
+        color: rgb(0, 112, 172);
+    }
+}
+
+.cellWordBreak {
+    word-break: break-all;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    height: 1.8rem;
+    line-height: 0.7rem;
+}
+
+.disableTree {
+    ::ng-deep .clr-checkbox-wrapper .clr-control-label {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    ::ng-deep .clr-checkbox-wrapper input[type='checkbox'] {
+        pointer-events: none;
+    }
+}
+
+clr-datagrid {
+    clr-progress-bar {
+        border-radius: 10px;
+        height: 50%;
+
+        ::ng-deep .progress>progress {
+            width: 96%;
+        }
+    }
+}
+
+
+
+
+.annotatorCell {
+    position: relative;
+
+    .annotatorSpan {
+        display: block;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 1rem;
+        position: absolute;
+        color: white;
+        z-index: 0;
+
+
+    }
+
+    .annotatorSpan:nth-child(1) {
+        background-color: rgb(222, 127, 153);
+    }
+
+    .annotatorSpan:nth-child(2) {
+        left: 1.3rem;
+        background-color: rgb(158, 163, 215)
+    }
+
+    .annotatorSpan:nth-child(3) {
+        left: 2rem;
+        background-color: rgb(115, 115, 115);
+        font-size: 0.8em;
+    }
+
+    .annotatorSpan:hover {
+        // width: 1.2rem;
+        // height: 1.2rem;
+        // line-height: 1.2rem;
+        // bottom: 0.3rem;
+        z-index: 10;
+        font-size: 1.2em;
+        font-weight: bold;
+        box-shadow: 1px 1px 4px 2px #eee;
+    }
+}
+
+.shareTip {
+    font-size: 0.458333rem;
+    line-height: 0.8rem;
+    color: #737373;
+    margin-top: 1.25rem;
+}
+
+.pnameLink {
+    pointer-events: none;
+    text-decoration: none;
+    cursor: not-allowed;
+    opacity: 0.5;
+}

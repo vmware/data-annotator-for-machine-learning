@@ -7,7 +7,7 @@
 
 
 const S3Utils = require('../utils/s3');
-const {DATASETTYPE, S3OPERATIONS, FILEPATH} = require('../config/constant');
+const {DATASETTYPE, S3OPERATIONS, FILEPATH, OPERATION, SRCS} = require('../config/constant');
 const ObjectId = require("mongodb").ObjectID;
 const validator = require('../utils/validator');
 const config = require('../config/config');
@@ -17,37 +17,45 @@ const _ = require("lodash");
 const fs = require('fs');
 const mongoDb = require('../db/mongo.db');
 const { ProjectModel, DataSetModel } = require('../db/db-connect');
+const MESSAGE = require('../config/code_msg');
+const {queryUserById} = require('./user-service');
+
 
 async function saveDataSetInfo(req) {
 
     await validator.checkDataSet({ dataSetName: req.body.dsname }, false);
     
     const user = req.auth.email;
-    let location = req.body.location;
-    let fileKey = req.body.fileKey;
+    let dataSynchronize = req.body.dataSynchronize? req.body.dataSynchronize: [];
+    dataSynchronize = typeof dataSynchronize == 'string'? JSON.parse(dataSynchronize): dataSynchronize;
 
     let dataSet = {
         dataSetName: req.body.dsname,
         fileName: req.body.fileName,
         fileSize: req.body.fileSize,
+        fileKey: req.body.fileKey,
+        location: req.body.location,
         user: user,
         description: req.body.description,
         format: req.body.format,
         createTime: Date.now(),
-        updateTime: Date.now()
+        updateTime: Date.now(),
+        dataSynchronize: dataSynchronize,
+        totalRows: req.body.totalRows,
+        totalColumns: req.body.totalColumns? req.body.totalColumns: 0,
     };
     
     if (config.useLocalFileSys) {
 
         const folder = `./${FILEPATH.UPLOAD}/${user}`;
-        location = `${folder}/${req.file.originalname}`;
-        fileKey = process.cwd();
+        dataSet.location = `${folder}/${req.file.originalname}`;
+        dataSet.fileKey = process.cwd();
         await localFileSysService.checkFileExistInLocalSys(folder, true);
-        const exist = await localFileSysService.checkFileExistInLocalSys(location);
+        const exist = await localFileSysService.checkFileExistInLocalSys(dataSet.location);
         if (exist) {
-            throw {CODE: 5001, MSG: "DATASET ALREADY EXIST"};
+            throw MESSAGE.VALIDATION_DS_EXIST;
         }
-        await localFileSysService.saveFileToLocalSys(location, req.file.buffer);
+        await localFileSysService.saveFileToLocalSys(dataSet.location, req.file.buffer);
 
         if (typeof req.body.topReview == "string") {
             req.body.topReview = JSON.parse(req.body.topReview)
@@ -61,8 +69,7 @@ async function saveDataSetInfo(req) {
             const unzipFolder = `./${FILEPATH.UPLOAD}/${user}/${FILEPATH.UNZIPIMAGE}/${Date.now()}`;
             await localFileSysService.singleUnzipStreamToLocalSystem(req.file.buffer, unzipFolder, statusCheck);
             await new Promise((resolve) => statusCheck.on('done', (images)=>{ resolve(dataSet.images = images) }));
-            dataSet.fileKey = fileKey;
-            dataSet.location = location;
+ 
  
         }else{
             if (req.body.images) {
@@ -77,17 +84,12 @@ async function saveDataSetInfo(req) {
         console.log(`[ DATASET ] Service fileter no-Eglish data`);
         const reviews = { 'header': req.body.topReview.header, 'topRows': req.body.topReview.topRows };
 
-        dataSet.fileKey = fileKey;
         dataSet.hasHeader = req.body.hasHeader;
-        dataSet.location = location;
         dataSet.columnInfo = req.body.columnInfo;
         dataSet.topReview = reviews;
 
     }else if (req.body.format == DATASETTYPE.LOG) {
-        dataSet.fileKey = fileKey;
-        dataSet.location = location;
         dataSet.topReview = req.body.topReview;
-        dataSet.totalRows = req.body.totalRows;
     }
     
     let conditions = { dataSetName: req.body.dsname };
@@ -101,9 +103,15 @@ async function saveDataSetInfo(req) {
 }
 
 async function queryDataSetByUser(req) {
-    console.log(`[ DATASET ] Service queryDataSetByUser`);
-    const condition = { user: req.auth.email };
+    
+    const user = req.auth.email;
     const format = req.query.format;
+    const src = req.query.src;
+    const dsid = req.query.dsid;
+    
+    //query current user's dataset
+    let condition = { user: user };
+    //query by format
     if (format) {
         if (format == DATASETTYPE.CSV) {
             condition.$or = [
@@ -114,11 +122,19 @@ async function queryDataSetByUser(req) {
             condition.format = format;
         }
     }
-    const datasets = await mongoDb.findByConditions(DataSetModel, condition);
-    if (datasets && (!format || format == DATASETTYPE.IMGAGE) ) {
-        return imageTopPreview(datasets);
+    //query single dataset
+    if (dsid) {
+        condition = { _id: dsid };
     }
-    return datasets;
+    //admin query all dataset
+    if (src == SRCS.ADMIN) {
+        await validator.checkAdmin(user)
+        condition = {};
+    }
+    
+    console.log(`[ DATASET ] Service queryDataSetByUser`);
+    const datasets = await mongoDb.findByConditions(DataSetModel, condition);
+    return imageTopPreview(datasets);
     
 }
 
@@ -161,7 +177,8 @@ async function imageTopPreview(datasets, singleData) {
 
 async function queryDataSetByDataSetName(req) {
     console.log(`[ DATASET ] Service queryDataSetByDataSetName`);
-    return mongoDb.findByConditions(DataSetModel, { dataSetName: req.query.dsname });
+    const datasets = await mongoDb.findByConditions(DataSetModel, { dataSetName: req.query.dsname });
+    return imageTopPreview(datasets);
 }
 
 async function deleteDataSet(req) {
@@ -219,7 +236,9 @@ async function deleteDataSet(req) {
         }
 
     }
-
+    for (const projectName of ds[0].projects) {
+        await require('./project.service').updateProjectDatasetInfo(projectName, ds[0].dataSetName, OPERATION.DELETE);
+    }
     console.log(`[ DATASET ] Service deleteDataSet.removeDataSet`);
     await mongoDb.removeByConditions(DataSetModel, { dataSetName: ds[0].dataSetName });
     
@@ -232,10 +251,67 @@ async function signS3Url(req) {
     const dataSet = await mongoDb.findById(DataSetModel, ObjectId(req.query.dsid));
 
     console.log(`[ DATASET ] Service S3Utils.signedUrlByS3`);
-    return  await S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, dataSet.location);
+    return S3Utils.signedUrlByS3(S3OPERATIONS.GETOBJECT, dataSet.location);
 }
 
+async function updateDataset(req) {
 
+    console.log(`[ DATASET ] Service updateDataset`);
+    const dsid = req.body.dsid;
+    const operation = req.body.o;
+    const system = req.body.system;
+    const _id = req.body._id;
+
+    if (operation == OPERATION.ADD) {
+        update = { 
+            $push:  { 
+                dataSynchronize: {
+                    system: system,
+                    _id: _id
+                } 
+            }
+        }
+    }else if(operation == OPERATION.DELETE){
+        update = { 
+            $pull: { 
+                dataSynchronize: { 
+                    system: system,
+                    _id: _id
+                }
+            }
+        };
+    }else{
+        throw  MESSAGE.VALIDATATION_OPERATION;
+    }
+    
+    const conditions = {_id: ObjectId(dsid)};
+    const options = { new: true, upsert: true };
+    return mongoDb.findOneAndUpdate(DataSetModel, conditions, update, options);
+
+}
+
+async function updateDatasetProjectInfo(dataSetName, projectName, operation, newProjectName) {
+
+    const condition = {dataSetName: dataSetName};
+    const options = { new: true, upsert: true };
+    let update = {};
+
+    if (OPERATION.ADD == operation) {
+        update = { $addToSet: { projects: projectName } }
+    }else if (OPERATION.DELETE == operation) {
+        update = { $pull: { projects: projectName } }
+    }else if (OPERATION.UPDATE == operation) {
+        condition['projects'] = projectName
+        update = { $set: {"projects.$": newProjectName} }
+        
+    }else{
+        throw  MESSAGE.VALIDATATION_OPERATION;
+    }
+    
+    console.log(`[ DATASET ] Service updateDatasetProjectInfo`);
+    return mongoDb.findOneAndUpdate(DataSetModel, condition, update, options);
+    
+}
 
 module.exports = {
     saveDataSetInfo,
@@ -244,4 +320,6 @@ module.exports = {
     deleteDataSet,
     signS3Url,
     imageTopPreview,
+    updateDataset,
+    updateDatasetProjectInfo,
 }

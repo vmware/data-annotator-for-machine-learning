@@ -1,0 +1,867 @@
+<!-- Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
+
+<div class="modal">
+  <div class="modal-dialog modal-xl" role="dialog" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button aria-label="Close" class="close" type="button">
+          <cds-icon aria-hidden="true" shape="close" (click)="onCloseEditDialog()"></cds-icon>
+        </button>
+        <h3 class="modal-title">Edit Project</h3>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; overflow-x: hidden; max-height: 70vh">
+        <div>
+          <clr-alert *ngIf="errorMessage" [clrAlertType]="'danger'" (clrAlertClosedChange)="errorMessage = ''">
+            <div class="alert-item">
+              <span class="alert-text">{{ errorMessage }}</span>
+            </div>
+          </clr-alert>
+          <clr-alert *ngIf="infoMessage" [clrAlertType]="'info'" (clrAlertClosedChange)="infoMessage = ''">
+            <div class="alert-item">
+              <span class="alert-text">{{ infoMessage }}</span>
+            </div>
+          </clr-alert>
+        </div>
+        <div class="prev-info clr-row">
+          <label for="projectName" class="label-tooltip clr-col-12 clr-col-md-2">Project Name</label>
+          <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+            <input
+              autocomplete="off"
+              id="projectName"
+              type="text"
+              class="clr-input"
+              [(ngModel)]="inputProjectName"
+              (ngModelChange)="this.inputPnameUpdate.next($event)"
+            />
+          </div>
+          <div>
+            <clr-tooltip *ngIf="nameExist || inputProjectName == ''">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span *ngIf="nameExist">This name already exists</span>
+                <span *ngIf="inputProjectName == ''">This field is required</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </div>
+        </div>
+        <div class="prev-info clr-row">
+          <label for="taskInstruction" class="label-tooltip clr-col-12 clr-col-md-2">Task Instruction</label>
+          <div class="clr-textarea-wrapper clr-col-12 clr-col-md-8">
+            <textarea
+              id="taskInstruction"
+              [(ngModel)]="inputTaskInstruction"
+              class="clr-textarea"
+              style="width: 100%; max-width: unset"
+            ></textarea>
+          </div>
+        </div>
+        <div class="prev-info clr-row">
+          <label for="projectOwner" class="label-tooltip clr-col-12 clr-col-md-2">Project Creator</label>
+          <div class="clr-col-12 clr-col-md-8 labelBox">
+            <div
+              class="clr-row"
+              *ngFor="let user of ownerList; let i = index"
+              style="margin-top: 1rem; margin-bottom: 1rem; margin-left: 0.5rem"
+            >
+              <div
+                class="clr-control-container clr-col-12"
+                [ngClass]="user.setUserErrMessage || user.emailReg ? 'clr-error' : ''"
+              >
+                <div class="clr-row" style="margin-left: -1.6rem">
+                  <div class="clr-input-wrapper clr-col-5">
+                    <input
+                      id="inputEmail"
+                      type="text"
+                      class="clr-input"
+                      style="width: 100%"
+                      placeholder="Type email here"
+                      [(ngModel)]="user.email"
+                      (ngModelChange)="inputOwnerUpdate(ownerList, i)"
+                      [ngModelOptions]="{ standalone: true }"
+                    />
+                  </div>
+                  <div>
+                    <cds-icon
+                      style="margin-left: 0.5rem; margin-top: 0.5rem"
+                      shape="trash"
+                      [ngStyle]="{
+                        color: ownerList.length > 1 ? 'rgb(190, 26, 17)' : '#999',
+                        cursor: ownerList.length > 1 ? 'pointer ' : 'not-allowed'
+                      }"
+                      (click)="deleteOwnerRow(i)"
+                    >
+                    </cds-icon>
+                  </div>
+                  <clr-tooltip *ngIf="user.setUserErrMessage" style="margin-left: 0.5rem; margin-top: 0.25rem">
+                    <cds-icon
+                      clrTooltipTrigger
+                      shape="error-standard"
+                      size="18"
+                      style="color: 'rgb(190, 26, 17)'"
+                      class="valid-tooltip"
+                    >
+                    </cds-icon>
+                    <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                      <span>{{ user.setUserErrMessage }}</span>
+                    </clr-tooltip-content>
+                  </clr-tooltip>
+                  <clr-tooltip *ngIf="user.emailReg" style="margin-left: 0.5rem; margin-top: 0.25rem">
+                    <cds-icon
+                      clrTooltipTrigger
+                      shape="error-standard"
+                      size="18"
+                      style="color: 'rgb(190, 26, 17)'"
+                      class="valid-tooltip"
+                    >
+                    </cds-icon>
+                    <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                      <span>{{ user.emailReg }}</span>
+                    </clr-tooltip-content>
+                  </clr-tooltip>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-link" style="padding: unset" (click)="createOwnerRow()">
+              <cds-icon shape="plus" style="margin-right: 0.5rem"></cds-icon>Add New
+            </button>
+          </div>
+        </div>
+        <div class="prev-info clr-row">
+          <label for="assignee" class="label-tooltip clr-col-12 clr-col-md-2"
+            >Assignee via<span style="color: red">*</span></label
+          >
+          <div class="clr-col-12 clr-col-md-8 labelBox">
+            <div class="clr-row">
+              <div class="clr-col-12 clr-col-md-3">
+                <clr-checkbox-container style="margin-top: 0.2rem !important">
+                  <clr-checkbox-wrapper *ngFor="let item of assignType; let i = index">
+                    <input
+                      type="checkbox"
+                      clrCheckbox
+                      name="item.name"
+                      value="item.value"
+                      [(ngModel)]="item.checked"
+                      (ngModelChange)="changeAssignType($event, i)"
+                      [ngModelOptions]="{ standalone: true }"
+                      [disabled]="
+                        !(
+                          env.config.enableSlack &&
+                          (msg.projectType === 'text' || msg.projectType === 'tabular') &&
+                          !msg.isMultipleLabel &&
+                          msg.labelType == 'textLabel'
+                        )
+                      "
+                    />
+                    <label>{{ item.name }}</label>
+                  </clr-checkbox-wrapper>
+                </clr-checkbox-container>
+              </div>
+              <div class="clr-col-12 clr-col-md-3">
+                <clr-tooltip
+                  *ngIf="!assignType[0].checked && !assignType[1].checked"
+                  style="margin-left: 0.5rem; margin-top: 0.25rem"
+                >
+                  <cds-icon
+                    clrTooltipTrigger
+                    shape="error-standard"
+                    size="18"
+                    style="color: 'rgb(190, 26, 17)'"
+                    class="valid-tooltip"
+                  >
+                  </cds-icon>
+                  <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                    <span>Please enable at least one assign via !</span>
+                  </clr-tooltip-content>
+                </clr-tooltip>
+              </div>
+            </div>
+            <div *ngIf="assignType[0].checked" class="clr-row" style="margin-top: 1rem">
+              <label class="label-tooltip clr-col-12 clr-col-md-2">Email ID</label>
+              <div class="clr-col-12 clr-col-md-10">
+                <div class="clr-row" *ngFor="let user of assigneeList; let i = index" style="margin-bottom: 1rem">
+                  <div
+                    class="clr-control-container"
+                    [ngClass]="user.setUserErrMessage || user.emailReg ? 'clr-error' : ''"
+                  >
+                    <div class="clr-row" style="margin-left: -1.1rem">
+                      <div class="clr-input-wrapper clr-col-5">
+                        <input
+                          id="inputEmail"
+                          type="text"
+                          class="clr-input"
+                          placeholder="Type email here"
+                          [(ngModel)]="user.email"
+                          (ngModelChange)="inputUserNameUpdate(assigneeList, i)"
+                          [ngModelOptions]="{ standalone: true }"
+                        />
+                      </div>
+                      <div style="margin-right: 0.5rem; margin-left: 0.5rem">-</div>
+                      <div class="clr-input-wrapper clr-col-2">
+                        <input
+                          type="number"
+                          class="clr-input"
+                          title="Number of tickets completed"
+                          placeholder="Number of tickets completed"
+                          disabled
+                          [(ngModel)]="user.completeCase"
+                          style="width: 100%"
+                          [ngModelOptions]="{ standalone: true }"
+                        />
+                      </div>
+                      <div style="margin-right: 0.5rem; margin-left: 0.5rem">-</div>
+                      <div class="clr-input-wrapper clr-col-2">
+                        <input
+                          type="number"
+                          class="clr-input"
+                          title="Number of tickets assigned"
+                          placeholder="Number of tickets assigned"
+                          [disabled]="!(user.email && !user.setUserErrMessage && !user.emailReg)"
+                          [(ngModel)]="user.assignedCase"
+                          (blur)="inputTicketsUpdate(user)"
+                          style="width: 100%"
+                          [ngModelOptions]="{ standalone: true }"
+                        />
+                      </div>
+                      <div>
+                        <cds-icon
+                          style="margin-left: 0.5rem; margin-top: 0.5rem"
+                          shape="trash"
+                          [ngStyle]="{
+                            color: assigneeList.length > 1 ? 'rgb(190, 26, 17)' : '#999',
+                            cursor: assigneeList.length > 1 ? 'pointer ' : 'not-allowed'
+                          }"
+                          (click)="deleteUserRow(i)"
+                        >
+                        </cds-icon>
+                      </div>
+                      <clr-tooltip *ngIf="user.setUserErrMessage" style="margin-left: 0.5rem; margin-top: 0.25rem">
+                        <cds-icon
+                          clrTooltipTrigger
+                          shape="error-standard"
+                          size="18"
+                          style="color: 'rgb(190, 26, 17)'"
+                          class="valid-tooltip"
+                        >
+                        </cds-icon>
+                        <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                          <span>{{ user.setUserErrMessage }}</span>
+                        </clr-tooltip-content>
+                      </clr-tooltip>
+                      <clr-tooltip *ngIf="user.emailReg" style="margin-left: 0.5rem; margin-top: 0.25rem">
+                        <cds-icon
+                          clrTooltipTrigger
+                          shape="error-standard"
+                          size="18"
+                          style="color: 'rgb(190, 26, 17)'"
+                          class="valid-tooltip"
+                        >
+                        </cds-icon>
+                        <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                          <span>{{ user.emailReg }}</span>
+                        </clr-tooltip-content>
+                      </clr-tooltip>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  class="btn btn-sm btn-link"
+                  style="padding: unset; margin-left: -1.1rem"
+                  (click)="createEmailRow()"
+                >
+                  <cds-icon shape="plus" style="margin-right: 0.5rem"></cds-icon>Add New
+                </button>
+              </div>
+            </div>
+            <div *ngIf="assignType[1].checked" class="clr-row" style="margin-top: 1rem">
+              <label class="label-tooltip clr-col-12 clr-col-md-2"
+                >Slack ID<clr-tooltip>
+                  <cds-icon clrTooltipTrigger shape="info-circle" size="20" aria-label="Uniq tooltip 5"></cds-icon>
+                  <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+                    &nbsp;<span class="tooltip-content"
+                      >Important, if you want to notice the target slack channel after this project is created
+                      successfully please make sure invite {{ env.config.slackAppName }} bot to the target channel
+                      first. Type "/invite @{{ env.config.slackAppName }}" and send in the target channel. And for the
+                      slack id, please go to slack channel's 'About' tab and scroll down to the bottom to get it.
+                    </span>
+                  </clr-tooltip-content>
+                </clr-tooltip></label
+              >
+              <div class="clr-col-12 clr-col-md-10" style="margin-left: -0.5rem">
+                <div class="clr-row" *ngFor="let item of slackList; let i = index" style="margin-bottom: 1rem">
+                  <div
+                    class="clr-control-container clr-col-12 clr-col-md-12"
+                    [ngClass]="item.setErrMessage ? 'clr-error' : ''"
+                  >
+                    <div class="clr-row" style="margin-left: -1.1rem">
+                      <div class="clr-input-wrapper clr-col-5">
+                        <input
+                          id="slackID"
+                          type="text"
+                          class="clr-input"
+                          placeholder="Type slack ID here"
+                          [(ngModel)]="item.slackId"
+                          (blur)="inputSlackUpdate(slackList, i)"
+                          [ngModelOptions]="{ standalone: true }"
+                        />
+                      </div>
+                      <div style="margin-right: 0.5rem; margin-left: 0.5rem">-</div>
+                      <div class="clr-input-wrapper clr-col-5">
+                        <input
+                          type="text"
+                          class="clr-input"
+                          placeholder="Slack Name"
+                          [(ngModel)]="item.slackName"
+                          disabled
+                          [ngModelOptions]="{ standalone: true }"
+                        />
+                      </div>
+
+                      <div>
+                        <cds-icon
+                          style="margin-left: 0.5rem; margin-top: 0.5rem"
+                          shape="trash"
+                          [ngStyle]="{
+                            color: slackList.length > 1 ? 'rgb(190, 26, 17)' : '#999',
+                            cursor: slackList.length > 1 ? 'pointer ' : 'not-allowed'
+                          }"
+                          (click)="deleteSlackRow(i)"
+                        >
+                        </cds-icon>
+                      </div>
+                      <!-- loading to search whether this is a valid id -->
+                      <div *ngIf="item.loadingSlack" class="slackLoading">
+                        <span
+                          style="position: unset; margin-left: 0.5rem; margin-top: 0.5rem"
+                          class="spinner spinner-sm"
+                        >
+                          Loading...
+                        </span>
+                      </div>
+                      <clr-tooltip *ngIf="item.setErrMessage" style="margin-left: 0.5rem; margin-top: 0.25rem">
+                        <cds-icon
+                          clrTooltipTrigger
+                          shape="error-standard"
+                          size="18"
+                          style="color: 'rgb(190, 26, 17)'"
+                          class="valid-tooltip"
+                        >
+                        </cds-icon>
+                        <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="sm" *clrIfOpen>
+                          <span>{{ item.setErrMessage }}</span>
+                        </clr-tooltip-content>
+                      </clr-tooltip>
+                      <clr-tooltip
+                        *ngIf="!item.loadingSlack && item.inputSlackValidation"
+                        style="margin-left: 0.5rem; margin-top: 0.25rem"
+                      >
+                        <cds-icon
+                          clrTooltipTrigger
+                          shape="error-standard"
+                          size="18"
+                          style="color: 'rgb(190, 26, 17)'"
+                          class="valid-tooltip"
+                        >
+                        </cds-icon>
+                        <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                          <span>{{ item.inputSlackValidation }}</span>
+                        </clr-tooltip-content>
+                      </clr-tooltip>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  class="btn btn-sm btn-link"
+                  style="padding: unset; margin-left: -0.6rem"
+                  (click)="createSlackRow()"
+                >
+                  <cds-icon shape="plus" style="margin-right: 0.5rem"></cds-icon>Add New
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="prev-info clr-row" *ngIf="showLabel && labelType !== 'HTL'">
+          <label class="label-tooltip clr-col-12 clr-col-md-2">Label</label>
+          <div class="clr-input-wrapper clr-col-12 clr-col-md-8 labelBox">
+            <div *ngIf="labelType != 'numericLabel'">
+              <span
+                *ngFor="let label of categoryList; let i = index"
+                class="label"
+                maxlength="5"
+                (mouseenter)="overLabels(i)"
+                (mouseleave)="outLabels(i)"
+                [ngClass]="{
+                  overLabels: activeOverOut == i,
+                  activeEditLabel: activeClickInput == i
+                }"
+              >
+                <input
+                  maxlength="50"
+                  clrInput
+                  placeholder="{{ label.editLabel }}"
+                  title="{{ label.editLabel }}"
+                  name="editLabel"
+                  class="clr-input editInput"
+                  [(ngModel)]="label.editLabel"
+                  (ngModelChange)="editLabelChange($event, i)"
+                  (keyup.enter)="enterEditLabel(label)"
+                  (blur)="blurEditLabel(label)"
+                  (click)="editLabel(label, i)"
+                  [readonly]="activeClickInput == i ? false : true"
+                  autocomplete="off"
+                />
+                <cds-icon
+                  *ngIf="activeOverOut == i && activeClickInput != i"
+                  size="12"
+                  shape="trash"
+                  class="deleteIcon"
+                  (click)="isShowDelete(label, i)"
+                >
+                </cds-icon>
+              </span>
+
+              <input
+                #labels
+                id="labels"
+                maxlength="50"
+                clrInput
+                placeholder="+ Add New Label Here"
+                name="addNewLabel"
+                class="clr-input"
+                [(ngModel)]="inputNewLabel"
+                (keyup.enter)="onEnterLabel(labels.value)"
+                (blur)="labelsBlur($event)"
+                (keyup)="onLabelKeyUp($event)"
+                [disabled]="categoryList.length > 49"
+                autocomplete="off"
+              />
+            </div>
+            <div
+              class="clr-row numeric"
+              *ngIf="labelType == 'numericLabel' && !isMultipleLabel"
+              style="margin-top: 0.5rem; margin-left: 0.1rem"
+            >
+              <div class="clr-row clr-col-12 clr-col-md-4">
+                <div class="clr-control-container" style="width: 100%">
+                  <div class="clr-input-wrapper">
+                    <input
+                      type="number"
+                      id="min"
+                      [(ngModel)]="msg.min"
+                      placeholder="{{ msg.min }}"
+                      class="clr-input"
+                      (ngModelChange)="minUpdate($event)"
+                    />
+                  </div>
+                  <span class="clr-subtext" style="margin-top: 0.5rem">Please set the minimum value</span>
+                </div>
+              </div>
+              <div class="clr-col-12 clr-col-md-1" style="text-align: center; margin-top: 0.3rem; margin-left: -2.2rem">
+                ——
+              </div>
+              <div class="clr-col-12 clr-col-md-4">
+                <div class="clr-control-container" style="width: 100%">
+                  <div class="clr-input-wrapper">
+                    <input
+                      type="number"
+                      id="max"
+                      [(ngModel)]="msg.max"
+                      placeholder="{{ msg.max }}"
+                      class="clr-input"
+                      (ngModelChange)="maxUpdate($event)"
+                    />
+                  </div>
+                  <span class="clr-subtext" style="margin-top: 0.5rem">Please set the maximum value</span>
+                </div>
+              </div>
+            </div>
+            <!-- both label -->
+            <form
+              *ngIf="labelType === 'numericLabel' && isMultipleLabel"
+              class="form"
+              [formGroup]="mutilNumericForm"
+              autocomplete="off"
+              (keydown.enter)="$event.preventDefault()"
+            >
+              <div class="clr-row" style="margin-top: 1rem; margin-left: 0.2rem" formArrayName="mutilLabelArray">
+                <div
+                  *ngFor="let mutilLabelEle of mutilLabelArray.controls; let i = index"
+                  [formGroupName]="i"
+                  class="clr-row clr-col-12"
+                  style="margin-bottom: 0.5rem; margin-left: -0.8rem"
+                >
+                  <div class="clr-row clr-col-12 clr-col-md-4 mutilLabel-row">
+                    <div class="clr-control-container">
+                      <div class="clr-input-wrapper">
+                        <input
+                          #multiLabels
+                          id="multiLabels"
+                          maxlength="50"
+                          title="{{ mutilLabelArray.value[i].editLabel }}"
+                          class="clr-input mutilLabel-input"
+                          style="width: 100%"
+                          placeholder="New Label"
+                          name="multiLabel"
+                          formControlName="editLabel"
+                          (keyup)="onMutilLabelKeydown($event)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="clr-col-12 clr-col-md-3 mutilLabel-row">
+                    <div class="clr-control-container">
+                      <div class="clr-input-wrapper">
+                        <input
+                          type="number"
+                          id="minMutilVal"
+                          formControlName="minMutilVal"
+                          placeholder="Minimum value"
+                          class="clr-input"
+                          style="width: 100%"
+                          (keyup)="minUpdate($event)"
+                          (change)="minUpdate($event)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="clr-col-12 clr-col-md-1 mutilLabel-row" style="text-align: center">-</div>
+                  <div class="clr-col-12 clr-col-md-3 mutilLabel-row">
+                    <div class="clr-control-container">
+                      <div class="clr-input-wrapper">
+                        <input
+                          type="number"
+                          id="maxMutilVal"
+                          formControlName="maxMutilVal"
+                          placeholder="Maximum value"
+                          class="clr-input"
+                          style="width: 100%"
+                          (keyup)="maxUpdate($event)"
+                          (change)="maxUpdate($event)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="clr-col-12 clr-col-md-1" style="margin-left: 0.5rem">
+                    <clr-tooltip
+                      *ngIf="
+                        labelType === 'numericLabel' &&
+                        isMultipleLabel &&
+                        mutilLabelArray.controls[i].value.status == 'old' &&
+                        (mutilLabelArray.controls[i].value.minMutilVal >=
+                          mutilLabelArray.controls[i].value.maxMutilVal ||
+                          mutilLabelArray.controls[i].value.minMutilVal >
+                            mutilLabelArray.controls[i].value.oldMinMutilVal ||
+                          mutilLabelArray.controls[i].value.maxMutilVal <
+                            mutilLabelArray.controls[i].value.oldMaxMutilVal)
+                      "
+                    >
+                      <cds-icon
+                        clrTooltipTrigger
+                        shape="error-standard"
+                        size="14"
+                        style="color: red"
+                        class="valid-tooltip"
+                      >
+                      </cds-icon>
+                      <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                        <span
+                          >Please make sure the new scope cover the old scope {{ oldMinMutilVal }}--{{
+                            oldMaxMutilVal
+                          }}
+                          ! And the Min should less than the Max!</span
+                        >
+                      </clr-tooltip-content>
+                    </clr-tooltip>
+                    <clr-tooltip
+                      *ngIf="
+                        labelType === 'numericLabel' &&
+                        isMultipleLabel &&
+                        mutilLabelArray.controls[i].value.status == 'new' &&
+                        mutilLabelArray.controls[i].value.minMutilVal >= mutilLabelArray.controls[i].value.maxMutilVal
+                      "
+                    >
+                      <cds-icon
+                        clrTooltipTrigger
+                        shape="error-standard"
+                        size="14"
+                        style="color: red"
+                        class="valid-tooltip"
+                      >
+                      </cds-icon>
+                      <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen
+                        ><span>Please make sure the Min should less than the Max!</span>
+                      </clr-tooltip-content>
+                    </clr-tooltip>
+                    <cds-icon
+                      *ngIf="mutilLabelArray.length > 2"
+                      style="margin-left: 1rem"
+                      [ngClass]="{
+                        scoreErr:
+                          mutilLabelArray.controls[i].value.minMutilVal >=
+                            mutilLabelArray.controls[i].value.maxMutilVal ||
+                          (mutilLabelArray.controls[i].value.oldMinMutilVal &&
+                            mutilLabelArray.controls[i].value.minMutilVal >
+                              mutilLabelArray.controls[i].value.oldMinMutilVal) ||
+                          (mutilLabelArray.controls[i].value.oldMaxMutilVal &&
+                            mutilLabelArray.controls[i].value.maxMutilVal <
+                              mutilLabelArray.controls[i].value.oldMaxMutilVal)
+                      }"
+                      shape="times"
+                      size="14"
+                      (click)="deleteMutilLabel(i)"
+                    ></cds-icon>
+                  </div>
+                </div>
+                <button
+                  class="btn btn-sm btn-link"
+                  style="padding: unset; margin-left: -0.3rem"
+                  [disabled]="mutilLabelArray.length > 49"
+                  (click)="addMutilLabel()"
+                >
+                  <cds-icon shape="plus" style="margin-right: 0.5rem"></cds-icon>Add New
+                </button>
+              </div>
+            </form>
+          </div>
+          <div>
+            <clr-tooltip *ngIf="inputLabelErrMsg">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>{{ inputLabelErrMsg }}</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+            <clr-tooltip *ngIf="labelType === 'numericLabel' && isMultipleLabel && inputIsNull">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>This field is required!</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+            <clr-tooltip *ngIf="labelType === 'numericLabel' && isMultipleLabel && inputLabelValidation">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>This label has already exist!</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+            <clr-tooltip
+              *ngIf="
+                (!(labelType === 'numericLabel' && isMultipleLabel) && sizeError) ||
+                msg.min > oldMin ||
+                msg.max < oldMax
+              "
+            >
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span
+                  >Please make sure the new scope cover the old scope {{ oldMin }}--{{ oldMax }} ! And the Min should
+                  less than the Max!</span
+                >
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </div>
+        </div>
+        <div class="prev-info clr-row" *ngIf="msg.projectType == 'log'">
+          <label for="isShowFilename" class="label-tooltip clr-col-12 clr-col-md-2">Show File Name</label>
+          <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+            <label class="md-check format">
+              <clr-radio-wrapper>
+                <input
+                  type="radio"
+                  clrRadio
+                  class="clr-radio"
+                  [(ngModel)]="isShowFilename"
+                  value="yes"
+                  id="yes"
+                  name="isShowFilename"
+                />
+                <label for="yes">&nbsp;Yes</label>
+              </clr-radio-wrapper>
+              <clr-radio-wrapper>
+                <input
+                  type="radio"
+                  clrRadio
+                  class="clr-radio"
+                  [(ngModel)]="isShowFilename"
+                  value="no"
+                  id="no"
+                  name="isShowFilename"
+                />
+                <label for="no">&nbsp;No</label>
+              </clr-radio-wrapper>
+            </label>
+          </div>
+        </div>
+        <div
+          class="prev-info clr-row"
+          *ngIf="
+            !(labelType == 'numericLabel' || msg.projectType == 'ner' || msg.isMultipleLabel) &&
+            msg.role == 'Power User'
+          "
+        >
+          <label for="trigger" class="label-tooltip clr-col-12 clr-col-md-2">Active Learning Threshold</label>
+          <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+            <input
+              autocomplete="off"
+              id="trigger"
+              type="text"
+              class="clr-input"
+              [(ngModel)]="inputTrigger"
+              (blur)="inputTriggerBlur($event)"
+              [disabled]="msg.al.trained"
+            />
+          </div>
+          <div>
+            <clr-tooltip *ngIf="inputTrigger == ''">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>This field is required</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+            <clr-tooltip *ngIf="notTriggerNumber">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>Wrong format! number only!</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+            <clr-tooltip *ngIf="minThreshold">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>Should not less than the minimum threshold 50 !</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </div>
+        </div>
+        <div
+          class="prev-info clr-row"
+          *ngIf="
+            !(labelType == 'numericLabel' || msg.projectType == 'ner' || msg.isMultipleLabel) &&
+            msg.role == 'Power User'
+          "
+        >
+          <label for="frequency" class="label-tooltip clr-col-12 clr-col-md-2">Active Learning Frequency</label>
+          <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+            <input
+              autocomplete="off"
+              id="frequency"
+              type="text"
+              class="clr-input"
+              [(ngModel)]="inputfrequency"
+              (blur)="inputFrequencyBlur($event)"
+            />
+          </div>
+          <div>
+            <clr-tooltip *ngIf="inputfrequency == ''">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>This field is required</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+            <clr-tooltip *ngIf="notNumber">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>Wrong format! number only!</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+            <clr-tooltip *ngIf="minFrequency">
+              <cds-icon clrTooltipTrigger shape="error-standard" size="18" style="color: red" class="valid-tooltip">
+              </cds-icon>
+              <clr-tooltip-content class="error-tooltip" clrPosition="bottom-right" clrSize="md" *clrIfOpen>
+                <span>Should not less than the minimum frequency 10 !</span>
+              </clr-tooltip-content>
+            </clr-tooltip>
+          </div>
+        </div>
+        <div
+          class="prev-info clr-row"
+          *ngIf="labelType == 'numericLabel' || msg.projectType == 'ner' || msg.isMultipleLabel"
+        >
+          <label for="assignmentLogicEdit" class="label-tooltip clr-col-12 clr-col-md-2">Assignment Logic</label>
+          <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
+            <label class="md-check format">
+              <clr-radio-wrapper>
+                <input
+                  type="radio"
+                  clrRadio
+                  class="clr-radio"
+                  [(ngModel)]="assignmentLogicEdit"
+                  value="random"
+                  id="random"
+                  name="assignmentLogicEdit"
+                />
+                <label for="random">&nbsp;Random</label>
+              </clr-radio-wrapper>
+              <clr-radio-wrapper>
+                <input
+                  type="radio"
+                  clrRadio
+                  class="clr-radio"
+                  [(ngModel)]="assignmentLogicEdit"
+                  value="sequential"
+                  id="sequential"
+                  name="assignmentLogicEdit"
+                />
+                <label for="sequential">&nbsp;Sequential</label>
+              </clr-radio-wrapper>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="margin-top: 1rem">
+        <button class="btn btn-outline" type="button" (click)="onCloseEditDialog()">Cancel</button>
+        <button *ngIf="!editProjectComplete" class="btn btn-primary" type="button" (click)="saveProjectEdit()">
+          Ok
+        </button>
+        <button *ngIf="editProjectComplete" type="button" class="btn uploadLoading">
+          <clr-spinner
+            style="min-height: 0.75rem; min-width: 0.75rem; height: 0.75rem; width: 0.75rem; margin-top: 0.09rem"
+            clrAssertive
+            >loading</clr-spinner
+          >
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" aria-hidden="true"></div>
+
+  <div *ngIf="isShowDeleteModal">
+    <div class="modal" style="z-index: 2001">
+      <div class="modal-dialog modal-md" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button aria-label="Close" class="close" type="button">
+              <cds-icon aria-hidden="true" shape="close" (click)="onCloseDeleteDialog()"></cds-icon>
+            </button>
+            <h3 class="modal-title">Delete Label</h3>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete the label ?</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" type="button" (click)="onCloseDeleteDialog()">Cancel</button>
+            <button *ngIf="!deleteLabelComplete" class="btn btn-primary" type="button" (click)="deleteLabel()">
+              Ok
+            </button>
+            <button *ngIf="deleteLabelComplete" type="button" class="btn uploadLoading">
+              <clr-spinner
+                style="min-height: 0.75rem; min-width: 0.75rem; height: 0.75rem; width: 0.75rem; margin-top: 0.09rem"
+                clrAssertive
+                >loading</clr-spinner
+              >
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop" aria-hidden="true" style="z-index: 2000; opacity: 0.25"></div>
+  </div>
+</div>

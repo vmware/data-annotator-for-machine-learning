@@ -1,15 +1,15 @@
 /*
-Copyright 2019-2022 VMware, Inc.
+Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
-import { AvaService } from '../ava.service';
+import { ApiService } from '../api.service';
 
 @Injectable()
 export class CommonService {
-  constructor(private avaService: AvaService) {}
+  constructor(private apiService: ApiService) {}
 
   editAssignedNumber(data, totalRow, maxAnnotations, assigneeList) {
     if (data.assignedCase <= 0) {
@@ -38,9 +38,7 @@ export class CommonService {
     }
     if (max < array.length || array.length === 1) {
       if (totalnum + (array.length - size) > max * row) {
-        alert(
-          'Fail to modify for the assigned tickets number is larger than the max value can be set.',
-        );
+        alert('Fail to modify for the assigned tickets number is larger than the max value can be set.');
         data.assignedCase = data.originValue;
         data.isModify = orginisModify;
         return;
@@ -132,7 +130,7 @@ export class CommonService {
     return new Promise<any>((resolve) => {
       e.src = from;
       if (e.projectType == 'log') {
-        this.avaService.downloadProject(e.id).subscribe(
+        this.apiService.downloadProject(e.id).subscribe(
           (res) => {
             if (res) {
               e.originalDataSets = res.originalDataSets;
@@ -144,7 +142,6 @@ export class CommonService {
             }
           },
           (error: any) => {
-            console.log(error);
             response = {
               err: error,
               datasets: datasets,

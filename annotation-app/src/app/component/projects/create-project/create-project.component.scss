@@ -1,0 +1,182 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+
+.createProjectWizardPage {
+
+    ::ng-deep .modal {
+        position: unset;
+        padding: unset;
+        align-items: unset;
+        justify-content: unset;
+        height: 100vh;
+
+    }
+
+    ::ng-deep .modal-dialog {
+        margin-left: -1.2rem;
+        margin-right: -1.2rem;
+        box-shadow: unset;
+        width: unset;
+        max-width: unset;
+        height: -webkit-fill-available;
+        height: calc(100% - 3rem);
+    }
+
+    ::ng-deep .modal-backdrop {
+        background-color: unset;
+        z-index: unset;
+        top: unset;
+        bottom: unset;
+        right: unset;
+        left: unset;
+    }
+
+
+}
+
+::ng-deep .clr-wizard .clr-wizard-footer-buttons-wrapper {
+    margin-right: 8.4%;
+    margin-top: -2.5rem;
+}
+
+
+
+label span {
+    color: red;
+}
+
+select {
+    width: 100% !important;
+}
+
+::ng-deep .dcr-doc-form .select2-class {
+    width: 100% !important;
+}
+
+input[type='text'] {
+    width: 100% !important;
+    margin-bottom: 0px;
+}
+
+textarea {
+    width: 100% !important;
+    max-width: unset;
+}
+
+.formField {
+    margin-bottom: 2rem;
+}
+
+.clr-row.formField {
+    margin-right: unset !important;
+}
+
+.tooltip-content {
+    color: white !important;
+}
+
+
+.timeLineBtns {
+    margin-top: 2rem;
+    text-align: right;
+}
+
+fieldset {
+    ::ng-deep .datagrid-row {
+        cursor: not-allowed !important;
+        pointer-events: none !important;
+    }
+
+    ::ng-deep .clr-checkbox-wrapper input[type='checkbox']+label::before {
+        background-color: #999;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+.disabledSelect {
+    cursor: not-allowed;
+    opacity: 0.6;
+
+}
+
+.labelType {
+    border-bottom: 1px solid rgb(197, 197, 197);
+    padding-bottom: 2.5rem;
+
+    ::ng-deep .clr-radio-wrapper .clr-control-label {
+        margin-bottom: -1rem;
+    }
+}
+
+::ng-deep input.disabled-checkbox+label::before {
+    background-color: #eee;
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.exclamation-circle {
+    width: 1.1rem;
+    height: 1.1rem;
+    min-width: 1.1rem;
+    min-height: 1.1rem;
+
+}
+
+.labelTree {
+    margin-top: 1rem;
+}
+
+::ng-deep .clr-wizard .sureSetLoading .clr-wizard-btn {
+    background-color: rgb(232, 232, 232);
+    border-color: rgb(232, 232, 232);
+}
+
+.disableTree {
+    ::ng-deep .clr-checkbox-wrapper .clr-control-label {
+        cursor: not-allowed;
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    ::ng-deep .clr-checkbox-wrapper input[type='checkbox'] {
+        pointer-events: none;
+        cursor: not-allowed;
+
+    }
+}
+
+.slackLoading {
+    ::ng-deep .spinner.spinner-sm {
+        height: 0.8rem;
+        width: 0.8rem;
+        min-height: 0.8rem;
+        min-width: 0.8rem;
+
+    }
+}
+
+.loadingCreate {
+    ::ng-deep .btn.btn-success {
+        background-color: rgb(231, 231, 231) !important;
+        border: unset !important;
+    }
+
+}
+
+.labelTrash {
+    margin-left: 0.5rem;
+    margin-top: 0.5rem
+}
+
+.emailTrash {
+    margin-left: 0.5rem;
+    margin-top: 0.5rem
+}
+
+.slackTrash {
+    margin-left: 0.5rem;
+    margin-top: 0.5rem
+}

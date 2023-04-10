@@ -56,6 +56,7 @@ const srSchema = new mongoose.Schema({
         reviewedTime: { type: String },
     },
     ticketQuestions: { type: Object },
+    questionForText:{ type: Array, default: []}
 }, { _id: true });
 srSchema.set("toJSON", { virtuals: true });
 srSchema.index({ projectName: 1 });
@@ -147,6 +148,11 @@ const userSchema = new mongoose.Schema({
     updateDate: { type: String },
     regularNotification: { type: Boolean, default: true },
     manul: { type: Boolean, default: false },
+    dashboard:{
+        createdDate: { type: String },
+        updateDate: { type: String },
+        data:[],
+    },
 }, { _id: false });
 userSchema.set("toJSON", { virtuals: true });
 userSchema.set("toObject", { virtuals: true });
@@ -237,7 +243,7 @@ const projectSchema = new mongoose.Schema({
         source: { type: String, default: "" },
         externalId: { type: Array, default: [] },
     },
-    assignSlackChannels: { type: Array }
+    assignSlackChannels: { type: Array },
 }, { _id: true });
 projectSchema.index({ projectName: 1 });
 projectSchema.set("toJSON", { virtuals: true });
@@ -270,7 +276,13 @@ const dataSetSchema = new mongoose.Schema({
         location: { type: String },
         fileSize: { type: Number },
     }],
-    totalRows: { type: Number }
+    totalRows: { type: Number },
+    totalColumns: { type: Number },
+    dataSynchronize:[{
+        system: { type: String },
+        _id: { type: String },
+    }],
+    projects:{ type: Array },
 });
 dataSetSchema.set("toJSON", { virtuals: true });
 dataSetSchema.index({ dataSetName: 1 });
