@@ -691,12 +691,29 @@ export class AnnotatePage extends CommonPage {
   }
 
   async selectMultipleNumericLabelNotSubmit(sliderValue) {
+    this.MULTIPLE_LABELS.then(async (labels) => {
+      labels.forEach(async (element) => {
+        await element.click();
+      });
+    });
     this.MULTIPLE_SLIDERS.then(async (sliders) => {
       sliders.forEach(async (slider) => {
         await browser
           .actions()
           .dragAndDrop(slider, { x: sliderValue, y: 0 })
           .perform();
+      });
+    });
+    await browser.waitForAngularEnabled(false);
+    await browser.sleep(1000);
+  }
+
+  async unselectMultipleNumericLabelNotSubmit() {
+    this.MULTIPLE_LABELS.then(async (labels) => {
+      labels.forEach(async (element, index) => {
+        if (index == 1) {
+          await element.click();
+        }
       });
     });
     await browser.waitForAngularEnabled(false);
@@ -736,11 +753,6 @@ export class AnnotatePage extends CommonPage {
   }
 
   async setMultipleNumericByInputNotSubmit(inputValue) {
-    this.MULTIPLE_LABELS.then(async (labels) => {
-      labels.forEach(async (element) => {
-        await element.click();
-      });
-    });
     this.SCORE_INPUT.then(async (inputs) => {
       inputs.forEach(async (input) => {
         await input.clear();

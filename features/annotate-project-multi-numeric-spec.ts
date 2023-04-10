@@ -138,6 +138,9 @@ describe("Spec - annotate multi numeric project ...", () => {
       );
       await browser.sleep(1000);
       await annotatePage.skipTicket();
+      await browser.sleep(1000);
+      await annotatePage.unselectMultipleNumericLabelNotSubmit();
+      await annotatePage.skipTicket();
       await done();
     } else {
       done.fail("can not filter out the consistent project....");
