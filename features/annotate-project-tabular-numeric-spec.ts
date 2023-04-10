@@ -101,7 +101,20 @@ describe("Spec - annotate project ...", () => {
       await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-
+      await annotatePage.clickHistoryBack();
+      await annotatePage.inputNumericLabelNotSubmit(8);
+      await browser.sleep(1000);
+      await annotatePage.skipTicket();
+      await browser.sleep(1000);
+      await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
+      await annotatePage.skipTicket();
+      await browser.sleep(1000);
+      await annotatePage.clickHistoryBack();
+      await annotatePage.inputNumericLabelNotSubmit(1);
+      await annotatePage.skipTicket();
+      await browser.sleep(1000);
       console.log("log-start to flag this ticket....");
       await annotatePage.flagTicket();
       await annotatePage.waitForPageLoading();
@@ -134,14 +147,14 @@ describe("Spec - annotate project ...", () => {
       await annotatePage.clickReviewBtn();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-      await annotatePage.inputNumericLabelNotSubmit(7);
+      await annotatePage.inputNumericLabelNotSubmit(117);
       await browser.sleep(1000);
       await annotatePage.skipTicket();
       await browser.sleep(1000);
       await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-      await annotatePage.inputNumericLabelNotSubmit(7);
+      await annotatePage.inputNumericLabelNotSubmit(117);
       await annotatePage.backToPrevious();
       await browser.sleep(1000);
       await annotatePage.skipTicket();

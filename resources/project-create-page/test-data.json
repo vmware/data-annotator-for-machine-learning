@@ -90,6 +90,7 @@
     "MaxVal": 10,
     "sliderValue": 4,
     "inputValue": 4.5,
+    "inputValue2": 6.5,
     "Source": "text-multiNumeric-data.csv",
     "ticketSessions": 52,
     "assignedTickets": 10,

@@ -213,20 +213,6 @@ describe("Spec - annotate project log", () => {
       await annotatePage.clickReviewBtn();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-      // since("project info should show up and content correct")
-      //   .expect(await annotatePage.getProjectInfo())
-      //   .toEqual({
-      //     name: project_name,
-      //     owner: Constant.username,
-      //     source: projectCreateData.LogProject.Source,
-      //     instruction: projectCreateData.LogProject.Instruction,
-      //   });
-      // since("progress shoud show up and content correct")
-      //   .expect(await annotatePage.getProgress())
-      //   .toEqual({
-      //     sessions: String(projectCreateData.LogProject.ticketSessions),
-      //     annotations: "0",
-      //   });
 
       await annotatePage.selectFilename();
       await annotatePage.waitForPageLoading();
@@ -241,12 +227,6 @@ describe("Spec - annotate project log", () => {
       await annotatePage.submitLogAnnotate();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
-      // since("the progress annotations should increas 1")
-      //   .expect(annotatePage.getProgress())
-      //   .toEqual({
-      //     sessions: String(projectCreateData.LogProject.ticketSessions),
-      //     annotations: "1",
-      //   });
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(1);
@@ -263,12 +243,6 @@ describe("Spec - annotate project log", () => {
       since("the content should not be empty")
         .expect(annotatePage.currentLogTicketContent())
         .not.toEqual("");
-      // since("the progress annotations shouldn't be changed")
-      //   .expect(annotatePage.getProgress())
-      //   .toEqual({
-      //     sessions: String(projectCreateData.LogProject.ticketSessions),
-      //     annotations: annotations.annotations,
-      //   });
       since("the history list shouldn't be changed")
         .expect(await annotatePage.getHistoryLists())
         .toEqual(historyLists);

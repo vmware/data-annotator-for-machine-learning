@@ -7,6 +7,7 @@ import { Constant } from "../general/constant";
 import { AnnotatePage } from "../page-object/annotate-page";
 import { browser } from "protractor";
 import { ProjectsPage } from "../page-object/projects-page";
+import { FunctionUtil } from "../utils/function-util";
 const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("Spec - annotate project ...", () => {
@@ -91,7 +92,24 @@ describe("Spec - annotate project ...", () => {
         .expect(await annotatePage.getHistoryLists())
         .toBe(2);
       console.log("log-skip and then history back success....");
-
+      await browser.sleep(2000);
+      await annotatePage.clickHistoryBack();
+      await annotatePage.selectMultipleLabelNotSubmit();
+      await annotatePage.skipTicket();
+      await browser.sleep(1000);
+      await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
+      await annotatePage.clickHistoryBack();
+      await annotatePage.selectAllMultipleLabelNotSubmit();
+      await annotatePage.skipTicket();
+      await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
+      await annotatePage.skipTicket();
+      await annotatePage.clickHistoryBack();
+      await annotatePage.selectAllMultipleLabelNotSubmit();
+      await annotatePage.skipTicket();
       console.log("log-start to flag this ticket....");
       await annotatePage.flagTicket();
       await annotatePage.waitForPageLoading();

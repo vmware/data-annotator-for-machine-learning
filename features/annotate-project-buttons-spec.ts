@@ -91,13 +91,6 @@ describe("Spec - annotate project text ...", () => {
         .expect(annotatePage.currentTicketContent())
         .not.toEqual("");
       console.log("log-flag success....");
-      // if (Constant.project_name_log) {
-      //   await annotatePage.selectProjects(Constant.project_name_log);
-      //   await annotatePage.waitForPageLoading();
-      //   browser.sleep(1000);
-      //   await annotatePage.exitAnnotatePage();
-      //   await commonPage.waitForGridLoading();
-      // }
       done();
     } else {
       done.fail("can not filter out the consistent project....");

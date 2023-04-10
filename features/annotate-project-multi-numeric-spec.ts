@@ -94,7 +94,13 @@ describe("Spec - annotate multi numeric project ...", () => {
         .expect(await annotatePage.getHistoryLists())
         .toBe(2);
       console.log("log-skip and then history back success....");
-
+      await browser.sleep(2000);
+      await annotatePage.clickHistoryBack();
+      await annotatePage.setMultipleNumericByInputNotSubmit(
+        projectCreateData.TextMultiNumericProject.inputValue2
+      );
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
       console.log("log-start to flag this ticket....");
       await annotatePage.flagTicket();
       await annotatePage.waitForPageLoading();

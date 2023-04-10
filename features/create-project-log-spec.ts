@@ -11,9 +11,6 @@ const projectCreateData = require("../resources/project-create-page/test-data");
 
 describe("Spec - create new project log", () => {
   const Task_Instruction = projectCreateData.LogProject.Instruction;
-  const PROJECT_NER_CLASSIFICATION = element(
-    by.css('clr-dropdown-menu a[href="/projects/create/log"]')
-  );
   const CSV_Path = "/doc/upload-resource/log-test-data.tgz";
 
   let New_Project_Name: string;
@@ -44,11 +41,6 @@ describe("Spec - create new project log", () => {
   it("Should succeed to create project log", async (done) => {
     await newProjectPage.navigateTo();
     await browser.waitForAngular();
-    // await newProjectPage.clickNewProjectBtn(PROJECT_NER_CLASSIFICATION);
-    // await newProjectPage.uploadCSV(New_CSV_Name, CSV_Path);
-    // await newProjectPage.navigateTo();
-    // await browser.waitForAngular();
-    // await newProjectPage.clickNewProjectBtn(PROJECT_NER_CLASSIFICATION);
     await newProjectPage.setProjectName(New_Project_Name);
     await newProjectPage.selectProjectType(4);
     await newProjectPage.setTaskInstruction(Task_Instruction);

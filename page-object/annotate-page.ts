@@ -238,6 +238,16 @@ export class AnnotatePage extends CommonPage {
     await browser.sleep(1000);
   }
 
+  async selectAllMultipleLabelNotSubmit() {
+    this.MULTIPLE_LABELS.then(async (labels) => {
+      labels.forEach(async (element) => {
+        await element.click();
+      });
+    });
+    await browser.waitForAngularEnabled(false);
+    await browser.sleep(1000);
+  }
+
   async inputNumericLabel() {
     await FunctionUtil.elementVisibilityOf(this.NUMERIC_LABEL_INPUT);
     await browser.waitForAngularEnabled(false);
@@ -248,6 +258,7 @@ export class AnnotatePage extends CommonPage {
   async inputNumericLabelNotSubmit(number) {
     await FunctionUtil.elementVisibilityOf(this.NUMERIC_LABEL_INPUT);
     await browser.waitForAngularEnabled(false);
+    await this.NUMERIC_LABEL_INPUT.clear();
     await this.NUMERIC_LABEL_INPUT.sendKeys(number);
   }
 
@@ -722,6 +733,40 @@ export class AnnotatePage extends CommonPage {
       await browser.actions().mouseMove(this.ANNOTATE_SUBMIT_BTN).perform();
     }
     await this.ANNOTATE_SUBMIT_BTN.click();
+  }
+
+  async setMultipleNumericByInputNotSubmit(inputValue) {
+    this.MULTIPLE_LABELS.then(async (labels) => {
+      labels.forEach(async (element) => {
+        await element.click();
+      });
+    });
+    this.SCORE_INPUT.then(async (inputs) => {
+      inputs.forEach(async (input) => {
+        await input.clear();
+        await input.sendKeys(inputValue);
+      });
+    });
+    await browser.waitForAngularEnabled(false);
+    if (process.env.IN) {
+      await FunctionUtil.elementVisibilityOf(this.SKIP_BTN);
+      await browser.actions().mouseMove(this.SKIP_BTN).perform();
+    }
+    await this.SKIP_BTN.click();
+    await browser.sleep(1000);
+    this.MULTIPLE_LABELS.then(async (labels) => {
+      labels.forEach(async (element, index) => {
+        if (index === 1) {
+          await element.click();
+        }
+      });
+    });
+    await browser.waitForAngularEnabled(false);
+    if (process.env.IN) {
+      await FunctionUtil.elementVisibilityOf(this.SKIP_BTN);
+      await browser.actions().mouseMove(this.SKIP_BTN).perform();
+    }
+    await this.SKIP_BTN.click();
   }
 
   async toExpandTree() {
