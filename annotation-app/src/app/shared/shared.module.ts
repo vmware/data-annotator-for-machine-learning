@@ -13,7 +13,6 @@ import { MyFilter } from './clr-filter/datagridFilter.component';
 import { FullNamePipe } from '../pipes/full-name.pipe';
 import { MathRoundPipe } from '../pipes/math-round.pipe';
 import { SliceTextPipe } from '../pipes/sliceText.pipe';
-import { ToUpperCasePipe } from '../pipes/to-upper-case.pipe';
 import { UploadFileComponent } from '../component/datasets/upload-file/upload-file.component';
 import { DndDirective } from '../component/datasets/dnd.directive';
 import { CreateNewDatasetModalComponent } from '../component/datasets/create-new-dataset-modal/create-new-dataset-modal.component';
@@ -26,7 +25,6 @@ import { CreateNewDatasetComponent } from '../component/datasets/create-new-data
     FullNamePipe,
     MathRoundPipe,
     SliceTextPipe,
-    ToUpperCasePipe,
     UploadFileComponent,
     DndDirective,
     CreateNewDatasetComponent,
@@ -43,7 +41,6 @@ import { CreateNewDatasetComponent } from '../component/datasets/create-new-data
     FullNamePipe,
     MathRoundPipe,
     SliceTextPipe,
-    ToUpperCasePipe,
     UploadFileComponent,
     DndDirective,
     CreateNewDatasetModalComponent,
