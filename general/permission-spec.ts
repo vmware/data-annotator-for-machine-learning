@@ -33,6 +33,7 @@ describe("Spec - make sure permission page can normally display", () => {
 
   it("Should edit user permission successfully", async (done) => {
     projectsPage.filterProjectName(Constant.fullname_owner);
+    await browser.sleep(2000);
     let Owner_FullName_Text = await projectsPage.getCellText(0);
     console.log("log-user name is: ", Owner_FullName_Text);
     if (Owner_FullName_Text !== "") {
