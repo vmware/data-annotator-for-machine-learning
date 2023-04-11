@@ -12,7 +12,7 @@ import { FunctionUtil } from "../utils/function-util";
 export class CommonUtils extends CommonPage {
   static DEFAULT_TIME_OUT = 100 * 1000;
   static commonPage: CommonPage = new CommonPage();
-  static projcetsPage: ProjectsPage = new ProjectsPage();
+  static projectsPage: ProjectsPage = new ProjectsPage();
   static myDatasetsPage: MyDatasetsPage = new MyDatasetsPage();
 
   static async deleteFunction(name: string) {
@@ -48,12 +48,12 @@ export class CommonUtils extends CommonPage {
     while (loopBool) {
       await browser.wait(
         ExpectedConditions.visibilityOf(
-          this.projcetsPage.PROJECT_NAME_FILTER_BTN
+          this.projectsPage.PROJECT_NAME_FILTER_BTN
         ),
         this.DEFAULT_TIME_OUT
       );
-      await this.projcetsPage.filterProjectName(projectsName);
-      let filtered_Projects_Count = await this.projcetsPage.getTableLength();
+      await this.projectsPage.filterProjectName(projectsName);
+      let filtered_Projects_Count = await this.projectsPage.getTableLength();
       if (filtered_Projects_Count > 0) {
         await CommonUtils.deleteFunction(projectsName);
       } else {
@@ -106,6 +106,34 @@ export class CommonUtils extends CommonPage {
       })
       .then(() => {
         FunctionUtil.click(DELETE_DATA_OK_BTN);
+      })
+      .then(() => {
+        browser.sleep(3000);
+      });
+  }
+
+  static async deleteLabelTaskCancel(ACTION_ICONS, ACTION_BUTTONS) {
+    return browser
+      .wait(
+        ExpectedConditions.visibilityOf(ACTION_ICONS),
+        Constant.DEFAULT_TIME_OUT
+      )
+      .then(() => {
+        FunctionUtil.click(ACTION_ICONS);
+      })
+      .then(() => {
+        FunctionUtil.click(ACTION_BUTTONS);
+      })
+      .then(() => {
+        return browser.wait(
+          ExpectedConditions.visibilityOf(
+            this.commonPage.DELETE_PROJECT_CANCEL_BTN
+          ),
+          Constant.DEFAULT_TIME_OUT
+        );
+      })
+      .then(() => {
+        FunctionUtil.click(this.commonPage.DELETE_PROJECT_CANCEL_BTN);
       })
       .then(() => {
         browser.sleep(3000);

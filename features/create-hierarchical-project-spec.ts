@@ -8,6 +8,7 @@ import { browser, ExpectedConditions, $ } from "protractor";
 import { Constant } from "../general/constant";
 import { ProjectsPage } from "../page-object/projects-page";
 import { FunctionUtil } from "../utils/function-util";
+import { CommonPage } from "../general/common-page";
 const projectCreateData = require("../resources/project-create-page/test-data");
 const since = require("jasmine2-custom-message");
 
@@ -24,6 +25,7 @@ describe("Spec - create new project ", () => {
   let Serial_Num: string;
   let newProjectPage: NewProjectPage;
   let projectsPage: ProjectsPage;
+  let commonPage: CommonPage;
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
@@ -32,6 +34,7 @@ describe("Spec - create new project ", () => {
     LoginBusiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjectsPage();
+    commonPage = new CommonPage();
     console.log(
       "log-start to create new hierarchical project : " + New_Project_Name
     );
@@ -106,7 +109,12 @@ describe("Spec - create new project ", () => {
       since("the data source should same as the user uploaded file")
         .expect(await projectsPage.getCellText(5))
         .toBe(projectCreateData.HierarchicalProject.Source);
-      done();
+      await commonPage.toShowTableColumns();
+      await browser.sleep(1000);
+      await FunctionUtil.click(commonPage.VIEW_LIST_ICON);
+      await browser.sleep(1000);
+      await FunctionUtil.click(commonPage.CLOSE_BTN);
+      await done();
     } else {
       done.fail("can not filter out the consistent project....");
     }

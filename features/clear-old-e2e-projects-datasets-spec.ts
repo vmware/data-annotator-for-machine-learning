@@ -16,10 +16,6 @@ describe("Spec - clear projects and datasets", () => {
   const datasetsName = Constant.dataset_name;
   const NAV_GROUP = element.all(by.css(".nav-group-text"));
   const NAV_TEXT = element.all(by.css(".nav-link .nav-text"));
-  // const PROJECT_TAB = $('.header-nav a[href="/projects"]');
-  // const MYDATASETS_TAB = $('.header-nav a[href="/myDatasets"]');
-  // const DELETE_BTN = $$('button[title="Delete Project"]');
-  // const DELETE_DATASET_BTN = $$('button[title="Delete Dataset"]');
   const ACTION_ICONS = element.all(
     by.css("button cds-icon[shape=ellipsis-vertical]")
   );

@@ -97,6 +97,7 @@ export class CommonPage {
   VIEW_LIST_ICON = element(by.css('cds-icon[shape="view-list"]'));
   CREATE_DATASET_BTN = element(by.partialButtonText("Create New Dataset"));
   OK_BTN = element(by.css('button[class="btn btn-primary"]'));
+  CLOSE_BTN = $('button[class="close"]');
 
   async toClickRefreshBtn() {
     await FunctionUtil.click(element(by.css("div.refreshBtn")));
