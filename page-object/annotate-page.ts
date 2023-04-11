@@ -721,11 +721,13 @@ export class AnnotatePage extends CommonPage {
   }
 
   async setMultipleNumericByInput(inputValue) {
+    await browser.sleep(1000);
     this.MULTIPLE_LABELS.then(async (labels) => {
       labels.forEach(async (element) => {
         await element.click();
       });
     });
+    await browser.sleep(1000);
     this.SCORE_INPUT.then(async (inputs) => {
       inputs.forEach(async (input) => {
         await input.sendKeys(inputValue);

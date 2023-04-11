@@ -118,7 +118,7 @@ export class CommonPage {
   }
 
   async refreshLabelingTask() {
-    await browser.sleep(20000);
+    await browser.sleep(5000);
     console.log("log-start to refresh Labeling task");
     await FunctionUtil.elementVisibilityOf(this.REFRESH_BTN);
     await browser.waitForAngularEnabled(false);
