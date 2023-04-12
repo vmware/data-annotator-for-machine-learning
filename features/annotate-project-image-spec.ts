@@ -83,6 +83,9 @@ describe("Spec - annotate project ...", () => {
       await browser.sleep(2000);
       await annotatePage.submitLogAnnotate();
       await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
+      await annotatePage.annotateImage();
+      await annotatePage.waitForPageLoading();
       done();
     } else {
       done.fail("can not filter out the consistent project....");
@@ -107,6 +110,8 @@ describe("Spec - annotate project ...", () => {
       await annotatePage.clickReviewBtn();
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
+      await annotatePage.flagTicket();
+      await browser.sleep(2000);
       await annotatePage.annotateImgByPolyNotSubmit();
       await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
       await annotatePage.waitForPageLoading();
@@ -115,6 +120,35 @@ describe("Spec - annotate project ...", () => {
       await annotatePage.backToPrevious();
       await browser.sleep(1000);
       await annotatePage.skipTicket();
+      await browser.sleep(1000);
+      await annotatePage.passTicket();
+      await browser.sleep(1000);
+      await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
+      await annotatePage.waitForPageLoading();
+      done();
+    } else {
+      done.fail("can not filter out the consistent project....");
+    }
+  });
+
+  it("Should review done image project successfully.", async (done) => {
+    if (process.env.IN) {
+      await browser.sleep(10000);
+    }
+    await annotatePage.navigateTo();
+    await annotatePage.waitForGridLoading();
+    await annotatePage.filterProjectName(project_name);
+    let Project_Count_After_Filter = await projectsPage.getTableLength();
+    let Project_Name_Text = await projectsPage.getCellText(0);
+    console.log(
+      "log-Project_Count_After_Filter:::",
+      Project_Count_After_Filter
+    );
+    console.log("log-Project_Name_Text:::", Project_Name_Text);
+    if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
+      await annotatePage.clickReviewBtn();
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
       done();
     } else {
       done.fail("can not filter out the consistent project....");
