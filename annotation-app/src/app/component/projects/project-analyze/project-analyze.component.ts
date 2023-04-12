@@ -896,7 +896,7 @@ export class ProjectAnalyzeComponent implements OnInit {
       // console.log("getOne.this.sr:::", this.sr)
       if (this.startFrom === 'review') {
         const images = [];
-        this.sr.userInputs.forEach((item) => {
+        this.sr.userInputs?.forEach((item) => {
           images.push(item.problemCategory);
         });
         this.historyTask = [{ result: images }];
@@ -1958,6 +1958,7 @@ export class ProjectAnalyzeComponent implements OnInit {
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
           if (this.startFrom === 'review') {
+            console.log(111111111111111111111);
             const images = [];
             this.sr.userInputs.forEach((item) => {
               images.push(item.problemCategory);
@@ -3076,10 +3077,6 @@ export class ProjectAnalyzeComponent implements OnInit {
     this.polygonLabelDom = this.rectLabelDom.nextElementSibling;
     this.renderer2.setStyle(this.polygonLabelDom, 'display', 'none');
     this.renderer2.setStyle(this.rectLabelDom, 'display', 'block');
-  }
-
-  submitImage() {
-    this.LabelStudioService.imageLabelInfo.submitCompletion();
   }
 
   deletePolygon() {
