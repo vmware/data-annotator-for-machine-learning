@@ -10,6 +10,7 @@ import { DownloadService } from 'src/app/services/common/download.service';
 import { EnvironmentsService } from 'src/app/services/environments.service';
 import { UserAuthService } from 'src/app/services/user-auth.service';
 import { Buffer } from 'buffer';
+import { InternalApiService } from 'src/app/services/internal-api.service';
 
 @Component({
   selector: 'app-my-datasets',
@@ -56,6 +57,7 @@ export class MyDatasetsComponent implements OnInit {
     private downloadService: DownloadService,
     private commonService: CommonService,
     private userAuthService: UserAuthService,
+    private internalApiService: InternalApiService,
   ) {
     this.user = this.userAuthService.loggedUser().user;
   }
@@ -183,7 +185,7 @@ export class MyDatasetsComponent implements OnInit {
       ids: [this.selectedDataset.dataSetName],
       deleteFiles: true,
     };
-    this.apiService.deleteInDataset(param).subscribe(
+    this.internalApiService.deleteInDataset(param).subscribe(
       (res) => {},
       (err) => {},
     );

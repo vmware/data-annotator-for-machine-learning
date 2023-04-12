@@ -20,6 +20,7 @@ import { Papa } from 'ngx-papaparse';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserAuthService } from 'src/app/services/user-auth.service';
+import { InternalApiService } from 'src/app/services/internal-api.service';
 
 @Component({
   selector: 'app-create-project',
@@ -84,6 +85,7 @@ export class CreateProjectComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private userAuthService: UserAuthService,
+    private internalApiService: InternalApiService,
   ) {
     this.user = this.userAuthService.loggedUser().user.email;
   }
@@ -745,7 +747,7 @@ export class CreateProjectComponent implements OnInit {
     this.infoMessage = '';
     this.toEvenlyDistributeTicket();
     if (this.env.config.enableAWSS3) {
-      this.apiService.getCloudUrl(this.datasetInfo.dataSetId).subscribe(
+      this.internalApiService.getCloudUrl(this.datasetInfo.dataSetId).subscribe(
         (res) => {
           this.papaParse(res);
         },
@@ -1068,7 +1070,7 @@ export class CreateProjectComponent implements OnInit {
     let params = {
       slackId: array[index].slackId,
     };
-    this.apiService.validSlackChannel(params).subscribe((res) => {
+    this.internalApiService.validSlackChannel(params).subscribe((res) => {
       array[index].loadingSlack = false;
       if (res) {
         if (res.is_member) {

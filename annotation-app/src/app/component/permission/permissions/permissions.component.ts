@@ -10,6 +10,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ToolService } from 'src/app/services/common/tool.service';
 import { EnvironmentsService } from 'src/app/services/environments.service';
 import { ClrLoadingState } from '@clr/angular';
+import { InternalApiService } from 'src/app/services/internal-api.service';
 
 @Component({
   selector: 'app-permissions',
@@ -31,7 +32,12 @@ export class PermissionsComponent implements OnInit {
   inputValueChange = new Subject<string>();
   loadingBtn: ClrLoadingState = ClrLoadingState.DEFAULT;
 
-  constructor(private apiService: ApiService, private toolService: ToolService, public env: EnvironmentsService) {}
+  constructor(
+    private apiService: ApiService,
+    private toolService: ToolService,
+    public env: EnvironmentsService,
+    private internalApiService: InternalApiService,
+  ) {}
 
   ngOnInit(): void {
     if (this.env.config.hubService) {
@@ -66,7 +72,7 @@ export class PermissionsComponent implements OnInit {
 
   getAllInternalUsers() {
     this.loading = true;
-    this.apiService.getAllInternalUsers().subscribe(
+    this.internalApiService.getAllInternalUsers().subscribe(
       (res) => {
         this.loading = false;
         this.datasets = res.result;
@@ -129,7 +135,7 @@ export class PermissionsComponent implements OnInit {
   }
 
   toSetUser(param) {
-    this.apiService.saveUser(param).subscribe(
+    this.internalApiService.saveUser(param).subscribe(
       (res) => {
         this.loadingBtn = ClrLoadingState.DEFAULT;
         this.editUser = {};
@@ -152,7 +158,7 @@ export class PermissionsComponent implements OnInit {
   }
 
   toSetInternalUser(param) {
-    this.apiService.saveInternalUser(param).subscribe(
+    this.internalApiService.saveInternalUser(param).subscribe(
       (res) => {
         if (res.status == 'OK') {
           this.loadingBtn = ClrLoadingState.DEFAULT;
@@ -202,7 +208,7 @@ export class PermissionsComponent implements OnInit {
   }
 
   toSaveInternalRoleEdit(obj) {
-    this.apiService.saveInternalRoleEdit(obj).subscribe(
+    this.internalApiService.saveInternalRoleEdit(obj).subscribe(
       (res) => {
         if (res.status == 'OK') {
           this.loadingBtn = ClrLoadingState.DEFAULT;
@@ -301,7 +307,7 @@ export class PermissionsComponent implements OnInit {
 
   deleteInternalUser(email) {
     this.loading = true;
-    this.apiService.deleteInternalUser(email).subscribe(
+    this.internalApiService.deleteInternalUser(email).subscribe(
       (res) => {
         this.deleteDatasetDialog = false;
         this.infoMessage = 'Success to delete the user';
