@@ -86,6 +86,12 @@ describe("Spec - annotate project ...", () => {
       await browser.sleep(2000);
       await annotatePage.annotateImage();
       await annotatePage.waitForPageLoading();
+      await annotatePage.clickHistory2Back();
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(2000);
+      await annotatePage.clickHistoryBack();
+      await annotatePage.waitForPageLoading();
+      await browser.sleep(1000);
       done();
     } else {
       done.fail("can not filter out the consistent project....");

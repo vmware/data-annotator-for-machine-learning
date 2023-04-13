@@ -118,6 +118,9 @@ export class AnnotatePage extends CommonPage {
     by.css(".left-project-info .clr-select-wrapper select option")
   );
   BACK_LIST_BTN = element(by.css("app-project-analyze cds-icon[shape=arrow]"));
+  HISTORY_LIST_2 = element(
+    by.css(".historyBox div:nth-child(2) .historyPosition")
+  );
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.NAV_TASK_LIST);
@@ -664,6 +667,12 @@ export class AnnotatePage extends CommonPage {
   async clickHistoryBack() {
     await FunctionUtil.elementVisibilityOf(this.HISTORY_LISTS.first());
     await this.HISTORY_LISTS.first().click();
+    await browser.waitForAngularEnabled(false);
+  }
+
+  async clickHistory2Back() {
+    await FunctionUtil.elementVisibilityOf(this.HISTORY_LIST_2);
+    await this.HISTORY_LIST_2.click();
     await browser.waitForAngularEnabled(false);
   }
 

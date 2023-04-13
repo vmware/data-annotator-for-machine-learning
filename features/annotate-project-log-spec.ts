@@ -165,7 +165,12 @@ describe("Spec - annotate project log", () => {
       .expect(annotatePage.currentLogTicketContent())
       .not.toEqual("");
     console.log("log-flag success....");
-
+    await annotatePage.clickHistory2Back();
+    await annotatePage.waitForPageLoading();
+    await browser.sleep(2000);
+    await annotatePage.clickHistoryBack();
+    await annotatePage.waitForPageLoading();
+    await browser.sleep(1000);
     done();
   });
 

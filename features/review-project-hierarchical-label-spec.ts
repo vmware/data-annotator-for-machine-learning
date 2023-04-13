@@ -64,6 +64,8 @@ describe("Spec - review project ...", () => {
       await annotatePage.selectHierarchicalLabelNotSubmit();
       await annotatePage.skipTicket();
       await browser.sleep(1000);
+      await annotatePage.passTicket();
+      await browser.sleep(1000);
       await FunctionUtil.click(annotatePage.ANNOTATE_SUBMIT_BTN);
       await annotatePage.waitForPageLoading();
       await browser.sleep(2000);
