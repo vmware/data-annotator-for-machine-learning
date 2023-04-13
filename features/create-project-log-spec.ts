@@ -50,6 +50,7 @@ describe("Spec - create new project log", () => {
     await newProjectPage.uploadCSVWithModal(New_CSV_Name, CSV_Path);
 
     // await newProjectPage.selectExistingFile(Constant.dataset_name_log);
+    await browser.sleep(2000);
     await newProjectPage.isShowFilename();
     await browser.sleep(1000);
     await newProjectPage.clickNextBtn();
