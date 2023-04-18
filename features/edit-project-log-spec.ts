@@ -41,6 +41,7 @@ describe("Spec - edit log project info", () => {
     if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
       console.log("log-start to edit projects");
       await commonPage.clickActionBtn(1);
+      await editPage.clearProjectName();
       await editPage.editTaskInstructions();
       await editPage.editAssignedTickets(
         projectEditData.LogProject.Annotator,
@@ -53,6 +54,9 @@ describe("Spec - edit log project info", () => {
         .toEqual(projectEditData.LogProject.ErrorMessage_Atleast);
       await editPage.addLabel([projectEditData.LogProject.Labels]);
       await editPage.clickEditSubmitButton();
+      await browser.sleep(1000);
+      await editPage.addProjectName(Project_Name_Text);
+      await editPage.clickEditSubmitButton();
       await browser.wait(
         ExpectedConditions.visibilityOf(PROMPT),
         Constant.DEFAULT_TIME_OUT
@@ -63,6 +67,10 @@ describe("Spec - edit log project info", () => {
       await projectsPage.filterProjectName(Constant.project_name_log);
       await browser.sleep(1000);
       await commonPage.clickActionBtn(1);
+      await editPage.deleteExistAnnotator();
+      await editPage.clickEditSubmitButton();
+      await editPage.addAnnotator(Constant.username);
+      await browser.sleep(1000);
       await editPage.deleteLabel(LABEL1_INPUT);
       since("prompt should show up and content correct")
         .expect(commonPage.getPromptText())
@@ -80,27 +88,6 @@ describe("Spec - edit log project info", () => {
         Constant.DEFAULT_TIME_OUT
       );
       await projectsPage.waitForGridLoading();
-
-      // console.log("log-start to verify the edit");
-      // await projectsPage.filterProjectName(Constant.project_name_log);
-      // let New_Project_Count_After_Filter = await projectsPage.getTableLength();
-      // let New_Project_Name_Text = await projectsPage.getCellText(0);
-      // let New_Project_Annotator;
-      // let New_Project_Labels;
-      // if (New_Project_Name_Text !== "" || New_Project_Count_After_Filter > 0) {
-      //   New_Project_Annotator = await projectsPage.getCellText(5);
-      //   New_Project_Labels = await projectsPage.getCellText(7);
-      //   console.log("log-annotator:", New_Project_Annotator);
-      //   console.log("log-labels:", New_Project_Labels);
-      // } else {
-      //   console.log("log-can not filter out the projects....");
-      // }
-      // since("project annotator should be 1 and content correct")
-      //   .expect(New_Project_Annotator.split("\n").length)
-      //   .toEqual(2);
-      // since("project labels' number should be 2 and content correct")
-      //   .expect(New_Project_Labels)
-      //   .toEqual(projectEditData.LogProject.editLabels);
     } else {
       console.log("log-can not filter out the projects....");
     }

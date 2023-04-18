@@ -94,7 +94,7 @@ describe("Spec - verify generate-download-share function", () => {
 
     it("Should download project", async (done) => {
       await downloadSharePage.clickDownloadProject();
-      await downloadSharePage.downloadProject();
+      await downloadSharePage.downloadProject(true);
       expect(
         await downloadSharePage.verifyDownloadFileExisted(filename, dirPath)
       ).toBe(true);

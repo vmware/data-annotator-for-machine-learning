@@ -17,6 +17,7 @@ export class DownloadSharePage extends CommonPage {
   CLOSE_BTN = $('button[class="close"]');
   MODAL_CANCEL_BTN = element(by.css("div.modal-footer button.btn-outline"));
   MODAL_OK_BTN = element(by.css("div.modal-footer button.btn-primary"));
+  REMOVE_UNLABELLED_LABEL = $('label[for="removeUnlabel"]');
 
   fs = require("fs");
 
@@ -34,7 +35,11 @@ export class DownloadSharePage extends CommonPage {
     return this.DATASET_LABELING_TASK_LINK_ALL.count();
   }
 
-  async clickGenerateNewDataset() {
+  async clickGenerateNewDataset(isLog?) {
+    if (isLog) {
+      await FunctionUtil.elementVisibilityOf(this.REMOVE_UNLABELLED_LABEL);
+      await FunctionUtil.click(this.REMOVE_UNLABELLED_LABEL);
+    }
     await FunctionUtil.elementVisibilityOf(this.GENERATE_BTN);
     await FunctionUtil.click(this.GENERATE_BTN);
     await browser.wait(
@@ -44,7 +49,11 @@ export class DownloadSharePage extends CommonPage {
     await browser.sleep(3000);
   }
 
-  async downloadProject() {
+  async downloadProject(isClickUnlabelled) {
+    if (isClickUnlabelled) {
+      await FunctionUtil.elementVisibilityOf(this.REMOVE_UNLABELLED_LABEL);
+      await FunctionUtil.click(this.REMOVE_UNLABELLED_LABEL);
+    }
     await FunctionUtil.elementVisibilityOf(this.DOWNLOAD_PROJECT_BTN);
     await FunctionUtil.click(this.DOWNLOAD_PROJECT_BTN);
     await browser.wait(

@@ -45,6 +45,12 @@ export class ProjectsPage extends CommonPage {
   PROJECT_PREVIEW_TABS = element.all(by.css("clr-tabs ul li"));
   CATEGORY_BTN = element(by.css(".radio.btn label[for=btn-demo-radio-2]"));
 
+  SELECT_ALL_CHECKBOX = $(".datagrid-column-title .clr-checkbox-wrapper label");
+  CHECKBOX_ROW2 = $(
+    "#content1 > div:nth-child(2) > clr-datagrid >div>div>div>div>div>clr-dg-row:nth-child(3) clr-checkbox-wrapper label"
+  );
+  MARK_ALL_REVIEW_BTN = $('cds-icon[title="To modify the annotated tickets"]');
+
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.NAV_TASK_LIST);
     await browser.waitForAngularEnabled(false);
@@ -125,6 +131,19 @@ export class ProjectsPage extends CommonPage {
     await FunctionUtil.elementVisibilityOf(this.RETURN_TO_ANNOTATOR_BTN);
     await this.RETURN_TO_ANNOTATOR_BTN.click();
     console.log("log-succeed to returnToAnnotatorBtn...");
+  }
+
+  async markAllForReview() {
+    console.log("log-start to markAllForReview...");
+    await FunctionUtil.elementVisibilityOf(this.SELECT_ALL_CHECKBOX);
+    await this.SELECT_ALL_CHECKBOX.click();
+    await browser.sleep(3000);
+    await FunctionUtil.click(this.CHECKBOX_ROW2);
+    await browser.sleep(3000);
+    await FunctionUtil.click(this.CHECKBOX_ROW2);
+    await browser.sleep(3000);
+    await FunctionUtil.click(this.MARK_ALL_REVIEW_BTN);
+    console.log("log-succeed to markAllForReview...");
   }
 
   async toExpandCell() {

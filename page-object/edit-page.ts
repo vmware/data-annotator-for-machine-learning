@@ -60,6 +60,7 @@ export class EditPage extends CommonPage {
   );
   TRASH_ICON = element.all(by.css("cds-icon[shape='trash']"));
   ICON_PLUS = element.all(by.css("button cds-icon[shape=plus]"));
+  ANNOTATE_INPUT = $('label[for="assignee"]+div input[id="inputEmail"]');
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.LABELING_TASK_LIST);
@@ -79,6 +80,24 @@ export class EditPage extends CommonPage {
     await browser.sleep(5000);
     await this.PROJECT_NAME_INPUT.clear();
     await this.PROJECT_NAME_INPUT.sendKeys(Constant.project_name_text_al);
+  }
+
+  async clearProjectName() {
+    console.log("log-start clear project name");
+    await FunctionUtil.elementVisibilityOf(this.PROJECT_NAME_INPUT);
+    await this.PROJECT_NAME_INPUT.click();
+    await this.PROJECT_NAME_INPUT.clear();
+    await this.PROJECT_NAME_INPUT.sendKeys(" ");
+    await this.PROJECT_NAME_INPUT.sendKeys(protractor.Key.TAB);
+    await browser.waitForAngularEnabled(false);
+    console.log("log-end clear project name");
+  }
+
+  async addProjectName(name) {
+    await FunctionUtil.elementVisibilityOf(this.PROJECT_NAME_INPUT);
+    console.log("log-editProjectName_name:::", name);
+    await this.PROJECT_NAME_INPUT.clear();
+    await this.PROJECT_NAME_INPUT.sendKeys(name);
     await browser.waitForAngularEnabled(false);
   }
 
@@ -236,6 +255,21 @@ export class EditPage extends CommonPage {
     await this.DELETE_ICON_TRASH.last().click();
     await browser.waitForAngularEnabled(false);
     console.log("log-succeed to deleteAnnotator...");
+  }
+
+  async deleteExistAnnotator() {
+    console.log("log-start to delete exist annotator...");
+    await this.DELETE_ICON_TRASH.get(1).click();
+    await browser.waitForAngularEnabled(false);
+    console.log("log-succeed to delete exist annotator...");
+  }
+
+  async addAnnotator(username) {
+    console.log("log-start to add annotator...");
+    await this.ANNOTATE_INPUT.clear();
+    await this.ANNOTATE_INPUT.sendKeys(username);
+    await this.ANNOTATE_INPUT.click();
+    console.log("log-succeed to add annotator...");
   }
 
   async editALProjectThreshold(threshold, threshold_err, validation_string) {

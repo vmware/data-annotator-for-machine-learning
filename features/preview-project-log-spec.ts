@@ -61,6 +61,31 @@ describe("Spec - enter labeling task analyze page...", () => {
     done();
   });
 
+  it("Should mark all for view log project successfully.", async (done) => {
+    project_name = Constant.project_name_log;
+    await projectsPage.navigateTo();
+    await projectsPage.waitForGridLoading();
+    await projectsPage.filterProjectName(project_name);
+    let Project_Count_After_Filter = await projectsPage.getTableLength();
+    let Project_Name_Text = await projectsPage.getCellText(0);
+    console.log(
+      "log-Project_Count_After_Filter:::",
+      Project_Count_After_Filter
+    );
+    console.log("log-Project_Name_Text:::", Project_Name_Text);
+    if (Project_Name_Text !== "" || Project_Count_After_Filter > 0) {
+      await projectsPage.clickGridFirstCell();
+      await projectsPage.waitForLoading();
+      await browser.sleep(1000);
+      await projectsPage.clickProjectPreviewTabs(1);
+      await browser.sleep(3000);
+      await projectsPage.markAllForReview();
+    } else {
+      done.fail("log-can not filter out the consistent project....");
+    }
+    done();
+  });
+
   it("Should preview log project, d3 chart.", async (done) => {
     await commonPage.clickClrTab(2);
     await element(

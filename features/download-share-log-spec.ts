@@ -70,7 +70,7 @@ describe("Spec - verify generate-download-share function", () => {
     it("Should download log project", async (done) => {
       await commonPage.filterProjectName(Constant.project_name_log);
       await downloadSharePage.clickDownloadProject();
-      await downloadSharePage.clickGenerateNewDataset();
+      await downloadSharePage.clickGenerateNewDataset(true);
       expect(
         await downloadSharePage.verifyDownloadFileExisted(logFileName, dirPath)
       ).toBe(true);
