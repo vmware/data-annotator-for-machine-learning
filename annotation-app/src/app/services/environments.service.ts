@@ -16,11 +16,10 @@ export class EnvironmentsService {
   private env: any;
   private nodeEnvironment: string;
   constructor(public router: Router) {
-    // console.log('APP_CONFIG：', this.configuration);
+    console.log('LOOP_APP_CONFIG:', this.configuration);
     this.nodeEnvironment =
       this.configuration === '' || this.configuration.startsWith('$') ? '' : `.${this.configuration}`;
     this.env = require('../../environments/environment' + this.nodeEnvironment);
-    // console.log('Environment:', this.nodeEnvironment);
     // Global site tag (gtag.js) - Google Analytics Start
     if (this.configuration == 'prod' && this.env.environment.googleTrackId) {
       this.router.events.subscribe((event) => {
