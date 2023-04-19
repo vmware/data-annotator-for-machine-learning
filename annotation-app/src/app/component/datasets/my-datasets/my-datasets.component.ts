@@ -161,6 +161,9 @@ export class MyDatasetsComponent implements OnInit {
           if (this.env.config.inUrl) {
             this.deleteInDataset();
           }
+          if (this.user.role === 'Power User') {
+            this.getAllDatasets('admin');
+          }
           this.getMyDatasets();
           this.loading = false;
           setTimeout(() => {
