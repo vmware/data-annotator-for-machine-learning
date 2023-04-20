@@ -896,7 +896,7 @@ export class ProjectAnalyzeComponent implements OnInit {
       // console.log("getOne.this.sr:::", this.sr)
       if (this.startFrom === 'review') {
         const images = [];
-        this.sr.userInputs.forEach((item) => {
+        this.sr.userInputs?.forEach((item) => {
           images.push(item.problemCategory);
         });
         this.historyTask = [{ result: images }];
@@ -1623,26 +1623,6 @@ export class ProjectAnalyzeComponent implements OnInit {
     }
   }
 
-  checkMutilNumberChanged(changedValues, originalValues) {
-    const originalVals = [];
-    if (originalValues && originalValues.length) {
-      originalValues.forEach((item) => {
-        if (this.startFrom === 'review') {
-          originalVals.push({
-            [item.problemCategory.label]: item.problemCategory.value,
-          });
-        } else {
-          if (item.user === this.user.email) {
-            originalVals.push({
-              [item.problemCategory.label]: item.problemCategory.value,
-            });
-          }
-        }
-      });
-    }
-    return _.isEqual(changedValues, originalVals);
-  }
-
   isSkipOrBack(type, id?, index?) {
     const isCategory = this.categoryFunc();
     let flag1;
@@ -1669,8 +1649,6 @@ export class ProjectAnalyzeComponent implements OnInit {
         if (this.labelType === 'HTL') {
           this.checkHTL(type);
           return false;
-        } else if (this.isMultipleNumericLabel) {
-          flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
         } else if (
           this.isMultipleLabel &&
           !this.isNumeric &&
@@ -3076,10 +3054,6 @@ export class ProjectAnalyzeComponent implements OnInit {
     this.polygonLabelDom = this.rectLabelDom.nextElementSibling;
     this.renderer2.setStyle(this.polygonLabelDom, 'display', 'none');
     this.renderer2.setStyle(this.rectLabelDom, 'display', 'block');
-  }
-
-  submitImage() {
-    this.LabelStudioService.imageLabelInfo.submitCompletion();
   }
 
   deletePolygon() {

@@ -31,6 +31,7 @@ import { LabelStudioService } from './services/label-studio.service';
 import { RouteReuseStrategy } from '@angular/router';
 import { ZwRouteReuseStrategy } from './shared/routeReuseStrategy';
 import { FAQComponent } from './component/faq/faq.component';
+import { InternalApiService } from './services/internal-api.service';
 
 @NgModule({
   declarations: [AppComponent, HeaderComponent, SidenavComponent, HomeComponent, PageNotFoundComponent, FAQComponent],
@@ -56,6 +57,7 @@ import { FAQComponent } from './component/faq/faq.component';
     S3Service,
     EmailService,
     LabelStudioService,
+    InternalApiService,
     {
       provide: RouteReuseStrategy,
       useClass: ZwRouteReuseStrategy,

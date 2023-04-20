@@ -8,16 +8,20 @@ import * as _ from 'lodash';
 import AWS from 'aws-sdk/lib/aws';
 import { ApiService } from '../api.service';
 import { Buffer } from 'buffer';
-import * as JSZip from 'jszip';
 import { UnZipService } from 'src/app/services/common/up-zip.service';
+import { InternalApiService } from '../internal-api.service';
 
 @Injectable()
 export class S3Service {
-  constructor(private apiService: ApiService, private unZipService: UnZipService) {}
+  constructor(
+    private apiService: ApiService,
+    private unZipService: UnZipService,
+    private internalApiService: InternalApiService,
+  ) {}
   public getS3UploadConfig() {
     let response;
     return new Promise<any>((resolve) => {
-      this.apiService.getS3UploadConfig().subscribe(
+      this.internalApiService.getS3UploadConfig().subscribe(
         async (res) => {
           if (res) {
             let outNo = new Date().getTime();
@@ -245,7 +249,7 @@ export class S3Service {
   public toCaculateTotalRow(choosedDataset, originalHead, previewContentDatas) {
     let response;
     return new Promise<any>((resolve) => {
-      this.apiService.getCloudUrl(choosedDataset.id).subscribe(
+      this.internalApiService.getCloudUrl(choosedDataset.id).subscribe(
         (res) => {
           this.unZipService
             .parseCSVChunk(res, false, true, choosedDataset.topReview.header, previewContentDatas)

@@ -14,6 +14,7 @@ import { CommonService } from 'src/app/services/common/common.service';
 import { EmailService } from 'src/app/services/common/email.service';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { DatasetValidator } from 'src/app/shared/form-validators/dataset-validator';
+import { InternalApiService } from 'src/app/services/internal-api.service';
 
 @Component({
   selector: 'app-edit-project',
@@ -78,6 +79,7 @@ export class EditProjectComponent implements OnInit {
     private commonService: CommonService,
     private emailService: EmailService,
     private formBuilder: FormBuilder,
+    private internalApiService: InternalApiService,
   ) {
     this.inputPnameUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       let pname = value.trim();
@@ -744,7 +746,7 @@ export class EditProjectComponent implements OnInit {
     let params = {
       slackId: array[index].slackId,
     };
-    this.apiService.validSlackChannel(params).subscribe((res) => {
+    this.internalApiService.validSlackChannel(params).subscribe((res) => {
       array[index].loadingSlack = false;
       if (res) {
         if (res.is_member) {

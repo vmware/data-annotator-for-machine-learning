@@ -30,18 +30,6 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/users`);
   }
 
-  public getAllInternalUsers(): Observable<any> {
-    return this.http.get<any>(`${this.hubUrl}/roles`);
-  }
-
-  public saveUser(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/users`, payload);
-  }
-
-  public saveInternalUser(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.hubUrl}/roles`, payload);
-  }
-
   public deleteUser(payload: any): Observable<any> {
     const options = {
       headers: new HttpHeaders(),
@@ -50,16 +38,8 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/users`, options);
   }
 
-  public deleteInternalUser(email: any): Observable<any> {
-    return this.http.delete(`${this.hubUrl}/role?email=${email}`);
-  }
-
   public saveRoleEdit(payload: any): Observable<any> {
     return this.http.patch(`${this.baseUrl}/users`, payload);
-  }
-
-  public saveInternalRoleEdit(payload: any): Observable<any> {
-    return this.http.post(`${this.hubUrl}/role`, payload);
   }
 
   public getUserRole(): Observable<any> {
@@ -192,14 +172,6 @@ export class ApiService {
     return this.http.post(`${this.baseUrl}/projects/tickets/flags/silence`, payload);
   }
 
-  public getS3UploadConfig(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/datasets/s3/credentials`);
-  }
-
-  public getCloudUrl(dataSetId?: any): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/datasets/s3/signed-url?dsid=${dataSetId}`);
-  }
-
   public uploadDateset(payload: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/datasets`, payload);
   }
@@ -213,18 +185,6 @@ export class ApiService {
 
   public findDatasetName(dataSetName?: any): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/datasets/names?dsname=${dataSetName}`);
-  }
-
-  public sendSQL(payload?: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/datasets/query-from-superCollider`, payload);
-  }
-
-  public sendEmailToOwner(payload: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/emails/send-to-owners`, payload);
-  }
-
-  public sendEmailToAnnotator(payload: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/emails/send-to-annotators`, payload);
   }
 
   public deleteLabel(payload: any): Observable<any> {
@@ -241,10 +201,6 @@ export class ApiService {
 
   public login(payload: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/login`, payload);
-  }
-
-  public getToken(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/token`);
   }
 
   public getOneReview(pid: any, user?: string, order?: string): Observable<any> {
@@ -283,22 +239,5 @@ export class ApiService {
         },
       ),
     );
-  }
-
-  public validSlackChannel(payload: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/conversations-list`, payload);
-  }
-
-  // upload dataset to inst
-  public postInDataset(formdata: FormData): Observable<any> {
-    return this.http.post<DatasetData>(this.inUrl + '/api/1.0/datasets', formdata);
-  }
-
-  // delete dataset to inst
-  public deleteInDataset(payload: any): Observable<any> {
-    const options: any = {
-      body: payload,
-    };
-    return this.http.delete<DatasetData>(this.inUrl + '/api/1.0/datasets', options);
   }
 }

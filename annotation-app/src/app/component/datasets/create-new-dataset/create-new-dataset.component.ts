@@ -17,6 +17,7 @@ import { DatasetValidator } from '../../../shared/form-validators/dataset-valida
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
+import { InternalApiService } from 'src/app/services/internal-api.service';
 
 @Component({
   selector: 'app-create-new-dataset',
@@ -49,6 +50,7 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
     private router: Router,
     private unZipService: UnZipService,
     private location: Location,
+    private internalApiService: InternalApiService,
   ) {
     this.userInputQueryUpdate.pipe(debounceTime(250), distinctUntilChanged()).subscribe((value) => {
       value = value.trim();
@@ -256,7 +258,7 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
       formData.append('docfile', inputFile, inputFile?.name);
     }
     return new Promise((resolve, reject) => {
-      this.apiService.postInDataset(formData).subscribe(
+      this.internalApiService.postInDataset(formData).subscribe(
         (res) => {
           resolve(res);
         },
