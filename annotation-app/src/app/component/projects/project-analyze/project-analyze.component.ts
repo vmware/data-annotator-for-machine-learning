@@ -1623,26 +1623,6 @@ export class ProjectAnalyzeComponent implements OnInit {
     }
   }
 
-  checkMutilNumberChanged(changedValues, originalValues) {
-    const originalVals = [];
-    if (originalValues && originalValues.length) {
-      originalValues.forEach((item) => {
-        if (this.startFrom === 'review') {
-          originalVals.push({
-            [item.problemCategory.label]: item.problemCategory.value,
-          });
-        } else {
-          if (item.user === this.user.email) {
-            originalVals.push({
-              [item.problemCategory.label]: item.problemCategory.value,
-            });
-          }
-        }
-      });
-    }
-    return _.isEqual(changedValues, originalVals);
-  }
-
   isSkipOrBack(type, id?, index?) {
     const isCategory = this.categoryFunc();
     let flag1;
@@ -1669,8 +1649,6 @@ export class ProjectAnalyzeComponent implements OnInit {
         if (this.labelType === 'HTL') {
           this.checkHTL(type);
           return false;
-        } else if (this.isMultipleNumericLabel) {
-          flag2 = this.checkMutilNumberChanged(isCategory, this.sr.userInputs);
         } else if (
           this.isMultipleLabel &&
           !this.isNumeric &&
@@ -1958,7 +1936,6 @@ export class ProjectAnalyzeComponent implements OnInit {
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
           if (this.startFrom === 'review') {
-            console.log(111111111111111111111);
             const images = [];
             this.sr.userInputs.forEach((item) => {
               images.push(item.problemCategory);
