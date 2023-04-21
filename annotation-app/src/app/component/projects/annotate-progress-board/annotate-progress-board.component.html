@@ -1,7 +1,7 @@
 <!-- Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
-<div>
+<div *ngIf="isAllowedAnnotate">
   <h5>{{ msg?.from === 'review' ? 'Review' : 'Annotation' }} Progress</h5>
   <div class="left-project-info fontSizeSmall">
     <clr-progress-bar
@@ -150,7 +150,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
 </div>
-<div>
+<div *ngIf="isAllowedAnnotate || msg?.from === 'review'">
   <h5>History</h5>
   <div class="left-project-info">
     <div class="historyBox fontSizeSmall">
