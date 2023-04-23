@@ -178,7 +178,9 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.initReview = data.reviewee;
       this.toGetProjectInfo(this.projectId);
     });
-    this.getProgress();
+    if (this.isAllowedAnnotate || this.startFrom == 'review') {
+      this.getProgress();
+    }
     window.addEventListener('scroll', this.handleScroll, true);
     // console.log(177, this.projectType, this.startFrom, this.moreReviewInfo);
   }

@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 */
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ClrLoadingState } from '@clr/angular';
 import { EnvironmentsService } from 'src/app/services/environments.service';
 import { Observable } from 'windowed-observable';
 
@@ -21,6 +22,7 @@ export class DatasetAnalyzeComponent implements OnInit {
   topRowHeader = [];
   initData: any;
   loadingPreviewData: boolean = true;
+  loadingAutomlBtn: ClrLoadingState = ClrLoadingState.DEFAULT;
 
   constructor(private route: ActivatedRoute, public env: EnvironmentsService, private router: Router) {}
 
@@ -92,6 +94,7 @@ export class DatasetAnalyzeComponent implements OnInit {
   }
 
   createModel(type: String) {
+    this.loadingAutomlBtn = ClrLoadingState.LOADING;
     const dataset = JSON.parse(JSON.stringify(this.dataset));
     dataset.modelType = type;
     if (dataset && dataset.images) {

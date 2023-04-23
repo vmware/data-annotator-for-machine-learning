@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import * as _ from 'lodash';
+import { UserAuthService } from 'src/app/services/user-auth.service';
 
 @Component({
   selector: 'app-annotate-progress-board',
@@ -22,14 +23,19 @@ export class AnnotateProgressBoardComponent implements OnInit {
 
   reviewOrder: string;
   reviewee: string;
+  isAllowedAnnotate: boolean;
+  user: any;
 
-  constructor() {}
+  constructor(private userAuthService: UserAuthService) {
+    this.user = this.userAuthService.loggedUser().user;
+  }
 
   ngOnInit(): void {}
 
   ngOnChanges() {
     this.reviewOrder = this.msg.reviewOrder;
     this.reviewee = this.msg.reviewee;
+    this.isAllowedAnnotate = this.msg.projectInfo.annotator.indexOf(this.user.email) > -1 ? true : false;
   }
 
   historyBack(index, id) {
