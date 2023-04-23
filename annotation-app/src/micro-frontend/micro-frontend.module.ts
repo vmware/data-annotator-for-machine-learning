@@ -18,5 +18,6 @@ export class MicroFrontendModule implements DoBootstrap {
       injector: this.injector,
     });
     window.customElements.define('mf-loop-entry', customElement);
+    console.log('Registered custom element mf-loop-entry');
   }
 }
