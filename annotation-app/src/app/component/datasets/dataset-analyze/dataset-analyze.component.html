@@ -57,14 +57,14 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="clr-row clr-justify-content-start">
                 <div class="clr-col-6">
                   <h6>Total {{ dataset.format !== 'image' && dataset.format !== 'txt' ? 'Rows' : 'Items' }}</h6>
-                  <span *ngIf="dataset.format !== 'image'">{{ dataset.totalRows }}</span>
+                  <span *ngIf="dataset.format !== 'image'">{{ dataset.totalRows > 0 ? dataset.totalRows : '/' }}</span>
                   <span *ngIf="dataset.format == 'image'">{{
                     dataset.totalRows ? dataset.totalRows : dataset.images.length
                   }}</span>
                 </div>
                 <div *ngIf="dataset.format !== 'image' && dataset.format !== 'txt'" class="clr-col-6">
                   <h6>Total Columns</h6>
-                  <span>{{ dataset.totalColumns }}</span>
+                  <span>{{ dataset.totalColumns > 0 ? dataset.totalColumns : '/' }}</span>
                 </div>
               </div>
             </div>
@@ -158,31 +158,39 @@ SPDX-License-Identifier: Apache-2.0 -->
               </p>
               <clr-dropdown *ngIf="!initData?.modelName">
                 <button
+                  [clrLoading]="loadingAutomlBtn"
                   class="btn btn-primary"
                   [attr.disabled]="!dataset.location && dataset.format === 'image' ? true : null"
                   clrDropdownTrigger
                 >
                   Create Automl Model
-                  <cds-icon shape="angle" direction="down"></cds-icon>
+                  <cds-icon shape="angle" direction="down" style="top: 35%"></cds-icon>
                 </button>
                 <clr-dropdown-menu *clrIfOpen clrPosition="bottom-left">
                   <label class="dropdown-header">Classification</label>
                   <a
+                    clrDropdownItem
                     *ngIf="dataset.format === 'csv'"
                     class="dropdown-item active"
                     (click)="createModel('Classification')"
                     >Text Classification</a
                   >
                   <a
+                    clrDropdownItem
                     *ngIf="dataset.format === 'csv'"
                     class="dropdown-item"
                     (click)="createModel('Multi Label Text Classification')"
                     >Multi Label Text Classification</a
                   >
-                  <a *ngIf="dataset.format === 'tabular'" class="dropdown-item" (click)="createModel('Tabular')"
+                  <a
+                    clrDropdownItem
+                    *ngIf="dataset.format === 'tabular'"
+                    class="dropdown-item"
+                    (click)="createModel('Tabular')"
                     >Tabular</a
                   >
                   <a
+                    clrDropdownItem
                     *ngIf="dataset.format === 'image'"
                     class="dropdown-item"
                     (click)="createModel('Image Classification')"
