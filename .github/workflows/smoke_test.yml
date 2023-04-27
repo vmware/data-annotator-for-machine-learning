@@ -26,7 +26,7 @@ jobs:
           node-version: "16"
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -66,7 +66,7 @@ jobs:
           echo container End connect-active-learning-service
 
       - name: Checkout e2e-test branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: "e2e-test"
@@ -116,12 +116,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Checkout devops branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           ref: "devops"
@@ -145,7 +145,7 @@ jobs:
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan annotation-app
-        uses: sonarsource/sonarcloud-github-action@master
+        uses: sonarsource/sonarcloud-github-action@v1.9
         with:
           projectBaseDir: ./annotation-app
           args: >
