@@ -755,7 +755,7 @@ async function sampleSr(req) {
     } else {
         data.sampleSr = sr[0].originalData;
         if(mp.project.projectType == PROJECTTYPE.QA){
-            data.sampleSr['questions'] = sr[0].questionForText;
+            data.sampleSr['questions'] = _.join(sr[0].questionForText, '?');
         }
     }
 

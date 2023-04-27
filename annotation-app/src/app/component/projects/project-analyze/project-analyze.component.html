@@ -29,6 +29,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <form
         *ngIf="
           projectType !== 'ner' &&
+          projectType !== 'qa' &&
           projectType !== 'image' &&
           projectType !== 'log' &&
           isAllowedAnnotate &&
@@ -208,7 +209,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       FLAGGED
                     </span>
                   </div>
-                  <div *ngIf="projectType !== 'ner' && projectType !== 'image' && projectType !== 'log'">
+                  <div *ngIf="projectType !== 'ner' && projectType !== 'qa' && projectType !== 'image' && projectType !== 'log'">
                     <div
                       class="textBox"
                       [ngStyle]="{
@@ -314,6 +315,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <span class="clear" (click)="clickClearMark($event, spanText)">×</span>
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- here is QA annotation content -->
+                  <div *ngIf="projectType === 'qa'" class="nerBox">
+                    <div class="nerContent">
+                      <div class="nerPassage" (mouseup)="onMouseUp($event)">
+                        <span id="mainText">{{ sr?.originalData?.text }}</span>
                       </div>
                     </div>
                   </div>
@@ -575,6 +585,104 @@ SPDX-License-Identifier: Apache-2.0 -->
                       &nbsp; &nbsp;
                     </div>
                   </div>
+                  
+                  <!-- QA label -->
+                  <!-- input question  -->
+                  <div *ngIf="projectType == 'qa'">
+                    <div
+                      class="clr-control-container clr-error"
+                      style="margin-top: 1rem"
+                      [ngClass]="{ 'clr-error': clrErrorTip }"
+                    >
+                      <div class="clr-input-wrapper">
+                        <input 
+                          type="text" 
+                          id="inputQuestion" 
+                          class="clr-input"
+                          placeholder="Add new question here then press the Enter key to save the question" 
+                          (keyup.enter)="onAddQuestion($event)"
+                          (blur)="onAddQuestion($event)"
+                          (keyup)="onAddQuestion($event, true)"
+                          name="inputQuestion"
+                          [(ngModel)]="inputQuestion"
+                          [ngModelOptions]="{ standalone: true }"
+                          style="width:40em"
+                        />
+                        <cds-icon class="clr-validate-icon" shape="exclamation-circle"></cds-icon>
+                      </div>
+                      <span class="clr-subtext">{{inputQuestionError}}</span>
+                    </div>
+                    <!-- question list -->
+                    <div *ngFor="let item of categories; let index=index" style="display: flex;" 
+                      class="clr-row clr-justify-content-between clr-error"
+                      [ngClass]="{ 'clr-error': editQuestionError }"
+                      >
+                      
+                      <label class="circle" [style.background-color]="getLabelColor(item)">&nbsp;&nbsp;<b>{{index+1}}</b></label>
+                      <div type="button" class="btn btn-icon btn-block" style="width: 72%; height: 100%;"
+                        id="QA-{{index}}"
+                        (click)="onSelectingEntity($event, item, index)"
+                        (dblclick)="editQuestion($event, index, item)"
+                        [style.border-color]="getLabelColor(item)"
+                        [style.background-color]="getBackgroundColor(index, item)"
+                        >
+                        <textarea
+                            id="QA-input-{{index}}"
+                            type="text"
+                            value="{{categories[index]}}" 
+                            style="width:100%; height: 100%; border:none; color: black;"
+                            [disabled]="editQuestionItem != index"
+                            [style.background-color]="getBackgroundColor(index, item)"
+                            (blur)="saveQuestion($event, index, item)"
+                          >
+                        </textarea>
+                        <span class="clr-subtext" *ngIf="editQuestionItem === index && editQuestionError">{{editQuestionError}}</span>
+                      </div>
+                      <div style="width: 20%; height: 100%;">
+                        <button type="button" class="btn btn-icon" aria-label="edit" 
+                          title="edit"
+                          [disabled]="editQuestionItem != -1 && editQuestionItem != index" 
+                          (click)="editQuestion($event, index, item)">
+                          <cds-icon shape="note"></cds-icon>
+                        </button>
+                        <button type="button" class="btn btn-icon" aria-label="save" 
+                          title="save"
+                          [disabled]="editQuestionItem != -1 && editQuestionItem != index" 
+                          (click)="saveQuestion($event, index, item)">
+                          <cds-icon shape="check"></cds-icon>
+                        </button>
+                        <button type="button" class="btn btn-icon" aria-label="delete" 
+                          title="delete"
+                          (click)="deleteQuestion(index)">
+                          <cds-icon shape="trash"></cds-icon>
+                        </button>
+                      </div>
+                      <!-- question answer list -->
+                      <div id="QuestionList-{{index}}" 
+                        *ngIf="ifContainsAnswer(item)"
+                        class="card-block annotateLabel" 
+                        style="max-width: 100%; min-width: 100%;">
+                        <ng-container *ngFor="let spanText of mapCurrentAnswerList(item)">
+                          <ul class="list spanSelected"
+                            style="display: flex;"
+                            *ngIf="spanText.label == item"
+                            (mouseenter)="mouseenterMark($event, spanText)"
+                            (mouseleave)="mouseleaveMark($event, spanText)">
+                            <li
+                              (click)="clickShowMark($event, spanText)">
+                              {{spanText.text}}
+                            </li>
+                            <span class="clear" 
+                              style="position: static;" 
+                              (click)="clickClearMark($event, spanText)">x
+                            </span>
+                          </ul>
+                        </ng-container>
+                          
+                      </div>
+                    </div>
+                  </div>
+
                   <!-- multiple checkbox labels -->
                   <div
                     *ngIf="
@@ -800,7 +908,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                           multipleLabelList.length == 0 &&
                           spansList.length == 0 &&
                           currentBoundingData.length == 0 &&
-                          !isNumeric
+                          !isNumeric ||
+                          editQuestionError
                         "
                         title="{{
                           multipleLabelList.length > 0 || spansList.length > 0 || currentBoundingData.length > 0

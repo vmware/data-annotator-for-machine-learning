@@ -162,7 +162,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         >
           <div *ngFor="let flag of item.historyDescription" class="historyText">
             <div
-              *ngIf="msg.projectInfo.projectType == 'ner' || msg.projectInfo.projectType == 'log'"
+              *ngIf="msg.projectInfo.projectType == 'ner' || msg.projectInfo.projectType == 'qa'|| msg.projectInfo.projectType == 'log'"
               title="{{ flag.text }}"
             >
               {{ flag.text }}
@@ -173,6 +173,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div
               *ngIf="
                 msg.projectInfo.projectType !== 'ner' &&
+                msg.projectInfo.projectType !== 'qa' &&
                 msg.projectInfo.projectType !== 'image' &&
                 msg.projectInfo.projectType !== 'log'
               "

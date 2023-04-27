@@ -40,7 +40,9 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
     <clr-datagrid *ngIf="isShowExample" [clrDgLoading]="loading">
       <clr-dg-column style="max-width: 90px">S. No.</clr-dg-column>
-      <clr-dg-column *ngFor="let header of sampleData">{{ header.key }}</clr-dg-column>
+      <clr-dg-column *ngFor="let header of sampleData">
+        {{ header.key }}
+      </clr-dg-column>
       <clr-dg-row>
         <clr-dg-cell style="max-width: 90px">1</clr-dg-cell>
         <clr-dg-cell *ngFor="let content of sampleData" style="padding-left: 0.8rem">
@@ -51,7 +53,15 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div *ngIf="isQuick" class="datagridBox">
       <clr-datagrid *ngIf="msg.projectType !== 'image' && msg.projectType !== 'log'" [clrDgLoading]="loading">
         <clr-dg-column style="max-width: 90px">S. No.</clr-dg-column>
-        <clr-dg-column *ngFor="let header of sampleData">{{ header.key }}</clr-dg-column>
+        <clr-dg-column *ngFor="let header of sampleData">
+          {{ header.key }}
+          <clr-tooltip *ngIf="msg.projectType == 'qa' && header.key == 'questions'">
+            <cds-icon clrTooltipTrigger role="img" shape="info-circle" size="24" aria-label="Uniq tooltip 5"></cds-icon>
+            <clr-tooltip-content *clrIfOpen>
+                <span>Split multiple questions with the ?</span>
+            </clr-tooltip-content>
+        </clr-tooltip>
+        </clr-dg-column>
         <clr-dg-column style="max-width: 90px">Action</clr-dg-column>
         <clr-dg-row *ngFor="let content of newAddedData; let a = index">
           <clr-dg-cell style="max-width: 90px">{{ a + 1 }}</clr-dg-cell>
@@ -405,6 +415,31 @@ SPDX-License-Identifier: Apache-2.0 -->
             </clr-datagrid>
           </div>
         </div>
+        
+        <div class="form-group clr-row" style="margin-top: 2rem" *ngIf="showPreviewTable && msg.projectType == 'qa'">
+          <label class="label-tooltip clr-col-2">
+            <label>Questions column</label>
+          </label>
+          <div class="clr-input-wrapper clr-col-9">
+            <div class="clr-select-wrapper" style="width: 100% !important">
+              <select
+                style="width: 100% !important"
+                id="select-basic"
+                class="clr-select"
+                formControlName="questions"
+                >
+                <ng-container *ngFor="let header of previewHeadDatas">
+                  <option
+                    *ngIf="!originalHead.includes(header)"
+                    [value]="header">
+                    {{ header }}
+                  </option>
+                </ng-container>
+              </select>
+            </div>
+          </div>
+        </div>
+
       </form>
     </div>
     <div *ngIf="!isQuick" class="clr-row">
