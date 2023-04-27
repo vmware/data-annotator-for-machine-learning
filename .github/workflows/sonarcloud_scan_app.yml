@@ -21,10 +21,6 @@ jobs:
       SONAR_ORG:  ${{ secrets.SONAR_ORG }}
 
     steps:
-      - name: Setup Node 16
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
           
       - name: Checkout 
         uses: actions/checkout@v3
