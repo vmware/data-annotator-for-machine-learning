@@ -12,6 +12,7 @@ import { ToolService } from 'src/app/services/common/tool.service';
 import { EnvironmentsService } from 'src/app/services/environments.service';
 import { UserAuthService } from 'src/app/services/user-auth.service';
 import { Buffer } from 'buffer';
+import { WebAnalyticsService } from 'src/app/services/web-analytics.service';
 
 @Component({
   selector: 'app-task-datagrid',
@@ -54,13 +55,11 @@ export class TaskDatagridComponent implements OnInit {
     private downloadService: DownloadService,
     private toolService: ToolService,
     private commonService: CommonService,
+    private wa: WebAnalyticsService,
   ) {}
 
   ngOnInit(): void {
     this.user = this.userAuthService.loggedUser().user;
-    // if (this.user.role) {
-    //   this.getProjects();
-    // }
   }
 
   ngOnChanges() {
@@ -180,6 +179,9 @@ export class TaskDatagridComponent implements OnInit {
         () => {
           this.deleteDatasetDialog = false;
           this.infoMessage = 'Project was deleted successfully.';
+          if (this.env.config.embedded && this.env.config.lumosUrl) {
+            this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-My_Labeling_Task', 'Delete_Task');
+          }
           this.getProjects();
           this.loading = false;
           setTimeout(() => {
@@ -236,6 +238,9 @@ export class TaskDatagridComponent implements OnInit {
       this.apiService.shareStatus(param).subscribe((res) => {
         if (res && res.shareStatus == true) {
           this.infoMessage = 'Sharing the annotated data successful.';
+          if (this.env.config.embedded && this.env.config.lumosUrl) {
+            this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-My_Labeling_Task', 'Share_Task');
+          }
           setTimeout(() => {
             this.infoMessage = '';
           }, 2000);
@@ -339,6 +344,9 @@ export class TaskDatagridComponent implements OnInit {
   receiveSubmitEdit(e) {
     this.editProjectDialog = false;
     e ? (this.infoMessage = 'Success to edit the project') : (this.errorMessage = 'Failed to edit');
+    if (this.env.config.embedded && this.env.config.lumosUrl && e) {
+      this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-My_Labeling_Task', 'Edit_Task');
+    }
     this.getProjects();
     setTimeout(() => {
       this.infoMessage = '';

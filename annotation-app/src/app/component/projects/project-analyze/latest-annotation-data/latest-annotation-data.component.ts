@@ -10,6 +10,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { ColorsRainbow } from '../../../../model/constant';
 import * as _ from 'lodash';
 import { LabelStudioService } from 'src/app/services/label-studio.service';
+import { WebAnalyticsService } from 'src/app/services/web-analytics.service';
 
 enableProdMode();
 
@@ -69,6 +70,7 @@ export class LatestAnnotationDataComponent implements OnInit {
     private toolService: ToolService,
     private LabelStudioService: LabelStudioService,
     private renderer2: Renderer2,
+    private wa: WebAnalyticsService,
   ) {
     this.page = 1;
     this.pageSize = 10;
@@ -634,6 +636,9 @@ export class LatestAnnotationDataComponent implements OnInit {
         (response) => {
           this.getALLFlag();
           this.selected = [];
+          if (this.env.config.embedded && this.env.config.lumosUrl) {
+            this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task_Analyze', 'Flag_Delete', type);
+          }
         },
         (error) => {
           this.loadingFlag = false;
@@ -654,6 +659,9 @@ export class LatestAnnotationDataComponent implements OnInit {
         (response) => {
           this.getALLFlag();
           this.selected = [];
+          if (this.env.config.embedded && this.env.config.lumosUrl) {
+            this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task_Analyze', 'Flag_Silence', type);
+          }
         },
         (error) => {},
       );
@@ -679,6 +687,9 @@ export class LatestAnnotationDataComponent implements OnInit {
         this.getALLSrs();
         this.selectedLogsToModify = [];
         this.selectAllStatus = false;
+        if (this.env.config.embedded && this.env.config.lumosUrl) {
+          this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task_Analyze', 'Mark_For_Review', type);
+        }
       });
     }
   }

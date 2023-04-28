@@ -18,6 +18,7 @@ import { FormValidatorUtil } from '../../../../shared/form-validators/form-valid
 import { UnZipService } from 'src/app/services/common/up-zip.service';
 import { EnvironmentsService } from 'src/app/services/environments.service';
 import { S3Service } from 'src/app/services/common/s3.service';
+import { WebAnalyticsService } from 'src/app/services/web-analytics.service';
 
 @Component({
   selector: 'app-append',
@@ -71,6 +72,7 @@ export class AppendComponent implements OnInit {
     private UnZipService: UnZipService,
     public env: EnvironmentsService,
     private s3Service: S3Service,
+    private wa: WebAnalyticsService,
   ) {
     this.user = this.userAuthService.loggedUser().user.email;
 
@@ -776,6 +778,13 @@ export class AppendComponent implements OnInit {
         this.showPreviewTable = false;
         this.uploadGroup.get('selectedDataset').reset();
         this.infoMessage = 'Succeed to append data.';
+        if (this.env.config.embedded && this.env.config.lumosUrl) {
+          this.wa.toTrackEventWebAnalytics(
+            'Loop-Labeling_Tasks_List-Task_Add_New_Entries',
+            'Append_Data',
+            params.isFile ? 'Upload_File' : 'Quick_Add',
+          );
+        }
       },
       (error: any) => {
         this.loadingPublish = false;
