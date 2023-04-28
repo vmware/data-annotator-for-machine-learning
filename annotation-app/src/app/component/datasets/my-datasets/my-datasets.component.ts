@@ -11,6 +11,7 @@ import { EnvironmentsService } from 'src/app/services/environments.service';
 import { UserAuthService } from 'src/app/services/user-auth.service';
 import { Buffer } from 'buffer';
 import { InternalApiService } from 'src/app/services/internal-api.service';
+import { WebAnalyticsService } from 'src/app/services/web-analytics.service';
 
 @Component({
   selector: 'app-my-datasets',
@@ -58,6 +59,7 @@ export class MyDatasetsComponent implements OnInit {
     private commonService: CommonService,
     private userAuthService: UserAuthService,
     private internalApiService: InternalApiService,
+    public wa: WebAnalyticsService,
   ) {
     this.user = this.userAuthService.loggedUser().user;
   }
@@ -134,6 +136,9 @@ export class MyDatasetsComponent implements OnInit {
   toShowPreview(dataset) {
     this.previewDatasetDialog = true;
     this.msgPreview = dataset;
+    if (this.env.config.embedded && this.env.config.lumosUrl) {
+      this.wa.toTrackEventWebAnalytics('Loop-Datasets_List-My_Datasets', 'Preview_Dataset');
+    }
   }
 
   receiveClosePreview(value: boolean) {
@@ -158,6 +163,9 @@ export class MyDatasetsComponent implements OnInit {
         () => {
           this.deleteDatasetDialog = false;
           this.infoMessage = 'Dataset was deleted successfully.';
+          if (this.env.config.embedded && this.env.config.lumosUrl) {
+            this.wa.toTrackEventWebAnalytics('Loop-Datasets_List-My_Datasets', 'Delete_Dataset');
+          }
           if (this.env.config.inUrl) {
             this.deleteInDataset();
           }

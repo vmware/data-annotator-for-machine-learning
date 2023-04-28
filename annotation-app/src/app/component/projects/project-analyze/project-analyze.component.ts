@@ -26,6 +26,7 @@ import {
 import { filterTreeLabel } from 'src/app/shared/utils/treeView';
 import { PopLabelColors, ColorsRainbow } from '../../../model/constant';
 import { ClrLoadingState } from '@clr/angular';
+import { WebAnalyticsService } from 'src/app/services/web-analytics.service';
 
 @Component({
   selector: 'app-project-analyze',
@@ -155,6 +156,7 @@ export class ProjectAnalyzeComponent implements OnInit {
     private userAuthService: UserAuthService,
     private env: EnvironmentsService,
     private md: MarkdownParserService,
+    public wa: WebAnalyticsService,
   ) {
     this.user = this.userAuthService.loggedUser().user;
     this.currentTabIndex = 1;
@@ -3518,6 +3520,13 @@ export class ProjectAnalyzeComponent implements OnInit {
       });
       this.questionForm.get('filterText').reset();
       this.toFilterLog(this.filterList);
+      if (this.env.config.embedded && this.env.config.lumosUrl) {
+        this.wa.toTrackEventWebAnalytics(
+          'Loop-Labeling_Tasks_List-Task_Assign',
+          `Log_Filter_${this.filterType}`,
+          e.value,
+        );
+      }
     }
   }
 
@@ -3540,6 +3549,13 @@ export class ProjectAnalyzeComponent implements OnInit {
       });
       this.questionForm.get('filterText').reset();
       this.toFilterLog(this.filterList);
+      if (this.env.config.embedded && this.env.config.lumosUrl) {
+        this.wa.toTrackEventWebAnalytics(
+          'Loop-Labeling_Tasks_List-Task_Assign',
+          `Log_Filter_${this.filterType}`,
+          e.target.value,
+        );
+      }
     }
   }
 
@@ -3570,6 +3586,9 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.isDrawer = false;
     } else {
       this.isDrawer = true;
+    }
+    if (this.env.config.embedded && this.env.config.lumosUrl) {
+      this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task', 'Open_Drawer');
     }
     this.clearPopDialog();
   }
@@ -3681,6 +3700,9 @@ export class ProjectAnalyzeComponent implements OnInit {
   changeRenderFormat(e) {
     this.renderFormat = e.target.value;
     this.saveAnnotateSetting('display', this.renderFormat);
+    if (this.env.config.embedded && this.env.config.lumosUrl) {
+      this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task', 'Display_Format', this.renderFormat);
+    }
   }
 
   saveAnnotateSetting(set, value) {
@@ -3804,6 +3826,9 @@ export class ProjectAnalyzeComponent implements OnInit {
     this.currentTabIndex = tabIndex;
     if (tabIndex === 1) {
       this.clickAssignTab();
+    }
+    if (this.env.config.embedded && this.env.config.lumosUrl && tabIndex == 3) {
+      this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task_Stats', 'D3');
     }
   }
 
