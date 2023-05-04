@@ -196,11 +196,6 @@ label .label-leftBoard {
     word-break: break-all;
 }
 
-
-
-
-
-
 .labels {
     font-size: unset;
     font-weight: bold;
@@ -1003,11 +998,14 @@ label .label-leftBoard {
     margin-right: 2rem;
 }
 
-.circle {
-    width: 2em;
-    height: 100%;
-    border-radius: 50%;
-    display:"inline-block";
-    margin-left: 1em;
-    margin-right: 0.5em;
+.answerList {
+    overflow: auto;
+    min-height: 2em;
+    max-height: 5em;
+    resize: vertical;
+    font-size: 0.77em;
+    padding: 1px;
+    border: 1px solid #e8e8e8;
+    width: 100%;
+
 }

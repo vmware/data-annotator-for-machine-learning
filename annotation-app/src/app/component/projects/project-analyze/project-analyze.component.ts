@@ -277,9 +277,9 @@ export class ProjectAnalyzeComponent implements OnInit {
             this.toReadStorageSetting('display');
           }
           if (this.projectType == 'ner' || this.projectType == 'qa') {
-            this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
             this.sr = this.resetNerSrData(this.sr);
             this.toShowExistingLabel();
+            this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
           }
           if (this.projectType == 'image') {
             this.sr = this.resetImageSrData(this.sr);
