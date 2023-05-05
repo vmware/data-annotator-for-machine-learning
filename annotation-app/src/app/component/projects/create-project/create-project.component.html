@@ -78,6 +78,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <option value="ner">Named Entity Recognition</option>
             <option value="image">Image Classification</option>
             <option value="log">Log Classification</option>
+            <option value="qa">Question Answer</option>
           </select>
         </div>
         <div class="clr-col-12 clr-col-md-1">
@@ -308,7 +309,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     *ngIf="dsDialogForm.get('projectType').value !== 'image' && dsDialogForm.get('projectType').value !== 'log'"
     (clrWizardPageCustomButton)="doCustomClick($event)"
     [clrWizardPageNextDisabled]="
-      dsDialogForm.get('projectType').value === 'ner'
+      dsDialogForm.get('projectType').value === 'ner' || dsDialogForm.get('projectType').value === 'qa'
         ? !dropdownSelected
         : !(dropdownSelected && selectDescription.length > 0)
     "
@@ -319,7 +320,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <div class="clr-row formField">
         <label class="label-tooltip clr-col-12 clr-col-md-2"
           >{{
-            dsDialogForm.get('projectType').value === 'ner'
+            dsDialogForm.get('projectType').value === 'ner' || dsDialogForm.get('projectType').value === 'qa'
               ? 'Select Text Column'
               : 'Select
               Label Column'
@@ -333,7 +334,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             (change)="selectedItem(dropdownSelected)"
             [ngModelOptions]="{ standalone: true }"
           >
-            <option *ngIf="dsDialogForm.get('projectType').value != 'ner'" value="No Labels">No Labels</option>
+            <option *ngIf="dsDialogForm.get('projectType').value != 'ner' && dsDialogForm.get('projectType').value != 'qa'" value="No Labels">No Labels</option>
             <option *ngFor="let item of previewHeadDatas" [value]="item">
               {{ item }}
             </option>
@@ -346,10 +347,25 @@ SPDX-License-Identifier: Apache-2.0 -->
           >{{
             dsDialogForm.get('projectType').value === 'ner'
               ? 'Select the columns to present to annotators about the existing labels (optional) or helpful text (optional)'
+              : dsDialogForm.get('projectType').value === 'qa'
+              ? 'Select Question Column'
               : 'Select the columns to present to annotators about the text'
-          }}<span *ngIf="dsDialogForm.get('projectType').value !== 'ner'">*</span></label
-        >
-        <div class="clr-col-12 clr-col-md-9">
+          }}<span *ngIf="dsDialogForm.get('projectType').value !== 'ner' && dsDialogForm.get('projectType').value !== 'qa'">*</span>
+        </label>
+        <div class="clr-select-wrapper clr-col-12 clr-col-md-9" *ngIf="dsDialogForm.get('projectType').value == 'qa'">
+          <select
+            id="select-basic"
+            class="clr-select"
+            [(ngModel)]="selectDescription"
+            (change)="selectQestionChanged(selectDescription)"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option *ngFor="let item of checkboxColumns" [value]="item">
+              {{ item }}
+            </option>
+          </select>
+        </div>
+        <div class="clr-col-12 clr-col-md-9" *ngIf="dsDialogForm.get('projectType').value != 'qa'">
           <clr-datagrid
             #selectDescriptionDatagrid
             *ngIf="dsDialogForm.get('projectType').value != 'ner'"
@@ -419,6 +435,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   </clr-wizard-page>
   <clr-wizard-page
     [id]="4"
+    *ngIf="dsDialogForm.get('projectType').value !== 'qa'"
     [clrWizardPageNextDisabled]="clrWizardPageNextDisabled.page4"
     (clrWizardPageOnLoad)="clrWizardPageOnLoad($event)"
   >
@@ -1128,7 +1145,8 @@ SPDX-License-Identifier: Apache-2.0 -->
       isUploadLabel ||
       dsDialogForm.get('projectType').value === 'log' ||
       dsDialogForm.get('projectType').value === 'image' ||
-      dsDialogForm.get('projectType').value === 'ner'
+      dsDialogForm.get('projectType').value === 'ner' ||
+      dsDialogForm.get('projectType').value === 'qa'
         ? false
         : clrWizardPageNextDisabled.page6
     "
@@ -1265,7 +1283,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           isUploadLabel ||
           dsDialogForm.get('projectType').value === 'log' ||
           dsDialogForm.get('projectType').value === 'image' ||
-          dsDialogForm.get('projectType').value === 'ner'
+          dsDialogForm.get('projectType').value === 'ner' ||
+          dsDialogForm.get('projectType').value === 'qa'
         "
         class="clr-row formField"
       >

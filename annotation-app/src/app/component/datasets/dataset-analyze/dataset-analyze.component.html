@@ -127,6 +127,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                     (click)="createLabelingTask('ner')"
                     >Named Entity Recognition</a
                   >
+                  <a
+                    *ngIf="dataset.format === 'csv' || dataset.format === 'tabular'"
+                    class="dropdown-item"
+                    (click)="createLabelingTask('qa')"
+                    >Question Answer</a
+                  >
                   <a *ngIf="dataset.format === 'image'" class="dropdown-item" (click)="createLabelingTask('image')"
                     >Image Classification</a
                   >
