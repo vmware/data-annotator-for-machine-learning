@@ -918,7 +918,7 @@ async function reviewTicket(req) {
     const user = req.auth.email;
     await validator.checkAnnotator(user);
 
-    const tid = ObjectId(req.body.tid);
+    const tid = (typeof req.body.tid === 'string')? ObjectId(req.body.tid): _.flatMap(req.body.tid, n => ObjectId(n))
     const pid = req.body.pid;
     const problemCategory = req.body.problemCategory;
     const logFreeText = req.body.logFreeText;
@@ -940,9 +940,9 @@ async function reviewTicket(req) {
 }
 
 async function flagToReview(mp, tid) {
-    const conditions = { _id: tid };
+    const conditions = { _id: {$in: tid} };
     const update = { $set: { "reviewInfo.review": true } };
-    await mongoDb.findOneAndUpdate(mp.model, conditions, update);
+    await mongoDb.updateManyByConditions(mp.model, conditions, update);
 }
 async function passReview(mp, tid, user) {
     const conditions = { _id: tid };
