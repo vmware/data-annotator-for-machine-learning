@@ -332,6 +332,8 @@ export class CreateProjectComponent implements OnInit {
       annotationQuestion: [
         this.dataset.projectType == 'ner'
           ? 'Label all entity types in the given text corpus.'
+          : this.dataset.projectType == 'qa'
+          ? 'Label all answers in the given text corpus according to the question.'
           : this.dataset.annotationQuestion,
         DatasetValidator.required(),
       ],
@@ -530,7 +532,7 @@ export class CreateProjectComponent implements OnInit {
 
   getMyDatasets(projectType) {
     let a =
-      projectType == 'text' || projectType == 'tabular' || projectType == 'ner'
+      projectType == 'text' || projectType == 'tabular' || projectType == 'ner' || projectType == 'qa'
         ? 'csv'
         : projectType == 'image'
         ? 'image'
@@ -682,7 +684,7 @@ export class CreateProjectComponent implements OnInit {
     let indexArray = [];
     let textArray = this.checkboxChecked;
     let selectedLabelIndex = this.previewHeadDatas.indexOf(this.dropdownSelected);
-    if (this.dsDialogForm.get('projectType').value === 'ner') {
+    if (this.dsDialogForm.get('projectType').value === 'ner' || this.dsDialogForm.get('projectType').value === 'qa') {
       selectedLabelIndex = -1;
       textArray = [this.dropdownSelected];
     }
@@ -799,6 +801,10 @@ export class CreateProjectComponent implements OnInit {
     this.sortPreviewHeadDatas(this.previewHeadDatas);
   }
 
+  selectQestionChanged(question){
+    this.selectDescription = [question]
+  }
+  
   selectDescriptionChanged(value) {
     // this value === this.selectDescription
     if (
@@ -1129,6 +1135,8 @@ export class CreateProjectComponent implements OnInit {
     let arr = this.toCheckCategoryListInfo();
     if (this.dsDialogForm.get('projectType').value === 'ner') {
       return arr;
+    }else if (this.dsDialogForm.get('projectType').value === 'qa') {
+      return [""];//qa project have no category
     } else {
       if (this.isShowNumeric) {
         return arr;
@@ -1160,6 +1168,7 @@ export class CreateProjectComponent implements OnInit {
       formData.append(
         'selectDescription',
         this.dsDialogForm.get('projectType').value === 'ner'
+         || this.dsDialogForm.get('projectType').value === 'qa'
           ? JSON.stringify([this.dropdownSelected])
           : JSON.stringify(this.checkboxChecked),
       );
@@ -1167,7 +1176,13 @@ export class CreateProjectComponent implements OnInit {
         'selectLabels',
         this.dsDialogForm.get('projectType').value === 'ner'
           ? JSON.stringify(this.checkboxChecked)
+          : this.dsDialogForm.get('projectType').value === 'qa'
+          ? null
           : this.dropdownSelected,
+      );
+      formData.append('questionForText', this.dsDialogForm.get('projectType').value === 'qa'
+        ? JSON.stringify(this.checkboxChecked)
+        : null
       );
     }
     if (this.dsDialogForm.get('projectType').value === 'ner') {
@@ -1181,6 +1196,7 @@ export class CreateProjectComponent implements OnInit {
         formData.append('popUpLabels', JSON.stringify(popLabels));
       }
     }
+   
     formData.append('totalRows', this.dsDialogForm.value.totalRow);
     formData.append('slack', this.assignType[1].checked ? JSON.stringify(this.slackList) : '[]');
     formData.append('maxAnnotations', this.dsDialogForm.value.maxAnnotations);
@@ -1203,6 +1219,7 @@ export class CreateProjectComponent implements OnInit {
     formData.append(
       'isMultipleLabel',
       this.dsDialogForm.get('projectType').value == 'ner' ||
+        this.dsDialogForm.get('projectType').value == 'qa' ||
         this.dsDialogForm.get('projectType').value == 'image' ||
         this.dsDialogForm.get('projectType').value == 'log' ||
         this.isMutilNumericLabel ||

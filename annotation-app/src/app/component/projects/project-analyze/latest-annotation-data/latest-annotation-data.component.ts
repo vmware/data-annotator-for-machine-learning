@@ -104,6 +104,8 @@ export class LatestAnnotationDataComponent implements OnInit {
     this.innerTable =
       this.msg.projectType == 'ner'
         ? ['Entity', 'Text', 'Start_idx', 'End_idx']
+        : this.msg.projectType == 'qa'
+        ? ['Question', 'Answer', 'Start_idx', 'End_idx']
         : ['LineNumber', 'LineContent', 'Label', 'FreeText'];
     setTimeout(() => {
       this.getALLSrs();
@@ -424,7 +426,7 @@ export class LatestAnnotationDataComponent implements OnInit {
               res[k].originalData = cellContent[k];
             }
           }
-          if (this.msg.projectType == 'ner') {
+          if (this.msg.projectType == 'ner' || this.msg.projectType == 'qa') {
             res.forEach((element) => {
               if (
                 element.userInputs.length > 0 &&
@@ -465,7 +467,7 @@ export class LatestAnnotationDataComponent implements OnInit {
           } else {
             this.loading = false;
           }
-          if (this.msg.isMultipleLabel && this.msg.projectType != 'ner' && this.msg.projectType != 'log') {
+          if (this.msg.isMultipleLabel && this.msg.projectType != 'ner' && this.msg.projectType != 'qa' && this.msg.projectType != 'log') {
             this.previewSrs = res;
             this.toRenewPreviewSrs();
           }

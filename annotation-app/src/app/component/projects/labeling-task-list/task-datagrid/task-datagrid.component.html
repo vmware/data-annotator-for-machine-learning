@@ -111,6 +111,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                   ? 'table'
                   : dataset.projectType === 'ner'
                   ? 'bars'
+                  : dataset.projectType === 'qa'
+                  ? 'checkbox-list'
                   : 'unknown-status'
               }}"
             >

@@ -131,6 +131,7 @@ export class AppendComponent implements OnInit {
       totalRow: [0, DatasetValidator.validRow()],
       selectLabels: [''],
       ticketQuestions: [''],
+      questions: [''],
     });
   }
 
@@ -165,6 +166,9 @@ export class AppendComponent implements OnInit {
           for (let i = 0; i < this.sampleData.length; i++) {
             flag = { key: this.sampleData[i].key, value: '', format: true };
             this.newAddedData.push(flag);
+            if (this.msg.projectType == 'qa' && this.sampleData[i].key == 'questions') {
+              continue;
+            }
             this.originalHead.push(this.sampleData[i].key);
           }
           this.newAddedData = [this.newAddedData];
@@ -307,7 +311,7 @@ export class AppendComponent implements OnInit {
 
   private getMyDatasets() {
     const a =
-      this.msg.projectType == 'text' || this.msg.projectType == 'tabular' || this.msg.projectType == 'ner'
+      this.msg.projectType == 'text' || this.msg.projectType == 'tabular' || this.msg.projectType == 'ner' || this.msg.projectType == 'qa'
         ? 'csv'
         : this.msg.projectType == 'image'
         ? 'image'
@@ -578,6 +582,9 @@ export class AppendComponent implements OnInit {
           appendParams['ticketQuestions'] = this.uploadGroup.get('ticketQuestions').value;
           appendParams['selectLabels'] = this.uploadGroup.get('selectLabels').value;
         }
+        if (this.msg.projectType === 'qa') {
+          appendParams['questions'] = [this.uploadGroup.get('questions').value];
+        }
         this.appendSrs(appendParams);
       } else {
         if (this.env.config.enableAWSS3) {
@@ -702,6 +709,9 @@ export class AppendComponent implements OnInit {
           appendParams['ticketQuestions'] = this.uploadGroup.get('ticketQuestions').value;
           appendParams['selectLabels'] = this.uploadGroup.get('selectLabels').value;
         }
+        if (this.msg.projectType === 'qa') {
+          appendParams['questions'] = [this.uploadGroup.get('questions').value];
+        }
         this.appendSrs(appendParams);
       },
       (error) => {
@@ -741,7 +751,7 @@ export class AppendComponent implements OnInit {
       });
       formData.append('topReview', JSON.stringify(a));
       formData.append('totalRows', this.uploadGroup.get('totalRow').value);
-    } else if (this.msg.projectType == 'text' || this.msg.projectType == 'tabular' || this.msg.projectType == 'ner') {
+    } else if (this.msg.projectType == 'text' || this.msg.projectType == 'tabular' || this.msg.projectType == 'ner' || this.msg.projectType == 'qa') {
       formData.append('hasHeader', 'yes');
       formData.append(
         'topReview',

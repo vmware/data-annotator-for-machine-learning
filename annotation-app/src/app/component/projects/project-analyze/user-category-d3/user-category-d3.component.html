@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <div class="clr-col-7">
     <h4>Number of Assigned Labels</h4>
   </div>
-  <div class="clr-col-5 btn-group floatRight btn-sm">
+  <div class="clr-col-5 btn-group floatRight btn-sm" *ngIf="msg.projectType != 'qa'">
     <div class="radio btn">
       <input type="radio" name="btn-group-demo-radios" id="btn-demo-radio-1" checked />
       <label for="btn-demo-radio-1" (click)="shiftBtnRadio('user')">User</label>

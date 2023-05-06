@@ -201,12 +201,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <clr-dg-column *ngIf="msg.projectType === 'log'"> Log Freetext </clr-dg-column>
                         <clr-dg-column
                           class="studioCell"
-                          *ngIf="msg.projectType == 'image' || msg.projectType == 'ner' || msg.projectType == 'log'"
+                          *ngIf="msg.projectType == 'image' || msg.projectType == 'ner' || msg.projectType == 'qa' || msg.projectType == 'log'"
                         >
                           Label
                         </clr-dg-column>
                         <clr-dg-column
-                          *ngIf="msg.projectType != 'ner' && msg.projectType != 'image' && msg.projectType != 'log'"
+                          *ngIf="msg.projectType != 'ner' && msg.projectType != 'qa' && msg.projectType != 'image' && msg.projectType != 'log'"
                           style="min-width: 20rem"
                         >
                           Label
@@ -224,6 +224,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <clr-dg-cell
                             *ngIf="
                               msg.projectType != 'ner' &&
+                              msg.projectType != 'qa' &&
                               msg.projectType != 'image' &&
                               msg.projectType != 'log' &&
                               msg.labelType !== 'HTL'
@@ -235,6 +236,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <clr-dg-cell
                             *ngIf="
                               msg.projectType != 'ner' &&
+                              msg.projectType != 'qa' &&
                               msg.projectType != 'image' &&
                               msg.projectType != 'log' &&
                               msg.labelType === 'HTL'
@@ -250,7 +252,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <li>{{ selectedTreeLabel }}</li>
                             </ul>
                           </clr-dg-cell>
-                          <clr-dg-cell *ngIf="msg.projectType == 'ner'" class="studioCell">
+                          <clr-dg-cell *ngIf="msg.projectType == 'ner' || msg.projectType == 'qa'" class="studioCell">
                             <clr-datagrid>
                               <clr-dg-column *ngFor="let title of innerTable">
                                 {{ title }}
@@ -293,12 +295,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <clr-dg-column *ngIf="msg.projectType === 'log'"> Updated Log Freetext </clr-dg-column>
                         <clr-dg-column
                           class="studioCell"
-                          *ngIf="msg.projectType == 'image' || msg.projectType == 'ner' || msg.projectType == 'log'"
+                          *ngIf="msg.projectType == 'image' || msg.projectType == 'ner' || msg.projectType == 'qa' || msg.projectType == 'log'"
                         >
                           Re-Label
                         </clr-dg-column>
                         <clr-dg-column
-                          *ngIf="msg.projectType != 'ner' && msg.projectType != 'image' && msg.projectType != 'log'"
+                          *ngIf="msg.projectType != 'ner' && msg.projectType != 'qa' && msg.projectType != 'image' && msg.projectType != 'log'"
                           style="min-width: 20rem"
                         >
                           Re-Label
@@ -319,6 +321,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <clr-dg-cell
                             *ngIf="
                               msg.projectType != 'ner' &&
+                              msg.projectType != 'qa' &&
                               msg.projectType != 'image' &&
                               msg.projectType != 'log' &&
                               msg.labelType !== 'HTL'
@@ -330,6 +333,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <clr-dg-cell
                             *ngIf="
                               msg.projectType != 'ner' &&
+                              msg.projectType != 'qa' &&
                               msg.projectType != 'image' &&
                               msg.projectType != 'log' &&
                               msg.labelType === 'HTL'
@@ -349,7 +353,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <li>{{ selectedTreeLabel }}</li>
                             </ul>
                           </clr-dg-cell>
-                          <clr-dg-cell *ngIf="msg.projectType == 'ner'" class="studioCell">
+                          <clr-dg-cell *ngIf="msg.projectType == 'ner' || msg.projectType == 'qa'" class="studioCell">
                             <clr-datagrid *ngIf="flag.problemCategory">
                               <clr-dg-column *ngFor="let title of innerTable">
                                 {{ title }}
