@@ -121,6 +121,28 @@ export class AnnotatePage extends CommonPage {
   HISTORY_LIST_2 = element(
     by.css(".historyBox div:nth-child(2) .historyPosition")
   );
+  QA_INPUT_WRAPPER = $("div.clr-input-wrapper");
+  ADD_QA_INPUT = $("#inputQuestion");
+  QA_TEXTAREA = $("#QA-input-0");
+  QA_TEXTAREA_1 = $("#QA-input-1");
+  QA_EDIT = $(
+    "div.questionContainer > div:nth-child(4) > div:nth-child(3) > div.clr-row.clr-col > div.clr-row.clr-col-3 > button:nth-child(1) > cds-icon"
+  );
+  QA_SAVE = $(
+    "div.questionContainer > div:nth-child(4) > div:nth-child(3) > div.clr-row.clr-col > div.clr-row.clr-col-3 > button:nth-child(2) > cds-icon"
+  );
+  QA_DEL = $(
+    "div.questionContainer > div:nth-child(4) > div:nth-child(4) > div.clr-row.clr-col > div.clr-row.clr-col-3 > button:nth-child(3) > cds-icon"
+  );
+  QA_QUESTION_LIST = $("#QuestionList-1 > ul:nth-child(1)");
+  QA_QUESTION_LIST_CLEAR = $("#QuestionList-1 > ul:nth-child(1) .clear");
+  ERROR_SPAN = $("span.clr-subtext");
+  EDIT_ERROR_SPAN = $(
+    "div.questionContainer > div:nth-child(4) > div:nth-child(3) .clr-subtext"
+  );
+  APPEND_DESC_TEXTAREA = $("clr-dg-cell:nth-child(6) textarea");
+  APPEND_QUES_TEXTAREA = $("clr-dg-cell:nth-child(7) textarea");
+  APPEND_PUBLISH_BTN = element(by.partialButtonText("Publish"));
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.NAV_TASK_LIST);
@@ -854,4 +876,96 @@ export class AnnotatePage extends CommonPage {
     });
     console.log("log-end to change reviewer");
   }
+
+  async getMainText() {
+    await FunctionUtil.elementVisibilityOf(this.MAIN_TEXT);
+    return this.MAIN_TEXT.getText();
+  }
+
+  annotateQa = async () => {
+    await FunctionUtil.click(this.DRAWER_BTN);
+    await browser.sleep(1000);
+    const mainText = await this.getMainText();
+    console.log("log-qa mainText length is: ", mainText.length);
+    if (mainText.length < 155) {
+      console.log("log-skip qa ticket");
+      await this.skipTicket();
+    }
+    console.log("log-start to annotate qa");
+    await FunctionUtil.elementVisibilityOf(this.QA_INPUT_WRAPPER);
+    await this.QA_INPUT_WRAPPER.click();
+    await this.ADD_QA_INPUT.sendKeys(projectCreateData.QAProject.questionOne);
+    await this.ADD_QA_INPUT.sendKeys(protractor.Key.ENTER);
+    await browser.sleep(1000);
+    await this.QA_INPUT_WRAPPER.click();
+    await this.ADD_QA_INPUT.sendKeys(projectCreateData.QAProject.questionOne);
+    await this.ADD_QA_INPUT.sendKeys(protractor.Key.ENTER);
+    await browser
+      .wait(
+        ExpectedConditions.visibilityOf(this.ERROR_SPAN),
+        Constant.DEFAULT_TIME_OUT
+      )
+      .then(() => {
+        this.QA_INPUT_WRAPPER.click();
+      });
+    await this.ADD_QA_INPUT.clear();
+    await this.ADD_QA_INPUT.sendKeys(projectCreateData.QAProject.questionTwo);
+    await this.ADD_QA_INPUT.sendKeys(protractor.Key.ENTER);
+    await FunctionUtil.click(this.QA_TEXTAREA_1);
+    await FunctionUtil.mouseDragMove(
+      this.MAIN_TEXT,
+      { x: 0, y: 0 },
+      { x: 100, y: 0 }
+    );
+    await FunctionUtil.mouseDragMove(
+      this.MAIN_TEXT,
+      { x: 50, y: 0 },
+      { x: 150, y: 0 }
+    );
+    await FunctionUtil.click(this.QA_EDIT);
+    await FunctionUtil.click(this.QA_TEXTAREA_1);
+    await this.QA_TEXTAREA_1.clear();
+    await FunctionUtil.click(this.QA_SAVE);
+    await browser.sleep(2000);
+    await FunctionUtil.click(this.QA_TEXTAREA_1);
+    await this.QA_TEXTAREA_1.sendKeys(projectCreateData.QAProject.questionTwo);
+    await FunctionUtil.click(this.QA_SAVE);
+    await browser
+      .wait(
+        ExpectedConditions.visibilityOf(this.EDIT_ERROR_SPAN),
+        Constant.DEFAULT_TIME_OUT
+      )
+      .then(() => {
+        browser.sleep(1000);
+        FunctionUtil.click(this.QA_EDIT);
+      });
+    await FunctionUtil.click(this.QA_TEXTAREA_1);
+    await this.QA_TEXTAREA_1.clear();
+    await this.QA_TEXTAREA_1.sendKeys(projectCreateData.QAProject.questionEdit);
+    await FunctionUtil.click(this.QA_SAVE);
+    await browser.sleep(1000);
+    await FunctionUtil.click(this.QA_QUESTION_LIST);
+    await browser.sleep(1000);
+    await browser.actions().mouseMove(this.QA_QUESTION_LIST).perform();
+    await FunctionUtil.elementVisibilityOf(this.QA_QUESTION_LIST_CLEAR);
+    await this.QA_QUESTION_LIST_CLEAR.click();
+    await FunctionUtil.click(this.QA_DEL);
+    await browser.sleep(1000);
+    await this.skipTicket();
+    await browser.sleep(1000);
+    await this.ANNOTATE_SUBMIT_BTN.click();
+    await FunctionUtil.click(this.DRAWER_BTN);
+  };
+
+  appendNewEntries = async () => {
+    await FunctionUtil.click(this.APPEND_DESC_TEXTAREA);
+    await this.APPEND_DESC_TEXTAREA.sendKeys(
+      "This is append description for append qa project"
+    );
+    await FunctionUtil.click(this.APPEND_QUES_TEXTAREA);
+    await this.APPEND_QUES_TEXTAREA.sendKeys(
+      projectCreateData.QAProject.questionSplit
+    );
+    await FunctionUtil.click(this.APPEND_PUBLISH_BTN);
+  };
 }

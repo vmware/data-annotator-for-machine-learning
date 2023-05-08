@@ -62,6 +62,9 @@ var conf = {
     "./features/preview-hierarchical-project-spec.ts",
     "./features/share-hierarchical-project-spec.ts",
 
+    "./features/create-project-qa-spec.ts",
+    "./features/annotate-project-qa-spec.ts",
+
     "./features/delete-e2e-projects-spec.ts",
     "./features/faq-spec.ts",
   ],

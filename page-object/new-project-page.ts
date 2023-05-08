@@ -130,6 +130,15 @@ export class NewProjectPage extends CommonPage {
     by.css("#clr-wizard-page-4 .btn.btn-sm.btn-link cds-icon[shape=plus]")
   );
 
+  SELECT_QUESTION_SELECTOR = element(
+    by.css("#clr-wizard-page-3 > div > div:nth-child(2) > div")
+  );
+  SELECT_QUESTION_SELECTOR_OPTION = element.all(
+    by.css(
+      "#clr-wizard-page-3 > div > div:nth-child(2) > div > select > option"
+    )
+  );
+
   async navigateTo() {
     console.log("log-go to labeling task");
     await FunctionUtil.elementVisibilityOf(this.LABELING_TASK_NAV);
@@ -214,6 +223,14 @@ export class NewProjectPage extends CommonPage {
     await FunctionUtil.elementVisibilityOf(this.LABEL_SELECTOR);
     await this.LABEL_SELECTOR.click();
     await this.LABEL_SELECTOR_OPTIONS.get(labelIndex).click();
+  }
+
+  async selectQuestionLabels(labelIndex) {
+    console.log("log-start to set question");
+    await FunctionUtil.elementVisibilityOf(this.SELECT_QUESTION_SELECTOR);
+    await this.SELECT_QUESTION_SELECTOR.click();
+    await this.SELECT_QUESTION_SELECTOR_OPTION.get(labelIndex).click();
+    console.log("log-end to set question");
   }
 
   async setLabelValidation(labelColumn) {

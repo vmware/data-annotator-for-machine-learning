@@ -113,5 +113,15 @@
       "x": 100,
       "y": 10
     }
+  },
+  "QAProject": {
+    "Instruction": "this is e2e qa project task instruction",
+    "Source": "text-test-data.csv",
+    "ticketSessions": 52,
+    "maxAnnotation": 1,
+    "questionOne": "question one",
+    "questionTwo": "question two",
+    "questionSplit": "Question one?Question_two",
+    "questionEdit": "question one edit"
   }
 }
