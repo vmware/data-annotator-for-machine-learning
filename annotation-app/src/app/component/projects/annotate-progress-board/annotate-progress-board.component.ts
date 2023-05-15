@@ -53,8 +53,6 @@ export class AnnotateProgressBoardComponent implements OnInit {
 
   onSelectingReviewee(e) {
     this.outSelectReviewee.emit(this.reviewee);
-
-    // this.outSelectReviewee.emit(_.filter(this.msg.progressInfo.userCompleteCase, ['fullName', this.reviewee])[0].user);
   }
 
   clickUncertain(e) {

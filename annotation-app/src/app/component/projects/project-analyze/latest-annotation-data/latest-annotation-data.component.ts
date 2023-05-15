@@ -82,7 +82,9 @@ export class LatestAnnotationDataComponent implements OnInit {
     if (this.msg?.labelType != 'numericLabel' && !this.msg?.isMultipleLabel) {
       this.getAccuracy(this.msg._id);
     }
-    // this.categoryList = this.msg?.categoryList?.split(',');
+    if (this.msg?.projectType === 'log') {
+      this.categoryList = this.msg?.categoryList?.split(',');
+    }
     this.previewHeadDatas = ['Annotator', 'Annotate Time', 'Re-Label'];
     if (this.msg?.projectType === 'image') {
       this.sortLabelForImage(this.msg?.categoryList?.split(','), this.msg?.annotationQuestion);
@@ -467,7 +469,12 @@ export class LatestAnnotationDataComponent implements OnInit {
           } else {
             this.loading = false;
           }
-          if (this.msg.isMultipleLabel && this.msg.projectType != 'ner' && this.msg.projectType != 'qa' && this.msg.projectType != 'log') {
+          if (
+            this.msg.isMultipleLabel &&
+            this.msg.projectType != 'ner' &&
+            this.msg.projectType != 'qa' &&
+            this.msg.projectType != 'log'
+          ) {
             this.previewSrs = res;
             this.toRenewPreviewSrs();
           }

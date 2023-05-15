@@ -6,7 +6,6 @@ SPDX-License-Identifier: Apache-2.0
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { EnvironmentsService } from 'src/app/services/environments.service';
-import { Console } from 'console';
 
 @Injectable()
 export class ToolService {
@@ -64,5 +63,16 @@ export class ToolService {
         return b[field] - a[field];
       }
     };
+  }
+
+  dateTransfer(time) {
+    let date = new Date(time);
+    let Y = date.getFullYear() + '-';
+    let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+    let D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + ' ';
+    let h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+    let m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+    let s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+    return Y + M + D + h + m + s;
   }
 }
