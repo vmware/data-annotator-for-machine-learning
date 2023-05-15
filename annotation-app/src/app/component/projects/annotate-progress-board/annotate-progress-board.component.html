@@ -36,7 +36,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
 </div>
 <div *ngIf="msg?.from === 'review'">
-  <h5>Annotator Review Progress</h5>
+  <h5>Annotator Review Progress {{ reviewee }}</h5>
   <div class="left-project-info fontSizeSmall clr-row" style="margin-left: unset">
     <label for="name" class="label-leftBoard">Reviewee:</label>&nbsp;&nbsp;
     <div class="clr-select-wrapper" style="width: 70%">
@@ -44,10 +44,9 @@ SPDX-License-Identifier: Apache-2.0 -->
       <select
         *ngIf="reviewOrder !== 'most_uncertain'"
         style="width: 100%"
-        (ngModelChange)="onSelectingReviewee($event)"
-        [ngModel]="reviewee"
+        (change)="onSelectingReviewee($event)"
+        [(ngModel)]="reviewee"
       >
-        <option value=""></option>
         <option *ngFor="let item of msg?.projectInfo?.userCompleteCase" [value]="item.user">
           {{ item.user }}
         </option>
@@ -162,7 +161,11 @@ SPDX-License-Identifier: Apache-2.0 -->
         >
           <div *ngFor="let flag of item.historyDescription" class="historyText">
             <div
-              *ngIf="msg.projectInfo.projectType == 'ner' || msg.projectInfo.projectType == 'qa'|| msg.projectInfo.projectType == 'log'"
+              *ngIf="
+                msg.projectInfo.projectType == 'ner' ||
+                msg.projectInfo.projectType == 'qa' ||
+                msg.projectInfo.projectType == 'log'
+              "
               title="{{ flag.text }}"
             >
               {{ flag.text }}

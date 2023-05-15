@@ -13,6 +13,14 @@ import { EnvironmentsService } from 'src/app/services/environments.service';
 import { UserAuthService } from 'src/app/services/user-auth.service';
 import { Buffer } from 'buffer';
 import { WebAnalyticsService } from 'src/app/services/web-analytics.service';
+import { ClrDatagridStringFilterInterface } from '@clr/angular';
+declare function dateTransfer(time: any): any;
+
+export class CreateTimeFilter implements ClrDatagridStringFilterInterface<any> {
+  accepts(item: any, search: string): boolean {
+    return dateTransfer(Number(item.createdDate)).indexOf(String(search)) >= 0;
+  }
+}
 
 @Component({
   selector: 'app-task-datagrid',
@@ -46,6 +54,7 @@ export class TaskDatagridComponent implements OnInit {
   showGenerateDatasets = false;
   editProjectDialog = false;
   msgEdit: any;
+  createDateFilter = new CreateTimeFilter();
 
   constructor(
     private router: Router,

@@ -192,6 +192,9 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   ngDoCheck(change) {
+    this.projectInfo.userCompleteCase = this.projectInfo.userCompleteCase.sort(
+      this.toolService.sortBy('completeCase', 'descending'),
+    );
     this.annotateProgressMsg = {
       from: this.startFrom,
       projectInfo: this.projectInfo,
@@ -459,16 +462,11 @@ export class ProjectAnalyzeComponent implements OnInit {
         this.loading = false;
         this.submitAndHistory(res, from);
         if (res && res.MSG) {
-          // const reviewee = this.reviewee;
-          // if (reviewee) {
-          //   this.error = res.MSG;
-          // } else {
-          //   this.error = 'All cases have been completely reviewed.';
-          // }
           this.error = res.MSG;
           this.loading = false;
           return;
         } else {
+          this.error = '';
           this.disabledSkip = res[0].reviewInfo.review;
           if (this.projectType === 'log') {
             this.currentLogFile = this.sr.fileInfo.fileName;
@@ -484,6 +482,7 @@ export class ProjectAnalyzeComponent implements OnInit {
         }
       },
       (error) => {
+        this.error = JSON.stringify(error);
         this.loading = false;
       },
       () => {
@@ -574,10 +573,10 @@ export class ProjectAnalyzeComponent implements OnInit {
         }
       } else if (this.projectType == 'ner') {
         this.modifyChangeHistory();
-      } else if(this.projectType == 'qa'){
+      } else if (this.projectType == 'qa') {
         this.modifyChangeHistory();
         srUserInput.userInput[0]['questionForText'] = this.categories;
-      }else if (this.projectType == 'image') {
+      } else if (this.projectType == 'image') {
         srUserInput.userInput[0].problemCategory = this.currentBoundingData;
         this.sr.images = this.currentBoundingData;
         this.modifyChangeHistory();
@@ -637,7 +636,7 @@ export class ProjectAnalyzeComponent implements OnInit {
       if (this.projectType === 'log' || this.projectType === 'ner') {
         param['problemCategory'] = this.spansList;
         param['logFreeText'] = this.questionForm.get('logFreeText').value;
-      }else if(this.projectType === 'qa'){
+      } else if (this.projectType === 'qa') {
         param['problemCategory'] = this.spansList;
         param['questionForText'] = this.categories;
       } else if (this.isMultipleNumericLabel || this.isNumeric) {
@@ -746,7 +745,12 @@ export class ProjectAnalyzeComponent implements OnInit {
             }
           }
         }
-      } else if (this.projectType === 'ner' || this.projectType === 'qa' || this.projectType === 'log' || this.projectType === 'image') {
+      } else if (
+        this.projectType === 'ner' ||
+        this.projectType === 'qa' ||
+        this.projectType === 'log' ||
+        this.projectType === 'image'
+      ) {
         const isCategory = this.categoryFunc();
         for (let i = 0; i < this.annotationHistory.length; i++) {
           if (this.annotationHistory[i].srId === this.sr._id) {
@@ -773,13 +777,21 @@ export class ProjectAnalyzeComponent implements OnInit {
               }
               const aa = this.annotationHistory[i].category.sort(
                 this.toolService.sortBy(
-                  this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
+                  this.projectType === 'ner' || this.projectType === 'qa'
+                    ? 'start'
+                    : this.projectType === 'log'
+                    ? 'line'
+                    : 'sort',
                   'ascending',
                 ),
               );
               const bb = isCategory.sort(
                 this.toolService.sortBy(
-                  this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
+                  this.projectType === 'ner' || this.projectType === 'qa'
+                    ? 'start'
+                    : this.projectType === 'log'
+                    ? 'line'
+                    : 'sort',
                   'ascending',
                 ),
               );
@@ -999,7 +1011,12 @@ export class ProjectAnalyzeComponent implements OnInit {
       ) {
         const isCategory = this.categoryFunc();
         this.isActionErr(isCategory, null, 'skip');
-      } else if (this.projectType == 'ner'|| this.projectType == 'qa' || this.projectType == 'image' || this.projectType == 'log') {
+      } else if (
+        this.projectType == 'ner' ||
+        this.projectType == 'qa' ||
+        this.projectType == 'image' ||
+        this.projectType == 'log'
+      ) {
         this.isSkipOrBack('skip');
       } else if (this.labelType == 'HTL') {
         this.checkHTL('skip');
@@ -1133,7 +1150,7 @@ export class ProjectAnalyzeComponent implements OnInit {
           }&token=${JSON.parse(localStorage.getItem(this.env.config.sessionKey)).token.access_token}`;
         }
         let category = [];
-        if (this.projectType === 'ner' || this.projectType === 'qa'|| this.projectType === 'log') {
+        if (this.projectType === 'ner' || this.projectType === 'qa' || this.projectType === 'log') {
           category = this.spansList;
         } else if (this.startFrom === 'review' && this.isMultipleLabel && !this.isNumeric) {
           if (OldSr.userInputs && OldSr.userInputs.length > 0) {
@@ -1147,7 +1164,7 @@ export class ProjectAnalyzeComponent implements OnInit {
         const addSkip = {
           srId: OldSr._id,
           historyDescription:
-            this.projectType === 'ner' || this.projectType === 'qa'|| this.projectType === 'image'
+            this.projectType === 'ner' || this.projectType === 'qa' || this.projectType === 'image'
               ? [OldSr.originalData]
               : OldSr.originalData.slice(0, 10),
           type: 'skip',
@@ -1708,7 +1725,11 @@ export class ProjectAnalyzeComponent implements OnInit {
         if (this.projectType !== 'text' && this.projectType !== 'tabular') {
           const aa = isCategory.sort(
             this.toolService.sortBy(
-              this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
+              this.projectType === 'ner' || this.projectType === 'qa'
+                ? 'start'
+                : this.projectType === 'log'
+                ? 'line'
+                : 'sort',
               'ascending',
             ),
           );
@@ -1717,7 +1738,10 @@ export class ProjectAnalyzeComponent implements OnInit {
             bb = a.sort(this.toolService.sortBy('sort', 'ascending'));
           } else {
             bb = this.sr.userInputs[0].problemCategory.sort(
-              this.toolService.sortBy(this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : 'line', 'ascending'),
+              this.toolService.sortBy(
+                this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : 'line',
+                'ascending',
+              ),
             );
           }
 
@@ -1795,7 +1819,12 @@ export class ProjectAnalyzeComponent implements OnInit {
             this.projectType !== 'log')
         ) {
           this.isActionErr(isCategory, this.annotationPrevious[0].srId);
-        } else if (this.projectType == 'ner' || this.projectType == 'qa' || this.projectType == 'log' || this.projectType == 'image') {
+        } else if (
+          this.projectType == 'ner' ||
+          this.projectType == 'qa' ||
+          this.projectType == 'log' ||
+          this.projectType == 'image'
+        ) {
           let flag = false;
           for (let i = 0; i < this.annotationHistory.length; i++) {
             if (this.annotationHistory[i].srId === this.sr._id) {
@@ -1823,13 +1852,21 @@ export class ProjectAnalyzeComponent implements OnInit {
                 }
                 const aa = this.annotationHistory[i].category.sort(
                   this.toolService.sortBy(
-                    this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
+                    this.projectType === 'ner' || this.projectType === 'qa'
+                      ? 'start'
+                      : this.projectType === 'log'
+                      ? 'line'
+                      : 'sort',
                     'ascending',
                   ),
                 );
                 const bb = isCategory.sort(
                   this.toolService.sortBy(
-                    this.projectType === 'ner' || this.projectType === 'qa' ? 'start' : this.projectType === 'log' ? 'line' : 'sort',
+                    this.projectType === 'ner' || this.projectType === 'qa'
+                      ? 'start'
+                      : this.projectType === 'log'
+                      ? 'line'
+                      : 'sort',
                     'ascending',
                   ),
                 );
@@ -2411,7 +2448,12 @@ export class ProjectAnalyzeComponent implements OnInit {
           });
         }, 10);
       }
-    } else if (!this.isShowDropDown && !this.isNumeric && this.isMultipleLabel && (this.projectType == 'ner' || this.projectType == 'qa')) {
+    } else if (
+      !this.isShowDropDown &&
+      !this.isNumeric &&
+      this.isMultipleLabel &&
+      (this.projectType == 'ner' || this.projectType == 'qa')
+    ) {
       this.spansList = [];
       const annotations = this.sr.userInputs;
       setTimeout(() => {
@@ -2694,7 +2736,7 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   onMouseUp() {
-    if (!this.categories.length){
+    if (!this.categories.length) {
       this.clrErrorTip = true;
       this.inputQuestionError = 'PLEASE ADD THE QUESTION FIRST';
       return;
@@ -2755,10 +2797,10 @@ export class ProjectAnalyzeComponent implements OnInit {
     const lastSpan = spans[spans.length - 1];
     if (this.projectType == 'ner') {
       lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
-    }else if (this.projectType == 'qa') {
+    } else if (this.projectType == 'qa') {
       lastSpan.setAttribute('title', this.categories[selectedEntityID]);
     }
-    
+
     if (this.isShowPopLabel) {
       lastSpan.addEventListener('click', this.showPopLabel.bind(this, spans));
     }
@@ -2911,7 +2953,12 @@ export class ProjectAnalyzeComponent implements OnInit {
           this.error = null;
 
           const flag = [];
-          if (this.projectType != 'ner' && this.projectType != 'qa' && this.projectType != 'image' && this.projectType != 'log') {
+          if (
+            this.projectType != 'ner' &&
+            this.projectType != 'qa' &&
+            this.projectType != 'image' &&
+            this.projectType != 'log'
+          ) {
             let that = this;
             _.forIn(responseSr.originalData, function (value, key) {
               that.updateOutput(value).then((e) => {
@@ -3879,6 +3926,7 @@ export class ProjectAnalyzeComponent implements OnInit {
 
   receiveOutSelectReviewee(reviewee) {
     this.reviewee = reviewee;
+    this.initReview = reviewee;
     this.getOneReview('order');
   }
 
@@ -3909,30 +3957,27 @@ export class ProjectAnalyzeComponent implements OnInit {
     );
   }
 
-
-  onAddQuestion(e, inputting?){
-    
+  onAddQuestion(e, inputting?) {
     let question = e.target.value.trim();
 
     if (this.categories.includes(question)) {
       this.clrErrorTip = true;
       this.inputQuestionError = `The question already exists at index ${this.categories.indexOf(question) + 1}`;
-      return
+      return;
     }
     //when inputting clear error message
     if (!question || inputting) {
       this.clrErrorTip = false;
       this.inputQuestionError = null;
-      return
+      return;
     }
     //and questiong to list and get question label color
     this.categories.push(question);
     this.nerLabelForColor(this.categories);
     this.inputQuestion = null;
-
   }
-  
-  deleteQuestion(i){
+
+  deleteQuestion(i) {
     //remove delete question from ui
     this.spansList.forEach((ele, index) => {
       if (ele.label == this.categories[i]) {
@@ -3951,36 +3996,34 @@ export class ProjectAnalyzeComponent implements OnInit {
     }
   }
 
-  getQuestionListAndSetQuestionColors(questionForText){
+  getQuestionListAndSetQuestionColors(questionForText) {
     if (this.projectType != 'qa') return;
 
-    this.categories = questionForText? questionForText: [];
+    this.categories = questionForText ? questionForText : [];
     this.nerLabelForColor(this.categories);
   }
 
-  getBackgroundColor(index, item, white?){
+  getBackgroundColor(index, item, white?) {
     if (white) {
-      return 'white'
+      return 'white';
     }
     return index == this.selectedEntityID ? this.getLabelColor(item) : 'white';
   }
 
-  editQuestion(e, i, item){
-
+  editQuestion(e, i, item) {
     if (this.editQuestionItem != -1) {
-      return
+      return;
     }
     this.editQuestionItem = i;
     const qaBTN = this.el.nativeElement.querySelector(`#QA-${i}`);
-    qaBTN.style.backgroundColor = "";
-    qaBTN.style.borderStyle = "dashed";
-    
+    qaBTN.style.backgroundColor = '';
+    qaBTN.style.borderStyle = 'dashed';
+
     const qaInput = this.el.nativeElement.querySelector(`#QA-input-${i}`);
-    qaInput.style.backgroundColor = "";
-    
+    qaInput.style.backgroundColor = '';
   }
 
-  saveQuestion(e, i, item){
+  saveQuestion(e, i, item) {
     const qaInput = this.el.nativeElement.querySelector(`#QA-input-${i}`);
     let editQuetion = qaInput.value.trim();
     if (i != this.editQuestionItem) {
@@ -3996,66 +4039,65 @@ export class ProjectAnalyzeComponent implements OnInit {
     }
     if (editQuetion == item) {
       this.resetQuestionColor(i, editQuetion);
-      return
+      return;
     }
     const originalQuestion = this.categories[i];
     this.categories[i] = editQuetion;
     this.nerLabelForColor(this.categories);
 
-    this.spansList.forEach(span => {
-      if(span.label == originalQuestion) {
+    this.spansList.forEach((span) => {
+      if (span.label == originalQuestion) {
         span.label = editQuetion;
       }
     });
     const mainText = document.getElementById('mainText');
     this.updateMainTextLabel(mainText.childNodes, originalQuestion, editQuetion);
-    
+
     this.resetQuestionColor(i, editQuetion);
-    
   }
 
-  resetQuestionColor(index, item){
+  resetQuestionColor(index, item) {
     this.selectedEntityID = index;
     this.editQuestionItem = -1;
-    this.editQuestionError = "";
+    this.editQuestionError = '';
 
     const qaBTN = this.el.nativeElement.querySelector(`#QA-${index}`);
-    qaBTN.style.borderStyle = "";
-    qaBTN.style.backgroundColor= this.getLabelColor(item);
+    qaBTN.style.borderStyle = '';
+    qaBTN.style.backgroundColor = this.getLabelColor(item);
 
     const qaInput = this.el.nativeElement.querySelector(`#QA-input-${index}`);
     qaInput.style.backgroundColor = this.getLabelColor(item);
-    
-    return [qaBTN, qaInput]
+
+    return [qaBTN, qaInput];
   }
 
-  updateMainTextLabel(nodes, label, newLabel){
+  updateMainTextLabel(nodes, label, newLabel) {
     //nodes have no childNodes it's the recursive exit condition
     if (nodes.type == 3) {
       if (nodes.title == label) {
-        nodes.setAttribute("title", newLabel)
+        nodes.setAttribute('title', newLabel);
       }
-      return
+      return;
     }
     // have childNodes and recursive update
     for (const node of nodes) {
       if (node.title == label) {
-        node.setAttribute("title", newLabel)
+        node.setAttribute('title', newLabel);
       }
       if (node.childNodes.length) {
-        this.updateMainTextLabel(node.childNodes, label, newLabel)
+        this.updateMainTextLabel(node.childNodes, label, newLabel);
       }
     }
   }
 
-  ifContainsAnswer(q){
-    return this.spansList.length && this.spansList.find(e => e.label == q);
+  ifContainsAnswer(q) {
+    return this.spansList.length && this.spansList.find((e) => e.label == q);
   }
-  mapCurrentAnswerList(q){
-    return this.spansList.filter(e => e.label.indexOf(q) != -1);
+  mapCurrentAnswerList(q) {
+    return this.spansList.filter((e) => e.label.indexOf(q) != -1);
   }
 
-  extendWordSelection(selection){
+  extendWordSelection(selection) {
     if (this.projectType != 'qa') {
       return selection;
     }
@@ -4070,21 +4112,20 @@ export class ProjectAnalyzeComponent implements OnInit {
     let endNode = selection.focusNode;
     let endOffset = selection.focusOffset;
     selection.collapse(selection.anchorNode, selection.anchorOffset);
-    
+
     let direction = [];
     if (backwards) {
-        direction = ['backward', 'forward'];
+      direction = ['backward', 'forward'];
     } else {
-        direction = ['forward', 'backward'];
+      direction = ['forward', 'backward'];
     }
 
-    selection.modify("move", direction[0], "character");
-    selection.modify("move", direction[1], "word");
+    selection.modify('move', direction[0], 'character');
+    selection.modify('move', direction[1], 'word');
     selection.extend(endNode, endOffset);
-    selection.modify("extend", direction[1], "character");
-    selection.modify("extend", direction[0], "word");
+    selection.modify('extend', direction[1], 'character');
+    selection.modify('extend', direction[0], 'word');
 
     return selection;
   }
-
 }

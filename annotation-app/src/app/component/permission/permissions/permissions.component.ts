@@ -9,9 +9,15 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ToolService } from 'src/app/services/common/tool.service';
 import { EnvironmentsService } from 'src/app/services/environments.service';
-import { ClrLoadingState } from '@clr/angular';
+import { ClrDatagridStringFilterInterface, ClrLoadingState } from '@clr/angular';
 import { InternalApiService } from 'src/app/services/internal-api.service';
+declare function dateTransfer(time: any): any;
 
+export class CreateTimeFilter implements ClrDatagridStringFilterInterface<any> {
+  accepts(item: any, search: string): boolean {
+    return dateTransfer(Number(item.createdDate)).indexOf(String(search)) >= 0;
+  }
+}
 @Component({
   selector: 'app-permissions',
   templateUrl: './permissions.component.html',
@@ -31,6 +37,7 @@ export class PermissionsComponent implements OnInit {
   collaborators: any = [];
   inputValueChange = new Subject<string>();
   loadingBtn: ClrLoadingState = ClrLoadingState.DEFAULT;
+  createDateFilter = new CreateTimeFilter();
 
   constructor(
     private apiService: ApiService,

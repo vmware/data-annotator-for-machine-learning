@@ -12,7 +12,32 @@ import { UserAuthService } from 'src/app/services/user-auth.service';
 import { Buffer } from 'buffer';
 import { InternalApiService } from 'src/app/services/internal-api.service';
 import { WebAnalyticsService } from 'src/app/services/web-analytics.service';
+import { ClrDatagridStringFilterInterface } from '@clr/angular';
+declare function dateTransfer(time: any): any;
 
+export class CreateDateFilter implements ClrDatagridStringFilterInterface<any> {
+  accepts(item: any, search: string): boolean {
+    return dateTransfer(Number(item.createTime)).indexOf(String(search)) >= 0;
+  }
+}
+
+export class UpdateDateFilter implements ClrDatagridStringFilterInterface<any> {
+  accepts(item: any, search: string): boolean {
+    return dateTransfer(Number(item.updateTime)).indexOf(String(search)) >= 0;
+  }
+}
+
+export class UpdateTimeFilter implements ClrDatagridStringFilterInterface<any> {
+  accepts(item: any, search: string): boolean {
+    return dateTransfer(Number(item.updatedDate)).indexOf(String(search)) >= 0;
+  }
+}
+
+export class GenerateUpdateTimeFilter implements ClrDatagridStringFilterInterface<any> {
+  accepts(item: any, search: string): boolean {
+    return dateTransfer(Number(item.generateInfo.updateTime)).indexOf(String(search)) >= 0;
+  }
+}
 @Component({
   selector: 'app-my-datasets',
   templateUrl: './my-datasets.component.html',
@@ -50,6 +75,10 @@ export class MyDatasetsComponent implements OnInit {
   treeData: any;
   currentTab: number;
   allDatasets: any = [];
+  createDateFilter = new CreateDateFilter();
+  updateDateFilter = new UpdateDateFilter();
+  generateUpdateTimeFilter = new GenerateUpdateTimeFilter();
+  updateTimeFilter = new UpdateTimeFilter();
 
   constructor(
     private apiService: ApiService,

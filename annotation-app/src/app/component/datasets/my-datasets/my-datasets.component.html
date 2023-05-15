@@ -40,8 +40,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           <clr-dg-column [clrDgField]="'projects'" class="ellipsis-datagrid" style="max-width: 25vw"
             >Labeling Task
           </clr-dg-column>
-          <clr-dg-column [clrDgField]="'createTime'" class="ellipsis-datagrid">Create On</clr-dg-column>
-          <clr-dg-column [clrDgField]="'updateTime'" class="ellipsis-datagrid">Last Updated On</clr-dg-column>
+          <clr-dg-column class="ellipsis-datagrid"
+            >Create On
+            <clr-dg-string-filter [clrDgStringFilter]="createDateFilter"></clr-dg-string-filter>
+          </clr-dg-column>
+          <clr-dg-column class="ellipsis-datagrid"
+            >Last Updated On<clr-dg-string-filter [clrDgStringFilter]="updateDateFilter"></clr-dg-string-filter
+          ></clr-dg-column>
           <ng-container>
             <clr-dg-row *clrDgItems="let dataset of datasets; let i = index" [clrDgItem]="dataset">
               <clr-dg-action-overflow>
@@ -114,11 +119,13 @@ SPDX-License-Identifier: Apache-2.0 -->
             <ng-container *clrDgHideableColumn="{ hidden: true }">Project Creator</ng-container>
           </clr-dg-column>
           <clr-dg-column [clrDgField]="'shareDescription'" class="ellipsis-datagrid">Description </clr-dg-column>
-          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">
-            <ng-container *clrDgHideableColumn="{ hidden: true }">Updated Date</ng-container>
+          <clr-dg-column class="ellipsis-datagrid">
+            <ng-container *clrDgHideableColumn="{ hidden: true }">Updated Date </ng-container
+            ><clr-dg-string-filter [clrDgStringFilter]="updateTimeFilter"></clr-dg-string-filter>
           </clr-dg-column>
-          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">
-            <ng-container *clrDgHideableColumn="{ hidden: true }"> Generate Updated Date</ng-container>
+          <clr-dg-column class="ellipsis-datagrid">
+            <ng-container *clrDgHideableColumn="{ hidden: true }"> Generate Updated Date</ng-container
+            ><clr-dg-string-filter [clrDgStringFilter]="generateUpdateTimeFilter"></clr-dg-string-filter>
           </clr-dg-column>
           <clr-dg-column [clrDgField]="'totalCase'" class="ellipsis-datagrid">Entries No.</clr-dg-column>
           <clr-dg-column [clrDgField]="'completeCase'" class="ellipsis-datagrid">Annotations No. </clr-dg-column>
@@ -255,8 +262,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           <clr-dg-column [clrDgField]="'projects'" class="ellipsis-datagrid" style="max-width: 25vw"
             >Labeling Task
           </clr-dg-column>
-          <clr-dg-column [clrDgField]="'createTime'" class="ellipsis-datagrid">Create On</clr-dg-column>
-          <clr-dg-column [clrDgField]="'updateTime'" class="ellipsis-datagrid">Last Updated On</clr-dg-column>
+          <clr-dg-column class="ellipsis-datagrid"
+            >Create On
+            <clr-dg-string-filter [clrDgStringFilter]="createDateFilter"></clr-dg-string-filter>
+          </clr-dg-column>
+          <clr-dg-column class="ellipsis-datagrid"
+            >Last Updated On
+            <clr-dg-string-filter [clrDgStringFilter]="updateDateFilter"></clr-dg-string-filter>
+          </clr-dg-column>
 
           <ng-container>
             <clr-dg-row *clrDgItems="let dataset of allDatasets; let i = index" [clrDgItem]="dataset">

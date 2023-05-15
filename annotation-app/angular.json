@@ -23,13 +23,20 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
-            "styles": ["src/styles.scss", "node_modules/@clr/ui/clr-ui.min.css"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss",
+              "node_modules/@clr/ui/clr-ui.min.css"
+            ],
             "scripts": [
               "src/libs/userChart.js",
               "src/libs/categoryChart.js",
               "src/libs/hierarchicalChart.js",
-              "src/libs/modelChart.js"
+              "src/libs/modelChart.js",
+              "src/app/services/common/tool.utils.js"
             ]
           },
           "configurations": {
@@ -87,13 +94,20 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/assets"],
-            "styles": ["src/styles.scss", "node_modules/@clr/ui/clr-ui.min.css"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.scss",
+              "node_modules/@clr/ui/clr-ui.min.css"
+            ],
             "scripts": [
               "src/libs/userChart.js",
               "src/libs/categoryChart.js",
               "src/libs/hierarchicalChart.js",
-              "src/libs/modelChart.js"
+              "src/libs/modelChart.js",
+              "src/app/services/common/tool.utils.js"
             ]
           },
           "configurations": {

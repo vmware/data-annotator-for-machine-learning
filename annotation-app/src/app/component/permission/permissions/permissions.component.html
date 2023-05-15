@@ -37,9 +37,9 @@ SPDX-License-Identifier: Apache-2.0 -->
       </clr-dg-column>
       <clr-dg-column [clrDgField]="'email'" class="ellipsis-datagrid">Email </clr-dg-column>
       <clr-dg-column [clrDgField]="'role'" class="ellipsis-datagrid">Role </clr-dg-column>
-      <clr-dg-column *ngIf="!env.config.hubService" [clrDgField]="'createdDate'" class="ellipsis-datagrid"
-        >Role Create Date</clr-dg-column
-      >
+      <clr-dg-column *ngIf="!env.config.hubService" class="ellipsis-datagrid"
+        >Role Create Date<clr-dg-string-filter [clrDgStringFilter]="createDateFilter"></clr-dg-string-filter
+      ></clr-dg-column>
       <clr-dg-column class="ellipsis-datagrid">Actions</clr-dg-column>
 
       <ng-container>
