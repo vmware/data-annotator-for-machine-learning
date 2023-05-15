@@ -866,6 +866,7 @@ export class AnnotatePage extends CommonPage {
     await this.REVIEWER_SELECT.click();
     await FunctionUtil.elementVisibilityOf(this.REVIEWER_SELECT_OPTION.get(0));
     await this.REVIEWER_SELECT_OPTION.then(async (options) => {
+      options = ["", ...options];
       options.forEach(async (value, index) => {
         await this.REVIEWER_SELECT_OPTION.get(1)
           .getText()
