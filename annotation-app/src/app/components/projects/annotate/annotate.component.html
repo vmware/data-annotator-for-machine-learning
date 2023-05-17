@@ -916,10 +916,13 @@ SPDX-License-Identifier: Apache-2.0 -->
               >
               <label class="circle" [style.background-color]="getLabelColor(item)">&nbsp;&nbsp;<b>{{index+1}}</b></label>
               <clr-radio-wrapper class="clr-col-10">
-                <input type="radio" clrRadio name="questionRadio"  class="questionRadio"
+                <input  clrRadio 
+                  class="questionRadio"
+                  type="radio"
+                  name="questionRadio"
                   value="{{item}}" 
-                  (change)="onSelectingEntity($event, index, index)"
-                  [attr.checked]="index == 0?'checked': null "
+                  (change)="onSelectingEntity($event, item, index)"
+                  [attr.checked]="index == 0?'checked': null"
                 />
                 <label (change)="editQuestion($event, index)">
                     <textarea

@@ -16,6 +16,7 @@ Core features include:
   - Tabular classification and regresion
   - Images recognition with bounding boxes and polygons
   - Log labeling
+  - Question answer
 - Active learning with uncertainly sampling to query unlabeled data
 - Project tracking with real time data aggregation and review process
 - User management panel with role-based access control

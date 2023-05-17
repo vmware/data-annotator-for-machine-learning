@@ -45,13 +45,13 @@ module.exports = {
             fork: true,
             flatKeys: true,
             headers: header,
-            checkType: true
+            checkType: false
         };
         if (req.body.isHasHeader == 'no') {
             headerRule.noheader = true;
         };
-        if (projectType == PROJECTTYPE.TEXT) {
-            headerRule.checkType = false;
+        if (projectType == PROJECTTYPE.TABULAR) {
+            headerRule.checkType = true;
         }
         let fileStream = await fileSystemUtils.handleFileStream(req.body.location);
 
@@ -86,10 +86,10 @@ module.exports = {
                 if (projectType == PROJECTTYPE.QA) {
                     let questions = [];
                     for (const q of questionForText) {
-                        if (!q || !q.trim() || !oneData[q]) {
+                        if (!`${q}`.trim() || !oneData[q].trim()) {
                             continue;
                         }
-                        for (const question of oneData[q].split("?")) {
+                        for (const question of oneData[q].trim().split("?")) {
                             if (question.trim()) {
                                 questions.push(question.trim()+"?");
                             }
