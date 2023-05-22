@@ -441,6 +441,23 @@ label .label-leftBoard {
     z-index: 1000;
 }
 
+.qaClear {
+    position: absolute;
+    margin-top: 0.2rem;
+    margin-left: 0.2rem;
+    background-color: transparent;
+    color: transparent;
+    width: 18px;
+    height: 18px;
+    text-align: center;
+    line-height: 15px;
+    user-select: none;
+    border-radius: 50%;
+    font-size: 1.5em;
+    transition: opacity 0.1s ease;
+    z-index: 1000;
+}
+
 .invalidAlert {
     position: absolute;
     top: -0.9rem;
@@ -509,6 +526,13 @@ label .label-leftBoard {
     overflow: auto;
     padding-bottom: 3rem;
     height: 18rem;
+    resize: vertical;
+}
+
+.qaBox {
+    overflow: auto;
+    padding-bottom: 3rem;
+    height: 10rem;
     resize: vertical;
 }
 
@@ -1000,8 +1024,7 @@ label .label-leftBoard {
 
 .answerList {
     overflow: auto;
-    min-height: 2em;
-    max-height: 5em;
+    height: 5em;
     resize: vertical;
     font-size: 0.77em;
     padding: 1px;
