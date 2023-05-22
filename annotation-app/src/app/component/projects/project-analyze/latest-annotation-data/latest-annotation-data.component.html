@@ -31,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <clr-tab>
         <button clrTabLink id="link1">Annotation</button>
         <clr-tab-content id="content1" *clrIfActive="msg.labelType == 'numericLabel'">
-          <div *ngIf="msg.projectType === 'log'" style="margin-top: 0.5rem">
+          <div style="margin-top: 0.5rem">
             <div class="btn-group btn-primary btn-icon">
               <button class="btn" (click)="modify(data, 'multiple')">
                 <cds-icon shape="note" title="To modify the annotated tickets" style="margin-right: 0.3rem"></cds-icon
@@ -41,7 +41,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div style="margin-bottom: 2rem">
             <clr-datagrid #dataGird [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)" *ngIf="!firstLoadTable">
-              <clr-dg-column *ngIf="msg.projectType === 'log'" class="ellipsis-datagrid" style="max-width: 90px">
+              <clr-dg-column class="ellipsis-datagrid" style="max-width: 90px">
                 <clr-checkbox-wrapper>
                   <input
                     type="checkbox"
@@ -67,7 +67,6 @@ SPDX-License-Identifier: Apache-2.0 -->
               <ng-container>
                 <clr-dg-row *ngFor="let dataset of previewSrs; let i = index" [clrDgItem]="dataset">
                   <clr-dg-cell
-                    *ngIf="dataset.projectType == 'log'"
                     class="ellipsis-datagrid previewHeight"
                     style="max-width: 90px"
                   >

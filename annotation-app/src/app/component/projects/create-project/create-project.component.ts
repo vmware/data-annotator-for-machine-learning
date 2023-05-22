@@ -320,7 +320,7 @@ export class CreateProjectComponent implements OnInit {
   createForm(): void {
     if (!this.dataset) {
       this.dataset = DatasetUtil.init();
-    }
+    }    
     this.dsDialogForm = this.formBuilder.group({
       projectName: [this.dataset.name || '', DatasetValidator.modelName()],
       projectType: [this.dataset.projectType, DatasetValidator.required()],
@@ -329,14 +329,7 @@ export class CreateProjectComponent implements OnInit {
       assignmentLogic: [this.dataset.assigmentLogic, ''],
       totalRow: [this.dataset.totalRow, DatasetValidator.validRow()],
       annotationDisplayName: [this.dataset.annotationDisplayName, DatasetValidator.required()],
-      annotationQuestion: [
-        this.dataset.projectType == 'ner'
-          ? 'Label all entity types in the given text corpus.'
-          : this.dataset.projectType == 'qa'
-          ? 'Label all answers in the given text corpus according to the question.'
-          : this.dataset.annotationQuestion,
-        DatasetValidator.required(),
-      ],
+      annotationQuestion: [this.dataset.annotationQuestion,DatasetValidator.required()],
       selectedDataset: ['', DatasetValidator.required()],
       selectedClassifier: [null, DatasetValidator.required()],
       selectedqueryStrategy: [null, DatasetValidator.required()],
@@ -527,6 +520,12 @@ export class CreateProjectComponent implements OnInit {
 
   changeProjectType() {
     this.clearFormdata(1);
+    let questesion={
+      qa:'Label all answers in the given text corpus according to the question.',
+      ner:'Label all entity types in the given text corpus.'
+    }
+    let questionTex = Object.keys(questesion).includes(this.dsDialogForm.value.projectType) ? questesion[this.dsDialogForm.value.projectType]:'What label does this ticket belong to ?'
+    this.dsDialogForm.get('annotationQuestion').setValue(questionTex)
     this.getMyDatasets(this.dsDialogForm.get('projectType').value).then((res) => {});
   }
 
