@@ -326,7 +326,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <!-- here is QA annotation content -->
                   <div
                     *ngIf="projectType === 'qa'"
-                    class="txtBox"
+                    class="qaBox"
                     [ngStyle]="{ height: textBoxResizedHeight }"
                     (mousedown)="resizeBox()"
                     (onmousedown)="resizeBox()"
@@ -713,7 +713,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <ng-container *ngFor="let spanText of mapCurrentAnswerList(item)">
                               <ul
                                 class="list spanSelected"
-                                style="display: flex; margin-top: -0.2rem; margin-bottom: -0.5rem"
+                                style="display: flex; margin-top: -0.2rem; margin-bottom: -0.3rem"
                                 *ngIf="spanText.label == item"
                                 (mouseenter)="mouseenterMark($event, spanText)"
                                 (mouseleave)="mouseleaveMark($event, spanText)"
@@ -721,7 +721,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <li (click)="clickShowMark($event, spanText)">
                                   {{ spanText.text }}
                                 </li>
-                                <span class="clear" style="position: static" (click)="clickClearMark($event, spanText)"
+                                <span class="qaClear" style="position: static" (click)="clickClearMark($event, spanText)"
                                   >x
                                 </span>
                               </ul>
