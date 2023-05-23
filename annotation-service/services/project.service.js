@@ -30,11 +30,11 @@ async function getProjects(req) {
 
     if (src == SRCS.ANNOTATE) {
         console.log(`[ PROJECT ] Service query current annotator project list`);
-        const annotateConditions = { annotator: { $regex: email } };
-        const logReviewConditions = { creator: { $regex: email }, annotator: { $not: { $size: 0 } } };
+        const annotateConditions = { annotator: email };
+        const logReviewConditions = { creator: email, annotator: { $not: { $size: 0 } } };
         condition = { $or: [annotateConditions, logReviewConditions] };
     } else if (src == SRCS.PROJECTS && user.role != "Annotator") {
-        condition = { creator: { $regex: email } };
+        condition = { creator: email };
     } else if (src == SRCS.ADMIN && user.role == "Admin") {
         condition = {};
     } else if (src == SRCS.COMMUNITY) {
@@ -56,7 +56,7 @@ async function getProjects(req) {
 
 async function getProjectByAnnotator(req) {
     console.log(`[ PROJECT ] Service query project name by annotator: ${req.auth.email}`);
-    const condition = { annotator: { $regex: req.auth.email } };
+    const condition = { annotator: req.auth.email };
     const columns = "projectName";
     return mongoDb.findByConditions(ProjectModel, condition, columns);
 }
@@ -559,7 +559,7 @@ async function getReviewList(req) {
     const user = req.auth.email;
     await validator.checkAnnotator(user);
 
-    const conditions = { creator: { $regex: user }, projectType: PROJECTTYPE.LOG };
+    const conditions = { creator: user, projectType: PROJECTTYPE.LOG };
     const options = { sort: { updatedDate: -1 } };
     return mongoDb.findByConditions(ProjectModel, conditions, null, options);
 }
@@ -1052,7 +1052,7 @@ async function getProjectsTextTabular(email) {
         { projectType: PROJECTTYPE.TABULAR }
     ];
     condition.$or = [
-        { annotator: { $regex: email } },
+        { annotator: email },
         { assignSlackChannels: { $exists: true } }
     ];
     return mongoDb.findByConditions(ProjectModel, condition, project, options);
