@@ -14,6 +14,7 @@ import { UserAuthService } from 'src/app/services/user-auth.service';
 import { Buffer } from 'buffer';
 import { WebAnalyticsService } from 'src/app/services/web-analytics.service';
 import { ClrDatagridStringFilterInterface } from '@clr/angular';
+import { forEach } from 'lodash';
 declare function dateTransfer(time: any): any;
 
 export class CreateTimeFilter implements ClrDatagridStringFilterInterface<any> {
@@ -54,7 +55,7 @@ export class TaskDatagridComponent implements OnInit {
   showGenerateDatasets = false;
   editProjectDialog = false;
   msgEdit: any;
-  createDateFilter = new CreateTimeFilter();
+  createDateFilter = new CreateTimeFilter()
 
   constructor(
     private router: Router,
@@ -80,53 +81,25 @@ export class TaskDatagridComponent implements OnInit {
     this.apiService.getProjects(param).subscribe(
       (res) => {
         this.loading = false;
-        for (let i = 0; i < res.length; i++) {
-          if (res[i].creator.indexOf(this.user.email) > -1) {
-            res[i].allowOwnerReview = true;
-          }
-          if (res[i].annotator.indexOf(this.user.email) > -1) {
-            res[i].allowStart = true;
-          }
-          for (let j = 0; j < res[i].userCompleteCase.length; j++) {
-            if (res[i].userCompleteCase[j].completeCase > 0) {
-              res[i].disableReview = true;
-              break;
-            }
-          }
-          // res[i].isExtend = true;
-          //start to array annotators's first letter
-          let firstLetter = [];
-          for (let j = 0; j < res[i].annotator.length; j++) {
-            firstLetter.push(res[i].annotator[j].slice(0, 1).toUpperCase());
-          }
-          res[i].firstLetter = firstLetter;
-          //start to array creator's first letter
-          let firstLetterOwner = [];
-          for (let z = 0; z < res[i].creator.length; z++) {
-            firstLetterOwner.push(res[i].creator[z].slice(0, 1).toUpperCase());
-          }
-          res[i].firstLetterOwner = firstLetterOwner;
-        }
-        this.projects = res;
-        this.projects.forEach((item) => {
-          if (item.labelType == 'numericLabel' && item.isMultipleLabel) {
-            const categoryList = JSON.parse(item.categoryList);
-            const itemKeys = [];
-            categoryList.forEach((element) => {
-              const labels = Object.keys(element);
-              itemKeys.push(labels[0]);
-            });
-            item.mutilNumbericLabels = itemKeys.toString();
-          }
-          if (item.labelType === 'HTL') {
-            item.categoryList = JSON.parse(item.categoryList);
-          }
-          // calculate the progress
-          item.progress =
-            item.projectCompleteCase === item.totalCase
-              ? 100
-              : Math.round((item.projectCompleteCase / item.totalCase) * 100);
+        this.projects = res.map((item) => {
+          return {
+            ...item,
+            allowOwnerReview: item.creator.includes(this.user.email),
+            allowStart: item.annotator.includes(this.user.email),
+            userCompleteCase: this.dealDisableReview(item?.userCompleteCase),
+            firstLetter: this.dealFirstLetter(item?.annotator),
+            firstLetterOwner: this.dealFirstLetter(item?.creator),
+            mutilNumbericLabels: this.dealMutilNumbericLabels(item),
+            categoryList: item.labelType === 'HTL' ? JSON.parse(item.categoryList) : item.categoryList,
+            progress:
+              item.projectCompleteCase === item.totalCase
+                ? 100
+                : Math.round((item.projectCompleteCase / item.totalCase) * 100),
+            showButByShare: !item.creator.includes(this.user.email)
+          };
         });
+
+        console.log('table数据', this.projects);
         this.totalItems = res.length;
       },
       (error: any) => {
@@ -135,7 +108,29 @@ export class TaskDatagridComponent implements OnInit {
       },
     );
   }
-
+  dealMutilNumbericLabels(item) {
+    if (item?.labelType === 'numericLabel' && item?.isMultipleLabel) {
+      const categoryList = JSON.parse(item.categoryList);
+      const itemKeys = [];
+      categoryList.forEach((element) => {
+        const labels = Object.keys(element);
+        itemKeys.push(labels[0]);
+      });
+      return itemKeys.toString();
+    }
+  }
+  dealFirstLetter(data) {
+    let firstLetter = [];
+    data.map((item) => {
+      firstLetter.push(item.slice(0, 1).toUpperCase());
+    });
+    return firstLetter;
+  }
+  dealDisableReview(data) {
+    data.forEach((item) => {
+      item.disableReview = item.completeCase > 0;
+    });
+  }
   getChildren = (folder) => folder.children;
 
   clickTreeView(data) {

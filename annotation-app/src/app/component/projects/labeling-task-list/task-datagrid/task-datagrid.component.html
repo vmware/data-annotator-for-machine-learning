@@ -58,7 +58,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 dataset.totalCase == 0 ||
                 !dataset.disableReview ||
                 dataset.projectCompleteCase == 0 ||
-                !dataset.allowOwnerReview
+                !dataset.allowOwnerReview 
               "
               (click)="toAnalyze(dataset, 'review')"
             >
@@ -66,12 +66,12 @@ SPDX-License-Identifier: Apache-2.0 -->
             </button>
             <button
               class="action-item"
-              [disabled]="dataset.totalCase == 0 || user.role === 'Annotator'"
+              [disabled]="dataset.showButByShare || dataset.totalCase == 0 || user.role === 'Annotator'"
               (click)="editProjectDialog = true; deleteDatasetDialog = false; showProjectEdit(dataset)"
             >
               Edit
             </button>
-            <button class="action-item" (click)="share(dataset)" [disabled]="user.role === 'Annotator'">
+            <button class="action-item" (click)="share(dataset)" [disabled]="user.role === 'Annotator' || dataset.showButByShare">
               {{ dataset.shareStatus ? 'Unshare' : 'Share' }}
             </button>
             <button
@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             >
               Download
             </button>
-            <button class="action-item" (click)="delete(dataset)" [disabled]="user.role === 'Annotator'">Delete</button>
+            <button class="action-item" (click)="delete(dataset)" [disabled]="user.role === 'Annotator' || dataset.showButByShare">Delete</button>
           </clr-dg-action-overflow>
           <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{ dataset.projectName }}">
             <a (click)="toAnalyze(dataset, 'annotate')" [ngClass]="dataset.totalCase == 0 ? 'pnameLink' : ''">{{
