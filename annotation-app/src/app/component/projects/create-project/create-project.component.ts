@@ -115,6 +115,7 @@ export class CreateProjectComponent implements OnInit {
         let data = JSON.parse(params['data']);
         // according to the dataset from router to init the wizard
         this.dsDialogForm.get('projectType').setValue(data.projectType);
+        this.dealAnnotationQuestionTex(data.projectType)
         this.getMyDatasets(data.projectType).then((res) => {
           if (res) {
             this.selectedDatasets({ target: { value: data.dataSetName } }, true);
@@ -520,15 +521,17 @@ export class CreateProjectComponent implements OnInit {
 
   changeProjectType() {
     this.clearFormdata(1);
-    let questesion={
+    this.dealAnnotationQuestionTex(this.dsDialogForm.value.projectType)
+    this.getMyDatasets(this.dsDialogForm.get('projectType').value).then((res) => {});
+  }
+  dealAnnotationQuestionTex(type){
+    const questesion={
       qa:'Label all answers in the given text corpus according to the question.',
       ner:'Label all entity types in the given text corpus.'
     }
-    let questionTex = Object.keys(questesion).includes(this.dsDialogForm.value.projectType) ? questesion[this.dsDialogForm.value.projectType]:'What label does this ticket belong to ?'
+    let questionTex = Object.keys(questesion).includes(type) ? questesion[type]:this.dataset.annotationQuestion
     this.dsDialogForm.get('annotationQuestion').setValue(questionTex)
-    this.getMyDatasets(this.dsDialogForm.get('projectType').value).then((res) => {});
   }
-
   getMyDatasets(projectType) {
     let a =
       projectType == 'text' || projectType == 'tabular' || projectType == 'ner' || projectType == 'qa'
