@@ -135,7 +135,7 @@ export class AnnotatePage extends CommonPage {
     "div.questionContainer > div:nth-child(4) > div:nth-child(4) > div.clr-row.clr-col > div.clr-row.clr-col-3 > button:nth-child(3) > cds-icon"
   );
   QA_QUESTION_LIST = $("#QuestionList-1 > ul:nth-child(1)");
-  QA_QUESTION_LIST_CLEAR = $("#QuestionList-1 > ul:nth-child(1) .clear");
+  QA_QUESTION_LIST_CLEAR = $("#QuestionList-1 > ul:nth-child(1) .qaClear");
   ERROR_SPAN = $("span.clr-subtext");
   EDIT_ERROR_SPAN = $(
     "div.questionContainer > div:nth-child(4) > div:nth-child(3) .clr-subtext"

@@ -32,15 +32,22 @@ describe("Spec - clear projects and datasets", () => {
     await browser.sleep(10000);
     await myDatasetsPage.waitForGridLoading();
     await myDatasetsPage.filterDatasetName(projectName);
+    await browser.sleep(2000);
     let dataLength = await FunctionUtil.getElementsNum(TABLE_LIST);
     console.log("log-clear old e2e projects-dataLength:", dataLength);
     if (dataLength > 0) {
       for (var i = 0; i < dataLength; i++) {
+        if (process.env.IN && i > 0) {
+          await browser.sleep(5000);
+        }
         await CommonUtils.deleteDataGrid(
           ACTION_ICONS.first(),
           ACTION_BUTTONS.last(),
           DELETE_DATA_OK_BTN
         );
+      }
+      if (process.env.IN) {
+        await browser.sleep(5000);
       }
       await browser.sleep(2000);
     }

@@ -75,7 +75,9 @@ describe("Spec - annotate project ...", () => {
             "Total Items:  " +
             String(projectCreateData.QAProject.ticketSessions),
           annotations: "Labeled Items:  " + "1",
-        });
+      });
+      
+      await browser.sleep(1000);
       since("the history list should increase 1")
         .expect(await annotatePage.getHistoryLists())
         .toBe(1);

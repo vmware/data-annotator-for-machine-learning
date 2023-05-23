@@ -9,9 +9,10 @@ import { Constant } from "../general/constant";
 import { browser, $, $$, element, by } from "protractor";
 import { FunctionUtil } from "../utils/function-util";
 
-describe("Spec - clear projects and datasets", () => {
+describe("Spec - delete projects and datasets", () => {
   const myDatasetsPage: MyDatasetsPage = new MyDatasetsPage();
   const TABLE_LIST = $$("clr-dg-row");
+  const NAV_GROUP = element.all(by.css(".nav-group-text"));
   const NAV_TEXT = element.all(by.css(".nav-link .nav-text"));
   const ACTION_ICONS = element.all(
     by.css("button cds-icon[shape=ellipsis-vertical]")
@@ -27,7 +28,7 @@ describe("Spec - clear projects and datasets", () => {
     await browser.sleep(2000);
     await myDatasetsPage.waitForGridLoading();
     await myDatasetsPage.filterDatasetName(
-      Constant.project_name_hierarchical_label
+      Constant.project_name
     );
     await browser.sleep(2000);
     let dataLength = await FunctionUtil.getElementsNum(TABLE_LIST);
@@ -49,4 +50,33 @@ describe("Spec - clear projects and datasets", () => {
     }
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0);
   });
+
+  it("Should succeed to delete e2e dataset", async () => {
+    await browser.sleep(2000);
+    // await FunctionUtil.clickByText(NAV_GROUP, "Datasets");
+    // await browser.sleep(2000);
+    await FunctionUtil.clickByText(NAV_TEXT, "Datasets List");
+    await myDatasetsPage.waitForGridLoading();
+    await browser.sleep(5000);
+    await myDatasetsPage.filterDatasetName(Constant.dataset_name);
+    await browser.sleep(2000);
+    let dataLength = await FunctionUtil.getElementsNum(TABLE_LIST);
+    console.log("log-delete old e2e dataset-dataLength:", dataLength);
+    for (var i = 0; i < dataLength; i++) {
+      if (process.env.IN && i > 0) {
+        await browser.sleep(5000);
+      }
+      await CommonUtils.deleteDataGrid(
+        ACTION_ICONS.first(),
+        ACTION_BUTTONS.last(),
+        DELETE_DATA_OK_BTN
+      );
+    }
+    if (process.env.IN) {
+      await browser.sleep(5000);
+    }
+    await browser.sleep(2000);
+    expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0);
+  });
+
 });
