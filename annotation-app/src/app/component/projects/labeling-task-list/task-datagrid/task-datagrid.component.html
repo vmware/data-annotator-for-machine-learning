@@ -58,7 +58,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                 dataset.totalCase == 0 ||
                 !dataset.disableReview ||
                 dataset.projectCompleteCase == 0 ||
-                !dataset.allowOwnerReview 
+                !dataset.allowOwnerReview  ||
+                dataset.showButByShare
               "
               (click)="toAnalyze(dataset, 'review')"
             >

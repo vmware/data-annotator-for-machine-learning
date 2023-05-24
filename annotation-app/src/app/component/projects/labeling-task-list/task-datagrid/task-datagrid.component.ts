@@ -127,9 +127,13 @@ export class TaskDatagridComponent implements OnInit {
     return firstLetter;
   }
   dealDisableReview(data) {
-    data.forEach((item) => {
-      item.disableReview = item.completeCase > 0;
+   let newData = data.map((item) => {
+      return {
+        ...item,
+        disableReview : item.completeCase > 0 ? true :false
+      }
     });
+    return newData
   }
   getChildren = (folder) => folder.children;
 
