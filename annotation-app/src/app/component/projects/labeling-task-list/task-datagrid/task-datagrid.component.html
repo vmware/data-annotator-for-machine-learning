@@ -58,21 +58,25 @@ SPDX-License-Identifier: Apache-2.0 -->
                 dataset.totalCase == 0 ||
                 !dataset.disableReview ||
                 dataset.projectCompleteCase == 0 ||
-                !dataset.allowOwnerReview  ||
-                dataset.showButByShare
-              "
+                !dataset.allowOwnerReview
+                "
               (click)="toAnalyze(dataset, 'review')"
             >
               Review
             </button>
             <button
               class="action-item"
-              [disabled]="dataset.showButByShare || dataset.totalCase == 0 || user.role === 'Annotator'"
+              [disabled]="dataset.totalCase == 0 ||
+              user.role === 'Annotator' ||
+              dataset.showButByAssign"
               (click)="editProjectDialog = true; deleteDatasetDialog = false; showProjectEdit(dataset)"
             >
               Edit
             </button>
-            <button class="action-item" (click)="share(dataset)" [disabled]="user.role === 'Annotator' || dataset.showButByShare">
+            <button class="action-item" (click)="share(dataset)" 
+              [disabled]="user.role === 'Annotator' ||
+              dataset.showByRole ||
+              dataset.showButByAssign">
               {{ dataset.shareStatus ? 'Unshare' : 'Share' }}
             </button>
             <button
@@ -97,7 +101,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             >
               Download
             </button>
-            <button class="action-item" (click)="delete(dataset)" [disabled]="user.role === 'Annotator' || dataset.showButByShare">Delete</button>
+            <button class="action-item" (click)="delete(dataset)" [disabled]="user.role === 'Annotator' || dataset.showButByAssign">Delete</button>
           </clr-dg-action-overflow>
           <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{ dataset.projectName }}">
             <a (click)="toAnalyze(dataset, 'annotate')" [ngClass]="dataset.totalCase == 0 ? 'pnameLink' : ''">{{

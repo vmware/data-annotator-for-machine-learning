@@ -146,6 +146,7 @@ export class ProjectAnalyzeComponent implements OnInit {
   inputQuestionError: string;
   editQuestionError: string;
   editQuestionItem: number = -1;
+  showAppendTabs:boolean=false;
 
   constructor(
     private renderer2: Renderer2,
@@ -173,6 +174,7 @@ export class ProjectAnalyzeComponent implements OnInit {
       data = JSON.parse(data.data);
       data.taskInstructions = data.taskInstructions.replace(/(\r\n|\n|\r)/gm, '<br/>');
       this.projectInfo = data;
+      this.showAppendTabs = this.dealShowAppendTabs(data);
       this.isAllowedAnnotate = data.annotator.indexOf(this.user.email) > -1 ? true : false;
       this.selectParam = data.projectName;
       this.createForm();
@@ -208,6 +210,13 @@ export class ProjectAnalyzeComponent implements OnInit {
     this.msgLatestData = this.projectInfo;
     this.msgUserCategoryData = this.projectInfo;
     this.msgAppend = this.projectInfo;
+  }
+
+  dealShowAppendTabs(data){
+    if(this.user.role === 'Power User' && data.tabType === 'admin'){
+      return false;
+    }
+    return !data.creator.includes(this.user.email)
   }
 
   sliderEvent() {

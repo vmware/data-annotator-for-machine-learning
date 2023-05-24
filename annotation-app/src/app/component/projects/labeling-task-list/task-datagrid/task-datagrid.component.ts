@@ -86,7 +86,7 @@ export class TaskDatagridComponent implements OnInit {
             ...item,
             allowOwnerReview: item.creator.includes(this.user.email),
             allowStart: item.annotator.includes(this.user.email),
-            userCompleteCase: this.dealDisableReview(item?.userCompleteCase),
+            disableReview: this.dealDisableReview(item?.userCompleteCase),
             firstLetter: this.dealFirstLetter(item?.annotator),
             firstLetterOwner: this.dealFirstLetter(item?.creator),
             mutilNumbericLabels: this.dealMutilNumbericLabels(item),
@@ -95,11 +95,9 @@ export class TaskDatagridComponent implements OnInit {
               item.projectCompleteCase === item.totalCase
                 ? 100
                 : Math.round((item.projectCompleteCase / item.totalCase) * 100),
-            showButByShare: !item.creator.includes(this.user.email)
+            showButByAssign: this.dealshowButByAssign(item)
           };
         });
-
-        console.log('table数据', this.projects);
         this.totalItems = res.length;
       },
       (error: any) => {
@@ -127,13 +125,15 @@ export class TaskDatagridComponent implements OnInit {
     return firstLetter;
   }
   dealDisableReview(data) {
-   let newData = data.map((item) => {
-      return {
-        ...item,
-        disableReview : item.completeCase > 0 ? true :false
-      }
+    return data.some((item) => {
+      return item.completeCase > 0;
     });
-    return newData
+  }
+  dealshowButByAssign(item){
+    if(this.user.role === 'Power User' && this.msgToTaskList?.tab === 'admin'){
+      return false;
+    }
+    return !item.creator.includes(this.user.email)
   }
   getChildren = (folder) => folder.children;
 
@@ -148,6 +148,7 @@ export class TaskDatagridComponent implements OnInit {
 
   toAnalyze(project, from) {
     project.from = from;
+    project.tabType = this.msgToTaskList?.tab;
     let flag = project.userCompleteCase.sort(this.toolService.sortBy('completeCase', 'descending'));
     let reviewee = '';
     for (let i = 0; i < flag.length; i++) {
