@@ -170,9 +170,12 @@ export class ProjectAnalyzeComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
     this.projectInfo = {};
-    this.route.queryParams.subscribe((data: any) => {
-      data = JSON.parse(data.data);
-      data.taskInstructions = data.taskInstructions.replace(/(\r\n|\n|\r)/gm, '<br/>');
+    this.route.queryParams.subscribe((value: any) => {
+      let data = JSON.parse(value.data);
+      if (data?.app === 'inst') {
+        data = JSON.parse(data.data);
+      }
+      data.taskInstructions = data.taskInstructions?.replace(/(\r\n|\n|\r)/gm, '<br/>');
       this.projectInfo = data;
       this.showAppendTabs = this.dealShowAppendTabs(data);
       this.isAllowedAnnotate = data.annotator.indexOf(this.user.email) > -1 ? true : false;
