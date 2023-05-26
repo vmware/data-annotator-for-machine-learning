@@ -25,7 +25,11 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
     </div>
-    <div class="clr-form-group form-group clr-col-4 clr-align-self-end" style="position: relative">
+    <div
+      class="clr-form-group form-group clr-col-4 clr-align-self-end"
+      style="position: relative"
+      [ngStyle]="{ 'margin-right': projectInfo.selectedDataset?.length ? '' : '0.6rem' }"
+    >
       <form
         *ngIf="
           projectType !== 'ner' &&
@@ -47,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </form>
     </div>
-    <div>
+    <div *ngIf="projectInfo.selectedDataset?.length">
       <button [clrLoading]="loadingViewData" class="btn btn-outline" (click)="toDatasetAnalyze()">View Dataset</button>
     </div>
   </div>
