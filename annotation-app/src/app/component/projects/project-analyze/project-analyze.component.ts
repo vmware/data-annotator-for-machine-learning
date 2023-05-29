@@ -875,8 +875,10 @@ export class ProjectAnalyzeComponent implements OnInit {
 
   submitAndHistory(newSr, from?) {
     // add to the history
-    if (this.maxAnnotationError == null && this.sr._id !== 0 && from !== 'review') {
-      const OldSr = JSON.parse(JSON.stringify(this.sr));
+    this.sr = newSr;
+    const OldSr = JSON.parse(JSON.stringify(this.sr))[0];
+    if (this.maxAnnotationError == null && this.sr._id !== 0 && from !== 'review' && newSr?.CODE !==200) {
+  
       const addSubmit = {
         srId: OldSr._id,
         type: from === 'pass' ? 'pass' : 'submit',
@@ -919,7 +921,6 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.clearScores(false);
       // console.log('getOne.annotationHistory:::', this.annotationHistory, this.annotationPrevious);
     }
-    this.sr = newSr;
     if (this.labelType === 'HTL') {
       this.treeLabels = this.originTreeLabels ? JSON.parse(JSON.stringify(this.originTreeLabels)) : [];
     }
@@ -948,22 +949,24 @@ export class ProjectAnalyzeComponent implements OnInit {
         this.historyTask = [{ result: images }];
         this.currentBoundingData = images;
       }
-      setTimeout(() => {
-        const option = {
-          dom: 'label-studio',
-          imageRectLabelTemplate: this.imageRectLabelTemplate,
-          imagePolyLabelTemplate: this.imagePolyLabelTemplate,
-          url: this.env.config.enableAWSS3
-            ? this.sr.originalData.location
-            : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
-                this.sr.originalData.location
-              }&token=${JSON.parse(localStorage.getItem(this.env.config.sessionKey)).token.access_token}`,
-          historyCompletions: this.historyTask,
-          annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
-          from: 'annotate',
-        };
-        this.toCallStudio(option);
-      }, 0);
+      if(this.sr?.originalData?.location){
+        setTimeout(() => {
+          const option = {
+            dom: 'label-studio',
+            imageRectLabelTemplate: this.imageRectLabelTemplate,
+            imagePolyLabelTemplate: this.imagePolyLabelTemplate,
+            url: this.env.config.enableAWSS3
+              ? this.sr.originalData.location
+              : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
+                  this.sr.originalData.location
+                }&token=${JSON.parse(localStorage.getItem(this.env.config.sessionKey)).token.access_token}`,
+            historyCompletions: this.historyTask,
+            annotationQuestion: `<Header style="margin-top:2rem;" value="${this.projectInfo.annotationQuestion}"/>`,
+            from: 'annotate',
+          };
+          this.toCallStudio(option);
+        }, 0);
+      }
     }
     if (this.projectType == 'log') {
       this.sr = this.resetLogSrData(this.sr);
