@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <clr-wizard-button *ngIf="!loading" type="previous">Back</clr-wizard-button>
   <clr-wizard-button type="next">Next</clr-wizard-button>
   <clr-wizard-button *ngIf="!loading" type="finish" (click)="toCreate()"
-    ><span> Sure to Create Labeling Task </span></clr-wizard-button
+    ><span> Create Labeling Task </span></clr-wizard-button
   >
   <clr-wizard-button *ngIf="loading" type="finish" class="loadingCreate">
     <clr-spinner clrInline></clr-spinner>&nbsp;&nbsp;
@@ -420,7 +420,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         [type]="'custom-next'"
         (click)="loading$.next(true)"
       >
-        Sure Set
+        Set
       </clr-wizard-button>
       <clr-wizard-button
         *ngIf="dsDialogForm.get('totalRow').value < 1 && loading$ | async"
