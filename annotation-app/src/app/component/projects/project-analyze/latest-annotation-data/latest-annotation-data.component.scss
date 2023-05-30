@@ -39,3 +39,8 @@ SPDX-License-Identifier: Apache-2.0
     padding-left: unset;
     outline-color: transparent;
 }
+:host ::ng-deep input.disabled-checkbox+label::before {
+    background-color: #eee;
+    cursor: not-allowed;
+    opacity: 0.3;
+}
