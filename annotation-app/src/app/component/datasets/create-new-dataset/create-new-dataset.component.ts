@@ -113,7 +113,7 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
       }
     }
     this.uploadGroup = this.formBuilder.group({
-      datasetsName: ['', DatasetValidator.modelName()],
+      datasetsName: ['', DatasetValidator.datasetName()],
       localFile: [null, DatasetValidator.required()],
       hasHeader: [this.uploadSet.hasHeader, ''],
       fileFormat: [this.uploadSet.fileFormat, ''],
