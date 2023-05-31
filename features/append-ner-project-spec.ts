@@ -26,7 +26,7 @@ describe("Spec - verify basic project append function", () => {
   it("Should local file change and upload to append", async () => {
     const FILE_1 = "/doc/upload-resource/ner-test-data.csv";
     const FILE_2 = "/doc/upload-resource/APPEND_NER_BY_CSV.csv";
-    const dataset_name = "e2e Test Data append ner file" + Date.now();
+    const dataset_name = "e2e_Test_Data_append_ner_file" + Date.now();
     expect(
       await commonAppend.localFileChangeAndUpload(dataset_name, FILE_1, FILE_2)
     ).toBeTruthy;

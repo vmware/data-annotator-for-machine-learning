@@ -25,7 +25,7 @@ describe("Spec - Create new project ", () => {
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
     New_Project_Name = "e2e Test Project qa " + Serial_Num;
-    New_CSV_Name = "e2e Test Data Text " + Serial_Num;
+    New_CSV_Name = "e2e_Test_Data_Text_" + Serial_Num;
     LoginBusiness.verifyLogin();
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjectsPage();

@@ -23,7 +23,7 @@ describe("Spec - create new project log", () => {
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
     New_Project_Name = "e2e Test Project Log " + Serial_Num;
-    New_CSV_Name = "e2e Test Data Log" + Serial_Num;
+    New_CSV_Name = "e2e_Test_Data_Log" + Serial_Num;
     Constant.project_name_log = New_Project_Name;
     Constant.dataset_name_log = New_CSV_Name;
     LoginBusiness.verifyLogin();

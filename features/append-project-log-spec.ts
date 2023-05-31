@@ -40,7 +40,7 @@ describe("Spec - verify log project append function", () => {
   it("Should succeed to change and upload file", async () => {
     const FILE_1 = "/doc/upload-resource/log-test-data.tgz";
     const FILE_2 = "/doc/upload-resource/APPEND_LOGS_BY_ZIP.zip";
-    const dataset_name = "e2e Test Data append log file" + Date.now();
+    const dataset_name = "e2e_Test_Data_append_log_file" + Date.now();
     expect(
       await commonAppend.localFileChangeAndUpload(dataset_name, FILE_1, FILE_2)
     ).toBeTruthy;

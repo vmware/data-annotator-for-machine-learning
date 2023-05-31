@@ -33,7 +33,7 @@ describe("Spec - create new project ", () => {
     newProjectPage = new NewProjectPage();
     projectsPage = new ProjectsPage();
     myDatasetsPage = new MyDatasetsPage();
-    New_CSV_Name = "e2e Test Data Text " + Serial_Num;
+    New_CSV_Name = "e2e_Test_Data_Text_" + Serial_Num;
     console.log(
       "log-start to create new tabular numeric labels project : " +
         New_Project_Name

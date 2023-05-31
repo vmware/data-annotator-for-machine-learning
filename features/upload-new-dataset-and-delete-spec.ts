@@ -12,7 +12,7 @@ import { CommonUtils } from "../general/common-utils";
 describe("Spec - upload new dataset", () => {
   let myDatasetsPage: MyDatasetsPage = new MyDatasetsPage();
   let SerialNum: string = new Date().getTime().toString().substring(0, 9);
-  let New_CSV_Name: string = "e2e Test Data " + SerialNum;
+  let New_CSV_Name: string = "e2e_Test_Data_" + SerialNum;
 
   // const PROMPT = $('span[class="alert-text"]');
   const since = require("jasmine2-custom-message");
@@ -27,9 +27,9 @@ describe("Spec - upload new dataset", () => {
   const DELETE_DATA_OK_BTN = $(".modal-footer .btn.btn-primary");
 
   it("Should upload new dataset successfully.", async (done) => {
-    console.log("log-start to create error formart CSV e2e Test Data Img ");
+    console.log("log-start to create error formart CSV e2e_Test_Data_Img_");
     await myDatasetsPage.navigateTo();
-    await myDatasetsPage.uploadErrorFormatCSV("e2e Test Data Img", CSV_Path);
+    await myDatasetsPage.uploadErrorFormatCSV("e2e_Test_Data_Img", CSV_Path);
 
     console.log("log-start to create new CSV : " + New_CSV_Name);
     await myDatasetsPage.uploadCSV(New_CSV_Name, CSV_Path);

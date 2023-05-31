@@ -23,7 +23,7 @@ describe("Spec - Create new project", () => {
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
     New_Project_Name = "e2e Test Project Image " + Serial_Num;
-    New_CSV_Name = "e2e Test Data Image" + Serial_Num;
+    New_CSV_Name = "e2e_Test_Data_Image" + Serial_Num;
     Constant.project_name_image = New_Project_Name;
     Constant.dataset_name_image = New_CSV_Name;
     LoginBusiness.verifyLogin();
