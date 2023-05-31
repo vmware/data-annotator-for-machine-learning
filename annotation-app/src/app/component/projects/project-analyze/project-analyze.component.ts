@@ -919,6 +919,9 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.clearScores(false);
       // console.log('getOne.annotationHistory:::', this.annotationHistory, this.annotationPrevious);
     }
+    if (newSr && newSr.MSG) {
+      return
+    }
     this.sr = newSr;
     if (this.labelType === 'HTL') {
       this.treeLabels = this.originTreeLabels ? JSON.parse(JSON.stringify(this.originTreeLabels)) : [];

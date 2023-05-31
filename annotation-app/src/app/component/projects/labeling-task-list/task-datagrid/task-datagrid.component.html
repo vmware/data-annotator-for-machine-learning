@@ -40,11 +40,11 @@ SPDX-License-Identifier: Apache-2.0 -->
       <clr-dg-column [clrDgField]="'categoryList'" class="ellipsis-datagrid">
         <ng-container *clrDgHideableColumn="{ hidden: true }">Labels</ng-container>
       </clr-dg-column>
-      <clr-dg-column class="ellipsis-datagrid"
+      <clr-dg-column class="ellipsis-datagrid"  [clrDgField]="'createdDate'" 
         >Create On
         <clr-dg-string-filter [clrDgStringFilter]="createDateFilter"></clr-dg-string-filter>
       </clr-dg-column>
-      <clr-dg-column class="ellipsis-datagrid"
+      <clr-dg-column class="ellipsis-datagrid"  [clrDgField]="'updatedDate'" 
         >Last Updated On
         <clr-dg-string-filter [clrDgStringFilter]="createDateFilter"></clr-dg-string-filter>
       </clr-dg-column>
