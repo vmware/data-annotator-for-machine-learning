@@ -51,10 +51,10 @@ app.use(function (req, res, next) {
 });
 
 // mannually set up swagger
-app.use(`${API_BASE_PATH}/api-docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(`${API_BASE_PATH}/api/api-docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Server health check
-app.get(`${API_BASE_PATH}/health`, (req, res) => {
+app.get(`${API_BASE_PATH}/api/health`, (req, res) => {
   return res.status(200).json(MESSAGE.SUCCESS);
 });
 
