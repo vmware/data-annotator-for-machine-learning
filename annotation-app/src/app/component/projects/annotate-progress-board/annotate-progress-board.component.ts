@@ -25,18 +25,20 @@ export class AnnotateProgressBoardComponent implements OnInit {
   reviewee: string;
   isAllowedAnnotate: boolean;
   user: any;
+  optionList:[];
 
   constructor(private userAuthService: UserAuthService) {
     this.user = this.userAuthService.loggedUser().user;
   }
 
-  ngOnInit(): void {}
-
-  ngOnChanges() {
+  ngOnInit(): void {
     this.reviewOrder = this.msg.reviewOrder;
     this.reviewee = this.msg.reviewee;
     this.isAllowedAnnotate = this.msg.projectInfo.annotator.indexOf(this.user.email) > -1 ? true : false;
+    this.optionList = this.msg?.projectInfo?.userCompleteCase;
   }
+
+  ngOnChanges() {}
 
   historyBack(index, id) {
     let value = {
