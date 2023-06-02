@@ -47,7 +47,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         (change)="onSelectingReviewee($event)"
         [(ngModel)]="reviewee"
       >
-        <option *ngFor="let item of msg?.projectInfo?.userCompleteCase" [value]="item.user">
+        <option *ngFor="let item of optionList" [value]="item.user">
           {{ item.user }}
         </option>
       </select>

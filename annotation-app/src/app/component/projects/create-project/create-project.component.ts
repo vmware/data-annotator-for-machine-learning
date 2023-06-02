@@ -3,7 +3,7 @@ Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild,ChangeDetectorRef } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { DatasetData } from '../../../model/index';
 import { FormGroup, FormBuilder } from '@angular/forms';
@@ -21,7 +21,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserAuthService } from 'src/app/services/user-auth.service';
 import { InternalApiService } from 'src/app/services/internal-api.service';
-
 @Component({
   selector: 'app-create-project',
   templateUrl: './create-project.component.html',
@@ -86,6 +85,7 @@ export class CreateProjectComponent implements OnInit {
     private route: ActivatedRoute,
     private userAuthService: UserAuthService,
     private internalApiService: InternalApiService,
+    private  changeDetectorRef:ChangeDetectorRef
   ) {
     this.user = this.userAuthService.loggedUser().user.email;
   }
@@ -206,33 +206,50 @@ export class CreateProjectComponent implements OnInit {
               this.dsDialogForm.get('selectedqueryStrategy').value &&
               this.dsDialogForm.get('selectedEncoder').value
             ) {
-              return (this.clrWizardPageNextDisabled.page6 = false);
+              this.clrWizardPageNextDisabled.page6 = false
+              this.updateView();
+              return;  
             } else {
-              return (this.clrWizardPageNextDisabled.page6 = true);
+              this.clrWizardPageNextDisabled.page6 = true;
+              this.updateView();
+              return;
             }
           }
         } else if (this.dsDialogForm.get('projectType').value == 'text') {
           if (this.dsDialogForm.get('multipleLabel').value == 'y') {
-            return (this.clrWizardPageNextDisabled.page6 = false);
+            this.clrWizardPageNextDisabled.page6 = false;
+            this.updateView();
+            return;
           } else {
             if (
               this.dsDialogForm.get('selectedClassifier').value &&
               this.dsDialogForm.get('selectedqueryStrategy').value
             ) {
-              return (this.clrWizardPageNextDisabled.page6 = false);
+              this.clrWizardPageNextDisabled.page6 = false
+              this.updateView()
+              return;
             } else {
-              return (this.clrWizardPageNextDisabled.page6 = true);
+              this.clrWizardPageNextDisabled.page6 = true;
+              this.updateView();
+              return 
             }
           }
         } else {
           this.clrWizardPageNextDisabled.page6 = false;
+          this.updateView();
         }
       } else {
-        return (this.clrWizardPageNextDisabled.page6 = false);
+        this.clrWizardPageNextDisabled.page6 = false;
+        this.updateView();
+        return;
       }
     }
   }
 
+  updateView(){
+    this.changeDetectorRef.markForCheck(); 
+    this.changeDetectorRef.detectChanges();
+  }
   changeEncoder() {
     this.clrWizardPageOnLoad('clr-wizard-page-6');
   }
