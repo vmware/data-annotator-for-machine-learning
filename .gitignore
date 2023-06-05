@@ -23,6 +23,8 @@ annotation-service/config/app-poc.js
 # active-learning-service
 *__pycache__*
 active-learning-service/venv/
+active-learning-service/.venv/
+active-learning-service/.python-version
 active-learning-service/.idea
 active-learning-service/logs
 active-learning-service/models
