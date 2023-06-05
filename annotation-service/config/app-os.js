@@ -9,7 +9,7 @@ module.exports = {
 
   //-------------------- mandatory configs --------------------//
   //active-learning-service url
-  loopALApiUrl: process.env.LOOP_AL_URL || "http://localhost:8000/api",
+  loopALApiUrl: process.env.LOOP_AL_URL || "http://127.0.0.1:8000/api",
   //mongodb url
   mongoDBUrl: process.env.MONGODB_URL || 'mongodb://127.0.0.1:27017/daml',
   //default admin users can see admin tab at ui
