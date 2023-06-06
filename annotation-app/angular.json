@@ -62,11 +62,11 @@
               "outputHashing": "all"
             },
             "development": {
-              "buildOptimizer": false,
-              "optimization": false,
-              "vendorChunk": true,
+              "buildOptimizer": true,
+              "optimization": true,
+              "vendorChunk": false,
               "extractLicenses": false,
-              "sourceMap": true,
+              "sourceMap": false,
               "namedChunks": true
             }
           },
@@ -114,9 +114,9 @@
             "prod": {
               "buildOptimizer": true,
               "optimization": true,
-              "vendorChunk": true,
+              "vendorChunk": false,
               "extractLicenses": false,
-              "sourceMap": true,
+              "sourceMap": false,
               "namedChunks": true,
               "fileReplacements": [
                 {
@@ -128,9 +128,9 @@
             "dev": {
               "buildOptimizer": true,
               "optimization": true,
-              "vendorChunk": true,
+              "vendorChunk": false,
               "extractLicenses": false,
-              "sourceMap": true,
+              "sourceMap": false,
               "namedChunks": true,
               "fileReplacements": [
                 {
@@ -142,9 +142,9 @@
             "stg": {
               "buildOptimizer": true,
               "optimization": true,
-              "vendorChunk": true,
+              "vendorChunk": false,
               "extractLicenses": false,
-              "sourceMap": true,
+              "sourceMap": false,
               "namedChunks": true,
               "fileReplacements": [
                 {
@@ -154,11 +154,11 @@
               ]
             },
             "development": {
-              "buildOptimizer": false,
-              "optimization": false,
-              "vendorChunk": true,
+              "buildOptimizer": true,
+              "optimization": true,
+              "vendorChunk": false,
               "extractLicenses": false,
-              "sourceMap": true,
+              "sourceMap": false,
               "namedChunks": true
             }
           },
