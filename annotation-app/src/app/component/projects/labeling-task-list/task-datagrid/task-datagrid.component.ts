@@ -152,12 +152,17 @@ export class TaskDatagridComponent implements OnInit {
     let flag = project.userCompleteCase.sort(this.toolService.sortBy('completeCase', 'descending'));
     let reviewee = '';
     for (let i = 0; i < flag.length; i++) {
-      if (flag[i].completeCase > flag[i].reviewed) {
+      if (flag[i].completeCase >flag[i].reviewed) {
         reviewee = flag[i].user;
         break;
       }
     }
-    project.reviewee = reviewee;
+    if((reviewee ?? '')!== ''){
+      project.reviewee = reviewee;
+    }else{
+      project.reviewee = flag[0].user
+    }
+
     this.router.navigate(['loop/project/analyze'], {
       queryParams: { data: JSON.stringify(project) },
     });
