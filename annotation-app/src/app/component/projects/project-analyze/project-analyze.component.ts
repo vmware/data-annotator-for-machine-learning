@@ -474,6 +474,7 @@ export class ProjectAnalyzeComponent implements OnInit {
         this.loading = false;
         this.submitAndHistory(res, from);
         if (res && res.MSG) {
+          this.getProgress();
           this.error = res.MSG;
           this.loading = false;
           return;
