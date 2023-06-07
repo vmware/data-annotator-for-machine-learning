@@ -4,7 +4,7 @@
   "description": "data-annotation-for-machine-learning end to end test",
   "main": "protractor.config.js",
   "scripts": {
-    "webdriver": "webdriver-manager update --gecko=false --versions.chrome 113.0.5672.63",
+    "webdriver": "webdriver-manager update --gecko=false --versions.chrome 114.0.5735.90",
     "webdriver-local": "webdriver-manager update --gecko=false --versions.chrome 111.0.5563.147",
     "e2e": "forever stopall && forever start node_modules/gulp/bin/gulp.js start && protractor-flake --parser standard --max-attempts=3 -- protractor.config.js && forever stopall",
     "e2e-serve": "lite-server -c bs-config.json",
