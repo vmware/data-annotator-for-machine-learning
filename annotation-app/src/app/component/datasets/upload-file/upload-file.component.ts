@@ -40,10 +40,14 @@ export class UploadFileComponent implements OnInit, OnChanges {
           .get('localFile')
           .setValidators([DatasetValidator.localFile(this.msg.type, this.env.config.enableAWSS3, false)]);
         this.uploadFile.get('localFile').updateValueAndValidity();
-        // to check log zip whether has txt and outer file
-        this.validIsTxtInLog(this.files[0]).then((res) => {
+        if (!this.uploadFile.get('localFile').invalid) {
+          // to check log zip whether has txt and outer file
+          this.validIsTxtInLog(this.files[0]).then((res) => {
+            this.isOutFile();
+          });
+        } else {
           this.isOutFile();
-        });
+        }
       }
 
       // for os upload file need first check file duplicate then valid file format
@@ -130,10 +134,14 @@ export class UploadFileComponent implements OnInit, OnChanges {
           .setValidators([DatasetValidator.localFile(type, this.env.config.enableAWSS3, false)]);
       }
       this.uploadFile.get('localFile').updateValueAndValidity();
-      // to check log zip whether has txt and outer file
-      this.validIsTxtInLog(this.files[0]).then((res) => {
+      if (!this.uploadFile.get('localFile').invalid) {
+        // to check log zip whether has txt and outer file
+        this.validIsTxtInLog(this.files[0]).then((res) => {
+          this.isOutFile();
+        });
+      } else {
         this.isOutFile();
-      });
+      }
     });
   }
 
@@ -272,7 +280,7 @@ export class UploadFileComponent implements OnInit, OnChanges {
               resolve(true);
             }
           });
-        } else {
+        } else if (file.name.split('.').pop().toLowerCase() !== 'csv') {
           this.unZipService.unTgz(file).then((e) => {
             if (e.exampleEntries === 0) {
               this.errorMessage =
