@@ -61,28 +61,30 @@ export class UnZipService {
         if (inflator.err) {
         }
         const output = inflator.result;
-        untar(output.buffer).then((extractedFiles) => {
-          let example = 0;
-          const txtList = [];
-          extractedFiles.forEach((element) => {
-            if (element.type == 0 || element.type == null) {
-              if (that.validTxtType(element.name)) {
-                example++;
-                txtList.push(element);
+        if (output) {
+          untar(output.buffer).then((extractedFiles) => {
+            let example = 0;
+            const txtList = [];
+            extractedFiles.forEach((element) => {
+              if (element.type == 0 || element.type == null) {
+                if (that.validTxtType(element.name)) {
+                  example++;
+                  txtList.push(element);
+                }
               }
-            }
-          });
-          const previewExample = txtList.splice(0, 3);
-          previewExample.forEach((e) => {
-            that.toReadBlobToText(e.blob).then((data) => {
-              e.content = data;
             });
+            const previewExample = txtList.splice(0, 3);
+            previewExample.forEach((e) => {
+              that.toReadBlobToText(e.blob).then((data) => {
+                e.content = data;
+              });
+            });
+            const res = { previewExample, exampleEntries: example };
+            setTimeout(() => {
+              resolve(res);
+            }, 1000);
           });
-          const res = { previewExample, exampleEntries: example };
-          setTimeout(() => {
-            resolve(res);
-          }, 1000);
-        });
+        }
       };
     });
   }

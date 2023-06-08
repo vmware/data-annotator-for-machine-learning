@@ -59,6 +59,7 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
         this.checkName(value);
       } else {
         this.nameExist = false;
+        this.outFormDataEmitter.emit(false);
       }
     });
   }
@@ -75,15 +76,15 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
     }
     this.createUploadForm();
     // to listen the form value change
-    this.uploadGroup.valueChanges.subscribe((data) => {
-      setTimeout(() => {
-        if (!this.uploadGroup.invalid && this.nameExist == false) {
-          this.outFormDataEmitter.emit(data);
-        } else {
-          this.outFormDataEmitter.emit(false);
-        }
-      }, 450);
-    });
+    // this.uploadGroup.valueChanges.subscribe((data) => {
+    //   setTimeout(() => {
+    //     if (!this.uploadGroup.invalid && this.nameExist == false) {
+    //       this.outFormDataEmitter.emit(data);
+    //     } else {
+    //       this.outFormDataEmitter.emit(false);
+    //     }
+    //   }, 450);
+    // });
   }
 
   createUploadForm(): void {
@@ -119,14 +120,17 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
       fileFormat: [this.uploadSet.fileFormat, ''],
     });
   }
+
   checkName(e) {
     return new Promise((resolve, reject) => {
       this.apiService.findDatasetName(e).subscribe((res) => {
         if (res.length != 0) {
           this.nameExist = true;
+          this.checkUploadGroup();
           resolve(true);
         } else {
           this.nameExist = false;
+          this.checkUploadGroup();
           resolve(false);
         }
       });
@@ -136,10 +140,20 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
   changeFileFormat(e) {
     this.uploadSet.fileFormat = e;
     this.msg = { type: e, page: 'createDataset' };
+    this.checkUploadGroup();
   }
 
   receiveFile(file) {
     this.uploadGroup.get('localFile').setValue(file);
+    this.checkUploadGroup();
+  }
+
+  checkUploadGroup() {
+    if (!this.uploadGroup.invalid && this.nameExist == false) {
+      this.outFormDataEmitter.emit(this.uploadGroup.value);
+    } else {
+      this.outFormDataEmitter.emit(false);
+    }
   }
 
   // papaParse() {
