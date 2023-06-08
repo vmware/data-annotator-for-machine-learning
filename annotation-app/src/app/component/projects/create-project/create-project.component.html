@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             id="projectName"
             type="text"
             formControlName="projectName"
-            (blur)="inputProjectBlur($event)"
+            (ngModelChange)="inputProjectChange($event)"
             class="clr-input"
           />
         </div>

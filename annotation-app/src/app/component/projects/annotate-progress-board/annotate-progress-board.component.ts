@@ -32,7 +32,7 @@ export class AnnotateProgressBoardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.reviewOrder = this.msg.reviewOrder;
+    this.reviewOrder = this.msg.projectInfo.assignmentLogic;
     this.reviewee = this.msg.reviewee;
     this.isAllowedAnnotate = this.msg.projectInfo.annotator.indexOf(this.user.email) > -1 ? true : false;
     this.optionList = this.msg?.projectInfo?.userCompleteCase;

@@ -17,7 +17,8 @@ import { ToolService } from 'src/app/services/common/tool.service';
 import { CommonService } from 'src/app/services/common/common.service';
 import { EmailService } from 'src/app/services/common/email.service';
 import { Papa } from 'ngx-papaparse';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable,Subject} from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserAuthService } from 'src/app/services/user-auth.service';
 import { InternalApiService } from 'src/app/services/internal-api.service';
@@ -72,7 +73,7 @@ export class CreateProjectComponent implements OnInit {
   loading: boolean = false;
   user: any;
   wizardpage: ClrWizardPage;
-
+  taskNameInput = new Subject<string>();
   constructor(
     private apiService: ApiService,
     private formBuilder: FormBuilder,
@@ -88,8 +89,16 @@ export class CreateProjectComponent implements OnInit {
     private  changeDetectorRef:ChangeDetectorRef
   ) {
     this.user = this.userAuthService.loggedUser().user.email;
+    this.taskNameInput.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
+      if(value != ''){
+        this.inputProjectBlur(value)
+      }else{
+        this.nameExist = false;
+      }
+    });
   }
 
+  
   ngOnInit(): void {
     this.createForm();
     this.isPop = false;
@@ -360,23 +369,21 @@ export class CreateProjectComponent implements OnInit {
   onKeydown(e) {
     e.stopPropagation();
   }
-
+  
+  inputProjectChange(value){
+    this.taskNameInput.next(value);
+  }
   inputProjectBlur(e) {
-    this.nameExist = true;
     const param = {
-      pname: e.target.value,
+      pname: e,
     };
-    if (e.target.value != '') {
-      this.apiService.findProjectName(param).subscribe((res) => {
-        if (res.length != 0) {
-          this.nameExist = true;
-        } else {
-          this.nameExist = false;
-        }
-      });
-    } else {
-      this.nameExist = false;
-    }
+    this.apiService.findProjectName(param).subscribe((res) => {
+      if (res.length != 0) {
+        this.nameExist = true;
+      } else {
+        this.nameExist = false;
+      }
+    }); 
   }
 
   selectedDatasets(e, from?) {
