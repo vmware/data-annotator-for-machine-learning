@@ -334,6 +334,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             (change)="selectedItem(dropdownSelected)"
             [ngModelOptions]="{ standalone: true }"
           >
+            <option ngif="!dropdownSelected" value="" style="display: none"></option>
             <option *ngIf="dsDialogForm.get('projectType').value != 'ner' && dsDialogForm.get('projectType').value != 'qa'" value="No Labels">No Labels</option>
             <option *ngFor="let item of previewHeadDatas" [value]="item">
               {{ item }}
