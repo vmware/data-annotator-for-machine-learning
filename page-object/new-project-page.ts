@@ -109,9 +109,11 @@ export class NewProjectPage extends CommonPage {
   ICON_PLUS = element.all(by.css("button cds-icon[shape=plus]"));
 
   LABEL_SELECTOR = element(by.css(".clr-select-wrapper:last-child"));
-  LABEL_SELECTOR_OPTIONS = element.all(
-    by.css(".clr-select-wrapper:last-child select option")
-  );
+  LABEL_SELECTOR_OPTIONS =$$('.clr-select-wrapper:last-child select option').filter(function(elem,index){
+    return elem.getText().then(function(text) {
+      return text !== '';
+    });
+  })
   SELECT_COLUMN_DATA_GRID = element(
     by.css(".clr-col-12.clr-col-md-9 clr-datagrid")
   );
