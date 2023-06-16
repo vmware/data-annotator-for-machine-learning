@@ -3,6 +3,17 @@ SPDX-License-Identifier: Apache-2.0 -->
 
 <clr-main-container>
   <app-header></app-header>
+  <div class="noticeAlert" *ngIf="shellUrl">
+    <clr-alert [clrAlertType]="'info'">
+      <clr-alert-item>
+        <span class="alert-text">
+          <b>NOTICE</b>: We'll be updating the InstaML Loop UI in a few days. If you want to use it
+          right now,
+          <b><a href="{{ shellUrl }}" target="_blank">click here.</a></b>
+        </span>
+      </clr-alert-item>
+    </clr-alert>
+  </div>
   <div class="content-container">
     <div class="content-area">
       <router-outlet></router-outlet>

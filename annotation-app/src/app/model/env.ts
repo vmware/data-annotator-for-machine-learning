@@ -25,4 +25,5 @@ export interface Env {
   fileSize?: number;
   enableSlack?: boolean;
   slackAppName?: string;
+  shellUrl?: string;
 }

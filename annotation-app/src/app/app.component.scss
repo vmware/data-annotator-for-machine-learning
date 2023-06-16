@@ -2,3 +2,11 @@
 Copyright 2019-2022 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
+.noticeAlert {
+    position: fixed;
+    width: 92%;
+    left: 49%;
+    top: 60px;
+    transform: translate(-50%);
+    z-index: 1000;
+  }

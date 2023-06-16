@@ -13,9 +13,11 @@ import { EnvironmentsService } from './services/environments.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
+  shellUrl: string;
   constructor(private titleService: Title, private env: EnvironmentsService) {}
 
   ngOnInit() {
+    this.shellUrl = this.env.config.shellUrl;
     this.getTitleInfo();
   }
 
