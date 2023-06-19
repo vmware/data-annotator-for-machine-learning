@@ -12,9 +12,16 @@ import { ModalDatagridComponent } from './modal-datagrid/modal-datagrid.componen
 import { CreateNewDatasetPageComponent } from './create-new-dataset-page/create-new-dataset-page.component';
 import { DatasetAnalyzeComponent } from './dataset-analyze/dataset-analyze.component';
 import { ProjectsModule } from '../projects/projects.module';
+import { AnalyzeDatagridComponent } from './dataset-analyze/analyze-datagrid/analyze-datagrid.component';
 
 @NgModule({
-  declarations: [MyDatasetsComponent, ModalDatagridComponent, CreateNewDatasetPageComponent, DatasetAnalyzeComponent],
+  declarations: [
+    MyDatasetsComponent,
+    ModalDatagridComponent,
+    CreateNewDatasetPageComponent,
+    DatasetAnalyzeComponent,
+    AnalyzeDatagridComponent,
+  ],
   imports: [CommonModule, DatasetsRoutingModule, SharedModule, ProjectsModule],
 })
 export class DatasetsModule {}
