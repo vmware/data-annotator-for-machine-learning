@@ -237,7 +237,7 @@ export class MyDatasetsComponent implements OnInit {
 
   toDatasetAnalyze(dataset) {
     this.router.navigate(['loop/datasets/analyze'], {
-      queryParams: { data: JSON.stringify(dataset) },
+      queryParams: { data: dataset?.dataSetName },
     });
   }
 

@@ -218,7 +218,7 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
         (res) => {
           if (this.msg.page === 'createDataset') {
             this.router.navigate(['loop/datasets/analyze'], {
-              queryParams: { data: JSON.stringify(res) },
+              queryParams: { data: res?.dataSetName },
             });
           }
           this.outUploadDoneEmitter.emit('yes');

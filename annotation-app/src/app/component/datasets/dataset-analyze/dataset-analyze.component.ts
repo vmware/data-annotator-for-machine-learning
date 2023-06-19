@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ClrLoadingState } from '@clr/angular';
 import { EnvironmentsService } from 'src/app/services/environments.service';
 import { Observable } from 'windowed-observable';
-
+import { ApiService } from 'src/app/services/api.service';
 @Component({
   selector: 'app-dataset-analyze',
   templateUrl: './dataset-analyze.component.html',
@@ -23,18 +23,33 @@ export class DatasetAnalyzeComponent implements OnInit {
   initData: any;
   loadingPreviewData: boolean = true;
   loadingAutomlBtn: ClrLoadingState = ClrLoadingState.DEFAULT;
+  dataSetName;
 
-  constructor(private route: ActivatedRoute, public env: EnvironmentsService, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    public env: EnvironmentsService,
+    private router: Router,
+    private apiService: ApiService,
+  ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((value) => {
-      this.initData = JSON.parse(value['data']);
-      if (this.initData && this.initData?.targetPath) {
-        this.dataset = JSON.parse(this.initData.dataset);
+    this.dataset = [];
+    this.route.queryParams.subscribe((values) => {
+      this.dataSetName = values['data'];
+      this.getDatasetData();
+    });
+  }
+
+  getDatasetData() {
+    this.apiService.findDatasetName(this.dataSetName).subscribe((res) => {
+      if (res && res.length > 0) {
+        this.loadingPreviewData = false;
+        this.dataset = res[0];
+        this.initData = res[0];
+        this.sortPreviewData();
       } else {
-        this.dataset = this.initData;
+        this.loadingPreviewData = true;
       }
-      this.sortPreviewData();
     });
   }
 
