@@ -146,7 +146,7 @@ export class ProjectAnalyzeComponent implements OnInit {
   inputQuestionError: string;
   editQuestionError: string;
   editQuestionItem: number = -1;
-  showAppendTabs:boolean=false;
+  showAppendTabs: boolean = false;
 
   constructor(
     private renderer2: Renderer2,
@@ -215,11 +215,11 @@ export class ProjectAnalyzeComponent implements OnInit {
     this.msgAppend = this.projectInfo;
   }
 
-  dealShowAppendTabs(data){
-    if(this.user.role === 'Power User' && data.tabType === 'admin'){
+  dealShowAppendTabs(data) {
+    if (this.user.role === 'Power User' && data.tabType === 'admin') {
       return false;
     }
-    return !data.creator.includes(this.user.email)
+    return !data.creator.includes(this.user.email);
   }
 
   sliderEvent() {
@@ -921,7 +921,7 @@ export class ProjectAnalyzeComponent implements OnInit {
       // console.log('getOne.annotationHistory:::', this.annotationHistory, this.annotationPrevious);
     }
     if (newSr && newSr.MSG) {
-      return
+      return;
     }
     this.sr = newSr;
     if (this.labelType === 'HTL') {
@@ -3954,12 +3954,11 @@ export class ProjectAnalyzeComponent implements OnInit {
 
   toDatasetAnalyze() {
     this.loadingViewData = ClrLoadingState.LOADING;
-
     this.apiService.findDatasetName(this.projectInfo.selectedDataset[0]).subscribe(
       (res) => {
         if (res?.length > 0) {
           this.router.navigate(['loop/datasets/analyze'], {
-            queryParams: { data: JSON.stringify(res[0]) },
+            queryParams: { data: res[0]?.dataSetName },
           });
         } else {
           this.errorMessage = 'No permission to view this data.';
