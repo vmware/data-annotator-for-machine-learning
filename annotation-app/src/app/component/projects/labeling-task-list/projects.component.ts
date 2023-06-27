@@ -18,7 +18,7 @@ export class ProjectsComponent implements OnInit {
   constructor(private userAuthService: UserAuthService) {}
 
   ngOnInit(): void {
-    this.user = this.userAuthService.loggedUser().user;
+    this.user = this.userAuthService.loggedUser()?.user;
     this.msg = { tab: 'annotate' };
   }
 

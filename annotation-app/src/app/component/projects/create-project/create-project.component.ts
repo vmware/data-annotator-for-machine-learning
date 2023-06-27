@@ -88,7 +88,7 @@ export class CreateProjectComponent implements OnInit {
     private internalApiService: InternalApiService,
     private  changeDetectorRef:ChangeDetectorRef
   ) {
-    this.user = this.userAuthService.loggedUser().user.email;
+    this.user = this.userAuthService.loggedUser()?.user.email;
     this.taskNameInput.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       if(value != ''){
         this.inputProjectBlur(value)

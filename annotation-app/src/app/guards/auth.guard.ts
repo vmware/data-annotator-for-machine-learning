@@ -17,6 +17,10 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean> | Promise<boolean> | boolean {
+    const user = this.userAuthService.loggedUser()?.user;
+    if (user) {
+      return true;
+    }
     if (!this.env.config.embedded) {
       if (this.userAuthService.isLoggedIn()) {
         return this.checkRole(state.url);
@@ -29,6 +33,7 @@ export class AuthGuard implements CanActivate {
         }
       }
     }
+    return false;
   }
 
   checkRole(url) {
