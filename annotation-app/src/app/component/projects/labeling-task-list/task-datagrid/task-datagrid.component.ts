@@ -69,7 +69,7 @@ export class TaskDatagridComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.user = this.userAuthService.loggedUser().user;
+    this.user = this.userAuthService.loggedUser()?.user;
   }
 
   ngOnChanges() {

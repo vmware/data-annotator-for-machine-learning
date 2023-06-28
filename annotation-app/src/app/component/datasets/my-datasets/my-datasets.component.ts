@@ -90,7 +90,7 @@ export class MyDatasetsComponent implements OnInit {
     private internalApiService: InternalApiService,
     public wa: WebAnalyticsService,
   ) {
-    this.user = this.userAuthService.loggedUser().user;
+    this.user = this.userAuthService.loggedUser()?.user;
   }
 
   ngOnInit(): void {

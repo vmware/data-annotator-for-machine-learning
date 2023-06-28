@@ -8,6 +8,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { CreateProjectComponent } from './create-project/create-project.component';
 import { ProjectAnalyzeComponent } from './project-analyze/project-analyze.component';
 import { ProjectsComponent } from './labeling-task-list/projects.component';
+import { AuthGuard } from 'src/app/guards/auth.guard';
 
 const routes: Routes = [
   {
@@ -16,6 +17,7 @@ const routes: Routes = [
     data: {
       title: 'loopProjectList',
     },
+    canActivate: [AuthGuard],
   },
   {
     path: 'create',
@@ -23,6 +25,7 @@ const routes: Routes = [
     data: {
       title: 'loopProjectCreate',
     },
+    canActivate: [AuthGuard],
   },
   {
     path: 'analyze',
@@ -30,6 +33,7 @@ const routes: Routes = [
     data: {
       title: 'loopProjectAnalyze',
     },
+    canActivate: [AuthGuard],
   },
 ];
 

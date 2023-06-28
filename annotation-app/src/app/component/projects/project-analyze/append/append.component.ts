@@ -74,7 +74,7 @@ export class AppendComponent implements OnInit {
     private s3Service: S3Service,
     private wa: WebAnalyticsService,
   ) {
-    this.user = this.userAuthService.loggedUser().user.email;
+    this.user = this.userAuthService.loggedUser()?.user.email;
 
     this.userQuestionUpdate.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       if (value != '') {

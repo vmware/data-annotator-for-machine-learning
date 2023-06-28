@@ -163,7 +163,7 @@ export class ProjectAnalyzeComponent implements OnInit {
     private md: MarkdownParserService,
     public wa: WebAnalyticsService,
   ) {
-    this.user = this.userAuthService.loggedUser().user;
+    this.user = this.userAuthService.loggedUser()?.user;
     this.currentTabIndex = 1;
   }
 

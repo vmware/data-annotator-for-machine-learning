@@ -34,7 +34,7 @@ export class GenerateComponent implements OnInit {
     private userAuthService: UserAuthService,
     private downloadService: DownloadService,
   ) {
-    this.user = this.userAuthService.loggedUser().user.email;
+    this.user = this.userAuthService.loggedUser()?.user.email;
   }
 
   ngOnInit() {

@@ -28,7 +28,7 @@ export class AnnotateProgressBoardComponent implements OnInit {
   optionList:[];
 
   constructor(private userAuthService: UserAuthService) {
-    this.user = this.userAuthService.loggedUser().user;
+    this.user = this.userAuthService.loggedUser()?.user;
   }
 
   ngOnInit(): void {
