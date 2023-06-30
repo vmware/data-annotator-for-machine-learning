@@ -42,61 +42,48 @@ SPDX-License-Identifier: Apache-2.0 -->
             class="clr-col-7"
             style="border-right: 1px solid rgb(197, 197, 197); padding-right: 1.5rem; height: 100vh"
           >
-            <div class="properties">
-              <h4>Properties</h4>
-              <div class="clr-row clr-justify-content-start">
-                <div class="clr-col-6">
-                  <h6>Created On</h6>
-                  <span>{{ dataset.createTime | date : 'yyyy-MM-dd HH:mm:ss' }}</span>
+            <ng-container *ngIf="!loadingPreviewData">
+              <div class="properties">
+                <h4>Properties</h4>
+                <div class="clr-row clr-justify-content-start">
+                  <div class="clr-col-6">
+                    <h6>Created On</h6>
+                    <span>{{ dataset.createTime | date : 'yyyy-MM-dd HH:mm:ss' }}</span>
+                  </div>
+                  <div class="clr-col-6">
+                    <h6>Dataset Format</h6>
+                    <span>{{ dataset.format }}</span>
+                  </div>
                 </div>
-                <div class="clr-col-6">
-                  <h6>Dataset Format</h6>
-                  <span>{{ dataset.format }}</span>
+                <div class="clr-row clr-justify-content-start">
+                  <div class="clr-col-6">
+                    <h6>Total {{ dataset.format !== 'image' && dataset.format !== 'txt' ? 'Rows' : 'Items' }}</h6>
+                    <span *ngIf="dataset.format !== 'image'">{{
+                      dataset.totalRows > 0 ? dataset.totalRows : '/'
+                    }}</span>
+                    <span *ngIf="dataset.format == 'image'">{{
+                      dataset.totalRows ? dataset.totalRows : dataset.images.length
+                    }}</span>
+                  </div>
+                  <div *ngIf="dataset.format !== 'image' && dataset.format !== 'txt'" class="clr-col-6">
+                    <h6>Total Columns</h6>
+                    <span>{{ dataset.totalColumns > 0 ? dataset.totalColumns : '/' }}</span>
+                  </div>
                 </div>
               </div>
-              <div class="clr-row clr-justify-content-start">
-                <div class="clr-col-6">
-                  <h6>Total {{ dataset.format !== 'image' && dataset.format !== 'txt' ? 'Rows' : 'Items' }}</h6>
-                  <span *ngIf="dataset.format !== 'image'">{{ dataset.totalRows > 0 ? dataset.totalRows : '/' }}</span>
-                  <span *ngIf="dataset.format == 'image'">{{
-                    dataset.totalRows ? dataset.totalRows : dataset.images.length
-                  }}</span>
-                </div>
-                <div *ngIf="dataset.format !== 'image' && dataset.format !== 'txt'" class="clr-col-6">
-                  <h6>Total Columns</h6>
-                  <span>{{ dataset.totalColumns > 0 ? dataset.totalColumns : '/' }}</span>
-                </div>
+              <div>
+                <h4>Preview</h4>
+                <app-analyze-datagrid
+                  [configData]="configData"
+                  [gridloading]="loadingPreviewData"
+                ></app-analyze-datagrid>
               </div>
-            </div>
-            <div>
-              <h4>Preview</h4>
-              <clr-datagrid [clrDgLoading]="loadingPreviewData">
-                <clr-dg-column *ngFor="let itemHeader of topRowHeader">{{ itemHeader }}</clr-dg-column>
-                <ng-container *ngIf="dataset.format !== 'image' && dataset.format !== 'txt'">
-                  <clr-dg-row *ngFor="let previewCont of topRowContent">
-                    <clr-dg-cell *ngFor="let item of previewCont">{{ item }}</clr-dg-cell>
-                  </clr-dg-row>
-                </ng-container>
-
-                <ng-container *ngIf="dataset.format == 'image'">
-                  <clr-dg-row *ngFor="let previewCont of topRowContent">
-                    <clr-dg-cell
-                      ><img src="{{ previewCont.location }}" alt="" style="max-width: 15rem; max-height: 15rem"
-                    /></clr-dg-cell>
-                    <clr-dg-cell>{{ previewCont.fileName }}</clr-dg-cell>
-                    <clr-dg-cell>{{ previewCont.fileSize }}</clr-dg-cell>
-                    <clr-dg-cell>{{ previewCont._id }}</clr-dg-cell>
-                  </clr-dg-row>
-                </ng-container>
-
-                <ng-container *ngIf="dataset.format == 'txt'">
-                  <clr-dg-row *ngFor="let previewCont of topRowContent">
-                    <clr-dg-cell>{{ previewCont.fileName }}</clr-dg-cell>
-                    <clr-dg-cell>{{ previewCont.fileContent }}</clr-dg-cell>
-                  </clr-dg-row>
-                </ng-container>
-              </clr-datagrid>
-            </div>
+            </ng-container>
+            <ng-container *ngIf="loadingPreviewData">
+              <div style="display: flex; margin-top: 6rem; justify-content: center">
+                <span class="spinner spinner-md"> Loading... </span>
+              </div>
+            </ng-container>
           </div>
           <div class="clr-col-5 createEntrance">
             <div style="border-bottom: 1px solid rgb(197, 197, 197)">

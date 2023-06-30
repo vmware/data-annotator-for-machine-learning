@@ -1,0 +1,22 @@
+<div>
+  <clr-datagrid *ngIf="configData?.columnData.length > 0" [clrDgLoading]="gridloading">
+    <clr-dg-column *ngFor="let column of configData.columnData" [ngClass]="{ columnWidth: column.type == 'img' }">
+      {{ column.label }}
+    </clr-dg-column>
+    <clr-dg-row *ngFor="let itemData of configData.tableData">
+      <clr-dg-cell *ngFor="let column of configData.columnData">
+        <ng-container *ngIf="column.type == 'img'">
+          <img
+            [src]="itemData[column.prop]"
+            (error)="setDefaultImage()"
+            class="imgLimit"
+            [ngClass]="{showImg:errorImg}"
+          />
+        </ng-container>
+        <ng-container *ngIf="column.type != 'img'">
+          {{ itemData[column.prop] }}
+        </ng-container>
+      </clr-dg-cell>
+    </clr-dg-row>
+  </clr-datagrid>
+</div>

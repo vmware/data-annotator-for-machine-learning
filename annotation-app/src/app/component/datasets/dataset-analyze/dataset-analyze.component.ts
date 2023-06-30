@@ -24,6 +24,7 @@ export class DatasetAnalyzeComponent implements OnInit {
   loadingPreviewData: boolean = true;
   loadingAutomlBtn: ClrLoadingState = ClrLoadingState.DEFAULT;
   dataSetName;
+  configData;
 
   constructor(
     private route: ActivatedRoute,
@@ -43,13 +44,72 @@ export class DatasetAnalyzeComponent implements OnInit {
   getDatasetData() {
     this.apiService.findDatasetName(this.dataSetName).subscribe((res) => {
       if (res && res.length > 0) {
-        this.loadingPreviewData = false;
         this.dataset = res[0];
         this.initData = res[0];
-        this.sortPreviewData();
+        this.dealGridData();
       } else {
         this.loadingPreviewData = true;
       }
+    });
+  }
+
+  dealGridData() {
+    if (this.dataset.format == 'image') {
+      let imgTypeNameArray = ['image', 'imageName', 'imageSize', 'id'];
+      this.topRowHeader = this.dealCloumn(imgTypeNameArray);
+      this.topRowContent = this.dataset.topReview.map((item) => {
+        return {
+          image: this.env.config.enableAWSS3
+            ? item.location
+            : `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${item.location}&token=${
+                JSON.parse(localStorage.getItem(this.env.config.sessionKey))?.token.access_token
+              }`,
+          imageName: item.fileName,
+          imageSize: (item.fileSize / 1024).toFixed(2),
+          id: item._id,
+        };
+      });
+    } else if (this.dataset.format == 'txt') {
+      this.topRowContent = this.dataset.topReview;
+      let texTypeNameArray = ['fileName', 'fileContent'];
+      this.topRowHeader = this.dealCloumn(texTypeNameArray);
+    } else {
+      this.topRowHeader = this.dealCloumn(this.dataset.topReview.header);
+      this.topRowContent = this.matchArrays(this.dataset.topReview.header, this.dataset.topReview.topRows);
+    }
+    this.configData = {
+      columnData: this.topRowHeader,
+      tableData: this.topRowContent,
+      type: this.dataset.format,
+    };
+    this.loadingPreviewData = false;
+  }
+
+  dealCloumn(header) {
+    return header.map((item) => {
+      return {
+        label: this.toPascalCase(item),
+        prop: item,
+        type: item === 'image' ? 'img' : '',
+      };
+    });
+  }
+
+  toPascalCase(str) {
+    var words = str.split(/[\s_-]+/);
+    var pascalCase = words.map(function (word) {
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    });
+    return pascalCase.join('');
+  }
+
+  matchArrays(header, topRows) {
+    return topRows.map(function (row) {
+      var obj = {};
+      header.forEach(function (key, index) {
+        obj[key] = row[index];
+      });
+      return obj;
     });
   }
 
@@ -125,3 +185,4 @@ export class DatasetAnalyzeComponent implements OnInit {
     observable.publish(value);
   }
 }
+
