@@ -25,6 +25,7 @@ export class DatasetAnalyzeComponent implements OnInit {
   loadingAutomlBtn: ClrLoadingState = ClrLoadingState.DEFAULT;
   dataSetName;
   configData;
+  currentTab;
 
   constructor(
     private route: ActivatedRoute,
@@ -37,6 +38,7 @@ export class DatasetAnalyzeComponent implements OnInit {
     this.dataset = [];
     this.route.queryParams.subscribe((values) => {
       this.dataSetName = values['data'];
+      this.currentTab = values['currentTab'];
       this.getDatasetData();
     });
   }
@@ -183,6 +185,14 @@ export class DatasetAnalyzeComponent implements OnInit {
       dataset: JSON.stringify(dataset),
     };
     observable.publish(value);
+  }
+
+  backToList() {
+    this.router.navigate(['/loop/datasets/list'], {
+      queryParams: {
+        currentTab: this.currentTab,
+      },
+    });
   }
 }
 

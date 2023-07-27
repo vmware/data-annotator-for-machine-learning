@@ -3,7 +3,7 @@ Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from 'src/app/services/api.service';
 import { CommonService } from 'src/app/services/common/common.service';
 import { DownloadService } from 'src/app/services/common/download.service';
@@ -89,12 +89,12 @@ export class MyDatasetsComponent implements OnInit {
     private userAuthService: UserAuthService,
     private internalApiService: InternalApiService,
     public wa: WebAnalyticsService,
+    private route: ActivatedRoute,
   ) {
     this.user = this.userAuthService.loggedUser()?.user;
   }
 
   ngOnInit(): void {
-    this.currentTab = 1;
     this.page = 1;
     this.pageSize = 10;
     this.pageCommunity = 1;
@@ -106,6 +106,9 @@ export class MyDatasetsComponent implements OnInit {
     if (this.user.role === 'Power User') {
       this.getAllDatasets('admin');
     }
+    this.route.queryParams.subscribe((queryParams) => {
+      this.currentTab = Number(queryParams['currentTab']) || 1;
+    });
   }
 
   private getMyDatasets() {
@@ -237,7 +240,7 @@ export class MyDatasetsComponent implements OnInit {
 
   toDatasetAnalyze(dataset) {
     this.router.navigate(['loop/datasets/analyze'], {
-      queryParams: { data: dataset?.dataSetName },
+      queryParams: { data: dataset?.dataSetName, currentTab: this.currentTab },
     });
   }
 

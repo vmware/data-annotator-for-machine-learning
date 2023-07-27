@@ -16,13 +16,13 @@ SPDX-License-Identifier: Apache-2.0 -->
   <clr-tabs>
     <clr-tab>
       <button clrTabLink id="link1" (click)="clickTaskTab('annotate')">My Labeling Task</button>
-      <clr-tab-content id="content1" *clrIfActive="true">
+      <clr-tab-content id="content1" *clrIfActive="msg.tab== 'annotate'">
         <app-task-datagrid [msgToTaskList]="msg"></app-task-datagrid>
       </clr-tab-content>
     </clr-tab>
     <clr-tab *ngIf="user.role === 'Power User'">
       <button clrTabLink (click)="clickTaskTab('admin')">Power User Labeling Task</button>
-      <clr-tab-content *clrIfActive>
+      <clr-tab-content *clrIfActive="msg.tab== 'admin'">
         <app-task-datagrid [msgToTaskList]="msg"></app-task-datagrid>
       </clr-tab-content>
     </clr-tab>
