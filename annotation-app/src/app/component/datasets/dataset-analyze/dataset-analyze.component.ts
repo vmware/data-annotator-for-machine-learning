@@ -126,50 +126,6 @@ export class DatasetAnalyzeComponent implements OnInit {
     });
   }
 
-  sortPreviewData() {
-    if (this.dataset.format == 'image') {
-      this.topRowContent = [];
-      let a = 0;
-      let flag = JSON.parse(JSON.stringify(this.dataset.topReview));
-      flag.forEach((element) => {
-        element.fileSize = (element.fileSize / 1024).toFixed(2);
-        if (this.env.config.enableAWSS3) {
-          const img = new Image();
-          let m = this;
-          img.src = element.location;
-          img.onload = function () {
-            a++;
-            if (a == Math.round(flag.length / 2)) {
-              m.loadingPreviewData = false;
-              m.topRowHeader = ['Image', 'ImageName', 'ImageSize(KB)', 'Id'];
-            }
-          };
-        } else {
-          element.location = `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
-            element.location
-          }&token=${JSON.parse(localStorage.getItem(this.env.config.sessionKey))?.token.access_token}`;
-          setTimeout(() => {
-            this.topRowHeader = ['Image', 'ImageName', 'ImageSize(KB)', 'Id'];
-            this.loadingPreviewData = false;
-          }, 1000);
-        }
-      });
-      this.topRowContent = flag;
-    } else if (this.dataset.format == 'txt') {
-      this.topRowContent = this.dataset.topReview;
-      setTimeout(() => {
-        this.topRowHeader = ['FileName', 'FileContent'];
-        this.loadingPreviewData = false;
-      }, 500);
-    } else {
-      this.topRowContent = this.dataset.topReview.topRows == null ? [] : this.dataset.topReview.topRows;
-      setTimeout(() => {
-        this.topRowHeader = this.dataset.topReview.header == null ? [] : this.dataset.topReview.header;
-        this.loadingPreviewData = false;
-      }, 500);
-    }
-  }
-
   createModel(type: String) {
     this.loadingAutomlBtn = ClrLoadingState.LOADING;
     const dataset = JSON.parse(JSON.stringify(this.dataset));
