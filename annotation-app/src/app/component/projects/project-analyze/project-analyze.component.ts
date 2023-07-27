@@ -147,6 +147,7 @@ export class ProjectAnalyzeComponent implements OnInit {
   editQuestionError: string;
   editQuestionItem: number = -1;
   showAppendTabs: boolean = false;
+  tabType: string;
 
   constructor(
     private renderer2: Renderer2,
@@ -177,6 +178,7 @@ export class ProjectAnalyzeComponent implements OnInit {
       }
       data.taskInstructions = data.taskInstructions?.replace(/(\r\n|\n|\r)/gm, '<br/>');
       this.projectInfo = data;
+      this.tabType = data.tabType;
       this.showAppendTabs = this.dealShowAppendTabs(data);
       this.isAllowedAnnotate = data.annotator.indexOf(this.user.email) > -1 ? true : false;
       this.selectParam = data.projectName;
@@ -994,18 +996,26 @@ export class ProjectAnalyzeComponent implements OnInit {
 
   onEndGame(): void {
     if (this.sr.MSG && this.error) {
-      this.router.navigate(['/loop/project/list']);
+      this.jumpTo();
       return;
     }
     if (this.isFormPrestine() || !this.isAllowedAnnotate) {
-      this.router.navigate(['/loop/project/list']);
+      this.jumpTo();
     } else {
       if (this.labelType == 'HTL' && this.selectedTreeLabels.length === 0) {
-        this.router.navigate(['/loop/project/list']);
+        this.jumpTo();
       } else {
         this.isEndingGameDialog = true;
       }
     }
+  }
+
+  jumpTo() {
+    this.router.navigate(['/loop/project/list'], {
+      queryParams: {
+        tabType: this.tabType,
+      },
+    });
   }
 
   onSkipGame(): void {

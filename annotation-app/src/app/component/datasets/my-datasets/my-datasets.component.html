@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <clr-tabs>
     <clr-tab>
       <button clrTabLink id="link1" (click)="clickTab(1)">My Datasets ({{ totalItems }})</button>
-      <clr-tab-content id="content1" *clrIfActive="true">
+      <clr-tab-content id="content1" *clrIfActive="currentTab == 1 ">
         <clr-datagrid [clrDgLoading]="loading" class="gridHeight">
           <clr-dg-placeholder>We couldn't find any dataset for you!</clr-dg-placeholder>
           <clr-dg-column [clrDgField]="'dataSetName'" class="ellipsis-datagrid">Dataset Name </clr-dg-column>
@@ -108,7 +108,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     </clr-tab>
     <clr-tab>
       <button clrTabLink (click)="clickTab(2)">Community Datasets ({{ totalItemsCommunity }})</button>
-      <clr-tab-content *clrIfActive>
+      <clr-tab-content *clrIfActive="currentTab == 2">
         <clr-datagrid [clrDgLoading]="loadingCommunity" class="gridHeight">
           <clr-dg-placeholder>We couldn't find any dataset here!</clr-dg-placeholder>
           <clr-dg-column [clrDgField]="'projectName'" class="ellipsis-datagrid">Project Name </clr-dg-column>
@@ -155,6 +155,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                       ? 'table'
                       : dataset.projectType === 'ner'
                       ? 'bars'
+                      : dataset.projectType === 'qa'
+                      ? 'checkbox-list'
                       : 'unknown-status'
                   }}"
                 >
@@ -252,7 +254,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     </clr-tab>
     <clr-tab *ngIf="user.role === 'Power User'">
       <button clrTabLink (click)="clickTab(3)">Power User Datasets ({{ totalItemsPower }})</button>
-      <clr-tab-content *clrIfActive>
+      <clr-tab-content *clrIfActive="currentTab == 3">
         <clr-datagrid [clrDgLoading]="loadingPower" class="gridHeight">
           <clr-dg-placeholder>We couldn't find any dataset for you!</clr-dg-placeholder>
           <clr-dg-column [clrDgField]="'dataSetName'" class="ellipsis-datagrid">Dataset Name </clr-dg-column>

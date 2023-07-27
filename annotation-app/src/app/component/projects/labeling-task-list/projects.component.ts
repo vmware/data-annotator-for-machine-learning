@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Component, OnInit } from '@angular/core';
 import { UserAuthService } from 'src/app/services/user-auth.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-projects',
@@ -15,11 +16,14 @@ export class ProjectsComponent implements OnInit {
   user;
   msg;
 
-  constructor(private userAuthService: UserAuthService) {}
+  constructor(private userAuthService: UserAuthService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.user = this.userAuthService.loggedUser()?.user;
     this.msg = { tab: 'annotate' };
+    this.route.queryParams.subscribe((queryParams) => {
+      this.msg.tab = queryParams['tabType'] || 'annotate';
+    });
   }
 
   clickTaskTab(tab) {

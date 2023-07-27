@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <div class="clr-row">
     <div class="clr-col-10">
       <div class="clr-row" style="margin-left: unset">
-        <cds-icon shape="arrow" routerLink="/loop/datasets/list"></cds-icon>
+        <cds-icon shape="arrow" (click)="backToList()"></cds-icon>
         <div class="h2Title" title="{{ dataSetName }}">
           {{ dataSetName }}
         </div>
