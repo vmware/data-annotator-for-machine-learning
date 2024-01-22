@@ -85,16 +85,26 @@ module.exports = {
                 };
                 if (projectType == PROJECTTYPE.QA) {
                     let questions = [];
-                    for (const q of questionForText) {
-                        if (!`${q}`.trim() || !oneData[q].trim()) {
-                            continue;
+                    if(req.body.regression){
+                        for (const q of questionForText) {
+                            if (!`${q}`.trim() || !oneData[q].trim()) {
+                                continue;
+                            }
+                            questions = [...oneData[q].trim()]
                         }
-                        for (const question of oneData[q].trim().split("?")) {
-                            if (question.trim()) {
-                                questions.push(question.trim()+"?");
+                    }else{
+                        for (const q of questionForText) {
+                            if (!`${q}`.trim() || !oneData[q].trim()) {
+                                continue;
+                            }
+                            for (const question of oneData[q].trim().split("?")) {
+                                if (question.trim()) {
+                                    questions.push(question.trim()+"?");
+                                }
                             }
                         }
                     }
+                    
                     sechema.questionForText = questions;
                 }
                 //support ner quesion anwser column display
