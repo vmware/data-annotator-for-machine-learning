@@ -57,7 +57,7 @@ def active_learning_train(request):
             srs['sr_text'] = vector_sr(srs['sr_text'], vector_local, project_type, pro[0]['al']['objectColumn'], pro[0]['al']['numberColumn'])
     else:
         # text request sr vector
-        srs['sr_text'] = request_text_vectors(req['user'], srs['sr_text'], token)
+        srs['sr_text'] = request_text_vectors(srs['sr_text'])
 
     data = separate_data(srs)
 
@@ -74,9 +74,6 @@ def active_learning_train(request):
 
     # save all test data
     batch_update_srs(al['test'])
-
-    # save ESP text sr vector to db for reuse
-    save_sr_vectors(data['id_test'], data['x_test'], project_type)
 
     # update al info
     update = {
@@ -123,12 +120,7 @@ def active_learning_query(request):
             unl_srs['sr_text'] = vector_sr(unl_srs['sr_text'], vector_local, project_type, pro[0]['al']['objectColumn'], pro[0]['al']['numberColumn'])
     else:
         # text project request sr vector
-        unl_srs['sr_text'] = request_text_vectors(req['user'], unl_srs['sr_text'], token)
-        # save ESP text sr vector to db for reuse
-        save_sr_vectors(unl_srs['ids'], unl_srs['sr_text'], project_type)
-        if "ESP" in config and config["ESP"]:
-            # query saved text vector as query pool
-            unl_srs = query_saved_sr_vectors(req['projectName'])
+        unl_srs['sr_text'] = request_text_vectors(unl_srs['sr_text'])
 
     # al query uncertain instance
     query_strategy = cst['QUERY_STRATEGY']['POOL_BASED_SAMPLING']['PB_UNS']
@@ -190,11 +182,8 @@ def active_learning_teach(request):
     # text project
     else:
         # use sr vector replace sr_text
-        new_labeled_sr['sr_text'] = request_text_vectors(req['user'], new_labeled_sr['sr_text'], token)
-        if "ESP" in config:
-            all_test_sr['sr_text'] = all_test_sr['sr_vectors']
-        else:
-            all_test_sr['sr_text'] = request_text_vectors(req['user'], all_test_sr['sr_text'], token)
+        new_labeled_sr['sr_text'] = request_text_vectors(new_labeled_sr['sr_text'])
+        all_test_sr['sr_text'] = request_text_vectors(all_test_sr['sr_text'])
 
     data = separate_data(new_labeled_sr)
 

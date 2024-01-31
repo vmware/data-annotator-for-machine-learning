@@ -3,8 +3,7 @@
 
 import logging
 import time
-import requests
-import json
+
 from config.config import config
 import numpy as np
 import spacy
@@ -13,29 +12,6 @@ from src.exceptions.base_exceptions import NetWorkException
 
 nlp = spacy.load(config['SPACY_MODEL'])
 log = logging.getLogger('loop_al')
-
-
-def esp_text_vectors(user, sr_text, token):
-
-    url_vectors = config["VECTOR_API_URL"]
-    headers = {
-        'Authorization': "Bearer " + token,
-        'Content-Type': "application/json"
-    }
-    input_cols = {"user": user, "name": "aclImdb", "rows": sr_text}
-
-    res = requests.post(url_vectors, headers=headers, data=json.dumps(input_cols))
-
-    if res.status_code == 200:
-        response = json.loads(res.text)
-        vectors = []
-        for row in response['rows']:
-            vectors.append(row['weights'])
-
-        return vectors
-    else:
-        log.error(f"Request text vector fail: {res}")
-        raise NetWorkException(res.status_code, f"Request text vector fail: {res}")
 
 
 def os_text_vectors(sr_text):
@@ -49,12 +25,8 @@ def os_text_vectors(sr_text):
     return vectors
 
 
-def request_text_vectors(user, sr_text, token):
+def request_text_vectors(sr_text):
     star_time = time.time()
-    if "ESP" in config and config["ESP"]:
-        vectors = esp_text_vectors(user, sr_text, token)
-    else:
-        vectors = os_text_vectors(sr_text)
-
+    vectors = os_text_vectors(sr_text)
     log.info(f'Response Time(in secs): {int(time.time() - star_time)}')
     return vectors
