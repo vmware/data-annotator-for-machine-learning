@@ -163,7 +163,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div
               *ngIf="
                 msg.projectInfo.projectType == 'ner' ||
-                msg.projectInfo.projectType == 'qa' ||
+                (msg.projectInfo.projectType == 'qa' && msg.projectInfo.regression == false) ||
                 msg.projectInfo.projectType == 'log'
               "
               title="{{ flag.text }}"
@@ -176,7 +176,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div
               *ngIf="
                 msg.projectInfo.projectType !== 'ner' &&
-                msg.projectInfo.projectType !== 'qa' &&
+                !(msg.projectInfo.projectType == 'qa' && msg.projectInfo.regression == false) &&
                 msg.projectInfo.projectType !== 'image' &&
                 msg.projectInfo.projectType !== 'log'
               "

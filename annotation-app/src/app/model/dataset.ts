@@ -50,6 +50,7 @@ export class DatasetUtil {
       selectedDisplayColumn: [],
       slack: [],
       projectType: 'text',
+      questionType: 'n',
     };
   }
 
@@ -98,6 +99,7 @@ export interface DatasetData {
   selectedDisplayColumn: any[];
   slack: any;
   projectType: string;
+  questionType: string;
 }
 
 export interface DatasetFile {

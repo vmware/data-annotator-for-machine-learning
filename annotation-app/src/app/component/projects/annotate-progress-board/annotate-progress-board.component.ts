@@ -25,7 +25,7 @@ export class AnnotateProgressBoardComponent implements OnInit {
   reviewee: string;
   isAllowedAnnotate: boolean;
   user: any;
-  optionList:[];
+  optionList: [];
 
   constructor(private userAuthService: UserAuthService) {
     this.user = this.userAuthService.loggedUser()?.user;

@@ -278,6 +278,29 @@ export class ProjectAnalyzeComponent implements OnInit {
     });
   }
 
+  setRegressionQaLabel() {
+    setTimeout(() => {
+      if (this.sr.questionForText) {
+        const annotations = this.sr.questionForText;
+        let arr = [];
+        annotations.forEach((element) => {
+          if (!element.Q) {
+            return;
+          }
+          const part = {
+            text: '',
+            label: '',
+          };
+          part.text = element.A;
+          part.label = element.Q;
+          this.spansList.push(part);
+          arr.push(element.Q);
+        });
+        this.categories = arr;
+      }
+    }, 20);
+  }
+
   fetchData(): void {
     this.silenceStatus = false;
     this.error = null;
@@ -293,11 +316,17 @@ export class ProjectAnalyzeComponent implements OnInit {
           this.loading = false;
           return;
         } else {
-          if (this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'regression') {
+          if (
+            this.projectType == 'text' ||
+            this.projectType == 'tabular' ||
+            this.projectType == 'regression' ||
+            (this.projectType == 'qa' && this.projectInfo.regression == true)
+          ) {
             this.sr = this.resetTabularSrData(this.sr);
+            this.setRegressionQaLabel();
             this.toReadStorageSetting('display');
           }
-          if (this.projectType == 'ner' || this.projectType == 'qa') {
+          if (this.projectType == 'ner' || (this.projectType == 'qa' && this.projectInfo.regression == false)) {
             this.sr = this.resetNerSrData(this.sr);
             this.toShowExistingLabel();
             this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
@@ -590,7 +619,13 @@ export class ProjectAnalyzeComponent implements OnInit {
         this.modifyChangeHistory();
       } else if (this.projectType == 'qa') {
         this.modifyChangeHistory();
-        srUserInput.userInput[0]['questionForText'] = this.categories;
+        if (this.projectInfo.regression == false) {
+          srUserInput.userInput[0]['questionForText'] = this.categories;
+        } else {
+          srUserInput.userInput[0]['questionForText'] = this.spansList.map((o) => {
+            return { Q: o.label, A: o.text };
+          });
+        }
       } else if (this.projectType == 'image') {
         srUserInput.userInput[0].problemCategory = this.currentBoundingData;
         this.sr.images = this.currentBoundingData;
@@ -653,7 +688,12 @@ export class ProjectAnalyzeComponent implements OnInit {
         param['logFreeText'] = this.questionForm.get('logFreeText').value;
       } else if (this.projectType === 'qa') {
         param['problemCategory'] = this.spansList;
-        param['questionForText'] = this.categories;
+        param['questionForText'] =
+          this.projectInfo.regression == true
+            ? this.spansList.map((o) => {
+                return { Q: o.label, A: o.text };
+              })
+            : this.categories;
       } else if (this.isMultipleNumericLabel || this.isNumeric) {
         if (this.moreReviewInfo.length !== 0 && this.categoryFunc().length === 0) {
           param['modify'] = false;
@@ -682,7 +722,7 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   srInHistory() {
-    // if user doesn't modify the history ticket then should keep the annotationhistory not change
+    // if user doesn't modify the history ticket then should keep the annotation history not change
     let a = 0;
     if (this.annotationHistory.length > 0) {
       for (let i = 0; i < this.annotationHistory.length; i++) {
@@ -792,20 +832,24 @@ export class ProjectAnalyzeComponent implements OnInit {
               }
               const aa = this.annotationHistory[i].category.sort(
                 this.toolService.sortBy(
-                  this.projectType === 'ner' || this.projectType === 'qa'
+                  this.projectType === 'ner' || (this.projectType === 'qa' && this.projectInfo.regression == false)
                     ? 'start'
                     : this.projectType === 'log'
                     ? 'line'
+                    : this.projectType === 'qa' && this.projectInfo.regression == true
+                    ? 'Q'
                     : 'sort',
                   'ascending',
                 ),
               );
               const bb = isCategory.sort(
                 this.toolService.sortBy(
-                  this.projectType === 'ner' || this.projectType === 'qa'
+                  this.projectType === 'ner' || (this.projectType === 'qa' && this.projectInfo.regression == false)
                     ? 'start'
                     : this.projectType === 'log'
                     ? 'line'
+                    : this.projectType === 'qa' && this.projectInfo.regression == true
+                    ? 'Q'
                     : 'sort',
                   'ascending',
                 ),
@@ -814,9 +858,12 @@ export class ProjectAnalyzeComponent implements OnInit {
               for (let n = 0; n < aa.length; n++) {
                 let aaString;
                 let bbString;
-                if (this.projectType === 'ner' || this.projectType === 'qa') {
+                if (this.projectType === 'ner' || (this.projectType === 'qa' && this.projectInfo.regression == false)) {
                   aaString = aa[n].text + aa[n].start + aa[n].end + aa[n].label;
                   bbString = bb[n].text + bb[n].start + bb[n].end + bb[n].label;
+                } else if (this.projectType === 'qa' && this.projectInfo.regression == true) {
+                  aaString = aa[n].text + aa[n].label;
+                  bbString = bb[n].text + bb[n].label;
                 } else if (this.projectType === 'log') {
                   aaString = aa[n].line + aa[n].label + aa[n].freeText;
                   bbString = bb[n].line + bb[n].label + bb[n].freeText;
@@ -889,7 +936,11 @@ export class ProjectAnalyzeComponent implements OnInit {
         activeClass: this.active,
         images: OldSr.images,
       };
-      if (this.projectType == 'ner' || this.projectType == 'qa' || this.projectType == 'image') {
+      if (
+        this.projectType == 'ner' ||
+        (this.projectType == 'qa' && this.projectInfo.regression == false) ||
+        this.projectType == 'image'
+      ) {
         if (!this.env.config.enableAWSS3 && this.projectType === 'image') {
           OldSr.originalData.location = `${this.env.config.annotationService}/api/v1.0/datasets/set-data?file=${
             OldSr.originalData.location
@@ -933,7 +984,7 @@ export class ProjectAnalyzeComponent implements OnInit {
     if (this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'regression') {
       this.sr = this.resetTabularSrData(this.sr);
     }
-    if (this.projectType == 'ner' || this.projectType == 'qa') {
+    if (this.projectType == 'ner' || (this.projectType == 'qa' && this.projectInfo.regression == false)) {
       this.sr = this.resetNerSrData(this.sr);
       if (this.projectType == 'qa') {
         this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
@@ -943,9 +994,14 @@ export class ProjectAnalyzeComponent implements OnInit {
         this.toShowExistingLabel();
       }
     }
+    if (this.projectType == 'qa' && this.projectInfo.regression == true) {
+      this.sr = this.resetTabularSrData(this.sr);
+      this.setRegressionQaLabel();
+      this.toReadStorageSetting('display');
+      this.selectedEntityID = 0;
+    }
     if (this.projectType == 'image') {
       this.sr = this.resetImageSrData(this.sr);
-      // console.log("getOne.this.sr:::", this.sr)
       if (this.startFrom === 'review') {
         const images = [];
         this.sr.userInputs?.forEach((item) => {
@@ -1190,7 +1246,9 @@ export class ProjectAnalyzeComponent implements OnInit {
         const addSkip = {
           srId: OldSr._id,
           historyDescription:
-            this.projectType === 'ner' || this.projectType === 'qa' || this.projectType === 'image'
+            this.projectType === 'ner' ||
+            (this.projectType === 'qa' && this.projectInfo.regression == false) ||
+            this.projectType === 'image'
               ? [OldSr.originalData]
               : OldSr.originalData.slice(0, 10),
           type: 'skip',
@@ -1212,10 +1270,15 @@ export class ProjectAnalyzeComponent implements OnInit {
         if (this.projectType == 'text' || this.projectType == 'tabular' || this.projectType == 'regression') {
           this.sr = this.resetTabularSrData(this.sr);
         }
-        if (this.projectType == 'ner' || this.projectType == 'qa') {
+        if (this.projectType == 'ner' || (this.projectType == 'qa' && this.projectInfo.regression == false)) {
           this.sr = this.resetNerSrData(this.sr);
           this.toShowExistingLabel();
           this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
+        }
+        if (this.projectType == 'qa' && this.projectInfo.regression == true) {
+          this.sr = this.resetTabularSrData(this.sr);
+          this.setRegressionQaLabel();
+          this.toReadStorageSetting('display');
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
@@ -1639,7 +1702,7 @@ export class ProjectAnalyzeComponent implements OnInit {
     this.silenceStatus = false;
     const isCategory = this.categoryFunc();
 
-    // to update the annotationprevious list from the index
+    // to update the annotation previous list from the index
     if (this.projectType !== 'image') {
       this.annotationPrevious = this.annotationHistory.slice(index + 1);
     }
@@ -1694,7 +1757,7 @@ export class ProjectAnalyzeComponent implements OnInit {
     } else {
       flag1 = this.sr.userInputs && this.sr.userInputs.length > 0;
     }
-    if (flag1) {
+    if (flag1 || (this.projectType == 'qa' && this.projectInfo.regression == true)) {
       const a = [];
       if (this.projectType === 'image') {
         this.sr.userInputs.forEach((e) => {
@@ -1725,9 +1788,9 @@ export class ProjectAnalyzeComponent implements OnInit {
           flag2 = isCategory[0] == this.sr.userInputs[0].problemCategory;
         }
       } else {
-        flag2 = isCategory.length == this.sr.userInputs[0].problemCategory.length;
+        flag2 = isCategory.length == this.sr.userInputs[0]?.problemCategory?.length;
       }
-      if (flag2) {
+      if (flag2 || (this.projectType == 'qa' && this.projectInfo.regression == true)) {
         if (this.projectType === 'image') {
           a.forEach((element) => {
             if (element.type === 'rectanglelabels') {
@@ -1748,7 +1811,11 @@ export class ProjectAnalyzeComponent implements OnInit {
             }
           });
         }
-        if (this.projectType !== 'text' && this.projectType !== 'tabular') {
+        if (
+          this.projectType !== 'text' &&
+          this.projectType !== 'tabular' &&
+          !(this.projectType == 'qa' && this.projectInfo.regression == true)
+        ) {
           const aa = isCategory.sort(
             this.toolService.sortBy(
               this.projectType === 'ner' || this.projectType === 'qa'
@@ -1797,6 +1864,9 @@ export class ProjectAnalyzeComponent implements OnInit {
             }
           }
         }
+        if (!this.isSkipOrBackQaRegression()) {
+          return;
+        }
         this.loading = true;
         if (type === 'previous') {
           const param = {
@@ -1824,6 +1894,33 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.actionError = this.tipMessage;
       this.loading = false;
       return;
+    }
+  }
+
+  isSkipOrBackQaRegression() {
+    if (this.projectType == 'qa' && this.projectInfo.regression == true) {
+      let aa = this.sr.questionForText;
+      let bb = this.spansList.map((o) => {
+        return { Q: o.label, A: o.text };
+      });
+      aa = aa.sort(this.toolService.sortBy('Q', 'ascending'));
+      bb = bb.sort(this.toolService.sortBy('Q', 'ascending'));
+      if (aa.length !== bb.length) {
+        this.actionError = this.tipMessage;
+        this.loading = false;
+        return false;
+      } else {
+        for (let i = 0; i < aa.length; i++) {
+          let aString = JSON.stringify(aa[i]);
+          let bString = JSON.stringify(bb[i]);
+          if (aString != bString) {
+            this.actionError = this.tipMessage;
+            this.loading = false;
+            return false;
+          }
+        }
+        return true;
+      }
     }
   }
 
@@ -2012,10 +2109,15 @@ export class ProjectAnalyzeComponent implements OnInit {
             this.getProgress();
           }
         }
-        if (this.projectType == 'ner' || this.projectType == 'qa') {
+        if (this.projectType == 'ner' || (this.projectType == 'qa' && this.projectInfo.regression == false)) {
           this.sr = this.resetNerSrData(this.sr);
           this.toShowExistingLabel();
           this.getQuestionListAndSetQuestionColors(this.sr.questionForText);
+        }
+        if (this.projectType == 'qa' && this.projectInfo.regression == true) {
+          this.sr = this.resetTabularSrData(this.sr);
+          this.setRegressionQaLabel();
+          this.toReadStorageSetting('display');
         }
         if (this.projectType == 'image') {
           this.sr = this.resetImageSrData(this.sr);
@@ -2481,6 +2583,9 @@ export class ProjectAnalyzeComponent implements OnInit {
       (this.projectType == 'ner' || this.projectType == 'qa')
     ) {
       this.spansList = [];
+      if (this.projectInfo.regression == true) {
+        return;
+      }
       const annotations = this.sr.userInputs;
       setTimeout(() => {
         annotations.forEach((element) => {
@@ -2488,7 +2593,7 @@ export class ProjectAnalyzeComponent implements OnInit {
             this.initNerPassage(element2, this.categories.indexOf(element2.label));
           });
         });
-      }, 10);
+      }, 20);
     } else if (this.projectType == 'log') {
       this.spansList = [];
       setTimeout(() => {
@@ -2823,7 +2928,7 @@ export class ProjectAnalyzeComponent implements OnInit {
     const lastSpan = spans[spans.length - 1];
     if (this.projectType == 'ner') {
       lastSpan.setAttribute('data-label', this.categories[selectedEntityID]);
-    } else if (this.projectType == 'qa') {
+    } else if (this.projectType == 'qa' && this.projectInfo.regression == false) {
       lastSpan.setAttribute('title', this.categories[selectedEntityID]);
     }
 
@@ -2853,23 +2958,25 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   clickShowMark(e, data) {
-    const alllabeledDom = this.el.nativeElement.querySelectorAll('.annotateLabel .spanSelected');
-    alllabeledDom.forEach((ele) => {
-      this.renderer2.removeStyle(ele, 'backgroundColor');
-    });
-    e.target.parentNode.style.backgroundColor = '#b4d2e3';
+    if (this.projectType == 'qa' && this.projectInfo.regression == false) {
+      const alllabeledDom = this.el.nativeElement.querySelectorAll('.annotateLabel .spanSelected');
+      alllabeledDom.forEach((ele) => {
+        this.renderer2.removeStyle(ele, 'backgroundColor');
+      });
+      e.target.parentNode.style.backgroundColor = '#b4d2e3';
 
-    if (data && data.spans) {
-      const allSpanDom = this.el.nativeElement.querySelectorAll('.nerPassage span');
-      allSpanDom.forEach((element) => {
-        this.renderer2.removeStyle(element, 'font-weight');
-      });
-      data.spans.forEach((element, index) => {
-        if (index === 0) {
-          element.scrollIntoView({ block: 'center' });
-        }
-        this.renderer2.setStyle(element, 'font-weight', 'bold');
-      });
+      if (data && data.spans) {
+        const allSpanDom = this.el.nativeElement.querySelectorAll('.nerPassage span');
+        allSpanDom.forEach((element) => {
+          this.renderer2.removeStyle(element, 'font-weight');
+        });
+        data.spans.forEach((element, index) => {
+          if (index === 0) {
+            element.scrollIntoView({ block: 'center' });
+          }
+          this.renderer2.setStyle(element, 'font-weight', 'bold');
+        });
+      }
     }
   }
 
@@ -2923,6 +3030,14 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   clickClearMark(event, data) {
+    if (this.projectType == 'qa' && this.projectInfo.regression == true) {
+      this.spansList.forEach((ele, index) => {
+        if (ele.text == data.text && ele.label == data.label) {
+          this.spansList.splice(index, 1);
+        }
+      });
+      return;
+    }
     this.spansList.forEach((ele, index) => {
       if (ele.spans == data.spans) {
         this.spansList.splice(index, 1);
@@ -2940,8 +3055,11 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   onSelectingEntity(e, data, index) {
+    if (this.projectInfo.regression === true) {
+      this.editQuestionItem = index;
+    }
     e.preventDefault();
-    if (this.projectType == 'qa' && this.editQuestionItem != -1) {
+    if (this.projectType == 'qa' && this.projectInfo.regression == false && this.editQuestionItem != -1) {
       return;
     }
     this.selectedEntityID = index;
@@ -2979,12 +3097,13 @@ export class ProjectAnalyzeComponent implements OnInit {
           this.error = null;
 
           const flag = [];
-          if (
+          let c1 =
             this.projectType != 'ner' &&
-            this.projectType != 'qa' &&
             this.projectType != 'image' &&
-            this.projectType != 'log'
-          ) {
+            this.projectType != 'log' &&
+            this.projectType != 'qa';
+          let c2 = this.projectType == 'qa' && this.projectInfo.regression == true;
+          if (c1 || c2) {
             let that = this;
             _.forIn(responseSr.originalData, function (value, key) {
               that.updateOutput(value).then((e) => {
@@ -3045,16 +3164,18 @@ export class ProjectAnalyzeComponent implements OnInit {
           if (responseSr.flag && responseSr.flag.silence) {
             this.silenceStatus = true;
           }
-          if (this.projectType === 'ner' || this.projectType === 'qa') {
+          if (this.projectType === 'ner' || (this.projectType === 'qa' && this.projectInfo.regression == false)) {
             this.resetNerSrData([responseSr]);
             this.getQuestionListAndSetQuestionColors(responseSr.questionForText);
+          }
+          if (this.projectType === 'qa' && this.projectInfo.regression == true) {
+            this.setRegressionQaLabel();
           }
           this.sr._id = responseSr._id;
           this.sr.originalData = responseSr.originalData;
           this.sr.flag = responseSr.flag;
           this.sr.userInputs = responseSr.userInputs;
           this.sr.questionForText = responseSr.questionForText;
-
           if (!this.sr.userInputs.length && this.labelType === 'HTL') {
             this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
           }
@@ -3221,10 +3342,12 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   nerLabelForColor(categories) {
-    this.labelColor = new Map();
-    categories.forEach((ele, index) => {
-      this.labelColor.set(ele, this.colorsRainbow[index]);
-    });
+    if (!(this.projectType == 'qa' && this.projectInfo.regression == true)) {
+      this.labelColor = new Map();
+      categories.forEach((ele, index) => {
+        this.labelColor.set(ele, this.colorsRainbow[index]);
+      });
+    }
   }
 
   @HostListener('click', ['$event.target'])
@@ -4000,6 +4123,10 @@ export class ProjectAnalyzeComponent implements OnInit {
     this.categories.push(question);
     this.nerLabelForColor(this.categories);
     this.inputQuestion = null;
+
+    if (this.projectInfo.regression == true) {
+      this.spansList.push({ label: question, text: '' });
+    }
   }
 
   deleteQuestion(i) {
@@ -4036,6 +4163,9 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   editQuestion(e, i, item) {
+    if (this.projectInfo.regression === true) {
+      this.editQuestionItem = i;
+    }
     if (this.editQuestionItem != -1) {
       return;
     }
@@ -4049,6 +4179,9 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   saveQuestion(e, i, item) {
+    if (this.projectInfo.regression === true) {
+      this.editQuestionItem = i;
+    }
     const qaInput = this.el.nativeElement.querySelector(`#QA-input-${i}`);
     let editQuetion = qaInput.value.trim();
     if (i != this.editQuestionItem) {
@@ -4076,41 +4209,45 @@ export class ProjectAnalyzeComponent implements OnInit {
       }
     });
     const mainText = document.getElementById('mainText');
-    this.updateMainTextLabel(mainText.childNodes, originalQuestion, editQuetion);
+    this.updateMainTextLabel(mainText?.childNodes, originalQuestion, editQuetion);
 
     this.resetQuestionColor(i, editQuetion);
   }
 
   resetQuestionColor(index, item) {
-    this.selectedEntityID = index;
-    this.editQuestionItem = -1;
-    this.editQuestionError = '';
+    if (this.projectType == 'qa' && this.projectInfo.regression == false) {
+      this.selectedEntityID = index;
+      this.editQuestionItem = -1;
+      this.editQuestionError = '';
 
-    const qaBTN = this.el.nativeElement.querySelector(`#QA-${index}`);
-    qaBTN.style.borderStyle = '';
-    qaBTN.style.backgroundColor = this.getLabelColor(item);
+      const qaBTN = this.el.nativeElement.querySelector(`#QA-${index}`);
+      qaBTN.style.borderStyle = '';
+      qaBTN.style.backgroundColor = this.getLabelColor(item);
 
-    const qaInput = this.el.nativeElement.querySelector(`#QA-input-${index}`);
-    qaInput.style.backgroundColor = this.getLabelColor(item);
+      const qaInput = this.el.nativeElement.querySelector(`#QA-input-${index}`);
+      qaInput.style.backgroundColor = this.getLabelColor(item);
 
-    return [qaBTN, qaInput];
+      return [qaBTN, qaInput];
+    }
   }
 
   updateMainTextLabel(nodes, label, newLabel) {
     //nodes have no childNodes it's the recursive exit condition
-    if (nodes.type == 3) {
-      if (nodes.title == label) {
-        nodes.setAttribute('title', newLabel);
+    if (nodes) {
+      if (nodes.type == 3) {
+        if (nodes.title == label) {
+          nodes.setAttribute('title', newLabel);
+        }
+        return;
       }
-      return;
-    }
-    // have childNodes and recursive update
-    for (const node of nodes) {
-      if (node.title == label) {
-        node.setAttribute('title', newLabel);
-      }
-      if (node.childNodes.length) {
-        this.updateMainTextLabel(node.childNodes, label, newLabel);
+      // have childNodes and recursive update
+      for (const node of nodes) {
+        if (node.title == label) {
+          node.setAttribute('title', newLabel);
+        }
+        if (node.childNodes.length) {
+          this.updateMainTextLabel(node.childNodes, label, newLabel);
+        }
       }
     }
   }
@@ -4119,7 +4256,13 @@ export class ProjectAnalyzeComponent implements OnInit {
     return this.spansList.length && this.spansList.find((e) => e.label == q);
   }
   mapCurrentAnswerList(q) {
-    return this.spansList.filter((e) => e.label.indexOf(q) != -1);
+    if (q) {
+      if (this.projectType == 'qa' && this.projectInfo.regression == false) {
+        return this.spansList.filter((e) => e.label.indexOf(q) != -1);
+      } else {
+        return this.spansList.filter((e) => e.label == q);
+      }
+    }
   }
 
   extendWordSelection(selection) {
@@ -4152,5 +4295,16 @@ export class ProjectAnalyzeComponent implements OnInit {
     selection.modify('extend', direction[0], 'word');
 
     return selection;
+  }
+
+  onAddAnswer(e, q, dom) {
+    let a = e.target.value.trim();
+    if (a) {
+      this.spansList.forEach((ele, index) => {
+        if (ele.label == q) {
+          ele.text = a;
+        }
+      });
+    }
   }
 }
