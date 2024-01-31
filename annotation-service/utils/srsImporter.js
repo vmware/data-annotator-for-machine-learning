@@ -90,7 +90,7 @@ module.exports = {
                             if (!`${q}`.trim() || !oneData[q].trim()) {
                                 continue;
                             }
-                            questions = [...oneData[q].trim()]
+                            questions = JSON.parse(oneData[q]);
                         }
                     }else{
                         for (const q of questionForText) {
