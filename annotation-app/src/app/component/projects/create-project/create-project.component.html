@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2023 VMware, Inc.
+<!-- Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <clr-wizard
@@ -315,7 +315,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     "
   >
     <ng-template clrPageTitle>Set Data</ng-template>
-    <div [formGroup]="dsDialogForm" style="max-height: 67vh; overflow: auto">
+    <div [formGroup]="dsDialogForm" style="height: 67vh; max-height: 67vh; overflow: auto">
       <!-- select dropdownSelected -->
       <div class="clr-row formField">
         <label class="label-tooltip clr-col-12 clr-col-md-2"
@@ -376,7 +376,28 @@ SPDX-License-Identifier: Apache-2.0 -->
                 name="questionType"
                 (change)="changeQuestionType()"
               />
-              <label for="y" style="margin-top: -1rem">&nbsp;JsonArray</label>
+              <label for="y" style="margin-top: -1rem"
+                >&nbsp;JsonArray
+                <clr-signpost>
+                  <clr-signpost-content *clrIfOpen>
+                    <pre>
+Please confirm that your every row under the selected question column has the following formatted data.
+
+[
+ {{ '{' }}
+  "Q": "What is your favorite annotation tool?",
+  "A": "Definitely Loop."
+ {{ '}' }},
+ {{ '{' }}
+  "Q": "Is there any suggestion for the current Loop?",
+  "A": "Yes. I prefer..."
+ {{ '}' }}
+]
+                      </pre
+                    >
+                  </clr-signpost-content>
+                </clr-signpost>
+              </label>
             </clr-radio-wrapper>
           </label>
         </div>
