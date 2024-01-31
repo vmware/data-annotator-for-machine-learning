@@ -118,7 +118,7 @@ def sr_vectors_labels(srs, project_label_id, project_type, test):
     if srs is None or srs.count() == 0:
         return
 
-    sr_ids, labels, sr_vectors, sr_text = [], [], [], []
+    sr_ids, labels, sr_text = [], [], []
     for sr in srs:
         sr_label = []
         for label in sr['userInputs']:
@@ -131,10 +131,8 @@ def sr_vectors_labels(srs, project_label_id, project_type, test):
         if project_type == 'tabular':
             sr_text.append(sr['originalData'])
         else:
-            if test and ("ESP" in config):
-                sr_vectors.append(eval(sr['text_vector']))
             sr_text.append(",".join(sr['originalData'].values()))
-    return {'sr_vectors': sr_vectors, 'labels': labels, "ids": sr_ids, "sr_text": sr_text}
+    return {'labels': labels, "ids": sr_ids, "sr_text": sr_text}
 
 
 def find_new_labeled_sr(project_name, project_type):
@@ -146,14 +144,14 @@ def find_new_labeled_sr(project_name, project_type):
     srs = query_srs_by_ids(srs)
 
     data = sr_vectors_labels(srs, pro[0]['al']['labelID'], project_type, False)
-    return {'sr_vectors': data['sr_vectors'], 'labels': data['labels'], "ids": data['ids'], 'sr_text': data['sr_text']}
+    return {'labels': data['labels'], "ids": data['ids'], 'sr_text': data['sr_text']}
 
 
 def find_all_test_sr(project_name, project_type):
     pro = find_project_by_name(project_name)
     srs = query_test_sr(project_name)
     data = sr_vectors_labels(srs, pro[0]['al']['labelID'], project_type, True)
-    return {'sr_vectors': data['sr_vectors'], 'labels': data['labels'], 'sr_text': data['sr_text']}
+    return {'labels': data['labels'], 'sr_text': data['sr_text']}
 
 
 def batch_update_srs(sr_ids):

@@ -9,7 +9,6 @@
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const authForNoe = require("../utils/authForNoe.service");
 const config = require("../config/config");
 const AWS = require('aws-sdk');
 const STS = require('../utils/sts');
@@ -89,67 +88,45 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
     if(!enable){
         return;
     }
-    if (config.ESP) {
-        htmlTemplate = htmlTemplate.replace(/\${team}/g, config.teamTitle);
-        let toList = [];
-        for (const email of toAddresses) {
-            toList.push({address: email});
-        }
-        
-        console.log(`[ EMAIL ] Service sendEmailToOwner.getEsp2NoeToken`);
-        const emailToken = await authForNoe.getEsp2NoeToken();
-        
-        return axios.post(`${config.noeServiceUrl}/noe/send/message`, {
-            subject: subject,
-            content: { html: htmlTemplate },
-            from: { address: config.sender },
-            destinations: { toList: toList },
-            options: { foreach: ["true"] }
-        }, { 
-            headers: { "x-noe-auth-type": "jwt-esp" },
-            auth: { username: config.esp2NoeClientId, password: emailToken }
-        });
 
+    htmlTemplate = htmlTemplate.replace(/\${team}/g, config.teamTitle);
+    if (config.useAWSSES) {
+        const data = await STS.prepareCredentials(AWSRESOURCE.S3, ACCESS_TIME_15);
+        await AWS.config.update({
+            region: config.region,
+            accessKeyId: data.Credentials.AccessKeyId,
+            secretAccessKey:data.Credentials.SecretAccessKey,
+            sessionToken:data.Credentials.SessionToken
+        });
+        
+        const sendParams = { 
+            Source: config.sender, 
+            Destination: { ToAddresses: toAddresses },
+            Message: { 
+                Body: { Html: { Charset: "UTF-8", Data: htmlTemplate } },
+                Subject: { Charset: 'UTF-8', Data: subject }
+            }
+        };
+        return new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(sendParams).promise();  
     }else{
-        htmlTemplate = htmlTemplate.replace(/\${team}/g, config.teamTitle);
-        if (config.useAWSSES) {
-            const data = await STS.prepareCredentials(AWSRESOURCE.S3, ACCESS_TIME_15);
-            await AWS.config.update({
-                region: config.region,
-                accessKeyId: data.Credentials.AccessKeyId,
-                secretAccessKey:data.Credentials.SecretAccessKey,
-                sessionToken:data.Credentials.SessionToken
-            });
-            
-            const sendParams = { 
-                Source: config.sender, 
-                Destination: { ToAddresses: toAddresses },
-                Message: { 
-                    Body: { Html: { Charset: "UTF-8", Data: htmlTemplate } },
-                    Subject: { Charset: 'UTF-8', Data: subject }
-                }
-            };
-            
-            return new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(sendParams).promise();  
-        }else{
-            const transporter = nodemailer.createTransport({
-                host: config.emailServerHost,
-                port: config.emailServerPort,
-                secure: config.emailServerPort == 465 ? true: false, // true for 465, false for other ports
-                auth: {
-                    user: config.sender,        // generated ethereal user
-                    pass: config.emailPassword, // generated ethereal password
-                }
-            });
-            
-            return transporter.sendMail({
-                from: config.sender,            // sender address
-                to: toAddresses.toString(),     // list of receivers
-                subject: subject,               // Subject line
-                html: htmlTemplate              // html body
-            });
-        }   
+        const transporter = nodemailer.createTransport({
+            host: config.emailServerHost,
+            port: config.emailServerPort,
+            secure: config.emailServerPort == 465 ? true: false, // true for 465, false for other ports
+            auth: {
+                user: config.sender,        // generated ethereal user
+                pass: config.emailPassword, // generated ethereal password
+            }
+        });
+        
+        return transporter.sendMail({
+            from: config.sender,            // sender address
+            to: toAddresses.toString(),     // list of receivers
+            subject: subject,               // Subject line
+            html: htmlTemplate              // html body
+        });
     }
+
 }
 
 async function isEnableEamil(){
