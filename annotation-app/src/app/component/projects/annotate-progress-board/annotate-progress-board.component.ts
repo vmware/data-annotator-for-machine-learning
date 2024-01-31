@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -25,7 +25,7 @@ export class AnnotateProgressBoardComponent implements OnInit {
   reviewee: string;
   isAllowedAnnotate: boolean;
   user: any;
-  optionList:[];
+  optionList: [];
 
   constructor(private userAuthService: UserAuthService) {
     this.user = this.userAuthService.loggedUser()?.user;

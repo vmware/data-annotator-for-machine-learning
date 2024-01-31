@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -178,4 +178,19 @@ fieldset {
 .slackTrash {
     margin-left: 0.5rem;
     margin-top: 0.5rem
+}
+::ng-deep .signpost{
+    margin-top: -0.1rem;
+    cds-icon[shape="info-circle"]{
+        color:currentColor ;
+        height: 19px;
+        width: 19px;
+        margin-bottom: 0.1rem;
+    }
+    .signpost-content{
+    margin-top: 4rem;
+    .popover-pointer{
+        margin-top: -4rem;
+    }
+} 
 }

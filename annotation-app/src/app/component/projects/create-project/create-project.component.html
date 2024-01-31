@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2023 VMware, Inc.
+<!-- Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <clr-wizard
@@ -315,15 +315,16 @@ SPDX-License-Identifier: Apache-2.0 -->
     "
   >
     <ng-template clrPageTitle>Set Data</ng-template>
-    <div [formGroup]="dsDialogForm" style="max-height: 67vh; overflow: auto">
+    <div [formGroup]="dsDialogForm" style="height: 67vh; max-height: 67vh; overflow: auto">
       <!-- select dropdownSelected -->
       <div class="clr-row formField">
         <label class="label-tooltip clr-col-12 clr-col-md-2"
           >{{
-            dsDialogForm.get('projectType').value === 'ner' || dsDialogForm.get('projectType').value === 'qa'
+            dsDialogForm.get('projectType').value === 'ner'
               ? 'Select Text Column'
-              : 'Select
-              Label Column'
+              : dsDialogForm.get('projectType').value === 'qa'
+              ? 'Select Question Column'
+              : 'Select Label Column'
           }}<span>*</span></label
         >
         <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
@@ -335,25 +336,87 @@ SPDX-License-Identifier: Apache-2.0 -->
             [ngModelOptions]="{ standalone: true }"
           >
             <option ngif="!dropdownSelected" value="" style="display: none"></option>
-            <option *ngIf="dsDialogForm.get('projectType').value != 'ner' && dsDialogForm.get('projectType').value != 'qa'" value="No Labels">No Labels</option>
+            <option *ngIf="dsDialogForm.get('projectType').value != 'ner'" value="No Labels">No Labels</option>
             <option *ngFor="let item of previewHeadDatas" [value]="item">
               {{ item }}
             </option>
           </select>
         </div>
       </div>
-      <!-- checkbox selected -->
+      <!-- qa type select question type -->
+      <div
+        class="clr-row formField"
+        *ngIf="dropdownSelected && dropdownSelected !== 'No Labels' && dsDialogForm.get('projectType').value === 'qa'"
+      >
+        <label class="label-tooltip clr-col-12 clr-col-md-2" for="questionType">Select a Question Type</label>
+        <div class="clr-col-12 clr-col-md-9">
+          <label>
+            <clr-radio-wrapper style="margin-right: 0.5rem">
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                formControlName="questionType"
+                value="n"
+                id="n"
+                name="questionType"
+                (change)="changeQuestionType()"
+                checked
+              />
+              <label for="n">&nbsp;String</label>
+            </clr-radio-wrapper>
+            <clr-radio-wrapper>
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                formControlName="questionType"
+                value="y"
+                id="y"
+                name="questionType"
+                (change)="changeQuestionType()"
+              />
+              <label for="y" style="margin-top: -1rem"
+                >&nbsp;JsonArray
+                <clr-signpost>
+                  <clr-signpost-content *clrIfOpen>
+                    <pre>
+Please confirm that your every row under the selected question column has the following formatted data.
+
+[
+ {{ '{' }}
+  "Q": "What is your favorite annotation tool?",
+  "A": "Definitely Loop."
+ {{ '}' }},
+ {{ '{' }}
+  "Q": "Is there any suggestion for the current Loop?",
+  "A": "Yes. I prefer..."
+ {{ '}' }}
+]
+                      </pre
+                    >
+                  </clr-signpost-content>
+                </clr-signpost>
+              </label>
+            </clr-radio-wrapper>
+          </label>
+        </div>
+      </div>
+      <!-- qa text area display single or multiple column -->
       <div *ngIf="dropdownSelected" class="clr-row formField">
         <label class="label-tooltip clr-col-12 clr-col-md-2"
           >{{
             dsDialogForm.get('projectType').value === 'ner'
-              ? 'Select the columns to present to annotators about the existing labels (optional) or helpful text (optional)'
-              : dsDialogForm.get('projectType').value === 'qa'
-              ? 'Select Question Column'
+              ? 'Select the columns to present to annotators about the existing labels (optional) or helpful text
+          (optional)'
               : 'Select the columns to present to annotators about the text'
-          }}<span *ngIf="dsDialogForm.get('projectType').value !== 'ner' && dsDialogForm.get('projectType').value !== 'qa'">*</span>
+          }}<span *ngIf="dsDialogForm.get('projectType').value !== 'ner'">*</span>
         </label>
-        <div class="clr-select-wrapper clr-col-12 clr-col-md-9" *ngIf="dsDialogForm.get('projectType').value == 'qa'">
+        <!-- single -->
+        <div
+          class="clr-select-wrapper clr-col-12 clr-col-md-9"
+          *ngIf="dsDialogForm.get('projectType').value === 'qa' && dsDialogForm.get('questionType').value === 'n'"
+        >
           <select
             id="select-basic"
             class="clr-select"
@@ -366,10 +429,14 @@ SPDX-License-Identifier: Apache-2.0 -->
             </option>
           </select>
         </div>
-        <div class="clr-col-12 clr-col-md-9" *ngIf="dsDialogForm.get('projectType').value != 'qa'">
+        <!-- multiple -->
+        <div class="clr-col-12 clr-col-md-9">
           <clr-datagrid
             #selectDescriptionDatagrid
-            *ngIf="dsDialogForm.get('projectType').value != 'ner'"
+            *ngIf="
+              (dsDialogForm.get('projectType').value != 'ner' && dsDialogForm.get('projectType').value != 'qa') ||
+              (dsDialogForm.get('projectType').value === 'qa' && dsDialogForm.get('questionType').value === 'y')
+            "
             [(clrDgSelected)]="selectDescription"
             (clrDgSelectedChange)="selectDescriptionChanged($event)"
           >
@@ -841,7 +908,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           dsDialogForm.get('projectType').value === 'image'
             ? 'Total Items'
             : 'Total
-        Rows'
+          Rows'
         }}</label>
         <div class="clr-col-12 clr-col-md-5" style="padding-left: unset">
           <input

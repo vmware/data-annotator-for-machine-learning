@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -50,6 +50,7 @@ export class DatasetUtil {
       selectedDisplayColumn: [],
       slack: [],
       projectType: 'text',
+      questionType: 'n',
     };
   }
 
@@ -98,6 +99,7 @@ export interface DatasetData {
   selectedDisplayColumn: any[];
   slack: any;
   projectType: string;
+  questionType: string;
 }
 
 export interface DatasetFile {

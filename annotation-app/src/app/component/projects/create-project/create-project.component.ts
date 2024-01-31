@@ -1,9 +1,9 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import { Component, OnInit, ViewChild,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { DatasetData } from '../../../model/index';
 import { FormGroup, FormBuilder } from '@angular/forms';
@@ -17,7 +17,7 @@ import { ToolService } from 'src/app/services/common/tool.service';
 import { CommonService } from 'src/app/services/common/common.service';
 import { EmailService } from 'src/app/services/common/email.service';
 import { Papa } from 'ngx-papaparse';
-import { BehaviorSubject, Observable,Subject} from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserAuthService } from 'src/app/services/user-auth.service';
@@ -86,19 +86,18 @@ export class CreateProjectComponent implements OnInit {
     private route: ActivatedRoute,
     private userAuthService: UserAuthService,
     private internalApiService: InternalApiService,
-    private  changeDetectorRef:ChangeDetectorRef
+    private changeDetectorRef: ChangeDetectorRef,
   ) {
     this.user = this.userAuthService.loggedUser()?.user.email;
     this.taskNameInput.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
-      if(value != ''){
-        this.inputProjectBlur(value)
-      }else{
+      if (value != '') {
+        this.inputProjectBlur(value);
+      } else {
         this.nameExist = false;
       }
     });
   }
 
-  
   ngOnInit(): void {
     this.createForm();
     this.isPop = false;
@@ -124,7 +123,7 @@ export class CreateProjectComponent implements OnInit {
         let data = JSON.parse(params['data']);
         // according to the dataset from router to init the wizard
         this.dsDialogForm.get('projectType').setValue(data.projectType);
-        this.dealAnnotationQuestionTex(data.projectType)
+        this.dealAnnotationQuestionTex(data.projectType);
         this.getMyDatasets(data.projectType).then((res) => {
           if (res) {
             this.selectedDatasets({ target: { value: data.dataSetName } }, true);
@@ -215,9 +214,9 @@ export class CreateProjectComponent implements OnInit {
               this.dsDialogForm.get('selectedqueryStrategy').value &&
               this.dsDialogForm.get('selectedEncoder').value
             ) {
-              this.clrWizardPageNextDisabled.page6 = false
+              this.clrWizardPageNextDisabled.page6 = false;
               this.updateView();
-              return;  
+              return;
             } else {
               this.clrWizardPageNextDisabled.page6 = true;
               this.updateView();
@@ -234,13 +233,13 @@ export class CreateProjectComponent implements OnInit {
               this.dsDialogForm.get('selectedClassifier').value &&
               this.dsDialogForm.get('selectedqueryStrategy').value
             ) {
-              this.clrWizardPageNextDisabled.page6 = false
-              this.updateView()
+              this.clrWizardPageNextDisabled.page6 = false;
+              this.updateView();
               return;
             } else {
               this.clrWizardPageNextDisabled.page6 = true;
               this.updateView();
-              return 
+              return;
             }
           }
         } else {
@@ -255,8 +254,8 @@ export class CreateProjectComponent implements OnInit {
     }
   }
 
-  updateView(){
-    this.changeDetectorRef.markForCheck(); 
+  updateView() {
+    this.changeDetectorRef.markForCheck();
     this.changeDetectorRef.detectChanges();
   }
   changeEncoder() {
@@ -347,7 +346,7 @@ export class CreateProjectComponent implements OnInit {
   createForm(): void {
     if (!this.dataset) {
       this.dataset = DatasetUtil.init();
-    }    
+    }
     this.dsDialogForm = this.formBuilder.group({
       projectName: [this.dataset.name || '', DatasetValidator.modelName()],
       projectType: [this.dataset.projectType, DatasetValidator.required()],
@@ -356,21 +355,22 @@ export class CreateProjectComponent implements OnInit {
       assignmentLogic: [this.dataset.assigmentLogic, ''],
       totalRow: [this.dataset.totalRow, DatasetValidator.validRow()],
       annotationDisplayName: [this.dataset.annotationDisplayName, DatasetValidator.required()],
-      annotationQuestion: [this.dataset.annotationQuestion,DatasetValidator.required()],
+      annotationQuestion: [this.dataset.annotationQuestion, DatasetValidator.required()],
       selectedDataset: ['', DatasetValidator.required()],
       selectedClassifier: [null, DatasetValidator.required()],
       selectedqueryStrategy: [null, DatasetValidator.required()],
       selectedEncoder: [null, DatasetValidator.required()],
       multipleLabel: [this.dataset.multipleLabel, null],
       isShowFilename: [this.dataset.isShowFilename, ''],
+      questionType: [this.dataset.questionType, null],
     });
   }
 
   onKeydown(e) {
     e.stopPropagation();
   }
-  
-  inputProjectChange(value){
+
+  inputProjectChange(value) {
     this.taskNameInput.next(value);
   }
   inputProjectBlur(e) {
@@ -383,7 +383,7 @@ export class CreateProjectComponent implements OnInit {
       } else {
         this.nameExist = false;
       }
-    }); 
+    });
   }
 
   selectedDatasets(e, from?) {
@@ -545,16 +545,16 @@ export class CreateProjectComponent implements OnInit {
 
   changeProjectType() {
     this.clearFormdata(1);
-    this.dealAnnotationQuestionTex(this.dsDialogForm.value.projectType)
+    this.dealAnnotationQuestionTex(this.dsDialogForm.value.projectType);
     this.getMyDatasets(this.dsDialogForm.get('projectType').value).then((res) => {});
   }
-  dealAnnotationQuestionTex(type){
-    const questesion={
-      qa:'Label all answers in the given text corpus according to the question.',
-      ner:'Label all entity types in the given text corpus.'
-    }
-    let questionTex = Object.keys(questesion).includes(type) ? questesion[type]:this.dataset.annotationQuestion
-    this.dsDialogForm.get('annotationQuestion').setValue(questionTex)
+  dealAnnotationQuestionTex(type) {
+    const questesion = {
+      qa: 'Label all answers in the given text corpus according to the question.',
+      ner: 'Label all entity types in the given text corpus.',
+    };
+    let questionTex = Object.keys(questesion).includes(type) ? questesion[type] : this.dataset.annotationQuestion;
+    this.dsDialogForm.get('annotationQuestion').setValue(questionTex);
   }
   getMyDatasets(projectType) {
     let a =
@@ -810,8 +810,11 @@ export class CreateProjectComponent implements OnInit {
       this.helpfulText = this.selectDescription;
     } else {
       this.checkboxChecked = this.selectDescription;
+      if (this.dsDialogForm.get('questionType').value === 'y') {
+      }
     }
     // console.log(5555, this.dropdownSelected + '---' + this.checkboxChecked + '---' + this.helpfulText);
+
     this.sureSet();
   }
 
@@ -827,10 +830,10 @@ export class CreateProjectComponent implements OnInit {
     this.sortPreviewHeadDatas(this.previewHeadDatas);
   }
 
-  selectQestionChanged(question){
-    this.selectDescription = [question]
+  selectQestionChanged(question) {
+    this.selectDescription = [question];
   }
-  
+
   selectDescriptionChanged(value) {
     // this value === this.selectDescription
     if (
@@ -1161,8 +1164,8 @@ export class CreateProjectComponent implements OnInit {
     let arr = this.toCheckCategoryListInfo();
     if (this.dsDialogForm.get('projectType').value === 'ner') {
       return arr;
-    }else if (this.dsDialogForm.get('projectType').value === 'qa') {
-      return [""];//qa project have no category
+    } else if (this.dsDialogForm.get('projectType').value === 'qa') {
+      return ['']; //qa project have no category
     } else {
       if (this.isShowNumeric) {
         return arr;
@@ -1194,8 +1197,9 @@ export class CreateProjectComponent implements OnInit {
       formData.append(
         'selectDescription',
         this.dsDialogForm.get('projectType').value === 'ner'
-         || this.dsDialogForm.get('projectType').value === 'qa'
           ? JSON.stringify([this.dropdownSelected])
+          : this.dsDialogForm.get('projectType').value === 'qa' && this.dsDialogForm.get('questionType').value === 'n'
+          ? JSON.stringify(this.selectDescription)
           : JSON.stringify(this.checkboxChecked),
       );
       formData.append(
@@ -1206,11 +1210,12 @@ export class CreateProjectComponent implements OnInit {
           ? null
           : this.dropdownSelected,
       );
-      formData.append('questionForText', this.dsDialogForm.get('projectType').value === 'qa'
-        ? JSON.stringify(this.checkboxChecked)
-        : null
+      formData.append(
+        'questionForText',
+        this.dsDialogForm.get('projectType').value === 'qa' ? JSON.stringify([this.dropdownSelected]) : null,
       );
     }
+
     if (this.dsDialogForm.get('projectType').value === 'ner') {
       formData.append('ticketQuestions', JSON.stringify(this.helpfulText));
       formData.append('regression', this.checkboxChecked.length > 0 ? 'true' : 'false');
@@ -1222,7 +1227,11 @@ export class CreateProjectComponent implements OnInit {
         formData.append('popUpLabels', JSON.stringify(popLabels));
       }
     }
-   
+
+    if (this.dsDialogForm.get('projectType').value === 'qa' && this.dsDialogForm.get('questionType').value === 'y') {
+      formData.append('regression', this.dsDialogForm.get('regression.regression').value);
+    }
+
     formData.append('totalRows', this.dsDialogForm.value.totalRow);
     formData.append('slack', this.assignType[1].checked ? JSON.stringify(this.slackList) : '[]');
     formData.append('maxAnnotations', this.dsDialogForm.value.maxAnnotations);
@@ -1304,5 +1313,15 @@ export class CreateProjectComponent implements OnInit {
   doCancel(): void {
     window.history.go(-1);
     this.wizard.close();
+  }
+
+  changeQuestionType() {
+    console.log(this.dsDialogForm.get('questionType').value);
+    if (this.dsDialogForm.get('questionType').value === 'y') {
+      this.dsDialogForm.addControl('regression', this.formBuilder.group({ regression: true }));
+      console.log(this.dsDialogForm.get('regression').value);
+    } else {
+      this.dsDialogForm.get('regression').setValue({ regression: false });
+    }
   }
 }
