@@ -382,7 +382,7 @@ async function getALLSrs(req) {
     if (req.query.fname && mp.project.projectType == PROJECTTYPE.LOG) {
         query["fileInfo.fileName"] = { $regex: req.query.fname };
     }
-    let options = { page: req.query.page, limit: req.query.limit, sort: { userInputsLength: -1,  reviewedTime: 1 } };
+    let options = { page: parseInt(req.query.page), limit: parseInt(req.query.limit), sort: { userInputsLength: -1,  reviewedTime: 1, _id: 1 } };
     const data = await mongoDb.paginateQuery(mp.model, query, options);
 
     const pageInfo = {

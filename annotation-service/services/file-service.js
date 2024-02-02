@@ -518,7 +518,7 @@ async function prepareCsv(mp, format, onlyLabelled, user) {
     console.log(`[ FILE ] Service prepare csvWriterOptions info`, csvWriterOptions.path);
 
 
-    let options = { page: 1, limit: mp.project.projectType == PROJECTTYPE.LOG ? PAGINATETEXTLIMIT : PAGINATELIMIT };
+    let options = { page: 1, limit: mp.project.projectType == PROJECTTYPE.LOG ? PAGINATETEXTLIMIT : PAGINATELIMIT, sort: {_id: 1} };
     let query = { projectName: mp.project.projectName };
     if (onlyLabelled == 'Yes') {
         query.userInputsLength = { $gt: 0 }
