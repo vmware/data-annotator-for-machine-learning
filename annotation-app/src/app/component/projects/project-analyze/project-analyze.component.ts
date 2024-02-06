@@ -1864,7 +1864,7 @@ export class ProjectAnalyzeComponent implements OnInit {
             }
           }
         }
-        if (!this.isSkipOrBackQaRegression()) {
+        if (this.projectType == 'qa' && this.projectInfo.regression == true && !this.isSkipOrBackQaRegression()) {
           return;
         }
         this.loading = true;
@@ -1898,29 +1898,27 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   isSkipOrBackQaRegression() {
-    if (this.projectType == 'qa' && this.projectInfo.regression == true) {
-      let aa = this.sr.questionForText;
-      let bb = this.spansList.map((o) => {
-        return { Q: o.label, A: o.text };
-      });
-      aa = aa.sort(this.toolService.sortBy('Q', 'ascending'));
-      bb = bb.sort(this.toolService.sortBy('Q', 'ascending'));
-      if (aa.length !== bb.length) {
-        this.actionError = this.tipMessage;
-        this.loading = false;
-        return false;
-      } else {
-        for (let i = 0; i < aa.length; i++) {
-          let aString = JSON.stringify(aa[i]);
-          let bString = JSON.stringify(bb[i]);
-          if (aString != bString) {
-            this.actionError = this.tipMessage;
-            this.loading = false;
-            return false;
-          }
+    let aa = this.sr.questionForText;
+    let bb = this.spansList.map((o) => {
+      return { Q: o.label, A: o.text };
+    });
+    aa = aa.sort(this.toolService.sortBy('Q', 'ascending'));
+    bb = bb.sort(this.toolService.sortBy('Q', 'ascending'));
+    if (aa.length !== bb.length) {
+      this.actionError = this.tipMessage;
+      this.loading = false;
+      return false;
+    } else {
+      for (let i = 0; i < aa.length; i++) {
+        let aString = JSON.stringify(aa[i]);
+        let bString = JSON.stringify(bb[i]);
+        if (aString != bString) {
+          this.actionError = this.tipMessage;
+          this.loading = false;
+          return false;
         }
-        return true;
       }
+      return true;
     }
   }
 
@@ -2583,7 +2581,7 @@ export class ProjectAnalyzeComponent implements OnInit {
       (this.projectType == 'ner' || this.projectType == 'qa')
     ) {
       this.spansList = [];
-      if (this.projectInfo.regression == true) {
+      if (this.projectType == 'qa' && this.projectInfo.regression == true) {
         return;
       }
       const annotations = this.sr.userInputs;

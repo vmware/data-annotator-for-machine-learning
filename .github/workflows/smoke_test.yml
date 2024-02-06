@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2023 VMware, Inc.
+# Copyright 2019-2024 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -85,7 +85,6 @@ jobs:
         run: |
           echo $str Smoke Test Start $str 
           npm install
-          npm run webdriver
           npm run e2e-smoke
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
           echo $str Smoke Test End $str
