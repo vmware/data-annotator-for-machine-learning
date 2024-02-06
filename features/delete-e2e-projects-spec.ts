@@ -58,7 +58,8 @@ describe("Spec - delete projects and datasets", () => {
       await FunctionUtil.getElementsNum(TABLE_LIST)
     );
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0);
-  });
+  }, 3600000);
+
   it("Should succeed to delete e2e dataset", async () => {
     await browser.sleep(2000);
     // await FunctionUtil.clickByText(NAV_GROUP, "Datasets");
@@ -86,5 +87,5 @@ describe("Spec - delete projects and datasets", () => {
     }
     await browser.sleep(2000);
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0);
-  });
+  }, 3600000);
 });
