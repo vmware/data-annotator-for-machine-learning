@@ -85,7 +85,6 @@ jobs:
         run: |
           echo $str Smoke Test Start $str 
           npm install
-          npm run webdriver
           npm run e2e-smoke
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
           echo $str Smoke Test End $str
