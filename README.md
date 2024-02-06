@@ -2,12 +2,7 @@
 
 ## build install
 ```bash
-  npm run install
-```
-
-## update webdriver
-```bash
-  npm run webdriver
+  npm install
 ```
 
 ## run local end-to-end-test

@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 export let Constant = {
@@ -16,11 +16,13 @@ export let Constant = {
   project_name_image: "",
   project_name_hierarchical_label: "",
   project_name_qa: "",
+  project_name_qa_regression_true: "",
   dataset_name: "e2e_Test_Data",
   dataset_name_text: "",
   dataset_name_ner: "",
   dataset_name_log: "",
   dataset_name_image: "",
+  dataset_name_qa_regression_true: "",
   firstname: "poc",
   lastname: "os",
   username: process.env.IN ? process.env.TEST_USER_NAME : "poc-os@poc-os.com",

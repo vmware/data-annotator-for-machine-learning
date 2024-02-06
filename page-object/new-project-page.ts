@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { browser, by, element, ExpectedConditions, $, $$ } from "protractor";
@@ -109,11 +109,13 @@ export class NewProjectPage extends CommonPage {
   ICON_PLUS = element.all(by.css("button cds-icon[shape=plus]"));
 
   LABEL_SELECTOR = element(by.css(".clr-select-wrapper:last-child"));
-  LABEL_SELECTOR_OPTIONS =$$('.clr-select-wrapper:last-child select option').filter(function(elem,index){
-    return elem.getText().then(function(text) {
-      return text !== '';
+  LABEL_SELECTOR_OPTIONS = $$(
+    ".clr-select-wrapper:last-child select option"
+  ).filter(function (elem, index) {
+    return elem.getText().then(function (text) {
+      return text !== "";
     });
-  })
+  });
   SELECT_COLUMN_DATA_GRID = element(
     by.css(".clr-col-12.clr-col-md-9 clr-datagrid")
   );
@@ -133,12 +135,21 @@ export class NewProjectPage extends CommonPage {
   );
 
   SELECT_QUESTION_SELECTOR = element(
-    by.css("#clr-wizard-page-3 > div > div:nth-child(2) > div")
+    by.css("#clr-wizard-page-3 > div > div:nth-child(1) > div")
   );
   SELECT_QUESTION_SELECTOR_OPTION = element.all(
     by.css(
-      "#clr-wizard-page-3 > div > div:nth-child(2) > div > select > option"
+      "#clr-wizard-page-3 > div > div:nth-child(1) > div > select > option"
     )
+  );
+  QA_TEXT_SELECTOR = element(
+    by.css("#clr-wizard-page-3 > div > div:nth-child(3) > div")
+  );
+  QA_TEXT_SELECTOR_OPTIONS = $$(
+    "#clr-wizard-page-3 > div > div:nth-child(3) > div > select > option"
+  );
+  QA_QUESTION_TYPE = element(
+    by.css("#clr-wizard-page-3 clr-radio-wrapper label[for=y]")
   );
 
   async navigateTo() {
@@ -235,8 +246,23 @@ export class NewProjectPage extends CommonPage {
     console.log("log-end to set question");
   }
 
+  async selectQuestionText(textIndex) {
+    console.log("log-start to set text");
+    await FunctionUtil.elementVisibilityOf(this.QA_TEXT_SELECTOR);
+    await this.QA_TEXT_SELECTOR.click();
+    await this.QA_TEXT_SELECTOR_OPTIONS.get(textIndex).click();
+    console.log("log-end to set text");
+  }
+
+  async selectQuestionType() {
+    console.log("log-start to set question type");
+    await FunctionUtil.elementVisibilityOf(this.QA_QUESTION_TYPE);
+    await this.QA_QUESTION_TYPE.click();
+    console.log("log-end to set question type");
+  }
+
   async setLabelValidation(labelColumn) {
-    console.log("start to setLabelValidation...");
+    console.log("log-start to setLabelValidation...");
     await FunctionUtil.elementVisibilityOf(this.WIZARD_SELECT_BTN);
     await browser.waitForAngularEnabled(false);
     await this.WIZARD_SELECT_BTN.click();
@@ -252,7 +278,7 @@ export class NewProjectPage extends CommonPage {
           });
       });
     });
-    console.log("succeed to setLabelValidation...");
+    console.log("log-succeed to setLabelValidation...");
   }
 
   async clickOkBtn() {

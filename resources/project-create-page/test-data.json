@@ -123,5 +123,13 @@
     "questionTwo": "question two",
     "questionSplit": "Question one?Question_two",
     "questionEdit": "question one edit"
+  },
+  "QARegressionProject": {
+    "Instruction": "this is e2e qa regression true project task instruction",
+    "Source": "qa-test-data.csv",
+    "ticketSessions": 5,
+    "maxAnnotation": 1,
+    "questionOne": "question one",
+    "answerOne":"answer one"
   }
 }
