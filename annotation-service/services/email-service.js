@@ -9,7 +9,7 @@
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const authForNoe = require("../utils/authForNoe.service");
+const authForNoe = require("./authForNoe.service");
 const config = require("../config/config");
 const AWS = require('aws-sdk');
 const STS = require('../utils/sts');
@@ -89,27 +89,30 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
     if(!enable){
         return;
     }
-    if (config.ESP) {
-        htmlTemplate = htmlTemplate.replace(/\${team}/g, config.teamTitle);
-        let toList = [];
-        for (const email of toAddresses) {
-            toList.push({address: email});
-        }
-        
-        console.log(`[ EMAIL ] Service sendEmailToOwner.getEsp2NoeToken`);
-        const emailToken = await authForNoe.getEsp2NoeToken();
-        
-        return axios.post(`${config.noeServiceUrl}/noe/send/message`, {
-            subject: subject,
-            content: { html: htmlTemplate },
-            from: { address: config.sender },
-            destinations: { toList: toList },
-            options: { foreach: ["true"] }
-        }, { 
-            headers: { "x-noe-auth-type": "jwt-esp" },
-            auth: { username: config.esp2NoeClientId, password: emailToken }
-        });
 
+    if (config.ESP) {
+        if (config.ESP) {
+            htmlTemplate = htmlTemplate.replace(/\${team}/g, config.teamTitle);
+            let toList = [];
+            for (const email of toAddresses) {
+                toList.push({address: email});
+            }
+            
+            console.log(`[ EMAIL ] Service sendEmailToOwner.getEsp2NoeToken`);
+            const emailToken = await authForNoe.getEsp2NoeToken();
+            
+            return axios.post(`${config.noeServiceUrl}/noe/send/message`, {
+                subject: subject,
+                content: { html: htmlTemplate },
+                from: { address: config.sender },
+                destinations: { toList: toList },
+                options: { foreach: ["true"] }
+            }, { 
+                headers: { "x-noe-auth-type": "jwt-esp" },
+                auth: { username: config.esp2NoeClientId, password: emailToken }
+            });
+    
+        }
     }else{
         htmlTemplate = htmlTemplate.replace(/\${team}/g, config.teamTitle);
         if (config.useAWSSES) {
@@ -129,7 +132,6 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
                     Subject: { Charset: 'UTF-8', Data: subject }
                 }
             };
-            
             return new AWS.SES({apiVersion: '2010-12-01'}).sendEmail(sendParams).promise();  
         }else{
             const transporter = nodemailer.createTransport({
@@ -148,8 +150,9 @@ async function sendEmail(subject, htmlTemplate, toAddresses) {
                 subject: subject,               // Subject line
                 html: htmlTemplate              // html body
             });
-        }   
+        }
     }
+
 }
 
 async function isEnableEamil(){

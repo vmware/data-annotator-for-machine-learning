@@ -183,8 +183,12 @@ async function prepareHeaders(project, format) {
         headerArray.push({ id: "freeText", title: "freeText" });
     } else if(project.projectType == PROJECTTYPE.QA){
         headerArray.push({ id: 'context', title: 'context' });
-        headerArray.push({ id: 'question', title: 'question' });
-        headerArray.push({ id: 'answers', title: 'answers' });
+        if (project.regression) {
+            headerArray.push({ id: 'qaPairs', title: 'qaPairs' });
+        }else{
+            headerArray.push({ id: 'question', title: 'question' });
+            headerArray.push({ id: 'answers', title: 'answers' });
+        }
     }else {
         await project.selectedColumn.forEach(item => {
             headerArray.push({ id: item, title: item });
@@ -323,25 +327,37 @@ async function prepareContents(srData, project, format) {
                 questionForText = userInputDatas[0].questionForText;
             }
             // init answer cloumn
-            for await(const item of userInputDatas) {
-                for await(const question of questionForText) {
-                    let answers = {text: [], answer_start: []};
-                    for await(const lb of item.problemCategory) {
-                        if (lb.label === question) {            
-                            answers['text'].push(lb.text);
-                            answers['answer_start'].push(lb.start);
+            if (project.regression) {//qestion anwser paires
+                let context = "";
+                for (const key in srs.originalData) {
+                    context += (key + ":" + (srs.originalData)[key] + "\n");
+                }
+                cvsData.push({
+                    context: context,
+                    qaPairs: JSON.stringify(questionForText)
+                });
+            }else{//nornal qestion anwser
+                for await(const item of userInputDatas) {
+                    for await(const question of questionForText) {
+                        let answers = {text: [], answer_start: []};
+                        for await(const lb of item.problemCategory) {
+                            if (lb.label === question) {            
+                                answers['text'].push(lb.text);
+                                answers['answer_start'].push(lb.start);
+                            }
                         }
-                    }
-                    // current question has answer
-                    if (answers.text.length) {
-                        cvsData.push({
-                            context: Object.values(srs.originalData)[0],
-                            question: question,
-                            answers: JSON.stringify(answers)
-                        });
+                        // current question has answer
+                        if (answers.text.length) {
+                            cvsData.push({
+                                context: Object.values(srs.originalData)[0],
+                                question: question,
+                                answers: JSON.stringify(answers)
+                            });
+                        }
                     }
                 }
             }
+
             
         }else if (project.projectType == PROJECTTYPE.LOG) {
             // init log classification fileName
@@ -502,7 +518,7 @@ async function prepareCsv(mp, format, onlyLabelled, user) {
     console.log(`[ FILE ] Service prepare csvWriterOptions info`, csvWriterOptions.path);
 
 
-    let options = { page: 1, limit: mp.project.projectType == PROJECTTYPE.LOG ? PAGINATETEXTLIMIT : PAGINATELIMIT };
+    let options = { page: 1, limit: mp.project.projectType == PROJECTTYPE.LOG ? PAGINATETEXTLIMIT : PAGINATELIMIT, sort: {_id: 1} };
     let query = { projectName: mp.project.projectName };
     if (onlyLabelled == 'Yes') {
         query.userInputsLength = { $gt: 0 }

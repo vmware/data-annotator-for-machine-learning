@@ -14,7 +14,7 @@ let token;
 let expirationDate;
 
 const generateEsp2NoeToken = async() => {
-    
+
     const response = await axios
         .create({
             validateStatus: () => {
