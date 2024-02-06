@@ -2,7 +2,7 @@
 
 ## build install
 ```bash
-  npm run install
+  npm install
 ```
 
 ## run local end-to-end-test
