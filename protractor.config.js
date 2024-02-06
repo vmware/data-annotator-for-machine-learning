@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 // Protractor configuration file, see link for more information
@@ -12,6 +12,8 @@ let HtmlReporter = require("protractor-beautiful-reporter");
 const fs = require("fs");
 const path = require("path");
 const nycOutput = ".nyc_output";
+
+
 
 var conf = {
   ci_specs: [
@@ -65,6 +67,9 @@ var conf = {
     "./features/create-project-qa-spec.ts",
     "./features/annotate-project-qa-spec.ts",
 
+    "./features/create-project-qa-regression-true-spec.ts",
+    "./features/annotate-project-qa-regression-true-spec.ts",
+
     "./features/delete-e2e-projects-spec.ts",
     "./features/faq-spec.ts",
   ],
@@ -85,6 +90,7 @@ var conf = {
 };
 
 exports.config = {
+  chromeDriver:'./node_modules/chromedriver/lib/chromedriver/chromedriver',
   allScriptsTimeout: 20000, //first page loading time
   specs: conf.specsConstOut.concat(conf.ci_specs),
   capabilities: {
@@ -199,6 +205,7 @@ const sleep = (ms) => {
 
 const setup = () => {
   return new Promise(async (resolve, reject) => {
+
     let loopCount = 5;
     let flag = true;
     while (flag) {
@@ -216,7 +223,7 @@ const setup = () => {
                 await sleep(8000);
                 console.log(
                   "\x1B[32m%s\x1b[0m",
-                  "test localhost service is started successfully"
+                  "test localhost service is started successfully1111"
                 );
                 console.log(out);
                 resolve2(true);

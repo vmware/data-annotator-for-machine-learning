@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { Constant } from "../general/constant";
@@ -132,10 +132,10 @@ export class AnnotatePage extends CommonPage {
     "div.questionContainer > div:nth-child(4) > div:nth-child(3) > div.clr-row.clr-col > div.clr-row.clr-col-3 > button:nth-child(2) > cds-icon"
   );
   QA_DEL = $(
-    "div.questionContainer > div:nth-child(4) > div:nth-child(4) > div.clr-row.clr-col > div.clr-row.clr-col-3 > button:nth-child(3) > cds-icon"
+    "div.questionContainer > div:nth-child(4) > div:nth-child(3) > div.clr-row.clr-col > div.clr-row.clr-col-3 > button:nth-child(3) > cds-icon"
   );
-  QA_QUESTION_LIST = $("#QuestionList-1 > ul:nth-child(1)");
-  QA_QUESTION_LIST_CLEAR = $("#QuestionList-1 > ul:nth-child(1) .qaClear");
+  QA_QUESTION_LIST = $("#QuestionList-0 > ul:nth-child(1)");
+  QA_QUESTION_LIST_CLEAR = $("#QuestionList-0 > ul:nth-child(1) .qaClear");
   ERROR_SPAN = $("span.clr-subtext");
   EDIT_ERROR_SPAN = $(
     "div.questionContainer > div:nth-child(4) > div:nth-child(3) .clr-subtext"
@@ -143,6 +143,16 @@ export class AnnotatePage extends CommonPage {
   APPEND_DESC_TEXTAREA = $("clr-dg-cell:nth-child(6) textarea");
   APPEND_QUES_TEXTAREA = $("clr-dg-cell:nth-child(7) textarea");
   APPEND_PUBLISH_BTN = element(by.partialButtonText("Publish"));
+  QA_NO2_ANSWER_TEXTAREA = element(
+    by.css(
+      "div.questionContainer > div:nth-child(4) > div:nth-child(3) > div.clr-row.clr-col >div:nth-child(3)>div>textarea"
+    )
+  );
+  QA_DELETE_FIRST_QA_BTN = element(
+    by.css(
+      "div.questionContainer > div:nth-child(4) > div:nth-child(2) > div.clr-row.clr-col >div:nth-child(2)> button:nth-child(3) > cds-icon"
+    )
+  );
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.NAV_TASK_LIST);
@@ -943,13 +953,17 @@ export class AnnotatePage extends CommonPage {
     await this.QA_TEXTAREA_1.clear();
     await this.QA_TEXTAREA_1.sendKeys(projectCreateData.QAProject.questionEdit);
     await FunctionUtil.click(this.QA_SAVE);
+    console.log("log-succeed to save q edition");
     await browser.sleep(1000);
     await FunctionUtil.click(this.QA_QUESTION_LIST);
-    await browser.sleep(1000);
+    console.log("log-succeed to click the q2 answer 1");
+    await browser.sleep(2000);
     await browser.actions().mouseMove(this.QA_QUESTION_LIST).perform();
     await FunctionUtil.elementVisibilityOf(this.QA_QUESTION_LIST_CLEAR);
     await this.QA_QUESTION_LIST_CLEAR.click();
+    console.log("log-succeed to delete the answer");
     await FunctionUtil.click(this.QA_DEL);
+    console.log("log-succeed to delete the q2");
     await browser.sleep(1000);
     await this.skipTicket();
     await browser.sleep(1000);
@@ -967,5 +981,28 @@ export class AnnotatePage extends CommonPage {
       projectCreateData.QAProject.questionSplit
     );
     await FunctionUtil.click(this.APPEND_PUBLISH_BTN);
+  };
+
+  annotateQaRegression = async () => {
+    console.log("log-start to add q");
+    await FunctionUtil.elementVisibilityOf(this.QA_INPUT_WRAPPER);
+    await this.QA_INPUT_WRAPPER.click();
+    await this.ADD_QA_INPUT.sendKeys(
+      projectCreateData.QARegressionProject.questionOne
+    );
+    await this.ADD_QA_INPUT.sendKeys(protractor.Key.ENTER);
+    await browser.sleep(1000);
+    console.log("log-start to edit a");
+    await FunctionUtil.click(this.QA_NO2_ANSWER_TEXTAREA);
+    await this.QA_NO2_ANSWER_TEXTAREA.sendKeys(
+      projectCreateData.QARegressionProject.answerOne
+    );
+    await browser.sleep(2000);
+    await FunctionUtil.click(this.QA_DELETE_FIRST_QA_BTN);
+    await browser.sleep(1000);
+    await this.ANNOTATE_SUBMIT_BTN.click();
+    console.log("log-submit qa regression annotate");
+    await this.skipTicket();
+    console.log("log-skip the qa regression ticket");
   };
 }
