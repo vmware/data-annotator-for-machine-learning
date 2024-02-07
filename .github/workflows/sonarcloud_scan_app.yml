@@ -39,7 +39,7 @@ jobs:
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan annotation-app
-        uses: sonarsource/sonarcloud-github-action@v1.9  
+        uses: sonarsource/sonarcloud-github-action@master
         with:
           projectBaseDir: ./annotation-app
           args: >

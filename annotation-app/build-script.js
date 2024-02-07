@@ -1,3 +1,10 @@
+/***
+ * 
+ * Copyright 2019-2024 VMware, Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+***/
+
 const fs = require('fs');
 const fse = require('fs-extra');
 const concat = require('concat');
