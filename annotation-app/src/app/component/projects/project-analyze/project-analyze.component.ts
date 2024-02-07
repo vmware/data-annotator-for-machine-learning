@@ -1753,7 +1753,7 @@ export class ProjectAnalyzeComponent implements OnInit {
     let flag1;
     let flag2;
     if (this.projectType == 'ner' || this.projectType == 'qa' || this.projectType == 'log') {
-      flag1 = this.sr.userInputs && this.sr.userInputs.length > 0 && this.sr.userInputs[0].problemCategory.length >= 0;
+      flag1 = this.sr.userInputs && this.sr.userInputs.length > 0 && this.sr.userInputs[0].problemCategory.length;
     } else {
       flag1 = this.sr.userInputs && this.sr.userInputs.length > 0;
     }

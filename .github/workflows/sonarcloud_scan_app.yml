@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2021 VMware, Inc.
+# Copyright 2019-2024 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -7,7 +7,7 @@ name: sonarcloud_scan_app
 
 on:
   push:
-    branches: ["**", '!master']
+    branches: ["**"]
   pull_request:
     branches: ['**']
 
