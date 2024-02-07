@@ -38,7 +38,7 @@ jobs:
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-annotation-service -ProjectKey ${{ env.SONAR_ORG }}-annotation-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName annotation-service -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan annotation-service
-        uses: sonarsource/sonarcloud-github-action@v1.9  
+        uses: sonarsource/sonarcloud-github-action@master 
         with:
           projectBaseDir: ./annotation-service
           args: >
@@ -77,7 +77,7 @@ jobs:
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-active-learning-service -ProjectKey ${{ env.SONAR_ORG }}-active-learning-service -OrgKey ${{ env.SONAR_ORG }} -QualityGateName active-learning -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan active-learning-service
-        uses: sonarsource/sonarcloud-github-action@v1.9  
+        uses: sonarsource/sonarcloud-github-action@master
         with:
           projectBaseDir: ./active-learning-service
           args: >

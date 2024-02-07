@@ -1,3 +1,5 @@
+<!-- Copyright 2019-2024 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0 -->
 <div>
   <clr-datagrid *ngIf="configData?.columnData.length > 0" [clrDgLoading]="gridloading">
     <clr-dg-column *ngFor="let column of configData.columnData" [ngClass]="{ columnWidth: column.type == 'img' }">
@@ -11,7 +13,7 @@
             [src]="itemData[column.prop]"
             (error)="setDefaultImage()"
             class="imgLimit"
-            [ngClass]="{showImg:errorImg}"
+            [ngClass]="{ showImg: errorImg }"
           />
         </ng-container>
         <ng-container *ngIf="column.type != 'img'">
