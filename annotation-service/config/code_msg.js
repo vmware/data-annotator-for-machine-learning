@@ -1,3 +1,10 @@
+/***
+ * 
+ * Copyright 2019-2024 VMware, Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ * 
+***/
+
 module.exports={
     //OPERATION
     SUCCESS: { CODE: 200, MSG: "SUCCESS" },

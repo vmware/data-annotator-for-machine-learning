@@ -1,5 +1,5 @@
 #
-# Copyright 2019-2023 VMware, Inc.
+# Copyright 2019-2024 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -85,7 +85,6 @@ jobs:
         run: |
           echo $str Smoke Test Start $str 
           npm install
-          npm run webdriver
           npm run e2e-smoke
           sed -i 's/dist\/root\///g' coverage-output/lcov.info
           echo $str Smoke Test End $str
@@ -145,7 +144,7 @@ jobs:
         run: python ./config_sonar_project.py -ProjectName ${{ env.SONAR_ORG }}-annotation-app -ProjectKey ${{ env.SONAR_ORG }}-annotation-app -OrgKey ${{ env.SONAR_ORG }} -QualityGateName angular-client-gate -QualityGateConditions ./quality_gates/angular-client.json -SonarToken ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan annotation-app
-        uses: sonarsource/sonarcloud-github-action@v1.9
+        uses: sonarsource/sonarcloud-github-action@master
         with:
           projectBaseDir: ./annotation-app
           args: >
