@@ -40,8 +40,9 @@ module.exports = {
     //TOKEN
     TOKEN_EXPIRE_TIME: process.env.TOKEN_EXPIRE_TIME || 60*30,
     TOKEN_ALGORITHM: process.env.TOKEN_ALGORITHM || "HS256",
-    //generate the key yourself. should keep the same with active-learning-serviceTOKEN_SECRET_OR_PRIVATE_KEY
-    TOKEN_SECRET_OR_PRIVATE_KEY: process.env.TOKEN_SECRET_OR_PRIVATE_KEY || "OPEN SOURCE",    
+    //!!! important 121ba6ff-64d6-4c1a-b6ef-dd6b95433064 just a random value get the value from environment or replace by yourslef
+    // generate the key yourself. should keep the same with active-learning-serviceTOKEN_SECRET_OR_PRIVATE_KEY
+    TOKEN_SECRET_OR_PRIVATE_KEY: process.env.TOKEN_SECRET_OR_PRIVATE_KEY || "121ba6ff-64d6-4c1a-b6ef-dd6b95433064",    
     TOKEN_EXPIRED_MESSAGE: 'SQS receive message failed: The security token included in the request is expired', //SQS Clinet
     ANNOTATION_QUESTION: "What label does this ticket belong to ?",
     TICKET_DESCRIPTION: "Passage",

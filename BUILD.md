@@ -10,9 +10,9 @@ The project includes three components:
 
 Building requires:
 
-- [Node.js 16](https://nodejs.org/en/)
-- [mongodb 3.5](https://www.mongodb.com/download-center/community)
-- [Python >=3.6, Python<=3.9](https://www.python.org/downloads/)
+- [Node.js = 16 ](https://nodejs.org/en/)
+- [mongodb = 3.5](https://www.mongodb.com/download-center/community)
+- [Python  = 3.7](https://www.python.org/downloads/)
 
 ## Installation
 
