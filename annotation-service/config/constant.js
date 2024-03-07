@@ -6,9 +6,6 @@
 ***/
 
 module.exports = {
-    API_VERSION: process.env.API_VERSION || 'v1.0',
-    API_BASE_PATH: process.env.API_BASE_PATH || '',
-    USER_ROLE: process.env.USER_ROLE || 'Project Owner',
     ROLES:{
         ANNOTATOR: "Annotator",
         PROJECT_OWNER: "Project Owner",
@@ -36,13 +33,7 @@ module.exports = {
     FILESIZE: 1024*1024*50, //less than 50MB directly download
     ACCESS_TIME_60: 60*60, //in seconds
     ACCESS_TIME_30: 60*30, //in seconds
-    ACCESS_TIME_15: 60*15, //in seconds
-    //TOKEN
-    TOKEN_EXPIRE_TIME: process.env.TOKEN_EXPIRE_TIME || 60*30,
-    TOKEN_ALGORITHM: process.env.TOKEN_ALGORITHM || "HS256",
-    //!!! important 121ba6ff-64d6-4c1a-b6ef-dd6b95433064 just a random value get the value from environment or replace by yourslef
-    // generate the key yourself. should keep the same with active-learning-serviceTOKEN_SECRET_OR_PRIVATE_KEY
-    TOKEN_SECRET_OR_PRIVATE_KEY: process.env.TOKEN_SECRET_OR_PRIVATE_KEY || "121ba6ff-64d6-4c1a-b6ef-dd6b95433064",    
+    ACCESS_TIME_15: 60*15, //in seconds  
     TOKEN_EXPIRED_MESSAGE: 'SQS receive message failed: The security token included in the request is expired', //SQS Clinet
     ANNOTATION_QUESTION: "What label does this ticket belong to ?",
     TICKET_DESCRIPTION: "Passage",
@@ -114,10 +105,6 @@ module.exports = {
         SQS: "SQS",
     },
     MILLISECOND_DAY: 1000 * 60 * 60 * 24,
-    REGULAR_NOTIFICATNO: process.env.REGULAR_NOTIFICATNO || "0 0 9 * * 1-5",
-    CURRENT_TIME_ZONE: process.env.CURRENT_TIME_ZONE || "America/Los_Angeles",
-    NOT_START_DAY: process.env.NOT_START_DAY || 7,
-    NOT_FINISH_DAY: process.env.NOT_FINISH_DAY || 14,
     SOURCE: {
         MODEL_FEEDBACK: "MODEL_FEEDBACK",
         NIMBUS: "NIMBUS",
