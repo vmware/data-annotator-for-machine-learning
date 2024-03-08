@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -51,6 +51,8 @@ import {
   refreshIconName,
   refreshIcon,
   sadFaceIcon,
+  circleArrowIcon,
+  timesCircleIcon,
 } from '@cds/core/icon';
 import { ClrSpinner } from '@clr/angular';
 
@@ -99,6 +101,8 @@ ClarityIcons.addIcons(
   checkboxListIcon,
   refreshIcon,
   sadFaceIcon,
+  circleArrowIcon,
+  timesCircleIcon,
 );
 
 @Injectable({

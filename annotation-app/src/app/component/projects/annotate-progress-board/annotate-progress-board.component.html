@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <h5>{{ msg?.from === 'review' ? 'Review' : 'Annotation' }} Progress</h5>
   <div class="left-project-info fontSizeSmall">
     <clr-progress-bar
+      *ngIf="msg?.projectInfo.projectType != 'qaChat'"
       title="{{
         msg?.from === 'review'
           ? 'Reviewed
@@ -25,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           : 'Labeled Items'
       }}:&nbsp;&nbsp;{{ msg?.progressInfo?.completeCase }}
     </div>
-    <div *ngIf="msg.from !== 'review'">
+    <div *ngIf="msg.from !== 'review' && msg?.projectInfo.projectType != 'qaChat'">
       <cds-icon shape="circle" solid size="xs" style="color: rgb(229, 229, 299)"></cds-icon>
       Assigned Items:&nbsp;&nbsp;{{ msg?.progressInfo?.assignedCase }}
     </div>
@@ -142,8 +143,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       Source:&nbsp;&nbsp;{{ msg?.projectInfo.dataSource }}
     </div>
     <div>Create Date:&nbsp;&nbsp;{{ msg?.projectInfo.createdDate | date : 'yyyy-MM-dd HH:mm:ss' }}</div>
-    <div>Assignment Logic:&nbsp;&nbsp;{{ msg?.projectInfo.assignmentLogic }}</div>
-    <div>Max Annotation:&nbsp;&nbsp;{{ msg?.projectInfo.maxAnnotation }}</div>
+    <div *ngIf="msg?.projectInfo.projectType != 'qaChat'">
+      Assignment Logic:&nbsp;&nbsp;{{ msg?.projectInfo.assignmentLogic }}
+    </div>
+    <div *ngIf="msg?.projectInfo.projectType != 'qaChat'">
+      Max Annotation:&nbsp;&nbsp;{{ msg?.projectInfo.maxAnnotation }}
+    </div>
     <div class="ellipsis" title="{{ msg?.projectInfo.taskInstructions }}">
       Instruction:&nbsp;&nbsp;{{ msg?.projectInfo.taskInstructions }}
     </div>
@@ -164,7 +169,8 @@ SPDX-License-Identifier: Apache-2.0 -->
               *ngIf="
                 msg.projectInfo.projectType == 'ner' ||
                 (msg.projectInfo.projectType == 'qa' && msg.projectInfo.regression == false) ||
-                msg.projectInfo.projectType == 'log'
+                msg.projectInfo.projectType == 'log' ||
+                msg.projectInfo.projectType == 'qaChat'
               "
               title="{{ flag.text }}"
             >
@@ -178,7 +184,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                 msg.projectInfo.projectType !== 'ner' &&
                 !(msg.projectInfo.projectType == 'qa' && msg.projectInfo.regression == false) &&
                 msg.projectInfo.projectType !== 'image' &&
-                msg.projectInfo.projectType !== 'log'
+                msg.projectInfo.projectType !== 'log' &&
+                msg.projectInfo.projectType !== 'qaChat'
               "
               title="{{ flag.key + ':' + flag.value }}"
             >

@@ -79,6 +79,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <option value="image">Image Classification</option>
             <option value="log">Log Classification</option>
             <option value="qa">Question Answer</option>
+            <option value="qaChat">Question Answer Conversational</option>
           </select>
         </div>
         <div class="clr-col-12 clr-col-md-1">
@@ -103,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           ></textarea>
         </div>
       </div>
-      <div class="clr-row formField">
+      <div *ngIf="dsDialogForm.get('projectType').value != 'qaChat'" class="clr-row formField">
         <label for="annotationDisplayName" class="label-tooltip clr-col-12 clr-col-md-2"
           >Annotation Display Name
           <clr-tooltip>
@@ -137,7 +138,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </clr-tooltip>
         </div>
       </div>
-      <div class="clr-row formField">
+      <div *ngIf="dsDialogForm.get('projectType').value != 'qaChat'" class="clr-row formField">
         <label for="annotationQuestion" class="label-tooltip clr-col-12 clr-col-md-2"
           >Annotation Question
           <clr-tooltip>
@@ -173,6 +174,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </clr-wizard-page>
   <clr-wizard-page
+    *ngIf="dsDialogForm.get('projectType').value != 'qaChat'"
     [id]="2"
     (clrWizardPageOnLoad)="clrWizardPageOnLoad($event)"
     [clrWizardPageNextDisabled]="!dsDialogForm.get('selectedDataset').value"
@@ -306,7 +308,11 @@ SPDX-License-Identifier: Apache-2.0 -->
   <!-- select label and text column -->
   <clr-wizard-page
     [id]="3"
-    *ngIf="dsDialogForm.get('projectType').value !== 'image' && dsDialogForm.get('projectType').value !== 'log'"
+    *ngIf="
+      dsDialogForm.get('projectType').value !== 'image' &&
+      dsDialogForm.get('projectType').value !== 'log' &&
+      dsDialogForm.get('projectType').value !== 'qaChat'
+    "
     (clrWizardPageCustomButton)="doCustomClick($event)"
     [clrWizardPageNextDisabled]="
       dsDialogForm.get('projectType').value === 'ner' || dsDialogForm.get('projectType').value === 'qa'
@@ -503,7 +509,7 @@ Please confirm that your every row under the selected question column has the fo
   </clr-wizard-page>
   <clr-wizard-page
     [id]="4"
-    *ngIf="dsDialogForm.get('projectType').value !== 'qa'"
+    *ngIf="dsDialogForm.get('projectType').value !== 'qa' && dsDialogForm.get('projectType').value !== 'qaChat'"
     [clrWizardPageNextDisabled]="clrWizardPageNextDisabled.page4"
     (clrWizardPageOnLoad)="clrWizardPageOnLoad($event)"
   >
@@ -903,7 +909,7 @@ Please confirm that your every row under the selected question column has the fo
     <ng-template clrPageTitle>Assign Team Members</ng-template>
     <div [formGroup]="dsDialogForm">
       <!-- total row -->
-      <div class="clr-row formField">
+      <div *ngIf="dsDialogForm.get('projectType').value !== 'qaChat'" class="clr-row formField">
         <label for="totalRow" class="label-tooltip clr-col-12 clr-col-md-2">{{
           dsDialogForm.get('projectType').value === 'image'
             ? 'Total Items'
@@ -925,7 +931,7 @@ Please confirm that your every row under the selected question column has the fo
         </div>
       </div>
       <!-- maxAnnotations -->
-      <div class="clr-row formField">
+      <div *ngIf="dsDialogForm.get('projectType').value !== 'qaChat'" class="clr-row formField">
         <label for="maxAnnotations" class="label-tooltip clr-col-12 clr-col-md-2"
           >Max Annotations Per Case<span>*</span>
           <clr-tooltip>
@@ -1042,8 +1048,13 @@ Please confirm that your every row under the selected question column has the fo
                     [ngModelOptions]="{ standalone: true }"
                   />
                 </div>
-                <div style="margin-right: 0.5rem; margin-left: 0.5rem">-</div>
-                <div class="clr-input-wrapper clr-col-4">
+                <div
+                  *ngIf="dsDialogForm.get('projectType').value !== 'qaChat'"
+                  style="margin-right: 0.5rem; margin-left: 0.5rem"
+                >
+                  -
+                </div>
+                <div *ngIf="dsDialogForm.get('projectType').value !== 'qaChat'" class="clr-input-wrapper clr-col-4">
                   <input
                     type="number"
                     class="clr-input"
@@ -1204,7 +1215,7 @@ Please confirm that your every row under the selected question column has the fo
     </div>
   </clr-wizard-page>
   <clr-wizard-page
-    *ngIf="dsDialogForm.get('projectType').value !== 'image'"
+    *ngIf="dsDialogForm.get('projectType').value !== 'image' && dsDialogForm.get('projectType').value !== 'qaChat'"
     [id]="6"
     [clrWizardPageNextDisabled]="
       isShowNumeric ||

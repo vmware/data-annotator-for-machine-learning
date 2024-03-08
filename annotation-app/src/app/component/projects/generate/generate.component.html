@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2023 VMware, Inc.
+<!-- Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <div class="modal footerLeft">
@@ -54,7 +54,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                   msg.projectType == 'qa' ||
                   msg.projectType == 'image' ||
                   msg.projectType == 'log' ||
-                  msg.labelType == 'numericLabel'
+                  msg.labelType == 'numericLabel' ||
+                  msg.projectType == 'qaChat'
                 "
               />
               <label>Top Label</label>
@@ -72,13 +73,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                   msg.projectType == 'qa' ||
                   msg.projectType == 'image' ||
                   msg.projectType == 'log' ||
-                  msg.labelType == 'numericLabel'
+                  msg.labelType == 'numericLabel' ||
+                  msg.projectType == 'qaChat'
                 "
               />
               <label>Probabilistic</label>
             </clr-radio-wrapper>
           </clr-radio-container>
-          <div class="clr-checkbox-wrapper removeEntry">
+          <div *ngIf="msg.projectType !== 'qaChat'" class="clr-checkbox-wrapper removeEntry">
             <input
               type="checkbox"
               id="removeUnlabel"

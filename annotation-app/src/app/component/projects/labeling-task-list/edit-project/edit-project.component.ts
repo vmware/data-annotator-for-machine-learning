@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -96,7 +96,12 @@ export class EditProjectComponent implements OnInit {
     this.msg = JSON.parse(JSON.stringify(this.msgInEdit));
     const al = this.msg.al;
     this.previousProjectName = this.msg.projectName;
-    this.showLabel = !((this.msg.integration.source && this.msg.integration.externalId[0]) || this.msg.projectType == "qa" || this.msg.labelType == "HTL");
+    this.showLabel = !(
+      (this.msg.integration.source && this.msg.integration.externalId[0]) ||
+      this.msg.projectType == 'qa' ||
+      this.msg.labelType == 'HTL' ||
+      this.msg.projectType == 'qaChat'
+    );
     this.inputProjectName = this.msg.projectName;
     this.inputTaskInstruction = this.msg.taskInstructions;
     this.inputfrequency = al.frequency ? al.frequency : null;
@@ -150,7 +155,7 @@ export class EditProjectComponent implements OnInit {
     } else if (this.labelType === 'HTL') {
       this.categoryList = this.msg.categoryList;
     } else {
-      this.msg.categoryList.split(',').forEach((element) => {
+      this.msg.categoryList?.split(',').forEach((element) => {
         const flag = { status: 'old', originalLabel: element, editLabel: element };
         this.categoryList.push(flag);
       });

@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -1031,4 +1031,35 @@ label .label-leftBoard {
     border: 1px solid #e8e8e8;
     width: 100%;
 
+}
+
+.boxBorder{
+    margin-top: .5rem;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    padding: 10px 10px 10px 10px;
+    .index{
+    display: flex;
+    align-items: flex-end;
+    margin-left: 0.5rem;
+    min-width: 1.5rem;
+    }
+    .add{
+        padding: unset;
+        margin-top: 2rem;
+    }
+}
+
+.card-header>cds-icon {
+    position: absolute;
+    right: 1rem;
+    color: #999;
+    width: 18px; 
+    height: 18px
+}
+
+.card-header>cds-icon:hover {
+    width: 19px; 
+    height: 19px;
+    color: currentColor;
 }

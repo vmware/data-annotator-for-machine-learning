@@ -1,6 +1,6 @@
 /***
  * 
- * Copyright 2019-2021 VMware, Inc.
+ * Copyright 2019-2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  * 
 ***/
@@ -41,13 +41,41 @@ async function updateSrsUserInput(req, from) {
     if (pro.annotator.indexOf(user) === -1) {
         await projectService.addAnnotatorFromSlack(pro, user);
     }
+    if(pro.projectType == PROJECTTYPE.QACHAT && !_ids[0]){
+            console.log(`[ SRS ] Service start insert qaChat single ticket to db`);
+            if(req.body.userInput[0].questionForText[0].prompt.trim() && req.body.userInput[0].questionForText[0].response.trim()){
+                let docs = [];
+                let schema = {
+                    projectName: pro.projectName,
+                    userInputs:[],
+                    questionForText : req.body.userInput[0].questionForText,
+                    userInputsLength: 1
+                };
+                schema.userInputs.push({
+                    problemCategory: req.body.userInput[0].questionForText,
+                    user: user,
+                    timestamp: Date.now()
+                });
+                docs.push(schema);
+                const options = { lean: true, ordered: false };
+                let qaChatSr= await mongoDb.insertOne(SrModel, docs, options)
+                console.log(`[ SRS ] Service insert qaChat single ticket to db done`);
+    
+                const conditions = { _id: projectId, "userCompleteCase.user": user };
+                const update = {$set: {updatedDate: Date.now(),"userCompleteCase.$.updateDate": Date.now()},$inc: { "totalCase": 1,"userCompleteCase.$.completeCase": 1,"projectCompleteCase": 1}};
+                await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
+                return qaChatSr;
+            }else{
+                return MESSAGE.ERROR_TK_SETDATA;
+            }
+    }
 
     const mp = await getModelProject({ _id: projectId });
 
     console.log(`[ SRS ] Service find if user already annotated tickets:`, usrSr.length);
     const query = { _id: { $in: _ids }, "userInputs.user": user };
     usrSr = await mongoDb.findByConditions(mp.model, query)
-
+    
     //validate maxAnnotation and  regression project
     //user not annotate
     if (!usrSr[0]) {
@@ -92,13 +120,13 @@ async function updateSrsUserInput(req, from) {
         let questionForText = [];
         req.body.userInput.forEach(async ui => {
             if (ui.tid == ticket._id.toString()) {
-                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.QA) {
+                if (pro.projectType == PROJECTTYPE.NER || pro.projectType == PROJECTTYPE.QA || pro.projectType == PROJECTTYPE.QACHAT) {
                     userInputs.push({
                         problemCategory: ui.problemCategory,
                         user: user,
                         timestamp: Date.now()
                     });
-                    if (pro.projectType == PROJECTTYPE.QA) {
+                    if (pro.projectType == PROJECTTYPE.QA || pro.projectType == PROJECTTYPE.QACHAT) {
                         questionForText = ui.questionForText;
                     }
                 } else if (pro.projectType == PROJECTTYPE.LOG) {
@@ -142,8 +170,8 @@ async function updateSrsUserInput(req, from) {
         await mongoDb.findOneAndUpdate(mp.model, conditions, update);
 
         update1 = { $push: { userInputs: { $each: userInputs } } }
-        //save user definde question
-        if (pro.projectType == PROJECTTYPE.QA) {
+        //save user defined question
+        if (pro.projectType == PROJECTTYPE.QA || pro.projectType == PROJECTTYPE.QACHAT) {
             update1.$set = {questionForText: questionForText}
         }
         await mongoDb.findOneAndUpdate(mp.model, conditions, update1);
@@ -151,7 +179,7 @@ async function updateSrsUserInput(req, from) {
 
     addSrIds = _ids.filter(id => !reEditSrIds.includes(id))
     console.log(`[ SRS ] Service check _ids=${_ids.length}, addSrIds=${addSrIds.length}, reEditSrIds=${reEditSrIds.length}`)
-
+    
     // for add new
     addSrIds.forEach(async id => {
         console.log(`[ SRS ] Service add new annotation to ticket=${id.toString()}`);
@@ -211,7 +239,7 @@ async function updateSrsUserInput(req, from) {
             await mongoDb.findOneAndUpdate(mp.model, conditions, updateSR);
         }
         let update = { $push: { userInputs: { $each: userInputs } }, $inc: { userInputsLength: 1 } };
-        //save user definde question
+        //save user defined question
         if (pro.projectType == PROJECTTYPE.QA) {
             update.$set = {questionForText: questionForText}
         }
@@ -917,7 +945,7 @@ async function reviewTicket(req) {
     //annotator have no right to access
     const user = req.auth.email;
     await validator.checkAnnotator(user);
-
+    
     const tid = (typeof req.body.tid === 'string')? ObjectId(req.body.tid): _.flatMap(req.body.tid, n => ObjectId(n))
     const pid = req.body.pid;
     const problemCategory = req.body.problemCategory;

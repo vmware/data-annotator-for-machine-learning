@@ -1,6 +1,6 @@
 /***
  * 
- * Copyright 2019-2021 VMware, Inc.
+ * Copyright 2019-2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  * 
 ***/
@@ -121,6 +121,18 @@ async function insertMany(MODEL, docs, options) {
     });
 }
 
+
+async function insertOne(MODEL, docs, options) {
+    return MODEL.insertMany(docs, options).then(function(result, error){
+        if (error) {
+            console.error(`[ DB ] [ ERROR ] DB insertOne fail with: `, error);
+            MESSAGE.ERROR_DATABASE.DATA = [error]
+            throw MESSAGE.ERROR_DATABASE;
+        }
+        return result
+    })
+}
+
 async function aggregateBySchema(MODEL, schema) {
     console.log(`[ DB ] begin aggregateBySchema`);
     return MODEL.aggregate(schema, function(error, result) {
@@ -191,4 +203,5 @@ module.exports = {
     deleteManyByConditions,
     deleteOneByConditions,
     removeByConditions,
+    insertOne
 }

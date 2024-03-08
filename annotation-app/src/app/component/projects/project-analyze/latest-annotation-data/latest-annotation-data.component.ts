@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -108,6 +108,8 @@ export class LatestAnnotationDataComponent implements OnInit {
         ? ['Entity', 'Text', 'Start_idx', 'End_idx']
         : this.msg.projectType == 'qa'
         ? ['Question', 'Answer', 'Start_idx', 'End_idx']
+        : this.msg.projectType == 'qaChat'
+        ? ['Prompt', 'Response', 'Reference']
         : ['LineNumber', 'LineContent', 'Label', 'FreeText'];
     setTimeout(() => {
       this.getALLSrs();
@@ -116,7 +118,7 @@ export class LatestAnnotationDataComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    if (this.msg.labelType != 'numericLabel' && !this.msg.isMultipleLabel) {
+    if (this.msg.labelType != 'numericLabel' && !this.msg.isMultipleLabel && this.msg.projectType !== 'qaChat') {
       this.modelChartWidth = this.el.nativeElement.querySelector('.modelChartBox').offsetWidth;
       const onresize = (dom_elem, callback) => {
         const resizeObserver = new ResizeObserver(() => callback());
@@ -428,8 +430,22 @@ export class LatestAnnotationDataComponent implements OnInit {
               res[k].originalData = cellContent[k];
             }
           }
-          if (this.msg.projectType == 'ner' || this.msg.projectType == 'qa') {
+          if (this.msg.projectType == 'ner' || this.msg.projectType == 'qa' || this.msg.projectType == 'qaChat') {
             res.forEach((element) => {
+              if (this.msg.projectType == 'qaChat') {
+                if (element.userInputs[0].problemCategory[0].followUps.length > 0) {
+                  element.userInputs[0].problemCategory = [
+                    ...element.userInputs[0].problemCategory,
+                    ...element.userInputs[0].problemCategory[0].followUps,
+                  ];
+                }
+                if (element.reviewInfo.userInputs.length > 0 && element.reviewInfo.userInputs[0].problemCategory) {
+                  element.reviewInfo.userInputs[0].problemCategory = [
+                    ...[element.reviewInfo.userInputs[0].problemCategory],
+                    ...element.reviewInfo.userInputs[0].problemCategory.followUps,
+                  ];
+                }
+              }
               if (
                 element.userInputs.length > 0 &&
                 element.userInputs[0].problemCategory.length > 0 &&
@@ -473,7 +489,8 @@ export class LatestAnnotationDataComponent implements OnInit {
             this.msg.isMultipleLabel &&
             this.msg.projectType != 'ner' &&
             this.msg.projectType != 'qa' &&
-            this.msg.projectType != 'log'
+            this.msg.projectType != 'log' &&
+            this.msg.projectType != 'qaChat'
           ) {
             this.previewSrs = res;
             this.toRenewPreviewSrs();
