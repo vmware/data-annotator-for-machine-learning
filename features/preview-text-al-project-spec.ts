@@ -80,10 +80,18 @@ describe("Spec - to preview text al project", () => {
       .toContain(projectsPage.getChartTickText(CATEGORY_CHART_FIRST_TICK));
     // to double click category bar
     console.log("log-start to double click category bar to zoom");
-    await browser
-      .actions()
-      .doubleClick(CATEGORY_CHART_FIRST_RECT.get(0))
-      .perform();
+    try {
+      await browser
+        .actions()
+        .doubleClick(CATEGORY_CHART_FIRST_RECT.get(0))
+        .perform();
+    } catch {
+      await browser
+        .actions()
+        .doubleClick(CATEGORY_CHART_FIRST_RECT.get(0))
+        .perform();
+    }
+
     done();
     // } else {
     //   done.fail("can not filter out the consistent project....");
