@@ -223,7 +223,7 @@ const setup = () => {
                 await sleep(8000);
                 console.log(
                   "\x1B[32m%s\x1b[0m",
-                  "test localhost service is started successfully1111"
+                  "test localhost service is started successfully"
                 );
                 console.log(out);
                 resolve2(true);
