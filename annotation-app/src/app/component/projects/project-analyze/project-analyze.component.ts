@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 import { Component, OnInit, ElementRef, Renderer2, ViewChild, HostListener } from '@angular/core';
 import { ApiService } from '../../../services/api.service';
-import { SR, SrUserInput } from '../../../model/sr';
+import { SR, SrUserInput, DatasetUtil } from '../../../model/sr';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
@@ -148,6 +148,8 @@ export class ProjectAnalyzeComponent implements OnInit {
   editQuestionItem: number = -1;
   showAppendTabs: boolean = false;
   tabType: string;
+  references: any = [];
+  followUps: any = [];
 
   constructor(
     private renderer2: Renderer2,
@@ -195,6 +197,10 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.getProgress();
     }
     window.addEventListener('scroll', this.handleScroll, true);
+    if (this.projectType === 'qaChat') {
+      this.references.push({ text: '', textErrMessage: '' });
+      this.isValidQaChat();
+    }
     // console.log(177, this.projectType, this.startFrom, this.moreReviewInfo);
   }
 
@@ -307,6 +313,12 @@ export class ProjectAnalyzeComponent implements OnInit {
     const paramSr = {
       id: this.projectId,
     };
+    // for qaChat project no need to get sr
+    if (this.projectType === 'qaChat') {
+      this.sr = DatasetUtil.initQaChat();
+      this.loading = false;
+      return;
+    }
     this.loading = true;
     this.apiService.getRandomSr(paramSr).subscribe(
       (response) => {
@@ -519,10 +531,16 @@ export class ProjectAnalyzeComponent implements OnInit {
             }
             this.getAllLogFilename();
           }
-          this.initInfo();
-          this.categoryBackFunc();
+          if (this.projectType === 'qaChat') {
+            this.sr = DatasetUtil.initQaChat();
+            this.produceQaChatInit(res[0], from);
+          } else {
+            this.initInfo();
+            this.categoryBackFunc();
+            this.toReadStorageSetting('logFilter');
+          }
+
           this.getProgress();
-          this.toReadStorageSetting('logFilter');
         }
       },
       (error) => {
@@ -545,6 +563,10 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   pass() {
+    if (this.projectType == 'qaChat') {
+      this.isQaChatModified() ? this.isSkipOrBack('pass') : this.submitReview('pass');
+      return;
+    }
     if (this.moreReviewInfo.length !== 0) {
       if (!this.checkMoreReviewChanged()) {
         return false;
@@ -566,6 +588,107 @@ export class ProjectAnalyzeComponent implements OnInit {
     return false;
   }
 
+  sortQaChatData(sr) {
+    for (let i = 0; i < this.followUps.length; i++) {
+      if (this.followUps[i].prompt && this.followUps[i].response) {
+        let arr = [];
+        for (let j = 0; j < this.followUps[i].reference.length; j++) {
+          if (this.followUps[i].reference[j].text && !this.followUps[i].reference[j].textErrMessage) {
+            arr.push(this.followUps[i].reference[j].text);
+          }
+        }
+        this.followUps[i].reference = arr;
+      }
+    }
+    sr.pid = this.projectId;
+    sr.userInput[0].questionForText[0]['followUps'] = this.followUps;
+    if (sr._id) {
+      sr.userInput[0]['tid'] = sr._id;
+    }
+    sr.userInput[0]['problemCategory'] = sr.userInput[0].questionForText;
+    sr.questionForText = sr.userInput[0].questionForText;
+    return sr;
+  }
+
+  patchQaChatData() {
+    this.sr = this.sortQaChatData(this.sr);
+    this.submitQaChat();
+  }
+
+  addQaChatToHistory(resSr, oldSr, from?) {
+    // add to the history
+    if (resSr && resSr[0]._id && resSr[0]._id !== 0) {
+      if (this.srInHistory() == -1) {
+        let addSubmit = {
+          srId: resSr[0]._id,
+          activeClass: this.active,
+          index: this.annotationHistory.length,
+        };
+        addSubmit['historyDescription'] = [
+          {
+            text: `${resSr[0].userInputs[0].problemCategory[0].prompt}\n\n${resSr[0].userInputs[0].problemCategory[0].response}`,
+          },
+        ];
+        this.annotationHistory.unshift(addSubmit);
+        this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+      }
+      console.log(611, this.annotationHistory);
+    } else {
+      if (from === 'review') {
+        if (this.srInHistory() == -1) {
+          let addSubmit = {
+            srId: oldSr[0]._id,
+            activeClass: this.active,
+            index: this.annotationHistory.length,
+          };
+          addSubmit['historyDescription'] = [
+            {
+              text: `${oldSr[0].userInputs[0].problemCategory[0].prompt}\n\n${oldSr[0].userInputs[0].problemCategory[0].response}`,
+            },
+          ];
+          this.annotationHistory.unshift(addSubmit);
+          this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+          return;
+        }
+      }
+      let index = _.findIndex(this.annotationHistory, function (o) {
+        return o.srId == oldSr._id;
+      });
+      if (index > -1) {
+        let historyDescription = [
+          {
+            text: `${oldSr.userInputs[0].problemCategory[0].prompt}\n\n${oldSr.userInputs[0].problemCategory[0].response}`,
+          },
+        ];
+        this.annotationHistory[index].historyDescription = historyDescription;
+        this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
+        console.log(612, this.annotationHistory);
+      }
+    }
+  }
+
+  submitQaChat() {
+    this.loading = true;
+    let oldSr = JSON.parse(JSON.stringify(this.sr));
+    this.apiService.putSrUserInput(this.sr).subscribe(
+      (response) => {
+        this.loading = false;
+        this.clearUserInput();
+        if (response && response.MSG) {
+          this.error = response.MSG;
+        } else {
+          this.addQaChatToHistory(response, oldSr);
+          this.getProgress();
+        }
+      },
+      (error) => {
+        this.loading = false;
+        this.clearUserInput();
+        this.error = error;
+      },
+    );
+  }
+
   onSubmit(from?): void {
     if (this.isNumeric && this.isInValidateNumber()) {
       this.clrErrorTip = true;
@@ -584,6 +707,14 @@ export class ProjectAnalyzeComponent implements OnInit {
     if (this.startFrom === 'review') {
       this.submitReview(from);
     } else {
+      if (this.projectType === 'qaChat') {
+        if (!this.isValidQaChat()) {
+          return;
+        } else {
+          this.patchQaChatData();
+          return;
+        }
+      }
       const srUserInput: SrUserInput = {
         pid: this.projectId,
         userInput: [
@@ -679,6 +810,11 @@ export class ProjectAnalyzeComponent implements OnInit {
       pid: this.projectId,
       tid: this.sr._id,
     };
+    let oldSr;
+    if (this.projectType === 'qaChat') {
+      oldSr = JSON.parse(JSON.stringify(this.sr));
+      this.sr = this.sortQaChatData(this.sr);
+    }
     if (from === 'pass') {
       param['modify'] = false;
     } else {
@@ -714,25 +850,31 @@ export class ProjectAnalyzeComponent implements OnInit {
         param['problemCategory'] = this.categoryFunc();
       } else if (this.projectType === 'image') {
         param['problemCategory'] = this.categoryFunc();
+      } else if (this.projectType === 'qaChat') {
+        param['problemCategory'] = this.sr.userInput[0].questionForText;
+        param['questionForText'] = this.sr.userInput[0].questionForText;
       }
     }
     this.apiService.passTicket(param).subscribe((res) => {
+      if (this.projectType === 'qaChat') {
+        this.addQaChatToHistory(null, [oldSr], 'review');
+      }
       this.getOneReview(from);
     });
   }
 
   srInHistory() {
     // if user doesn't modify the history ticket then should keep the annotation history not change
-    let a = 0;
-    if (this.annotationHistory.length > 0) {
-      for (let i = 0; i < this.annotationHistory.length; i++) {
-        if (this.annotationHistory[i].srId === this.sr._id) {
-          a++;
-          break;
-        }
+    let a = -1;
+    // if (this.annotationHistory.length > 0) {
+    for (let i = 0; i < this.annotationHistory.length; i++) {
+      if (this.annotationHistory[i].srId === this.sr._id) {
+        a = i;
+        break;
       }
-      return a > 0 ? true : false;
     }
+    return a > -1 ? a : -1;
+    // }
   }
 
   modifyChangeHistory(originalLabel?, from?) {
@@ -965,7 +1107,7 @@ export class ProjectAnalyzeComponent implements OnInit {
         addSubmit['historyDescription'] = OldSr.originalData?.slice(0, 10);
       }
       if (from !== 'order') {
-        if (!this.srInHistory()) {
+        if (this.srInHistory() == -1) {
           this.annotationHistory.unshift(addSubmit);
         }
         this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
@@ -1258,7 +1400,7 @@ export class ProjectAnalyzeComponent implements OnInit {
           activeClass: -1,
           images: [],
         };
-        if (!this.srInHistory()) {
+        if (this.srInHistory() == -1) {
           this.annotationHistory.unshift(addSkip);
         }
         this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
@@ -1455,7 +1597,7 @@ export class ProjectAnalyzeComponent implements OnInit {
           this.originTreeLabels = JSON.parse(response.categoryList);
           this.treeLabels = this.originTreeLabels ? JSON.parse(JSON.stringify(this.originTreeLabels)) : [];
         } else {
-          this.categories = response.categoryList.split(',');
+          this.categories = response.categoryList?.split(',');
           this.popLabels = response.popUpLabels;
           this.isShowPopLabel = response.popUpLabels && response.popUpLabels.length;
         }
@@ -1688,9 +1830,6 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   receiveOutClickHistory(value) {
-    // this.loading = false;
-    // this.sr.MSG = null;
-    // this.error = null;
     if (this.currentTabIndex !== 1) {
       this.currentTabIndex = 1;
     }
@@ -1700,7 +1839,10 @@ export class ProjectAnalyzeComponent implements OnInit {
   historyBack(index, id) {
     this.actionError = null;
     this.silenceStatus = false;
-    const isCategory = this.categoryFunc();
+    let isCategory = [];
+    if (this.projectType !== 'qaChat') {
+      isCategory = this.categoryFunc();
+    }
 
     // to update the annotation previous list from the index
     if (this.projectType !== 'image') {
@@ -1739,6 +1881,9 @@ export class ProjectAnalyzeComponent implements OnInit {
         this.getSrById(param, index, 'history');
       }
     } else {
+      if (this.projectType == 'qaChat' && this.isQaChatModified()) {
+        this.isSkipOrBack('history');
+      }
       this.clearCheckbox();
       const param = {
         id,
@@ -1748,7 +1893,22 @@ export class ProjectAnalyzeComponent implements OnInit {
     }
   }
 
+  isQaChatModified() {
+    let old = JSON.stringify(this.sr['originalUserInputs'][0]);
+    this.sr = this.sortQaChatData(this.sr);
+    let fresh = JSON.stringify(this.sr.questionForText[0]);
+    return old == fresh ? false : true;
+  }
+
   isSkipOrBack(type, id?, index?) {
+    if (this.projectType == 'qaChat') {
+      this.actionError = this.tipMessage;
+      setTimeout(() => {
+        this.actionError = '';
+      }, 5000);
+      this.loading = false;
+      return;
+    }
     const isCategory = this.categoryFunc();
     let flag1;
     let flag2;
@@ -1927,115 +2087,124 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.loading = true;
       this.silenceStatus = false;
       this.clrErrorTip = false;
-      const isCategory = this.categoryFunc();
-      if (isCategory.length > 0) {
-        if (
-          this.isNumeric ||
-          this.isMultipleNumericLabel ||
-          (this.isMultipleLabel &&
-            this.labelType !== 'HTL' &&
-            this.projectType !== 'ner' &&
-            this.projectType !== 'qa' &&
-            this.projectType !== 'image' &&
-            this.projectType !== 'log')
-        ) {
-          this.isActionErr(isCategory, this.annotationPrevious[0].srId);
-        } else if (
-          this.projectType == 'ner' ||
-          this.projectType == 'qa' ||
-          this.projectType == 'log' ||
-          this.projectType == 'image'
-        ) {
-          let flag = false;
-          for (let i = 0; i < this.annotationHistory.length; i++) {
-            if (this.annotationHistory[i].srId === this.sr._id) {
-              flag = true;
-              if (this.annotationHistory[i].category.length == isCategory.length) {
-                if (this.projectType === 'image') {
-                  this.annotationHistory[i].category.forEach((element) => {
-                    if (element.type === 'rectanglelabels') {
-                      element.valueInfo = JSON.stringify(element.value);
-                      element.sort = element.value.x;
-                    } else if (element.type === 'polygonlabels') {
-                      element.valueInfo = JSON.stringify(element.value.points);
-                      element.sort = element.value.points[0][0];
-                    }
-                  });
-                  isCategory.forEach((element) => {
-                    if (element.type === 'rectanglelabels') {
-                      element.valueInfo = JSON.stringify(element.value);
-                      element.sort = element.value.x;
-                    } else if (element.type === 'polygonlabels') {
-                      element.valueInfo = JSON.stringify(element.value.points);
-                      element.sort = element.value.points[0][0];
-                    }
-                  });
-                }
-                const aa = this.annotationHistory[i].category.sort(
-                  this.toolService.sortBy(
-                    this.projectType === 'ner' || this.projectType === 'qa'
-                      ? 'start'
-                      : this.projectType === 'log'
-                      ? 'line'
-                      : 'sort',
-                    'ascending',
-                  ),
-                );
-                const bb = isCategory.sort(
-                  this.toolService.sortBy(
-                    this.projectType === 'ner' || this.projectType === 'qa'
-                      ? 'start'
-                      : this.projectType === 'log'
-                      ? 'line'
-                      : 'sort',
-                    'ascending',
-                  ),
-                );
-                for (let i = 0; i < aa.length; i++) {
-                  let aaString;
-                  let bbString;
-                  if (this.projectType === 'ner' || this.projectType === 'qa') {
-                    const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
-                    const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
-                    aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
-                    bbString = bb[i].text + bb[i].start + bb[i].end + bb[i].label + bbPopupLabel;
-                  } else if (this.projectType === 'log') {
-                    const logFreeText = this.questionForm.get('logFreeText').value
-                      ? this.questionForm.get('logFreeText').value
-                      : '';
-                    const srlogFreeText = this.annotationHistory[i].logFreeText
-                      ? this.annotationHistory[i].logFreeText
-                      : '';
-                    aaString = aa[i].line + aa[i].label + aa[i].freeText + srlogFreeText;
-                    bbString = bb[i].line + bb[i].label + bb[i].freeText + logFreeText;
-                  } else if (this.projectType === 'image') {
-                    aaString = aa[i].valueInfo;
-                    bbString = bb[i].valueInfo;
+      let isCategory = [];
+      if (this.projectType !== 'qaChat') {
+        isCategory = this.categoryFunc();
+        if (isCategory.length > 0) {
+          if (
+            this.isNumeric ||
+            this.isMultipleNumericLabel ||
+            (this.isMultipleLabel &&
+              this.labelType !== 'HTL' &&
+              this.projectType !== 'ner' &&
+              this.projectType !== 'qa' &&
+              this.projectType !== 'image' &&
+              this.projectType !== 'log')
+          ) {
+            this.isActionErr(isCategory, this.annotationPrevious[0].srId);
+          } else if (
+            this.projectType == 'ner' ||
+            this.projectType == 'qa' ||
+            this.projectType == 'log' ||
+            this.projectType == 'image'
+          ) {
+            let flag = false;
+            for (let i = 0; i < this.annotationHistory.length; i++) {
+              if (this.annotationHistory[i].srId === this.sr._id) {
+                flag = true;
+                if (this.annotationHistory[i].category.length == isCategory.length) {
+                  if (this.projectType === 'image') {
+                    this.annotationHistory[i].category.forEach((element) => {
+                      if (element.type === 'rectanglelabels') {
+                        element.valueInfo = JSON.stringify(element.value);
+                        element.sort = element.value.x;
+                      } else if (element.type === 'polygonlabels') {
+                        element.valueInfo = JSON.stringify(element.value.points);
+                        element.sort = element.value.points[0][0];
+                      }
+                    });
+                    isCategory.forEach((element) => {
+                      if (element.type === 'rectanglelabels') {
+                        element.valueInfo = JSON.stringify(element.value);
+                        element.sort = element.value.x;
+                      } else if (element.type === 'polygonlabels') {
+                        element.valueInfo = JSON.stringify(element.value.points);
+                        element.sort = element.value.points[0][0];
+                      }
+                    });
                   }
-                  if (aaString !== bbString) {
-                    this.actionError = this.tipMessage;
-                    this.loading = false;
-                    return false;
+                  const aa = this.annotationHistory[i].category.sort(
+                    this.toolService.sortBy(
+                      this.projectType === 'ner' || this.projectType === 'qa'
+                        ? 'start'
+                        : this.projectType === 'log'
+                        ? 'line'
+                        : 'sort',
+                      'ascending',
+                    ),
+                  );
+                  const bb = isCategory.sort(
+                    this.toolService.sortBy(
+                      this.projectType === 'ner' || this.projectType === 'qa'
+                        ? 'start'
+                        : this.projectType === 'log'
+                        ? 'line'
+                        : 'sort',
+                      'ascending',
+                    ),
+                  );
+                  for (let i = 0; i < aa.length; i++) {
+                    let aaString;
+                    let bbString;
+                    if (this.projectType === 'ner' || this.projectType === 'qa') {
+                      const aaPopupLabel = aa[i].popUpLabel ? aa[i].popUpLabel : '';
+                      const bbPopupLabel = bb[i].popUpLabel ? bb[i].popUpLabel : '';
+                      aaString = aa[i].text + aa[i].start + aa[i].end + aa[i].label + aaPopupLabel;
+                      bbString = bb[i].text + bb[i].start + bb[i].end + bb[i].label + bbPopupLabel;
+                    } else if (this.projectType === 'log') {
+                      const logFreeText = this.questionForm.get('logFreeText').value
+                        ? this.questionForm.get('logFreeText').value
+                        : '';
+                      const srlogFreeText = this.annotationHistory[i].logFreeText
+                        ? this.annotationHistory[i].logFreeText
+                        : '';
+                      aaString = aa[i].line + aa[i].label + aa[i].freeText + srlogFreeText;
+                      bbString = bb[i].line + bb[i].label + bb[i].freeText + logFreeText;
+                    } else if (this.projectType === 'image') {
+                      aaString = aa[i].valueInfo;
+                      bbString = bb[i].valueInfo;
+                    }
+                    if (aaString !== bbString) {
+                      this.actionError = this.tipMessage;
+                      this.loading = false;
+                      return false;
+                    }
                   }
+                  this.loading = true;
+                  const param = {
+                    id: this.annotationPrevious[0].srId,
+                    pid: this.projectId,
+                  };
+                  this.getSrById(param, 0, 'previous');
+                } else {
+                  this.actionError = this.tipMessage;
+                  this.loading = false;
+                  return;
                 }
-                this.loading = true;
-                const param = {
-                  id: this.annotationPrevious[0].srId,
-                  pid: this.projectId,
-                };
-                this.getSrById(param, 0, 'previous');
-              } else {
-                this.actionError = this.tipMessage;
-                this.loading = false;
-                return;
               }
             }
+            if (!flag) {
+              this.isSkipOrBack('previous');
+            }
+          } else if (this.labelType === 'HTL') {
+            this.checkHTL('previous', this.annotationPrevious[0].srId);
+          } else {
+            const param = {
+              id: this.annotationPrevious[0].srId,
+              pid: this.projectId,
+            };
+            this.getSrById(param, 0, 'previous');
           }
-          if (!flag) {
-            this.isSkipOrBack('previous');
-          }
-        } else if (this.labelType === 'HTL') {
-          this.checkHTL('previous', this.annotationPrevious[0].srId);
         } else {
           const param = {
             id: this.annotationPrevious[0].srId,
@@ -2043,12 +2212,31 @@ export class ProjectAnalyzeComponent implements OnInit {
           };
           this.getSrById(param, 0, 'previous');
         }
-      } else {
-        const param = {
-          id: this.annotationPrevious[0].srId,
-          pid: this.projectId,
-        };
-        this.getSrById(param, 0, 'previous');
+      }
+      if (this.projectType == 'qaChat') {
+        if (this.isQaChatModified()) {
+          this.isSkipOrBack('previous');
+        }
+        console.log(222, this.sr);
+        let tid;
+        if (this.sr._id) {
+          tid = this.sr._id;
+        } else {
+          tid = this.annotationHistory[0].srId;
+        }
+        let historyIndex = _.findIndex(this.annotationHistory, function (o) {
+          return o.srId == tid;
+        });
+        if (historyIndex > 0 && this.annotationHistory.length - 1 == historyIndex) {
+          this.loading = false;
+          this.actionError = 'There has no previous ticket.';
+        } else {
+          const param = {
+            id: this.annotationHistory[this.sr._id ? historyIndex + 1 : 0].srId,
+            pid: this.projectId,
+          };
+          this.getSrById(param, 0, 'previous');
+        }
       }
     } else {
       this.actionError = 'There has no previous ticket.';
@@ -2282,6 +2470,9 @@ export class ProjectAnalyzeComponent implements OnInit {
 
   categoryFunc() {
     let category = [];
+    if (this.projectType == 'qaChat') {
+      return category;
+    }
     if (
       this.isShowDropDown &&
       !this.isMultipleLabel &&
@@ -2639,6 +2830,11 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.questionForm.get('filterText').reset();
     }
     this.regexErr = false;
+    if (this.projectType === 'qaChat') {
+      this.references = [{ text: '', textErrMessage: '' }];
+      this.followUps = [];
+      this.sr = DatasetUtil.initQaChat();
+    }
   }
 
   clearCheckbox() {
@@ -3085,6 +3281,51 @@ export class ProjectAnalyzeComponent implements OnInit {
     }
   }
 
+  produceQaChatInit(res, from?) {
+    this.sr['originalUserInputs'] = res.questionForText;
+    this.sr._id = res._id;
+    // this.sr.userInputs = from == 'review' ? res.reviewInfo.userInputs : res.userInputs;
+    // this.sr.questionForText = from == 'review' ? [res.reviewInfo.userInputs[0].problemCategory] : res.questionForText;
+    // this.sr.userInput[0].questionForText[0] =
+    //   from == 'review' ? res.reviewInfo.userInputs[0].problemCategory : res.userInputs[0].problemCategory[0];
+    // let links =
+    //   from == 'review' ? res.reviewInfo.userInputs[0].problemCategory.reference : res.questionForText[0].reference;
+    // let follow =
+    //   from == 'review' ? res.reviewInfo.userInputs[0].problemCategory.followUps : res.questionForText[0].followUps;
+    this.sr.userInputs = res.userInputs;
+    this.sr.questionForText = res.questionForText;
+    this.sr.userInput[0].questionForText[0] = res.userInputs[0].problemCategory[0];
+    let links = res.questionForText[0].reference;
+    let follow = res.questionForText[0].followUps;
+
+    if (links.length > 0) {
+      let arr = links;
+      this.references = [];
+      for (const it of arr) {
+        this.references.push({ text: it, textErrMessage: '' });
+      }
+    }
+    this.followUps = follow;
+    console.log(4.1, this.followUps);
+    for (let i = 0; i < this.followUps.length; i++) {
+      if (this.followUps[i].prompt && this.followUps[i].response) {
+        let arr = [];
+        for (let j = 0; j < this.followUps[i].reference.length; j++) {
+          arr.push({ text: this.followUps[i].reference[j], textErrMessage: '' });
+        }
+        if (this.followUps[i].reference.length == 0) {
+          arr.push({ text: '', textErrMessage: '' });
+        }
+        this.followUps[i].reference = arr;
+      }
+    }
+    console.log(4.2, this.followUps);
+
+    // make next item btn available
+    this.editQuestionError = '';
+    this.isValidQaChat();
+  }
+
   getSrById(data, index, from) {
     this.loading = true;
     this.apiService.getSrById(data).subscribe(
@@ -3099,7 +3340,8 @@ export class ProjectAnalyzeComponent implements OnInit {
             this.projectType != 'ner' &&
             this.projectType != 'image' &&
             this.projectType != 'log' &&
-            this.projectType != 'qa';
+            this.projectType != 'qa' &&
+            this.projectType != 'qaChat';
           let c2 = this.projectType == 'qa' && this.projectInfo.regression == true;
           if (c1 || c2) {
             let that = this;
@@ -3170,10 +3412,13 @@ export class ProjectAnalyzeComponent implements OnInit {
             this.setRegressionQaLabel();
           }
           this.sr._id = responseSr._id;
-          this.sr.originalData = responseSr.originalData;
           this.sr.flag = responseSr.flag;
+          this.sr.originalData = responseSr.originalData;
           this.sr.userInputs = responseSr.userInputs;
           this.sr.questionForText = responseSr.questionForText;
+          if (this.projectType === 'qaChat') {
+            this.produceQaChatInit(responseSr);
+          }
           if (!this.sr.userInputs.length && this.labelType === 'HTL') {
             this.treeLabels = JSON.parse(JSON.stringify(this.originTreeLabels));
           }
@@ -3183,7 +3428,7 @@ export class ProjectAnalyzeComponent implements OnInit {
               this.projectInfo.isShowFilename || this.startFrom === 'review' ? responseSr.fileInfo.fileName : '';
             this.setSelectedFile();
           }
-          if (this.projectType !== 'image') {
+          if (this.projectType !== 'image' && this.projectType !== 'qaChat') {
             this.categoryBackFunc(index, from);
           }
           if (this.isNumeric) {
@@ -3195,7 +3440,6 @@ export class ProjectAnalyzeComponent implements OnInit {
               this.numericInput.nativeElement.focus();
             }, 500);
           }
-        } else {
         }
       },
       (error) => {
@@ -4304,5 +4548,105 @@ export class ProjectAnalyzeComponent implements OnInit {
         }
       });
     }
+  }
+
+  toPrompt(e, chatIndex) {
+    let data = e.target.value.trim();
+    if (chatIndex > -1) {
+      this.followUps[chatIndex].prompt = data;
+    } else {
+      this.sr.userInput[0].questionForText[0].prompt = data;
+    }
+    this.isValidQaChat();
+  }
+
+  toResponse(e, chatIndex) {
+    let data = e.target.value.trim();
+    if (chatIndex > -1) {
+      this.followUps[chatIndex].response = data;
+    } else {
+      this.sr.userInput[0].questionForText[0].response = data;
+    }
+    this.isValidQaChat();
+  }
+
+  updateReference(e, index, chatIndex) {
+    let data = e.target.value.trim();
+    if (chatIndex > -1) {
+      this.followUps[chatIndex].reference[index].text = data;
+    } else {
+      this.references[index].text = data;
+      let arr = [];
+      for (let i = 0; i < this.references.length; i++) {
+        if (this.references[i].text && !this.references[i].textErrMessage) {
+          arr.push(this.references[i].text);
+        }
+      }
+      this.sr.userInput[0].questionForText[0].reference = arr;
+    }
+  }
+
+  deleteReference(index, chatIndex) {
+    if (chatIndex > -1) {
+      if (this.followUps[chatIndex].reference.length > 1) {
+        this.followUps[chatIndex].reference.splice(index, 1);
+      }
+    } else {
+      if (this.references.length > 1) {
+        this.references.splice(index, 1);
+      }
+    }
+  }
+
+  createReferenceRow(chatIndex) {
+    if (chatIndex > -1) {
+      this.followUps[chatIndex].reference.push({ text: '', textErrMessage: '' });
+    } else {
+      this.references.push({ text: '', textErrMessage: '' });
+    }
+  }
+
+  toFollowUp() {
+    this.followUps.push({ prompt: '', response: '', reference: [{ text: '', textErrMessage: '' }] });
+  }
+
+  deleteFollowUp(chatIndex) {
+    this.followUps.splice(chatIndex, 1);
+    this.isValidQaChat();
+  }
+
+  upFollowUp(chatIndex) {
+    if (chatIndex > 0) {
+      this.followUps.splice(chatIndex - 1, 0, this.followUps[chatIndex]);
+      this.followUps.splice(chatIndex + 1, 1);
+    }
+  }
+
+  downFollowUp(chatIndex) {
+    if (chatIndex + 1 !== this.followUps.length) {
+      this.followUps.splice(chatIndex + 2, 0, this.followUps[chatIndex]);
+      this.followUps.splice(chatIndex, 1);
+    }
+  }
+
+  isValidQaChat() {
+    let data = this.sr.userInput ? this.sr.userInput[0].questionForText[0] : null;
+    if (data && (!data.prompt || !data.response)) {
+      this.editQuestionError = 'err';
+      return false;
+    }
+    if (this.followUps.length > 0) {
+      for (let i = 0; i < this.followUps.length; i++) {
+        if (
+          (this.followUps[i].prompt && !this.followUps[i].response) ||
+          (!this.followUps[i].prompt && this.followUps[i].response)
+        ) {
+          this.editQuestionError = 'err';
+          return false;
+        }
+      }
+    }
+    this.editQuestionError = '';
+    return true;
   }
 }

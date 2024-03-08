@@ -1,6 +1,6 @@
 /***
  * 
- * Copyright 2019-2021 VMware, Inc.
+ * Copyright 2019-2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  * 
 ***/
@@ -20,7 +20,7 @@ async function triggerActiveLearning(pid, _ids, user, token) {
   const update = { $pullAll: { "al.queriedSr": _ids } };
   const project = await mongoDb.findOneAndUpdate(ProjectModel, { _id: pid }, update, { new: true, multi: true });
 
-  // regression project or acteave learning faild
+  // regression project or active learning failed
   if (project.projectType == PROJECTTYPE.IMGAGE || project.labelType == LABELTYPE.NUMERIC || project.al.alFailed) return;
 
   // set axios default config

@@ -1,7 +1,7 @@
-<!-- Copyright 2019-2023 VMware, Inc.
+<!-- Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
-<div *ngIf="msg.labelType != 'numericLabel' && !msg.isMultipleLabel">
+<div *ngIf="msg.labelType != 'numericLabel' && !msg.isMultipleLabel && msg.projectType !== 'qaChat'">
   <div>
     <h4>Model Performance</h4>
     <p style="margin-bottom: 1rem">
@@ -66,10 +66,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <clr-dg-column class="ellipsis-datagrid" style="min-width: 250px">Action </clr-dg-column>
               <ng-container>
                 <clr-dg-row *ngFor="let dataset of previewSrs; let i = index" [clrDgItem]="dataset">
-                  <clr-dg-cell
-                    class="ellipsis-datagrid previewHeight"
-                    style="max-width: 90px"
-                  >
+                  <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width: 90px">
                     <clr-checkbox-wrapper>
                       <input
                         type="checkbox"
@@ -77,9 +74,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                         name="options"
                         [(ngModel)]="dataset.selected"
                         (ngModelChange)="selectionLogsChanged($event, 'single', dataset)"
-                        [disabled]="dataset.userInputsLength <= 0 || dataset.reviewInfo.review"
+                        [disabled]="dataset.userInputs.length <= 0 || dataset.reviewInfo.review"
                         [ngClass]="{
-                          'disabled-checkbox': dataset.userInputsLength <= 0 || dataset.reviewInfo.review
+                          'disabled-checkbox': dataset.userInputs.length <= 0 || dataset.reviewInfo.review
                         }"
                       />
                     </clr-checkbox-wrapper>
@@ -87,7 +84,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width: 90px">
                     {{ i + 1 }}
                   </clr-dg-cell>
-                  <ng-container *ngIf="dataset.projectType !== 'log'">
+                  <ng-container *ngIf="dataset.projectType !== 'log' && dataset.projectType !== 'qaChat'">
                     <clr-dg-cell
                       *ngFor="let content of dataset.originalData"
                       class="previewHeight ellipsis-datagrid"
@@ -161,18 +158,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </div>
                   </clr-dg-cell>
                   <clr-dg-cell class="ellipsis-datagrid previewHeight" style="max-width: 90px">
-                    {{ dataset.userInputsLength }}
+                    {{ dataset.userInputs.length }}
                   </clr-dg-cell>
 
                   <clr-dg-cell
-                    *ngIf="dataset.userInputsLength <= 0"
+                    *ngIf="dataset.userInputs.length <= 0"
                     class="ellipsis-datagrid previewHeight"
                     style="min-width: 250px"
                   >
                     None
                   </clr-dg-cell>
                   <clr-dg-cell
-                    *ngIf="dataset.userInputsLength > 0"
+                    *ngIf="dataset.userInputs.length > 0"
                     class="ellipsis-datagrid previewHeight"
                     style="min-width: 250px"
                   >
@@ -182,7 +179,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <div class="clr-row">
                       <button
                         class="btn btn-sm"
-                        [disabled]="dataset.userInputsLength <= 0 || dataset.reviewInfo.review"
+                        [disabled]="dataset.userInputs.length <= 0 || dataset.reviewInfo.review"
                         (click)="modify(dataset, 'single')"
                       >
                         mark for review
@@ -191,21 +188,34 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </clr-dg-cell>
                   <ng-container
                     ngProjectAs="clr-dg-row-detail"
-                    *ngIf="dataset.userInputsLength > 0 || dataset?.originalInputs > 0"
+                    *ngIf="dataset.userInputs.length > 0 || dataset?.originalInputs > 0"
                   >
                     <clr-dg-row-detail class="annotateDetail{{ i }}" (clrIfExpanded)="(true)">
+                      <!-- this is inner annotate table -->
                       <clr-datagrid *ngIf="dataset.userInputs.length > 0">
                         <clr-dg-column> Annotator </clr-dg-column>
                         <clr-dg-column> Annotate Time </clr-dg-column>
                         <clr-dg-column *ngIf="msg.projectType === 'log'"> Log Freetext </clr-dg-column>
                         <clr-dg-column
                           class="studioCell"
-                          *ngIf="msg.projectType == 'image' || msg.projectType == 'ner' || msg.projectType == 'qa' || msg.projectType == 'log'"
+                          *ngIf="
+                            msg.projectType == 'image' ||
+                            msg.projectType == 'ner' ||
+                            msg.projectType == 'qa' ||
+                            msg.projectType == 'log' ||
+                            msg.projectType == 'qaChat'
+                          "
                         >
                           Label
                         </clr-dg-column>
                         <clr-dg-column
-                          *ngIf="msg.projectType != 'ner' && msg.projectType != 'qa' && msg.projectType != 'image' && msg.projectType != 'log'"
+                          *ngIf="
+                            msg.projectType != 'ner' &&
+                            msg.projectType != 'qa' &&
+                            msg.projectType != 'image' &&
+                            msg.projectType != 'log' &&
+                            msg.projectType != 'qaChat'
+                          "
                           style="min-width: 20rem"
                         >
                           Label
@@ -226,6 +236,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               msg.projectType != 'qa' &&
                               msg.projectType != 'image' &&
                               msg.projectType != 'log' &&
+                              msg.projectType != 'qaChat' &&
                               msg.labelType !== 'HTL'
                             "
                             style="min-width: 20rem"
@@ -238,6 +249,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               msg.projectType != 'qa' &&
                               msg.projectType != 'image' &&
                               msg.projectType != 'log' &&
+                              msg.projectType != 'qaChat' &&
                               msg.labelType === 'HTL'
                             "
                             style="min-width: 20rem"
@@ -251,16 +263,24 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <li>{{ selectedTreeLabel }}</li>
                             </ul>
                           </clr-dg-cell>
-                          <clr-dg-cell *ngIf="msg.projectType == 'ner' || msg.projectType == 'qa'" class="studioCell">
+                          <clr-dg-cell
+                            *ngIf="msg.projectType == 'ner' || msg.projectType == 'qa' || msg.projectType == 'qaChat'"
+                            class="studioCell"
+                          >
+                            <!-- this is  inner annotate table inner table for ner and qa and qaChat-->
                             <clr-datagrid>
                               <clr-dg-column *ngFor="let title of innerTable">
                                 {{ title }}
                               </clr-dg-column>
                               <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
-                                <clr-dg-cell>{{ innerCell.label }}</clr-dg-cell>
-                                <clr-dg-cell>{{ innerCell.text }}</clr-dg-cell>
-                                <clr-dg-cell>{{ innerCell.start }}</clr-dg-cell>
-                                <clr-dg-cell>{{ innerCell.end }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType !== 'qaChat'">{{ innerCell.label }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType !== 'qaChat'">{{ innerCell.text }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType !== 'qaChat'">{{ innerCell.start }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType !== 'qaChat'">{{ innerCell.end }}</clr-dg-cell>
+                                <!-- following cell will show if projectType is qaChat -->
+                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.prompt }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.response }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.reference }}</clr-dg-cell>
                               </clr-dg-row>
                             </clr-datagrid>
                           </clr-dg-cell>
@@ -294,12 +314,24 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <clr-dg-column *ngIf="msg.projectType === 'log'"> Updated Log Freetext </clr-dg-column>
                         <clr-dg-column
                           class="studioCell"
-                          *ngIf="msg.projectType == 'image' || msg.projectType == 'ner' || msg.projectType == 'qa' || msg.projectType == 'log'"
+                          *ngIf="
+                            msg.projectType == 'image' ||
+                            msg.projectType == 'ner' ||
+                            msg.projectType == 'qa' ||
+                            msg.projectType == 'log' ||
+                            msg.projectType == 'qaChat'
+                          "
                         >
                           Re-Label
                         </clr-dg-column>
                         <clr-dg-column
-                          *ngIf="msg.projectType != 'ner' && msg.projectType != 'qa' && msg.projectType != 'image' && msg.projectType != 'log'"
+                          *ngIf="
+                            msg.projectType != 'ner' &&
+                            msg.projectType != 'qa' &&
+                            msg.projectType != 'image' &&
+                            msg.projectType != 'log' &&
+                            msg.projectType != 'qaChat'
+                          "
                           style="min-width: 20rem"
                         >
                           Re-Label
@@ -323,7 +355,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                               msg.projectType != 'qa' &&
                               msg.projectType != 'image' &&
                               msg.projectType != 'log' &&
-                              msg.labelType !== 'HTL'
+                              msg.labelType !== 'HTL' &&
+                              msg.projectType !== 'qaChat'
                             "
                             style="min-width: 20rem"
                           >
@@ -335,7 +368,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                               msg.projectType != 'qa' &&
                               msg.projectType != 'image' &&
                               msg.projectType != 'log' &&
-                              msg.labelType === 'HTL'
+                              msg.labelType === 'HTL' &&
+                              msg.projectType != 'qaChat'
                             "
                             style="min-width: 20rem"
                             class="disableTree"
@@ -362,6 +396,19 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <clr-dg-cell>{{ innerCell.text }}</clr-dg-cell>
                                 <clr-dg-cell>{{ innerCell.start }}</clr-dg-cell>
                                 <clr-dg-cell>{{ innerCell.end }}</clr-dg-cell>
+                              </clr-dg-row>
+                            </clr-datagrid>
+                          </clr-dg-cell>
+                          <clr-dg-cell *ngIf="msg.projectType == 'qaChat'" class="studioCell">
+                            <clr-datagrid *ngIf="flag.problemCategory">
+                              <clr-dg-column *ngFor="let title of innerTable">
+                                {{ title }}
+                              </clr-dg-column>
+                              <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
+                                <!-- following cell will show if projectType is qaChat -->
+                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.prompt }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.response }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.reference }}</clr-dg-cell>
                               </clr-dg-row>
                             </clr-datagrid>
                           </clr-dg-cell>

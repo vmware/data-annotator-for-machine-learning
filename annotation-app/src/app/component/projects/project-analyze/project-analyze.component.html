@@ -32,7 +32,11 @@ SPDX-License-Identifier: Apache-2.0 -->
     >
       <form
         *ngIf="
-          ((projectType !== 'ner' && projectType !== 'image' && projectType !== 'log' && projectType != 'qa') ||
+          ((projectType !== 'ner' &&
+            projectType !== 'image' &&
+            projectType !== 'log' &&
+            projectType != 'qa' &&
+            projectType != 'qaChat') ||
             projectInfo.regression == true) &&
           isAllowedAnnotate &&
           currentTabIndex == 1
@@ -88,8 +92,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </clr-alert>
                 </div>
                 <div>
-                  <h3 style="word-break: break-all">{{ projectInfo?.ticketDescription }}</h3>
-                  <span>Please read the item below and assign the most suitable label to it.</span>
+                  <h3 *ngIf="projectType === 'qaChat'" style="word-break: break-all">GenAI Prompt/Response</h3>
+                  <h3 *ngIf="projectType !== 'qaChat'" style="word-break: break-all">
+                    {{ projectInfo?.ticketDescription }}
+                  </h3>
+                  <span *ngIf="projectType !== 'qaChat'"
+                    >Please read the item below and assign the most suitable label to it.</span
+                  >
                   <div style="position: absolute; top: 1.5rem; right: 0rem">
                     <div class="showTag" *ngIf="!isDrawer" (click)="detailDrawer()">
                       <cds-icon shape="angle" class="drawer" size="sm" style="transform: rotate(90deg)"> </cds-icon>
@@ -194,7 +203,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
 
                 <div class="questionContainer">
-                  <div style="margin-bottom: 2rem; font-size: 1.3em">
+                  <div *ngIf="projectType !== 'qaChat'" style="margin-bottom: 2rem; font-size: 1.3em">
                     <span style="font-weight: bold; color: black; margin-right: 0.5rem">
                       Item ( {{ progressInfo?.completeCase }} of {{ progressInfo?.totalCase }} )
                     </span>
@@ -213,7 +222,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                   <div
                     *ngIf="
-                      projectType !== 'ner' && projectType !== 'qa' && projectType !== 'image' && projectType !== 'log'
+                      projectType !== 'ner' &&
+                      projectType !== 'qa' &&
+                      projectType !== 'image' &&
+                      projectType !== 'log' &&
+                      projectType !== 'qaChat'
                     "
                   >
                     <div
@@ -501,7 +514,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </div>
                   </div>
 
-                  <div class="clr-row" *ngIf="projectType !== 'image'">
+                  <div class="clr-row" *ngIf="projectType !== 'image' && projectType !== 'qaChat'">
                     <h4 style="margin-top: 2rem; margin-left: 0.5rem; margin-bottom: 1rem; font-weight: bold">
                       {{ projectInfo?.annotationQuestion }}
                     </h4>
@@ -782,6 +795,176 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </div>
                   </div>
 
+                  <!-- qaChat -->
+                  <div *ngIf="projectType == 'qaChat'">
+                    <div>
+                      <h5 style="margin-top: 0.1rem !important">Prompt</h5>
+                      <div class="clr-textarea-wrapper" style="margin-top: 0.5rem; margin-bottom: 2rem; width: 100%">
+                        <textarea
+                          style="width: 100%; max-width: 100%"
+                          rows="3"
+                          class="clr-textarea"
+                          (keydown)="$event.stopPropagation()"
+                          (blur)="toPrompt($event, -1)"
+                          value="{{ sr.questionForText ? sr.questionForText[0].prompt : '' }}"
+                          placeholder="Let's start with a question..."
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div>
+                      <h5>Response</h5>
+                      <div class="clr-textarea-wrapper" style="margin-top: 0.5rem; margin-bottom: 2rem; width: 100%">
+                        <textarea
+                          style="width: 100%; max-width: 100%"
+                          rows="5"
+                          class="clr-textarea"
+                          (keydown)="$event.stopPropagation()"
+                          (blur)="toResponse($event, -1)"
+                          value="{{ sr.questionForText ? sr.questionForText[0].response : '' }}"
+                          placeholder="Please type answer here... "
+                        ></textarea>
+                      </div>
+                    </div>
+                    <div>
+                      <h5>References (Optional)</h5>
+                      <div class="boxBorder">
+                        <div *ngFor="let item of references; let i = index" style="margin-bottom: 1rem">
+                          <div class="clr-row">
+                            <div class="index">
+                              <span>[&nbsp;{{ i + 1 }}&nbsp;]</span>
+                            </div>
+                            <div class="clr-input-wrapper clr-col-10" style="margin-top: 0.5rem">
+                              <input
+                                type="text"
+                                style="width: 100%"
+                                class="clr-input"
+                                placeholder="Type reference here..."
+                                [(ngModel)]="item.text"
+                                (change)="updateReference($event, i, -1)"
+                                [ngModelOptions]="{ standalone: true }"
+                              />
+                            </div>
+                            <div class="clr-col">
+                              <button
+                                class="btn btn-sm btn-icon"
+                                type="button"
+                                style="margin-bottom: -0.7rem; width: 100%"
+                              >
+                                <cds-icon shape="trash" (click)="deleteReference(i, -1)"> </cds-icon>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <button class="btn btn-sm btn-link add" type="button" (click)="createReferenceRow(-1)">
+                          <cds-icon shape="plus"></cds-icon>Add New Reference
+                        </button>
+                      </div>
+                    </div>
+                    <div *ngIf="followUps.length > 0">
+                      <div *ngFor="let item of followUps; let i = index">
+                        <div class="clr-row" style="margin-right: unset; margin-left: unset">
+                          <div class="card">
+                            <h4 class="card-header" style="background-color: rgba(242, 242, 242)">
+                              Make it Conversational
+                              <cds-icon
+                                shape="circle-arrow"
+                                style="margin-right: 2.4rem"
+                                (click)="upFollowUp(i)"
+                                title="Up"
+                              ></cds-icon>
+                              <cds-icon
+                                shape="circle-arrow"
+                                style="margin-right: 1.2rem; transform: rotate(-180deg)"
+                                (click)="downFollowUp(i)"
+                                title="Down"
+                              ></cds-icon>
+                              <cds-icon shape="times-circle" (click)="deleteFollowUp(i)" title="Delete"></cds-icon>
+                            </h4>
+                            <div class="card-block">
+                              <div>
+                                <h5 style="margin-top: 0.1rem !important">Prompt</h5>
+                                <div
+                                  class="clr-textarea-wrapper"
+                                  style="margin-top: 0.5rem; margin-bottom: 2rem; width: 100%"
+                                >
+                                  <textarea
+                                    style="width: 100%; max-width: 100%"
+                                    rows="3"
+                                    class="clr-textarea"
+                                    (keydown)="$event.stopPropagation()"
+                                    (blur)="toPrompt($event, i)"
+                                    value="{{ item.prompt }}"
+                                    placeholder="Let's start with a question..."
+                                  ></textarea>
+                                </div>
+                              </div>
+                              <div>
+                                <h5>Response</h5>
+                                <div
+                                  class="clr-textarea-wrapper"
+                                  style="margin-top: 0.5rem; margin-bottom: 2rem; width: 100%"
+                                >
+                                  <textarea
+                                    style="width: 100%; max-width: 100%"
+                                    rows="5"
+                                    class="clr-textarea"
+                                    (keydown)="$event.stopPropagation()"
+                                    (blur)="toResponse($event, i)"
+                                    value="{{ item.response }}"
+                                    placeholder="Please type answer here... "
+                                  ></textarea>
+                                </div>
+                              </div>
+                              <div>
+                                <h5>References (Optional)</h5>
+                                <div class="boxBorder">
+                                  <div
+                                    *ngFor="let item1 of item.reference; let linkIndex = index"
+                                    style="margin-bottom: 1rem"
+                                  >
+                                    <div class="clr-row">
+                                      <div class="index">
+                                        <span>[&nbsp;{{ linkIndex + 1 }}&nbsp;]</span>
+                                      </div>
+                                      <div class="clr-input-wrapper clr-col-10" style="margin-top: 0.5rem">
+                                        <input
+                                          type="text"
+                                          style="width: 100%"
+                                          class="clr-input"
+                                          placeholder="Type reference here..."
+                                          [(ngModel)]="item1.text"
+                                          (change)="updateReference($event, linkIndex, i)"
+                                          [ngModelOptions]="{ standalone: true }"
+                                        />
+                                      </div>
+                                      <div class="clr-col">
+                                        <button
+                                          class="btn btn-sm btn-icon"
+                                          type="button"
+                                          style="margin-bottom: -0.7rem; width: 100%"
+                                        >
+                                          <cds-icon shape="trash" (click)="deleteReference(linkIndex, i)"> </cds-icon>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <button class="btn btn-sm btn-link add" type="button" (click)="createReferenceRow(i)">
+                                    <cds-icon shape="plus"></cds-icon>Add New Reference
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div style="margin-top: 1rem">
+                      <button class="btn btn-primary" type="button" (click)="toFollowUp()">
+                        Add Follow-up Prompt/Response
+                      </button>
+                    </div>
+                  </div>
+
                   <!-- multiple checkbox labels -->
                   <div
                     *ngIf="
@@ -924,6 +1107,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </clr-tree-node>
                     </clr-tree>
                   </div>
+                  <!-- ready to give action to the current ticket -->
                   <div class="actions">
                     <div
                       *ngIf="actionError"
@@ -953,6 +1137,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </button>
 
                       <button
+                        *ngIf="projectType != 'qaChat'"
                         class="clr-col btn btn-link"
                         type="button"
                         (click)="onSkipGame()"
@@ -979,11 +1164,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                             isMultipleLabel)
                         "
                         [disabled]="
-                          selectedTreeLabels.length == 0 &&
-                          multipleLabelList.length == 0 &&
-                          spansList.length == 0 &&
-                          currentBoundingData.length == 0 &&
-                          !isNumeric
+                          (selectedTreeLabels.length == 0 &&
+                            multipleLabelList.length == 0 &&
+                            spansList.length == 0 &&
+                            currentBoundingData.length == 0 &&
+                            !isNumeric &&
+                            projectType !== 'qaChat') ||
+                          editQuestionError
                         "
                         class="clr-col btn btn-link submit"
                         type="submit"
@@ -1007,7 +1194,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                             multipleLabelList.length == 0 &&
                             spansList.length == 0 &&
                             currentBoundingData.length == 0 &&
-                            !isNumeric) ||
+                            !isNumeric &&
+                            projectType !== 'qaChat') ||
                           editQuestionError
                         "
                         title="{{
@@ -1117,7 +1305,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </clr-tab-content>
     </clr-tab>
-    <clr-tab *ngIf="user.role !== 'Annotator'">
+    <clr-tab *ngIf="user.role !== 'Annotator' && projectType != 'qaChat'">
       <button clrTabLink (click)="clickTab(3)">Stats</button>
       <clr-tab-content *clrIfActive>
         <div class="clr-row">
@@ -1142,7 +1330,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </clr-tab-content>
     </clr-tab>
-    <clr-tab *ngIf="user.role !== 'Annotator' && !showAppendTabs">
+    <clr-tab *ngIf="user.role !== 'Annotator' && !showAppendTabs && projectType != 'qaChat'">
       <button clrTabLink (click)="clickTab(4)">Add New Entries</button>
       <clr-tab-content *clrIfActive>
         <div class="clr-row">

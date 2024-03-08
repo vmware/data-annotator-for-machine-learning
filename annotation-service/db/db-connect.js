@@ -1,6 +1,6 @@
 /***
  * 
- * Copyright 2019-2021 VMware, Inc.
+ * Copyright 2019-2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  * 
 ***/
@@ -61,7 +61,7 @@ const srSchema = new mongoose.Schema({
 srSchema.set("toJSON", { virtuals: true });
 srSchema.index({ projectName: 1 });
 srSchema.index({ "flag.users": 1 });
-srSchema.plugin(mongoosePaginate);
+srSchema.plugin(mongoosePaginate); 
 
 // create SR model
 const SrModel = mongoose.model("SR", srSchema);

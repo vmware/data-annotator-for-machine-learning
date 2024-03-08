@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2023 VMware, Inc.
+<!-- Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <div class="container">
@@ -40,11 +40,11 @@ SPDX-License-Identifier: Apache-2.0 -->
       <clr-dg-column [clrDgField]="'categoryList'" class="ellipsis-datagrid">
         <ng-container *clrDgHideableColumn="{ hidden: true }">Labels</ng-container>
       </clr-dg-column>
-      <clr-dg-column class="ellipsis-datagrid"  [clrDgField]="'createdDate'" 
+      <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'createdDate'"
         >Create On
         <clr-dg-string-filter [clrDgStringFilter]="createDateFilter"></clr-dg-string-filter>
       </clr-dg-column>
-      <clr-dg-column class="ellipsis-datagrid"  [clrDgField]="'updatedDate'" 
+      <clr-dg-column class="ellipsis-datagrid" [clrDgField]="'updatedDate'"
         >Last Updated On
         <clr-dg-string-filter [clrDgStringFilter]="createDateFilter"></clr-dg-string-filter>
       </clr-dg-column>
@@ -53,30 +53,38 @@ SPDX-License-Identifier: Apache-2.0 -->
         <clr-dg-row *clrDgItems="let dataset of projects; let i = index" [clrDgItem]="dataset">
           <clr-dg-action-overflow>
             <button
+              *ngIf="dataset.projectType !== 'qaChat'"
               class="action-item"
               [disabled]="
                 dataset.totalCase == 0 ||
                 !dataset.disableReview ||
                 dataset.projectCompleteCase == 0 ||
                 !dataset.allowOwnerReview
-                "
+              "
+              (click)="toAnalyze(dataset, 'review')"
+            >
+              Review
+            </button>
+            <button
+              *ngIf="dataset.projectType === 'qaChat'"
+              class="action-item"
+              [disabled]="dataset.projectCompleteCase == 0 || !dataset.allowOwnerReview"
               (click)="toAnalyze(dataset, 'review')"
             >
               Review
             </button>
             <button
               class="action-item"
-              [disabled]="dataset.totalCase == 0 ||
-              user.role === 'Annotator' ||
-              dataset.showButByAssign"
+              [disabled]="dataset.totalCase == 0 || user.role === 'Annotator' || dataset.showButByAssign"
               (click)="editProjectDialog = true; deleteDatasetDialog = false; showProjectEdit(dataset)"
             >
               Edit
             </button>
-            <button class="action-item" (click)="share(dataset)" 
-              [disabled]="user.role === 'Annotator' ||
-              dataset.showByRole ||
-              dataset.showButByAssign">
+            <button
+              class="action-item"
+              (click)="share(dataset)"
+              [disabled]="user.role === 'Annotator' || dataset.showByRole || dataset.showButByAssign"
+            >
               {{ dataset.shareStatus ? 'Unshare' : 'Share' }}
             </button>
             <button
@@ -101,12 +109,20 @@ SPDX-License-Identifier: Apache-2.0 -->
             >
               Download
             </button>
-            <button class="action-item" (click)="delete(dataset)" [disabled]="user.role === 'Annotator' || dataset.showButByAssign">Delete</button>
+            <button
+              class="action-item"
+              (click)="delete(dataset)"
+              [disabled]="user.role === 'Annotator' || dataset.showButByAssign"
+            >
+              Delete
+            </button>
           </clr-dg-action-overflow>
           <clr-dg-cell class="ellipsis-datagrid cellWordBreak" title="{{ dataset.projectName }}">
-            <a (click)="toAnalyze(dataset, 'annotate')" [ngClass]="dataset.totalCase == 0 ? 'pnameLink' : ''">{{
-              dataset.projectName
-            }}</a>
+            <a
+              (click)="toAnalyze(dataset, 'annotate')"
+              [ngClass]="dataset.projectType !== 'qaChat' && dataset.totalCase == 0 ? 'pnameLink' : ''"
+              >{{ dataset.projectName }}</a
+            >
           </clr-dg-cell>
           <clr-dg-cell>
             <cds-icon
@@ -122,7 +138,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   ? 'table'
                   : dataset.projectType === 'ner'
                   ? 'bars'
-                  : dataset.projectType === 'qa'
+                  : dataset.projectType === 'qa' || dataset.projectType === 'qaChat'
                   ? 'checkbox-list'
                   : 'unknown-status'
               }}"

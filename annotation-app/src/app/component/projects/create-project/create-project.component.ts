@@ -184,7 +184,10 @@ export class CreateProjectComponent implements OnInit {
     }
     if (e === 'clr-wizard-page-5') {
       this.toEvenlyDistributeTicket();
-      if (this.dsDialogForm.get('totalRow').value < 1 || this.dsDialogForm.get('maxAnnotations').value < 0) {
+      if (
+        this.dsDialogForm.get('projectType').value !== 'qaChat' &&
+        (this.dsDialogForm.get('totalRow').value < 1 || this.dsDialogForm.get('maxAnnotations').value < 0)
+      ) {
         return (this.clrWizardPageNextDisabled.page5 = true);
       }
       if (!this.assignType[0].checked && !this.assignType[1].checked) {
@@ -201,6 +204,10 @@ export class CreateProjectComponent implements OnInit {
         }
       }
       this.clrWizardPageNextDisabled.page5 = false;
+      if (this.dsDialogForm.get('projectType').value === 'qaChat') {
+        this.clrWizardPageNextDisabled.page4 = false;
+        this.clrWizardPageNextDisabled.page6 = false;
+      }
       return;
     }
     if (e === 'clr-wizard-page-6') {
@@ -336,11 +343,6 @@ export class CreateProjectComponent implements OnInit {
     if ('custom-previous' === buttonType) {
       this.wizard.previous();
     }
-
-    // if ('custom-finish' === buttonType) {
-    //   // if click the image type finish in assign email page
-    //   this.toCreate();
-    // }
   }
 
   createForm(): void {
@@ -517,37 +519,14 @@ export class CreateProjectComponent implements OnInit {
       this.checkboxChecked = [];
       this.helpfulText = [];
     }
-
-    // if (this.dsDialogForm.get('projectType').value !== 'ner') {
-    //   this.dsDialogForm.get('labels').setValue([]);
-    //   this.categoryList = [];
-    // }
-    // this.isShowLabelRadio = false;
-    // this.nonEnglish = 0;
-    // this.totalCase = 0;
-    // this.dsDialogForm.get('totalRow').setValue(0);
-    // this.minLabel = null;
-    // this.maxLabel = null;
-    // this.dsDialogForm.get('min').setValue(null);
-    // this.dsDialogForm.get('max').setValue(null);
-    // this.labelType = '';
-    // this.isNumeric = null;
-    // this.isShowNumeric = false;
-    // this.dsDialogForm.get('multipleLabel').setValue(null);
-    // this.isMultipleLabel = null;
-    // this.isMutilNumericLabel = false;
-    // this.isUploadLabel = false;
-    // this.dsDialogForm.get('mutilLabelArray').reset();
-    // while (this.mutilLabelArray.length > 2) {
-    //   this.mutilLabelArray.removeAt(2);
-    // }
   }
 
   changeProjectType() {
     this.clearFormdata(1);
     this.dealAnnotationQuestionTex(this.dsDialogForm.value.projectType);
-    this.getMyDatasets(this.dsDialogForm.get('projectType').value).then((res) => {});
+    this.getMyDatasets(this.dsDialogForm.get('projectType').value);
   }
+
   dealAnnotationQuestionTex(type) {
     const questesion = {
       qa: 'Label all answers in the given text corpus according to the question.',
@@ -556,7 +535,11 @@ export class CreateProjectComponent implements OnInit {
     let questionTex = Object.keys(questesion).includes(type) ? questesion[type] : this.dataset.annotationQuestion;
     this.dsDialogForm.get('annotationQuestion').setValue(questionTex);
   }
+
   getMyDatasets(projectType) {
+    if (projectType == 'qaChat') {
+      return;
+    }
     let a =
       projectType == 'text' || projectType == 'tabular' || projectType == 'ner' || projectType == 'qa'
         ? 'csv'
@@ -1182,6 +1165,12 @@ export class CreateProjectComponent implements OnInit {
     formData.append('pname', this.dsDialogForm.value.projectName);
     formData.append('projectType', this.dsDialogForm.value.projectType);
     formData.append('taskInstruction', this.dsDialogForm.value.taskInstruction);
+    formData.append('assignee', JSON.stringify(this.toCheckAssigneeList()));
+    if (this.dsDialogForm.value.projectType === 'qaChat') {
+      formData.append('isMultipleLabel', 'true');
+      formData.append('labels', '');
+      return this.apiService.postDataset(formData);
+    }
     formData.append('ticketDescription', this.dsDialogForm.value.annotationDisplayName);
     formData.append('annotationQuestion', this.dsDialogForm.value.annotationQuestion);
     formData.append('fileName', this.datasetInfo.fileName);
@@ -1236,7 +1225,6 @@ export class CreateProjectComponent implements OnInit {
     formData.append('slack', this.assignType[1].checked ? JSON.stringify(this.slackList) : '[]');
     formData.append('maxAnnotations', this.dsDialogForm.value.maxAnnotations);
     formData.append('assignmentLogic', this.dsDialogForm.value.assignmentLogic);
-    formData.append('assignee', JSON.stringify(this.toCheckAssigneeList()));
     formData.append('min', this.categoryListInfoToCategoryList()[0].min);
     formData.append('max', this.categoryListInfoToCategoryList()[0].max);
     formData.append('estimator', this.dsDialogForm.value.selectedClassifier);

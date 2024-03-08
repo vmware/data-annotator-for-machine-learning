@@ -1,6 +1,6 @@
 /***
  * 
- * Copyright 2019-2021 VMware, Inc.
+ * Copyright 2019-2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  * 
 ***/
@@ -189,6 +189,9 @@ async function prepareHeaders(project, format) {
             headerArray.push({ id: 'question', title: 'question' });
             headerArray.push({ id: 'answers', title: 'answers' });
         }
+    }else if(project.projectType == PROJECTTYPE.QACHAT){
+        headerArray.push({ id: 'qaPairs', title: 'qaPairs' });
+        
     }else {
         await project.selectedColumn.forEach(item => {
             headerArray.push({ id: item, title: item });
@@ -204,7 +207,7 @@ async function prepareHeaders(project, format) {
             await labelsArray.forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
-        } else if(project.projectType != PROJECTTYPE.QA){
+        } else if(project.projectType != PROJECTTYPE.QA &&project.projectType != PROJECTTYPE.QACHAT){
             await project.categoryList.split(",").forEach(item => {
                 headerArray.push({ id: item, title: item });
             });
@@ -359,6 +362,16 @@ async function prepareContents(srData, project, format) {
             }
 
             
+        }else if(project.projectType == PROJECTTYPE.QACHAT){
+            let questionForText = srs.questionForText;
+            // take user input or reviewed info
+            if (srs.reviewInfo.modified) {
+                let userInputDatas = await prepareUserInputs(srs);
+                questionForText = [userInputDatas[0].problemCategory];
+            }
+            cvsData.push({
+                qaPairs: JSON.stringify(questionForText[0])
+            });
         }else if (project.projectType == PROJECTTYPE.LOG) {
             // init log classification fileName
             newCase.fileName = srs.fileInfo.fileName;
@@ -491,7 +504,7 @@ async function prepareContents(srData, project, format) {
                 }
             }
         }
-        if (project.projectType != PROJECTTYPE.QA) {
+        if (project.projectType != PROJECTTYPE.QA && project.projectType != PROJECTTYPE.QACHAT) {
             cvsData.push(newCase);
         }
     }

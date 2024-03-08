@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2023 VMware, Inc.
+<!-- Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <div class="modal">
@@ -217,7 +217,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                           class="clr-input"
                           title="Number of tickets assigned"
                           placeholder="Number of tickets assigned"
-                          [disabled]="!(user.email && !user.setUserErrMessage && !user.emailReg)"
+                          [disabled]="
+                            !(user.email && !user.setUserErrMessage && !user.emailReg) || msg.projectType == 'qaChat'
+                          "
                           [(ngModel)]="user.assignedCase"
                           (blur)="inputTicketsUpdate(user)"
                           style="width: 100%"
@@ -783,7 +785,10 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
         <div
           class="prev-info clr-row"
-          *ngIf="labelType == 'numericLabel' || msg.projectType == 'ner' || msg.isMultipleLabel"
+          *ngIf="
+            (labelType == 'numericLabel' || msg.projectType == 'ner' || msg.isMultipleLabel) &&
+            msg.projectType !== 'qaChat'
+          "
         >
           <label for="assignmentLogicEdit" class="label-tooltip clr-col-12 clr-col-md-2">Assignment Logic</label>
           <div class="clr-input-wrapper clr-col-12 clr-col-md-8">
