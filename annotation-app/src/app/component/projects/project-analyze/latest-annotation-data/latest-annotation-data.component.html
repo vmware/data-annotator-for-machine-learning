@@ -280,7 +280,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <!-- following cell will show if projectType is qaChat -->
                                 <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.prompt }}</clr-dg-cell>
                                 <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.response }}</clr-dg-cell>
-                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.reference }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">
+                                  <clr-datagrid *ngFor="let link of innerCell.reference">
+                                    <clr-dg-row>
+                                      <clr-dg-cell>{{ link }}</clr-dg-cell>
+                                    </clr-dg-row>
+                                  </clr-datagrid>
+                                </clr-dg-cell>
                               </clr-dg-row>
                             </clr-datagrid>
                           </clr-dg-cell>
@@ -408,7 +414,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <!-- following cell will show if projectType is qaChat -->
                                 <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.prompt }}</clr-dg-cell>
                                 <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.response }}</clr-dg-cell>
-                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.reference }}</clr-dg-cell>
+                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">
+                                  <clr-datagrid *ngFor="let link of innerCell.reference">
+                                    <clr-dg-row>
+                                      <clr-dg-cell>{{ link }}</clr-dg-cell>
+                                    </clr-dg-row>
+                                  </clr-datagrid>
+                                </clr-dg-cell>
                               </clr-dg-row>
                             </clr-datagrid>
                           </clr-dg-cell>
