@@ -154,6 +154,64 @@ export class AnnotatePage extends CommonPage {
     )
   );
 
+  QA_CHAR_PROMPT_TEXTAREA = $(
+    "div.questionContainer > div.ng-star-inserted > div:nth-child(1) > div > textarea"
+  );
+  QA_CHAR_RES_TEXTAREA = $(
+    "div.questionContainer > div.ng-star-inserted > div:nth-child(2) > div > textarea"
+  );
+  QA_CHAR_REFERENCES_INPUT = $(
+    "div.questionContainer > div.ng-star-inserted > div:nth-child(3) > div > div > div > div.clr-input-wrapper > input"
+  );
+  QA_CHAR_REFERENCES_ADD = $(
+    " div.questionContainer > div.ng-star-inserted > div:nth-child(3) > div > button"
+  );
+  QA_CHAR_REFERENCES_INPUT2 = $(
+    "div.questionContainer > div.ng-star-inserted > div:nth-child(3) > div > div:nth-child(2) > div > div.clr-input-wrapper > input"
+  );
+  QA_CHAR_REFERENCES_DEL = $(
+    "div.questionContainer > div.ng-star-inserted > div:nth-child(3) > div > div:nth-child(1) > div > div.clr-col > button"
+  );
+  QA_CHAR_ADD_FOLLOW = $(
+    "div.questionContainer > div.ng-star-inserted > div:nth-child(4) > button"
+  );
+  QA_CHAR_ADD_FOLLOW2 = $(
+    "div.questionContainer > div.ng-star-inserted > div:nth-child(5) > button"
+  );
+  QA_CHAR_FOLLOW_PROMPT_TEXTAREA1 = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(1) > div > div > div > div:nth-child(1) > div > textarea"
+  );
+  QA_CHAR_FOLLOW_RES_TEXTAREA1 = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(1) > div > div > div > div:nth-child(2) > div > textarea"
+  );
+  QA_CHAR_FOLLOW_PROMPT_TEXTAREA2 = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(2) > div > div > div > div:nth-child(1) > div > textarea"
+  );
+  QA_CHAR_FOLLOW_RES_TEXTAREA2 = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(2) > div > div > div > div:nth-child(2) > div > textarea"
+  );
+  QA_CHAR_FOLLOW_REFERENCES1 = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(1) > div > div > div > div:nth-child(3) > div > div > div > div.clr-input-wrapper > input"
+  );
+  QA_CHAR_ADD_FOLLOW_REFERENCES = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(1) > div > div > div > div:nth-child(3) > div > button"
+  );
+  QA_CHAR_FOLLOW_REFERENCES2 = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(1) > div > div > div > div:nth-child(3) > div > div:nth-child(2) > div > div.clr-input-wrapper > input"
+  );
+  QA_CHAR_FOLLOW_REFERENCES2_DEL = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(1) > div > div > div > div:nth-child(3) > div > div:nth-child(2) > div > div.clr-col > button"
+  );
+  QA_CHAR_FOLLOW_DOWN = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(1) > div > div > h4 > cds-icon[title=Down]"
+  );
+  QA_CHAR_FOLLOW_UP = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(2) > div > div > h4 > cds-icon[title=Up]"
+  );
+  QA_CHAR_FOLLOW_DEL = $(
+    "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(1) > div > div > h4 > cds-icon[title=Delete]"
+  );
+
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.NAV_TASK_LIST);
     await browser.waitForAngularEnabled(false);
@@ -174,6 +232,18 @@ export class AnnotatePage extends CommonPage {
       infos.owner = await list[4].getText();
       infos.source = await list[5].getText();
       infos.instruction = await list[9].getText();
+      console.log("log-getProjectInfo:", infos);
+      return infos;
+    });
+  }
+
+  async getQaChatProjectInfo() {
+    let infos = { name: "", owner: "", source: "", instruction: "" };
+    return this.PROJECT_INFOS.then(async (list) => {
+      infos.name = await list[2].getText();
+      infos.owner = await list[3].getText();
+      infos.source = await list[4].getText();
+      infos.instruction = await list[6].getText();
       console.log("log-getProjectInfo:", infos);
       return infos;
     });
@@ -205,6 +275,16 @@ export class AnnotatePage extends CommonPage {
     let result = { sessions: "", annotations: "" };
     return this.PROJECT_INFOS.then(async (list) => {
       result.sessions = await list[2].getText();
+      result.annotations = await list[0].getText();
+      console.log("log-getProgress info:", result);
+      return result;
+    });
+  }
+
+  async getQAChatProgress() {
+    let result = { sessions: "", annotations: "" };
+    return this.PROJECT_INFOS.then(async (list) => {
+      result.sessions = await list[1].getText();
       result.annotations = await list[0].getText();
       console.log("log-getProgress info:", result);
       return result;
@@ -1004,5 +1084,112 @@ export class AnnotatePage extends CommonPage {
     console.log("log-submit qa regression annotate");
     await this.skipTicket();
     console.log("log-skip the qa regression ticket");
+  };
+
+  annotateQaChat = async () => {
+    console.log("log-start to add prompt");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_PROMPT_TEXTAREA);
+    await this.QA_CHAR_PROMPT_TEXTAREA.click();
+    await this.QA_CHAR_PROMPT_TEXTAREA.sendKeys(
+      projectCreateData.QAChatProject.prompt
+    );
+    await browser.sleep(1000);
+    console.log("log-start to add response");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_RES_TEXTAREA);
+    await FunctionUtil.click(this.QA_CHAR_RES_TEXTAREA);
+    await this.QA_CHAR_RES_TEXTAREA.sendKeys(
+      projectCreateData.QAChatProject.response
+    );
+    await browser.sleep(1000);
+    await this.QA_CHAR_RES_TEXTAREA.sendKeys("");
+    await browser.sleep(1000);
+    await this.QA_CHAR_RES_TEXTAREA.sendKeys(
+      projectCreateData.QAChatProject.response
+    );
+    console.log("log-start to add references");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_REFERENCES_INPUT);
+    await this.QA_CHAR_REFERENCES_INPUT.click();
+    await this.QA_CHAR_REFERENCES_INPUT.sendKeys(
+      projectCreateData.QAChatProject.references1
+    );
+    await FunctionUtil.click(this.QA_CHAR_REFERENCES_ADD);
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_REFERENCES_INPUT2);
+    await this.QA_CHAR_REFERENCES_INPUT2.click();
+    await this.QA_CHAR_REFERENCES_INPUT2.sendKeys(
+      projectCreateData.QAChatProject.references2
+    );
+    await browser.sleep(1000);
+    console.log("log-start to delete references");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_REFERENCES_DEL);
+    await FunctionUtil.click(this.QA_CHAR_REFERENCES_DEL);
+    await browser.sleep(1000);
+    console.log("log-start to add follow up");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_ADD_FOLLOW);
+    await FunctionUtil.click(this.QA_CHAR_ADD_FOLLOW);
+    await browser.sleep(1000);
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_ADD_FOLLOW2);
+    await FunctionUtil.click(this.QA_CHAR_ADD_FOLLOW2);
+    console.log("log-start to add follow 1 prompt res");
+    await FunctionUtil.elementVisibilityOf(
+      this.QA_CHAR_FOLLOW_PROMPT_TEXTAREA1
+    );
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_PROMPT_TEXTAREA1);
+    await this.QA_CHAR_FOLLOW_PROMPT_TEXTAREA1.sendKeys(
+      projectCreateData.QAChatProject.followPrompt1
+    );
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_FOLLOW_RES_TEXTAREA1);
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_RES_TEXTAREA1);
+    await this.QA_CHAR_FOLLOW_RES_TEXTAREA1.sendKeys(
+      projectCreateData.QAChatProject.followResponse1
+    );
+    console.log("log-start to add follow 2 prompt res");
+    await FunctionUtil.elementVisibilityOf(
+      this.QA_CHAR_FOLLOW_PROMPT_TEXTAREA2
+    );
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_PROMPT_TEXTAREA2);
+    await this.QA_CHAR_FOLLOW_PROMPT_TEXTAREA2.sendKeys(
+      projectCreateData.QAChatProject.followPrompt2
+    );
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_FOLLOW_RES_TEXTAREA2);
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_RES_TEXTAREA2);
+    await this.QA_CHAR_FOLLOW_RES_TEXTAREA2.sendKeys(
+      projectCreateData.QAChatProject.followResponse2
+    );
+    console.log("log-start to add follow references");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_FOLLOW_REFERENCES1);
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_REFERENCES1);
+    await this.QA_CHAR_FOLLOW_REFERENCES1.sendKeys(
+      projectCreateData.QAChatProject.follow_references1
+    );
+
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_ADD_FOLLOW_REFERENCES);
+    await FunctionUtil.click(this.QA_CHAR_ADD_FOLLOW_REFERENCES);
+    await browser.sleep(1000);
+
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_FOLLOW_REFERENCES2);
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_REFERENCES2);
+    await this.QA_CHAR_FOLLOW_REFERENCES2.sendKeys(
+      projectCreateData.QAChatProject.follow_references2
+    );
+    await browser.sleep(1000);
+    console.log("log-start to delete follow references");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_FOLLOW_REFERENCES2_DEL);
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_REFERENCES2_DEL);
+    await browser.sleep(1000);
+    console.log("log-start to down follow");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_FOLLOW_DOWN);
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_DOWN);
+    await browser.sleep(1000);
+    console.log("log-start to up follow");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_FOLLOW_UP);
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_UP);
+
+    await browser.sleep(1000);
+    console.log("log-start to delete follow");
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAR_FOLLOW_DEL);
+    await FunctionUtil.click(this.QA_CHAR_FOLLOW_DEL);
+
+    await this.ANNOTATE_SUBMIT_BTN.click();
+    console.log("log-submit qa chat annotate");
   };
 }

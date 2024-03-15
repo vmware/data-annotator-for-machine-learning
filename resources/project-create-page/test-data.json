@@ -130,6 +130,21 @@
     "ticketSessions": 5,
     "maxAnnotation": 1,
     "questionOne": "question one",
-    "answerOne":"answer one"
+    "answerOne": "answer one"
+  },
+  "QAChatProject": {
+    "Instruction": "this is e2e qa chat project task instruction",
+    "ticketSessions": 0,
+    "maxAnnotation": 1,
+    "prompt": "this is prompt test",
+    "response": "this is response test",
+    "references1": "this is references1",
+    "references2": "this is references2",
+    "followPrompt1": "this is follow prompt 1 content",
+    "followResponse1": "this is follow response 1 content",
+    "followPrompt2": "this is follow prompt 2 content",
+    "followResponse2": "this is follow response 2 content",
+    "follow_references1": "this is follow  references 1 content",
+    "follow_references2": "this is follow  references 2 content"
   }
 }

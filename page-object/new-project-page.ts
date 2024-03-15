@@ -452,6 +452,20 @@ export class NewProjectPage extends CommonPage {
       });
   }
 
+  setAssigneeForQaChat(annotator1) {
+    console.log("log-start to setAssignee annotator");
+    return browser
+      .wait(
+        ExpectedConditions.visibilityOf(this.ASSIGNEE.first()),
+        Constant.DEFAULT_TIME_OUT
+      )
+      .then(async () => {
+        console.log("log-succeed to visibility of annotator");
+        // await this.ASSIGNEE.clear();
+        await this.ASSIGNEE.first().sendKeys(annotator1);
+      });
+  }
+
   async setDuplicateAnnotator(annotator) {
     await this.ICON_PLUS.last().click();
     // await this.ASSIGNEE.clear();

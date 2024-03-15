@@ -70,6 +70,9 @@ var conf = {
     "./features/create-project-qa-regression-true-spec.ts",
     "./features/annotate-project-qa-regression-true-spec.ts",
 
+    "./features/create-project-qa-chat-spec.ts",
+    "./features/annotate-project-qa-chat-spec.ts",
+
     "./features/delete-e2e-projects-spec.ts",
     "./features/faq-spec.ts",
   ],

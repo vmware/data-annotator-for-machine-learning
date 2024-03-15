@@ -17,6 +17,7 @@ export let Constant = {
   project_name_hierarchical_label: "",
   project_name_qa: "",
   project_name_qa_regression_true: "",
+  project_name_qa_chat: "",
   dataset_name: "e2e_Test_Data",
   dataset_name_text: "",
   dataset_name_ner: "",
