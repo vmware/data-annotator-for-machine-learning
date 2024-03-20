@@ -24,10 +24,11 @@ app = {
 
     # optional token config
     "TOKEN_ALGORITHM": os.getenv("TOKEN_ALGORITHM", "HS256"),
+    # !!! important 121ba6ff-64d6-4c1a-b6ef-dd6b95433064 just a random value get the value from environment or replace by yourslef
     # generate the key yourself. should keep the same with annotation-service TOKEN_SECRET_OR_PRIVATE_KEY
-    "TOKEN_SECRET_OR_PRIVATE_KEY": os.getenv("TOKEN_SECRET_OR_PRIVATE_KEY", "OPEN SOURCE"),
-
+    "TOKEN_SECRET_OR_PRIVATE_KEY": os.getenv("TOKEN_SECRET_OR_PRIVATE_KEY", "121ba6ff-64d6-4c1a-b6ef-dd6b95433064"),
+    # 01a406f3-e5f4-45b8-a722-cff17e9d8cf9 just a random value
     # generate the key yourself. django SECRET_KEY a random generated value https://docs.djangoproject.com/en/3.2/ref/settings/#std:setting-SECRET_KEY
-    "DJANGO_SECRET_KEY": os.getenv("DJANGO_SECRET_KEY", "your_key"),
+    "DJANGO_SECRET_KEY": os.getenv("DJANGO_SECRET_KEY", "01a406f3-e5f4-45b8-a722-cff17e9d8cf9"),
 
 }

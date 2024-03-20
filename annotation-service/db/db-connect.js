@@ -6,7 +6,7 @@
 ***/
 
 const config = require('../config/config');
-const { USER_ROLE, GENERATESTATUS, APPENDSR, QUERYORDER, ANNOTATION_QUESTION, TICKET_DESCRIPTION } = require('../config/constant');
+const { GENERATESTATUS, APPENDSR, QUERYORDER, ANNOTATION_QUESTION, TICKET_DESCRIPTION } = require('../config/constant');
 const mongoose = require("mongoose"),
     Schema = mongoose.Schema;
 const mongoosePaginate = require('mongoose-paginate-v2');
@@ -143,7 +143,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String },
     fullName: { type: String },
     points: { type: Number, default: 0 },
-    role: { type: String, default: USER_ROLE },
+    role: { type: String, default: config.USER_ROLE },
     createdDate: { type: String },
     updateDate: { type: String },
     regularNotification: { type: Boolean, default: true },

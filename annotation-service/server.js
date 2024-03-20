@@ -15,7 +15,6 @@ const fs = require('fs')
 const { consumeSQSMessage } = require('./utils/sqs');
 const { regularNotification } = require('./utils/taskSchedule');
 const config = require('./config/config');
-const { API_VERSION, API_BASE_PATH } = require('./config/constant');
 const MESSAGE = require('./config/code_msg');
 
 // Get our API routes
@@ -51,10 +50,10 @@ app.use(function (req, res, next) {
 });
 
 // mannually set up swagger
-app.use(`${API_BASE_PATH}/api/api-docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(`${config.API_BASE_PATH}/api/api-docs`, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Server health check
-app.get(`${API_BASE_PATH}/api/health`, (req, res) => {
+app.get(`${config.API_BASE_PATH}/api/health`, (req, res) => {
   return res.status(200).json(MESSAGE.SUCCESS);
 });
 
@@ -86,7 +85,7 @@ authService.authentication().then(data => {
 }).finally(() => {
   // Set our api routers
   routers.forEach(
-    api => app.use(`${API_BASE_PATH}/api/${API_VERSION}`, require(`./routers/${api}`))
+    api => app.use(`${config.API_BASE_PATH}/api/${config.API_VERSION}`, require(`./routers/${api}`))
   );
   consumeSQSMessage();
   regularNotification();
