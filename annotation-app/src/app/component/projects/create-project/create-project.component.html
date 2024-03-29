@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <option value="ner">Named Entity Recognition</option>
             <option value="image">Image Classification</option>
             <option value="log">Log Classification</option>
-            <option value="qa">Question Answer</option>
+            <option value="qa">Question Answer Extraction</option>
             <option value="qaChat">Question Answer Conversational</option>
           </select>
         </div>
@@ -315,7 +315,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     "
     (clrWizardPageCustomButton)="doCustomClick($event)"
     [clrWizardPageNextDisabled]="
-      dsDialogForm.get('projectType').value === 'ner' || dsDialogForm.get('projectType').value === 'qa'
+      dsDialogForm.get('projectType').value === 'ner'
         ? !dropdownSelected
         : !(dropdownSelected && selectDescription.length > 0)
     "
@@ -408,8 +408,14 @@ Please confirm that your every row under the selected question column has the fo
           </label>
         </div>
       </div>
-      <!-- qa text area display single or multiple column -->
-      <div *ngIf="dropdownSelected" class="clr-row formField">
+      <!-- select description section -->
+      <div
+        *ngIf="
+          dropdownSelected &&
+          !(dsDialogForm.get('projectType').value === 'qa' && dsDialogForm.get('questionType').value === 'n')
+        "
+        class="clr-row formField"
+      >
         <label class="label-tooltip clr-col-12 clr-col-md-2"
           >{{
             dsDialogForm.get('projectType').value === 'ner'
@@ -419,7 +425,7 @@ Please confirm that your every row under the selected question column has the fo
           }}<span *ngIf="dsDialogForm.get('projectType').value !== 'ner'">*</span>
         </label>
         <!-- single -->
-        <div
+        <!-- <div
           class="clr-select-wrapper clr-col-12 clr-col-md-9"
           *ngIf="dsDialogForm.get('projectType').value === 'qa' && dsDialogForm.get('questionType').value === 'n'"
         >
@@ -434,7 +440,7 @@ Please confirm that your every row under the selected question column has the fo
               {{ item }}
             </option>
           </select>
-        </div>
+        </div> -->
         <!-- multiple -->
         <div class="clr-col-12 clr-col-md-9">
           <clr-datagrid
@@ -471,6 +477,71 @@ Please confirm that your every row under the selected question column has the fo
                   [disabled]="column.checkboxDisabled"
                   [checked]="column.labelChecked"
                   (change)="changeCheckbox(column.name, 'labelChecked')"
+                />
+              </clr-dg-cell>
+              <clr-dg-cell class="ellipsis-datagrid">
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  name="checkbox2"
+                  [checked]="column.helptextChecked"
+                  (change)="changeCheckbox(column.name, 'helptextChecked')"
+                />
+              </clr-dg-cell>
+            </clr-dg-row>
+          </clr-datagrid>
+        </div>
+      </div>
+      <!-- qa, question type is string, need show helpful text -->
+      <div
+        *ngIf="
+          dropdownSelected &&
+          dsDialogForm.get('projectType').value === 'qa' &&
+          dsDialogForm.get('questionType').value === 'n'
+        "
+        class="clr-row formField"
+      >
+        <label class="label-tooltip clr-col-12 clr-col-md-2"
+          >{{
+            'Select the columns to present to annotators about the text for annotate (required) or helpful text
+          (optional)'
+          }}
+        </label>
+        <!-- multiple -->
+        <div class="clr-col-12 clr-col-md-9">
+          <clr-datagrid>
+            <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
+            <clr-dg-column class="ellipsis-datagrid">Text for Annotate<span style="color: red">*</span></clr-dg-column>
+            <clr-dg-column class="ellipsis-datagrid">Helpful Text</clr-dg-column>
+            <clr-dg-row *clrDgItems="let column of checkboxColumns; let i = index" [clrDgItem]="column">
+              <clr-dg-cell class="ellipsis-datagrid" style="color: #000; word-break: break-all">{{
+                column.name
+              }}</clr-dg-cell>
+              <!-- <clr-dg-cell class="ellipsis-datagrid">
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  name="checkbox1"
+                  [ngClass]="{
+                    'disabled-checkbox': column.checkboxDisabled
+                  }"
+                  [disabled]="column.checkboxDisabled"
+                  [checked]="column.labelChecked"
+                  (change)="changeCheckbox(column.name, 'labelChecked')"
+                />
+              </clr-dg-cell> -->
+              <clr-dg-cell class="ellipsis-datagrid">
+                <input
+                  type="radio"
+                  clrRadio
+                  class="clr-radio"
+                  name="radioForText"
+                  [value]="column.name"
+                  [ngClass]="{
+                    'disabled-checkbox': column.checkboxDisabled
+                  }"
+                  [disabled]="column.checkboxDisabled"
+                  (change)="changeCheckbox(column.name, 'labelChecked', $event)"
                 />
               </clr-dg-cell>
               <clr-dg-cell class="ellipsis-datagrid">

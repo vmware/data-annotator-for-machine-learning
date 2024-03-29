@@ -410,6 +410,45 @@ async function getALLSrs(req) {
     if (req.query.fname && mp.project.projectType == PROJECTTYPE.LOG) {
         query["fileInfo.fileName"] = { $regex: req.query.fname };
     }
+    if (mp.project.projectType == PROJECTTYPE.QACHAT) {
+        if(req.query.reference){
+            let value={$regex: req.query.reference}
+            query.$or=[
+                {
+                "reviewInfo.modified":true,
+                $or:[
+                    {"reviewInfo.userInputs.problemCategory.reference":value},
+                    {"reviewInfo.userInputs.problemCategory.followUps.reference":value}
+                ]
+                },
+                {
+                "reviewInfo.reviewed":false,
+                $or:[
+                    {"questionForText.reference":value},
+                    {"questionForText.followUps.reference":value}
+                ]
+                }
+            ]
+        }
+        // if(req.query.prompt){
+        //     let value={$regex: req.query.prompt}
+        //     query.$or=[
+        //         {"reviewInfo.userInputs.problemCategory.prompt":value},
+        //         {"reviewInfo.userInputs.problemCategory.followUps.prompt":value},
+        //         {"questionForText.prompt":value},
+        //         {"questionForText.followUps.prompt":value}
+        //     ]
+        // }
+        // if(req.query.response){
+        //     let value={$regex: req.query.response}
+        //     query.$or=[
+        //         {"reviewInfo.userInputs.problemCategory.response":value},
+        //         {"reviewInfo.userInputs.problemCategory.followUps.response":value},
+        //         {"questionForText.response":value},
+        //         {"questionForText.followUps.response":value}
+        //     ]
+        // }
+    }
     let options = { page: parseInt(req.query.page), limit: parseInt(req.query.limit), sort: { userInputsLength: -1,  reviewedTime: 1, _id: 1 } };
     const data = await mongoDb.paginateQuery(mp.model, query, options);
 
@@ -658,6 +697,19 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
                     }
                 }
                 sechema.questionForText = questions;
+                //helpful text
+                const ticketQuestions = req.body.ticketQuestions;
+                if (ticketQuestions && ticketQuestions.length) {
+                    let questions = {};
+                    for (const qst of ticketQuestions) {
+                        questionData = oneData[qst]
+                        if (typeof oneData[qst] === 'object') {
+                            questionData = JSON.stringify(questionData);
+                        }
+                        questions[qst] = questionData;
+                    }
+                    sechema.ticketQuestions = questions;
+                }
             }
 
             docs.push(sechema);
@@ -945,27 +997,78 @@ async function reviewTicket(req) {
     //annotator have no right to access
     const user = req.auth.email;
     await validator.checkAnnotator(user);
-    
-    const tid = (typeof req.body.tid === 'string')? ObjectId(req.body.tid): _.flatMap(req.body.tid, n => ObjectId(n))
     const pid = req.body.pid;
-    const problemCategory = req.body.problemCategory;
-    const logFreeText = req.body.logFreeText;
-    const questionForText = req.body.questionForText;
-    const review = req.body.review;
-    const modify = req.body.modify;
-
     const mp = await getModelProject({ _id: ObjectId(pid) });
+    // to review one ticket
+    if(req.body.tid){
+        const tid = (typeof req.body.tid === 'string')? ObjectId(req.body.tid): _.flatMap(req.body.tid, n => ObjectId(n))
+        const problemCategory = req.body.problemCategory;
+        const logFreeText = req.body.logFreeText;
+        const questionForText = req.body.questionForText;
+        const review = req.body.review;
+        const modify = req.body.modify;
+    
+        if (await validator.checkRequired(review)) {
+            await flagToReview(mp, tid);
+        } else if (await validator.checkRequired(modify)) {
+            await calculateReviewdCase(mp, [tid], user);
+            await modifyReview(mp, tid, user, problemCategory, logFreeText, questionForText);
+        } else if (!await validator.checkRequired(modify)) {
+            await calculateReviewdCase(mp, [tid], user);
+            await passReview(mp, tid, user);
+        }
+    }
 
-    if (await validator.checkRequired(review)) {
-        await flagToReview(mp, tid);
-    } else if (await validator.checkRequired(modify)) {
-        await calculateReviewdCase(mp, [tid], user);
-        await modifyReview(mp, tid, user, problemCategory, logFreeText, questionForText);
-    } else if (!await validator.checkRequired(modify)) {
-        await calculateReviewdCase(mp, [tid], user);
-        await passReview(mp, tid, user);
+    // to review ticket according to filtered
+    if(!req.body.tid && req.body.reference){
+        const projectName = mp.project.projectName;
+        let query = { projectName: projectName };
+        if(req.query.reference){
+            let value={$regex: `/${req.body.reference.old}/`}
+            query.$or=[
+                {
+                "reviewInfo.modified":true,
+                $or:[
+                    {"reviewInfo.userInputs.problemCategory.reference":value},
+                    {"reviewInfo.userInputs.problemCategory.followUps.reference":value}
+                ]
+                },
+                {
+                "reviewInfo.reviewed":false,
+                $or:[
+                    {"questionForText.reference":value},
+                    {"questionForText.followUps.reference":value}
+                ]
+                }
+            ]
+        }
+        update = { $set: { "reviewInfo.userInputs.$[elem].problemCategory.reference": {
+                        $replaceOne: {
+                            input: "$reviewInfo.userInputs.$[elem].problemCategory.reference",
+                            find: req.body.reference.old,
+                            replacement: req.body.reference.new
+                        }
+                        },
+                        "reviewInfo.userInputs.$[elem].problemCategory.followUps.reference": {
+                            $replaceOne: {
+                                input: "$reviewInfo.userInputs.$[elem].problemCategory.followUps.reference",
+                                find: req.body.reference.old,
+                                replacement: req.body.reference.new
+                            }
+                            },"reviewInfo.review": false,
+                            "reviewInfo.passed": false,
+                            "reviewInfo.reviewed": true,
+                            "reviewInfo.modified": true,
+                            "reviewInfo.user": user,
+                            "reviewInfo.reviewedTime": Date.now()
+                    },
+                    $pull: {
+                        "reviewInfo.userInputs": {user: user}
+                    }};
+        await mongoDb.updateManyByConditions(mp.model, query, update);
     }
 }
+
 
 async function flagToReview(mp, tid) {
     const conditions = { _id: {$in: tid} };

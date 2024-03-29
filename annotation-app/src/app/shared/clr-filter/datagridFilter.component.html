@@ -1,14 +1,71 @@
 <!-- Copyright 2019-2023 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 <form class="clr-form">
-  <input
-    type="text"
-    id="basic"
-    placeholder="Enter value here"
-    class="clr-input filenameFilter"
-    [ngModelOptions]="{ standalone: true }"
-    [(ngModel)]="filename"
-    (ngModelChange)="this.filenameFilter.next($event)"
-    autocomplete="off"
-  />
+  <clr-tabs>
+    <clr-tab>
+      <button clrTabLink>Find</button>
+      <clr-tab-content *clrIfActive>
+        <div class="clr-form-control">
+          <label for="basic" class="clr-control-label">Find What:</label>
+          <div class="clr-control-container">
+            <div class="clr-input-wrapper">
+              <input
+                type="text"
+                id="basic"
+                placeholder="Enter value here"
+                class="clr-input"
+                [ngModelOptions]="{ standalone: true }"
+                [(ngModel)]="inputString"
+                (ngModelChange)="this.inputStringFilter.next($event)"
+                autocomplete="off"
+              />
+            </div>
+            <span class="clr-subtext">Filtered Total: {{ filteredTotal }}</span>
+          </div>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+    <clr-tab *ngIf="filterMsg == 'filterReference'">
+      <button clrTabLink>Replace</button>
+      <clr-tab-content *clrIfActive>
+        <div class="clr-form-control">
+          <label for="basic" class="clr-control-label">Find What:</label>
+          <div class="clr-control-container">
+            <div class="clr-input-wrapper">
+              <input
+                type="text"
+                id="basic"
+                placeholder="Enter value here"
+                class="clr-input"
+                [ngModelOptions]="{ standalone: true }"
+                [(ngModel)]="inputString"
+                (ngModelChange)="this.inputStringFilter.next($event)"
+                autocomplete="off"
+              />
+            </div>
+            <span class="clr-subtext">Filtered Total: {{ filteredTotal }}</span>
+          </div>
+        </div>
+        <div class="clr-form-control">
+          <label for="basic1" class="clr-control-label">Replace with:</label>
+          <div class="clr-control-container">
+            <div class="clr-input-wrapper">
+              <input
+                type="text"
+                id="basic1"
+                placeholder="Enter value here"
+                class="clr-input"
+                [ngModelOptions]="{ standalone: true }"
+                [(ngModel)]="inputString1"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 1rem">
+          <button class="btn btn-primary btn-sm" type="button" (click)="replaceAll()">Replace All</button>
+        </div>
+      </clr-tab-content>
+    </clr-tab>
+  </clr-tabs>
 </form>

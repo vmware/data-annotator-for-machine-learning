@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <clr-dg-column *ngFor="let header of previewSrsHeader" class="ellipsis-datagrid">
                 {{ header }}
                 <clr-dg-filter *ngIf="header == 'FileName'" [clrDgFilter]="myFilter">
-                  <my-filter #myFilter (filter)="receiveFilename($event)"></my-filter>
+                  <my-filter #myFilter [filteredTotal]="filteredTotal" (filter)="receiveFilename($event)"></my-filter>
                 </clr-dg-filter>
               </clr-dg-column>
               <clr-dg-column class="ellipsis-datagrid" style="max-width: 90px"> Annotations No. </clr-dg-column>
@@ -192,7 +192,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   >
                     <clr-dg-row-detail class="annotateDetail{{ i }}" (clrIfExpanded)="(true)">
                       <!-- this is inner annotate table -->
-                      <clr-datagrid *ngIf="dataset.userInputs.length > 0">
+                      <clr-datagrid *ngIf="dataset.userInputs.length > 0" style="width: 100%">
                         <clr-dg-column> Annotator </clr-dg-column>
                         <clr-dg-column> Annotate Time </clr-dg-column>
                         <clr-dg-column *ngIf="msg.projectType === 'log'"> Log Freetext </clr-dg-column>
@@ -268,22 +268,30 @@ SPDX-License-Identifier: Apache-2.0 -->
                             class="studioCell"
                           >
                             <!-- this is  inner annotate table inner table for ner and qa and qaChat-->
-                            <clr-datagrid>
-                              <clr-dg-column *ngFor="let title of innerTable">
-                                {{ title }}
-                              </clr-dg-column>
+                            <clr-datagrid *ngIf="msg.projectType !== 'qaChat'">
+                              <clr-dg-column *ngFor="let title of innerTable">{{ title }} </clr-dg-column>
                               <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
-                                <clr-dg-cell *ngIf="msg.projectType !== 'qaChat'">{{ innerCell.label }}</clr-dg-cell>
-                                <clr-dg-cell *ngIf="msg.projectType !== 'qaChat'">{{ innerCell.text }}</clr-dg-cell>
-                                <clr-dg-cell *ngIf="msg.projectType !== 'qaChat'">{{ innerCell.start }}</clr-dg-cell>
-                                <clr-dg-cell *ngIf="msg.projectType !== 'qaChat'">{{ innerCell.end }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.label }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.text }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.start }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.end }}</clr-dg-cell>
+                              </clr-dg-row>
+                            </clr-datagrid>
+                            <!-- this is qaChat -->
+                            <clr-datagrid *ngIf="msg.projectType == 'qaChat'">
+                              <clr-dg-column>Prompt </clr-dg-column>
+                              <clr-dg-column>Response </clr-dg-column>
+                              <clr-dg-column style="min-width: 70%">Reference</clr-dg-column>
+                              <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
                                 <!-- following cell will show if projectType is qaChat -->
-                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.prompt }}</clr-dg-cell>
-                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.response }}</clr-dg-cell>
-                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">
+                                <clr-dg-cell>{{ innerCell.prompt }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.response }}</clr-dg-cell>
+                                <clr-dg-cell style="min-width: 70%">
                                   <clr-datagrid *ngFor="let link of innerCell.reference">
                                     <clr-dg-row>
-                                      <clr-dg-cell>{{ link }}</clr-dg-cell>
+                                      <clr-dg-cell
+                                        ><a [href]="link" target="_blank">{{ link }}</a></clr-dg-cell
+                                      >
                                     </clr-dg-row>
                                   </clr-datagrid>
                                 </clr-dg-cell>
@@ -313,7 +321,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </clr-dg-row-detail>
                     <clr-dg-row-detail class="reviewDetail{{ i }}" (clrIfExpanded)="(true)" style="margin-bottom: 1rem">
                       <!-- review data datagrid -->
-                      <clr-datagrid *ngIf="dataset.reviewInfo.userInputs.length > 0">
+                      <clr-datagrid *ngIf="dataset.reviewInfo.userInputs.length > 0" style="width: 100%">
                         <clr-dg-column> Reviewer </clr-dg-column>
                         <clr-dg-column> Review Time </clr-dg-column>
                         <clr-dg-column> Review Action </clr-dg-column>
@@ -407,17 +415,19 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </clr-dg-cell>
                           <clr-dg-cell *ngIf="msg.projectType == 'qaChat'" class="studioCell">
                             <clr-datagrid *ngIf="flag.problemCategory">
-                              <clr-dg-column *ngFor="let title of innerTable">
-                                {{ title }}
-                              </clr-dg-column>
+                              <clr-dg-column>Prompt </clr-dg-column>
+                              <clr-dg-column>Response </clr-dg-column>
+                              <clr-dg-column style="min-width: 70%">Reference</clr-dg-column>
                               <clr-dg-row *ngFor="let innerCell of flag.problemCategory">
                                 <!-- following cell will show if projectType is qaChat -->
-                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.prompt }}</clr-dg-cell>
-                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">{{ innerCell.response }}</clr-dg-cell>
-                                <clr-dg-cell *ngIf="msg.projectType == 'qaChat'">
+                                <clr-dg-cell>{{ innerCell.prompt }}</clr-dg-cell>
+                                <clr-dg-cell>{{ innerCell.response }}</clr-dg-cell>
+                                <clr-dg-cell style="min-width: 70%">
                                   <clr-datagrid *ngFor="let link of innerCell.reference">
                                     <clr-dg-row>
-                                      <clr-dg-cell>{{ link }}</clr-dg-cell>
+                                      <clr-dg-cell
+                                        ><a [href]="link" target="_blank">{{ link }}</a></clr-dg-cell
+                                      >
                                     </clr-dg-row>
                                   </clr-datagrid>
                                 </clr-dg-cell>
@@ -601,6 +611,71 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div *ngIf="firstLoadFlag" class="annotationLoading">
             <span class="spinner spinner-md" style="margin-top: 3rem; margin-bottom: -0.6rem"> Loading... </span>
             <span class="loadingSpan"> Loading Flag Tickets, Please Wait... </span>
+          </div>
+        </clr-tab-content>
+      </clr-tab>
+
+      <clr-tab *ngIf="msg.projectType == 'qaChat'">
+        <button clrTabLink (click)="clickDataReview()">Data Review</button>
+        <clr-tab-content>
+          <div style="margin-bottom: 2rem">
+            <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)" *ngIf="!loadingReview">
+              <clr-dg-column class="ellipsis-datagrid"></clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid">Index</clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid">Prompt</clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid"
+                >Response
+                <clr-dg-filter [clrDgFilter]="myFilter">
+                  <my-filter #myFilter [filteredTotal]="filteredTotal" (filter)="filterResponse($event)"></my-filter>
+                </clr-dg-filter>
+              </clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid" style="min-width: 50%"
+                >Reference
+                <clr-dg-filter [clrDgFilter]="myFilter">
+                  <my-filter
+                    #myFilter
+                    [filterMsg]="'filterReference'"
+                    [filteredTotal]="filteredTotal"
+                    (filter)="filterReference($event)"
+                    (replace)="replace($event)"
+                  ></my-filter>
+                </clr-dg-filter>
+              </clr-dg-column>
+              <ng-container *ngFor="let dataset of previewSrs; let j = index">
+                <clr-dg-row *ngFor="let qa of dataset.displayDate">
+                  <clr-dg-cell>
+                    <cds-icon *ngIf="qa.followUps" shape="angle" style="transform: rotate(90deg)"></cds-icon>
+                  </clr-dg-cell>
+                  <clr-dg-cell>{{ qa.followUps ? j + 1 : '' }}</clr-dg-cell>
+                  <clr-dg-cell>{{ qa.prompt }}</clr-dg-cell>
+                  <clr-dg-cell>{{ qa.response }}</clr-dg-cell>
+                  <clr-dg-cell style="min-width: 50%">
+                    <div *ngFor="let link of qa.reference" style="margin-bottom: 5px; word-break: break-all">
+                      <a [href]="link" target="_blank"
+                        ><cds-icon shape="circle" solid="true" size="xs" style="margin-right: 0.2rem"></cds-icon
+                        >{{ link }}</a
+                      >
+                    </div>
+                  </clr-dg-cell>
+                </clr-dg-row>
+              </ng-container>
+              <clr-dg-footer>
+                <clr-dg-pagination
+                  #pagination
+                  [(clrDgPageSize)]="pageSize"
+                  [clrDgTotalItems]="totalItems"
+                  [(clrDgPage)]="page"
+                  [clrDgLastPage]="totalPages"
+                >
+                  <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]"> Records per page</clr-dg-page-size>
+                  {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ pagination.totalItems }} Records
+                </clr-dg-pagination>
+              </clr-dg-footer>
+            </clr-datagrid>
+          </div>
+          <div *ngIf="loadingReview" class="annotationLoading">
+            <span class="spinner spinner-md" style="margin-top: 3rem; margin-bottom: -0.6rem"> Loading... </span>
+            <span class="loadingSpan"> Loading Annotation Data, Please Wait... </span>
           </div>
         </clr-tab-content>
       </clr-tab>
