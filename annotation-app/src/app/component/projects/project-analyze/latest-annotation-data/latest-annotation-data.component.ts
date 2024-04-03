@@ -11,7 +11,6 @@ import { ColorsRainbow } from '../../../../model/constant';
 import * as _ from 'lodash';
 import { LabelStudioService } from 'src/app/services/label-studio.service';
 import { WebAnalyticsService } from 'src/app/services/web-analytics.service';
-import { dataClusterIcon } from '@cds/core/icon';
 
 enableProdMode();
 
@@ -65,6 +64,7 @@ export class LatestAnnotationDataComponent implements OnInit {
   treeData: any;
   loadingReview: boolean = true;
   filteredTotal: number;
+  replaceStatus: string;
 
   constructor(
     private apiService: ApiService,
@@ -386,7 +386,7 @@ export class LatestAnnotationDataComponent implements OnInit {
           const resCopy = JSON.parse(JSON.stringify(res));
           const oldRes = JSON.parse(JSON.stringify(res.data));
           this.totalItems = res.pageInfo.totalRowss;
-          if (from == 'filter' && this.getALLSrsParam.fname) {
+          if (from == 'filter') {
             this.filteredTotal = res.pageInfo.totalRowss;
           }
           this.totalPages = res.pageInfo.totalPages;
@@ -458,7 +458,7 @@ export class LatestAnnotationDataComponent implements OnInit {
                 // to sort data for data review tab under analyze
                 element.displayDate =
                   (element.reviewInfo.userInputs.length > 0 &&
-                    element.reviewInfo.userInputs[0].problemCategory.length) > 0
+                    element.reviewInfo.userInputs[0].problemCategory?.length) > 0
                     ? element.reviewInfo.userInputs[0].problemCategory
                     : element.userInputs[0].problemCategory;
               }
@@ -786,23 +786,24 @@ export class LatestAnnotationDataComponent implements OnInit {
   }
 
   filterReference(e) {
+    this.replaceStatus = '';
     this.getALLSrsParam.reference = e.trim();
-    this.getALLSrs();
+    this.getALLSrs('filter');
   }
 
-  filterResponse(e) {
-    this.getALLSrsParam.response = e.trim();
-    // this.getALLSrs();
-  }
+  // filterResponse(e) {
+  //   this.getALLSrsParam.response = e.trim();
+  //   this.getALLSrs();
+  // }
 
   replace(e) {
-    console.log(88, e);
     let param = {
       pid: this.msg?._id,
       reference: { old: e.filter, new: e.replace },
     };
     this.apiService.passTicket(param).subscribe((res) => {
-      console.log(555, res);
+      this.replaceStatus = 'succeed';
+      this.getALLSrs('filter');
     });
   }
 }

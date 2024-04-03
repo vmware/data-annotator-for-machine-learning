@@ -74,6 +74,8 @@ export class CreateProjectComponent implements OnInit {
   user: any;
   wizardpage: ClrWizardPage;
   taskNameInput = new Subject<string>();
+  existingQA: boolean = false;
+
   constructor(
     private apiService: ApiService,
     private formBuilder: FormBuilder,
@@ -537,11 +539,12 @@ export class CreateProjectComponent implements OnInit {
   }
 
   getMyDatasets(projectType) {
-    if (projectType == 'qaChat') {
-      return;
-    }
     let a =
-      projectType == 'text' || projectType == 'tabular' || projectType == 'ner' || projectType == 'qa'
+      projectType == 'text' ||
+      projectType == 'tabular' ||
+      projectType == 'ner' ||
+      projectType == 'qa' ||
+      projectType == 'qaChat'
         ? 'csv'
         : projectType == 'image'
         ? 'image'
@@ -693,7 +696,11 @@ export class CreateProjectComponent implements OnInit {
     let indexArray = [];
     let textArray = this.checkboxChecked;
     let selectedLabelIndex = this.previewHeadDatas.indexOf(this.dropdownSelected);
-    if (this.dsDialogForm.get('projectType').value === 'ner' || this.dsDialogForm.get('projectType').value === 'qa') {
+    if (
+      this.dsDialogForm.get('projectType').value === 'ner' ||
+      this.dsDialogForm.get('projectType').value === 'qa' ||
+      this.existingQA
+    ) {
       selectedLabelIndex = -1;
       textArray = [this.dropdownSelected];
     }
@@ -1181,6 +1188,9 @@ export class CreateProjectComponent implements OnInit {
     if (this.dsDialogForm.value.projectType === 'qaChat') {
       formData.append('isMultipleLabel', 'true');
       formData.append('labels', '');
+      if (this.existingQA) {
+        formData.append('selectLabels', JSON.stringify([this.dropdownSelected]));
+      }
       return this.apiService.postDataset(formData);
     }
     formData.append('ticketDescription', this.dsDialogForm.value.annotationDisplayName);
@@ -1328,5 +1338,9 @@ export class CreateProjectComponent implements OnInit {
     } else {
       this.dsDialogForm.get('regression').setValue({ regression: false });
     }
+  }
+
+  uploadExistingQa(e) {
+    e == 'y' ? (this.existingQA = true) : (this.existingQA = false);
   }
 }

@@ -57,13 +57,16 @@ SPDX-License-Identifier: Apache-2.0 -->
                 class="clr-input"
                 [ngModelOptions]="{ standalone: true }"
                 [(ngModel)]="inputString1"
+                (ngModelChange)="change()"
                 autocomplete="off"
               />
             </div>
           </div>
         </div>
         <div style="margin-top: 1rem">
-          <button class="btn btn-primary btn-sm" type="button" (click)="replaceAll()">Replace All</button>
+          <button [clrLoading]="loadingReplace" class="btn btn-primary btn-sm" type="button" (click)="replaceAll()">
+            Replace All
+          </button>
         </div>
       </clr-tab-content>
     </clr-tab>

@@ -620,14 +620,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         <clr-tab-content>
           <div style="margin-bottom: 2rem">
             <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)" *ngIf="!loadingReview">
-              <clr-dg-column class="ellipsis-datagrid"></clr-dg-column>
+              <!-- <clr-dg-column class="ellipsis-datagrid"></clr-dg-column> -->
               <clr-dg-column class="ellipsis-datagrid">Index</clr-dg-column>
               <clr-dg-column class="ellipsis-datagrid">Prompt</clr-dg-column>
               <clr-dg-column class="ellipsis-datagrid"
                 >Response
-                <clr-dg-filter [clrDgFilter]="myFilter">
+                <!-- <clr-dg-filter [clrDgFilter]="myFilter">
                   <my-filter #myFilter [filteredTotal]="filteredTotal" (filter)="filterResponse($event)"></my-filter>
-                </clr-dg-filter>
+                </clr-dg-filter> -->
               </clr-dg-column>
               <clr-dg-column class="ellipsis-datagrid" style="min-width: 50%"
                 >Reference
@@ -636,6 +636,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     #myFilter
                     [filterMsg]="'filterReference'"
                     [filteredTotal]="filteredTotal"
+                    [replaceStatus]="replaceStatus"
                     (filter)="filterReference($event)"
                     (replace)="replace($event)"
                   ></my-filter>
@@ -643,9 +644,9 @@ SPDX-License-Identifier: Apache-2.0 -->
               </clr-dg-column>
               <ng-container *ngFor="let dataset of previewSrs; let j = index">
                 <clr-dg-row *ngFor="let qa of dataset.displayDate">
-                  <clr-dg-cell>
+                  <!-- <clr-dg-cell>
                     <cds-icon *ngIf="qa.followUps" shape="angle" style="transform: rotate(90deg)"></cds-icon>
-                  </clr-dg-cell>
+                  </clr-dg-cell> -->
                   <clr-dg-cell>{{ qa.followUps ? j + 1 : '' }}</clr-dg-cell>
                   <clr-dg-cell>{{ qa.prompt }}</clr-dg-cell>
                   <clr-dg-cell>{{ qa.response }}</clr-dg-cell>

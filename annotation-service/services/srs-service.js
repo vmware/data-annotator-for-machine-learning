@@ -23,7 +23,8 @@ const fileSystemUtils = require('../utils/fileSystem.utils');
 const config = require('../config/config');
 const { reduceHierarchicalUnselectedLabel, initHierarchicalLabelsCase } = require('./project.service');
 const MESSAGE = require('../config/code_msg');
-const {updateDatasetProjectInfo} = require('./dataSet-service')
+const {updateDatasetProjectInfo} = require('./dataSet-service');
+const { query } = require("express");
 
 async function updateSrsUserInput(req, from) {
 
@@ -412,42 +413,33 @@ async function getALLSrs(req) {
     }
     if (mp.project.projectType == PROJECTTYPE.QACHAT) {
         if(req.query.reference){
-            let value={$regex: req.query.reference}
+            let filter=new RegExp(req.query.reference, 'g');
             query.$or=[
                 {
                 "reviewInfo.modified":true,
+                "reviewInfo.reviewed":true,
                 $or:[
-                    {"reviewInfo.userInputs.problemCategory.reference":value},
-                    {"reviewInfo.userInputs.problemCategory.followUps.reference":value}
+                    {"reviewInfo.userInputs.problemCategory.reference":filter},
+                    {"reviewInfo.userInputs.problemCategory.followUps.reference":filter}
                 ]
                 },
                 {
                 "reviewInfo.reviewed":false,
                 $or:[
-                    {"questionForText.reference":value},
-                    {"questionForText.followUps.reference":value}
+                    {"questionForText.reference":filter},
+                    {"questionForText.followUps.reference":filter}
+                ]
+                },
+                {
+                "reviewInfo.reviewed":true,
+                "reviewInfo.passed":true,
+                $or:[
+                    {"questionForText.reference":filter},
+                    {"questionForText.followUps.reference":filter}
                 ]
                 }
             ]
         }
-        // if(req.query.prompt){
-        //     let value={$regex: req.query.prompt}
-        //     query.$or=[
-        //         {"reviewInfo.userInputs.problemCategory.prompt":value},
-        //         {"reviewInfo.userInputs.problemCategory.followUps.prompt":value},
-        //         {"questionForText.prompt":value},
-        //         {"questionForText.followUps.prompt":value}
-        //     ]
-        // }
-        // if(req.query.response){
-        //     let value={$regex: req.query.response}
-        //     query.$or=[
-        //         {"reviewInfo.userInputs.problemCategory.response":value},
-        //         {"reviewInfo.userInputs.problemCategory.followUps.response":value},
-        //         {"questionForText.response":value},
-        //         {"questionForText.followUps.response":value}
-        //     ]
-        // }
     }
     let options = { page: parseInt(req.query.page), limit: parseInt(req.query.limit), sort: { userInputsLength: -1,  reviewedTime: 1, _id: 1 } };
     const data = await mongoDb.paginateQuery(mp.model, query, options);
@@ -1018,57 +1010,242 @@ async function reviewTicket(req) {
             await passReview(mp, tid, user);
         }
     }
+    if(!req.body.tid && req.body.reference){
+        await reviewToReplace(mp,req)
+    }
+
 
     // to review ticket according to filtered
-    if(!req.body.tid && req.body.reference){
-        const projectName = mp.project.projectName;
-        let query = { projectName: projectName };
-        if(req.query.reference){
-            let value={$regex: `/${req.body.reference.old}/`}
-            query.$or=[
-                {
-                "reviewInfo.modified":true,
-                $or:[
-                    {"reviewInfo.userInputs.problemCategory.reference":value},
-                    {"reviewInfo.userInputs.problemCategory.followUps.reference":value}
-                ]
-                },
-                {
-                "reviewInfo.reviewed":false,
-                $or:[
-                    {"questionForText.reference":value},
-                    {"questionForText.followUps.reference":value}
-                ]
-                }
-            ]
-        }
-        update = { $set: { "reviewInfo.userInputs.$[elem].problemCategory.reference": {
-                        $replaceOne: {
-                            input: "$reviewInfo.userInputs.$[elem].problemCategory.reference",
-                            find: req.body.reference.old,
-                            replacement: req.body.reference.new
-                        }
-                        },
-                        "reviewInfo.userInputs.$[elem].problemCategory.followUps.reference": {
-                            $replaceOne: {
-                                input: "$reviewInfo.userInputs.$[elem].problemCategory.followUps.reference",
-                                find: req.body.reference.old,
-                                replacement: req.body.reference.new
-                            }
-                            },"reviewInfo.review": false,
-                            "reviewInfo.passed": false,
-                            "reviewInfo.reviewed": true,
-                            "reviewInfo.modified": true,
-                            "reviewInfo.user": user,
-                            "reviewInfo.reviewedTime": Date.now()
-                    },
-                    $pull: {
-                        "reviewInfo.userInputs": {user: user}
-                    }};
-        await mongoDb.updateManyByConditions(mp.model, query, update);
-    }
+//     if(!req.body.tid && req.body.reference){
+//         const projectName = mp.project.projectName;
+//         let query = { projectName: projectName };
+//         if(req.body.reference){
+//             let value={$regex: req.body.reference.old}
+//             console.log(999,value)       
+//             query.$or=[
+//                 {
+//                 "reviewInfo.modified":true,
+//                 $or:[
+//                     {"reviewInfo.userInputs.$[elem].problemCategory.reference":value},
+//                     {"reviewInfo.userInputs.$[elem].problemCategory.followUps.$[elem].reference":value}
+//                 ]
+//                 },
+//                 {
+//                 "reviewInfo.reviewed":false,
+//                 $or:[
+//                     {"questionForText.reference":value},
+//                     {"questionForText.followUps.$[elem].reference":value}
+//                 ]
+//                 }
+//             ]
+//         }
+//         let update = { 
+//             $set: {
+//             "reviewInfo.review": false,
+//             "reviewInfo.passed": false,
+//             "reviewInfo.reviewed": true,
+//             "reviewInfo.modified": true,
+//             "reviewInfo.user": user,
+//             "reviewInfo.reviewedTime": Date.now()
+//             }
+//         };
+//         update.$set= {
+//             "reviewInfo.userInputs.0.problemCategory.reference.$[element]": {
+//               $regexReplace: {
+//                 input: "$reviewInfo.userInputs.0.problemCategory.reference.$[element]",
+//                 find: req.body.reference.old,
+//                 replacement: req.body.reference.new
+//               }
+//             }
+//           }
+//         // update.$replaceAll={
+//         //     input: "$reviewInfo.userInputs.$[].problemCategory.reference",
+//         //     find: req.body.reference.old,
+//         //     replacement: req.body.reference.new
+//         // }
+//         // let update = { $set: { 
+//         //                     "reviewInfo.userInputs.problemCategory.reference": {
+//         //                         $replaceOne: {
+//         //                         input: "$reviewInfo.userInputs.problemCategory.reference",
+//         //                         find: req.body.reference.old,
+//         //                         replacement: req.body.reference.new
+//         //                         }
+//         //                     },
+//         //                     "reviewInfo.userInputs.problemCategory.followUps.reference": {
+//         //                         $replaceOne: {
+//         //                         input: "$reviewInfo.userInputs.problemCategory.followUps.reference",
+//         //                         find: req.body.reference.old,
+//         //                         replacement: req.body.reference.new
+//         //                         }
+//         //                     },
+//         //                     "reviewInfo.review": false,
+//         //                     "reviewInfo.passed": false,
+//         //                     "reviewInfo.reviewed": true,
+//         //                     "reviewInfo.modified": true,
+//         //                     "reviewInfo.user": user,
+//         //                     "reviewInfo.reviewedTime": Date.now()
+//         //             },
+//         //             $pull: {
+//         //                 "reviewInfo.userInputs": {user: user}
+//         //             }};
+
+
+//         // if(req.body.reference){
+//         //     let value={$regex: `/${req.body.reference.old}/`}
+//         //     // let value={$regex: req.body.reference.old}
+//         //     console.log(999,value,req.body.reference.new)     
+//         //     query["reviewInfo.modified"]=true
+//         //     query["reviewInfo.userInputs.problemCategory.reference"]={ $exists: true }
+//         //     let update = { $set: {"reviewInfo.userInputs.0.problemCategory.reference.$[element]": req.body.reference.new}}
+//         //     let options = { arrayFilters: [{ "element":value }] }
+//         //     await mongoDb.updateManyByConditions(mp.model, query, update,options);
+//         // }
+
+//         // Assuming you have an array of documents with the "reviewInfo" field
+// // and each document has an array of "userInputs" with "problemCategory" containing "reference" field
+
+// // Sample data
+// const documents = [
+//     {
+//         reviewInfo: {
+//             userInputs: [
+//                 {
+//                     problemCategory: {
+//                         reference: ["17link17", "sjdhfgjhd"]
+//                     }
+//                 }
+//             ]
+//         }
+//     },
+//     // Add more documents here...
+// ];
+
+// // // Function to recursively search and replace "17" with "18"
+// // function searchAndReplace(obj) {
+// //     if (typeof obj === 'object') {
+// //         for (const key in obj) {
+// //             if (key === 'reference' && Array.isArray(obj[key])) {
+// //                 // Replace "17" with "18" in the list
+// //                 obj[key] = obj[key].map(item => item.replace('17', '18'));
+// //             } else {
+// //                 searchAndReplace(obj[key]);
+// //             }
+// //         }
+// //     }
+// // }
+
+// // // Iterate over each document
+// // for (const doc of documents) {
+// //     searchAndReplace(doc);
+// // }
+
+// // // Print the updated documents
+// // for (const doc of documents) {
+// //     console.log(doc);
+// // }
+
+//         const options = { new: true };
+//         console.log(666,query)
+//         await mongoDb.updateManyByConditions(mp.model, query, update,options);
+
+//                     };
+   
+    
+    
 }
 
+async function reviewToReplace(mp, req) {
+    const user = req.auth.email;
+    let old = req.body.reference.old;
+    let replace = req.body.reference.new;
+    let filter=new RegExp(old, 'g');
+    console.log(`[ SRS ] Service reviewToReplace coming filter:`, filter);
+    let query = { projectName: mp.project.projectName };
+    query.$or=[
+        {
+        "reviewInfo.modified":true,
+        "reviewInfo.reviewed":true,
+        $or:[
+            {"reviewInfo.userInputs.problemCategory.reference":filter},
+            {"reviewInfo.userInputs.problemCategory.followUps.reference":filter}
+        ]
+        },
+        {
+        "reviewInfo.reviewed":false,
+        $or:[
+            {"questionForText.reference":filter},
+            {"questionForText.followUps.reference":filter}
+        ]
+        },
+        {
+        "reviewInfo.reviewed":true,
+        "reviewInfo.passed":true,
+        $or:[
+            {"questionForText.reference":filter},
+            {"questionForText.followUps.reference":filter}
+        ]
+        }
+    ]
+    const cursor = await mongoDb.findByConditions(mp.model, query);
+    console.log(`[ SRS ] Service reviewToReplace filtered total:`, cursor.length);
+    let updatedReferences;
+    await cursor.forEach(async (doc) => {
+        let timestamp=Date.now();
+        if(doc.reviewInfo.reviewed && doc.reviewInfo.modified && !doc.reviewInfo.passed){
+            updatedReferences = doc.reviewInfo.userInputs.map((input) => {
+                let updatedProblemCategory = {
+                    ...input.problemCategory,
+                    reference: input.problemCategory.reference.map((ref) => ref.replace(filter, replace)),
+                    // followUps: input.problemCategory.followUps.map(async (follows) => {follows.reference.map((ref) => ref.replace(filter, replace))})
+                };
+                let aa=[];
+                input.problemCategory.followUps.map(async (follows) => {
+                    let bb={
+                        ...follows,
+                        reference:follows.reference.map((ref) => ref.replace(filter, replace))
+                    }
+                    aa.push(bb)
+                    })
+                updatedProblemCategory.followUps=aa
+                return { ...input, problemCategory: updatedProblemCategory };
+            });
+        }
+        if((doc.reviewInfo.reviewed && !doc.reviewInfo.modified && doc.reviewInfo.passed)||!doc.reviewInfo.reviewed){
+            updatedReferences = doc.questionForText.map((input) => {
+                let updatedProblemCategory = {
+                    ...input,
+                    reference: input.reference.map((ref) => ref.replace(filter, replace)),
+                    // followUps: input.followUps.forEach((follows) => {follows.reference.map((ref) => ref.replace(filter, replace))})
+                };
+                let aa=[];
+                input.followUps.map(async (follows) => {
+                    let bb={
+                        ...follows,
+                        reference:follows.reference.map((ref) => ref.replace(filter, replace))
+                    }
+                    aa.push(bb)
+                    })
+                updatedProblemCategory.followUps=aa
+                return { user:user,timestamp: timestamp,problemCategory: updatedProblemCategory };
+            });
+        }
+        
+        // Update the document
+        console.log(`[ SRS ] Service reviewToReplace updatedReferences:`, updatedReferences);
+        const update = {
+            $set: {
+                "reviewInfo.review": false,
+                "reviewInfo.passed": false,
+                "reviewInfo.reviewed": true,
+                "reviewInfo.modified": true,
+                "reviewInfo.user": user,
+                "reviewInfo.reviewedTime": timestamp,
+                'reviewInfo.userInputs': updatedReferences
+            }
+        }
+        await mongoDb.findOneAndUpdate(mp.model, { _id: doc._id }, update);
+    });
+}
 
 async function flagToReview(mp, tid) {
     const conditions = { _id: {$in: tid} };

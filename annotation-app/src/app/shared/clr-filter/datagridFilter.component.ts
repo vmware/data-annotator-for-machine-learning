@@ -6,6 +6,7 @@ import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@
 import { ClrDatagridFilterInterface, ClrDatagridFilter } from '@clr/angular';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ClrLoadingState } from '@clr/angular';
 
 @Component({
   selector: 'my-filter',
@@ -15,6 +16,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 export class MyFilter implements ClrDatagridFilterInterface<any> {
   @Input() filterMsg?: any;
   @Input() filteredTotal;
+  @Input() replaceStatus;
   @Output() filter = new EventEmitter();
   @Output() replace = new EventEmitter();
 
@@ -25,6 +27,7 @@ export class MyFilter implements ClrDatagridFilterInterface<any> {
   inputStringFilter = new Subject<string>();
   changes = new Subject<any>();
   inputString1: string = '';
+  loadingReplace: ClrLoadingState = ClrLoadingState.DEFAULT;
 
   constructor(private filterContainer: ClrDatagridFilter) {
     setTimeout(() => {
@@ -33,8 +36,15 @@ export class MyFilter implements ClrDatagridFilterInterface<any> {
     filterContainer.setFilter(this);
     this.inputStringFilter.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
       console.log(555, this.inputString, value);
+      this.loadingReplace = ClrLoadingState.DEFAULT;
       this.filter.emit(value.trim());
     });
+  }
+
+  ngOnChanges() {
+    if (this.replaceStatus == 'succeed') {
+      this.loadingReplace = ClrLoadingState.SUCCESS;
+    }
   }
 
   isActive(): boolean {
@@ -45,8 +55,13 @@ export class MyFilter implements ClrDatagridFilterInterface<any> {
     return true;
   }
 
+  change() {
+    this.loadingReplace = ClrLoadingState.DEFAULT;
+  }
+
   replaceAll() {
     if (this.inputString.trim() && this.filteredTotal && this.filteredTotal > 0 && this.inputString1.trim()) {
+      this.loadingReplace = ClrLoadingState.LOADING;
       let data = {
         filter: this.inputString.trim(),
         replace: this.inputString1.trim(),
