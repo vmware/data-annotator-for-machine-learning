@@ -390,6 +390,7 @@ Please confirm that your every row under the selected column keep the same key a
                 [ngModelOptions]="{ standalone: true }"
               >
                 <ng-container *ngFor="let header of previewHeadDatas">
+                  <option *ngIf="!existingQA" value="" style="display: none"></option>
                   <option [value]="header">
                     {{ header }}
                   </option>

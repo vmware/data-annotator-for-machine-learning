@@ -377,7 +377,39 @@ SPDX-License-Identifier: Apache-2.0 -->
               : dsDialogForm.get('projectType').value === 'qaChat' && existingQA
               ? 'Select Existing Q&A Column'
               : 'Select Label Column'
-          }}<span>*</span></label
+          }}<span>*</span
+          ><clr-signpost *ngIf="dsDialogForm.get('projectType').value === 'qaChat' && existingQA">
+            <clr-signpost-content *clrIfOpen>
+              <pre>
+Please confirm that your every row under the selected column keep the same key as the following formatted data.
+        
+{{ '{' }}
+  "prompt": "What types of projects are supported?",
+  "response": "Text,tabular,image,log,ner and qa.",
+  "reference": [
+    "https://***.***.com"
+  ],
+  "followUps": [
+    {{ '{' }}
+      "prompt": "What is the format for downloading annotated data?",
+      "response": "Each label type is captured as a new column in the export CSV. Each row contains the number of annotations for a label type.",
+      "reference": [
+        "https://*.***.**",
+        "https://*.***.**",
+        "https://*.***.**"
+      ]
+    {{ '}' }},
+    {{ '{' }}
+      "prompt": "When will you support more other annotation tasks?",
+      "response": "This is on our roadmap.",
+      "reference": []
+    {{ '}' }}
+  ]
+{{ '}' }}
+                </pre
+              >
+            </clr-signpost-content>
+          </clr-signpost></label
         >
         <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
           <select
@@ -387,7 +419,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             (change)="selectedItem(dropdownSelected)"
             [ngModelOptions]="{ standalone: true }"
           >
-            <!-- <option ngif="!dropdownSelected" value="" style="display: none"></option> -->
+            <option *ngIf="!dropdownSelected" value="" style="display: none"></option>
             <option *ngIf="dsDialogForm.get('projectType').value != 'ner' && !existingQA" value="No Labels">
               No Labels
             </option>

@@ -87,13 +87,6 @@ export class AppendComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.msg.projectType == 'qaChat') {
-      this.isQuick = false;
-    } else {
-      this.isQuick = true;
-      this.getAnExample();
-    }
-    this.loading = true;
     this.nameExist = false;
     this.loadPreviewTable = false;
     this.isShowExample = false;
@@ -112,6 +105,15 @@ export class AppendComponent implements OnInit {
           : 'csv',
       page: 'create',
     };
+  }
+
+  ngOnChanges() {
+    if (this.msg && this.msg.projectType == 'qaChat') {
+      this.isQuick = false;
+    } else {
+      this.isQuick = true;
+      this.getAnExample();
+    }
   }
 
   shiftBtnRadio(val) {
@@ -142,6 +144,7 @@ export class AppendComponent implements OnInit {
   }
 
   private getAnExample() {
+    this.loading = true;
     if (this.msg.projectType == 'image') {
       const flag = {
         src: '/',
