@@ -62,6 +62,9 @@ export class LatestAnnotationDataComponent implements OnInit {
   formerFilenameFilter: string;
   showTreeView: boolean;
   treeData: any;
+  loadingReview: boolean = true;
+  filteredTotal: number;
+  replaceStatus: string;
 
   constructor(
     private apiService: ApiService,
@@ -96,6 +99,9 @@ export class LatestAnnotationDataComponent implements OnInit {
       limit: this.pageSize,
       id: this.msg?._id,
       fname: '',
+      reference: '',
+      prompt: '',
+      response: '',
     };
     this.isInit = 1;
     this.isInitFlag = 1;
@@ -371,7 +377,8 @@ export class LatestAnnotationDataComponent implements OnInit {
     }
   }
 
-  getALLSrs() {
+  // getALLSrs(from?:'tab3'/'filter')
+  getALLSrs(from?) {
     this.loading = true;
     this.apiService.getALLSrs(this.getALLSrsParam).subscribe(
       (res) => {
@@ -379,6 +386,9 @@ export class LatestAnnotationDataComponent implements OnInit {
           const resCopy = JSON.parse(JSON.stringify(res));
           const oldRes = JSON.parse(JSON.stringify(res.data));
           this.totalItems = res.pageInfo.totalRowss;
+          if (from == 'filter') {
+            this.filteredTotal = res.pageInfo.totalRowss;
+          }
           this.totalPages = res.pageInfo.totalPages;
           const flag = [];
           const cellContent = [];
@@ -445,6 +455,12 @@ export class LatestAnnotationDataComponent implements OnInit {
                     ...element.reviewInfo.userInputs[0].problemCategory.followUps,
                   ];
                 }
+                // to sort data for data review tab under analyze
+                element.displayDate =
+                  (element.reviewInfo.userInputs.length > 0 &&
+                    element.reviewInfo.userInputs[0].problemCategory?.length) > 0
+                    ? element.reviewInfo.userInputs[0].problemCategory
+                    : element.userInputs[0].problemCategory;
               }
               if (
                 element.userInputs.length > 0 &&
@@ -496,6 +512,9 @@ export class LatestAnnotationDataComponent implements OnInit {
             this.toRenewPreviewSrs();
           }
           this.firstLoadTable = false;
+          if (from === 'tab3') {
+            this.loadingReview = false;
+          }
         }
       },
       (error: any) => {
@@ -632,6 +651,17 @@ export class LatestAnnotationDataComponent implements OnInit {
     this.selectAllStatus = false;
   }
 
+  refreshReview(event) {
+    if (event && event.page && this.isInit != 1) {
+      this.getALLSrsParam.pageNumber = event.page.from / event.page.size + 1;
+      this.getALLSrsParam.limit = event.page.size;
+      this.getALLSrs();
+    }
+    this.isInit = 0;
+    this.selectedLogsToModify = [];
+    this.selectAllStatus = false;
+  }
+
   refreshFlag(event) {
     if (event && event.page && this.isInitFlag != 1) {
       this.getALLSrsParam.pageNumber = event.page.from / event.page.size + 1;
@@ -650,9 +680,9 @@ export class LatestAnnotationDataComponent implements OnInit {
     }
   }
 
-  delete(data, type) {
-    if (this.selectedFlag.length > 0 || data != undefined) {
-      this.loadingFlag = true;
+  // from:'dataReview'
+  delete(data, type, from?) {
+    if (this.selectedFlag?.length > 0 || data != undefined) {
       const param = {
         pname: this.msg.projectName,
         tids: this.selectedFlag,
@@ -660,14 +690,19 @@ export class LatestAnnotationDataComponent implements OnInit {
       type == 'multiple' ? (param.tids = this.selectedFlag) : (param.tids = [data.id]);
       this.apiService.deleteTicket(param).subscribe(
         (response) => {
-          this.getALLFlag();
-          this.selected = [];
-          if (this.env.config.embedded && this.env.config.lumosUrl) {
-            this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task_Analyze', 'Flag_Delete', type);
+          if (from && from == 'dataReview') {
+            this.getALLSrs();
+          } else {
+            this.getALLFlag();
+            this.selected = [];
+            if (this.env.config.embedded && this.env.config.lumosUrl) {
+              this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task_Analyze', 'Flag_Delete', type);
+            }
           }
         },
         (error) => {
           this.loadingFlag = false;
+          this.loading = false;
         },
       );
     }
@@ -721,17 +756,26 @@ export class LatestAnnotationDataComponent implements OnInit {
   }
 
   receiveFilename(data) {
+    data = data.trim();
     if (this.formerFilenameFilter !== data) {
       this.formerFilenameFilter = data;
       this.getALLSrsParam.pageNumber = 1;
     }
     this.getALLSrsParam.fname = data;
-    this.getALLSrs();
+    if (data == '') {
+      this.filteredTotal = 0;
+      this.getALLSrs();
+    } else {
+      this.getALLSrs('filter');
+    }
   }
 
   clickFlagTab() {
     this.formerFilenameFilter = '';
     this.getALLSrsParam.fname = '';
+    this.getALLSrsParam.reference = '';
+    this.getALLSrsParam.prompt = '';
+    this.getALLSrsParam.response = '';
   }
 
   getChildren = (folder) => folder.children;
@@ -743,5 +787,37 @@ export class LatestAnnotationDataComponent implements OnInit {
 
   onCloseTreeDialog() {
     this.showTreeView = false;
+  }
+
+  clickDataReview() {
+    this.getALLSrs('tab3');
+  }
+
+  filterReference(e) {
+    e = e.trim();
+    this.replaceStatus = '';
+    this.getALLSrsParam.reference = e;
+    if (e == '') {
+      this.filteredTotal = 0;
+      this.getALLSrs();
+    } else {
+      this.getALLSrs('filter');
+    }
+  }
+
+  // filterResponse(e) {
+  //   this.getALLSrsParam.response = e.trim();
+  //   this.getALLSrs();
+  // }
+
+  replace(e) {
+    let param = {
+      pid: this.msg?._id,
+      reference: { old: e.filter, new: e.replace },
+    };
+    this.apiService.passTicket(param).subscribe((res) => {
+      this.replaceStatus = 'succeed';
+      this.getALLSrs('filter');
+    });
   }
 }

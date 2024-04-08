@@ -48,11 +48,11 @@ import {
   pencilIcon,
   plusIcon,
   checkboxListIcon,
-  refreshIconName,
   refreshIcon,
   sadFaceIcon,
   circleArrowIcon,
   timesCircleIcon,
+  linkIcon,
 } from '@cds/core/icon';
 import { ClrSpinner } from '@clr/angular';
 
@@ -103,6 +103,7 @@ ClarityIcons.addIcons(
   sadFaceIcon,
   circleArrowIcon,
   timesCircleIcon,
+  linkIcon,
 );
 
 @Injectable({

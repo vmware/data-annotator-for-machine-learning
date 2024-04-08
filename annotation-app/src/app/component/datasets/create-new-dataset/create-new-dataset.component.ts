@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -155,56 +155,6 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
       this.outFormDataEmitter.emit(false);
     }
   }
-
-  // papaParse() {
-  //   const previewData = [];
-  //   const hasHeader = this.uploadGroup.get('hasHeader').value === 'yes' ? true : false;
-  //   if (this.uploadGroup.get('localFile').value) {
-  //     this.unZipService.parseCSVChunk(this.uploadGroup.get('localFile').value, hasHeader, false).then((res) => {
-  //       console.log(151, res);
-  //       this.previewHeadDatas = res.previewHeadDatas;
-  //       this.previewContentDatas = res.topReview;
-  //     });
-  //     // return new Promise((resolve, reject) => {
-  //     //   this.papa.parse(this.uploadGroup.get('localFile').value, {
-  //     //     header: false,
-  //     //     // preview: 20,
-  //     //     dynamicTyping: true,
-  //     //     skipEmptyLines: true,
-  //     //     error: (error) => {
-  //     //       console.log('parse_error: ', error);
-  //     //     },
-  //     //     step: (results, parser) => {
-  //     //       // check csv headers is empty.
-  //     //       if (hasHeader === 'yes') {
-  //     //         const data = results.data.map((item) => item && String(item).trim());
-  //     //         if (_.sortedUniq(data).includes(null) || _.sortedUniq(data).includes('')) {
-  //     //           reject(false);
-  //     //         }
-  //     //       }
-  //     //       if (!(_.sortedUniq(results.data).length == 1 && _.sortedUniq(results.data)[0] == null)) {
-  //     //         previewData.push(results.data);
-  //     //       }
-  //     //       if (previewData.length < 7) {
-  //     //         this.previewHeadDatas = [];
-  //     //         if (hasHeader == 'yes') {
-  //     //           this.previewHeadDatas = previewData[0];
-  //     //           this.previewContentDatas = previewData.slice(1, 6);
-  //     //           // resolve(null);
-  //     //         } else {
-  //     //           for (let i = 0; i < previewData[0].length; i++) {
-  //     //             this.previewHeadDatas.push('Header' + i);
-  //     //           }
-  //     //           this.previewContentDatas = previewData.slice(0, 5);
-  //     //           // resolve(null);
-  //     //         }
-  //     //       }
-  //     //     },
-
-  //     //   });
-  //     // });
-  //   }
-  // }
 
   toPostDatasets(uploadFormat, formData, params): void {
     let postData;
@@ -435,21 +385,6 @@ export class CreateNewDatasetComponent implements OnInit, OnChanges {
                   return;
                 });
             }
-
-            // this.papaParse()
-            //   .then((e) => {
-            //     if (this.env.config.enableAWSS3) {
-            //       this.uploadToS3(inputFile);
-            //     } else {
-            //       this.updateDatasets('data');
-            //     }
-            //   })
-            //   .catch((err) => {
-            //     console.log(err);
-            //     this.errorMessage = JSON.stringify(err);
-            //     this.outUploadDoneEmitter.emit('no');
-            //     return;
-            //   });
           }
           if (this.uploadGroup.get('fileFormat').value == 'image') {
             if (this.env.config.enableAWSS3) {

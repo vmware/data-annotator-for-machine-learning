@@ -1,4 +1,4 @@
-<!-- Copyright 2019-2023 VMware, Inc.
+<!-- Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0 -->
 
 <div>
@@ -20,10 +20,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       >Before you upload, make sure your new file contains the same original headers. Then choose a data source.</span
     >
   </div>
-  <div class="clr-col-4 btn-group floatRight btn-sm">
+  <div class="clr-col-4 btn-group floatRight btn-sm" *ngIf="msg.projectType !== 'qaChat'">
     <div class="radio btn">
       <input type="radio" name="btn-group-demo-radios" id="btn-demo-radio-1" checked />
-      <label for="btn-demo-radio-1" (click)="shiftBtnRadio('quick')">Quick Add</label>
+      <label for="btn-demo-radio-1" (click)="shiftBtnRadio('quick')" disabled>Quick Add</label>
     </div>
     <div class="radio btn">
       <input type="radio" name="btn-group-demo-radios" id="btn-demo-radio-2" />
@@ -38,18 +38,48 @@ SPDX-License-Identifier: Apache-2.0 -->
         View Example <cds-icon [ngClass]="!isShowExample ? 'exampleAngle' : ''" shape="angle"> </cds-icon>
       </button>
     </div>
-    <clr-datagrid *ngIf="isShowExample" [clrDgLoading]="loading">
-      <clr-dg-column style="max-width: 90px">S. No.</clr-dg-column>
-      <clr-dg-column *ngFor="let header of sampleData">
-        {{ header.key }}
-      </clr-dg-column>
-      <clr-dg-row>
-        <clr-dg-cell style="max-width: 90px">1</clr-dg-cell>
-        <clr-dg-cell *ngFor="let content of sampleData" style="padding-left: 0.8rem">
-          {{ content.value }}
-        </clr-dg-cell>
-      </clr-dg-row>
-    </clr-datagrid>
+    <div *ngIf="isShowExample">
+      <clr-datagrid *ngIf="msg.projectType !== 'qaChat'" [clrDgLoading]="loading">
+        <clr-dg-column style="max-width: 90px">S. No.</clr-dg-column>
+        <clr-dg-column *ngFor="let header of sampleData">
+          {{ header.key }}
+        </clr-dg-column>
+        <clr-dg-row>
+          <clr-dg-cell style="max-width: 90px">1</clr-dg-cell>
+          <clr-dg-cell *ngFor="let content of sampleData" style="padding-left: 0.8rem">
+            {{ content.value }}
+          </clr-dg-cell>
+        </clr-dg-row>
+      </clr-datagrid>
+      <pre *ngIf="msg.projectType == 'qaChat'">
+Please confirm that your every row under the selected column keep the same key as the following formatted data.
+        
+{{ '{' }}
+  "prompt": "What types of projects are supported?",
+  "response": "Text,tabular,image,log,ner and qa.",
+  "reference": [
+    "https://***.***.com"
+  ],
+  "followUps": [
+    {{ '{' }}
+      "prompt": "What is the format for downloading annotated data?",
+      "response": "Each label type is captured as a new column in the export CSV. Each row contains the number of annotations for a label type.",
+      "reference": [
+        "https://*.***.**",
+        "https://*.***.**",
+        "https://*.***.**"
+      ]
+    {{ '}' }},
+    {{ '{' }}
+      "prompt": "When will you support more other annotation tasks?",
+      "response": "This is on our roadmap.",
+      "reference": []
+    {{ '}' }}
+  ]
+{{ '}' }}
+    </pre
+      >
+    </div>
     <div *ngIf="isQuick" class="datagridBox">
       <clr-datagrid *ngIf="msg.projectType !== 'image' && msg.projectType !== 'log'" [clrDgLoading]="loading">
         <clr-dg-column style="max-width: 90px">S. No.</clr-dg-column>
@@ -58,9 +88,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           <clr-tooltip *ngIf="msg.projectType == 'qa' && header.key == 'questions'">
             <cds-icon clrTooltipTrigger role="img" shape="info-circle" size="24" aria-label="Uniq tooltip 5"></cds-icon>
             <clr-tooltip-content *clrIfOpen>
-                <span>Split multiple questions with the ?</span>
+              <span>Split multiple questions with the ?</span>
             </clr-tooltip-content>
-        </clr-tooltip>
+          </clr-tooltip>
         </clr-dg-column>
         <clr-dg-column style="max-width: 90px">Action</clr-dg-column>
         <clr-dg-row *ngFor="let content of newAddedData; let a = index">
@@ -341,6 +371,35 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
 
+        <!-- projectType is qaChat, regression is true, let uploader to set the existing Q&A column -->
+        <div
+          class="form-group clr-row"
+          style="margin-top: 2rem"
+          *ngIf="showPreviewTable && msg.projectType == 'qaChat'"
+        >
+          <label class="label-tooltip clr-col-2">
+            <label>Select Existing Q&A Column</label>
+          </label>
+          <div class="clr-input-wrapper clr-col-9">
+            <div class="clr-select-wrapper" style="width: 100% !important">
+              <select
+                style="width: 100% !important"
+                class="clr-select"
+                [(ngModel)]="existingQA"
+                (change)="selectedItem(existingQA)"
+                [ngModelOptions]="{ standalone: true }"
+              >
+                <ng-container *ngFor="let header of previewHeadDatas">
+                  <option *ngIf="!existingQA" value="" style="display: none"></option>
+                  <option [value]="header">
+                    {{ header }}
+                  </option>
+                </ng-container>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div class="form-group clr-row" style="margin-top: 2rem" *ngIf="showPreviewTable || msg.projectType == 'image'">
           <div class="clr-col-2">
             <label for="totalRow" class="label-tooltip"
@@ -415,23 +474,16 @@ SPDX-License-Identifier: Apache-2.0 -->
             </clr-datagrid>
           </div>
         </div>
-        
+
         <div class="form-group clr-row" style="margin-top: 2rem" *ngIf="showPreviewTable && msg.projectType == 'qa'">
           <label class="label-tooltip clr-col-2">
             <label>Questions column</label>
           </label>
           <div class="clr-input-wrapper clr-col-9">
             <div class="clr-select-wrapper" style="width: 100% !important">
-              <select
-                style="width: 100% !important"
-                id="select-basic"
-                class="clr-select"
-                formControlName="questions"
-                >
+              <select style="width: 100% !important" id="select-basic" class="clr-select" formControlName="questions">
                 <ng-container *ngFor="let header of previewHeadDatas">
-                  <option
-                    *ngIf="!originalHead.includes(header)"
-                    [value]="header">
+                  <option *ngIf="!originalHead.includes(header)" [value]="header">
                     {{ header }}
                   </option>
                 </ng-container>
@@ -439,7 +491,6 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
         </div>
-
       </form>
     </div>
     <div *ngIf="!isQuick" class="clr-row">

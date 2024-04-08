@@ -1,0 +1,15 @@
+/*
+Copyright 2019-2023 VMware, Inc.
+SPDX-License-Identifier: Apache-2.0
+*/
+.clr-form {
+  width: 20vw;
+
+  .clr-control-container {
+    width: 100%;
+
+    .clr-input {
+      width: 100%;
+    }
+  }
+}

@@ -589,6 +589,15 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   sortQaChatData(sr) {
+    // sort non-followups reference
+    let arrObj = [];
+    for (let i = 0; i < this.references.length; i++) {
+      if (this.references[i].text && !this.references[i].textErrMessage) {
+        arrObj.push(this.references[i].text);
+      }
+    }
+    sr.userInput[0].questionForText[0].reference = arrObj;
+    // sort followups
     let arr = [];
     for (let i = 0; i < this.followUps.length; i++) {
       if (this.followUps[i].prompt && this.followUps[i].response) {
@@ -663,7 +672,6 @@ export class ProjectAnalyzeComponent implements OnInit {
         ];
         this.annotationHistory[index].historyDescription = historyDescription;
         this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
-        console.log(612, this.annotationHistory);
       }
     }
   }
@@ -4571,22 +4579,28 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.followUps[chatIndex].reference[index].text = data;
     } else {
       this.references[index].text = data;
-      let arr = [];
-      for (let i = 0; i < this.references.length; i++) {
-        if (this.references[i].text && !this.references[i].textErrMessage) {
-          arr.push(this.references[i].text);
-        }
-      }
-      this.sr.userInput[0].questionForText[0].reference = arr;
+      // let arr = [];
+      // for (let i = 0; i < this.references.length; i++) {
+      //   if (this.references[i].text && !this.references[i].textErrMessage) {
+      //     arr.push(this.references[i].text);
+      //   }
+      // }
+      // this.sr.userInput[0].questionForText[0].reference = arr;
     }
   }
 
   deleteReference(index, chatIndex) {
     if (chatIndex > -1) {
+      if (this.followUps[chatIndex].reference.length == 1) {
+        this.followUps[chatIndex].reference = [{ text: '', textErrMessage: '' }];
+      }
       if (this.followUps[chatIndex].reference.length > 1) {
         this.followUps[chatIndex].reference.splice(index, 1);
       }
     } else {
+      if (this.references.length == 1) {
+        this.references = [{ text: '', textErrMessage: '' }];
+      }
       if (this.references.length > 1) {
         this.references.splice(index, 1);
       }

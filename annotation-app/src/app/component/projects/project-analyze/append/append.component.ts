@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -29,7 +29,7 @@ export class AppendComponent implements OnInit {
   @Input() msg: any;
   @ViewChild('uploadFile') uploadFile;
 
-  isQuick: boolean = true;
+  isQuick: boolean;
   user: string;
   loading: boolean;
   errorMessage = '';
@@ -60,6 +60,7 @@ export class AppendComponent implements OnInit {
   ticketQuestions: any = [];
   isShowExample: boolean;
   msgUploadFile;
+  existingQA: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -86,13 +87,11 @@ export class AppendComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loading = true;
     this.nameExist = false;
     this.loadPreviewTable = false;
     this.isShowExample = false;
     this.nonEnglish = 0;
     this.totalCase = 0;
-    this.getAnExample();
     this.createUploadForm();
     this.getMyDatasets();
     this.msgUploadFile = {
@@ -106,6 +105,15 @@ export class AppendComponent implements OnInit {
           : 'csv',
       page: 'create',
     };
+  }
+
+  ngOnChanges() {
+    if (this.msg && this.msg.projectType == 'qaChat') {
+      this.isQuick = false;
+    } else {
+      this.isQuick = true;
+      this.getAnExample();
+    }
   }
 
   shiftBtnRadio(val) {
@@ -136,6 +144,7 @@ export class AppendComponent implements OnInit {
   }
 
   private getAnExample() {
+    this.loading = true;
     if (this.msg.projectType == 'image') {
       const flag = {
         src: '/',
@@ -311,7 +320,11 @@ export class AppendComponent implements OnInit {
 
   private getMyDatasets() {
     const a =
-      this.msg.projectType == 'text' || this.msg.projectType == 'tabular' || this.msg.projectType == 'ner' || this.msg.projectType == 'qa'
+      this.msg.projectType == 'text' ||
+      this.msg.projectType == 'tabular' ||
+      this.msg.projectType == 'ner' ||
+      this.msg.projectType == 'qa' ||
+      this.msg.projectType == 'qaChat'
         ? 'csv'
         : this.msg.projectType == 'image'
         ? 'image'
@@ -351,7 +364,7 @@ export class AppendComponent implements OnInit {
       });
     } else {
       const params = {
-        columns: choosedDataset.topReview.header,
+        columns: this.msg.projectType !== 'qaChat' ? choosedDataset.topReview.header : [this.existingQA],
         location: choosedDataset.location,
         hasHeader: choosedDataset.hasHeader,
       };
@@ -382,6 +395,7 @@ export class AppendComponent implements OnInit {
     this.totalCase = 0;
     this.notValidInputfile();
     this.uploadGroup.get('totalRow').setValue(0);
+    this.existingQA = '';
     this.columnInfo = [];
     this.inputFile = null;
     this.uploadGroup.get('localFile').setValue(null);
@@ -438,7 +452,13 @@ export class AppendComponent implements OnInit {
           this.fixHeader = _.difference(this.originalHead, this.previewHeadDatas);
           this.setExistingLabelsforNer();
           if (this.fixHeader.length == 0) {
-            this.toCaculateTotalRow(choosedDataset, this.originalHead);
+            // this.toCaculateTotalRow(choosedDataset, this.originalHead);
+            if (this.msg.projectType !== 'qaChat') {
+              this.toCaculateTotalRow(choosedDataset, this.originalHead);
+            }
+            if (this.msg.projectType == 'qaChat') {
+              this.loadPreviewTable = false;
+            }
           } else {
             this.loadPreviewTable = false;
           }
@@ -462,6 +482,7 @@ export class AppendComponent implements OnInit {
       this.previewHeadDatas = [];
       this.previewContentDatas = [];
       this.uploadGroup.get('totalRow').setValue(0);
+      this.existingQA = '';
       this.nonEnglish = 0;
       this.columnInfo = [];
       this.uploadGroup.get('localFile').setValue(this.inputFile);
@@ -539,7 +560,7 @@ export class AppendComponent implements OnInit {
         this.previewContentDatas = res.previewContentDatas;
         this.previewHeadDatas = res.previewHeadDatas;
         this.fixHeader = _.difference(this.originalHead, this.previewHeadDatas);
-        if (this.fixHeader.length == 0) {
+        if (this.fixHeader.length == 0 && this.msg.projectType !== 'qaChat') {
           this.totalCase = res.count;
           this.nonEnglish = res.invalidCount;
           this.uploadGroup.get('totalRow').setValue(this.totalCase - this.nonEnglish);
@@ -584,6 +605,9 @@ export class AppendComponent implements OnInit {
         }
         if (this.msg.projectType === 'qa') {
           appendParams['questions'] = [this.uploadGroup.get('questions').value];
+        }
+        if (this.msg.projectType === 'qaChat') {
+          appendParams['questions'] = [this.existingQA];
         }
         this.appendSrs(appendParams);
       } else {
@@ -712,6 +736,9 @@ export class AppendComponent implements OnInit {
         if (this.msg.projectType === 'qa') {
           appendParams['questions'] = [this.uploadGroup.get('questions').value];
         }
+        if (this.msg.projectType === 'qaChat') {
+          appendParams['questions'] = [this.existingQA];
+        }
         this.appendSrs(appendParams);
       },
       (error) => {
@@ -751,7 +778,13 @@ export class AppendComponent implements OnInit {
       });
       formData.append('topReview', JSON.stringify(a));
       formData.append('totalRows', this.uploadGroup.get('totalRow').value);
-    } else if (this.msg.projectType == 'text' || this.msg.projectType == 'tabular' || this.msg.projectType == 'ner' || this.msg.projectType == 'qa') {
+    } else if (
+      this.msg.projectType == 'text' ||
+      this.msg.projectType == 'tabular' ||
+      this.msg.projectType == 'ner' ||
+      this.msg.projectType == 'qa' ||
+      this.msg.projectType == 'qaChat'
+    ) {
       formData.append('hasHeader', 'yes');
       formData.append(
         'topReview',
@@ -780,11 +813,14 @@ export class AppendComponent implements OnInit {
         this.previewHeadDatas = [];
         this.previewContentDatas = [];
         this.uploadGroup.get('totalRow').setValue(0);
+        this.existingQA = '';
         this.nonEnglish = 0;
         this.columnInfo = [];
         // after publish to clean data and add new row
         this.newAddedData = [];
-        this.getAnExample();
+        if (this.msg.projectType !== 'qaChat') {
+          this.getAnExample();
+        }
         this.showPreviewTable = false;
         this.uploadGroup.get('selectedDataset').reset();
         this.infoMessage = 'Succeed to append data.';
@@ -958,7 +994,22 @@ export class AppendComponent implements OnInit {
       this.uploadGroup.get('datasetsName').reset();
       this.fixHeader = [];
       this.uploadGroup.get('totalRow').setValue(0);
+      this.existingQA = '';
       this.columnInfo = [];
+    }
+  }
+
+  selectedItem(column) {
+    let data = _.filter(this.datasetsList, ['dataSetName', this.uploadGroup.get('selectedDataset').value]);
+    if (this.uploadGroup.get('selectedDataset').value && data.length > 0) {
+      this.toCaculateTotalRow(data[0], [column]);
+    }
+    if (!this.uploadGroup.get('selectedDataset').value && this.inputFile && data.length == 0) {
+      this.UnZipService.parseQa(this.inputFile, true, false, [column], this.previewHeadDatas).then((e) => {
+        this.totalCase = e.count;
+        this.nonEnglish = e.invalidCount;
+        this.uploadGroup.get('totalRow').setValue(this.totalCase - this.nonEnglish);
+      });
     }
   }
 }

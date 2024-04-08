@@ -23,7 +23,8 @@ const fileSystemUtils = require('../utils/fileSystem.utils');
 const config = require('../config/config');
 const { reduceHierarchicalUnselectedLabel, initHierarchicalLabelsCase } = require('./project.service');
 const MESSAGE = require('../config/code_msg');
-const {updateDatasetProjectInfo} = require('./dataSet-service')
+const {updateDatasetProjectInfo} = require('./dataSet-service');
+const { query } = require("express");
 
 async function updateSrsUserInput(req, from) {
 
@@ -410,6 +411,36 @@ async function getALLSrs(req) {
     if (req.query.fname && mp.project.projectType == PROJECTTYPE.LOG) {
         query["fileInfo.fileName"] = { $regex: req.query.fname };
     }
+    if (mp.project.projectType == PROJECTTYPE.QACHAT) {
+        if(req.query.reference){
+            let filter=new RegExp(req.query.reference, 'g');
+            query.$or=[
+                {
+                "reviewInfo.modified":true,
+                "reviewInfo.reviewed":true,
+                $or:[
+                    {"reviewInfo.userInputs.problemCategory.reference":filter},
+                    {"reviewInfo.userInputs.problemCategory.followUps.reference":filter}
+                ]
+                },
+                {
+                "reviewInfo.reviewed":false,
+                $or:[
+                    {"questionForText.reference":filter},
+                    {"questionForText.followUps.reference":filter}
+                ]
+                },
+                {
+                "reviewInfo.reviewed":true,
+                "reviewInfo.passed":true,
+                $or:[
+                    {"questionForText.reference":filter},
+                    {"questionForText.followUps.reference":filter}
+                ]
+                }
+            ]
+        }
+    }
     let options = { page: parseInt(req.query.page), limit: parseInt(req.query.limit), sort: { userInputsLength: -1,  reviewedTime: 1, _id: 1 } };
     const data = await mongoDb.paginateQuery(mp.model, query, options);
 
@@ -594,7 +625,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
     let caseNum = 0;
     let docs = [];
     csv(headerRule).fromStream(fileStream).subscribe(async (oneData, index) => {
-        if (index == 0) {
+        if (index == 0 && project.projectType !== PROJECTTYPE.QACHAT) {
             await validator.checkAppendTicketsHeaders(Object.keys(oneData), originalHeaders)
         }
         //only save selected data
@@ -610,7 +641,6 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
                 userInputsLength: 0,
                 originalData: select
             };
-
             //support ner helpful text and existing lable append
             if (project.projectType == PROJECTTYPE.NER) {
                 //helpful text
@@ -658,8 +688,30 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
                     }
                 }
                 sechema.questionForText = questions;
+                //helpful text
+                const ticketQuestions = req.body.ticketQuestions;
+                if (ticketQuestions && ticketQuestions.length) {
+                    let questions = {};
+                    for (const qst of ticketQuestions) {
+                        questionData = oneData[qst]
+                        if (typeof oneData[qst] === 'object') {
+                            questionData = JSON.stringify(questionData);
+                        }
+                        questions[qst] = questionData;
+                    }
+                    sechema.ticketQuestions = questions;
+                }
             }
-
+            //support qaChat with existing Q&A
+            if (project.projectType == PROJECTTYPE.QACHAT) {
+                let problemCategory = Object.values(select);
+                sechema = {
+                    projectName: req.body.pname,
+                    userInputsLength: 1,
+                    userInputs: [{ problemCategory: problemCategory,user:req.auth.email,timestamp:Date.now()}],
+                    questionForText:problemCategory
+                };
+            }
             docs.push(sechema);
             caseNum++;
         }
@@ -670,26 +722,32 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
             docs = [];
         }
     }, async (error) => {
-        console.log(`[ SRS ] [ERROR] Service inserte sr have ${error}: `, Date.now());
+        console.log(`[ SRS ] [ERROR] Service insert sr have ${error}: `, Date.now());
     }, async () => {
         try {
-            console.log(`[ SRS ] Service inserte last sr to db: `, Date.now());
+            console.log(`[ SRS ] Service insert last sr to db: `, Date.now());
             const options = { lean: true, ordered: false };
             await mongoDb.insertMany(SrModel, docs, options);
 
-            console.log(`[ SRS ] Service appendSrsDataByCSVFile update appen sr status to done`);
+            console.log(`[ SRS ] Service appendSrsDataByCSVFile update append sr status to done`);
             const conditions = { projectName: req.body.pname };
             const update = {
                 $set: { appendSr: APPENDSR.DONE, updatedDate: Date.now() },
                 $inc: { totalCase: caseNum },
                 $addToSet: { selectedDataset: req.body.selectedDataset }
             };
+            // if append qaChat with existing Q&A then need update projectCompleteCase and userCompleteCase also
+            if (project.projectType == PROJECTTYPE.QACHAT) {
+                conditions["userCompleteCase.user"] = req.auth.email;
+                update.$inc['projectCompleteCase'] = caseNum;
+                update.$inc["userCompleteCase.$.completeCase"]=caseNum
+            }
             await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
             await updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD);
             await projectService.updateAssinedCase(conditions, caseNum, true);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
         } catch (error) {
-            console.log(`[ SRS ] [ERROR] insert sr done, but fail on update tatalcase or send email ${error}: `, Date.now());
+            console.log(`[ SRS ] [ERROR] insert sr done, but fail on update total case or send email ${error}: `, Date.now());
         }
     });
 }
@@ -760,6 +818,9 @@ async function appendSrsData(req) {
             console.log(`[ SRS ] Service append logs tickets by forms done`);
         }
 
+    } else if(projectType == PROJECTTYPE.QACHAT){
+        await appendSrsDataByCSVFile(req, req.body.questions, project);
+        console.log(`[ SRS ] Service append qaChat tickets by CSV file done`);
     }
 }
 
@@ -945,26 +1006,120 @@ async function reviewTicket(req) {
     //annotator have no right to access
     const user = req.auth.email;
     await validator.checkAnnotator(user);
-    
-    const tid = (typeof req.body.tid === 'string')? ObjectId(req.body.tid): _.flatMap(req.body.tid, n => ObjectId(n))
     const pid = req.body.pid;
-    const problemCategory = req.body.problemCategory;
-    const logFreeText = req.body.logFreeText;
-    const questionForText = req.body.questionForText;
-    const review = req.body.review;
-    const modify = req.body.modify;
-
     const mp = await getModelProject({ _id: ObjectId(pid) });
-
-    if (await validator.checkRequired(review)) {
-        await flagToReview(mp, tid);
-    } else if (await validator.checkRequired(modify)) {
-        await calculateReviewdCase(mp, [tid], user);
-        await modifyReview(mp, tid, user, problemCategory, logFreeText, questionForText);
-    } else if (!await validator.checkRequired(modify)) {
-        await calculateReviewdCase(mp, [tid], user);
-        await passReview(mp, tid, user);
+    // to review one ticket
+    if(req.body.tid){
+        const tid = (typeof req.body.tid === 'string')? ObjectId(req.body.tid): _.flatMap(req.body.tid, n => ObjectId(n))
+        const problemCategory = req.body.problemCategory;
+        const logFreeText = req.body.logFreeText;
+        const questionForText = req.body.questionForText;
+        const review = req.body.review;
+        const modify = req.body.modify;
+    
+        if (await validator.checkRequired(review)) {
+            await flagToReview(mp, tid);
+        } else if (await validator.checkRequired(modify)) {
+            await calculateReviewdCase(mp, [tid], user);
+            await modifyReview(mp, tid, user, problemCategory, logFreeText, questionForText);
+        } else if (!await validator.checkRequired(modify)) {
+            await calculateReviewdCase(mp, [tid], user);
+            await passReview(mp, tid, user);
+        }
     }
+    if(!req.body.tid && req.body.reference){
+        await reviewToReplace(mp,req)
+    }   
+}
+
+async function reviewToReplace(mp, req) {
+    const user = req.auth.email;
+    let old = req.body.reference.old;
+    let replace = req.body.reference.new;
+    let filter=new RegExp(old, 'g');
+    console.log(`[ SRS ] Service reviewToReplace coming filter:`, filter);
+    let query = { projectName: mp.project.projectName };
+    query.$or=[
+        {
+        "reviewInfo.modified":true,
+        "reviewInfo.reviewed":true,
+        $or:[
+            {"reviewInfo.userInputs.problemCategory.reference":filter},
+            {"reviewInfo.userInputs.problemCategory.followUps.reference":filter}
+        ]
+        },
+        {
+        "reviewInfo.reviewed":false,
+        $or:[
+            {"questionForText.reference":filter},
+            {"questionForText.followUps.reference":filter}
+        ]
+        },
+        {
+        "reviewInfo.reviewed":true,
+        "reviewInfo.passed":true,
+        $or:[
+            {"questionForText.reference":filter},
+            {"questionForText.followUps.reference":filter}
+        ]
+        }
+    ]
+    const cursor = await mongoDb.findByConditions(mp.model, query);
+    console.log(`[ SRS ] Service reviewToReplace filtered total:`, cursor.length);
+    let updatedReferences;
+    await cursor.forEach(async (doc) => {
+        let timestamp=Date.now();
+        if(doc.reviewInfo.reviewed && doc.reviewInfo.modified && !doc.reviewInfo.passed){
+            updatedReferences = doc.reviewInfo.userInputs.map((input) => {
+                let updatedProblemCategory = {
+                    ...input.problemCategory,
+                    reference: input.problemCategory.reference.map((ref) => ref.replace(filter, replace)),
+                };
+                let aa=[];
+                input.problemCategory.followUps.map(async (follows) => {
+                    let bb={
+                        ...follows,
+                        reference:follows.reference.map((ref) => ref.replace(filter, replace))
+                    }
+                    aa.push(bb)
+                    })
+                updatedProblemCategory.followUps=aa
+                return { ...input, problemCategory: updatedProblemCategory };
+            });
+        }
+        if((doc.reviewInfo.reviewed && !doc.reviewInfo.modified && doc.reviewInfo.passed)||!doc.reviewInfo.reviewed){
+            updatedReferences = doc.questionForText.map((input) => {
+                let updatedProblemCategory = {
+                    ...input,
+                    reference: input.reference.map((ref) => ref.replace(filter, replace)),
+                };
+                let aa=[];
+                input.followUps.map(async (follows) => {
+                    let bb={
+                        ...follows,
+                        reference:follows.reference.map((ref) => ref.replace(filter, replace))
+                    }
+                    aa.push(bb)
+                    })
+                updatedProblemCategory.followUps=aa
+                return { user:user,timestamp: timestamp,problemCategory: updatedProblemCategory };
+            });
+        }
+        // Update the document
+        console.log(`[ SRS ] Service reviewToReplace updatedReferences:`, updatedReferences);
+        const update = {
+            $set: {
+                "reviewInfo.review": false,
+                "reviewInfo.passed": false,
+                "reviewInfo.reviewed": true,
+                "reviewInfo.modified": true,
+                "reviewInfo.user": user,
+                "reviewInfo.reviewedTime": timestamp,
+                'reviewInfo.userInputs': updatedReferences
+            }
+        }
+        await mongoDb.findOneAndUpdate(mp.model, { _id: doc._id }, update);
+    });
 }
 
 async function flagToReview(mp, tid) {
