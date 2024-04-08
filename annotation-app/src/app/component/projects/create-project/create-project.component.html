@@ -352,7 +352,10 @@ SPDX-License-Identifier: Apache-2.0 -->
   <clr-wizard-page
     [id]="3"
     *ngIf="
-      dsDialogForm.get('projectType').value !== 'image' && dsDialogForm.get('projectType').value !== 'log' && existingQA
+      (dsDialogForm.get('projectType').value !== 'image' &&
+        dsDialogForm.get('projectType').value !== 'log' &&
+        dsDialogForm.get('projectType').value !== 'qaChat') ||
+      (dsDialogForm.get('projectType').value == 'qaChat' && existingQA)
     "
     (clrWizardPageCustomButton)="doCustomClick($event)"
     [clrWizardPageNextDisabled]="

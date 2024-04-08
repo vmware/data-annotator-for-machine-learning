@@ -473,7 +473,7 @@ export class LatestAnnotationDataComponent implements OnInit {
           }
           setTimeout(() => {
             this.previewSrs = res;
-            console.log('this.previewSrs:::', this.previewSrs);
+            // console.log('this.previewSrs:::', this.previewSrs);
             // console.log('oldRes:::', oldRes);
           }, 100);
 
@@ -680,9 +680,9 @@ export class LatestAnnotationDataComponent implements OnInit {
     }
   }
 
-  delete(data, type) {
-    if (this.selectedFlag.length > 0 || data != undefined) {
-      this.loadingFlag = true;
+  // from:'dataReview'
+  delete(data, type, from?) {
+    if (this.selectedFlag?.length > 0 || data != undefined) {
       const param = {
         pname: this.msg.projectName,
         tids: this.selectedFlag,
@@ -690,14 +690,19 @@ export class LatestAnnotationDataComponent implements OnInit {
       type == 'multiple' ? (param.tids = this.selectedFlag) : (param.tids = [data.id]);
       this.apiService.deleteTicket(param).subscribe(
         (response) => {
-          this.getALLFlag();
-          this.selected = [];
-          if (this.env.config.embedded && this.env.config.lumosUrl) {
-            this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task_Analyze', 'Flag_Delete', type);
+          if (from && from == 'dataReview') {
+            this.getALLSrs();
+          } else {
+            this.getALLFlag();
+            this.selected = [];
+            if (this.env.config.embedded && this.env.config.lumosUrl) {
+              this.wa.toTrackEventWebAnalytics('Loop-Labeling_Tasks_List-Task_Analyze', 'Flag_Delete', type);
+            }
           }
         },
         (error) => {
           this.loadingFlag = false;
+          this.loading = false;
         },
       );
     }
@@ -751,15 +756,18 @@ export class LatestAnnotationDataComponent implements OnInit {
   }
 
   receiveFilename(data) {
-    if (!data) {
-      this.filteredTotal = 0;
-    }
+    data = data.trim();
     if (this.formerFilenameFilter !== data) {
       this.formerFilenameFilter = data;
       this.getALLSrsParam.pageNumber = 1;
     }
     this.getALLSrsParam.fname = data;
-    this.getALLSrs('filter');
+    if (data == '') {
+      this.filteredTotal = 0;
+      this.getALLSrs();
+    } else {
+      this.getALLSrs('filter');
+    }
   }
 
   clickFlagTab() {
@@ -786,9 +794,15 @@ export class LatestAnnotationDataComponent implements OnInit {
   }
 
   filterReference(e) {
+    e = e.trim();
     this.replaceStatus = '';
-    this.getALLSrsParam.reference = e.trim();
-    this.getALLSrs('filter');
+    this.getALLSrsParam.reference = e;
+    if (e == '') {
+      this.filteredTotal = 0;
+      this.getALLSrs();
+    } else {
+      this.getALLSrs('filter');
+    }
   }
 
   // filterResponse(e) {

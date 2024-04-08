@@ -851,7 +851,6 @@ export class CreateProjectComponent implements OnInit {
     ) {
       this.selectDescription = [e.target.value];
     }
-    console.log(800, this.checkboxColumns);
   }
 
   uploadModalInfo(value) {
@@ -1188,7 +1187,14 @@ export class CreateProjectComponent implements OnInit {
     if (this.dsDialogForm.value.projectType === 'qaChat') {
       formData.append('isMultipleLabel', 'true');
       formData.append('labels', '');
+      formData.append('regression', this.existingQA ? 'true' : 'false');
       if (this.existingQA) {
+        formData.append('fileName', this.datasetInfo.fileName);
+        formData.append('fileSize', this.datasetInfo.fileSize);
+        formData.append('location', this.datasetInfo.fileLocation);
+        formData.append('selectedDataset', this.dsDialogForm.value.selectedDataset);
+        formData.append('header', JSON.stringify(this.previewHeadDatas));
+        formData.append('isHasHeader', this.datasetInfo.isHasHeader);
         formData.append('selectLabels', JSON.stringify([this.dropdownSelected]));
       }
       return this.apiService.postDataset(formData);

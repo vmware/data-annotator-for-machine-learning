@@ -625,7 +625,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
     let caseNum = 0;
     let docs = [];
     csv(headerRule).fromStream(fileStream).subscribe(async (oneData, index) => {
-        if (index == 0) {
+        if (index == 0 && project.projectType !== PROJECTTYPE.QACHAT) {
             await validator.checkAppendTicketsHeaders(Object.keys(oneData), originalHeaders)
         }
         //only save selected data
@@ -641,7 +641,6 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
                 userInputsLength: 0,
                 originalData: select
             };
-
             //support ner helpful text and existing lable append
             if (project.projectType == PROJECTTYPE.NER) {
                 //helpful text
@@ -703,7 +702,16 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
                     sechema.ticketQuestions = questions;
                 }
             }
-
+            //support qaChat with existing Q&A
+            if (project.projectType == PROJECTTYPE.QACHAT) {
+                let problemCategory = Object.values(select);
+                sechema = {
+                    projectName: req.body.pname,
+                    userInputsLength: 1,
+                    userInputs: [{ problemCategory: problemCategory,user:req.auth.email,timestamp:Date.now()}],
+                    questionForText:problemCategory
+                };
+            }
             docs.push(sechema);
             caseNum++;
         }
@@ -714,26 +722,32 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
             docs = [];
         }
     }, async (error) => {
-        console.log(`[ SRS ] [ERROR] Service inserte sr have ${error}: `, Date.now());
+        console.log(`[ SRS ] [ERROR] Service insert sr have ${error}: `, Date.now());
     }, async () => {
         try {
-            console.log(`[ SRS ] Service inserte last sr to db: `, Date.now());
+            console.log(`[ SRS ] Service insert last sr to db: `, Date.now());
             const options = { lean: true, ordered: false };
             await mongoDb.insertMany(SrModel, docs, options);
 
-            console.log(`[ SRS ] Service appendSrsDataByCSVFile update appen sr status to done`);
+            console.log(`[ SRS ] Service appendSrsDataByCSVFile update append sr status to done`);
             const conditions = { projectName: req.body.pname };
             const update = {
                 $set: { appendSr: APPENDSR.DONE, updatedDate: Date.now() },
                 $inc: { totalCase: caseNum },
                 $addToSet: { selectedDataset: req.body.selectedDataset }
             };
+            // if append qaChat with existing Q&A then need update projectCompleteCase and userCompleteCase also
+            if (project.projectType == PROJECTTYPE.QACHAT) {
+                conditions["userCompleteCase.user"] = req.auth.email;
+                update.$inc['projectCompleteCase'] = caseNum;
+                update.$inc["userCompleteCase.$.completeCase"]=caseNum
+            }
             await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
             await updateDatasetProjectInfo(req.body.selectedDataset, req.body.pname, OPERATION.ADD);
             await projectService.updateAssinedCase(conditions, caseNum, true);
             console.log(`[ SRS ] Service insert sr end: `, Date.now());
         } catch (error) {
-            console.log(`[ SRS ] [ERROR] insert sr done, but fail on update tatalcase or send email ${error}: `, Date.now());
+            console.log(`[ SRS ] [ERROR] insert sr done, but fail on update total case or send email ${error}: `, Date.now());
         }
     });
 }
@@ -804,6 +818,9 @@ async function appendSrsData(req) {
             console.log(`[ SRS ] Service append logs tickets by forms done`);
         }
 
+    } else if(projectType == PROJECTTYPE.QACHAT){
+        await appendSrsDataByCSVFile(req, req.body.questions, project);
+        console.log(`[ SRS ] Service append qaChat tickets by CSV file done`);
     }
 }
 
@@ -1012,146 +1029,7 @@ async function reviewTicket(req) {
     }
     if(!req.body.tid && req.body.reference){
         await reviewToReplace(mp,req)
-    }
-
-
-    // to review ticket according to filtered
-//     if(!req.body.tid && req.body.reference){
-//         const projectName = mp.project.projectName;
-//         let query = { projectName: projectName };
-//         if(req.body.reference){
-//             let value={$regex: req.body.reference.old}
-//             console.log(999,value)       
-//             query.$or=[
-//                 {
-//                 "reviewInfo.modified":true,
-//                 $or:[
-//                     {"reviewInfo.userInputs.$[elem].problemCategory.reference":value},
-//                     {"reviewInfo.userInputs.$[elem].problemCategory.followUps.$[elem].reference":value}
-//                 ]
-//                 },
-//                 {
-//                 "reviewInfo.reviewed":false,
-//                 $or:[
-//                     {"questionForText.reference":value},
-//                     {"questionForText.followUps.$[elem].reference":value}
-//                 ]
-//                 }
-//             ]
-//         }
-//         let update = { 
-//             $set: {
-//             "reviewInfo.review": false,
-//             "reviewInfo.passed": false,
-//             "reviewInfo.reviewed": true,
-//             "reviewInfo.modified": true,
-//             "reviewInfo.user": user,
-//             "reviewInfo.reviewedTime": Date.now()
-//             }
-//         };
-//         update.$set= {
-//             "reviewInfo.userInputs.0.problemCategory.reference.$[element]": {
-//               $regexReplace: {
-//                 input: "$reviewInfo.userInputs.0.problemCategory.reference.$[element]",
-//                 find: req.body.reference.old,
-//                 replacement: req.body.reference.new
-//               }
-//             }
-//           }
-//         // update.$replaceAll={
-//         //     input: "$reviewInfo.userInputs.$[].problemCategory.reference",
-//         //     find: req.body.reference.old,
-//         //     replacement: req.body.reference.new
-//         // }
-//         // let update = { $set: { 
-//         //                     "reviewInfo.userInputs.problemCategory.reference": {
-//         //                         $replaceOne: {
-//         //                         input: "$reviewInfo.userInputs.problemCategory.reference",
-//         //                         find: req.body.reference.old,
-//         //                         replacement: req.body.reference.new
-//         //                         }
-//         //                     },
-//         //                     "reviewInfo.userInputs.problemCategory.followUps.reference": {
-//         //                         $replaceOne: {
-//         //                         input: "$reviewInfo.userInputs.problemCategory.followUps.reference",
-//         //                         find: req.body.reference.old,
-//         //                         replacement: req.body.reference.new
-//         //                         }
-//         //                     },
-//         //                     "reviewInfo.review": false,
-//         //                     "reviewInfo.passed": false,
-//         //                     "reviewInfo.reviewed": true,
-//         //                     "reviewInfo.modified": true,
-//         //                     "reviewInfo.user": user,
-//         //                     "reviewInfo.reviewedTime": Date.now()
-//         //             },
-//         //             $pull: {
-//         //                 "reviewInfo.userInputs": {user: user}
-//         //             }};
-
-
-//         // if(req.body.reference){
-//         //     let value={$regex: `/${req.body.reference.old}/`}
-//         //     // let value={$regex: req.body.reference.old}
-//         //     console.log(999,value,req.body.reference.new)     
-//         //     query["reviewInfo.modified"]=true
-//         //     query["reviewInfo.userInputs.problemCategory.reference"]={ $exists: true }
-//         //     let update = { $set: {"reviewInfo.userInputs.0.problemCategory.reference.$[element]": req.body.reference.new}}
-//         //     let options = { arrayFilters: [{ "element":value }] }
-//         //     await mongoDb.updateManyByConditions(mp.model, query, update,options);
-//         // }
-
-//         // Assuming you have an array of documents with the "reviewInfo" field
-// // and each document has an array of "userInputs" with "problemCategory" containing "reference" field
-
-// // Sample data
-// const documents = [
-//     {
-//         reviewInfo: {
-//             userInputs: [
-//                 {
-//                     problemCategory: {
-//                         reference: ["17link17", "sjdhfgjhd"]
-//                     }
-//                 }
-//             ]
-//         }
-//     },
-//     // Add more documents here...
-// ];
-
-// // // Function to recursively search and replace "17" with "18"
-// // function searchAndReplace(obj) {
-// //     if (typeof obj === 'object') {
-// //         for (const key in obj) {
-// //             if (key === 'reference' && Array.isArray(obj[key])) {
-// //                 // Replace "17" with "18" in the list
-// //                 obj[key] = obj[key].map(item => item.replace('17', '18'));
-// //             } else {
-// //                 searchAndReplace(obj[key]);
-// //             }
-// //         }
-// //     }
-// // }
-
-// // // Iterate over each document
-// // for (const doc of documents) {
-// //     searchAndReplace(doc);
-// // }
-
-// // // Print the updated documents
-// // for (const doc of documents) {
-// //     console.log(doc);
-// // }
-
-//         const options = { new: true };
-//         console.log(666,query)
-//         await mongoDb.updateManyByConditions(mp.model, query, update,options);
-
-//                     };
-   
-    
-    
+    }   
 }
 
 async function reviewToReplace(mp, req) {
@@ -1196,7 +1074,6 @@ async function reviewToReplace(mp, req) {
                 let updatedProblemCategory = {
                     ...input.problemCategory,
                     reference: input.problemCategory.reference.map((ref) => ref.replace(filter, replace)),
-                    // followUps: input.problemCategory.followUps.map(async (follows) => {follows.reference.map((ref) => ref.replace(filter, replace))})
                 };
                 let aa=[];
                 input.problemCategory.followUps.map(async (follows) => {
@@ -1215,7 +1092,6 @@ async function reviewToReplace(mp, req) {
                 let updatedProblemCategory = {
                     ...input,
                     reference: input.reference.map((ref) => ref.replace(filter, replace)),
-                    // followUps: input.followUps.forEach((follows) => {follows.reference.map((ref) => ref.replace(filter, replace))})
                 };
                 let aa=[];
                 input.followUps.map(async (follows) => {
@@ -1229,7 +1105,6 @@ async function reviewToReplace(mp, req) {
                 return { user:user,timestamp: timestamp,problemCategory: updatedProblemCategory };
             });
         }
-        
         // Update the document
         console.log(`[ SRS ] Service reviewToReplace updatedReferences:`, updatedReferences);
         const update = {

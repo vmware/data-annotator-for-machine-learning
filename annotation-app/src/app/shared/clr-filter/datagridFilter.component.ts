@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
@@ -20,9 +20,6 @@ export class MyFilter implements ClrDatagridFilterInterface<any> {
   @Output() filter = new EventEmitter();
   @Output() replace = new EventEmitter();
 
-  // @ViewChild('filenameFilterEl') filenameFilterEl?: ElementRef;
-  // @ViewChild('filterEl') filterEl?: ElementRef;
-
   inputString: string = '';
   inputStringFilter = new Subject<string>();
   changes = new Subject<any>();
@@ -30,12 +27,8 @@ export class MyFilter implements ClrDatagridFilterInterface<any> {
   loadingReplace: ClrLoadingState = ClrLoadingState.DEFAULT;
 
   constructor(private filterContainer: ClrDatagridFilter) {
-    setTimeout(() => {
-      console.log(666, this.filterMsg);
-    }, 500);
     filterContainer.setFilter(this);
     this.inputStringFilter.pipe(debounceTime(400), distinctUntilChanged()).subscribe((value) => {
-      console.log(555, this.inputString, value);
       this.loadingReplace = ClrLoadingState.DEFAULT;
       this.filter.emit(value.trim());
     });
@@ -60,7 +53,13 @@ export class MyFilter implements ClrDatagridFilterInterface<any> {
   }
 
   replaceAll() {
-    if (this.inputString.trim() && this.filteredTotal && this.filteredTotal > 0 && this.inputString1.trim()) {
+    if (
+      this.inputString.trim() &&
+      this.filteredTotal &&
+      this.filteredTotal > 0 &&
+      this.inputString1.trim() &&
+      this.inputString !== this.inputString1
+    ) {
       this.loadingReplace = ClrLoadingState.LOADING;
       let data = {
         filter: this.inputString.trim(),

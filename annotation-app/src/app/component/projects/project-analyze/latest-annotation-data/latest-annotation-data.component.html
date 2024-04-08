@@ -622,6 +622,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <clr-datagrid [clrDgLoading]="loading" (clrDgRefresh)="refresh($event)" *ngIf="!loadingReview">
               <!-- <clr-dg-column class="ellipsis-datagrid"></clr-dg-column> -->
               <clr-dg-column class="ellipsis-datagrid">Index</clr-dg-column>
+              <clr-dg-column class="ellipsis-datagrid" style="min-width: 15%">Action </clr-dg-column>
               <clr-dg-column class="ellipsis-datagrid">Prompt</clr-dg-column>
               <clr-dg-column class="ellipsis-datagrid"
                 >Response
@@ -648,6 +649,20 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <cds-icon *ngIf="qa.followUps" shape="angle" style="transform: rotate(90deg)"></cds-icon>
                   </clr-dg-cell> -->
                   <clr-dg-cell>{{ qa.followUps ? j + 1 : '' }}</clr-dg-cell>
+                  <clr-dg-cell style="min-width: 15%">
+                    <div *ngIf="qa.followUps" class="clr-row">
+                      <button
+                        class="btn btn-sm"
+                        [disabled]="dataset.userInputs.length <= 0 || dataset.reviewInfo.review"
+                        (click)="modify(dataset, 'single')"
+                      >
+                        mark for review
+                      </button>
+                    </div>
+                    <div *ngIf="qa.followUps" class="clr-row">
+                      <button class="btn btn-sm" (click)="delete(dataset, 'single', 'dataReview')">Delete</button>
+                    </div>
+                  </clr-dg-cell>
                   <clr-dg-cell>{{ qa.prompt }}</clr-dg-cell>
                   <clr-dg-cell>{{ qa.response }}</clr-dg-cell>
                   <clr-dg-cell style="min-width: 50%">
