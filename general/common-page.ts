@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import {
@@ -95,7 +95,7 @@ export class CommonPage {
     by.css(".ellipsisMore > div > div:nth-child(1) > a")
   );
   VIEW_LIST_ICON = element(by.css('cds-icon[shape="view-list"]'));
-  CREATE_DATASET_BTN = element(by.partialButtonText("Create New Dataset"));
+  CREATE_DATASET_BTN = element(by.partialButtonText("Upload New Dataset"));
   OK_BTN = element(by.css('button[class="btn btn-primary"]'));
   CLOSE_BTN = $('button[class="close"]');
 

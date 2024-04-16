@@ -211,6 +211,7 @@ export class AnnotatePage extends CommonPage {
   QA_CHAR_FOLLOW_DEL = $(
     "div.questionContainer > div.ng-star-inserted > div.ng-star-inserted > div:nth-child(1) > div > div > h4 > cds-icon[title=Delete]"
   );
+  REFERENCE_FILTER = $("clr-dg-filter");
 
   async navigateTo() {
     await FunctionUtil.elementVisibilityOf(this.NAV_TASK_LIST);
@@ -1192,4 +1193,22 @@ export class AnnotatePage extends CommonPage {
     await this.ANNOTATE_SUBMIT_BTN.click();
     console.log("log-submit qa chat annotate");
   };
+
+  async filter(filter, replace?) {
+    console.log("log-start to filter reference");
+    await FunctionUtil.elementVisibilityOf(this.REFERENCE_FILTER);
+    await browser.waitForAngularEnabled(false);
+    await this.REFERENCE_FILTER.click();
+    await $("my-filter li:nth-child(2) button").click();
+    await browser.sleep(1000);
+    await $("my-filter div:nth-child(1) input").click();
+    await $("my-filter div:nth-child(1) input").sendKeys("text");
+    await $("my-filter div:nth-child(1) input").clear();
+    await $("my-filter div:nth-child(1) input").sendKeys(filter);
+    await browser.sleep(1000);
+    await $$("my-filter div input").last().sendKeys(replace);
+    await browser.sleep(1000);
+    await $("my-filter div:nth-child(3) button").click();
+    await browser.sleep(5000);
+  }
 }

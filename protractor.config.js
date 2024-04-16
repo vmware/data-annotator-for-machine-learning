@@ -73,6 +73,10 @@ var conf = {
     "./features/create-project-qa-chat-spec.ts",
     "./features/annotate-project-qa-chat-spec.ts",
 
+    "./features/create-project-qa-chat-existingQA-spec.ts",
+    "./features/annotate-project-qa-chat-existingQA-spec.ts",
+    "./features/append-qaChat-project-spec.ts",
+
     "./features/delete-e2e-projects-spec.ts",
     "./features/faq-spec.ts",
   ],

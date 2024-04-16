@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -38,6 +38,7 @@ export class CommonAppend {
   CLOSE_ICON = element.all(by.css("cds-icon[shape=window-close]"));
   DELETE_FILE_BTN = $(".clr-col-6.text-right.delete");
   VIEW_EXAMPLE_ICON = $("cds-icon.exampleAngle");
+  APPEND_UPLOAD_SELECTS = $$(".addCsv select");
 
   async appendNewLine(project_name, isNer) {
     await FunctionUtil.click(this.PROJECT_ANALYZE_TABS.last());
@@ -102,11 +103,16 @@ export class CommonAppend {
     return false;
   }
 
-  async fileAppendSelectExistingFile(dataset_name, isNer) {
+  async fileAppendSelectExistingFile(dataset_name, projectType?) {
     console.log("log-start to fileAppendSelectExistingFile");
     // await this.locateProjectAppend(project_name);
-    await FunctionUtil.click(this.APPEND_BY_FILE_TAB);
-    if (isNer) {
+    if (projectType && projectType == "qaChat") {
+      await $("clr-tabs li:nth-child(3)").click();
+    }
+    if (projectType && projectType !== "qaChat") {
+      await FunctionUtil.click(this.APPEND_BY_FILE_TAB);
+    }
+    if (projectType && projectType == "ner") {
       await browser.sleep(1000);
       await FunctionUtil.click(this.APPEND_BY_QUICK_TAB);
       await browser.sleep(1000);
@@ -126,17 +132,31 @@ export class CommonAppend {
       }
     });
     await browser.sleep(2000);
-    if (isNer) {
+    if (projectType && projectType == "ner") {
       await this.clickExistingLabel(2, 4);
     }
     // if (process.env.IN) {
     //   await browser.sleep(10000);
     // }
-    await browser.sleep(2000);
+    // await browser.sleep(2000);
     // if (process.env.IN) {
     //   console.log("log-show publish btn");
     //   await FunctionUtil.elementVisibilityOf(this.APPEND_PUBLISH_BTN);
     // }
+    if (projectType && projectType == "qaChat") {
+      await FunctionUtil.click($(".addCsv>div:nth-child(2) select"));
+      await browser.sleep(1000);
+      $$(".addCsv>div:nth-child(2) select option").each(async function (
+        element: any
+      ) {
+        if ((await element.getText()) == dataset_name) {
+          await FunctionUtil.click(element);
+        }
+      });
+      await browser.sleep(5000);
+      $(".addCsv>div:nth-child(5) select option:nth-child(2)").click();
+    }
+    await browser.sleep(5000);
     await FunctionUtil.click(this.APPEND_PUBLISH_BTN);
     // if (process.env.IN) {
     //   await browser.sleep(20000);
@@ -201,6 +221,7 @@ export class CommonAppend {
     //   await browser.sleep(10000);
     //   await FunctionUtil.elementVisibilityOf(this.APPEND_PUBLISH_BTN);
     // }
+
     await FunctionUtil.click(this.APPEND_PUBLISH_BTN);
     // if (process.env.IN) {
     //   await browser.sleep(20000);

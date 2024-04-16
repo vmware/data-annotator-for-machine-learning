@@ -137,19 +137,18 @@ export class NewProjectPage extends CommonPage {
   SELECT_QUESTION_SELECTOR = element(
     by.css("#clr-wizard-page-3 > div > div:nth-child(1) > div")
   );
-  SELECT_QUESTION_SELECTOR_OPTION = element.all(
-    by.css(
-      "#clr-wizard-page-3 > div > div:nth-child(1) > div > select > option"
-    )
-  );
-  QA_TEXT_SELECTOR = element(
-    by.css("#clr-wizard-page-3 > div > div:nth-child(3) > div")
-  );
-  QA_TEXT_SELECTOR_OPTIONS = $$(
-    "#clr-wizard-page-3 > div > div:nth-child(3) > div > select > option"
-  );
+  SELECT_QUESTION_SELECTOR_OPTION = $$(
+    "#clr-wizard-page-3 div select option"
+  ).filter(function (elem, index) {
+    return elem.getText().then(function (text) {
+      return text !== "";
+    });
+  });
   QA_QUESTION_TYPE = element(
     by.css("#clr-wizard-page-3 clr-radio-wrapper label[for=y]")
+  );
+  QA_CHAT_EXISTINGQA_LABEL_INPUT = element(
+    by.css("clr-radio-wrapper label[for=yExistingQa]")
   );
 
   async navigateTo() {
@@ -238,21 +237,31 @@ export class NewProjectPage extends CommonPage {
     await this.LABEL_SELECTOR_OPTIONS.get(labelIndex).click();
   }
 
+  // labelIndex start from 1
   async selectQuestionLabels(labelIndex) {
     console.log("log-start to set question");
     await FunctionUtil.elementVisibilityOf(this.SELECT_QUESTION_SELECTOR);
     await this.SELECT_QUESTION_SELECTOR.click();
+    await browser.sleep(1000);
     await this.SELECT_QUESTION_SELECTOR_OPTION.get(labelIndex).click();
     console.log("log-end to set question");
   }
 
-  async selectQuestionText(textIndex) {
-    console.log("log-start to set text");
-    await FunctionUtil.elementVisibilityOf(this.QA_TEXT_SELECTOR);
-    await this.QA_TEXT_SELECTOR.click();
-    await this.QA_TEXT_SELECTOR_OPTIONS.get(textIndex).click();
-    console.log("log-end to set text");
-  }
+  // async selectQuestionText(textIndex) {
+  //   console.log("log-start to set text");
+  //   // await FunctionUtil.elementVisibilityOf(this.QA_TEXT_SELECTOR);
+  //   // await this.QA_TEXT_SELECTOR.click();
+  //   // await this.QA_TEXT_SELECTOR_OPTIONS.get(textIndex).click();
+  //   await FunctionUtil.elementVisibilityOf(this.QA_TEXT_RADIOs[0]);
+  //   await this.QA_TEXT_RADIOs.then(async (radios) => {
+  //     radios.forEach(async (value, index) => {
+  //       if (index === textIndex) {
+  //         await this.FILE_SELECT_OPTION.get(index).click();
+  //       }
+  //     });
+  //   });
+  //   console.log("log-end to set text");
+  // }
 
   async selectQuestionType() {
     console.log("log-start to set question type");
@@ -658,5 +667,10 @@ export class NewProjectPage extends CommonPage {
   async clickSureBtn() {
     await FunctionUtil.elementVisibilityOf(this.SURE_BTN);
     await this.SURE_BTN.click();
+  }
+
+  async hasExistingQA() {
+    await FunctionUtil.elementVisibilityOf(this.QA_CHAT_EXISTINGQA_LABEL_INPUT);
+    await this.QA_CHAT_EXISTINGQA_LABEL_INPUT.click();
   }
 }

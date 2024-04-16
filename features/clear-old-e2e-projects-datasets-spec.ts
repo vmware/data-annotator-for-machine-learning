@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -8,8 +8,10 @@ import { CommonUtils } from "../general/common-utils";
 import { Constant } from "../general/constant";
 import { browser, $, $$, ExpectedConditions, element, by } from "protractor";
 import { FunctionUtil } from "../utils/function-util";
+import { CommonPage } from "../general/common-page";
 
 describe("Spec - clear projects and datasets", () => {
+  let commonPage: CommonPage;
   const myDatasetsPage: MyDatasetsPage = new MyDatasetsPage();
   const TABLE_LIST = $$("clr-dg-row");
   const projectName = Constant.project_name;
@@ -24,6 +26,10 @@ describe("Spec - clear projects and datasets", () => {
   );
   const DELETE_DATA_OK_BTN = $(".modal-footer .btn.btn-primary");
 
+  beforeAll(() => {
+    commonPage = new CommonPage();
+  });
+
   it("Should succeed to clear old e2e projects", async () => {
     await browser.sleep(2000);
     await FunctionUtil.clickByText(NAV_GROUP, "Labeling Tasks");
@@ -33,6 +39,9 @@ describe("Spec - clear projects and datasets", () => {
     await myDatasetsPage.waitForGridLoading();
     await myDatasetsPage.filterDatasetName(projectName);
     await browser.sleep(2000);
+    await commonPage.changePageValue(3);
+    await myDatasetsPage.waitForGridLoading();
+    await browser.sleep(5000);
     let dataLength = await FunctionUtil.getElementsNum(TABLE_LIST);
     console.log("log-clear old e2e projects-dataLength:", dataLength);
     if (dataLength > 0) {
@@ -63,6 +72,9 @@ describe("Spec - clear projects and datasets", () => {
     await browser.sleep(5000);
     await myDatasetsPage.filterDatasetName(datasetsName);
     await browser.sleep(2000);
+    await commonPage.changePageValue(3);
+    await myDatasetsPage.waitForGridLoading();
+    await browser.sleep(5000);
     let dataLength = await FunctionUtil.getElementsNum(TABLE_LIST);
     console.log("log-clear old e2e dataset-dataLength:", dataLength);
     for (var i = 0; i < dataLength; i++) {
@@ -78,7 +90,7 @@ describe("Spec - clear projects and datasets", () => {
     if (process.env.IN) {
       await browser.sleep(5000);
     }
-    await browser.sleep(2000);
+    await browser.sleep(10000);
     expect(await FunctionUtil.getElementsNum(TABLE_LIST)).toEqual(0);
   });
 });

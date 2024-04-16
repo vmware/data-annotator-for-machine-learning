@@ -145,6 +145,8 @@
     "followPrompt2": "this is follow prompt 2 content",
     "followResponse2": "this is follow response 2 content",
     "follow_references1": "this is follow  references 1 content",
-    "follow_references2": "this is follow  references 2 content"
+    "follow_references2": "this is follow  references 2 content",
+    "filter_string":"3",
+    "replace_string":"three"
   }
 }

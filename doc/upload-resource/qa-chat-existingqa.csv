@@ -1,0 +1,4 @@
+qaPairs,qaPairs1
+"{""prompt"":""q1"",""response"":""a1"",""reference"":[""link1""],""followUps"":[]}","{""prompt"":""q1"",""response"":""a1"",""reference"":[""link1""],""followUps"":[]}"
+"{""prompt"":""q2"",""response"":""a2"",""reference"":[""link2""],""followUps"":[{""prompt"":""q2.1"",""response"":""a2.1"",""reference"":[""link2.1""]}]}","{""prompt"":""q2"",""response"":""a2"",""reference"":[""link2""],""followUps"":[{""prompt"":""q2.1"",""response"":""a2.1"",""reference"":[""link2.1""]}]}"
+"{""prompt"":""q3"",""response"":""a3"",""reference"":[""link3""],""followUps"":[]}","{""prompt"":""q3"",""response"":""a3"",""reference"":[""link3""],""followUps"":[]}"

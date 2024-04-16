@@ -22,7 +22,7 @@ describe("Spec - Create new project qa regression true", () => {
 
   beforeAll(() => {
     Serial_Num = new Date().getTime().toString();
-    New_Project_Name = "e2e Test Project Qa Regression True" + Serial_Num;
+    New_Project_Name = "e2e Test Project Qa Regression" + Serial_Num;
     New_CSV_Name = "e2e_Test_Data_Qa_Regression_" + Serial_Num;
     LoginBusiness.verifyLogin();
     newProjectPage = new NewProjectPage();
@@ -33,6 +33,7 @@ describe("Spec - Create new project qa regression true", () => {
 
   afterAll(() => {
     Constant.project_name_qa_regression_true = New_Project_Name;
+    Constant.dataset_name_qa_regression_true = New_CSV_Name;
     console.log(
       "log-project name after update: " +
         Constant.project_name_qa_regression_true
