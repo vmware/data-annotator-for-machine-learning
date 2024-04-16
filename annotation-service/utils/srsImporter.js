@@ -111,7 +111,7 @@ module.exports = {
                     sechema.questionForText = questions;
                 }
                 //support ner or qa sting type quesion anwser column display
-                if ((projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA) && req.body.ticketQuestions.length) {
+                if ((projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA) && req.body.ticketQuestions && req.body.ticketQuestions.length) {
                     let ticketQuestions = {};
                     for (const qst of req.body.ticketQuestions) {
                         questionData = oneData[qst]
