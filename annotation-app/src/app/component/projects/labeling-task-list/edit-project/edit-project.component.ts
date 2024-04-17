@@ -702,7 +702,9 @@ export class EditProjectComponent implements OnInit {
       array[index].setUserErrMessage = '';
     }
     if (!this.toolService.toRegEmail([array[index].email.trim()])) {
-      array[index].emailReg = this.env.config.authUrl ? 'Wrong format! Only allow Vmware email box!' : 'Wrong format';
+      array[index].emailReg = this.env.config.authUrl
+        ? 'Wrong format! Only allow vmware/broadcom email box!'
+        : 'Wrong format';
     } else {
       array[index].emailReg = '';
     }
@@ -787,7 +789,9 @@ export class EditProjectComponent implements OnInit {
       array[index].setUserErrMessage = '';
     }
     if (!this.toolService.toRegEmail([array[index].email.trim()])) {
-      array[index].emailReg = this.env.config.authUrl ? 'Wrong format! Only allow Vmware email box!' : 'Wrong format';
+      array[index].emailReg = this.env.config.authUrl
+        ? 'Wrong format! Only allow vmware/broadcom email box!'
+        : 'Wrong format';
     } else {
       array[index].emailReg = '';
     }
