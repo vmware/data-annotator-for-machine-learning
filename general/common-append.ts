@@ -106,13 +106,13 @@ export class CommonAppend {
   async fileAppendSelectExistingFile(dataset_name, projectType?) {
     console.log("log-start to fileAppendSelectExistingFile");
     // await this.locateProjectAppend(project_name);
-    if (projectType && projectType == "qaChat") {
+    if (projectType == "qaChat") {
       await $("clr-tabs li:nth-child(3)").click();
     }
-    if (projectType && projectType !== "qaChat") {
+    if (projectType !== "qaChat") {
       await FunctionUtil.click(this.APPEND_BY_FILE_TAB);
     }
-    if (projectType && projectType == "ner") {
+    if (projectType == "ner") {
       await browser.sleep(1000);
       await FunctionUtil.click(this.APPEND_BY_QUICK_TAB);
       await browser.sleep(1000);
@@ -132,7 +132,7 @@ export class CommonAppend {
       }
     });
     await browser.sleep(2000);
-    if (projectType && projectType == "ner") {
+    if (projectType == "ner") {
       await this.clickExistingLabel(2, 4);
     }
     // if (process.env.IN) {
@@ -143,7 +143,7 @@ export class CommonAppend {
     //   console.log("log-show publish btn");
     //   await FunctionUtil.elementVisibilityOf(this.APPEND_PUBLISH_BTN);
     // }
-    if (projectType && projectType == "qaChat") {
+    if (projectType == "qaChat") {
       await FunctionUtil.click($(".addCsv>div:nth-child(2) select"));
       await browser.sleep(1000);
       $$(".addCsv>div:nth-child(2) select option").each(async function (
