@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -74,9 +74,11 @@ export class DatasetValidator {
 
       const pattern = `@vmware.com\\s*$`;
       const argRegEx = new RegExp(pattern, 'g');
-      if (!control.value.match(argRegEx)) {
+      const pattern2 = `@broadcom.com\\s*$`;
+      const argRegEx2 = new RegExp(pattern2, 'g');
+      if (!control.value.match(argRegEx) && !control.value.match(argRegEx2)) {
         return {
-          msg: { value: 'Wrong format! Email only accept vmware emailbox' },
+          msg: { value: 'Wrong format! Email only accept vmware/broadcom email box' },
         };
       }
       return null!;

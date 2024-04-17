@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -40,7 +40,10 @@ export class ToolService {
   toRegEmail(emails) {
     if (this.env.config.authUrl) {
       for (let i = 0; i < emails.length; i++) {
-        if (!/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/.test(emails[i].trim())) {
+        if (
+          !/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@vmware.com$/.test(emails[i].trim()) &&
+          !/^[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@broadcom.com$/.test(emails[i].trim())
+        ) {
           return false;
         }
       }
