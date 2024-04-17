@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 import { LoginBusiness } from "../general/login-business";
@@ -47,10 +47,10 @@ describe("Spec - enter labeling task analyze page...", () => {
       await projectsPage.filterLogFileName(
         projectEditData.LogProject.Filter_File_Name
       );
-      let tableLengthBeforeReturn = await projectsPage.getTableLength();
-      console.log("log-tableLengthBeforeReturn", tableLengthBeforeReturn);
-      let aa = (await projectsPage.getTableTotalItems()).trim().split(" ")[4];
-      console.log("log-table total items", aa);
+      // let tableLengthBeforeReturn = await projectsPage.getTableLength();
+      // console.log("log-tableLengthBeforeReturn", tableLengthBeforeReturn);
+      // let aa = (await projectsPage.getTableTotalItems()).trim().split(" ")[4];
+      // console.log("log-table total items", aa);
       await projectsPage.logShowDetails();
       await projectsPage.returnToAnnotatorBtn();
       await browser.sleep(1000);

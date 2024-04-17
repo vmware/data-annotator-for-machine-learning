@@ -156,11 +156,13 @@ export class CommonPage {
     console.log("log-start to filterLogFileName1...", name);
     await FunctionUtil.click(this.LOG_FILE_NAME_FILTER_BTN);
     console.log("log-start to filterLogFileName2...", name);
-    await FunctionUtil.elementVisibilityOf(this.LOG_FILE_NAME_FILTER_INPUT);
+    await FunctionUtil.elementVisibilityOf(
+      $("my-filter div:nth-child(1) input")
+    );
     console.log("log-start to filterLogFileName3...", name);
-    await this.LOG_FILE_NAME_FILTER_INPUT.click();
+    await $("my-filter div:nth-child(1) input").click();
     console.log("log-start to filterLogFileName4...", name);
-    await this.LOG_FILE_NAME_FILTER_INPUT.sendKeys(name);
+    await $("my-filter div:nth-child(1) input").sendKeys(name);
     console.log("log-succeed to filterLogFileName...");
   }
 
