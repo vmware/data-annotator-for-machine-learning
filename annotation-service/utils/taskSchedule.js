@@ -5,7 +5,7 @@
  * 
 ***/
 
-const { MILLISECOND_DAY, REGULAR_NOTIFICATNO, CURRENT_TIME_ZONE, NOT_START_DAY, NOT_FINISH_DAY } = require("../config/constant");
+const { MILLISECOND_DAY } = require("../config/constant");
 const config = require("../config/config");
 const { ProjectModel, UserModel, InstanceModel } = require("../db/db-connect");
 const mongoDb = require("../db/mongo.db");
@@ -26,7 +26,7 @@ module.exports.regularNotification = async () => {
   }
 
   var job = new CronJob(
-      REGULAR_NOTIFICATNO, 
+      config.REGULAR_NOTIFICATNO, 
       async () => {
         if (await checkingRunningInstance()) {
             return;
@@ -35,13 +35,13 @@ module.exports.regularNotification = async () => {
       },
       null,
       true,
-      CURRENT_TIME_ZONE
+      config.CURRENT_TIME_ZONE
     );
   
 }
 async function checkingRunningInstance() {
 
-  const NODE_INSTANCE = {data: new Date(Date.now()).toLocaleDateString("en-US", {timeZone: CURRENT_TIME_ZONE})};
+  const NODE_INSTANCE = {data: new Date(Date.now()).toLocaleDateString("en-US", {timeZone: config.CURRENT_TIME_ZONE})};
   const instance = await mongoDb.findByConditions(InstanceModel, NODE_INSTANCE);
   console.log('[ REGULAR-NOTIFICATION ]', NODE_INSTANCE);
   if (instance.length) {
@@ -69,7 +69,7 @@ async function findProjectAndSendRegularNotification() {
       
       const createTime = (today - pro.createdDate) / MILLISECOND_DAY;
       const done = pro.totalCase <= pro.projectCompleteCase;
-      const overStart = createTime < NOT_START_DAY;
+      const overStart = createTime < config.NOT_START_DAY;
       //don't more than NOT_START_DAY
       if(overStart || done){
         continue;
@@ -102,7 +102,7 @@ async function findUserSendNotification(pro, today){
     //not start labeling
     uc.assignedDate = uc.assignedDate? uc.assignedDate: pro.createdDate;
     const assignedTime = (today - uc.assignedDate) / MILLISECOND_DAY;
-    const overStartDay = assignedTime >= NOT_START_DAY;
+    const overStartDay = assignedTime >= config.NOT_START_DAY;
     //send notification
     if(!uc.completeCase && overStartDay){
       const assignedDate = new Date(uc.assignedDate * 1).toLocaleDateString();
@@ -113,7 +113,7 @@ async function findUserSendNotification(pro, today){
     //not finish labeling
     uc.updateDate = uc.updateDate? uc.updateDate: uc.assignedDate;
     const updateTime = (today - uc.updateDate) / MILLISECOND_DAY;
-    const overFinish = updateTime >= NOT_FINISH_DAY;
+    const overFinish = updateTime >= config.NOT_FINISH_DAY;
     const userNotFinish = uc.assignedCase > uc.completeCase;
     //send notification
     if(uc.completeCase && overFinish && userNotFinish){

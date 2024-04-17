@@ -589,19 +589,30 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   sortQaChatData(sr) {
+    // sort non-followups reference
+    let arrObj = [];
+    for (let i = 0; i < this.references.length; i++) {
+      if (this.references[i].text && !this.references[i].textErrMessage) {
+        arrObj.push(this.references[i].text);
+      }
+    }
+    sr.userInput[0].questionForText[0].reference = arrObj;
+    // sort followups
+    let arr = [];
     for (let i = 0; i < this.followUps.length; i++) {
       if (this.followUps[i].prompt && this.followUps[i].response) {
-        let arr = [];
+        let links = [];
+
         for (let j = 0; j < this.followUps[i].reference.length; j++) {
           if (this.followUps[i].reference[j].text && !this.followUps[i].reference[j].textErrMessage) {
-            arr.push(this.followUps[i].reference[j].text);
+            links.push(this.followUps[i].reference[j].text);
           }
         }
-        this.followUps[i].reference = arr;
+        arr.push({ prompt: this.followUps[i].prompt, response: this.followUps[i].response, reference: links });
       }
     }
     sr.pid = this.projectId;
-    sr.userInput[0].questionForText[0]['followUps'] = this.followUps;
+    sr.userInput[0].questionForText[0]['followUps'] = arr;
     if (sr._id) {
       sr.userInput[0]['tid'] = sr._id;
     }
@@ -632,7 +643,6 @@ export class ProjectAnalyzeComponent implements OnInit {
         this.annotationHistory.unshift(addSubmit);
         this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
       }
-      console.log(611, this.annotationHistory);
     } else {
       if (from === 'review') {
         if (this.srInHistory() == -1) {
@@ -662,7 +672,6 @@ export class ProjectAnalyzeComponent implements OnInit {
         ];
         this.annotationHistory[index].historyDescription = historyDescription;
         this.annotationPrevious = JSON.parse(JSON.stringify(this.annotationHistory));
-        console.log(612, this.annotationHistory);
       }
     }
   }
@@ -1883,6 +1892,7 @@ export class ProjectAnalyzeComponent implements OnInit {
     } else {
       if (this.projectType == 'qaChat' && this.isQaChatModified()) {
         this.isSkipOrBack('history');
+        return;
       }
       this.clearCheckbox();
       const param = {
@@ -1894,9 +1904,12 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   isQaChatModified() {
-    let old = JSON.stringify(this.sr['originalUserInputs'][0]);
+    let old = this.sr['originalUserInputs'] ? JSON.stringify(this.sr['originalUserInputs'][0]) : '';
     this.sr = this.sortQaChatData(this.sr);
-    let fresh = JSON.stringify(this.sr.questionForText[0]);
+    let fresh =
+      this.sr.questionForText && this.sr.questionForText[0].prompt && this.sr.questionForText[0].response
+        ? JSON.stringify(this.sr.questionForText[0])
+        : '';
     return old == fresh ? false : true;
   }
 
@@ -2216,8 +2229,8 @@ export class ProjectAnalyzeComponent implements OnInit {
       if (this.projectType == 'qaChat') {
         if (this.isQaChatModified()) {
           this.isSkipOrBack('previous');
+          return;
         }
-        console.log(222, this.sr);
         let tid;
         if (this.sr._id) {
           tid = this.sr._id;
@@ -3284,14 +3297,6 @@ export class ProjectAnalyzeComponent implements OnInit {
   produceQaChatInit(res, from?) {
     this.sr['originalUserInputs'] = res.questionForText;
     this.sr._id = res._id;
-    // this.sr.userInputs = from == 'review' ? res.reviewInfo.userInputs : res.userInputs;
-    // this.sr.questionForText = from == 'review' ? [res.reviewInfo.userInputs[0].problemCategory] : res.questionForText;
-    // this.sr.userInput[0].questionForText[0] =
-    //   from == 'review' ? res.reviewInfo.userInputs[0].problemCategory : res.userInputs[0].problemCategory[0];
-    // let links =
-    //   from == 'review' ? res.reviewInfo.userInputs[0].problemCategory.reference : res.questionForText[0].reference;
-    // let follow =
-    //   from == 'review' ? res.reviewInfo.userInputs[0].problemCategory.followUps : res.questionForText[0].followUps;
     this.sr.userInputs = res.userInputs;
     this.sr.questionForText = res.questionForText;
     this.sr.userInput[0].questionForText[0] = res.userInputs[0].problemCategory[0];
@@ -3306,7 +3311,6 @@ export class ProjectAnalyzeComponent implements OnInit {
       }
     }
     this.followUps = follow;
-    console.log(4.1, this.followUps);
     for (let i = 0; i < this.followUps.length; i++) {
       if (this.followUps[i].prompt && this.followUps[i].response) {
         let arr = [];
@@ -3319,8 +3323,6 @@ export class ProjectAnalyzeComponent implements OnInit {
         this.followUps[i].reference = arr;
       }
     }
-    console.log(4.2, this.followUps);
-
     // make next item btn available
     this.editQuestionError = '';
     this.isValidQaChat();
@@ -3417,6 +3419,7 @@ export class ProjectAnalyzeComponent implements OnInit {
           this.sr.userInputs = responseSr.userInputs;
           this.sr.questionForText = responseSr.questionForText;
           if (this.projectType === 'qaChat') {
+            this.clearUserInput();
             this.produceQaChatInit(responseSr);
           }
           if (!this.sr.userInputs.length && this.labelType === 'HTL') {
@@ -4576,22 +4579,28 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.followUps[chatIndex].reference[index].text = data;
     } else {
       this.references[index].text = data;
-      let arr = [];
-      for (let i = 0; i < this.references.length; i++) {
-        if (this.references[i].text && !this.references[i].textErrMessage) {
-          arr.push(this.references[i].text);
-        }
-      }
-      this.sr.userInput[0].questionForText[0].reference = arr;
+      // let arr = [];
+      // for (let i = 0; i < this.references.length; i++) {
+      //   if (this.references[i].text && !this.references[i].textErrMessage) {
+      //     arr.push(this.references[i].text);
+      //   }
+      // }
+      // this.sr.userInput[0].questionForText[0].reference = arr;
     }
   }
 
   deleteReference(index, chatIndex) {
     if (chatIndex > -1) {
+      if (this.followUps[chatIndex].reference.length == 1) {
+        this.followUps[chatIndex].reference = [{ text: '', textErrMessage: '' }];
+      }
       if (this.followUps[chatIndex].reference.length > 1) {
         this.followUps[chatIndex].reference.splice(index, 1);
       }
     } else {
+      if (this.references.length == 1) {
+        this.references = [{ text: '', textErrMessage: '' }];
+      }
       if (this.references.length > 1) {
         this.references.splice(index, 1);
       }

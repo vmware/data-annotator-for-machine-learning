@@ -1,6 +1,6 @@
 /***
  * 
- * Copyright 2019-2021 VMware, Inc.
+ * Copyright 2019-2024 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  * 
 ***/
@@ -23,7 +23,7 @@ module.exports = {
     execute: async function (req, annotators) {
         const projectType = req.body.projectType;
         const source = req.body.source;
-        if ((projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER && projectType != PROJECTTYPE.QA) || source == SOURCE.MODEL_FEEDBACK) {
+        if ((projectType != PROJECTTYPE.TEXT && projectType != PROJECTTYPE.TABULAR && projectType != PROJECTTYPE.NER && projectType != PROJECTTYPE.QA && projectType != PROJECTTYPE.QACHAT) || source == SOURCE.MODEL_FEEDBACK) {
             return;
         }
         const start = Date.now();
@@ -32,6 +32,9 @@ module.exports = {
         let header = req.body.header;
         header = (typeof header === 'string' ? JSON.parse(header) : header);
         let selectedColumn = req.body.selectDescription;
+        if(projectType == PROJECTTYPE.QACHAT && req.body.selectLabels){
+        selectedColumn=req.body.selectLabels
+        }
         selectedColumn = (typeof selectedColumn === 'string' ? JSON.parse(selectedColumn) : selectedColumn);
         const user = req.auth.email;
         let questionForText = req.body.questionForText? req.body.questionForText: [];
@@ -104,11 +107,11 @@ module.exports = {
                             }
                         }
                     }
-                    
+
                     sechema.questionForText = questions;
                 }
-                //support ner quesion anwser column display
-                if (projectType == PROJECTTYPE.NER && req.body.ticketQuestions.length) {
+                //support ner or qa sting type quesion anwser column display
+                if ((projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA) && req.body.ticketQuestions && req.body.ticketQuestions.length) {
                     let ticketQuestions = {};
                     for (const qst of req.body.ticketQuestions) {
                         questionData = oneData[qst]
@@ -139,6 +142,24 @@ module.exports = {
                     }
                     sechema.userInputs = [{ problemCategory: problemCategory }];
                 }
+                //support qaChat with existing Q&A
+                if (projectType == PROJECTTYPE.QACHAT && req.body.selectLabels && (req.body.regression == 'true' || req.body.regression == true)) {
+                    let selectLabels = req.body.selectLabels;
+                    selectLabels = (typeof selectLabels === 'string' ? JSON.parse(selectLabels) : selectLabels);
+                    let problemCategory = [];
+                    for (const lb of selectLabels) {
+                            if (typeof JSON.parse(oneData[lb]) === 'object') {
+                                problemCategory.push(JSON.parse(oneData[lb]));
+                            }
+                        
+                    }
+                    sechema = {
+                        projectName: req.body.pname,
+                        userInputsLength: 1,
+                        userInputs: [{ problemCategory: problemCategory,user:user,timestamp:Date.now()}],
+                        questionForText:problemCategory
+                    };
+                }
                 docs.push(sechema);
                 totalCase += 1;
             }
@@ -158,13 +179,21 @@ module.exports = {
                 mongoDb.insertMany(SrModel, docs, options);
                 docs = [];
 
-                console.log(`[ SRS ] Utils import data to db end: `);
+                console.log(`[ SRS ] Utils import data to db end`);
                 const condition = { projectName: req.body.pname };
                 const update = {
                     $set: {
                         totalCase: totalCase
                     }
                 };
+                // if create qaChat with existing Q&A then need update projectCompleteCase and userCompleteCase also
+                if (projectType == PROJECTTYPE.QACHAT && req.body.selectLabels && (req.body.regression == 'true' || req.body.regression == true)) {
+                    update.$set['projectCompleteCase'] = totalCase;
+                    update.$set['userCompleteCase'] = [{
+                        user: user,
+                        completeCase: totalCase
+                      }]
+                }
                 console.log(`[ SRS ] Utils update totalCase:`, totalCase);
                 await mongoDb.findOneAndUpdate(ProjectModel, condition, update);
 

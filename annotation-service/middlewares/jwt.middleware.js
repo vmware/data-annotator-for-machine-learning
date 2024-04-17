@@ -8,7 +8,6 @@
 const jwt = require('express-jwt');
 const config = require('../config/config');
 const JWTS = require('jsonwebtoken');
-const { API_VERSION, API_BASE_PATH, TOKEN_EXPIRE_TIME, TOKEN_ALGORITHM, TOKEN_SECRET_OR_PRIVATE_KEY} = require('../config/constant');
 const APIs = require('../resources/APIs');
 
 jwtTokenAuthrization = (data) => {
@@ -21,20 +20,20 @@ jwtTokenAuthrization = (data) => {
             requestProperty: 'auth',
         }).unless({
             path: [
-                `${API_BASE_PATH}/api/${API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
+                `${config.API_BASE_PATH}/api/${config.API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
             ],
         });
     } else {
         return jwt({
-            secret: TOKEN_SECRET_OR_PRIVATE_KEY,
-            algorithms: [TOKEN_ALGORITHM],
+            secret: config.TOKEN_SECRET_OR_PRIVATE_KEY,
+            algorithms: [config.TOKEN_ALGORITHM],
             getToken: fromHeaderOrQuerystring,
             requestProperty: 'auth',
         }).unless({
             path: [
-                `${API_BASE_PATH}/api/${API_VERSION}${APIs.REGISTER}`,
-                `${API_BASE_PATH}/api/${API_VERSION}${APIs.LOGIN}`,
-                `${API_BASE_PATH}/api/${API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
+                `${config.API_BASE_PATH}/api/${config.API_VERSION}${APIs.REGISTER}`,
+                `${config.API_BASE_PATH}/api/${config.API_VERSION}${APIs.LOGIN}`,
+                `${config.API_BASE_PATH}/api/${config.API_VERSION}${APIs.EMAIL_REGULAR_NOTIFICATION}`,
             ],
         });
     }
@@ -54,20 +53,20 @@ function fromHeaderOrQuerystring(req) {
 
 async function generateBasicToken(user) {
 
-    const expires_time = Math.floor(Date.now() / 1000) + TOKEN_EXPIRE_TIME;
+    const expires_time = Math.floor(Date.now() / 1000) + config.TOKEN_EXPIRE_TIME;
     const access_token = await JWTS.sign({
         exp: expires_time,
         email: user
     },
-        TOKEN_SECRET_OR_PRIVATE_KEY,
+        config.TOKEN_SECRET_OR_PRIVATE_KEY,
         {
-            algorithm: TOKEN_ALGORITHM
+            algorithm: config.TOKEN_ALGORITHM
         }
     );
     return {
         access_token: access_token,
         access_type: "Bearer",
-        expires_in: TOKEN_EXPIRE_TIME,
+        expires_in: config.TOKEN_EXPIRE_TIME,
         expires_time: expires_time
     }
 }

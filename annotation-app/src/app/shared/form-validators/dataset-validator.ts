@@ -327,6 +327,7 @@ export class DatasetValidator {
       if (
         projectType == 'ner' ||
         projectType == 'qa' ||
+        projectType == 'qaChat' ||
         projectType == 'text' ||
         projectType == 'csv' ||
         projectType == 'tabular' ||

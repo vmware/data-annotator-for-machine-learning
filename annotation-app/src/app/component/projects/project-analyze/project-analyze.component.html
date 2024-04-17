@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             projectType !== 'log' &&
             projectType != 'qa' &&
             projectType != 'qaChat') ||
-            projectInfo.regression == true) &&
+            (projectType != 'qaChat' && projectInfo.regression == true)) &&
           isAllowedAnnotate &&
           currentTabIndex == 1
         "
@@ -346,6 +346,16 @@ SPDX-License-Identifier: Apache-2.0 -->
                     (mousedown)="resizeBox()"
                     (onmousedown)="resizeBox()"
                   >
+                    <div class="nerDisplayText">
+                      <div *ngFor="let ticket of sr.ticketQuestions">
+                        <p class="question-paragraph" style="word-break: break-word">
+                          <span class="ticketColumn">{{ ticket.key }}</span>
+                          <span>:&nbsp;&nbsp;</span>
+                          <span>{{ ticket.value }}</span>
+                        </p>
+                        <br />
+                      </div>
+                    </div>
                     <div class="nerContent">
                       <div class="nerPassage" (mouseup)="onMouseUp($event)">
                         <span id="mainText">{{ sr?.originalData?.text }}</span>
@@ -842,15 +852,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 [(ngModel)]="item.text"
                                 (change)="updateReference($event, i, -1)"
                                 [ngModelOptions]="{ standalone: true }"
-                              />
+                              /><a *ngIf="item.text" [href]="item.text" target="_blank"
+                                ><cds-icon shape="link"></cds-icon></a
+                              ><a *ngIf="!item.text" disabled><cds-icon shape="link"></cds-icon></a>
                             </div>
                             <div class="clr-col">
                               <button
                                 class="btn btn-sm btn-icon"
                                 type="button"
                                 style="margin-bottom: -0.7rem; width: 100%"
+                                (click)="deleteReference(i, -1)"
                               >
-                                <cds-icon shape="trash" (click)="deleteReference(i, -1)"> </cds-icon>
+                                <cds-icon shape="trash"> </cds-icon>
                               </button>
                             </div>
                           </div>
@@ -935,15 +948,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                                           [(ngModel)]="item1.text"
                                           (change)="updateReference($event, linkIndex, i)"
                                           [ngModelOptions]="{ standalone: true }"
-                                        />
+                                        /><a *ngIf="item1.text" [href]="item1.text" target="_blank"
+                                          ><cds-icon shape="link"></cds-icon></a
+                                        ><a *ngIf="!item1.text" disabled><cds-icon shape="link"></cds-icon></a>
                                       </div>
                                       <div class="clr-col">
                                         <button
                                           class="btn btn-sm btn-icon"
                                           type="button"
                                           style="margin-bottom: -0.7rem; width: 100%"
+                                          (click)="deleteReference(linkIndex, i)"
                                         >
-                                          <cds-icon shape="trash" (click)="deleteReference(linkIndex, i)"> </cds-icon>
+                                          <cds-icon shape="trash"> </cds-icon>
                                         </button>
                                       </div>
                                     </div>
@@ -1330,7 +1346,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </clr-tab-content>
     </clr-tab>
-    <clr-tab *ngIf="user.role !== 'Annotator' && !showAppendTabs && projectType != 'qaChat'">
+    <clr-tab *ngIf="user.role !== 'Annotator' && !showAppendTabs">
       <button clrTabLink (click)="clickTab(4)">Add New Entries</button>
       <clr-tab-content *clrIfActive>
         <div class="clr-row">

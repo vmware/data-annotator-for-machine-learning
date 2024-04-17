@@ -1,5 +1,5 @@
 /*
-Copyright 2019-2023 VMware, Inc.
+Copyright 2019-2024 VMware, Inc.
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -214,6 +214,49 @@ export class UnZipService {
             originalHead,
             previewHeadDatas,
             previewContentDatas,
+            count,
+            invalidCount,
+          };
+          resolve(res);
+        },
+      });
+    });
+  }
+
+  parseQa(file, header, download, originalHead?, previewHeader?) {
+    let count = 0;
+    let invalidCount = 0;
+    const indexArray = [];
+    for (let k = 0; k < originalHead.length; k++) {
+      indexArray.push(previewHeader.indexOf(originalHead[k]));
+    }
+    return new Promise<any>((resolve, reject) => {
+      this.papa.parse(file, {
+        header,
+        download,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        worker: true,
+        error: (error) => {},
+        chunk: (results, parser) => {
+          const chunkData = results.data;
+          const newArray = [];
+          for (let a = 0; a < chunkData.length; a++) {
+            for (let c = 0; c < indexArray.length; c++) {
+              let key = previewHeader[indexArray[c]];
+              newArray.push(chunkData[a][key]);
+            }
+          }
+          count += newArray.length;
+
+          for (let b = 0; b < newArray.length; b++) {
+            if (newArray[b] == null || newArray[b] == '') {
+              invalidCount += 1;
+            }
+          }
+        },
+        complete: () => {
+          const res = {
             count,
             invalidCount,
           };

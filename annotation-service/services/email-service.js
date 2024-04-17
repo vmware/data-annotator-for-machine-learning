@@ -13,7 +13,7 @@ const authForNoe = require("./authForNoe.service");
 const config = require("../config/config");
 const AWS = require('aws-sdk');
 const STS = require('../utils/sts');
-const { ACCESS_TIME_15, API_VERSION } = require('../config/constant')
+const { ACCESS_TIME_15 } = require('../config/constant')
 const nodemailer = require("nodemailer");
 const APIs = require('../resources/APIs');
 
@@ -58,7 +58,7 @@ async function sendNotStartLabelingNotificationEmail(user, projectName, projectO
     const htmlTemplate = notStartTemp.replace(/\${user}/g, user)
         .replace(/\${projectName}/g, projectName)
         .replace(/\${serviceHost}/g, config.annotationServiceUrl)
-        .replace(/\${apiVersion}/g, API_VERSION)
+        .replace(/\${apiVersion}/g, config.API_VERSION)
         .replace(/\${notification}/g, APIs.EMAIL_REGULAR_NOTIFICATION)
         .replace("${projectOwner}", projectOwner)
         .replace("${assignedDate}", assignedDate)
@@ -73,7 +73,7 @@ async function sendNotFinishLabelingNotificationEmail(user, projectName, project
     const htmlTemplate = notFinishTemp.replace(/\${user}/g, user)
         .replace(/\${projectName}/g, projectName)
         .replace(/\${serviceHost}/g, config.annotationServiceUrl)
-        .replace(/\${apiVersion}/g, API_VERSION)
+        .replace(/\${apiVersion}/g, config.API_VERSION)
         .replace(/\${notification}/g, APIs.EMAIL_REGULAR_NOTIFICATION)
         .replace("${projectOwner}", projectOwner)
         .replace("${assignedDate}", assignedDate)

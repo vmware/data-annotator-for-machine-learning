@@ -78,7 +78,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <option value="ner">Named Entity Recognition</option>
             <option value="image">Image Classification</option>
             <option value="log">Log Classification</option>
-            <option value="qa">Question Answer</option>
+            <option value="qa">Question Answer Extraction</option>
             <option value="qaChat">Question Answer Conversational</option>
           </select>
         </div>
@@ -171,10 +171,53 @@ SPDX-License-Identifier: Apache-2.0 -->
           </clr-tooltip>
         </div>
       </div>
+      <div *ngIf="dsDialogForm.get('projectType').value === 'qaChat'" class="clr-row formField">
+        <label class="label-tooltip clr-col-12 clr-col-md-2"
+          >Has Existing Q&A
+          <clr-tooltip>
+            <cds-icon clrTooltipTrigger shape="info-circle" size="20" aria-label="Uniq tooltip 5"></cds-icon>
+            <clr-tooltip-content clrPosition="right" clrSize="md" *clrIfOpen>
+              &nbsp;<span class="tooltip-content"
+                >If you want to enable this task upload some existing question answer conversational, please select yes
+                and do upload csv in the next step.
+              </span>
+            </clr-tooltip-content>
+          </clr-tooltip>
+        </label>
+        <div class="clr-col-12 clr-col-md-9">
+          <label>
+            <clr-radio-wrapper style="margin-right: 0.5rem">
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                value="yExistingQa"
+                id="yExistingQa"
+                name="existingQa"
+                (change)="uploadExistingQa('y')"
+              />
+              <label for="yExistingQa">&nbsp;Yes</label>
+            </clr-radio-wrapper>
+            <clr-radio-wrapper>
+              <input
+                type="radio"
+                clrRadio
+                class="clr-radio"
+                value="nExistingQa"
+                id="nExistingQa"
+                name="existingQa"
+                checked
+                (change)="uploadExistingQa('n')"
+              />
+              <label for="nExistingQa" style="margin-top: -1rem">&nbsp;No</label>
+            </clr-radio-wrapper>
+          </label>
+        </div>
+      </div>
     </div>
   </clr-wizard-page>
   <clr-wizard-page
-    *ngIf="dsDialogForm.get('projectType').value != 'qaChat'"
+    *ngIf="dsDialogForm.get('projectType').value != 'qaChat' || existingQA"
     [id]="2"
     (clrWizardPageOnLoad)="clrWizardPageOnLoad($event)"
     [clrWizardPageNextDisabled]="!dsDialogForm.get('selectedDataset').value"
@@ -309,13 +352,14 @@ SPDX-License-Identifier: Apache-2.0 -->
   <clr-wizard-page
     [id]="3"
     *ngIf="
-      dsDialogForm.get('projectType').value !== 'image' &&
-      dsDialogForm.get('projectType').value !== 'log' &&
-      dsDialogForm.get('projectType').value !== 'qaChat'
+      (dsDialogForm.get('projectType').value !== 'image' &&
+        dsDialogForm.get('projectType').value !== 'log' &&
+        dsDialogForm.get('projectType').value !== 'qaChat') ||
+      (dsDialogForm.get('projectType').value == 'qaChat' && existingQA)
     "
     (clrWizardPageCustomButton)="doCustomClick($event)"
     [clrWizardPageNextDisabled]="
-      dsDialogForm.get('projectType').value === 'ner' || dsDialogForm.get('projectType').value === 'qa'
+      dsDialogForm.get('projectType').value === 'ner' || existingQA
         ? !dropdownSelected
         : !(dropdownSelected && selectDescription.length > 0)
     "
@@ -330,8 +374,42 @@ SPDX-License-Identifier: Apache-2.0 -->
               ? 'Select Text Column'
               : dsDialogForm.get('projectType').value === 'qa'
               ? 'Select Question Column'
+              : dsDialogForm.get('projectType').value === 'qaChat' && existingQA
+              ? 'Select Existing Q&A Column'
               : 'Select Label Column'
-          }}<span>*</span></label
+          }}<span>*</span
+          ><clr-signpost *ngIf="dsDialogForm.get('projectType').value === 'qaChat' && existingQA">
+            <clr-signpost-content *clrIfOpen>
+              <pre>
+Please confirm that your every row under the selected column keep the same key as the following formatted data.
+        
+{{ '{' }}
+  "prompt": "What types of projects are supported?",
+  "response": "Text,tabular,image,log,ner and qa.",
+  "reference": [
+    "https://***.***.com"
+  ],
+  "followUps": [
+    {{ '{' }}
+      "prompt": "What is the format for downloading annotated data?",
+      "response": "Each label type is captured as a new column in the export CSV. Each row contains the number of annotations for a label type.",
+      "reference": [
+        "https://*.***.**",
+        "https://*.***.**",
+        "https://*.***.**"
+      ]
+    {{ '}' }},
+    {{ '{' }}
+      "prompt": "When will you support more other annotation tasks?",
+      "response": "This is on our roadmap.",
+      "reference": []
+    {{ '}' }}
+  ]
+{{ '}' }}
+                </pre
+              >
+            </clr-signpost-content>
+          </clr-signpost></label
         >
         <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
           <select
@@ -341,8 +419,10 @@ SPDX-License-Identifier: Apache-2.0 -->
             (change)="selectedItem(dropdownSelected)"
             [ngModelOptions]="{ standalone: true }"
           >
-            <option ngif="!dropdownSelected" value="" style="display: none"></option>
-            <option *ngIf="dsDialogForm.get('projectType').value != 'ner'" value="No Labels">No Labels</option>
+            <option *ngIf="!dropdownSelected" value="" style="display: none"></option>
+            <option *ngIf="dsDialogForm.get('projectType').value != 'ner' && !existingQA" value="No Labels">
+              No Labels
+            </option>
             <option *ngFor="let item of previewHeadDatas" [value]="item">
               {{ item }}
             </option>
@@ -408,8 +488,15 @@ Please confirm that your every row under the selected question column has the fo
           </label>
         </div>
       </div>
-      <!-- qa text area display single or multiple column -->
-      <div *ngIf="dropdownSelected" class="clr-row formField">
+      <!-- select description section -->
+      <div
+        *ngIf="
+          dropdownSelected &&
+          dsDialogForm.get('projectType').value !== 'qaChat' &&
+          !(dsDialogForm.get('projectType').value === 'qa' && dsDialogForm.get('questionType').value === 'n')
+        "
+        class="clr-row formField"
+      >
         <label class="label-tooltip clr-col-12 clr-col-md-2"
           >{{
             dsDialogForm.get('projectType').value === 'ner'
@@ -419,7 +506,7 @@ Please confirm that your every row under the selected question column has the fo
           }}<span *ngIf="dsDialogForm.get('projectType').value !== 'ner'">*</span>
         </label>
         <!-- single -->
-        <div
+        <!-- <div
           class="clr-select-wrapper clr-col-12 clr-col-md-9"
           *ngIf="dsDialogForm.get('projectType').value === 'qa' && dsDialogForm.get('questionType').value === 'n'"
         >
@@ -434,7 +521,7 @@ Please confirm that your every row under the selected question column has the fo
               {{ item }}
             </option>
           </select>
-        </div>
+        </div> -->
         <!-- multiple -->
         <div class="clr-col-12 clr-col-md-9">
           <clr-datagrid
@@ -471,6 +558,71 @@ Please confirm that your every row under the selected question column has the fo
                   [disabled]="column.checkboxDisabled"
                   [checked]="column.labelChecked"
                   (change)="changeCheckbox(column.name, 'labelChecked')"
+                />
+              </clr-dg-cell>
+              <clr-dg-cell class="ellipsis-datagrid">
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  name="checkbox2"
+                  [checked]="column.helptextChecked"
+                  (change)="changeCheckbox(column.name, 'helptextChecked')"
+                />
+              </clr-dg-cell>
+            </clr-dg-row>
+          </clr-datagrid>
+        </div>
+      </div>
+      <!-- qa, question type is string, need show helpful text -->
+      <div
+        *ngIf="
+          dropdownSelected &&
+          dsDialogForm.get('projectType').value === 'qa' &&
+          dsDialogForm.get('questionType').value === 'n'
+        "
+        class="clr-row formField"
+      >
+        <label class="label-tooltip clr-col-12 clr-col-md-2"
+          >{{
+            'Select the columns to present to annotators about the text for annotate (required) or helpful text
+          (optional)'
+          }}
+        </label>
+        <!-- multiple -->
+        <div class="clr-col-12 clr-col-md-9">
+          <clr-datagrid>
+            <clr-dg-column class="ellipsis-datagrid">Column Name</clr-dg-column>
+            <clr-dg-column class="ellipsis-datagrid">Text for Annotate<span style="color: red">*</span></clr-dg-column>
+            <clr-dg-column class="ellipsis-datagrid">Helpful Text</clr-dg-column>
+            <clr-dg-row *clrDgItems="let column of checkboxColumns; let i = index" [clrDgItem]="column">
+              <clr-dg-cell class="ellipsis-datagrid" style="color: #000; word-break: break-all">{{
+                column.name
+              }}</clr-dg-cell>
+              <!-- <clr-dg-cell class="ellipsis-datagrid">
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  name="checkbox1"
+                  [ngClass]="{
+                    'disabled-checkbox': column.checkboxDisabled
+                  }"
+                  [disabled]="column.checkboxDisabled"
+                  [checked]="column.labelChecked"
+                  (change)="changeCheckbox(column.name, 'labelChecked')"
+                />
+              </clr-dg-cell> -->
+              <clr-dg-cell class="ellipsis-datagrid">
+                <input
+                  type="radio"
+                  clrRadio
+                  class="clr-radio"
+                  name="radioForText"
+                  [value]="column.name"
+                  [ngClass]="{
+                    'disabled-checkbox': column.checkboxDisabled
+                  }"
+                  [disabled]="column.checkboxDisabled"
+                  (change)="changeCheckbox(column.name, 'labelChecked', $event)"
                 />
               </clr-dg-cell>
               <clr-dg-cell class="ellipsis-datagrid">
@@ -909,7 +1061,7 @@ Please confirm that your every row under the selected question column has the fo
     <ng-template clrPageTitle>Assign Team Members</ng-template>
     <div [formGroup]="dsDialogForm">
       <!-- total row -->
-      <div *ngIf="dsDialogForm.get('projectType').value !== 'qaChat'" class="clr-row formField">
+      <div *ngIf="!(dsDialogForm.get('projectType').value == 'qaChat' && !existingQA)" class="clr-row formField">
         <label for="totalRow" class="label-tooltip clr-col-12 clr-col-md-2">{{
           dsDialogForm.get('projectType').value === 'image'
             ? 'Total Items'

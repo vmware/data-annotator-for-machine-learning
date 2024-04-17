@@ -112,6 +112,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <label class="clr-col-3 keepAllWord" title="{{ item.fullName }}">{{ item.fullName }}</label>
       <div class="clr-col">
         <clr-progress-bar
+          *ngIf="msg?.projectInfo.projectType != 'qaChat'"
           title="Annotation progress: (annotated tickets / assigned tickets)%"
           clrValue="{{ (item.completeCase / (item.assignedCase == 0 ? 1 : item.assignedCase)) * 100 }}"
           clrLabeled

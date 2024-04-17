@@ -24,13 +24,13 @@ SPDX-License-Identifier: Apache-2.0 -->
       <div title="Refresh Table" class="refreshBtn" (click)="reload()">
         <cds-icon shape="refresh"></cds-icon> &nbsp;REFRESH
       </div>
-      <button class="btn btn-primary" (click)="onAddingDataset()">Create New Dataset</button>
+      <button class="btn btn-primary" (click)="onAddingDataset()">Upload New Dataset</button>
     </div>
   </div>
   <clr-tabs>
     <clr-tab>
       <button clrTabLink id="link1" (click)="clickTab(1)">My Datasets ({{ totalItems }})</button>
-      <clr-tab-content id="content1" *clrIfActive="currentTab == 1 ">
+      <clr-tab-content id="content1" *clrIfActive="currentTab == 1">
         <clr-datagrid [clrDgLoading]="loading" class="gridHeight">
           <clr-dg-placeholder>We couldn't find any dataset for you!</clr-dg-placeholder>
           <clr-dg-column [clrDgField]="'dataSetName'" class="ellipsis-datagrid">Dataset Name </clr-dg-column>
@@ -119,7 +119,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <ng-container *clrDgHideableColumn="{ hidden: true }">Project Creator</ng-container>
           </clr-dg-column>
           <clr-dg-column [clrDgField]="'shareDescription'" class="ellipsis-datagrid">Description </clr-dg-column>
-          <clr-dg-column  [clrDgField]="'updatedDate'" class="ellipsis-datagrid">
+          <clr-dg-column [clrDgField]="'updatedDate'" class="ellipsis-datagrid">
             <ng-container *clrDgHideableColumn="{ hidden: true }">Updated Date </ng-container
             ><clr-dg-string-filter [clrDgStringFilter]="updateTimeFilter"></clr-dg-string-filter>
           </clr-dg-column>

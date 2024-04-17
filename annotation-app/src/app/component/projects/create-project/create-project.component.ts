@@ -74,6 +74,8 @@ export class CreateProjectComponent implements OnInit {
   user: any;
   wizardpage: ClrWizardPage;
   taskNameInput = new Subject<string>();
+  existingQA: boolean = false;
+
   constructor(
     private apiService: ApiService,
     private formBuilder: FormBuilder,
@@ -439,7 +441,6 @@ export class CreateProjectComponent implements OnInit {
           this.datasetInfo.location = choosedDataset.location;
         } else {
           this.previewContentDatas = choosedDataset.topReview.topRows;
-          // this.sortPreviewHeadDatas(this.previewHeadDatas);
           setTimeout(() => {
             this.previewHeadDatas = choosedDataset.topReview.header;
             this.datasetInfo.loadingPreviewData = false;
@@ -447,17 +448,18 @@ export class CreateProjectComponent implements OnInit {
           this.datasetInfo.isHasHeader = choosedDataset.hasHeader;
           this.datasetInfo.location = choosedDataset.location;
           this.datasetInfo.chooseLabel = choosedDataset.topReview.header;
-          // open wizard and reset
-          // this.openWizard();
         }
-        // this.toEvenlyDistributeTicket();
         return;
       }
     });
   }
 
   sortPreviewHeadDatas(csvHeaders) {
-    if (this.dsDialogForm.get('projectType').value === 'ner') {
+    this.checkboxColumns = [];
+    if (
+      this.dsDialogForm.get('projectType').value === 'ner' ||
+      (this.dsDialogForm.get('projectType').value === 'qa' && this.dsDialogForm.get('questionType').value === 'n')
+    ) {
       for (let item of csvHeaders) {
         this.checkboxColumns.push({
           name: item,
@@ -537,11 +539,12 @@ export class CreateProjectComponent implements OnInit {
   }
 
   getMyDatasets(projectType) {
-    if (projectType == 'qaChat') {
-      return;
-    }
     let a =
-      projectType == 'text' || projectType == 'tabular' || projectType == 'ner' || projectType == 'qa'
+      projectType == 'text' ||
+      projectType == 'tabular' ||
+      projectType == 'ner' ||
+      projectType == 'qa' ||
+      projectType == 'qaChat'
         ? 'csv'
         : projectType == 'image'
         ? 'image'
@@ -693,7 +696,11 @@ export class CreateProjectComponent implements OnInit {
     let indexArray = [];
     let textArray = this.checkboxChecked;
     let selectedLabelIndex = this.previewHeadDatas.indexOf(this.dropdownSelected);
-    if (this.dsDialogForm.get('projectType').value === 'ner' || this.dsDialogForm.get('projectType').value === 'qa') {
+    if (
+      this.dsDialogForm.get('projectType').value === 'ner' ||
+      this.dsDialogForm.get('projectType').value === 'qa' ||
+      this.existingQA
+    ) {
       selectedLabelIndex = -1;
       textArray = [this.dropdownSelected];
     }
@@ -793,7 +800,11 @@ export class CreateProjectComponent implements OnInit {
       this.helpfulText = this.selectDescription;
     } else {
       this.checkboxChecked = this.selectDescription;
-      if (this.dsDialogForm.get('questionType').value === 'y') {
+    }
+    if (this.dsDialogForm.get('projectType').value === 'qa' && this.dsDialogForm.get('questionType').value === 'n') {
+      let arr = _.filter(this.checkboxColumns, { helptextChecked: true });
+      if (arr && arr.length > 0) {
+        this.helpfulText = _.map(arr, 'name');
       }
     }
     // console.log(5555, this.dropdownSelected + '---' + this.checkboxChecked + '---' + this.helpfulText);
@@ -818,7 +829,6 @@ export class CreateProjectComponent implements OnInit {
   }
 
   selectDescriptionChanged(value) {
-    // this value === this.selectDescription
     if (
       this.selectDescriptionCopy.sort().toString() != this.selectDescription.sort().toString() ||
       (this.selectDescriptionCopy.length == 0 && this.selectDescription.length == 0)
@@ -827,12 +837,20 @@ export class CreateProjectComponent implements OnInit {
     }
   }
 
-  changeCheckbox(data, from) {
+  changeCheckbox(data, from, e?) {
     this.clearFormdata();
     let index = _.findIndex(this.checkboxColumns, function (o) {
       return o.name === data;
     });
     this.checkboxColumns[index][from] = !this.checkboxColumns[index][from];
+    if (
+      from == 'labelChecked' &&
+      e &&
+      this.dsDialogForm.get('projectType').value === 'qa' &&
+      this.dsDialogForm.get('questionType').value === 'n'
+    ) {
+      this.selectDescription = [e.target.value];
+    }
   }
 
   uploadModalInfo(value) {
@@ -1171,6 +1189,16 @@ export class CreateProjectComponent implements OnInit {
     if (this.dsDialogForm.value.projectType === 'qaChat') {
       formData.append('isMultipleLabel', 'true');
       formData.append('labels', '');
+      formData.append('regression', this.existingQA ? 'true' : 'false');
+      if (this.existingQA) {
+        formData.append('fileName', this.datasetInfo.fileName);
+        formData.append('fileSize', this.datasetInfo.fileSize);
+        formData.append('location', this.datasetInfo.fileLocation);
+        formData.append('selectedDataset', this.dsDialogForm.value.selectedDataset);
+        formData.append('header', JSON.stringify(this.previewHeadDatas));
+        formData.append('isHasHeader', this.datasetInfo.isHasHeader);
+        formData.append('selectLabels', JSON.stringify([this.dropdownSelected]));
+      }
       return this.apiService.postDataset(formData);
     }
     formData.append('ticketDescription', this.dsDialogForm.value.annotationDisplayName);
@@ -1221,6 +1249,9 @@ export class CreateProjectComponent implements OnInit {
 
     if (this.dsDialogForm.get('projectType').value === 'qa' && this.dsDialogForm.get('questionType').value === 'y') {
       formData.append('regression', this.dsDialogForm.get('regression.regression').value);
+    }
+    if (this.dsDialogForm.get('projectType').value === 'qa' && this.dsDialogForm.get('questionType').value === 'n') {
+      formData.append('ticketQuestions', JSON.stringify(this.helpfulText));
     }
 
     formData.append('totalRows', this.dsDialogForm.value.totalRow);
@@ -1306,12 +1337,18 @@ export class CreateProjectComponent implements OnInit {
   }
 
   changeQuestionType() {
-    console.log(this.dsDialogForm.get('questionType').value);
+    this.selectDescription = [];
+    this.helpfulText = [];
+    this.sortPreviewHeadDatas(this.previewHeadDatas);
     if (this.dsDialogForm.get('questionType').value === 'y') {
       this.dsDialogForm.addControl('regression', this.formBuilder.group({ regression: true }));
       console.log(this.dsDialogForm.get('regression').value);
     } else {
       this.dsDialogForm.get('regression').setValue({ regression: false });
     }
+  }
+
+  uploadExistingQa(e) {
+    e == 'y' ? (this.existingQA = true) : (this.existingQA = false);
   }
 }

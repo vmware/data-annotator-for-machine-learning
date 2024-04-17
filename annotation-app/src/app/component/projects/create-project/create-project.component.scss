@@ -188,9 +188,13 @@ fieldset {
         margin-bottom: 0.1rem;
     }
     .signpost-content{
-    margin-top: 4rem;
+    margin-top: 7rem;
+    min-width: 35vw;
     .popover-pointer{
-        margin-top: -4rem;
+        margin-top: -7rem;
+    }
+    .signpost-action {
+        display: none;
     }
 } 
 }
