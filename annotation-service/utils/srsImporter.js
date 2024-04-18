@@ -56,19 +56,20 @@ module.exports = {
         if (projectType == PROJECTTYPE.TABULAR) {
             headerRule.checkType = true;
         }
-        let fileStream = await fileSystemUtils.handleFileStream(req.body.location);
-
-        // chunking line by line to read
-        console.log(`[ SRS ] Utils import data to db start: `, Date.now());
-        csv(headerRule).fromStream(fileStream).subscribe((oneData) => {
-            saveData(oneData);
-        }, async (error) => {
-            console.log(`[ SRS ] [ERROR] Utils import data have ${error}: `, Date.now());
-        }, async () => {
-            setTimeout(async () => {
-                await finishSaveData();
-            }, 1000 * 5);
-        });
+        if(req.body.location){
+            let fileStream = await fileSystemUtils.handleFileStream(req.body.location);
+            // chunking line by line to read
+            console.log(`[ SRS ] Utils import data to db start: `, Date.now());
+            csv(headerRule).fromStream(fileStream).subscribe((oneData) => {
+                saveData(oneData);
+            }, async (error) => {
+                console.log(`[ SRS ] [ERROR] Utils import data have ${error}: `, Date.now());
+            }, async () => {
+                setTimeout(async () => {
+                    await finishSaveData();
+                }, 1000 * 5);
+            });
+        }
 
         // handle and save data to db
         function saveData(oneData) {

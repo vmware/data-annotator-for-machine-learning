@@ -606,9 +606,27 @@ async function appendSrsDataByForms(req, originalHeaders, projectType) {
 
 }
 
+// if the appender just owner and not in the usercompletecase then need add this appender in the usercompletecase first
+async function addUserCompleteCase(req,project){
+    const user_case = await project.userCompleteCase.find(uc => uc.user == req.auth.email);
+    const conditions = { projectName: req.body.pname };
+    let completeCase=project.userCompleteCase
+    if(!user_case){
+        completeCase.push({
+            user: req.auth.email,
+            completeCase: 0,
+            assignedCase: 0,
+            assignedDate: Date.now(),
+            updateDate: Date.now(),
+        });
+        const update = { $set: { userCompleteCase: completeCase, updatedDate: Date.now() } };
+        await mongoDb.findOneAndUpdate(ProjectModel, conditions, update);
+    }
+}
+
 async function appendSrsDataByCSVFile(req, originalHeaders, project) {
 
-    console.log(`[ SRS ] Service appendSrsDataByCSVFile update appen sr status to adding: `, Date.now());
+    console.log(`[ SRS ] Service appendSrsDataByCSVFile update append sr status to adding: `, Date.now());
     //update append status
     const conditions = { projectName: req.body.pname };
     const update = { $set: { "appendSr": APPENDSR.ADDING, updatedDate: Date.now() } };
@@ -738,6 +756,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
             };
             // if append qaChat with existing Q&A then need update projectCompleteCase and userCompleteCase also
             if (project.projectType == PROJECTTYPE.QACHAT) {
+                await addUserCompleteCase(req,project);
                 conditions["userCompleteCase.user"] = req.auth.email;
                 update.$inc['projectCompleteCase'] = caseNum;
                 update.$inc["userCompleteCase.$.completeCase"]=caseNum
@@ -751,6 +770,7 @@ async function appendSrsDataByCSVFile(req, originalHeaders, project) {
         }
     });
 }
+
 
 async function appendSrsData(req) {
     //validate user and project
