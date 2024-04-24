@@ -443,7 +443,7 @@ export class LatestAnnotationDataComponent implements OnInit {
           if (this.msg.projectType == 'ner' || this.msg.projectType == 'qa' || this.msg.projectType == 'qaChat') {
             res.forEach((element) => {
               if (this.msg.projectType == 'qaChat') {
-                if (element.userInputs[0].problemCategory[0].followUps.length > 0) {
+                if (element.userInputs.length > 0 && element.userInputs[0].problemCategory[0].followUps.length > 0) {
                   element.userInputs[0].problemCategory = [
                     ...element.userInputs[0].problemCategory,
                     ...element.userInputs[0].problemCategory[0].followUps,
@@ -460,7 +460,9 @@ export class LatestAnnotationDataComponent implements OnInit {
                   (element.reviewInfo.userInputs.length > 0 &&
                     element.reviewInfo.userInputs[0].problemCategory?.length) > 0
                     ? element.reviewInfo.userInputs[0].problemCategory
-                    : element.userInputs[0].problemCategory;
+                    : element.userInputs.length > 0
+                    ? element.userInputs[0].problemCategory
+                    : [];
               }
               if (
                 element.userInputs.length > 0 &&

@@ -351,23 +351,21 @@ SPDX-License-Identifier: Apache-2.0 -->
   <!-- select label and text column -->
   <clr-wizard-page
     [id]="3"
-    *ngIf="
-      (dsDialogForm.get('projectType').value !== 'image' &&
-        dsDialogForm.get('projectType').value !== 'log' &&
-        dsDialogForm.get('projectType').value !== 'qaChat') ||
-      (dsDialogForm.get('projectType').value == 'qaChat' && existingQA)
-    "
+    (clrWizardPageOnLoad)="clrWizardPageOnLoad($event)"
+    *ngIf="dsDialogForm.get('projectType').value !== 'image' && dsDialogForm.get('projectType').value !== 'log'"
     (clrWizardPageCustomButton)="doCustomClick($event)"
     [clrWizardPageNextDisabled]="
-      dsDialogForm.get('projectType').value === 'ner' || existingQA
+      dsDialogForm.get('projectType').value === 'ner'
         ? !dropdownSelected
+        : dsDialogForm.get('projectType').value === 'qaChat'
+        ? isQaChatNext
         : !(dropdownSelected && selectDescription.length > 0)
     "
   >
     <ng-template clrPageTitle>Set Data</ng-template>
     <div [formGroup]="dsDialogForm" style="height: 67vh; max-height: 67vh; overflow: auto">
       <!-- select dropdownSelected -->
-      <div class="clr-row formField">
+      <!-- <div class="clr-row formField">
         <label class="label-tooltip clr-col-12 clr-col-md-2"
           >{{
             dsDialogForm.get('projectType').value === 'ner'
@@ -423,6 +421,32 @@ Please confirm that your every row under the selected column keep the same key a
             <option *ngIf="dsDialogForm.get('projectType').value != 'ner' && !existingQA" value="No Labels">
               No Labels
             </option>
+            <option *ngFor="let item of previewHeadDatas" [value]="item">
+              {{ item }}
+            </option>
+          </select>
+        </div>
+      </div> -->
+      <div class="clr-row formField" *ngIf="dsDialogForm.get('projectType').value !== 'qaChat'">
+        <label class="label-tooltip clr-col-12 clr-col-md-2"
+          >{{
+            dsDialogForm.get('projectType').value === 'ner'
+              ? 'Select Text Column'
+              : dsDialogForm.get('projectType').value === 'qa'
+              ? 'Select Question Column'
+              : 'Select Label Column'
+          }}<span>*</span>
+        </label>
+        <div class="clr-select-wrapper clr-col-12 clr-col-md-9">
+          <select
+            id="select-basic"
+            class="clr-select"
+            [(ngModel)]="dropdownSelected"
+            (change)="selectedItem(dropdownSelected)"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option *ngIf="!dropdownSelected" value="" style="display: none"></option>
+            <option *ngIf="dsDialogForm.get('projectType').value != 'ner'" value="No Labels">No Labels</option>
             <option *ngFor="let item of previewHeadDatas" [value]="item">
               {{ item }}
             </option>
@@ -505,24 +529,6 @@ Please confirm that your every row under the selected question column has the fo
               : 'Select the columns to present to annotators about the text'
           }}<span *ngIf="dsDialogForm.get('projectType').value !== 'ner'">*</span>
         </label>
-        <!-- single -->
-        <!-- <div
-          class="clr-select-wrapper clr-col-12 clr-col-md-9"
-          *ngIf="dsDialogForm.get('projectType').value === 'qa' && dsDialogForm.get('questionType').value === 'n'"
-        >
-          <select
-            id="select-basic"
-            class="clr-select"
-            [(ngModel)]="selectDescription"
-            (change)="selectQestionChanged(selectDescription)"
-            [ngModelOptions]="{ standalone: true }"
-          >
-            <option *ngFor="let item of checkboxColumns" [value]="item">
-              {{ item }}
-            </option>
-          </select>
-        </div> -->
-        <!-- multiple -->
         <div class="clr-col-12 clr-col-md-9">
           <clr-datagrid
             #selectDescriptionDatagrid
@@ -636,6 +642,139 @@ Please confirm that your every row under the selected question column has the fo
               </clr-dg-cell>
             </clr-dg-row>
           </clr-datagrid>
+        </div>
+      </div>
+      <!-- qaChat, set data section -->
+      <div *ngIf="dsDialogForm.get('projectType').value == 'qaChat'" class="clr-row formField">
+        <label class="label-tooltip clr-col-12 clr-col-md-2"
+          >{{ existingQA ? 'Select the columns to present to annotators' : 'Custom the columns (optional)'
+          }}<span style="color: red">*</span
+          ><clr-signpost *ngIf="existingQA">
+            <clr-signpost-content *clrIfOpen>
+              <pre>
+Before select the target existing Q&A column. Please confirm that your every row under the selected column keep the same key as the following formatted data.
+        
+{{ '{' }}
+  "prompt": "What types of projects are supported?",
+  "response": "Text,tabular,image,log,ner and qa.",
+  "reference": [
+    "https://***.***.com"
+  ],
+  "followUps": [
+    {{ '{' }}
+      "prompt": "What is the format for downloading annotated data?",
+      "response": "Each label type is captured as a new column in the export CSV. Each row contains the number of annotations for a label type.",
+      "reference": [
+        "https://*.***.**",
+        "https://*.***.**",
+        "https://*.***.**"
+      ]
+    {{ '}' }},
+    {{ '{' }}
+      "prompt": "When will you support more other annotation tasks?",
+      "response": "This is on our roadmap.",
+      "reference": []
+    {{ '}' }}
+  ]
+{{ '}' }}
+                </pre
+              >
+            </clr-signpost-content>
+          </clr-signpost>
+        </label>
+        <div class="clr-col-12 clr-col-md-9">
+          <clr-datagrid class="qaChatDatagrid">
+            <clr-dg-column class="ellipsis-datagrid" style="min-width: 30vw">Column Name</clr-dg-column>
+            <clr-dg-column *ngIf="existingQA" class="ellipsis-datagrid"
+              >Existing Q&A<span style="color: red">*</span>
+            </clr-dg-column>
+            <clr-dg-column class="ellipsis-datagrid">Custom field</clr-dg-column>
+            <clr-dg-column *ngIf="existingQA" class="ellipsis-datagrid">Helpful Text</clr-dg-column>
+            <clr-dg-column class="ellipsis-datagrid" style="max-width: 1rem"></clr-dg-column>
+            <clr-dg-row *clrDgItems="let column of qaChatColumns; let i = index" [clrDgItem]="column">
+              <clr-dg-cell
+                *ngIf="existingQA && !column.isAdded"
+                class="ellipsis-datagrid"
+                style="color: #000; word-break: break-all; min-width: 30vw"
+                >{{ column.header }}</clr-dg-cell
+              >
+              <clr-dg-cell
+                *ngIf="column.isAdded"
+                class="ellipsis-datagrid"
+                style="color: #000; word-break: break-all; min-width: 30vw"
+                ><form class="clr-form">
+                  <div class="clr-form-control headerInput clr-row">
+                    <div class="clr-control-container" [ngClass]="column.errMessage ? 'clr-error' : ''">
+                      <div class="clr-input-wrapper">
+                        <input
+                          type="text"
+                          placeholder="Custom Field Header Input"
+                          class="clr-input"
+                          (change)="inputHeader($event, i)"
+                          (blur)="inputHeader($event, i)"
+                        />
+                      </div>
+                      <span class="clr-subtext" style="margin-top: 0.6rem">{{ column.errMessage }}</span>
+                    </div>
+                  </div>
+                </form>
+              </clr-dg-cell>
+              <clr-dg-cell *ngIf="existingQA" class="ellipsis-datagrid">
+                <input
+                  type="radio"
+                  clrRadio
+                  class="clr-radio"
+                  name="radioForExistingQA"
+                  [value]="column.header"
+                  (change)="changeQaChatColumns(column.header, '', $event)"
+                  [disabled]="column.isAdded"
+                />
+              </clr-dg-cell>
+              <clr-dg-cell class="ellipsis-datagrid">
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  name="checkbox1"
+                  [checked]="column.customFieldChecked"
+                  (change)="changeQaChatColumns(column.header, 'customFieldChecked')"
+                  [disabled]="column.isAdded"
+                  [ngClass]="{
+                    'disabled-checkbox': column.isAdded
+                  }"
+                />
+              </clr-dg-cell>
+              <clr-dg-cell *ngIf="existingQA" class="ellipsis-datagrid">
+                <input
+                  type="checkbox"
+                  clrCheckbox
+                  name="checkbox2"
+                  [checked]="column.helptextChecked"
+                  (change)="changeQaChatColumns(column.header, 'helptextChecked')"
+                  [disabled]="column.isAdded"
+                  [ngClass]="{
+                    'disabled-checkbox': column.isAdded
+                  }"
+                />
+              </clr-dg-cell>
+              <clr-dg-cell class="ellipsis-datagrid" style="max-width: 1rem">
+                <button
+                  type="button"
+                  class="btn btn-icon clr-col deleteRow"
+                  aria-label="delete"
+                  title="delete"
+                  *ngIf="column.isAdded"
+                  (click)="deleteRow(i)"
+                >
+                  <cds-icon shape="trash"></cds-icon>
+                </button>
+              </clr-dg-cell>
+            </clr-dg-row>
+          </clr-datagrid>
+          <div style="margin-top: 0.5rem">
+            <button class="btn btn-sm btn-link" style="padding: unset" (click)="createNewRow()">
+              <cds-icon shape="plus" style="margin-right: 0.5rem"></cds-icon>Add New Row for Custom Field
+            </button>
+          </div>
         </div>
       </div>
     </div>

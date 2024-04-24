@@ -179,22 +179,59 @@ fieldset {
     margin-left: 0.5rem;
     margin-top: 0.5rem
 }
-::ng-deep .signpost{
+
+::ng-deep .signpost {
     margin-top: -0.1rem;
-    cds-icon[shape="info-circle"]{
-        color:currentColor ;
+
+    cds-icon[shape="info-circle"] {
+        color: currentColor;
         height: 19px;
         width: 19px;
         margin-bottom: 0.1rem;
     }
-    .signpost-content{
-    margin-top: 7rem;
-    min-width: 35vw;
-    .popover-pointer{
-        margin-top: -7rem;
+
+    .signpost-content {
+        margin-top: 7rem;
+        min-width: 35vw;
+
+        .popover-pointer {
+            margin-top: -7rem;
+        }
+
+        .signpost-action {
+            display: none;
+        }
     }
-    .signpost-action {
-        display: none;
+}
+
+.qaChatDatagrid {
+    clr-dg-cell {
+        display: flex;
+        align-items: center;
     }
-} 
+
+    .deleteRow {
+        padding-left: 0;
+        padding-right: 0;
+        max-width: 2rem;
+        max-height: 1.5rem;
+        line-height: 1.3rem;
+    }
+}
+
+.headerInput {
+    margin: unset;
+    padding: unset;
+
+    .clr-control-container {
+        width: 15vw;
+        margin-left: -0.5rem;
+
+        input {
+            border: 1px solid #9e9e9e;
+            border-radius: 4px;
+            /* height: 13rem; */
+            min-height: 1.7rem;
+        }
+    }
 }

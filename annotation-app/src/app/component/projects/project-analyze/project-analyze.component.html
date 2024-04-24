@@ -807,6 +807,26 @@ SPDX-License-Identifier: Apache-2.0 -->
 
                   <!-- qaChat -->
                   <div *ngIf="projectType == 'qaChat'">
+                    <!-- display the helpful text -->
+                    <div *ngIf="sr.ticketQuestions && sr.ticketQuestions.length > 0">
+                      <div class="btn-link">
+                        <button class="btn" type="button" style="padding-left: unset" (click)="clickExample()">
+                          View Helpful Text
+                          <cds-icon [ngClass]="!isShowExample ? 'exampleAngle' : ''" shape="angle"> </cds-icon>
+                        </button>
+                      </div>
+                      <div *ngIf="isShowExample" class="nerDisplayText">
+                        <div *ngFor="let ticket of sr.ticketQuestions">
+                          <p class="question-paragraph" style="word-break: break-word">
+                            <span class="ticketColumn">{{ ticket.key }}</span>
+                            <span>:&nbsp;&nbsp;</span>
+                            <span>{{ ticket.value }}</span>
+                          </p>
+                          <br />
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <h5 style="margin-top: 0.1rem !important">Prompt</h5>
                       <div class="clr-textarea-wrapper" style="margin-top: 0.5rem; margin-bottom: 2rem; width: 100%">
@@ -871,6 +891,21 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <button class="btn btn-sm btn-link add" type="button" (click)="createReferenceRow(-1)">
                           <cds-icon shape="plus"></cds-icon>Add New Reference
                         </button>
+                      </div>
+                    </div>
+                    <!-- custom field -->
+                    <div *ngFor="let itemm of projectInfo.selectedColumn; let i = index">
+                      <h5>{{ itemm.header }}</h5>
+                      <div class="clr-textarea-wrapper" style="margin-top: 0.5rem; margin-bottom: 2rem; width: 100%">
+                        <textarea
+                          style="width: 100%; max-width: 100%"
+                          rows="5"
+                          class="clr-textarea"
+                          (keydown)="$event.stopPropagation()"
+                          (blur)="updateCustomField($event, i, -1)"
+                          value="{{ itemm.isOriginal ? itemm.data : '' }}"
+                          placeholder="Please type here... "
+                        ></textarea>
                       </div>
                     </div>
                     <div *ngIf="followUps.length > 0">
@@ -967,6 +1002,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   <button class="btn btn-sm btn-link add" type="button" (click)="createReferenceRow(i)">
                                     <cds-icon shape="plus"></cds-icon>Add New Reference
                                   </button>
+                                </div>
+                              </div>
+                              <div *ngFor="let itemm of projectInfo.selectedColumn; let customIndex = index">
+                                <h5>{{ itemm.header }}</h5>
+                                <div
+                                  class="clr-textarea-wrapper"
+                                  style="margin-top: 0.5rem; margin-bottom: 2rem; width: 100%"
+                                >
+                                  <textarea
+                                    style="width: 100%; max-width: 100%"
+                                    rows="5"
+                                    class="clr-textarea"
+                                    (keydown)="$event.stopPropagation()"
+                                    (blur)="updateCustomField($event, customIndex, i)"
+                                    value="{{ itemm.isOriginal ? itemm.data : '' }}"
+                                    placeholder="Please type here... "
+                                  ></textarea>
                                 </div>
                               </div>
                             </div>

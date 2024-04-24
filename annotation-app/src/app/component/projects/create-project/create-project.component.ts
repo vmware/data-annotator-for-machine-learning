@@ -22,6 +22,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserAuthService } from 'src/app/services/user-auth.service';
 import { InternalApiService } from 'src/app/services/internal-api.service';
+import { bool } from 'aws-sdk/clients/signer';
 @Component({
   selector: 'app-create-project',
   templateUrl: './create-project.component.html',
@@ -75,6 +76,8 @@ export class CreateProjectComponent implements OnInit {
   wizardpage: ClrWizardPage;
   taskNameInput = new Subject<string>();
   existingQA: boolean = false;
+  qaChatColumns: any = [];
+  isQaChatNext: boolean = false;
 
   constructor(
     private apiService: ApiService,
@@ -139,6 +142,10 @@ export class CreateProjectComponent implements OnInit {
   clrWizardPageOnLoad(e) {
     if (e === 'clr-wizard-page-2') {
       this.dsDialogForm.get('selectedDataset').setValue(this.dsDialogForm.get('selectedDataset').value!);
+    }
+    if (e === 'clr-wizard-page-3') {
+      // let row = {};
+      // this.qaChatColumns.push(row);
     }
     if (e === 'clr-wizard-page-4') {
       // user can next to assign when the label is ready
@@ -338,7 +345,11 @@ export class CreateProjectComponent implements OnInit {
       if (this.totalCase > 0) {
         this.wizard.next();
       } else {
-        this.setdata();
+        if (this.dsDialogForm.get('projectType').value == 'qaChat' && !this.existingQA) {
+          this.wizard.next();
+        } else {
+          this.setdata();
+        }
       }
     }
 
@@ -444,6 +455,9 @@ export class CreateProjectComponent implements OnInit {
           setTimeout(() => {
             this.previewHeadDatas = choosedDataset.topReview.header;
             this.datasetInfo.loadingPreviewData = false;
+            if (this.dsDialogForm.get('projectType').value == 'qaChat') {
+              this.sortPreviewHeadDatas(this.previewHeadDatas);
+            }
           }, 500);
           this.datasetInfo.isHasHeader = choosedDataset.hasHeader;
           this.datasetInfo.location = choosedDataset.location;
@@ -456,6 +470,7 @@ export class CreateProjectComponent implements OnInit {
 
   sortPreviewHeadDatas(csvHeaders) {
     this.checkboxColumns = [];
+    this.qaChatColumns = [];
     if (
       this.dsDialogForm.get('projectType').value === 'ner' ||
       (this.dsDialogForm.get('projectType').value === 'qa' && this.dsDialogForm.get('questionType').value === 'n')
@@ -465,6 +480,14 @@ export class CreateProjectComponent implements OnInit {
           name: item,
           checkboxDisabled: this.dropdownSelected === item ? true : false,
           labelChecked: this.checkboxChecked.indexOf(item) > -1 ? true : false,
+          helptextChecked: this.helpfulText.indexOf(item) > -1 ? true : false,
+        });
+      }
+    } else if (this.dsDialogForm.get('projectType').value === 'qaChat') {
+      for (let item of csvHeaders) {
+        this.qaChatColumns.push({
+          header: item,
+          customFieldChecked: this.checkboxChecked.indexOf(item) > -1 ? true : false,
           helptextChecked: this.helpfulText.indexOf(item) > -1 ? true : false,
         });
       }
@@ -520,6 +543,7 @@ export class CreateProjectComponent implements OnInit {
       this.checkboxColumns = [];
       this.checkboxChecked = [];
       this.helpfulText = [];
+      this.qaChatColumns = [];
     }
   }
 
@@ -799,7 +823,9 @@ export class CreateProjectComponent implements OnInit {
       this.checkboxChecked = nerLabel;
       this.helpfulText = this.selectDescription;
     } else {
-      this.checkboxChecked = this.selectDescription;
+      if (this.dsDialogForm.get('projectType').value !== 'qaChat') {
+        this.checkboxChecked = this.selectDescription;
+      }
     }
     if (this.dsDialogForm.get('projectType').value === 'qa' && this.dsDialogForm.get('questionType').value === 'n') {
       let arr = _.filter(this.checkboxColumns, { helptextChecked: true });
@@ -1198,7 +1224,9 @@ export class CreateProjectComponent implements OnInit {
         formData.append('header', JSON.stringify(this.previewHeadDatas));
         formData.append('isHasHeader', this.datasetInfo.isHasHeader);
         formData.append('selectLabels', JSON.stringify([this.dropdownSelected]));
+        formData.append('ticketQuestions', JSON.stringify(this.helpfulText));
       }
+      formData.append('selectDescription', JSON.stringify(this.checkboxChecked));
       return this.apiService.postDataset(formData);
     }
     formData.append('ticketDescription', this.dsDialogForm.value.annotationDisplayName);
@@ -1349,6 +1377,138 @@ export class CreateProjectComponent implements OnInit {
   }
 
   uploadExistingQa(e) {
-    e == 'y' ? (this.existingQA = true) : (this.existingQA = false);
+    this.qaChatColumns = [];
+    if (e == 'y') {
+      this.existingQA = true;
+      this.isQaChatNext = true;
+    } else {
+      this.existingQA = false;
+      this.isQaChatNext = false;
+    }
+  }
+
+  changeQaChatColumns(targetHeader, action, e?) {
+    // console.log(13, targetHeader, action, e ? e.target.value : '');
+    this.clearFormdata();
+    if (e && e.target.value) {
+      this.dropdownSelected = e.target.value.trim();
+    }
+    if (action) {
+      let index = _.findIndex(this.qaChatColumns, function (o: any) {
+        return o.header === targetHeader;
+      });
+      this.qaChatColumns[index][action] = !this.qaChatColumns[index][action];
+    }
+    // this.qaChatColumns.forEach((element) => {
+    //   if (element.errMessage) {
+    //     return;
+    //   }
+    //   if (
+    //     element.customFieldChecked &&
+    //     _.filter(this.checkboxChecked, ['header', element.header.trim()]).length < 1 &&
+    //     element.header.trim()
+    //   ) {
+    //     this.checkboxChecked.push({ header: element.header, isOriginal: !element.isAdded });
+    //   }
+    //   if (!element.customFieldChecked) {
+    //     this.checkboxChecked.forEach((ele, index) => {
+    //       if (ele.header.trim() == element.header.trim()) {
+    //         this.checkboxChecked.splice(index, 1);
+    //       }
+    //     });
+    //   }
+
+    //   if (element.helptextChecked && this.helpfulText.indexOf(element.header) < 0) {
+    //     this.helpfulText.push(element.header);
+    //   }
+    //   if (!element.helptextChecked && this.helpfulText.indexOf(element.header) > -1) {
+    //     this.helpfulText.splice(this.helpfulText.indexOf(element.header), 1);
+    //   }
+    // });
+    this.sortQaChatCheckbox();
+    console.log(13, e ? e.target.value : '', this.checkboxChecked, this.helpfulText);
+    console.log(14, this.qaChatColumns);
+    this.qaChatNextDisabled();
+  }
+
+  sortQaChatCheckbox() {
+    this.qaChatColumns.forEach((element) => {
+      if (element.errMessage) {
+        return;
+      }
+      if (
+        element.customFieldChecked &&
+        _.filter(this.checkboxChecked, ['header', element.header.trim()]).length < 1 &&
+        element.header.trim()
+      ) {
+        this.checkboxChecked.push({ header: element.header, isOriginal: !element.isAdded });
+      }
+      if (!element.customFieldChecked) {
+        this.checkboxChecked.forEach((ele, index) => {
+          if (ele.header.trim() == element.header.trim()) {
+            this.checkboxChecked.splice(index, 1);
+          }
+        });
+      }
+
+      if (element.helptextChecked && this.helpfulText.indexOf(element.header) < 0) {
+        this.helpfulText.push(element.header);
+      }
+      if (!element.helptextChecked && this.helpfulText.indexOf(element.header) > -1) {
+        this.helpfulText.splice(this.helpfulText.indexOf(element.header), 1);
+      }
+    });
+  }
+
+  qaChatNextDisabled() {
+    // if there has err or qa no value should disable true
+    if (this.existingQA) {
+      if (this.dropdownSelected) {
+        this.isQaChatNext = false;
+      } else {
+        this.isQaChatNext = true;
+      }
+    }
+    for (let i = 0; i < this.qaChatColumns.length; i++) {
+      if (this.qaChatColumns[i].errMessage) {
+        this.isQaChatNext = true;
+        break;
+      } else {
+        this.isQaChatNext = false;
+      }
+    }
+  }
+
+  createNewRow() {
+    let row = {
+      header: '',
+      customFieldChecked: true,
+      helptextChecked: false,
+      isAdded: true,
+    };
+    this.qaChatColumns.push(row);
+    this.sortQaChatCheckbox();
+  }
+
+  inputHeader(e, index) {
+    let value = e.target.value.trim();
+    if (value) {
+      this.qaChatColumns[index].header = value;
+      if (_.filter(this.qaChatColumns, ['header', this.qaChatColumns[index].header.trim()]).length > 1) {
+        this.qaChatColumns[index].errMessage = 'This field already exist!';
+      } else {
+        this.qaChatColumns[index].errMessage = '';
+      }
+    }
+    this.sortQaChatCheckbox();
+    this.qaChatNextDisabled();
+    console.log(7333, this.qaChatColumns);
+  }
+
+  deleteRow(index) {
+    this.qaChatColumns.splice(index, 1);
+    console.log(888, this.qaChatColumns);
+    this.sortQaChatCheckbox();
+    this.qaChatNextDisabled();
   }
 }
