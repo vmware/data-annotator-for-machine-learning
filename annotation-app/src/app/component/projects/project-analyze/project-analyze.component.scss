@@ -1033,18 +1033,20 @@ label .label-leftBoard {
 
 }
 
-.boxBorder{
+.boxBorder {
     margin-top: .5rem;
     border: 1px solid currentColor;
     border-radius: 3px;
     padding: 10px 10px 10px 10px;
-    .index{
-    display: flex;
-    align-items: flex-end;
-    margin-left: 0.5rem;
-    min-width: 1.5rem;
+
+    .index {
+        display: flex;
+        align-items: flex-end;
+        margin-left: 0.5rem;
+        min-width: 1.5rem;
     }
-    .add{
+
+    .add {
         padding: unset;
         margin-top: 2rem;
     }
@@ -1054,12 +1056,16 @@ label .label-leftBoard {
     position: absolute;
     right: 1rem;
     color: #999;
-    width: 18px; 
+    width: 18px;
     height: 18px
 }
 
 .card-header>cds-icon:hover {
-    width: 19px; 
+    width: 19px;
     height: 19px;
     color: currentColor;
+}
+
+.exampleAngle {
+    transform: rotate(180deg);
 }

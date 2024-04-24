@@ -150,6 +150,7 @@ export class ProjectAnalyzeComponent implements OnInit {
   tabType: string;
   references: any = [];
   followUps: any = [];
+  isShowExample: boolean = false;
 
   constructor(
     private renderer2: Renderer2,
@@ -3300,6 +3301,14 @@ export class ProjectAnalyzeComponent implements OnInit {
     this.sr.userInputs = res.userInputs;
     this.sr.questionForText = res.questionForText;
     this.sr.userInput[0].questionForText[0] = res.userInputs[0].problemCategory[0];
+    if (res.ticketQuestions) {
+      let vv = [];
+      _.forIn(res.ticketQuestions, function (value, key) {
+        value = JSON.stringify(value);
+        vv.push({ key, value });
+      });
+      this.sr.ticketQuestions = vv;
+    }
     let links = res.questionForText[0].reference;
     let follow = res.questionForText[0].followUps;
 
@@ -3322,6 +3331,14 @@ export class ProjectAnalyzeComponent implements OnInit {
         }
         this.followUps[i].reference = arr;
       }
+    }
+    // to display the custom field
+    if (this.projectInfo.selectedColumn && this.projectInfo.selectedColumn.length > 0) {
+      this.projectInfo.selectedColumn.forEach((element) => {
+        if (element.isOriginal) {
+          element.data = res.originalData[element.header];
+        }
+      });
     }
     // make next item btn available
     this.editQuestionError = '';
@@ -4657,5 +4674,11 @@ export class ProjectAnalyzeComponent implements OnInit {
     }
     this.editQuestionError = '';
     return true;
+  }
+
+  updateCustomField(e, customIndex, index) {}
+
+  clickExample() {
+    this.isShowExample = !this.isShowExample;
   }
 }

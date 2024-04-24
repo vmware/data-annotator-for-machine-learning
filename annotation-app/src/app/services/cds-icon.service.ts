@@ -53,6 +53,7 @@ import {
   circleArrowIcon,
   timesCircleIcon,
   linkIcon,
+  minusIcon,
 } from '@cds/core/icon';
 import { ClrSpinner } from '@clr/angular';
 
@@ -104,6 +105,7 @@ ClarityIcons.addIcons(
   circleArrowIcon,
   timesCircleIcon,
   linkIcon,
+  minusIcon,
 );
 
 @Injectable({

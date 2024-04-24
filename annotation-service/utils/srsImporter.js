@@ -32,8 +32,22 @@ module.exports = {
         let header = req.body.header;
         header = (typeof header === 'string' ? JSON.parse(header) : header);
         let selectedColumn = req.body.selectDescription;
-        if(projectType == PROJECTTYPE.QACHAT && req.body.selectLabels){
-        selectedColumn=req.body.selectLabels
+        if(projectType == PROJECTTYPE.QACHAT){
+            let arr=(typeof req.body.selectDescription === 'string' ? JSON.parse(req.body.selectDescription) : req.body.selectDescription);
+            let flag=[]
+            if(arr.length>0){
+                arr.forEach(item => {
+                    if(item.isOriginal){
+                        flag.push(item.header)
+                    }
+                });
+            }
+            if(req.body.selectLabels){
+                let selectLabels=(typeof req.body.selectLabels === 'string' ? JSON.parse(req.body.selectLabels) : req.body.selectLabels);
+                flag.push(selectLabels[0])
+            }
+            selectedColumn=flag
+            console.log(49,selectedColumn)
         }
         selectedColumn = (typeof selectedColumn === 'string' ? JSON.parse(selectedColumn) : selectedColumn);
         const user = req.auth.email;
@@ -75,7 +89,10 @@ module.exports = {
         function saveData(oneData) {
             //only save selected data
             let select = {};
-            for (const item of selectedColumn) {
+            let selectedColumnCopy=JSON.parse(JSON.stringify(selectedColumn))
+
+            selectedColumnCopy.pop()
+            for (const item of selectedColumnCopy) {
                 select[item] = oneData[item];
             }
 
@@ -112,8 +129,9 @@ module.exports = {
                     sechema.questionForText = questions;
                 }
                 //support ner or qa sting type quesion anwser column display
-                if ((projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA) && req.body.ticketQuestions && req.body.ticketQuestions.length) {
+                if ((projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA || projectType == PROJECTTYPE.QACHAT) && req.body.ticketQuestions && req.body.ticketQuestions.length) {
                     let ticketQuestions = {};
+                    console.log(132,req.body.ticketQuestions)
                     for (const qst of req.body.ticketQuestions) {
                         questionData = oneData[qst]
                         if (typeof oneData[qst] === 'object') {
@@ -149,20 +167,27 @@ module.exports = {
                     selectLabels = (typeof selectLabels === 'string' ? JSON.parse(selectLabels) : selectLabels);
                     let problemCategory = [];
                     for (const lb of selectLabels) {
-                            if (typeof JSON.parse(oneData[lb]) === 'object') {
+                            if (oneData[lb]&&typeof JSON.parse(oneData[lb]) === 'object') {
                                 problemCategory.push(JSON.parse(oneData[lb]));
                             }
                         
                     }
-                    sechema = {
-                        projectName: req.body.pname,
-                        userInputsLength: 1,
-                        userInputs: [{ problemCategory: problemCategory,user:user,timestamp:Date.now()}],
-                        questionForText:problemCategory
-                    };
+                    // sechema = {
+                    //     projectName: req.body.pname,
+                    //     userInputsLength: 1,
+                    //     userInputs: [{ problemCategory: problemCategory,user:user,timestamp:Date.now()}],
+                    //     questionForText:problemCategory
+                    // };
+                    if(problemCategory.length>0){
+                        sechema.userInputsLength=1;
+                        sechema.userInputs=[{ problemCategory: problemCategory,user:user,timestamp:Date.now()}],
+                        sechema.questionForText=problemCategory
+                    }
+                    console.log(82,sechema)
                 }
                 docs.push(sechema);
                 totalCase += 1;
+                console.log(83,totalCase)
             }
             //batch write data to db 
             if (docs.length && docs.length % PAGINATELIMIT == 0) {
