@@ -609,7 +609,12 @@ export class ProjectAnalyzeComponent implements OnInit {
             links.push(this.followUps[i].reference[j].text);
           }
         }
-        arr.push({ prompt: this.followUps[i].prompt, response: this.followUps[i].response, reference: links });
+        arr.push({
+          prompt: this.followUps[i].prompt,
+          response: this.followUps[i].response,
+          reference: links,
+          custom: this.followUps[i].custom,
+        });
       }
     }
     sr.pid = this.projectId;
@@ -3334,11 +3339,15 @@ export class ProjectAnalyzeComponent implements OnInit {
     }
     // to display the custom field
     if (this.projectInfo.selectedColumn && this.projectInfo.selectedColumn.length > 0) {
+      let custom = [];
       this.projectInfo.selectedColumn.forEach((element) => {
         if (element.isOriginal) {
           element.data = res.originalData[element.header];
         }
+        // to add custom field data into prompt format
+        custom.push(element);
       });
+      this.sr.userInput[0].questionForText[0].custom = custom;
     }
     // make next item btn available
     this.editQuestionError = '';
@@ -4596,13 +4605,6 @@ export class ProjectAnalyzeComponent implements OnInit {
       this.followUps[chatIndex].reference[index].text = data;
     } else {
       this.references[index].text = data;
-      // let arr = [];
-      // for (let i = 0; i < this.references.length; i++) {
-      //   if (this.references[i].text && !this.references[i].textErrMessage) {
-      //     arr.push(this.references[i].text);
-      //   }
-      // }
-      // this.sr.userInput[0].questionForText[0].reference = arr;
     }
   }
 
@@ -4633,7 +4635,14 @@ export class ProjectAnalyzeComponent implements OnInit {
   }
 
   toFollowUp() {
-    this.followUps.push({ prompt: '', response: '', reference: [{ text: '', textErrMessage: '' }] });
+    // to display the custom field
+    let custom = [];
+    if (this.projectInfo.selectedColumn && this.projectInfo.selectedColumn.length > 0) {
+      this.projectInfo.selectedColumn.forEach((element) => {
+        custom.push({ header: element.header, isOriginal: element.isOriginal });
+      });
+    }
+    this.followUps.push({ prompt: '', response: '', reference: [{ text: '', textErrMessage: '' }], custom });
   }
 
   deleteFollowUp(chatIndex) {
@@ -4676,7 +4685,26 @@ export class ProjectAnalyzeComponent implements OnInit {
     return true;
   }
 
-  updateCustomField(e, customIndex, index) {}
+  updateCustomField(e, currentCustom, customIndex, chatIndex) {
+    let data = e.target.value.trim();
+    if (chatIndex > -1) {
+      let arr = this.followUps[chatIndex].custom;
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].header === currentCustom.header) {
+          arr[i].data = data;
+        }
+      }
+      this.followUps[chatIndex].custom = arr;
+    } else {
+      let arr = this.sr.userInput[0].questionForText[0].custom;
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].header === currentCustom.header) {
+          arr[i].data = data;
+        }
+      }
+      this.sr.userInput[0].questionForText[0].custom = arr;
+    }
+  }
 
   clickExample() {
     this.isShowExample = !this.isShowExample;

@@ -1388,7 +1388,6 @@ export class CreateProjectComponent implements OnInit {
   }
 
   changeQaChatColumns(targetHeader, action, e?) {
-    // console.log(13, targetHeader, action, e ? e.target.value : '');
     this.clearFormdata();
     if (e && e.target.value) {
       this.dropdownSelected = e.target.value.trim();
@@ -1399,35 +1398,7 @@ export class CreateProjectComponent implements OnInit {
       });
       this.qaChatColumns[index][action] = !this.qaChatColumns[index][action];
     }
-    // this.qaChatColumns.forEach((element) => {
-    //   if (element.errMessage) {
-    //     return;
-    //   }
-    //   if (
-    //     element.customFieldChecked &&
-    //     _.filter(this.checkboxChecked, ['header', element.header.trim()]).length < 1 &&
-    //     element.header.trim()
-    //   ) {
-    //     this.checkboxChecked.push({ header: element.header, isOriginal: !element.isAdded });
-    //   }
-    //   if (!element.customFieldChecked) {
-    //     this.checkboxChecked.forEach((ele, index) => {
-    //       if (ele.header.trim() == element.header.trim()) {
-    //         this.checkboxChecked.splice(index, 1);
-    //       }
-    //     });
-    //   }
-
-    //   if (element.helptextChecked && this.helpfulText.indexOf(element.header) < 0) {
-    //     this.helpfulText.push(element.header);
-    //   }
-    //   if (!element.helptextChecked && this.helpfulText.indexOf(element.header) > -1) {
-    //     this.helpfulText.splice(this.helpfulText.indexOf(element.header), 1);
-    //   }
-    // });
     this.sortQaChatCheckbox();
-    console.log(13, e ? e.target.value : '', this.checkboxChecked, this.helpfulText);
-    console.log(14, this.qaChatColumns);
     this.qaChatNextDisabled();
   }
 
@@ -1502,12 +1473,10 @@ export class CreateProjectComponent implements OnInit {
     }
     this.sortQaChatCheckbox();
     this.qaChatNextDisabled();
-    console.log(7333, this.qaChatColumns);
   }
 
   deleteRow(index) {
     this.qaChatColumns.splice(index, 1);
-    console.log(888, this.qaChatColumns);
     this.sortQaChatCheckbox();
     this.qaChatNextDisabled();
   }

@@ -902,8 +902,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                           rows="5"
                           class="clr-textarea"
                           (keydown)="$event.stopPropagation()"
-                          (blur)="updateCustomField($event, i, -1)"
-                          value="{{ itemm.isOriginal ? itemm.data : '' }}"
+                          (blur)="updateCustomField($event, itemm, i, -1)"
+                          value="{{ itemm.data }}"
                           placeholder="Please type here... "
                         ></textarea>
                       </div>
@@ -1004,7 +1004,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   </button>
                                 </div>
                               </div>
-                              <div *ngFor="let itemm of projectInfo.selectedColumn; let customIndex = index">
+                              <div *ngFor="let itemm of item.custom; let customIndex = index">
                                 <h5>{{ itemm.header }}</h5>
                                 <div
                                   class="clr-textarea-wrapper"
@@ -1015,8 +1015,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                                     rows="5"
                                     class="clr-textarea"
                                     (keydown)="$event.stopPropagation()"
-                                    (blur)="updateCustomField($event, customIndex, i)"
-                                    value="{{ itemm.isOriginal ? itemm.data : '' }}"
+                                    (blur)="updateCustomField($event, itemm, customIndex, i)"
+                                    value="{{ itemm.data }}"
                                     placeholder="Please type here... "
                                   ></textarea>
                                 </div>

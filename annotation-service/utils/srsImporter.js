@@ -87,18 +87,26 @@ module.exports = {
 
         // handle and save data to db
         function saveData(oneData) {
+            console.log(11.1,oneData)
             //only save selected data
             let select = {};
             let selectedColumnCopy=JSON.parse(JSON.stringify(selectedColumn))
 
-            selectedColumnCopy.pop()
+            let qaChatColumn=selectedColumnCopy.pop()
             for (const item of selectedColumnCopy) {
                 select[item] = oneData[item];
             }
 
             //check all selected data if is empty
             let selectedData = Object.values(select).toString().replace(new RegExp(',', 'g'), '').trim();
-            if (selectedData) {
+
+            //for qaChat should set the existingQA column as the main column, if it is empty then need remove the whole row
+            if (projectType == PROJECTTYPE.QACHAT) {
+                let cellContent=oneData[qaChatColumn].toString().replace(new RegExp(',', 'g'), '').trim();
+                if(!cellContent){return}
+            }
+
+            if ((projectType !== PROJECTTYPE.QACHAT && selectedData)||(projectType == PROJECTTYPE.QACHAT)) {
                 let sechema = {
                     projectName: req.body.pname,
                     userInputsLength: 0,
@@ -172,22 +180,14 @@ module.exports = {
                             }
                         
                     }
-                    // sechema = {
-                    //     projectName: req.body.pname,
-                    //     userInputsLength: 1,
-                    //     userInputs: [{ problemCategory: problemCategory,user:user,timestamp:Date.now()}],
-                    //     questionForText:problemCategory
-                    // };
                     if(problemCategory.length>0){
                         sechema.userInputsLength=1;
                         sechema.userInputs=[{ problemCategory: problemCategory,user:user,timestamp:Date.now()}],
                         sechema.questionForText=problemCategory
                     }
-                    console.log(82,sechema)
                 }
                 docs.push(sechema);
                 totalCase += 1;
-                console.log(83,totalCase)
             }
             //batch write data to db 
             if (docs.length && docs.length % PAGINATELIMIT == 0) {
