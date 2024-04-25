@@ -43,12 +43,13 @@ export interface QaChat {
   response: string;
   reference?: any;
   followUps?: QaChat[];
+  custom?: any;
 }
 
 export class DatasetUtil {
   static initQaChat(): SR {
     return {
-      userInput: [{ questionForText: [{ prompt: '', response: '', reference: [], followUps: [] }] }],
+      userInput: [{ questionForText: [{ prompt: '', response: '', reference: [], followUps: [], custom: [] }] }],
     };
   }
 }
