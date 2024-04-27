@@ -317,6 +317,16 @@ export class ProjectAnalyzeComponent implements OnInit {
     // for qaChat project no need to get sr
     if (this.projectType === 'qaChat') {
       this.sr = DatasetUtil.initQaChat();
+      // to display the custom field
+      if (this.projectInfo.selectedColumn && this.projectInfo.selectedColumn.length > 0) {
+        let custom = [];
+        this.projectInfo.selectedColumn.forEach((element) => {
+          element.data = '';
+          // to add custom field data into prompt format
+          custom.push(element);
+        });
+        this.sr.userInput[0].questionForText[0].custom = custom;
+      }
       this.loading = false;
       return;
     }
@@ -694,6 +704,16 @@ export class ProjectAnalyzeComponent implements OnInit {
         } else {
           this.addQaChatToHistory(response, oldSr);
           this.getProgress();
+          // to display the custom field
+          if (this.projectInfo.selectedColumn && this.projectInfo.selectedColumn.length > 0) {
+            let custom = [];
+            this.projectInfo.selectedColumn.forEach((element) => {
+              element.data = '';
+              // to add custom field data into prompt format
+              custom.push(element);
+            });
+            this.sr.userInput[0].questionForText[0].custom = custom;
+          }
         }
       },
       (error) => {
@@ -3325,6 +3345,22 @@ export class ProjectAnalyzeComponent implements OnInit {
       }
     }
     this.followUps = follow;
+
+    // to display the custom field
+    let custom = [];
+    let custom1 = [];
+    if (this.projectInfo.selectedColumn && this.projectInfo.selectedColumn.length > 0) {
+      this.projectInfo.selectedColumn.forEach((element) => {
+        custom1.push({ header: element.header, isOriginal: element.isOriginal });
+        element.data = '';
+        if (element.isOriginal && res.originalData) {
+          element.data = res.originalData[element.header];
+        }
+        // to add custom field data into prompt format
+        custom.push(element);
+      });
+      this.sr.userInput[0].questionForText[0].custom = custom;
+    }
     for (let i = 0; i < this.followUps.length; i++) {
       if (this.followUps[i].prompt && this.followUps[i].response) {
         let arr = [];
@@ -3335,20 +3371,10 @@ export class ProjectAnalyzeComponent implements OnInit {
           arr.push({ text: '', textErrMessage: '' });
         }
         this.followUps[i].reference = arr;
+        this.followUps[i].custom = custom1;
       }
     }
-    // to display the custom field
-    if (this.projectInfo.selectedColumn && this.projectInfo.selectedColumn.length > 0) {
-      let custom = [];
-      this.projectInfo.selectedColumn.forEach((element) => {
-        if (element.isOriginal) {
-          element.data = res.originalData[element.header];
-        }
-        // to add custom field data into prompt format
-        custom.push(element);
-      });
-      this.sr.userInput[0].questionForText[0].custom = custom;
-    }
+
     // make next item btn available
     this.editQuestionError = '';
     this.isValidQaChat();
@@ -4688,9 +4714,11 @@ export class ProjectAnalyzeComponent implements OnInit {
   updateCustomField(e, currentCustom, customIndex, chatIndex) {
     let data = e.target.value.trim();
     if (chatIndex > -1) {
-      let arr = this.followUps[chatIndex].custom;
+      let aa = JSON.parse(JSON.stringify(currentCustom));
+      aa.data = data;
+      let arr = JSON.parse(JSON.stringify(this.followUps[chatIndex].custom));
       for (let i = 0; i < arr.length; i++) {
-        if (arr[i].header === currentCustom.header) {
+        if (arr[i].header === aa.header) {
           arr[i].data = data;
         }
       }

@@ -47,7 +47,6 @@ module.exports = {
                 flag.push(selectLabels[0])
             }
             selectedColumn=flag
-            console.log(49,selectedColumn)
         }
         selectedColumn = (typeof selectedColumn === 'string' ? JSON.parse(selectedColumn) : selectedColumn);
         const user = req.auth.email;
@@ -87,13 +86,17 @@ module.exports = {
 
         // handle and save data to db
         function saveData(oneData) {
-            console.log(11.1,oneData)
             //only save selected data
             let select = {};
-            let selectedColumnCopy=JSON.parse(JSON.stringify(selectedColumn))
+            let qaChatColumn;
+            let selectedColumnArray=selectedColumn;
+            if (projectType == PROJECTTYPE.QACHAT) {
+                let selectedColumnCopy=JSON.parse(JSON.stringify(selectedColumn))
+                qaChatColumn=selectedColumnCopy.pop()
+                selectedColumnArray=selectedColumnCopy
+            }
 
-            let qaChatColumn=selectedColumnCopy.pop()
-            for (const item of selectedColumnCopy) {
+            for (const item of selectedColumnArray) {
                 select[item] = oneData[item];
             }
 
@@ -139,7 +142,6 @@ module.exports = {
                 //support ner or qa sting type quesion anwser column display
                 if ((projectType == PROJECTTYPE.NER || projectType == PROJECTTYPE.QA || projectType == PROJECTTYPE.QACHAT) && req.body.ticketQuestions && req.body.ticketQuestions.length) {
                     let ticketQuestions = {};
-                    console.log(132,req.body.ticketQuestions)
                     for (const qst of req.body.ticketQuestions) {
                         questionData = oneData[qst]
                         if (typeof oneData[qst] === 'object') {
