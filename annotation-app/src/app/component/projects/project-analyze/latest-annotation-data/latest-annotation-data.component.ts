@@ -430,7 +430,8 @@ export class LatestAnnotationDataComponent implements OnInit {
               const cell = [];
               for (const index in this.previewSrsHeader) {
                 let key = this.previewSrsHeader[index];
-                cell.push(a[key]);
+                // if original data (custom field has no value then push '')
+                cell.push(a ? a[key] : '');
               }
 
               cellContent.push(cell);

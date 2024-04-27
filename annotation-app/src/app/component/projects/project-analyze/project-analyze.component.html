@@ -1004,8 +1004,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   </button>
                                 </div>
                               </div>
-                              <div *ngFor="let itemm of item.custom; let customIndex = index">
-                                <h5>{{ itemm.header }}</h5>
+                              <div *ngFor="let followCustom of item.custom; let customIndex = index">
+                                <h5>{{ followCustom.header }}</h5>
                                 <div
                                   class="clr-textarea-wrapper"
                                   style="margin-top: 0.5rem; margin-bottom: 2rem; width: 100%"
@@ -1015,8 +1015,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                                     rows="5"
                                     class="clr-textarea"
                                     (keydown)="$event.stopPropagation()"
-                                    (blur)="updateCustomField($event, itemm, customIndex, i)"
-                                    value="{{ itemm.data }}"
+                                    (blur)="updateCustomField($event, followCustom, customIndex, i)"
+                                    value="{{ followCustom.data }}"
                                     placeholder="Please type here... "
                                   ></textarea>
                                 </div>
